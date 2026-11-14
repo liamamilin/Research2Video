@@ -237,8 +237,10 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
                             cancel_token=cancel, user='scheduler')
     engine.run_context = context or {}
     output = engine.run_job(canonical)
-    if output and Path(output).is_file():
-        return 'success', '', str(Path(output).resolve())
+    if output:
+        report = Path(runtime.workspace) / output
+        if report.is_file():
+            return 'success', '', str(report.resolve())
     last = state.StateManager.get(canonical) or {}
     if job.get('source_collection') and last.get('last_status') == 'skipped':
         return 'skipped', '素材积累已关闭，未调用模型或生产视频', None

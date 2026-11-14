@@ -9,6 +9,7 @@ A job becomes a topic source by saying how to read its reports::
                             # items, optional for flash (F) and opportunities (C) — a second source of the same format
                             # needs one, or both would number their topics F1, F2 … and overwrite each other's
       refresh: true         # the unattended pipeline may start this job when its newest report is not today's
+      daily_limit: 3        # optional daily automatic production limit; also bounds one report's topics
 
 Its reports are the files its ``output`` path names (``{date}`` in the path is the report date). They are read into
 the ``topics`` table by a reconcile scan (``sync``): a report whose size or modification time changed is parsed
@@ -48,6 +49,7 @@ _PREFIX = re.compile(r"[A-Z]{1,3}")
 _ALIAS = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 #: per-script research jobs are never topic sources
 _SKIP = ("video/", "vod/")
+_NO_TOPIC = re.compile(r"^\s*(?:#{1,6}\s+)?本次暂无新题材[。.!！]?\s*$", re.MULTILINE)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS topics (
@@ -94,6 +96,7 @@ class Source:
     refresh: bool = False
     output: str = ""     # the job's output path, with {date}
     error: str = ""      # why it cannot be read; it is listed but not imported
+    daily_limit: int | None = None
 
     def as_dict(self) -> dict:
         return {"name": self.name, "job": self.job, "label": self.label, "format": self.format,
@@ -112,6 +115,7 @@ def _declare(job_name: str, job: dict) -> Optional[Source]:
     fmt = str(block.get("format") or "items")
     prefix = str(block.get("prefix") or "").strip()
     output = str(job.get("output") or "")
+    daily_limit = block.get("daily_limit")
     errors = []
     if alias and not _ALIAS.fullmatch(alias):
         errors.append(f"alias {alias!r} 只能用小写字母、数字、下划线、连字符")
@@ -125,11 +129,13 @@ def _declare(job_name: str, job: dict) -> Optional[Source]:
         errors.append("prefix 要写 1–3 个大写字母，选题编号就是 prefix + 序号")
     if "{date}" not in output:
         errors.append("这个 Job 的 output 路径里要有 {date}，才能知道每份报告是哪天的")
-    unknown = set(block) - {"alias", "format", "prefix", "refresh"}
+    if daily_limit is not None and (type(daily_limit) is not int or daily_limit < 1):
+        errors.append("topics.daily_limit 应为正整数")
+    unknown = set(block) - {"alias", "format", "prefix", "refresh", "daily_limit"}
     if unknown:
         errors.append(f"topics 不认识这些字段：{', '.join(sorted(unknown))}")
     return Source(name=name, job=job_name, label=label, format=fmt, prefix=prefix or DEFAULT_PREFIXES.get(fmt, ""),
-                  refresh=bool(block.get("refresh")), output=output, error="；".join(errors))
+                  refresh=bool(block.get("refresh")), output=output, error="；".join(errors), daily_limit=daily_limit)
 
 
 #: path → ((mtime_ns, size), job name, its Source or None). Parsing every job file took ~80 ms per call, and the
@@ -309,6 +315,7 @@ _ITEM_HEADING = re.compile(r"^###\s+(.+?)\s*$")
 _NUMBERING = re.compile(r"^(?:[A-Z]{0,3}\d+(?:\.\d+)*)\s*[.．、:：]?\s+")
 _ANY_HEADING = re.compile(r"^#{1,6}\s")
 _BOLD_FIELD = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*[:：]\s*(.*)$")
+_NESTED_FIELD_ITEM = re.compile(r"^\s{2,}[-*]\s+(.*)$")
 
 
 def parse_items(text: str, report_date: str, prefix: str) -> list[Topic]:
@@ -318,16 +325,24 @@ def parse_items(text: str, report_date: str, prefix: str) -> list[Topic]:
     (an overview, a section title) is not a topic."""
     found: list[tuple[str, dict]] = []
     current: tuple[str, dict] | None = None
+    last_field = ""
     for line in text.splitlines():
         heading = _ITEM_HEADING.match(line)
         if heading or _ANY_HEADING.match(line):
             if current and current[1]:
                 found.append(current)
             current = (_NUMBERING.sub("", heading.group(1)).replace("**", "").strip(), {}) if heading else None
+            last_field = ""
             continue
         field = _BOLD_FIELD.match(line)
         if current is not None and field:
-            current[1][field.group(1).replace("**", "").strip()] = field.group(2).replace("**", "").strip()
+            last_field = field.group(1).replace("**", "").strip()
+            current[1][last_field] = field.group(2).replace("**", "").strip()
+        elif current is not None and last_field in {"证据来源", "来源网址"}:
+            if nested := _NESTED_FIELD_ITEM.match(line):
+                current[1][last_field] += "\n" + nested.group(1)
+            elif line.strip():
+                last_field = ""
     if current and current[1]:
         found.append(current)
     topics = []
@@ -341,12 +356,13 @@ def parse_items(text: str, report_date: str, prefix: str) -> list[Topic]:
 
 def parse(source: Source, text: str, report_date: str) -> list[Topic]:
     if source.format == "items":
-        return parse_items(text, report_date, source.prefix)
+        return parse_items(text, report_date, source.prefix)[:source.daily_limit]
     if source.format == "opportunities":
         found = opportunity_format.parse(text, report_date)
     else:
         found = flash_format.parse(text, report_date)
     default = DEFAULT_PREFIXES[source.format]
+    found = found[:source.daily_limit]
     if source.prefix == default:
         return found
     for topic in found:  # a declared prefix replaces the format's own letter: F3 -> MF3
@@ -393,9 +409,11 @@ def _import(source: Source, rel: str, path: str, report_date: str, stat, root: s
         _, found = read_report(source, path, root)
         quiet = False
         if not found:
+            with open(path, encoding="utf-8") as report:
+                quiet = bool(_NO_TOPIC.search(report.read()))
             try:
                 with open(path + ".source-supply.json", encoding="utf-8") as receipt:
-                    quiet = json.load(receipt).get("quiet") is True
+                    quiet = quiet or json.load(receipt).get("quiet") is True
             except (OSError, ValueError, AttributeError):
                 pass
         error = "" if found or quiet else "报告里没找到选题：标题和字段的格式不对？"

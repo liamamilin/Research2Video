@@ -11,9 +11,9 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-PROMPT_VERSION = 3
-#: "不是 A，而是 B" is a fine turn of phrase once or twice an episode; past this it becomes a tic.
-CONTRAST_ALLOWED = 2
+from . import persona
+
+PROMPT_VERSION = 5
 
 #: A production note to the video maker said as narration ("视频里应该说清楚", "素材只有一句描述").
 _PRODUCTION_NOTE = re.compile(
@@ -32,14 +32,12 @@ _STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价�
 _STOCK_BRIDGE = re.compile(r"如果说[^。！？]{2,40}?[，,]\s*那么|接下来(?:这|的这)(?:一)?条|下面这(?:一)?条")
 #: A hedge said like a disclaimer ("以你实际界面为准", "不是效果承诺", "我们不做猜测").
 _HEDGE = re.compile(r"以(?:你的?)?实际(?:界面|页面|情况|账单)?(?:显示)?为准|不是效果承诺|(?:我们)?不(?:做|作)(?:任何)?猜测")
-_CONTRAST = re.compile(r"不是[^。！？；\n]{1,30}?[，,]\s*(?:而)?是")
 #: The closing's goodbye; a rewrite of that paragraph must still say it.
 _SIGN_OFF = re.compile(r"[^。！？]*(?:下期见|感谢收看|感谢观看|再见)[^。！？]*[。！？]?")
 
 RULES = {
     "production_note": "制作说明混进了口播，观众听到的是写给剪辑的话",
     "stock_ending": "用固定句式收尾，各条听起来一个模子",
-    "contrast_overuse": "「不是……而是……」在本期用得太多，变成口头禅",
     "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
     "hedge": "像免责声明一样的套话，观众听着生硬",
 }
@@ -49,8 +47,7 @@ SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想�
 只改列出的段落，每段改成一段，意思、事实、数字、名称和条件保持不变，只换说法。
 制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成一句贴合本段内容的短判断；
 硬造的过渡句改成直接进入本条（比如“再说 Gemini。”），或用一句话说出两条真实的关系；免责套话删去，必要的前提用半句话自然带过；
-「不是……而是……」改为直接说出肯定的那一半，被否定的一半不必要就删去，不换成「……反而没那么重要」「……倒在其次」之类的新套话。
-保持段落与前后文的衔接，不加新内容，不打招呼；段落里原有的道别句原样保留。
+只处理指出的问题，保留作者作比较的对象、取舍和结论范围。保持段落与前后文的衔接，不加新内容；保留原有的开场钩子、问候、自我介绍和话题衔接，也保留原有的道别句。
 输出 JSON：{"paragraphs":[{"id":"S1P2","text":"改好的口播"}]}"""
 
 
@@ -73,7 +70,6 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
     The fixed greeting is the program's own line and is never flagged.
     """
     found = []
-    contrasts = 0
     for si, section in enumerate(sections):
         item = section.get("episode_role", "item") == "item"
         for pi, paragraph in enumerate(section.get("paragraphs", [])):
@@ -85,10 +81,6 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
                 hits += [("stock_ending", m.group()) for m in _STOCK_ENDING.finditer(text)]
                 hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
             hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
-            for match in _CONTRAST.finditer(text):
-                contrasts += 1
-                if contrasts > CONTRAST_ALLOWED:
-                    hits.append(("contrast_overuse", match.group()))
             found += [{"id": pid(si, pi), "section": si, "paragraph": pi, "rule": rule, "quote": quote,
                        "problem": RULES[rule]} for rule, quote in hits]
     return found
@@ -126,6 +118,9 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         record["error"] = f"{type(exc).__name__}: {exc}"[:500]
         return sections, record
     out = json.loads(json.dumps(sections))
+    narrator = persona.load()
+    opening = out[0]["paragraphs"]
+    preserve_intro = not persona.opening_needs_introduction(opening, narrator, fixed_greeting=greeting)
     where = {f["id"]: (f["section"], f["paragraph"]) for f in found}
     for rewrite in reply.paragraphs:
         if rewrite.id not in targets:
@@ -141,6 +136,11 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         if _numbers(after) != _numbers(before):
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
             continue
+        if si == 0 and preserve_intro:
+            candidate = [*opening[:pi], {**opening[pi], "text": after}, *opening[pi + 1:]]
+            if persona.opening_needs_introduction(candidate, narrator, fixed_greeting=greeting):
+                record["rejected"].append({"id": rewrite.id, "reason": "改写打断了开场自我介绍", "text": after})
+                continue
         out[si]["paragraphs"][pi]["text"] = after
         record["changes"].append({"id": rewrite.id, "where": f"{out[si]['title']} · 第 {pi + 1} 段",
                                   "rules": sorted({f["rule"] for f in targets[rewrite.id]}),

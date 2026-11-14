@@ -12,14 +12,16 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from hashlib import sha256
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
 from core import telemetry
+from core.errors import CancelledError
 from core.provenance import extract_urls, normalize_url
 
-from . import length
+from . import length, persona as narrator
 from .audience_copy import findings as audience_findings
 
 MIN_CHINESE_SHARE = 0.5
@@ -47,7 +49,12 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 12
+class _EpisodeEntrance(BaseModel):
+    opening: list[_Paragraph] = Field(min_length=1)
+    entry_start: int = Field(ge=0)
+
+
+PROMPT_VERSION = 15
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
 #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
@@ -59,10 +66,9 @@ TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Cla
 #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
 OPENING_RULE = ("第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；"
                 "钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；"
-                "不打招呼，不报栏目名，不用“据某某报道”起头。")
-#: Viewers like and favourite a fifth as often as on the benchmark hits; the last words ask them to take a side.
-ENDING_RULE = ("道别前抛一个让观众站队的问题，最好是二选一（比如“你会为它多花这笔钱吗？”“你选 A 还是 B？”），"
-               "请大家在评论区说出自己的选择；觉得有用就点个赞、收藏起来。")
+                "第一句不打招呼，不报栏目名，不用“据某某报道”起头；钩子后的问候和自我介绍按讲述者设定自然衔接。")
+ENDING_RULE = ("结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；"
+               "避免把正文讲清的取舍硬凑成站队。")
 #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
 STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
               "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。"
@@ -78,16 +84,17 @@ ANGLE_RULE = "选题核心角度里点名要比较或讲清的点，正文必须
 CONCRETE_RULE = ("写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），"
                  "每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；"
                  "判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；"
-                 "不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”“这期帮你……”），换话题就直接说下一件事；"
-                 "材料没有的东西直接不讲，不把“待实测”“没有测试结果”“我不下结论”念给观众听。")
+                 "正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；"
+                 "上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。")
 PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
 找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
-沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
-素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
-影响观众理解和实际使用的条件随对应内容讲清。
+沿用上游给出的事实、数据和计算。挑出最值得讲的材料，给出讲述者自己的解释、判断或取舍，让观众听到原材料之外的一层认识。
+有意思的推论和猜测可以直接讲，交代从哪个细节想到的，用“我猜”或“我更看重”这样的自然口吻表达。
+有两面时，讲清哪一面在眼下更重要、凭什么，或哪个条件会改变选择。把真正影响判断的条件放在相关处，结尾把自己的观点讲完整。
+研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。
 """ + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
@@ -95,16 +102,62 @@ SYSTEM_PROMPT = AUTHORING_PROMPT + """
 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
 接口输出 JSON：
 {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
+EPISODE_LEAD = "整期按节目讲述：开场用一两句话抛出本期最抓人的那一条，再用一句话报出后面还有哪几条，细节留到正文讲。"
 EPISODE_PROMPT = AUTHORING_PROMPT + """
 你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容；同一问题的内容按解释层次组织。
 各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。
 各独立内容使用自己的具体对象、主例子和讲述线索，整期按合理顺序排列；同一问题的解释章节沿用共同主例子。
-整期按节目讲述：开场用一两句话抛出本期最抓人的那一条，再用一句话报出后面还有哪几条，细节留到正文讲。""" + OPENING_RULE + """
+""" + EPISODE_LEAD + OPENING_RULE + """
 随后逐条展开。两条之间确有关系、对比或递进就用一句话接上；没有就直接切换（比如“再说 Gemini。”），不硬造过渡，不重新打招呼。每条用一句短判断收住，各条措辞不同，不用“最值得记住的是”“这一条的要点是”之类的固定句式。
 收尾只用一两句话落下本期最重要的一个判断，不逐条复述。""" + ENDING_RULE + """
 每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。
 整期共用开场和收尾，不受单条视频的篇幅限制。具体看点体现在各内容标题中；整期总标题用本期最值得看的一两条内容来写，""" + TITLE_RULE + """
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
+
+EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
+你要把研究底稿里一个有足够细节的科学问题，讲成一集解释。整期跟着同一个对象，从可以想象的现象讲到它为何发生。研究报告里的其他发现只有在帮助解释这个问题的一步时进入。拿同一个对象的前后状态推动讲述；介绍实验时说清实验做了什么、看到了什么和它怎样帮助理解那个对象。每一节继续回答上一节留下的问题。
+""" + EPISODE_LEAD + OPENING_RULE + """
+每个解释阶段用一个 section。标题围绕同一个开场现象，结尾回到这个现象，给出经过讲述后的答案。
+""" + ENDING_RULE + """
+开场用 opening，解释阶段用 item，结尾用 closing。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+"""
+
+BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
+这期用一个真实业务过程解释一门生意。各节沿同一笔交易，依次写客户需求、购买和付款、产品或服务怎样交到客户手里，以及已有材料中接下来发生的事。每次出现新角色，让观众听见它接过什么、付出什么、交给谁。另一个案例在能帮助解释这笔交易里的具体经营取舍时出现。按材料组织讲述，顺序跟着这笔交易走。
+""" + EPISODE_LEAD + OPENING_RULE + """
+每个业务阶段用一个 section。标题围绕本期最值得追问的经营取舍，收尾回到这笔生意靠什么让客户愿意继续买、让交付方能继续做。
+""" + ENDING_RULE + """
+开场用 opening，业务阶段用 item，结尾用 closing。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+"""
+
+ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
+整期从一件具体作品入手，讲清它怎样改变观众的观看或聆听。选底稿里能展开的作品，先让人注意一个真实细节，然后沿这处细节讲创作者的动作、形式怎样变化、观众会感受到什么。可以从新发现切入，但要回到作品中能被辨认的部分。相邻作品只在直接照亮这处表达时出现。
+""" + EPISODE_LEAD + OPENING_RULE + """
+每个推进观众理解的部分用一个 section。标题点出作品或一处值得看听的细节，结尾回到同一作品，留下可亲自观察的一处。
+""" + ENDING_RULE + """
+开场用 opening，讲述阶段用 item，结尾用 closing。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+"""
+
+CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
+用一件有具体来路的代表作品或表达讲清本期文化变化。让作品随人物的动作和出现的场合持续推进；每一节讲清这次创作、展示或传播使后来的人怎样理解它。选有材料支撑的环节展开。别的作品只在能解释一次具体变化时带到，随后接回主作品。
+""" + EPISODE_LEAD + OPENING_RULE + """
+每次推进变化用一个 section。标题用具体作品、行动或观众反应带出问题。结尾回到主作品现在的处境或意义。
+""" + ENDING_RULE + """
+开场用 opening，讲述阶段用 item，结尾用 closing。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+"""
+
+MANUFACTURING_EPISODE_PROMPT = AUTHORING_PROMPT + """
+整期解释一件产品或一个部件怎样被制造并交付。跟同一个产品走，每节解释工具或人做了什么、产品的状态怎样变、下一步为什么要接在这里。已有材料支持的工序充分展开。规格、设备、伙伴和另一个案例只在帮助理解当下工序或交付条件时进入。
+""" + EPISODE_LEAD + OPENING_RULE + """
+每个改变产品状态或交付条件的步骤用一个 section。标题写出具体产品或最值得追问的制造变化，结尾回到用途，说明做出来以后要怎样持续交付。
+""" + ENDING_RULE + """
+开场用 opening，制造阶段用 item，结尾用 closing。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+"""
 
 TUTORIAL_PROMPT = AUTHORING_PROMPT + """
 你是工具教程的讲述者，沿同一份输入讲到实际输出。
@@ -347,6 +400,11 @@ def _require_chinese(sections: list[dict]) -> None:
         raise ScriptError("文稿主要不是中文，AutoVideo 只能制作中文视频")
 
 
+def tutorial_context(content_context: dict) -> bool:
+    return (content_context.get('type') == 'tutorial'
+            or (content_context.get('render') or {}).get('production_recipe') == 'mixed_tutorial')
+
+
 def write_for_column(*, column: Any, content_context: dict, column_style: str | None = None, **kwargs: Any) -> WrittenScript:
     """Apply the same column programme settings to report and supplied-material authors."""
     from core.video import episodes
@@ -354,8 +412,7 @@ def write_for_column(*, column: Any, content_context: dict, column_style: str | 
     from core.video import angles
 
     topic = kwargs['topic']
-    tutorial = (content_context.get('type') == 'tutorial'
-                or (content_context.get('render') or {}).get('production_recipe') == 'mixed_tutorial')
+    tutorial = tutorial_context(content_context)
     return write(**kwargs,
                  column_style=(column.script_style if column_style is None else column_style)
                  + episodes.brief(topic, tutorial=tutorial),
@@ -363,6 +420,101 @@ def write_for_column(*, column: Any, content_context: dict, column_style: str | 
                  target_minutes=angles.minutes(topic.get("angle") or "") or column.target_minutes, voice=column.voice_id or None,
                  paragraph_units=tuple(column.paragraph_units), topic_fields=column.writer_topic_fields(),
                  greeting=episodes.greeting(topic, content_context) or None, tutorial=tutorial)
+
+
+def introduce_opening(script: _Script, persona: dict, client: Any, *, greeting: Optional[str] = None) -> tuple[_Script, dict]:
+    """Author a missing/bare introduction in context once; never insert a stock sentence.
+
+    The same author sees the real opening and the next section. Only the opening
+    section can change; the rest of the script and its metadata stay intact.
+    Failure leaves the original available and records the unsuccessful attempt.
+    """
+    from core.video import persona as narrator
+    if not narrator.opening_needs_introduction(script.sections[0].paragraphs, persona, fixed_greeting=greeting or ""):
+        return script, {"status": "authored", "requests": 0}
+    instruction = (
+        "修顺这篇口播的开场，保留完整钩子、事实、人物引语和引用链接。将原来孤立的自我介绍改写为问候、名字和具体话题的连贯表达，不是另外新增一段介绍。"
+        "不要删掉讲述者身份，不添加材料没有的事实或亲身经历。这里只改开场，不添加道别。仅返回首节，格式为"
+        '{"title":"原首节标题","paragraphs":[{"text":"口播","citations":[]}]}。'
+        + narrator.prompt(persona, opening_only=True)
+    )
+    if greeting:
+        instruction += f"节目会在正文前统一念出固定问候「{greeting}」，这里不另加问候。"
+    request = {"title": script.title, "opening": script.sections[0].model_dump(),
+               "following": script.sections[1].model_dump() if len(script.sections) > 1 else None}
+    try:
+        response = client.chat([{"role": "system", "content": instruction},
+                                {"role": "user", "content": json.dumps(request, ensure_ascii=False)}], temperature=0.4)
+        candidate = _parse('{"title":"opening","sections":[' + response.content.strip().removeprefix("```json").removesuffix("```").strip() + ']}').sections[0]
+        if narrator.opening_needs_introduction(candidate.paragraphs, persona, fixed_greeting=greeting or ""):
+            return script, {"status": "unchanged", "requests": 1, "reason": "opening_still_missing_or_bare",
+                            "candidate": candidate.model_dump()}
+        opening = script.sections[0].model_copy(update={"paragraphs": candidate.paragraphs})
+        return script.model_copy(update={"sections": [opening, *script.sections[1:]]}), {"status": "rewritten", "requests": 1}
+    except CancelledError:
+        raise
+    except Exception as exc:  # Keep the authored draft, including when the provider is unavailable.
+        return script, {"status": "unchanged", "requests": 1, "reason": type(exc).__name__}
+
+
+def author_episode_opening(script: _Script, persona: dict, client: Any, *, audience: str,
+                           greeting: Optional[str] = None) -> tuple[_Script, dict]:
+    """Compose the lead around a verbatim continuation into the first story."""
+    from core.errors import LLMError
+    from . import persona as narrator
+    from .adapt.common import AdaptError, call_json
+
+    opening, *body = script.sections
+    if opening.episode_role != "opening" or not body or body[0].episode_role != "item":
+        return introduce_opening(script, persona, client, greeting=greeting)
+
+    first, *rest = body[0].paragraphs
+    sentences = [part for part in re.split(r"(?<=[。！？!?])", first.text) if part.strip()]
+    if not sentences:
+        return introduce_opening(script, persona, client, greeting=greeting)
+    receipt = {"method": "scoped_lead", "version": 3}
+    instruction = (
+        "给中文视频写两三句开场，自然接到已写好的正文。先从观众的具体处境发问，或者把正文首段的"
+        "开头一句移到这里，再接主持人自我介绍。entry_start 指开场后从正文首段的哪句起读，编号从 0 开始。"
+        "只有把原句信息完整讲进开场时才跳过这句；首段至少留一句，后续正文保持原样。"
+        "开场给观众继续听的理由，第一段就接着说过程或原因。照录已经给出的数字口径和归属。"
+        '仅写开场，返回 JSON：{"opening":[{"text":"开场口播","citations":[]}],"entry_start":0}。'
+        + narrator.prompt(persona, opening_only=True)
+        + "\n这里是开场，直接接正文。"
+    )
+    if greeting:
+        instruction += f"节目会先统一念出固定问候「{greeting}」，这里不另加问候。"
+    request = json.dumps({"audience": audience, "first_item_title": body[0].title,
+                          "entry_sentences": dict(enumerate(sentences)),
+                          "following": [paragraph.text for paragraph in rest[:2]]}, ensure_ascii=False)
+    try:
+        lead = call_json(client, instruction, request, _EpisodeEntrance, temperature=0.4)
+        if lead.entry_start >= len(sentences):
+            return script, {**receipt, "status": "unchanged", "reason": "entry_start_out_of_range"}
+        if narrator.opening_needs_introduction(lead.opening, persona, fixed_greeting=greeting or ""):
+            return script, {**receipt, "status": "unchanged", "reason": "opening_still_missing_or_bare"}
+    except (AdaptError, LLMError) as exc:
+        return script, {**receipt, "status": "unchanged", "reason": type(exc).__name__}
+    opening = opening.model_copy(update={"paragraphs": lead.opening})
+    first = first.model_copy(update={"text": "".join(sentences[lead.entry_start:]).strip()})
+    item = body[0].model_copy(update={"paragraphs": [first, *rest]})
+    return script.model_copy(update={"sections": [opening, item, *body[1:]]}), {
+        **receipt, "status": "rewritten", "entry_start": lead.entry_start,
+    }
+
+
+def author_system_prompt(topic: dict, persona: dict, *, greeting: str | None = None, tutorial: bool = False,
+                         episode_prompt: str | None = None, episode_lead: str | None = None) -> str:
+    """Build the complete system message for the first drafting call."""
+    programme = topic.get("content_mode") == "episode"
+    system = (TUTORIAL_PROMPT if tutorial else episode_prompt or EPISODE_PROMPT) if programme else SYSTEM_PROMPT
+    if programme and not tutorial and episode_lead:
+        system = system.replace(EPISODE_LEAD, episode_lead, 1)
+    if greeting:
+        system += GREETING_PROMPT.format(greeting=greeting)
+    if topic.get("next_episode"):
+        system += NEXT_EPISODE_PROMPT.format(next=topic["next_episode"])
+    return system + narrator.prompt(persona)
 
 
 def write(
@@ -382,6 +534,10 @@ def write(
     original_material: Optional[str] = None,
     greeting: Optional[str] = None,
     tutorial: bool = False,
+    editorial_context: str = "",
+    scoped_lead: bool = False,
+    episode_lead: Optional[str] = None,
+    episode_prompt: Optional[str] = None,
 ) -> WrittenScript:
     """Write a complete first draft; validate only its transport shape.
 
@@ -393,18 +549,16 @@ def write(
     client = LLMClient(llm_config, cancel_token=cancel_token)
     report = report_body(report)
     programme = topic.get("content_mode") == "episode"
-    system = (TUTORIAL_PROMPT if tutorial else EPISODE_PROMPT) if programme else SYSTEM_PROMPT
-    if greeting:
-        system += GREETING_PROMPT.format(greeting=greeting)
-    if topic.get("next_episode"):
-        system += NEXT_EPISODE_PROMPT.format(next=topic["next_episode"])
-    from core.video import persona as narrator
     persona = narrator.load()
-    system += narrator.prompt(persona)
+    system = author_system_prompt(topic, persona, greeting=greeting, tutorial=tutorial,
+                                  episode_prompt=episode_prompt, episode_lead=episode_lead)
+    request = _request(report, topic, column_style, target_minutes, 0,
+                       topic_fields=topic_fields, original_material=original_material)
+    if editorial_context:
+        request += "\n\n" + editorial_context
     messages = [
         {"role": "system", "content": system},
-        {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
-                                              topic_fields=topic_fields, original_material=original_material)},
+        {"role": "user", "content": request},
     ]
     with telemetry.track("write"):
         response = client.chat(messages, temperature=0.4)
@@ -416,9 +570,12 @@ def write(
             attempts += 1
             response = client.chat(messages, temperature=0.4)
             script = _parse(response.content)
+    if scoped_lead and programme and not tutorial:
+        audience = (topic.get("fields") or {}).get("目标受众") or "普通观众"
+        script, introduction = author_episode_opening(script, persona, client, audience=audience, greeting=greeting)
+    else:
+        script, introduction = introduce_opening(script, persona, client, greeting=greeting)
     script = _programme_frame(script, greeting, programme)
-    if script.sections:  # the author left the introduction out: it goes right after the first sentence
-        narrator.ensure_introduced(script.sections[0].paragraphs, persona)
     allowed = trusted_urls(report, citation_check)
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))
@@ -436,8 +593,9 @@ def write(
               "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
               "model_switches": list(getattr(client, "model_switches", [])),
               "duration_seconds": round(time.monotonic() - started, 3),
-              "generation": "goal_first", "prompt_version": PROMPT_VERSION,
+              "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
               "creative_direction": column_style.strip(),
+              "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
               "trusted_urls": len(allowed),
               **({'episode': episodes.manifest(topic, sections)} if programme else {})},
     )

@@ -508,10 +508,10 @@ class ResearchEngine:
             return SearchClient.format_results(items)
         from pathlib import Path
         from .source_history import prepare
-        block, self._source_pending = prepare(Path(self.workspace_dir) / "state/source_history",
-                                             job.get("_file") or job["name"], items)
-        if job["source_history"] == "context":
-            block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
+        block, self._source_pending = prepare(
+            Path(self.workspace_dir) / "state/source_history", job.get("_file") or job["name"], items,
+            include_current=job["source_history"] == "context",
+        )
         return block
 
     def _fetch_sources_block(self, job: dict) -> str:

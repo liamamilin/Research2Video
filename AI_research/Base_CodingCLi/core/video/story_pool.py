@@ -18,6 +18,7 @@ from core.fileio import file_lock
 from core.video import store
 
 PROMPT_VERSION = 5
+TUTORIAL_PROMPT_VERSION = 1
 SAID_CHARS = 2400  # what an earlier video told viewers, for comparing against a price/plan page
 POLICY = "matrix-story-v3"
 ACTIONS = {"release", "pricing", "results", "policy", "financing", "earnings", "discovery", "event", "analysis"}
@@ -163,7 +164,8 @@ def context(peers: list[dict], said: bool = False) -> list[dict]:
              "sources": sorted(p["sources"])} for i, p in enumerate(peers)]
 
 
-def organize(report: str, source_packets: list[dict], previous: list[dict], llm_config) -> tuple[list[dict], dict]:
+def organize(report: str, source_packets: list[dict], previous: list[dict], llm_config, *,
+             tutorial: bool = False) -> tuple[list[dict], dict]:
     """One cached organization call over existing text, not a research or fact-check step."""
     from core.llm import LLMClient
 
@@ -178,6 +180,15 @@ same_as 关联已经讲过该题材的 H 编号；changes 比较的是相对这�
 JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"release","edition":"","event_date":"",
 "summary":"事件与本次看点","primary":["S1"],"background":[],"same_as":[],
 "changes":[{"dimension":"明确变化的维度","before":"原值","after":"新值"}]}]}"""
+    if tutorial:
+        schema = system[system.index("JSON:"):]
+        system = """把给定底稿和对应材料整理成教程候选，只使用输入。保持底稿指定的动作和结果。
+每条候选讲一个可学会的操作。subject 写产品和具体操作，summary 交代入口、关键动作和可观察结果。
+比较 covered 中已经讲过的内容。只有旧稿已经教过同一个操作并让观众得到相同结果，才在 same_as 填它的 H 编号。
+换标题、对象或示例，操作与结果一样，仍是同题。共用产品、文档、功能区、起始文件或“不用下载”等便利不构成重复。
+例如把附件放回对话继续改，与把附件发给同事，是两种操作。分别看实际点击的动作及最终结果。
+primary 填支撑关键动作的 S 编号，background 填辅助材料。常青教程用 analysis，日期、版本、变化在无材料支持时留空。
+""" + schema
     request = {"report": report,
                "materials": [{**p, "text": p["text"][:2400]} for p in source_packets],
                "covered": [{k: v for k, v in p.items() if k != "script_id"} for p in previous]}
@@ -189,12 +200,12 @@ JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"rele
         raw = reply.content.strip()
         start, end = raw.find("{"), raw.rfind("}")
         items = json.loads(raw[start:end+1])["events"]
-        return validate(items, source_packets, previous), dict(client.usage)
+        return validate(items, source_packets, previous, tutorial=tutorial), dict(client.usage)
     except (ValueError, KeyError, TypeError) as exc:
         raise SelectionError("候选事件返回格式无效") from exc
 
 
-def validate(items, source_packets: list[dict], previous: list[dict]) -> list[dict]:
+def validate(items, source_packets: list[dict], previous: list[dict], *, tutorial: bool = False) -> list[dict]:
     from core.video import content_guard as guard
 
     if not isinstance(items, list):
@@ -256,6 +267,8 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
                               for k in primary) if not event["edition"] and not event["event_date"] else []
             event["event_key"] = _hash(event["family_key"], _edition(event["edition"]), event["event_date"], evidence)
         event["primary_sources"] = list(dict.fromkeys(u for k in primary for u in by_source[k]["links"]))
+        if tutorial:
+            event["tutorial"] = True
         key = event["event_key"]
         for known_key, known in output.items():
             peer = {"story": known, "sources": {k for u in known["primary_sources"] if (k := guard.source_key(u))}}
@@ -271,8 +284,11 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
 
 
 def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
-                   references: bool = False) -> dict:
-    pool_id = _hash(PROMPT_VERSION, scope, report, material, *(["references"] if references else []))
+                   references: bool = False, *, tutorial: bool = False) -> dict:
+    variant = ["references"] if references else []
+    if tutorial:
+        variant.extend(("tutorial", TUTORIAL_PROMPT_VERSION))
+    pool_id = _hash(PROMPT_VERSION, scope, report, material, *variant)
     lock = Path(store.db_path()).parent / ("story-pool-" + pool_id)
     with file_lock(str(lock), timeout=60):
         with store.connect() as conn:
@@ -281,7 +297,8 @@ def load_or_create(scope: str, report: str, material: str, peers: list[dict], ll
             return json.loads(row["payload"])
         source_packets = packets(report, material, references)
         said = any(p.get("reference") for p in source_packets)
-        events, usage = organize(report, source_packets, context(peers, said), llm_config)
+        options = {"tutorial": True} if tutorial else {}
+        events, usage = organize(report, source_packets, context(peers, said), llm_config, **options)
         pool = {"id": pool_id, "scope": scope, "packets": source_packets, "events": events, "usage": usage,
                 "prompt_version": PROMPT_VERSION}
         with store.connect(write=True) as conn:
@@ -412,13 +429,16 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
         if _same_event(event, peer.get("story") or {}) or alias(peer):
             result.append(peer)
             continue
+        if event.get("tutorial"):
+            continue  # An official guide can document several independent operations.
         # Legacy scripts have no structured story. Match a named edition on its
         # core article as well, so omitted semantic aliases cannot bypass history.
         edition = event.get("edition", "")
         named_edition = bool(edition and _normal(edition) in _normal(peer["title"]))
         if named_edition and guard.overlap(evidence, peer["sources"]):
             result.append(peer)
-    result += guard.duplicate_peers(evidence, unchanged)
+    if not event.get("tutorial"):
+        result += guard.duplicate_peers(evidence, unchanged)
     by_id = {}
     for peer in result:
         by_id.setdefault(peer["script_id"], peer)
@@ -484,6 +504,23 @@ def material_for(pool: dict, story: dict) -> str:
     primary = "\n\n---\n\n".join(by_id[key]["text"] for key in story["primary"])
     background = "\n\n---\n\n".join(by_id[key]["text"] for key in story["background"] if key not in story["primary"])
     return "## 主事件材料\n\n" + primary + ("\n\n## 辅助背景（不另作主事件）\n\n" + background if background else "")
+
+
+def material_for_report_item(report: str, material: str, story: dict | None = None) -> str:
+    """Reuse a frozen item's packet or limit older snapshots to the item's links."""
+    from core.provenance import extract_urls, normalize_url
+
+    if story and (pool_id := story.get("pool_id")):
+        try:
+            return material_for(get(pool_id), story)
+        except (SelectionError, KeyError):
+            # Older or archived drafts may have lost their cached packets.
+            pass
+    urls = {normalize_url(url) for url in extract_urls(report)}
+    return "\n\n---\n\n".join(
+        block for block in material.split("\n\n---\n\n")
+        if urls & {normalize_url(url) for url in extract_urls(block)}
+    )
 
 
 def get(pool_id: str) -> dict:

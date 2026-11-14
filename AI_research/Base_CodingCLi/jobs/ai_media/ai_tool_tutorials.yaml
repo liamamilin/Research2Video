@@ -1,0 +1,65 @@
+name: AI 工具教程
+description: 每天从官方资料中选至多三个可以具体讲清的 AI 工具操作或任务
+enabled: true
+language: zh
+keywords: [AI 工具教程, 功能与技巧, 怎么做一件事]
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1200
+  skip_if_running: true
+search: false
+source_history: context
+sources_limit: 5
+sources:
+- source:cg_learn_updates
+- page:https://learn.chatgpt.com/docs/projects?surface=app
+- source:cg_claude_release_notes
+- page:https://academy.claude.com/tutorials/create-and-edit-files-with-claude-to-eliminate-hours-of-busy-work
+- page:https://apps.apple.com/cn/app/id6683305962
+- page:https://apps.apple.com/cn/app/id6459478672
+- page:https://apps.apple.com/cn/app/id6480446430
+- page:https://apps.apple.com/cn/app/id6466733523
+- page:https://docs.qoder.com/zh/qoder/quickstart.md
+- page:https://docs.qoder.com/zh/qoder/execution-environments.md
+- page:https://www.codebuddy.cn/docs/workbuddy/Changelog
+- page:https://www.codebuddy.cn/docs/workbuddy/Results
+- page:https://www.deepseek.com/news/deepseek-app/
+- page:https://learn.chatgpt.com/docs/codex/ide.md
+- page:https://code.claude.com/docs/en/common-workflows
+prompt: |
+  为中文观众从本次取得的 ChatGPT、Claude、豆包、元宝、千问、Qoder、WorkBuddy、DeepSeek、Codex、Claude Code 官方资料中选最多三个可以直接写成短视频的教程，最值得做的放在最前。有足够的新题就选三条，材料不足时按实际合格题材的数量输出。同轮选题各解决一个不同的观众问题。App Store 只采用开发者填写的产品介绍和版本记录。选题从资料里的具体入口、动作或案例起步，优先考虑实用、容易漏掉且能看见结果的操作。页面无新增时，仍适用且未讲过的常青技巧也可入选，注明产品端、适用条件和示例性质。操作依赖未取得的材料时，留给后续再做。
+  每题只处理一个问题。功能与技巧讲什么时候用、从哪进入、做一个什么动作、会看到什么。怎么做一件事用同一份示例输入走到一个可见的产物。若示例需要修改已有内容，写清改动前的具体内容和改动后要看到的结果。观众需要什么背景才能听懂下一步，也写进底稿。示例用于说明，资料来自公开说明，口播不能声称亲测。
+  对照近期已报道记录，避免更换标题或示例重做同一个操作。首批库存已覆盖以下知识点：
+  - ChatGPT：回答保存为项目来源、点回答引用看原网页、两份课程 PDF 做复习提纲、关键词找旧对话。
+  - Claude：选中 Artifact 的一段局部改写、复盘简报转成 PPTX。
+  - 豆包：网页中英对照翻译、把英文更新页整理成三行卡片。
+  - 元宝：录音时拍投影片、会议录音整理后导出腾讯文档。
+  - 千问：查订单物流、按 200 元预算比较两件礼物。
+  - Qoder：在审阅里筛选最后一轮、给列表接口加分页前查看计划、新任务放到 Worktree。
+  - WorkBuddy：批量改名先看预览、在产物里把表格另存、笔记整理为待办纪要。
+  - DeepSeek：从附件摘录原文、把公开图书馆通知整理成报名卡。
+  - Codex：把 IDE 选区加进对话、在 IDE 看改动差异、改示例报名按钮并核对差异。
+  - Claude Code：切换计划模式、添加 Hello World 函数并查看 Git 改动。
+  近期已报道记录：
+  {reported_events}
+
+  日期：{date}
+  每个合适的题材单独输出一个 Markdown 条目，使用下列字段。条目内保留能核对的官方原文链接，以及与所选产品端、步骤、限制相关的资料。
+  ### 具体选题标题
+  - **系列**：产品名
+  - **题材分类**：功能与技巧 或 怎么做一件事
+  - **一句话**：观众能学会什么
+  - **核心角度**：本期处理的具体问题
+  - **目标受众**：描述观众通常知道什么，以及哪些词需要解释
+  - **具体材料**：来自官方资料的操作条件、动作和结果
+  - **操作与演示**：用公开案例或明确写作示意的例子，说明输入、步骤和结果
+  - **来源网址**：官方链接
+  没有合适题材时，在采集范围之后另起一行原样输出：本次暂无新题材
+output: output/ai_tutorial/{date}_ai_tool_tutorials.md
+topics:
+  alias: ai_tool_tutorials
+  format: items
+  prefix: ATU
+  refresh: true
+  daily_limit: 3

@@ -436,8 +436,9 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool, searc
     if item["state"] in ("DONE", "FAILED", "HELD", "CANCELLED"):
         return took
     if not item["script_id"]:
-        if not can_start_script:
-            if search_down and item["note"] != video_executor.SEARCH_WAIT_NOTE:
+        needs_search = search_down and not item["topic"].get("from_report")
+        if not can_start_script or needs_search:
+            if needs_search and item["note"] != video_executor.SEARCH_WAIT_NOTE:
                 ap.update_item(item["id"], note=video_executor.SEARCH_WAIT_NOTE)
             return took
         from core.video import content_guard
@@ -739,11 +740,11 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
     if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
         counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))
     from core import search_health
-    # While no search provider can answer, research would only fail: new scripts wait, renders go on.
+    # While search is down, wait only for work that depends on it.
     search_down = search_health.outage() is not None
     for item in run["items"]:
         try:
-            took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS and not search_down,
+            took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS,
                            can_start_render=counts["renders"] < MAX_RENDERS, search_down=search_down)
             if (item.get('retries') or {}).get('dispatch'):
                 current = (ap.get_run(run['id']) or {}).get('items', [])

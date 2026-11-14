@@ -20,6 +20,16 @@ def test_oversized_material_keeps_only_the_blocks_the_report_cites_in_order():
     assert fit["blocks"] == 50 and fit["cited"] == 2 and fit["kept"] == 2
 
 
+def test_documentation_port_placeholder_keeps_cited_source_eligible():
+    cited = _block(1) + "\n打开 http://localhost:PORT/setup 查看结果。"
+    material = SEP.join([_block(0, 1_000), cited, _block(2, 1_000)])
+
+    kept, fit = fit_material("报告引用 https://example.com/a1", material, limit=1_000)
+
+    assert kept == cited
+    assert fit["cited"] == 1 and fit["kept"] == 1
+
+
 def test_cited_blocks_that_still_overflow_are_taken_in_order_until_full():
     material = SEP.join(_block(i, 400) for i in range(10))
     report = " ".join(f"https://example.com/a{i}" for i in range(10))

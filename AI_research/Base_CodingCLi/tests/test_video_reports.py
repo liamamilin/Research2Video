@@ -104,6 +104,49 @@ def _topic_rows() -> int:
         return conn.execute("SELECT count(*) FROM topics").fetchone()[0]
 
 
+def test_manual_report_and_rewrite_keep_the_job_prompts(client, video_env, llm, monkeypatch):
+    from core.llm import ChatResponse
+    from core.video import manuscript_workflow
+
+    job = "ai_media/ai_tool_tutorials"
+    profile = manuscript_workflow.JOB_PROMPTS[job]
+    (video_env / "config/manuscript.yaml").write_text(f"jobs: [{job}]\n")
+    relative = "output/ai_tutorial/2026-11-14_ai_tool_tutorials.md"
+    path = video_env / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(WEEKLY_REPORT)
+    report = reports.record_file(relative, job=job)
+    stock_chat = llm.chat
+    prompts = []
+
+    def chat(self, messages, **kwargs):
+        system, request = (message["content"] for message in messages[:2])
+        if system == profile.read:
+            prompts.append("reader")
+            return ChatResponse(content=json.dumps({
+                "takeaway": "能操作", "keep_quote": "说明", "targets": [],
+            }))
+        if profile.draft in request:
+            prompts.append("author")
+        return stock_chat(self, messages, **kwargs)
+
+    monkeypatch.setattr(llm, "chat", chat)
+    monkeypatch.setattr(manuscript_workflow, "LLMClient", llm)
+    llm.replies = [script_json(400), script_json(400)]
+    _login(client)
+    response = client.post("/api/video/scripts", headers=_csrf(client),
+                           json={"column": "point_short", "report_id": report["id"]})
+    assert response.status_code == 202, response.text
+    script = _wait(client, response.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert not store.get_script(script["id"])["production"]
+    from web.services import video_workflow
+    assert video_workflow.run_rewrite(script["id"]) == "DRAFT"
+    assert prompts == ["author", "reader", "author", "reader"]
+    for version in (1, 2):
+        assert store.get_version(script["id"], version)["meta"]["manuscript_workflow"]["profile"] == profile.version
+
+
 def test_api_any_engine_report_is_written_into_a_video_without_a_topic(client, video_env, research, llm, autovideo):
     """Product redesign phase 1: a report from any Job becomes a video directly; nothing goes into the topic pool."""
     base = video_env / "output" / "monitoring"

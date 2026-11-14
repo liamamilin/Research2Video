@@ -58,6 +58,20 @@ def test_daily_and_weekly_share_story_identity_even_after_title_changes(guard_en
     check(first)  # keep the earlier draft deterministically, including same-second creations
 
 
+def test_tutorial_history_survives_the_news_memory_window(guard_env):
+    config = guard_env / "config"
+    (config / "matrices/ai_media.yaml").write_text("name: AI 视频\njobs: [ai_media/ai_tool_tutorials]\n")
+    job = "ai_media/ai_tool_tutorials"
+    old = script(guard_env, job)
+    store.update_script(old["id"], content_column_id="ai_tutorial", content_matrix_id="ai_media",
+                        source_matrix_id="ai_media")
+    with store.connect(write=True) as conn:
+        conn.execute("UPDATE script_versions SET created_at='2020-01-01' WHERE script_id=?", (old["id"],))
+    assert old["id"] not in {row["script_id"] for row in guard.history(str(config), str(guard_env / "jobs"))}
+    peers = guard.coverage(guard.policy_topic({}, job), str(config), str(guard_env / "jobs"))
+    assert old["id"] in {row["script_id"] for row in peers}
+
+
 def test_different_matrices_and_different_stories_on_same_report_are_allowed(guard_env):
     first = script(guard_env, "science/daily")
     check(script(guard_env, "history/daily"))
@@ -230,9 +244,12 @@ def test_sources_are_canonical_and_shared_reference_pages_remain_reusable():
     assert guard.source_key(SNAKE + "?utm_source=share#part") == guard.source_key(SNAKE.replace("https:", "http:"))
     assert guard.source_key("https://arxiv.org/html/2610.12345v2") == guard.source_key("https://arxiv.org/abs/2610.12345")
     for url in ("https://docs.example.com/models", "https://artificialanalysis.ai/leaderboards/models#one", "https://example.com/rss.xml",
-                "https://www.ft.com/rss/home", "https://example.com/feeds/news", "https://example.com/feed"):
+                "https://www.ft.com/rss/home", "https://example.com/feeds/news", "https://example.com/feed",
+                "https://www.codebuddy.cn/docs/workbuddy/Results#产物", "https://code.claude.com/docs/en/common-workflows",
+                "https://learn.chatgpt.com/docs/projects?surface=app", "https://apps.apple.com/cn/app/id6683305962"):
         assert not guard.source_key(url)
     assert guard.source_key("https://developers.example.com/blog/new-model")
+    assert guard.source_key("https://learn.chatgpt.com/docs/whats-new.md")
     assert guard.overlap({"a.example/critical-maxkb-ai-agent-flaw"}, {"b.example/critical-maxkb-ai-agent-flaw"})
     assert not guard.overlap({"a.example/openai-launches-gpt6"}, {"b.example/anthropic-ships-opus-55"})
 

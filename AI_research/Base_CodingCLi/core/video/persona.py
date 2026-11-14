@@ -1,10 +1,7 @@
-"""The account's fixed narrator (config/persona.yaml): one name, first person, introduced right after the hook.
+"""The account's narrator: a hook, a natural introduction tied to this topic, then the story.
 
-B站 hits have a narrator viewers remember ("这里是瑞亚", "我是赎罪利亚"); ours was a nameless voice reading other
-people's news ("据某某报道"). Every script is now told by one narrator in the first person. What the narrator did is
-what the pipeline did (read, compared, calculated); a test the material reports is someone else's, so the narrator
-never says they ran it. The program makes sure the introduction is said: when the author left it out, it goes right
-after the first sentence. Without the file there is no persona and nothing changes.
+Identity is authored with the surrounding narration, never spliced into a sentence
+by position. Without config/persona.yaml there is no narrator instruction.
 """
 from __future__ import annotations
 
@@ -34,36 +31,59 @@ def load(config_dir: Optional[str] = None) -> dict:
     name = str(data.get("name") or "").strip() if isinstance(data, dict) else ""
     if not name:
         return {}
+    greeting = str(data.get("opening_greeting") or "").strip()
     return {"name": name, "introduce": str(data.get("introduce") or f"我是{name}。").strip(),
-            "farewell": str(data.get("farewell") or f"我是{name}，我们下期见。").strip()}
+            "farewell": str(data.get("farewell") or f"我是{name}，我们下期见。").strip(),
+            **({"opening_greeting": greeting} if greeting else {})}
 
 
-def prompt(persona: dict) -> str:
+def prompt(persona: dict, *, opening_only: bool = False) -> str:
     if not persona:
         return ""
     name = persona["name"]
+    introduction = str(persona.get("introduce") or f"我是{name}。").rstrip("。.!！ ")
+    greeting = persona.get("opening_greeting", "大家好")
+    exact_greeting = (f"没有固定栏目问候时，用「{greeting}，{introduction}」接在钩子后。"
+                      if persona.get("opening_greeting") else "")
+    ending = "。" if opening_only else f"；最后道别说「{persona['farewell']}」。"
     return (f"\n你是这个账号固定的讲述者「{name}」，全程用第一人称“我”对观众讲：我看了、我算了一下、我的判断是、我建议。"
-            f"第一句仍是钩子，紧接着第二句以「我是{name}，」开头，用半句话说这期帮观众解决什么"
-            f"（比如“我是{name}，这期帮你把这笔账算清楚。”）；最后道别说「{persona['farewell']}」。"
+            f"开头先讲完整的钩子，再自然问候、自我介绍并接上本期具体要聊的问题，然后承接正文。"
+            f"例如句式‘{greeting}，{introduction}，今天我们聊聊……’，省略处必须写成这份材料的具体问题，不能照抄省略号。"
+            f"{exact_greeting}"
+            "问候、名字和本期话题写成同一段连贯口播，不把名字单独写成一句或一段，不把自我介绍插进尚未讲完的事件。"
+            "介绍要短，说明为什么接下来要讲这件事，不列节目流程，不重复钩子；语气贴合内容，严肃事件不强行热闹。"
+            f"若节目已经有固定问候，不重复打招呼，仍自然衔接名字和本期问题{ending}"
             "来源只用半句话带过（“官方公告写的是……”“测出来的结果是……”），不用“据某某报道”“某某表示”起句。"
             "没有亲手做过的事不说成自己做的：材料里的测试、跑分、实验是别人做的，不说“我实测”“我试了”。")
 
 
-_SENTENCE = re.compile(r"^(.+?[。！？!?])")
+def opening_needs_introduction(paragraphs: list, persona: dict, *, fixed_greeting: str = "") -> bool:
+    """Recognize missing or bare identity lines, not judge the quality of an opening.
 
-
-def ensure_introduced(paragraphs: list, persona: dict) -> bool:
-    """Put ``introduce`` after the first sentence unless the opening already names the narrator. True when added.
-
-    ``paragraphs`` are the first section's paragraph models (with ``.text``); only the first two are looked at."""
+    A complete introduction with a topic is left to the author. This only catches
+    the mechanical name-only sentence previously inserted by this module.
+    """
     if not persona or not paragraphs:
         return False
-    if any(f"我是{persona['name']}" in p.text for p in paragraphs[:2]):
-        return False
-    first = paragraphs[0].text.strip()
-    head = _SENTENCE.match(first)
-    if head and head.group(1) != first:
-        paragraphs[0].text = head.group(1) + persona["introduce"] + first[len(head.group(1)):].lstrip()
-    else:
-        paragraphs[0].text = (first + persona["introduce"]) if first else persona["introduce"]
-    return True
+    identity = str(persona.get("introduce") or f"我是{persona['name']}。").rstrip("。.!！ ")
+    opening = "\n".join(p["text"] if isinstance(p, dict) else p.text for p in paragraphs)
+    if greeting := (persona.get("opening_greeting") if not fixed_greeting else ""):
+        introductions = list(re.finditer(re.escape(greeting) + r"[，, ]+" + re.escape(identity), opening))
+        if len(introductions) != 1 or opening.count(identity) != 1:
+            return True
+        intro = introductions[0]
+        hook = opening[:intro.start()].rstrip()
+        continuation = opening[intro.end():].partition("\n")[0].lstrip("，,。.!！ ")
+        return not (re.search(r"\w", hook) and hook.endswith(("。", "？", "！", "?", "!", "”", "」"))
+                    and re.search(r"\w", continuation))
+    if identity not in opening:
+        return True
+    bare = re.compile(r"(?:^|[。！？!?\n])\s*(?:(?P<greeting>大家好|各位好)[，,。！! ]*)?"
+                      + re.escape(identity) + r"\s*(?:[。！!](?![”’\"'])|$)")
+    for match in bare.finditer(opening):
+        # A greeting after the hook can end a sentence. The same paragraph
+        # still carries the topic, so the spoken introduction is not isolated.
+        continuation = opening[match.end():].partition("\n")[0].strip()
+        if not (match["greeting"] and opening[:match.start()].strip() and continuation):
+            return True
+    return False

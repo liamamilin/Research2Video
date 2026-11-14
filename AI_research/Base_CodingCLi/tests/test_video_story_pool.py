@@ -27,9 +27,9 @@ def event(**overrides):
 def organized(monkeypatch, rows):
     calls = []
 
-    def organize(report, packets, previous, config):
+    def organize(report, packets, previous, config, *, tutorial=False):
         calls.append((report, packets, previous))
-        return pool.validate(rows, packets, previous), {"requests": 1}
+        return pool.validate(rows, packets, previous, tutorial=tutorial), {"requests": 1}
 
     monkeypatch.setattr(pool, "organize", organize)
     return calls
@@ -79,6 +79,20 @@ def test_missing_urls_keep_full_material_and_can_match_an_explicit_event_alias()
     selected = pool.validate([event(same_as=["H1"])], packets, pool.context(peers))[0]
     assert packets[0]["text"] == text and not selected["primary_sources"]
     assert pool.duplicate(selected, peers) == peers
+
+
+def test_tutorials_sharing_a_guide_are_deduplicated_by_operation():
+    url = "https://example.com/help/workbuddy"
+    packets = [{"id": "S1", "title": "结果区", "text": "把文件放回对话或发给同事。", "links": [url]}]
+    old = pool.validate([event(subject="WorkBuddy 把文件加回对话", action="analysis", event_date="")],
+                        packets, [], tutorial=True)[0]
+    peers = [{"script_id": "old", "title": old["title"], "story": old, "sources": {guard.source_key(url)}}]
+    send, = pool.validate([event(subject="WorkBuddy 把文件发给同事", action="analysis", event_date="")],
+                          packets, pool.context(peers), tutorial=True)
+    repeat, = pool.validate([event(subject="用附件接着改文档", action="analysis", event_date="", same_as=["H1"])],
+                            packets, pool.context(peers), tutorial=True)
+    assert not pool.duplicate(send, peers)
+    assert pool.duplicate(repeat, peers) == peers
 
 
 @pytest.mark.parametrize("override", [
@@ -445,6 +459,34 @@ def test_writer_receives_selected_material_and_frozen_event_metadata(guard_env, 
     assert NEW in request and SNAKE not in request
     assert "已选主事件" in request
     assert claim_state(row["id"]) == "COVERED"
+
+
+@pytest.mark.parametrize("has_cached_pool", [True, False])
+def test_published_item_rewrite_keeps_its_frozen_source_scope(guard_env, monkeypatch, llm, has_cached_pool):
+    row = fresh(guard_env)
+    report = f"### 小蛇\n简短发现。{SNAKE}\n\n### 恐龙\n另一条新闻。{NEW}"
+    (guard_env / row["report_path"]).write_text(report)
+    raw_material = f"原始材料中的滚动观察。{SNAKE}\n\n---\n\n原始材料中的另一条。{NEW}"
+    candidates = create_pool(monkeypatch, material=f"### 小蛇\n已锁定的滚动证据。{SNAKE}")
+    selected, _ = pool.take(row["id"], candidates, [])
+    if not has_cached_pool:
+        selected = {**selected, "pool_id": "missing-pool"}
+    current = store.get_script(row["id"])
+    topic = {**current["topic"], "story": selected, "from_item": "frozen-item", "from_item_title": "小蛇"}
+    store.update_script(row["id"], topic=topic, status="APPROVED")
+    version = store.add_version(row["id"], title="原稿", sections=sections(), length_check={}, edit_type="GENERATED")
+    store.add_publication(row["id"], version=version, url="https://www.bilibili.com/video/BV1xx411c7mD", published_on="2026-10-25")
+    monkeypatch.setattr(workflow.report_meta, "get", lambda path: {"material": {"path": "test"}})
+    monkeypatch.setattr(workflow.report_material, "read", lambda *args: raw_material)
+    FakeLLM.replies = [script_json(citations={(0, 0): [SNAKE]})]
+
+    assert workflow.run_rewrite(row["id"], previous_status="APPROVED") == "DRAFT"
+
+    request = FakeLLM.calls[0][-1]["content"]
+    assert NEW not in request and "原始材料中的另一条" not in request
+    assert ("已锁定的滚动证据" if has_cached_pool else "原始材料中的滚动观察") in request
+    assert store.get_script(row["id"])["topic"]["story"] == selected
+    assert store.list_publications(row["id"])[0]["version"] == version
 
 
 def test_adaptation_uses_same_selected_event_and_saves_metadata(guard_env, monkeypatch):

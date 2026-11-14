@@ -218,6 +218,31 @@ def test_budget_guard_prevents_model_call(runtime, monkeypatch):
     assert (status, reason, output) == ('blocked', 'budget exhausted', None)
 
 
+def test_research_output_is_resolved_inside_the_worker_workspace(runtime, monkeypatch, tmp_path):
+    import threading
+    from core import budget, state, lock, report_meta
+    from core.engine import ResearchEngine
+
+    for module, names in [(state, ('_STATE_DIR', '_HISTORY_DIR')), (lock, ('_LOCK_DIR',)), (report_meta, ('META_FILE',))]:
+        for name in names:
+            monkeypatch.setattr(module, name, getattr(module, name))
+    monkeypatch.setattr(budget, 'pipeline_allowed', lambda *_: (True, ''))
+    caller = tmp_path / 'caller'
+    caller.mkdir()
+    monkeypatch.chdir(caller)
+    relative = Path('output/radar.md')
+    report = Path(runtime.workspace) / relative
+    report.parent.mkdir()
+    report.write_text('worker report')
+    (caller / relative).parent.mkdir()
+    (caller / relative).write_text('unrelated report')
+    monkeypatch.setattr(ResearchEngine, 'run_job', lambda *_: str(relative))
+
+    assert execute_job(runtime, 'radar', threading.Event()) == ('success', '', str(report.resolve()))
+    report.unlink()
+    assert execute_job(runtime, 'radar', threading.Event())[0] == 'failed'
+
+
 def test_user_cancelled_claim_never_starts_or_retries(store):
     p = plan(store)
     store.enqueue_due(DUE)

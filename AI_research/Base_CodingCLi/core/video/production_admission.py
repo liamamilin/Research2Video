@@ -25,10 +25,14 @@ class Ledger:
                 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY,value REAL NOT NULL);
                 CREATE TABLE IF NOT EXISTS admissions (
                     issue TEXT PRIMARY KEY, day TEXT NOT NULL, accepted_at REAL NOT NULL,
-                    policy_revision TEXT NOT NULL, mode TEXT NOT NULL
+                    policy_revision TEXT NOT NULL, mode TEXT NOT NULL,
+                    job TEXT NOT NULL DEFAULT ''
                 );
                 CREATE INDEX IF NOT EXISTS admission_day ON admissions(day,mode);
             """)
+            db.execute("BEGIN IMMEDIATE")
+            if "job" not in {row[1] for row in db.execute("PRAGMA table_info(admissions)")}:
+                db.execute("ALTER TABLE admissions ADD COLUMN job TEXT NOT NULL DEFAULT ''")
             db.execute(
                 "INSERT OR IGNORE INTO meta VALUES ('enabled_at',?)",
                 (time.time() if now is None else now,),
@@ -52,6 +56,8 @@ class Ledger:
         accepted_before: float | None = None,
         manual: bool = False,
         now: float | None = None,
+        job: str = "",
+        job_limit: int | None = None,
     ) -> bool:
         now = time.time() if now is None else now
         local = datetime.fromtimestamp(
@@ -77,9 +83,17 @@ class Ledger:
             limit = automatic.get("daily_limit", 4)  # None: every issue is admitted, still once
             if mode == "automatic" and limit is not None and count >= limit:
                 return False
+            if mode == "automatic" and job_limit is not None:
+                job_count = db.execute(
+                    "SELECT COUNT(*) FROM admissions WHERE accepted_at>=? AND accepted_at<?"
+                    " AND mode='automatic' AND job=?",
+                    (midnight.timestamp(), (midnight + timedelta(days=1)).timestamp(), job),
+                ).fetchone()[0]
+                if job_count >= job_limit:
+                    return False
             db.execute(
-                "INSERT INTO admissions VALUES (?,?,?,?,?)",
-                (issue, day, now, revision, mode),
+                "INSERT INTO admissions (issue,day,accepted_at,policy_revision,mode,job) VALUES (?,?,?,?,?,?)",
+                (issue, day, now, revision, mode, job),
             )
         return True
 
@@ -98,7 +112,9 @@ def enter(
         or (topic.get("matrix_dedup") or {}).get("job", "")
         or topic.get("knowledge_job", "")
     )
-    matrix = (topic.get("_content_context") or {}).get("matrix", "")
+    context = topic.get("_content_context") or {}
+    job = job or context.get("job", "")
+    matrix = context.get("matrix", "")
     if not job and topic.get("_production"):
         from core.video.production import load_all
 
@@ -106,6 +122,10 @@ def enter(
         job = config.job if config else ""
     if not production_policy.manages(policy, paths.config_dir, job=job, matrix=matrix):
         return True
+    from . import topic_store
+
+    source = topic_store.resolve(paths.jobs_dir, job) if job else None
+    job_limit = source.daily_limit if source and not source.error else None
     episode = topic.get("episode") or {}
     # Retries retain the frozen report identity; a newly authored report revision is new production.
     identity = [
@@ -119,6 +139,9 @@ def enter(
             topic.get("theme_task_id") or topic.get("id") or key,
             topic.get("_production", ""),
         ]
+    if job_limit is not None and not episode:
+        # One admission per video, shared by writing and rendering.
+        identity = [job, topic.get("_production", ""), topic.get("from_item") or topic.get("id") or key]
     issue = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     return Ledger(paths.state_dir).enter(
         issue,
@@ -126,4 +149,6 @@ def enter(
         policy["revision"],
         accepted_before=accepted_before,
         manual=manual,
+        job=job,
+        job_limit=job_limit,
     )

@@ -972,6 +972,27 @@ def test_while_search_is_down_scripts_wait_instead_of_failing_and_keep_their_ret
     assert item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
 
 
+def test_report_backed_tutorial_can_write_and_retry_while_search_is_down(pilot_env, monkeypatch, search_health_dir):
+    spawned, _ = pilot_env
+    search_health_dir.record_failures({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    search_health_dir.record_outage({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    tutorial = {**topic(1), "from_report": "output/tutorial.md", "from_item": "tutorial-1"}
+    monkeypatch.setattr(pilot, "pick_topics", lambda *_: [
+        {"column_key": "flash", "topic": tutorial},
+        {"column_key": "flash", "topic": topic(2)},
+    ])
+    run = pilot.start_run({"picks": [{"column": "flash"}], "refresh": False})
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    assert script_id and spawned == [script_id]
+    assert item_of(run["id"], 1)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+    store.update_script(script_id, status="FAILED", error="模型返回格式错误")
+    pilot.tick()
+    assert spawned == [script_id, script_id]
+    assert item_of(run["id"], 0)["retries"]["script"] == 1
+
+
 def test_items_held_by_a_search_outage_can_be_released_once(pilot_env, monkeypatch, search_health_dir):
     run = batch(monkeypatch, 2)
     pilot.tick()

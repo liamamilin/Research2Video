@@ -1,0 +1,21 @@
+# Job-specific writing workflows accepted for production.
+jobs:
+  - ai_media/ai_tool_tutorials
+  - monitoring/ai_flash_discovery
+  - chatgpt_acquisition/t08_troubleshooting
+  - chatgpt_acquisition/t01_product
+  - ai_media/daily_opensource_radar
+  - tech/tech_weekly
+  - science/science_daily
+  - history/history_weekly
+  - science/science_weekly
+  - company/company_weekly
+  - culture/culture_daily
+  - culture/culture_weekly
+  - industry/industry_weekly
+  - software/software_daily
+  - analysis/ai_gap_analysis
+  - practical_ai_intelligence/04_project_understanding_radar
+  - research/ai
+  - research/assistant_app_acceptance_20261025
+  - tech/tech_illustrated

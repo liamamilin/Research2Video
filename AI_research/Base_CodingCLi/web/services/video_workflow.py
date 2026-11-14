@@ -334,7 +334,20 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
-    column = apply_script_context(column, script.get("content_context") or {})
+    context = script.get("content_context") or {}
+    video_config = load_system_config(settings.paths.config_dir).get("video") or {}
+    from core.video import manuscript_workflow
+
+    profile = manuscript_workflow.profile_for(script, settings.paths.config_dir, settings.paths.jobs_dir, video_config)
+    if profile and profile.draft and context.get("column"):
+        context = {**context, "notes": profile.draft}
+    column = apply_script_context(column, context)
+    if profile and profile.draft and not context.get("column"):
+        column = replace(column, script_style=column.script_style + "\n" + profile.draft)
+    programme_direction = column.script_style
+    if report_images:
+        from core.video.material_context import visual_brief
+        column = replace(column, script_style=column.script_style + visual_brief(settings.paths.state_dir, report_images))
     from core.video import episodes
     is_episode = episodes.enabled(topic)
     joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
@@ -366,8 +379,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                                                                  if story_pool.cited_packet(p, cited))
                     selection_report = research_dossier.selection_brief(report, script)
                     # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
+                    options = {"tutorial": True} if context.get("type") == "tutorial" else {}
                     pool = story_pool.load_or_create(key, selection_report, original, peers, config,
-                                                     references=bool(topic.get("from_item")))
+                                                     references=bool(topic.get("from_item")),
+                                                     **options)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
@@ -434,15 +449,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     if material_ref else "")
         if guarded:
             material = filtered_material
-        if topic.get("from_item") and material and not topic.get("story"):
-            # A discovered topic is one item, not the entire feed. Keep the
-            # original blocks that contain its links, with its selected context.
-            from core.provenance import extract_urls, normalize_url
-
-            urls = {normalize_url(url) for url in extract_urls(report)}
-            parts = [part for part in material.split("\n\n---\n\n")
-                     if urls & {normalize_url(url) for url in extract_urls(part)}]
-            material = "\n\n---\n\n".join(parts)
+        if topic.get("from_item") and not (guarded and topic.get("story")):
+            # Rewriting a published item skips deduplication, but its story
+            # and source scope are still frozen to the selected item.
+            material = story_pool.material_for_report_item(report, material, topic.get("story"))
         material, material_fit = fit_material(dossier_report if joint_input else report, material)
         writing_topic = topic
         told = _episode_told(script, topic, dossier_report) if is_episode else []
@@ -461,7 +471,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
         greeting = episodes.greeting(topic, script.get("content_context") or {})
-        written = writer.write_for_column(
+        written = manuscript_workflow.write(
+            mode=video_config.get("manuscript_workflow"), profile=profile,
             column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
@@ -473,6 +484,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             **({"original_material": material} if joint_input else {}),
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
+        written.meta['programme_direction'] = programme_direction
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
             if told:

@@ -153,7 +153,14 @@ def source_key(url: str) -> str:
         value = normalize_url(url)
         parts = urlsplit(value)
         path = parts.path.lower().rstrip("/")
+        manual = (
+            (parts.netloc == "codebuddy.cn" and path.startswith("/docs/"))
+            or (parts.netloc == "code.claude.com" and path.startswith("/docs/"))
+            or (parts.netloc == "learn.chatgpt.com" and path.startswith("/docs/") and not path.startswith("/docs/whats-new"))
+            or (parts.netloc == "apps.apple.com" and "/app/" in path)
+        )
         if (not parts.netloc or not path or "/leaderboards" in path or "/changelog" in path
+                or manual
                 or path.endswith((".rss", ".xml", "/feed", "/feeds", "/rss", "/atom", "/pricing"))
                 or path.startswith(("/rss/", "/feed/", "/feeds/"))
                 or (parts.netloc.startswith(("docs.", "developers.", "help."))
@@ -263,7 +270,7 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
     return {t["id"] for t in candidates if t.get("id") and identity(t) in remembered}
 
 
-def history(config_dir: str, jobs_dir: str) -> list[dict]:
+def history(config_dir: str, jobs_dir: str, *, include_tutorial_archive: bool = False) -> list[dict]:
     """A batch read, with the same ownership rules as the board; unpublished test drafts reserve nothing."""
     from core.video import outputs
 
@@ -278,9 +285,10 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
                             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=v.script_id "
                             "AND (p.version=v.version OR p.version IS NULL)) AS published "
                             "FROM script_versions v JOIN scripts s ON s.id=v.script_id "
-                            "WHERE v.created_at>=? AND (v.version=s.current_version OR EXISTS "
+                            "WHERE (v.created_at>=? OR (? AND s.content_column_id='ai_tutorial')) "
+                            "AND (v.version=s.current_version OR EXISTS "
                             "(SELECT 1 FROM publications p WHERE p.script_id=v.script_id "
-                            "AND (p.version=v.version OR p.version IS NULL)))", (cutoff,)).fetchall()
+                            "AND (p.version=v.version OR p.version IS NULL)))", (cutoff, include_tutorial_archive)).fetchall()
     result = []
     for row in rows:
         script = by_id[row["script_id"]]
@@ -317,9 +325,11 @@ def coverage(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str = ""
     key = scope(policy.get("job", ""), config_dir)
     if not key:
         return []
+    tutorial = policy.get("job") == "ai_media/ai_tool_tutorials"
     with store.connect() as conn:
         current = conn.execute("SELECT rowid AS sequence FROM scripts WHERE id=?", (script_id,)).fetchone() if script_id else None
-    return [h for h in history(config_dir, jobs_dir) if h["scope"] == key and h["script_id"] != script_id
+    return [h for h in history(config_dir, jobs_dir, include_tutorial_archive=tutorial)
+            if h["scope"] == key and h["script_id"] != script_id
             and (not current or h["published"] or h["sequence"] < current["sequence"])]
 
 

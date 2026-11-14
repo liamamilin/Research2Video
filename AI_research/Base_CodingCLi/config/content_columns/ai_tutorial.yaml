@@ -2,15 +2,20 @@ schema_version: 1
 name: AI 工具教程
 matrix: ai_media
 type: tutorial
-audience: 关注 AI 产品、技术与应用的观众
-promise: 跟随步骤完成一个具体 AI 工具任务
-production_ids: []
+audience: 使用 AI 工具的中文职场、学习和开发者观众
+promise: 学会一个具体功能、技巧，或用 AI 工具完成一件事
+production_ids:
+- ai_tool_tutorials
+content_mode: individual
 render_inheritance: source_compatible
-render: {}
+render:
+  production_recipe: mixed_tutorial
+  packaging:
+    label: AI 工具教程
 presentation:
   preferred_visuals:
-  - 操作截图
+  - 操作示意
   - 步骤演示
   - 局部聚焦
-status: planned
-notes: 目标栏目，尚未配置教程供稿与生产绑定。
+status: configured
+notes: 用同一个示例讲清入口、关键动作和可见结果。首次提到观众未必熟悉且理解操作需要的功能或状态时，结合例子简短交代。
