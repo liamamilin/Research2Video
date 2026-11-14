@@ -75,3 +75,22 @@ def test_trending_failure_is_only_a_note(tmp_path):
     trigger = ht.HotTrigger(str(tmp_path / "state"), str(tmp_path), trending=broken, start=lambda: "started",
                             clock=lambda: at(14))
     assert "热搜取不到" in trigger.check()
+
+
+def test_hot_trigger_passes_the_original_trigger_timestamp(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ht, "start_flash", lambda *, triggered_at: calls.append(triggered_at) or "started")
+    timestamp = at(16, 36)
+    trigger = ht.HotTrigger(str(tmp_path / "state"), str(tmp_path),
+                            trending=lambda: ["DeepSeek新功能"], clock=lambda: timestamp)
+    assert "已加跑" in trigger.check()
+    assert calls == [timestamp]
+
+
+def test_busy_or_cooling_down_hot_word_can_start_after_the_next_check(tmp_path):
+    word = "DeepSeek新功能"
+    report(tmp_path, "### 上午快讯", at(10))
+    assert "不到 3 小时" in make(tmp_path, [word], [at(12)]).check()
+    assert "快讯正在运行" in make(tmp_path, [word], [at(13)], outcome="快讯正在运行").check()
+    assert "已加跑" in make(tmp_path, [word], [at(13, 30)]).check()
+    assert make(tmp_path, [word], [at(14)]).check() == ""

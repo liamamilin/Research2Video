@@ -20,10 +20,10 @@ import time
 from typing import Callable, Optional
 
 from core.fileio import atomic_write, file_lock
+from core.production_policy import FLASH_JOB as JOB
 
 logger = logging.getLogger(__name__)
 
-JOB = "monitoring/ai_flash_discovery"
 REPORTS = "output/flash/{day}_ai_flash_discovery*.md"
 CHECK_EVERY = 1800
 ACTIVE_HOURS = (8, 22)
@@ -36,7 +36,7 @@ def _clean(text: str) -> str:
 
 
 class HotTrigger:
-    """Daily state in ``state/hot_trigger.json``: when it last looked, the AI words seen, the runs it started."""
+    """Daily state in ``state/hot_trigger.json``: when it last looked and the runs it started."""
 
     def __init__(self, state_dir: str, workspace: str, *, trending: Optional[Callable[[], list[str]]] = None,
                  start: Optional[Callable[[], str]] = None, clock: Callable[[], float] = time.time):
@@ -44,7 +44,7 @@ class HotTrigger:
         self.workspace = workspace
         self.clock = clock
         self._trending = trending
-        self._start = start or start_flash
+        self._start = start
 
     def trending(self) -> list[str]:
         if self._trending is not None:
@@ -58,7 +58,7 @@ class HotTrigger:
         except (OSError, ValueError):
             state = {}
         if state.get("day") != day:
-            state = {"day": day, "checked_at": state.get("checked_at", 0), "seen": [], "runs": []}
+            state = {"day": day, "checked_at": state.get("checked_at", 0), "runs": []}
         return state
 
     def reports_today(self, day: str) -> list[str]:
@@ -83,11 +83,8 @@ class HotTrigger:
             return f"热搜取不到（{type(exc).__name__}）"
         reports = self.reports_today(day)
         told = _clean(" ".join(Path(p).read_text(encoding="utf-8", errors="ignore") for p in reports))
-        fresh = [w for w in words if w not in state["seen"] and _clean(w) not in told]
-        with file_lock(str(self.path), timeout=5):
-            state = self._load(day)
-            state["seen"] = sorted(set(state["seen"]) | set(words))
-            self._save(state)
+        served = {_clean(word) for run in state["runs"] for word in run["words"]}
+        fresh = [w for w in words if _clean(w) not in served and _clean(w) not in told]
         if not fresh:
             return ""
         if len(state["runs"]) >= MAX_PER_DAY:
@@ -95,7 +92,7 @@ class HotTrigger:
         last = max((os.path.getmtime(p) for p in reports), default=0)
         if now - last < MIN_GAP:
             return f"热搜新词 {'、'.join(fresh)}，距上一份快讯不到 {MIN_GAP // 3600} 小时，留给下一轮"
-        outcome = self._start()
+        outcome = self._start() if self._start is not None else start_flash(triggered_at=now)
         if outcome == "started":
             with file_lock(str(self.path), timeout=5):
                 state = self._load(day)
@@ -109,7 +106,7 @@ class HotTrigger:
         atomic_write(str(self.path), json.dumps(state, ensure_ascii=False, indent=1))
 
 
-def start_flash() -> str:
+def start_flash(*, triggered_at: float | None = None) -> str:
     """Start the flash Job the way 「立即运行」 does: "started", or why not."""
     from core import matrices
     from core.budget import month_spend, run_allowed
@@ -138,7 +135,8 @@ def start_flash() -> str:
             if TaskRegistry().is_running(JOB):
                 return "快讯正在运行"
             start_job(job_name=JOB, started_by="hot-trigger", config_dir=settings.paths.config_dir,
-                      jobs_dir=settings.paths.jobs_dir)
+                      jobs_dir=settings.paths.jobs_dir,
+                      flash_triggered_at=triggered_at if triggered_at is not None else time.time())
     except Exception as exc:  # noqa: BLE001 - never more than a missed burst
         return f"启动失败（{type(exc).__name__}）"
     return "started"

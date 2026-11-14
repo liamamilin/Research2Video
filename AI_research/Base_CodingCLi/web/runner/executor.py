@@ -38,7 +38,8 @@ def wrap_progress_event(event: dict) -> dict:
 
 
 def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
-                      verbose: bool = False, date_override: str = None):
+                      verbose: bool = False, date_override: str = None, *,
+                      flash_triggered_at: float | None = None):
     """Run a job inside a thread.
 
     Creates a ResearchEngine with the task's cancel token and a progress callback
@@ -62,6 +63,8 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
         user=task.started_by,
         prompt_vars=getattr(task, "prompt_vars", None),
     )
+    if flash_triggered_at is not None:
+        engine.run_context = {"flash_triggered_at": flash_triggered_at}
 
     # Attach handler to the ROOT logger to capture core/engine log output
     root_logger = logging.getLogger()
@@ -102,7 +105,7 @@ class MatrixLimitReached(RuntimeError):
 
 def start_job(job_name: str, started_by: str,
               config_dir: str = "config", jobs_dir: str = "jobs",
-              verbose: bool = False) -> RunningTask:
+              verbose: bool = False, *, flash_triggered_at: float | None = None) -> RunningTask:
     """Start a job asynchronously. Returns the RunningTask immediately.
 
     Raises ``MatrixLimitReached`` when the Job's matrix has used up the month's searches (spec/matrices.md)."""
@@ -124,7 +127,8 @@ def start_job(job_name: str, started_by: str,
     })
 
     # the pool's thread starts with an empty context: carry the caller's attribution (which video this research is for)
-    future = _executor.submit(contextvars.copy_context().run, run_job_in_thread, task, config_dir, jobs_dir, verbose)
+    future = _executor.submit(contextvars.copy_context().run, run_job_in_thread, task,
+                              config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at)
     task.future = future
 
     return task
