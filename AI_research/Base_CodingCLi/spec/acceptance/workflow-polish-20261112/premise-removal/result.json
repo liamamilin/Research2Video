@@ -1,0 +1,17 @@
+{
+  "script_id": "2045bd6607094f18bf93575b37e70d53",
+  "before_version": 1,
+  "after_version": 2,
+  "removed": {
+    "text": "先把一个前提说清楚：ChatGPT在国内应用商店下载不到，得用海外账号，还要能访问海外服务的网络，付费也不走国内App。真正在用的人，大多坐在电脑前开网页。Claude也一样，不是手机上能直接装的选项。",
+    "citations": [],
+    "evidence": "UNCITED",
+    "note": null
+  },
+  "scope": "手工修正文稿；生成配置已删减，尚未重新生成文稿或视频",
+  "preserved_render": "4f000f5ede9d459f81fb501d631b0ab7",
+  "cause": "矩阵级 premise 强制每篇讲使用门槛，九个研究任务重复相同命令；原稿 polish.findings 为空。",
+  "changes": "撤掉矩阵 premise 和九个任务中的重复指令；未增加写作规则或关键词检测；当前文稿运行上下文也移除 premise，历史版本保留。",
+  "verification": "73 项相关测试通过；新建 T04 与当前稿重写上下文均不再包含统一前提。",
+  "limitations": "只修正现稿段落和配置注入，未重新调用生成模型，未生成新版成片；其他历史稿保留当时配置快照。"
+}
