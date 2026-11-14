@@ -17,7 +17,9 @@ from core import telemetry
 from core.fileio import file_lock
 from core.video import store
 
-PROMPT_VERSION = 5
+CHAPTER_PROMPT_VERSION = 6
+ENTRY_PROMPT_VERSION = 7
+PROMPT_VERSION = ENTRY_PROMPT_VERSION
 TUTORIAL_PROMPT_VERSION = 1
 SAID_CHARS = 2400  # what an earlier video told viewers, for comparing against a price/plan page
 POLICY = "matrix-story-v3"
@@ -152,12 +154,19 @@ def changes(value: list[dict]) -> list[dict]:
     return result
 
 
+def _chapter_peers(peers: list[dict]) -> list[dict]:
+    return [entry for peer in peers for entry in (
+        [{**peer, **chapter, "story": {}, "summary": chapter["text"][:600]}
+         for chapter in peer["chapters"]] if peer.get("chapters") else [peer]
+    )]
+
+
 def context(peers: list[dict], said: bool = False) -> list[dict]:
     """Keep legacy frozen event summaries as evidence without backfilling their versions."""
-    peers = list({(p["script_id"], (p.get("story") or {}).get("event_key") or p.get("version") or p["title"]): p
-                  for p in peers}.values())
+    peers = list({(p["script_id"], (p.get("story") or {}).get("event_key") or p.get("version") or p["title"],
+                   p.get("chapter")): p for p in _chapter_peers(peers)}.values())
     return [{"ref": f"H{i+1}", "script_id": p["script_id"], "title": p["title"],
-             "version": p.get("version"),
+             "version": p.get("version"), **({"chapter": p["chapter"]} if "chapter" in p else {}),
              "event_date": p.get("event_date", ""), "written_at": p.get("created_at", ""),
              "summary": p.get("summary", ""), "story": p.get("story") or {},
              **({"said": p.get("text", "")[:SAID_CHARS]} if said and p.get("text") else {}),
@@ -165,7 +174,7 @@ def context(peers: list[dict], said: bool = False) -> list[dict]:
 
 
 def organize(report: str, source_packets: list[dict], previous: list[dict], llm_config, *,
-             tutorial: bool = False) -> tuple[list[dict], dict]:
+             tutorial: bool = False, from_material: bool = False) -> tuple[list[dict], dict]:
     """One cached organization call over existing text, not a research or fact-check step."""
     from core.llm import LLMClient
 
@@ -175,6 +184,7 @@ subject 使用具体产品/事项名称，action 从 release/pricing/results/pol
 edition 填材料明确给出的版本/财报期/轮次。event_date 只填材料明确给出的单日事件日期，格式 YYYY-MM-DD，未知留空；时间段、日期范围与历史时期放在 edition 或 summary 中，event_date 留空。报告日期不等于事件日期。
 primary 填核心证据的 S 编号，background 填辅助背景 S 编号。新增参考、热度、下载量或换标题不构成新事件。
 same_as 关联已经讲过该题材的 H 编号；changes 比较的是相对这些已做视频后来发生了什么，不是与上一代产品、竞品或同次发布的另一个指标比较。没有后续进展就留空。
+标有 chapter 的 H 只代表该视频的这一章。依据该章实际讲述的动作与结果判断覆盖；只介绍了产品的发布、定价或跑分，不能算讲过后来上架的入口和使用条件。
 标 reference 的材料是价格/套餐/文档页的当前内容：已做视频的 said 与它的数值不同时，写入 changes，before 取 said 原文里的值，after 取页面原文里的值；页面与 said 一致就不是新进展。
 不确定有新进展时不得编造 changes。保持各候选与实际材料一致，优先排列适合讲述的具体事件。
 JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"release","edition":"","event_date":"",
@@ -189,6 +199,10 @@ JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"rele
 例如把附件放回对话继续改，与把附件发给同事，是两种操作。分别看实际点击的动作及最终结果。
 primary 填支撑关键动作的 S 编号，background 填辅助材料。常青教程用 analysis，日期、版本、变化在无材料支持时留空。
 """ + schema
+    if from_material:
+        system += ("\n本轮从报告未采用的原始资料重新找题。只提出具体、有独立报道价值的 AI 新事件，最多 6 条。"
+                   "日期不明的背景、热搜关键词、产品常驻页面和材料中提到的旧事不单独立题。"
+                   "已有足够覆盖或没有合适候选时，返回空 events。")
     request = {"report": report,
                "materials": [{**p, "text": p["text"][:2400]} for p in source_packets],
                "covered": [{k: v for k, v in p.items() if k != "script_id"} for p in previous]}
@@ -246,11 +260,14 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
         event["primary"], event["background"] = list(dict.fromkeys(primary)), list(dict.fromkeys(background))
         event["previous"] = list(dict.fromkeys(by_peer[k]["script_id"] for k in same_as))
         event["previous_refs"] = [{"script_id": by_peer[k]["script_id"], "version": by_peer[k].get("version"),
-                                   "event_key": (by_peer[k].get("story") or {}).get("event_key", "")} for k in same_as]
+                                   "event_key": (by_peer[k].get("story") or {}).get("event_key", ""),
+                                   **({"chapter": by_peer[k]["chapter"]} if "chapter" in by_peer[k] else {})}
+                                  for k in same_as]
         family = "edition" if event["edition"] and event["action"] in EDITION_ACTIONS else event["action"]
         event["family_key"] = _hash(_normal(event["subject"]), family)
-        if same_as and not event["changes"]:
-            peer = by_peer[same_as[0]]
+        identity_peer = next((by_peer[k] for k in same_as if "chapter" not in by_peer[k]), None)
+        if identity_peer and not event["changes"]:
+            peer = identity_peer
             event["event_key"] = (peer.get("story") or {}).get("event_key") or _hash(
                 "legacy", peer["script_id"], peer.get("version") or peer["title"])
         elif event["action"] == "release" and event["edition"] and event["event_date"]:
@@ -284,21 +301,28 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
 
 
 def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
-                   references: bool = False, *, tutorial: bool = False) -> dict:
+                   references: bool = False, *, tutorial: bool = False,
+                   material_packets: list[dict] | None = None) -> dict:
     variant = ["references"] if references else []
     if tutorial:
         variant.extend(("tutorial", TUTORIAL_PROMPT_VERSION))
-    pool_id = _hash(PROMPT_VERSION, scope, report, material, *variant)
+    if material_packets is not None:
+        variant.append("raw-material")
+    pool_id = _hash(PROMPT_VERSION, scope, report, material if material_packets is None else material_packets, *variant)
     lock = Path(store.db_path()).parent / ("story-pool-" + pool_id)
     with file_lock(str(lock), timeout=60):
         with store.connect() as conn:
             row = conn.execute("SELECT payload FROM video_story_pools WHERE id=?", (pool_id,)).fetchone()
         if row:
             return json.loads(row["payload"])
-        source_packets = packets(report, material, references)
+        source_packets = packets(report, material, references) if material_packets is None else material_packets
         said = any(p.get("reference") for p in source_packets)
         options = {"tutorial": True} if tutorial else {}
-        events, usage = organize(report, source_packets, context(peers, said), llm_config, **options)
+        if material_packets is not None:
+            options["from_material"] = True
+        events, usage = organize(report, source_packets, context(peers, said), llm_config, **options) if source_packets else ([], {})
+        if material_packets is not None:
+            events = events[:6]
         pool = {"id": pool_id, "scope": scope, "packets": source_packets, "events": events, "usage": usage,
                 "prompt_version": PROMPT_VERSION}
         with store.connect(write=True) as conn:
@@ -402,9 +426,11 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
     def alias(peer):
         refs = event.get("previous_refs")
         if refs is None:  # pools written before version-specific aliases
-            return peer["script_id"] in event["previous"]
+            return "chapter" not in peer and peer["script_id"] in event["previous"]
         for ref in refs:
             if ref["script_id"] != peer["script_id"]:
+                continue
+            if ref.get("chapter") != peer.get("chapter"):
                 continue
             if ref["event_key"]:
                 if ref["event_key"] == (peer.get("story") or {}).get("event_key"):
@@ -416,7 +442,7 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
     evidence = {key for u in event["primary_sources"] if (key := guard.source_key(u))}
     # An event told from another angle (core/video/angles.py) is another video: only the same angle repeats it.
     angle = event.get("angle") or ""
-    peers = [peer for peer in peers if ((peer.get("story") or {}).get("angle") or "") == angle]
+    peers = [peer for peer in _chapter_peers(peers) if ((peer.get("story") or {}).get("angle") or "") == angle]
     result = []
     unchanged = []
     for peer in peers:
@@ -475,7 +501,7 @@ def take(script_id: str, pool: dict, peers: list[dict]) -> tuple[dict, list[dict
             hits = duplicate(event, peers+occupied)
             if hits:
                 decisions.append({"decision": "skip", "title": event["title"], "peer_id": hits[0]["script_id"],
-                                  "reason": "主事件已覆盖或正在写稿："+hits[0]["title"]})
+                                  "reason": "主事件已覆盖或正在写稿：" + hits[0]["title"]})
                 continue
             selected = {**event, "pool_id": pool["id"], "scope": pool["scope"]}
             topic = json.loads(row["topic"])
@@ -490,7 +516,8 @@ def take(script_id: str, pool: dict, peers: list[dict]) -> tuple[dict, list[dict
             decisions.append({"decision": "select", "title": selected["title"], "peer_id": "", "reason": "已占用主事件，开始写稿"})
             break
         if selected is None:
-            decisions.append({"decision": "exhausted", "title": "", "peer_id": "", "reason": "排重后没有新的可写候选，少做一条"})
+            reason = pool.get("selection_note") or "排重后没有新的可写候选，少做一条"
+            decisions.append({"decision": "exhausted", "title": "", "peer_id": "", "reason": reason})
         for value in decisions:
             conn.execute("INSERT INTO video_story_decisions(script_id,pool_id,decision,title,peer_id,reason,created_at) VALUES(?,?,?,?,?,?,?)",
                          (script_id, pool["id"], value["decision"], value["title"], value["peer_id"], value["reason"], store._now()))

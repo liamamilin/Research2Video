@@ -26,6 +26,7 @@ import uuid
 from typing import Optional
 
 from core.fileio import file_lock
+from core.production_policy import FLASH_JOB
 from core.video import auto as video_auto
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
@@ -52,6 +53,8 @@ DISCOVERY_DEFAULT_TIMEOUT = 3600
 DEFAULT_SPEC = {"picks": [{"column": "flash", "all": True, "source": "flash"},
                           {"column": "point_short", "all": True, "source": "flash"}],
                 "refresh": True}
+FLASH_PRODUCTION = "flash_each"
+RAW_PACKET_LIMIT = 40
 
 
 # --- picking ---------------------------------------------------------------
@@ -253,6 +256,11 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
         for item in items:
             if item["pick"] is pick and story_pool.enabled(item["topic"]):
                 item["topic"] = {**item["topic"], "_story_fallbacks": [dict(c) for c in candidates if c["id"] not in taken]}
+        if spec.get("report") and pick.get("production") == FLASH_PRODUCTION and not any(i["pick"] is pick for i in items):
+            fallback = _material_topic(spec["report"], spec.get("report_identity"))
+            if fallback["id"] not in taken:
+                taken.add(fallback["id"])
+                items.append({"column_key": pick["column"], "topic": fallback, "production": FLASH_PRODUCTION, "pick": pick})
     for item in items:
         del item["pick"]
     return items
@@ -439,6 +447,14 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool, searc
     if item["state"] in ("DONE", "FAILED", "HELD", "CANCELLED"):
         return took
     if not item["script_id"]:
+        if item["topic"].get("_material_reselection"):
+            batch = ap.get_run(item["run_id"]) or {}
+            # Let the report's original slots select first. The raw-material
+            # pass fills one vacancy and must not compete with those slots.
+            if any(row["id"] != item["id"] and row.get("production") == FLASH_PRODUCTION
+                   and (row["state"] == "PENDING" or row["state"] == "WORKING" and not (row.get("gate") or {}).get("story_selection"))
+                   for row in batch.get("items", [])):
+                return took
         needs_search = search_down and not item["topic"].get("from_report")
         if not can_start_script or needs_search:
             if needs_search and item["note"] != video_executor.SEARCH_WAIT_NOTE:
@@ -562,6 +578,54 @@ def _reselect(item: dict, script: dict, gate: dict) -> None:
     _replace_candidate(item, {**gate, "story_attempts": attempts}, script.get('error') or '主事件均已覆盖')
 
 
+def _material_topic(report: str, revision: str | None = None) -> dict:
+    """One bounded second pass per report and production batch."""
+    return {"id": f"flash-material:{revision or os.path.basename(report)}", "title": "从快讯原始资料重新选题",
+            "from_report": report, "fields": {}, "_material_reselection": True,
+            **({"report_identity": revision} if revision else {}),
+            "matrix_dedup": {"job": FLASH_JOB, "policy": story_pool.POLICY}}
+
+
+def material_story_pool(script: dict, report: str, original: str, peers: list[dict], config, column) -> dict:
+    from core.video import content_guard
+
+    paths = get_settings().paths
+    scope = content_guard.scope(FLASH_JOB, paths.config_dir)
+    if not original:
+        pool = story_pool.load_or_create(scope, "", "", peers, config, material_packets=[])
+        return {**pool, "selection_note": "本期没有可读取的原始资料快照"}
+    source = topic_store.resolve(paths.jobs_dir, FLASH_JOB)
+    candidates = topic_store.parse(source, report, "2000-01-01") if source else []
+    cited = set()
+    for candidate in candidates:
+        item = excerpt.item_excerpt(report, candidate.title, include_nested=True)
+        if item:
+            cited.update(story_pool.cited(item))
+    covered = set().union(*(p["sources"] for p in peers))
+    packets = {}
+    for packet in story_pool.packets("", original):
+        if not packet["links"] or story_pool.cited_packet(packet, cited):
+            continue
+        url = packet["links"][0]
+        key = content_guard.source_key(url)
+        if not key or key in covered or key.startswith("search.bilibili.com/"):
+            continue
+        # The collector puts dated news first. Consolidate article/excerpt copies
+        # and prefer the packet most likely to contain the full reportable story.
+        identity = story_pool._anchored(url)
+        previous = packets.get(identity)
+        if previous is None or len(packet["text"]) > len(previous["text"]):
+            packets[identity] = packet
+    pool = story_pool.load_or_create(scope, "", "", peers, config,
+                                     material_packets=list(packets.values())[:RAW_PACKET_LIMIT])
+    entries = [{"id": f"material-event:{e['event_key']}", "title": e["title"], "fields": {"一句话": e["summary"]}, "event": e}
+               for e in pool["events"]]
+    kept, note = _heat_rank({"production": script["production"]}, column, entries, set())
+    if not entries:
+        note = "本期原始资料中没有可补充的候选"
+    return {**pool, "events": [e["event"] for e in kept], "selection_note": note}
+
+
 def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
     from core.video import content_guard
 
@@ -579,8 +643,19 @@ def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
             links.setdefault('episode_id', item['topic']['id'])  # older batches
         replacement = {**topic, **links, "_story_fallbacks": alternatives[index+1:]}
         ap.update_item(item["id"], topic=replacement, script_id=None, state="PENDING", retries={},
-                       gate={k: v for k, v in gate.items() if k != "story_selection"}, note=f"旧事件已覆盖，自动改选：{topic['title']}")
+                       gate={**gate, "story_selection": {}, "replacements": gate.get("replacements", 0) + 1},
+                       note=f"旧事件已覆盖，自动改选：{topic['title']}")
         return
+    if item.get("production") == FLASH_PRODUCTION and not item["topic"].get("_material_reselection"):
+        run = ap.get_run(item["run_id"])
+        report = (run or {}).get("spec", {}).get("report") or item["topic"].get("from_report")
+        already = any(row.get("production") == FLASH_PRODUCTION and row["topic"].get("_material_reselection")
+                      for row in (run or {}).get("items", []))
+        if report and not already:
+            topic = _material_topic(report, (run or {}).get("spec", {}).get("report_identity"))
+            ap.update_item(item["id"], topic=topic, script_id=None, state="PENDING", retries={},
+                           gate={**gate, "story_selection": {}}, note="报告候选已耗尽，回原始资料重新选题")
+            return
     ap.update_item(item["id"], state="CANCELLED", gate=gate,
                    note=f"候选不足，排重后少做一条：{reason}")
 
@@ -804,14 +879,17 @@ def _summary(run: dict) -> str:
     current = [(i.get("gate") or {}).get("story_selection") for i in run["items"]]
     current = [s for s in current if s]
     selections = current + [a["selection"] for i in run["items"] for a in (i.get("gate") or {}).get("story_attempts", [])]
-    if not selections:
+    raw = [i for i in run["items"] if i["topic"].get("_material_reselection")]
+    replaced = sum((i.get("gate") or {}).get("replacements", 0) for i in run["items"])
+    if not selections and not raw and not replaced:
         return "，".join(f"{k} {v}" for k, v in sorted(counts.items()))
     pools = {s["pool_id"]: s["candidates"] for s in selections}
     skipped = {(s["pool_id"], d["title"]) for s in selections for d in s["decisions"] if d["decision"] == "skip"}
-    replaced = sum(len((i.get("gate") or {}).get("story_attempts") or []) for i in run["items"])
+    raw_selected = sum(bool(((i.get("gate") or {}).get("story_selection") or {}).get("selected")) for i in raw)
     shortages = sum(not s["selected"] for s in current)
     return (f"候选 {sum(pools.values())}，采用 {sum(bool(s['selected']) for s in current)}，"
-            f"重复跳过 {len(skipped)}，改选 {replaced}，素材不足 {shortages}；" +
+            f"重复跳过 {len(skipped)}，改选 {replaced + raw_selected}，候选耗尽 {shortages}；"
+            + (f"回原始资料 {len(raw)} 次，选中 {raw_selected} 条；" if raw else "") +
             "，".join(f"{k} {v}" for k, v in sorted(counts.items())))
 
 

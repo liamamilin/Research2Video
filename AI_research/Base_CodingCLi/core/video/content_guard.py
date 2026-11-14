@@ -159,7 +159,9 @@ def source_key(url: str) -> str:
             or (parts.netloc == "learn.chatgpt.com" and path.startswith("/docs/") and not path.startswith("/docs/whats-new"))
             or (parts.netloc == "apps.apple.com" and "/app/" in path)
         )
-        if (not parts.netloc or not path or "/leaderboards" in path or "/changelog" in path
+        entry_page = re.search(r"/(?:whats-new|updates|changelog)(?:\.[^/]+)?$", path)
+        fragment = urlsplit(url).fragment if entry_page else ""
+        if (not parts.netloc or not path or "/leaderboards" in path or ("/changelog" in path and not fragment)
                 or manual
                 or path.endswith((".rss", ".xml", "/feed", "/feeds", "/rss", "/atom", "/pricing"))
                 or path.startswith(("/rss/", "/feed/", "/feeds/"))
@@ -170,7 +172,8 @@ def source_key(url: str) -> str:
             match = re.search(r"/(?:abs|html|pdf)/(\d{4}\.\d+)", path)
             if match:
                 return "arxiv:" + match[1]
-        return value.removeprefix("http://").removeprefix("https://")
+        key = value.removeprefix("http://").removeprefix("https://")
+        return f"{key}#{fragment}" if fragment else key
     except (TypeError, ValueError):
         return ""
 
@@ -189,8 +192,10 @@ def overlap(left: set[str], right: set[str]) -> set[str]:
     """Reuse the report memory's conservative cross-outlet story matcher, without touching its database."""
     hits = left & right
     for key in left - hits:
+        if "#" in key:  # entry anchors identify independent rows on a single index
+            continue
         host, tokens = _signature(key)
-        if any(events.same_story(tokens, _signature(other)[1], same_host=host == _signature(other)[0])
+        if any("#" not in other and events.same_story(tokens, _signature(other)[1], same_host=host == _signature(other)[0])
                for other in right):
             hits.add(key)
     return hits
@@ -236,10 +241,21 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
     ids = [t["id"] for t in candidates if t.get("id")]
     if not ids:
         return set()
+    from core.video.story_pool import CHAPTER_PROMPT_VERSION, ENTRY_PROMPT_VERSION
+
     with store.connect() as conn:
         skipped = [json.loads(r["topic"]) for r in conn.execute(
-            "SELECT topic FROM scripts WHERE archived=1 AND status='FAILED' AND current_version=0"
-            " AND json_extract(topic,'$.content_archive') IS NOT NULL"
+            "SELECT s.topic FROM scripts s WHERE s.archived=1 AND s.status='FAILED' AND s.current_version=0"
+            " AND json_extract(s.topic,'$.content_archive') IS NOT NULL"
+            " AND NOT EXISTS (SELECT 1 FROM video_story_decisions d JOIN video_story_pools p ON p.id=d.pool_id"
+            " JOIN scripts peer ON peer.id=d.peer_id WHERE d.script_id=s.id AND d.decision='skip' AND ("
+            " (json_extract(peer.topic,'$.content_mode')='episode'"
+            " AND COALESCE(json_extract(p.payload,'$.prompt_version'),0) < ?)"
+            " OR (COALESCE(json_extract(p.payload,'$.prompt_version'),0) < ? AND EXISTS ("
+            " SELECT 1 FROM json_each(p.payload,'$.events') e, json_each(e.value,'$.primary_sources') src"
+            " WHERE json_extract(e.value,'$.title')=d.title AND (src.value LIKE '%/whats-new%#%'"
+            " OR src.value LIKE '%/updates%#%' OR src.value LIKE '%/changelog%#%')))))",
+            (CHAPTER_PROMPT_VERSION, ENTRY_PROMPT_VERSION),
             )]
         peers = {peer for t in skipped for peer in t["content_archive"].get("duplicate_of", [])}
         cutoff = (datetime.now().astimezone() - timedelta(days=MEMORY_DAYS)).isoformat()[:10]
@@ -300,7 +316,17 @@ def history(config_dir: str, jobs_dir: str, *, include_tutorial_archive: bool = 
         if not source_matrix:
             key = matrix_scopes.get((script["topic"].get("matrix_dedup") or {}).get("job"), key)
         sections = json.loads(row["sections"])
-        story = json.loads(row["meta"]).get("story") or {}
+        meta = json.loads(row["meta"])
+        story = meta.get("story") or {}
+        chapters = []
+        if (meta.get("episode") or {}).get("mode") == "episode":
+            for index, section in enumerate(sections):
+                if section.get("episode_role") != "item":
+                    continue
+                text = " ".join(p.get("text", "") for p in section.get("paragraphs", []))
+                if text.strip():
+                    chapters.append({"chapter": index, "title": section["title"], "text": text,
+                                     "sources": cited_sources([section])})
         fields = script["topic"].get("fields") or {}
         event_date = str(fields.get("发布日期") or script["topic"].get("event_date") or "")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", event_date):
@@ -314,6 +340,7 @@ def history(config_dir: str, jobs_dir: str, *, include_tutorial_archive: bool = 
                        "text": " ".join(p.get("text", "") for section in sections for p in section.get("paragraphs", [])),
                        "created_at": script["created_at"],
                        "sequence": row["sequence"],
+                       **({"chapters": chapters} if chapters else {}),
                        "scope": key, "report": script.get("report_path") or script["topic"].get("from_report", ""),
                        "sources": {k for u in story["primary_sources"] if (k := source_key(u))}
                                   if story else cited_sources(sections)})

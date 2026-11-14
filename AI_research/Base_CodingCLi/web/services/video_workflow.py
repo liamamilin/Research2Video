@@ -79,6 +79,13 @@ def report_of(script: dict, report_path: str = "", *, version: dict | None = Non
 
     text = writer.report_body(_read_report(report_path or script["report_path"]))
     topic = script.get("topic") or {}
+    if topic.get("_material_reselection") and (version or script.get("current_version")):
+        story = ((version or {}).get("meta") or {}).get("story") or topic.get("story")
+        if story:
+            try:
+                return story_pool.brief(story) + "\n\n" + story_pool.material_for(story_pool.get(story["pool_id"]), story)
+            except (story_pool.SelectionError, KeyError) as exc:
+                raise OSError("读不到重新选中的快讯原始材料") from exc
     if not topic.get("from_item"):
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
@@ -358,7 +365,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     if guarded:
         store.update_script(script_id, topic=script["topic"])
         topic = script["topic"]
-        reference = (report_meta.get(report_path) or {}).get("material") or {}
+        reference = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
         try:
@@ -372,17 +379,20 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     story = topic["story"]
                     pool = story_pool.get(story["pool_id"])
                 else:
-                    if topic.get("from_item") and original:
-                        # A flash item cannot wander into another item from its feed.
-                        cited = story_pool.cited(report)
-                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
-                                                                 if story_pool.cited_packet(p, cited))
-                    selection_report = research_dossier.selection_brief(report, script)
-                    # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
-                    options = {"tutorial": True} if context.get("type") == "tutorial" else {}
-                    pool = story_pool.load_or_create(key, selection_report, original, peers, config,
-                                                     references=bool(topic.get("from_item")),
-                                                     **options)
+                    if topic.get("_material_reselection"):
+                        from web.services.video_autopilot import material_story_pool
+
+                        pool = material_story_pool(script, report, original, peers, config, column)
+                    else:
+                        if topic.get("from_item") and original:
+                            # A report item may only use the material it cites.
+                            cited = story_pool.cited(report)
+                            original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                     if story_pool.cited_packet(p, cited))
+                        selection_report = research_dossier.selection_brief(report, script)
+                        options = {"tutorial": True} if context.get("type") == "tutorial" else {}
+                        pool = story_pool.load_or_create(key, selection_report, original, peers, config,
+                                                         references=bool(topic.get("from_item")), **options)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
@@ -407,7 +417,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 dossier_report = report
         except story_pool.NoCandidate as exc:
             peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
-            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
+            reason = exc.decisions[-1]["reason"] if topic.get("_material_reselection") else str(exc)
+            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, reason), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
     if column.writer == "adapt" and not is_episode:
@@ -443,12 +454,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         return "DRAFT"
     try:
         store.update_script(script_id, stage="写稿")
-        material_ref = (report_meta.get(report_path) or {}).get("material") or {}
+        material_ref = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        material = (report_material.read(material_ref, full_path, _read_report(report_path))
-                    if material_ref else "")
         if guarded:
             material = filtered_material
+        elif topic.get("_material_reselection"):
+            # An existing raw-material story is bound to the packets already
+            # loaded by report_of, including when publication protects it.
+            material = ""
+        else:
+            material = report_material.read(material_ref, full_path, _read_report(report_path)) if material_ref else ""
         if topic.get("from_item") and not (guarded and topic.get("story")):
             # Rewriting a published item skips deduplication, but its story
             # and source scope are still frozen to the selected item.

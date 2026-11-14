@@ -254,6 +254,15 @@ def test_sources_are_canonical_and_shared_reference_pages_remain_reusable():
     assert not guard.overlap({"a.example/openai-launches-gpt6"}, {"b.example/anthropic-ships-opus-55"})
 
 
+def test_update_index_anchors_identify_independent_events():
+    page = "https://example.com/whats-new/"
+    first = guard.source_key(page + "#w-418")
+    second = guard.source_key(page + "#w-634")
+    assert first and second and first != second
+    assert guard.overlap({first}, {first}) == {first}
+    assert not guard.overlap({second}, {first, guard.source_key(page)})
+
+
 def test_extra_background_link_does_not_make_covered_core_event_fresh(guard_env):
     script(guard_env, "science/daily")
     topic = guard.policy_topic({"id": "2026-10-27/F2", "title": "同一个小蛇事件的新标题",
