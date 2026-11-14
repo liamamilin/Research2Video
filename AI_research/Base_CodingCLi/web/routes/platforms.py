@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, File, Form, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
 
 from web import audit
@@ -60,6 +60,56 @@ class UploadIn(Input):
 
 class VideoIn(Input):
     bvid: str = Field(pattern=r"^BV[0-9A-Za-z]{10}$")
+
+
+class CoverPathsIn(Input):
+    account_uid: str = Field(min_length=1, max_length=64)
+    cover_4x3: str = Field(min_length=1, max_length=4096)
+    cover_16x9: str = Field(min_length=1, max_length=4096)
+
+
+class CoverUpdateIn(Input):
+    account_uid: str = Field(min_length=1, max_length=64)
+
+
+@router.get('/covers/{render_id}')
+def covers_preview(render_id: str, user=Depends(require_viewer)) -> dict:
+    from web.services import bilibili_covers
+    render, _, _ = call(manager.eligible, render_id)
+    return call(bilibili_covers.preview, render)
+
+
+@router.put('/covers/{render_id}/paths')
+def covers_paths(render_id: str, body: CoverPathsIn, user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    if body.account_uid != call(manager.uid):
+        raise HTTPException(409, detail=ApiError.make('account_changed', '平台账号已改变。'))
+    call(manager.eligible, render_id)
+    result = call(bilibili_covers.import_paths, render_id, {'4x3': body.cover_4x3, '16x9': body.cover_16x9})
+    audit.log('bilibili_cover_assets', user=user['username'], target=render_id)
+    return result
+
+
+@router.post('/covers/{render_id}/{ratio}')
+async def cover_file(render_id: str, ratio: str, account_uid: str = Form(...),
+                     file: UploadFile = File(...), user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    if account_uid != call(manager.uid):
+        raise HTTPException(409, detail=ApiError.make('account_changed', '平台账号已改变。'))
+    call(manager.eligible, render_id)
+    data = await file.read(bilibili_covers.MAX_BYTES + 1)
+    await file.close()
+    result = call(bilibili_covers.save, render_id, {ratio: data})
+    audit.log('bilibili_cover_asset', user=user['username'], target=render_id, details={'ratio': ratio})
+    return result
+
+
+@router.post('/uploads/{task_id}/covers')
+def update_covers(task_id: str, body: CoverUpdateIn, user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    result = call(bilibili_covers.update_published, task_id, body.account_uid)
+    audit.log('bilibili_cover_edit', user=user['username'], target=task_id, result=result['status'])
+    return result
 
 
 class SyncIn(VideoIn):

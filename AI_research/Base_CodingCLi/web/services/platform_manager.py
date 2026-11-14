@@ -13,7 +13,6 @@ from pathlib import Path
 from core.platform_store import PlatformStore
 from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
-from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
@@ -271,6 +270,7 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
 
 
 def preview(render_id: str) -> dict:
+    from web.services import bilibili_covers
     from web.services.distributions import preview_draft
     render, script, version = eligible(render_id)
     pack = video_render.publish_pack(script, version, column_for(script), render_id=render_id)
@@ -286,7 +286,7 @@ def preview(render_id: str) -> dict:
             "adaptation": adaptation, "tid": category_for(script), "warnings": warnings,
             "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
-            "credibility": credibility.label(version),
+            "credibility": credibility.label(version), "covers": bilibili_covers.preview(render),
             "existing_upload": next((u for u in script_uploads(script["id"]) if u["version"] == render["version"]), None)}
 
 
@@ -397,8 +397,9 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     first_comment = payload.get("first_comment")
     if first_comment is None:
         first_comment = store().settings()["first_comment"]
+    from web.services.bilibili_covers import for_upload
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
-             "cover": publish_cover(render, title), "automatic": automatic,
+             **for_upload(render, title), "automatic": automatic,
              "first_comment": clean_first_comment(first_comment)}
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)

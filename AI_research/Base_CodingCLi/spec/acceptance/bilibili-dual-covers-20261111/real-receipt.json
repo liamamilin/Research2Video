@@ -1,0 +1,22 @@
+{
+  "bvid": "BV1cNW26fEwZ",
+  "account_uid": "382769913",
+  "updated_at": 1794408462.06754,
+  "files": {
+    "4x3": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/20d0f031c4254432b43d6c7b15c95846/cover-bili4x3-5faf444f6f4f5204.png",
+    "16x9": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/20d0f031c4254432b43d6c7b15c95846/cover-bili16x9-1989b64c5d02ff23.png"
+  },
+  "remote": {
+    "cover": "https://archive.biliimg.com/bfs/archive/1d23e85fcdbf08e8b80e71173aeb4b37d8693d8f.png",
+    "cover43": "https://archive.biliimg.com/bfs/archive/34454b38b4f3d086447d9b1efe8661978199d01a.png"
+  },
+  "before": {
+    "cover": "http://i1.hdslb.com/bfs/archive/2a73c2311fc470f6c9091e71f1b2f7a31ddcff84.jpg",
+    "cover43": "http://i2.hdslb.com/bfs/archive/5c792328b9c0a3b4ee178ef500661080fa91b1f9.jpg"
+  },
+  "status": "CONFIRMED",
+  "after": {
+    "cover": "http://i0.hdslb.com/bfs/archive/1d23e85fcdbf08e8b80e71173aeb4b37d8693d8f.png",
+    "cover43": "http://i2.hdslb.com/bfs/archive/34454b38b4f3d086447d9b1efe8661978199d01a.png"
+  }
+}

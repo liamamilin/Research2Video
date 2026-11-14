@@ -35,6 +35,8 @@ class LocalVideoRequest(BaseModel):
     platform: str = Field(min_length=1, max_length=40)
     account_uid: str = Field(default='', max_length=300)
     fields: LocalVideoFields = Field(default_factory=LocalVideoFields)
+    covers: dict[Literal['4x3', '16x9'], str] = Field(default_factory=dict,
+        description='B站独立封面的本机绝对路径；按比例分别保存，随同一次投稿提交。')
 
 
 def is_local(script: dict) -> bool:
@@ -143,8 +145,15 @@ def execute(a: LocalVideoRequest, request, user: dict) -> dict:
         raise ValueError('请先连接指定平台的账号：' + management.platform_href(a.platform))
     if a.account_uid and a.account_uid != profile['uid']:
         raise ValueError('指定账号与当前平台账号不一致，请先切换平台账号。')
+    if a.covers and a.platform != 'bilibili':
+        raise ValueError('双比例封面目前用于 B 站，请指定 bilibili 平台。')
     asset = import_video(a.path, user['username'])
     rid, sid = asset['render_id'], asset['script_id']
+    if a.covers:
+        if existing_upload(a.platform, profile['uid'], sid, store.get_render(rid)['version']):
+            raise ValueError('视频已有投稿任务；请使用该任务的封面更新入口，不重新投稿。')
+        from web.services.bilibili_covers import import_paths
+        import_paths(rid, a.covers)
     render, script = store.get_render(rid), store.get_script(sid)
     preview = management._native(request, 'GET', management.platform_path(a.platform) + '/preview/' + rid)
     saved = (preview.get('draft') or {}).get('payload') or {}
@@ -163,7 +172,7 @@ def execute(a: LocalVideoRequest, request, user: dict) -> dict:
                               'file_name': Path(a.path).name, 'imported': asset['imported'], 'reused': asset['reused']},
               'script_id': sid, 'render_id': rid, 'version': render['version'], 'href': href,
               'platform': a.platform, 'account_uid': profile['uid'], 'account_name': profile.get('name') or '',
-              'fields': fields, 'check': check, 'submitted': False,
+              'fields': fields, 'check': check, 'submitted': False, 'covers': preview.get('covers', {}),
               'references': [{'type': 'video', 'id': sid, 'title': render['title'], 'href': href}],
               'message': '视频已就绪，可按当前发布信息提交。' if check['valid'] else '视频已就绪，请按平台要求调整发布信息。'}
     prior = existing_upload(a.platform, profile['uid'], sid, render['version'])
