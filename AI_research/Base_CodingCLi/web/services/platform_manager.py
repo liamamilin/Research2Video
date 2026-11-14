@@ -472,13 +472,15 @@ def candidates() -> list[dict]:
 
 
 def overview() -> dict:
+    from web.services import comment_restrictions
     profile = account()
     owner = profile.get("uid", "") if profile.get("connected") else ""
     db = store()
     available, summary = candidate_catalog()
     return {"account": profile, "settings": db.settings(), "biliup_ready": bool(bilibili.biliup_binary()), "publication_flow": True,
             "uploads": db.uploads(owner), "videos": db.videos(owner), "comments": db.comments(owner),
-            "candidates": available, "candidate_summary": summary}
+            "candidates": available, "candidate_summary": summary,
+            "restrictions": comment_restrictions.restrictions(owner)}
 
 
 def watch(bvid: str) -> dict:
@@ -854,6 +856,11 @@ def tick() -> None:
         collection_tasks = db.collection_tasks(owner, retry_after=COLLECTION_RETRY_SECONDS)
         if collection_tasks:
             process_collection(collection_tasks[0])
+        from web.services import comment_restrictions  # imports this module
+        try:
+            comment_restrictions.tick(owner)
+        except Exception:  # a failed limit check must not stop uploads
+            logger.exception("comment restriction check failed")
         if config["sync_comments"]:
             due = [v for v in db.videos(owner) if (v["last_attempt_at"] or v["synced_at"] or 0) < time.time() - 300]
             if due:

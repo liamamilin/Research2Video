@@ -37,6 +37,12 @@ class PublishWindowIn(Input):
     spacing: int = Field(default=30, ge=5, le=180)
 
 
+class RestrictedCommentIn(Input):
+    enabled: bool = False
+    text: str = Field(default="", max_length=1000)
+    pin: bool = True
+
+
 class SettingsIn(Input):
     auto_upload: bool
     sync_comments: bool
@@ -46,6 +52,8 @@ class SettingsIn(Input):
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
     publish_window: PublishWindowIn | None = Field(
         default=None, description="自动投稿的公开时段；时段外完成的成片定时到下一个时段公开。省略时保留原设置。")
+    restricted_comment: RestrictedCommentIn | None = Field(
+        default=None, description="稿件因评论区商业推广被限流时：删掉本账号带站外链接的评论，换上这条引导评论（不可带站外链接）。省略时保留原设置。")
 
 
 class UploadIn(Input):
@@ -226,6 +234,11 @@ def settings(body: SettingsIn, user=Depends(require_admin)) -> dict:
         del patch["publish_window"]
     elif body.publish_window and body.publish_window.start >= body.publish_window.end:
         raise HTTPException(422, detail=ApiError.make("invalid_publish_window", "发布时段的开始时间需早于结束时间。"))
+    if patch.get("restricted_comment", 0) is None:
+        del patch["restricted_comment"]
+    elif "restricted_comment" in patch:
+        from web.services import comment_restrictions
+        patch["restricted_comment"] = call(comment_restrictions.clean_settings, body.restricted_comment.model_dump())
     if "first_comment" in patch:
         if body.first_comment.enabled:
             call(manager.uid)

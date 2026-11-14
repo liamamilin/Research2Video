@@ -190,7 +190,14 @@ class BilibiliClient:
                 archive = entry["Archive"]
                 if archive.get("mid") and str(archive["mid"]) != self.cookies.get("DedeUserID"):
                     raise BilibiliError("稿件列表账号不一致，本次不改变投稿状态。")
-                rows.append({k: archive[k] for k in ("bvid", "title", "desc", "tid", "ctime", "state", "state_desc") if k in archive})
+                row = {k: archive[k] for k in ("bvid", "title", "desc", "tid", "ctime", "state", "state_desc") if k in archive}
+                # 流量受影响: the creator list carries the platform's own limit flag and per-problem detail.
+                row["limit_state"] = bool(archive.get("limit_state"))
+                row["problems"] = [{"reason": str(p.get("reject_reason") or ""),
+                                    "title": str(p.get("problem_description_title") or ""),
+                                    "position": str(p.get("violation_position") or "")}
+                                   for p in entry.get("problem_detail") or [] if isinstance(p, dict)]
+                rows.append(row)
             if page*metadata["ps"] >= total:
                 break
         return {"archives": rows, "total": total, "pages": page, "complete": page*metadata["ps"] >= total}
@@ -343,6 +350,30 @@ class BilibiliClient:
         if not rpid.isdigit() or int(rpid) <= 0:
             raise BilibiliError("B 站未返回评论 ID，请到视频下核对，避免重复发送。")
         return rpid
+
+    def own_comments(self, info: dict, mid: str, pages: int = 3) -> list[dict]:
+        """The owner's top-level comments: the pinned one plus the newest pages."""
+        data, _ = self.request("/x/v2/reply/main", type=1, oid=info["aid"], mode=3)
+        rows = list(data.get("top_replies") or [])
+        for page in range(1, pages + 1):
+            found, more = self.comments(info, page)
+            rows += [r for r in found if not r.get("root")]
+            if not more:
+                break
+        seen, mine = set(), []
+        for row in rows:
+            rpid = str(row.get("rpid") or "")
+            if rpid and rpid not in seen and str(row.get("mid") or (row.get("member") or {}).get("mid")) == str(mid):
+                seen.add(rpid)
+                mine.append({"rpid": rpid, "message": str((row.get("content") or {}).get("message") or "")})
+        return mine
+
+    def delete_comment(self, info: dict, rpid: str) -> None:
+        """Delete one of the owner's comments; one already gone (12022) counts as deleted."""
+        if not rpid.isdigit() or int(rpid) <= 0:
+            raise BilibiliError("没有可删除的评论 ID。")
+        self.request("/x/v2/reply/del", data={"oid": info["aid"], "type": 1, "rpid": rpid,
+                     "csrf": self.cookies.get("bili_jct", "")}, allowed_codes=(12022,))
 
     def pin_comment(self, info: dict, rpid: str) -> None:
         if not rpid.isdigit() or int(rpid) <= 0:
