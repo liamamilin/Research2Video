@@ -79,6 +79,13 @@ def report_of(script: dict, report_path: str = "", *, version: dict | None = Non
 
     text = writer.report_body(_read_report(report_path or script["report_path"]))
     topic = script.get("topic") or {}
+    if topic.get("_material_reselection") and (version or script.get("current_version")):
+        story = ((version or {}).get("meta") or {}).get("story") or topic.get("story")
+        if story:
+            try:
+                return story_pool.brief(story) + "\n\n" + story_pool.material_for(story_pool.get(story["pool_id"]), story)
+            except (story_pool.SelectionError, KeyError) as exc:
+                raise OSError("读不到重新选中的快讯原始材料") from exc
     if not topic.get("from_item"):
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
@@ -160,6 +167,12 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
         fields["目标受众"] = context["audience"]
     if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
         topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
+    try:  # the A/B module's one write point (spec/ab-testing.md §5); any failure leaves the script as today (A)
+        from core.experiments import hook as experiments_hook
+        context = experiments_hook.arm_for(settings.paths.state_dir, context, column_key=column.key,
+                                           created_by=started_by)
+    except Exception:  # noqa: BLE001
+        logger.exception("experiments: arm_for failed; this script is produced as today")
     script = store.create_script(column.key, topic, created_by=started_by,
                                  production=production_id, content_context=context)
     if topic.get("article"):
@@ -328,7 +341,20 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
-    column = apply_script_context(column, script.get("content_context") or {})
+    context = script.get("content_context") or {}
+    video_config = load_system_config(settings.paths.config_dir).get("video") or {}
+    from core.video import manuscript_workflow
+
+    profile = manuscript_workflow.profile_for(script, settings.paths.config_dir, settings.paths.jobs_dir, video_config)
+    if profile and profile.draft and context.get("column"):
+        context = {**context, "notes": profile.draft}
+    column = apply_script_context(column, context)
+    if profile and profile.draft and not context.get("column"):
+        column = replace(column, script_style=column.script_style + "\n" + profile.draft)
+    programme_direction = column.script_style
+    if report_images:
+        from core.video.material_context import visual_brief
+        column = replace(column, script_style=column.script_style + visual_brief(settings.paths.state_dir, report_images))
     from core.video import episodes
     is_episode = episodes.enabled(topic)
     joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
@@ -339,7 +365,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     if guarded:
         store.update_script(script_id, topic=script["topic"])
         topic = script["topic"]
-        reference = (report_meta.get(report_path) or {}).get("material") or {}
+        reference = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
         try:
@@ -353,15 +379,20 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     story = topic["story"]
                     pool = story_pool.get(story["pool_id"])
                 else:
-                    if topic.get("from_item") and original:
-                        # A flash item cannot wander into another item from its feed.
-                        cited = story_pool.cited(report)
-                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
-                                                                 if story_pool.cited_packet(p, cited))
-                    selection_report = research_dossier.selection_brief(report, script)
-                    # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
-                    pool = story_pool.load_or_create(key, selection_report, original, peers, config,
-                                                     references=bool(topic.get("from_item")))
+                    if topic.get("_material_reselection"):
+                        from web.services.video_autopilot import material_story_pool
+
+                        pool = material_story_pool(script, report, original, peers, config, column)
+                    else:
+                        if topic.get("from_item") and original:
+                            # A report item may only use the material it cites.
+                            cited = story_pool.cited(report)
+                            original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                     if story_pool.cited_packet(p, cited))
+                        selection_report = research_dossier.selection_brief(report, script)
+                        options = {"tutorial": True} if context.get("type") == "tutorial" else {}
+                        pool = story_pool.load_or_create(key, selection_report, original, peers, config,
+                                                         references=bool(topic.get("from_item")), **options)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
@@ -386,7 +417,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 dossier_report = report
         except story_pool.NoCandidate as exc:
             peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
-            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
+            reason = exc.decisions[-1]["reason"] if topic.get("_material_reselection") else str(exc)
+            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, reason), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
     if column.writer == "adapt" and not is_episode:
@@ -422,21 +454,21 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         return "DRAFT"
     try:
         store.update_script(script_id, stage="写稿")
-        material_ref = (report_meta.get(report_path) or {}).get("material") or {}
+        material_ref = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        material = (report_material.read(material_ref, full_path, _read_report(report_path))
-                    if material_ref else "")
         if guarded:
             material = filtered_material
-        if topic.get("from_item") and material and not topic.get("story"):
-            # A discovered topic is one item, not the entire feed. Keep the
-            # original blocks that contain its links, with its selected context.
-            from core.provenance import extract_urls, normalize_url
-
-            urls = {normalize_url(url) for url in extract_urls(report)}
-            parts = [part for part in material.split("\n\n---\n\n")
-                     if urls & {normalize_url(url) for url in extract_urls(part)}]
-            material = "\n\n---\n\n".join(parts)
+        elif topic.get("_material_reselection"):
+            # An existing raw-material story is bound to the packets already
+            # loaded by report_of, including when publication protects it.
+            material = ""
+        else:
+            material = report_material.read(material_ref, full_path, _read_report(report_path)) if material_ref else ""
+        if topic.get("from_item") and not (guarded and topic.get("story")):
+            # Rewriting a published item skips deduplication, but its story
+            # and source scope are still frozen to the selected item.
+            material = story_pool.material_for_report_item(report, material, topic.get("story"))
+        material, material_fit = fit_material(dossier_report if joint_input else report, material)
         writing_topic = topic
         told = _episode_told(script, topic, dossier_report) if is_episode else []
         if told:
@@ -454,7 +486,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
         greeting = episodes.greeting(topic, script.get("content_context") or {})
-        written = writer.write_for_column(
+        written = manuscript_workflow.write(
+            mode=video_config.get("manuscript_workflow"), profile=profile,
             column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
@@ -466,6 +499,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             **({"original_material": material} if joint_input else {}),
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
+        written.meta['programme_direction'] = programme_direction
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
             if told:
@@ -476,6 +510,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
+        if material_fit:
+            written.meta["material_fit"] = material_fit
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
@@ -503,6 +539,40 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+MATERIAL_SEPARATOR = "\n\n---\n\n"
+
+
+def fit_material(report: str, material: str, limit: int | None = None) -> tuple[str, dict]:
+    """The original material the writer is sent, kept inside the model's window.
+
+    Since every news article is read in full (11-03), a weekly dossier's material can run to millions of characters;
+    research works through it in batches, but the writer gets one call. When report and material do not fit, only the
+    material blocks the report cites are kept (the report is what the script is written from), in their order; if
+    those still do not fit, they are taken in order until the window is full. Returns the material and, when it was
+    reduced, what was kept, so the version records it.
+    """
+    from core import research_batches
+    from core.provenance import extract_urls, normalize_url
+
+    limit = limit or research_batches.MAX_PROMPT_CHARS
+    room = limit - len(report)
+    if not material or len(material) <= room:
+        return material, {}
+    blocks = material.split(MATERIAL_SEPARATOR)
+    cited_urls = {normalize_url(url) for url in extract_urls(report)}
+    cited = [b for b in blocks if cited_urls & {normalize_url(url) for url in extract_urls(b)}]
+    kept, used = [], 0
+    for block in cited:
+        cost = len(block) + len(MATERIAL_SEPARATOR)
+        if used + cost > room:
+            break
+        kept.append(block)
+        used += cost
+    return MATERIAL_SEPARATOR.join(kept), {"reason": "原始材料超出模型上限，只保留报告引用的材料",
+                                           "blocks": len(blocks), "cited": len(cited), "kept": len(kept),
+                                           "chars": len(material), "kept_chars": used}
 
 
 def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:

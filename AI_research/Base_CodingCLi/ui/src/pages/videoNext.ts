@@ -22,7 +22,8 @@ const ACTIVE = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
 export function renderPhase(stage: string | null | undefined): string {
   const labels: Record<string, string> = { PLAN: "整理讲稿", VOICE_ALIGN: "生成旁白与对齐", STORYBOARD: "规划分镜",
     SCENE_IMAGES: "准备场景图片", BUILD_IR: "编排画面与时间轴", RENDER: "渲染画面", QUALITY_CHECK: "检查成片",
-    PACKAGE: "制作片头片尾", AUDIO_MIX: "混合音频", COMPLETE: "制作完成" };
+    PACKAGE: "制作片头片尾", AUDIO_MIX: "混合音频", COMPLETE: "制作完成",
+    WAITING_DRAW_THINGS: "等待 Draw Things 打开（插画讲解需要）" };
   return stage ? labels[stage] ?? "后台处理中" : "";
 }
 

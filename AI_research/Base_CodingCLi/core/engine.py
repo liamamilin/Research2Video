@@ -192,7 +192,20 @@ class ResearchEngine:
                 prompt = base_prompt = self._build_prompt(job)
                 fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
                 fetched = None
-                if fetch_only:
+                from . import knowledge_job
+                if knowledge_job.enabled(job):
+                    # Declared knowledge Job: no sources by design; it sees only what it already covered.
+                    if issue := knowledge_job.problem(job):
+                        raise ValueError(issue)
+                    source_block = knowledge_job.block(knowledge_job.past_titles(job, self.workspace_dir))
+                    if job.get("sources"):
+                        from .sources import fetch_all, resolve
+                        specs = resolve(list(job["sources"]), self.config_dir)
+                        ideas = fetch_all(specs, limit_per_source=int(job.get("sources_limit", 8)))
+                        logger.info("Knowledge job topic ideas: %d items from %d source(s)", len(ideas), len(specs))
+                        source_block += "\n\n" + knowledge_job.topic_block(ideas)
+                    fetched = ([], {})
+                elif fetch_only:
                     source_block, fetched = self._fetch_sources_strict(job)
                 else:
                     source_block = self._fetch_sources_block(job)
@@ -479,7 +492,7 @@ class ResearchEngine:
         return material_block(items, self._supply_receipt), (items, stats)
 
     def _source_options(self, specs: list[str]) -> dict:
-        if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
+        if not any(spec.startswith(("page:", "catalog:", "search:", "bili_hot:")) for spec in specs):
             return {}
         if getattr(self, "_source_search_client", None) is None:
             from .search import SearchClient
@@ -495,10 +508,10 @@ class ResearchEngine:
             return SearchClient.format_results(items)
         from pathlib import Path
         from .source_history import prepare
-        block, self._source_pending = prepare(Path(self.workspace_dir) / "state/source_history",
-                                             job.get("_file") or job["name"], items)
-        if job["source_history"] == "context":
-            block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
+        block, self._source_pending = prepare(
+            Path(self.workspace_dir) / "state/source_history", job.get("_file") or job["name"], items,
+            include_current=job["source_history"] == "context",
+        )
         return block
 
     def _fetch_sources_block(self, job: dict) -> str:

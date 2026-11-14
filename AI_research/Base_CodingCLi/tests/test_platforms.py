@@ -828,27 +828,111 @@ def test_render_finished_shortly_before_the_window_never_waits_longer_than_one_i
     assert manager.publish_at(_at(8), WINDOW, [], held=True) is None
     assert manager.publish_at(_at(8, 5), WINDOW, [_at(8)], held=True) == manager.HOLD
     assert manager.publish_at(_at(8, 20), WINDOW, [_at(8)], held=True) is None
-    # A render finished in the daytime is never held back by the queue.
-    assert manager.publish_at(_at(8, 5), WINDOW, [_at(8)]) is None
+    # In the daytime, too, an upload keeps the spacing from the others (11-10) and leaves once it is clear.
+    assert manager.publish_at(_at(8, 5), WINDOW, [_at(8)]) == manager.HOLD
+    assert manager.publish_at(_at(8, 20), WINDOW, [_at(8)]) is None
 
 
-def test_held_upload_waits_here_then_submits_without_timer_in_order(platform_env, monkeypatch):
-    first, second = render(), render()
+def test_a_hot_topic_waits_for_the_evening_peak_and_falls_back_when_it_is_full():
+    hot = 300000
+    # in the morning: a timer for 19:00 (more than 4 hours away)
+    assert manager.publish_at(_at(9), WINDOW, [], heat=hot) == _at(19)
+    assert manager.publish_at(_at(9), WINDOW, [_at(19)], heat=hot) == _at(19, 20)
+    # in the afternoon the timer cannot reach 19:00: it waits here, and is not let out early by the daytime rule
+    assert manager.publish_at(_at(16), WINDOW, [], heat=hot) == manager.HOLD
+    # inside the peak it goes like any other
+    assert manager.publish_at(_at(19, 5), WINDOW, [], heat=hot) is None
+    # a cooler topic, or a full peak, keeps the ordinary rule
+    assert manager.publish_at(_at(9), WINDOW, [], heat=50000) is None
+    full = [_at(19) + i * 1200 for i in range(9)]
+    assert manager.publish_at(_at(9), WINDOW, full, heat=hot) is None
+    # once today's peak has begun or passed, a hot topic is not held a day for tomorrow's: the ordinary rule
+    assert manager.publish_at(_at(19, 40), WINDOW, [_at(19, 30)], heat=hot) == manager.HOLD
+    assert manager.publish_at(_at(22, 0), WINDOW, [_at(20, 40)], heat=hot) is None
+    assert manager.publish_at(_at(23, 30), WINDOW, [], heat=hot) == _at(8, day=3)
+    # the window can move the peak
+    assert manager.publish_at(_at(9), {**WINDOW, "prime_start": 20, "prime_end": 22}, [], heat=hot) == _at(20)
+
+
+def test_tutorial_uploads_use_the_account_window_and_spacing(platform_env, monkeypatch):
+    renders = [render() for _ in range(3)]
+    for row in renders:
+        video_store.update_script(row["script_id"], content_column_id="ai_tutorial")
     db = manager.store()
-    tasks = [manager.enqueue(row["id"], PAYLOAD, automatic=True) for row in (first, second)]
+    for hour in (12, 20):
+        scheduled = render()
+        video_store.update_script(scheduled["script_id"], content_column_id="ai_tutorial")
+        previous = db.enqueue("123", scheduled, {**PAYLOAD, "dtime": _at(hour, 30)})
+        db.update_upload(previous["id"], status="SUBMITTED")
+    tasks = [manager.enqueue(row["id"], PAYLOAD, automatic=True) for row in renders]
     clock = [_at(6)]
     monkeypatch.setattr(manager.time, "time", lambda: clock[0])
     sent = []
     monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV + str(len(sent)))
     manager.tick()
-    assert sent == [] and all(db.get_upload(t["id"])["error"].startswith("等待白天时段：08:00") for t in tasks)
+    assert sent == [] and all(db.get_upload(t["id"])["error"].startswith("等待发布时段：08:00") for t in tasks)
     clock[0] = _at(8, 1)
     manager.tick()
     manager.tick()  # the second waits a spacing after the first
     assert len(sent) == 1 and "dtime" not in sent[0] and db.get_upload(tasks[0]["id"])["status"] == "SUBMITTED"
     clock[0] = _at(8, 21)
     manager.tick()
+    assert len(sent) == 1  # the default spacing is half an hour (11-10)
+    clock[0] = _at(8, 31)
+    manager.tick()
     assert len(sent) == 2 and db.get_upload(tasks[1]["id"])["status"] == "SUBMITTED"
+    clock[0] = _at(9, 1)
+    manager.tick()
+    assert len(sent) == 3 and db.get_upload(tasks[2]["id"])["status"] == "SUBMITTED"
+    assert all(payload["ai_generated"] for payload in sent)
+
+
+def test_automatic_upload_spaces_from_a_timer_outside_upload_history_page(platform_env, monkeypatch):
+    db = manager.store()
+    clock = [_at(6)]
+    monkeypatch.setattr(manager.time, "time", lambda: clock[0])
+    previous = db.enqueue("123", render(), {**PAYLOAD, "dtime": _at(8, 10)})
+    db.update_upload(previous["id"], status="SUBMITTED")
+    clock[0] += 1
+    for n in range(200):
+        row = db.enqueue("123", {"id": f"past-render-{n}", "script_id": f"past-script-{n}", "version": 1}, {})
+        db.update_upload(row["id"], status="PUBLISHED")
+    assert previous["id"] not in {row["id"] for row in db.uploads("123")}
+    new = render()
+    video_store.update_script(new["script_id"], content_column_id="ai_tutorial")
+    task = manager.enqueue(new["id"], PAYLOAD, automatic=True)
+    sent = []
+    monkeypatch.setattr(bilibili, "upload", lambda *args: sent.append(args[2]) or BV)
+    clock[0] = _at(8)
+    manager.tick()
+    assert not sent and db.get_upload(task["id"])["status"] == "QUEUED"
+    clock[0] = _at(8, 40)
+    manager.tick()
+    assert len(sent) == 1
+    assert db.get_upload(previous["id"])["payload"]["dtime"] == _at(8, 10)
+
+
+def test_uncertain_timed_submission_reserves_its_slot_without_blocking_other_uploads(platform_env, monkeypatch):
+    first, second = render(), render()
+    db = manager.store()
+    original = manager.enqueue(first["id"], PAYLOAD, automatic=True)
+    later = manager.enqueue(second["id"], PAYLOAD, automatic=True)
+    monkeypatch.setattr(manager.time, "time", lambda: _at(2))
+    sent = []
+
+    def upload(_credential, _video, payload, _folder):
+        sent.append(payload["dtime"])
+        if len(sent) == 1:
+            raise bilibili.BilibiliError("投稿回执未确认")
+        return BV
+
+    monkeypatch.setattr(bilibili, "upload", upload)
+    manager.tick()
+    assert db.get_upload(original["id"])["status"] == "UNKNOWN"
+    manager.tick()
+    assert sent == [_at(8), _at(8, 30)]
+    assert db.get_upload(later["id"])["status"] == "SUBMITTED"
+    assert db.get_upload(original["id"])["status"] == "UNKNOWN"
 
 
 def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform_env, monkeypatch):
@@ -859,13 +943,13 @@ def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform
     monkeypatch.setattr(manager, "preview", lambda _: pack)
     when = int(time.time()) + 5 * 3600
     seen = []
-    monkeypatch.setattr(manager, "publish_at", lambda now, window, taken, held=False: seen.append((window, taken)) or when)
+    monkeypatch.setattr(manager, "publish_at", lambda now, window, taken, held=False, heat=0: seen.append((window, taken)) or when)
     sent = []
     monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV)
     monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: pytest.fail("not public before its time"))
     manager.tick()
     [task] = manager.store().uploads("123")
-    assert sent[0]["dtime"] == when and seen[0][0] == WINDOW
+    assert sent[0]["dtime"] == when and seen[0][0] == {**WINDOW, "spacing": 30}
     assert task["status"] == "SUBMITTED" and task["error"].startswith("定时发布：将于")
     monkeypatch.setattr(manager.time, "time", lambda: when - 120)
     manager.tick()  # still before its time: no polling
@@ -892,7 +976,7 @@ def test_publish_window_is_saved_and_validated(platform_env, client):
     _login(client, "admin", "admin-pass-123")
     headers = _csrf(client)
     body = {"auto_upload": False, "sync_comments": False, "tid": 231}
-    assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == WINDOW
+    assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == {**WINDOW, "spacing": 30}
     evening = {"enabled": True, "start": 18, "end": 22, "spacing": 30}
     assert client.put("/api/platforms/bilibili/settings", json={**body, "publish_window": evening}, headers=headers).json()["publish_window"] == evening
     assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == evening

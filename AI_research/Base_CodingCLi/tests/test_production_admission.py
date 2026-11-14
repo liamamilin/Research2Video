@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+import sqlite3
 from types import SimpleNamespace
 
 import yaml
@@ -89,3 +90,44 @@ def test_no_daily_limit_admits_every_issue_once(tmp_path):
     assert ledger.enter("issue-0", unlimited, "v1", now=NOW + 20)  # a retry is the same issue
     with ledger.connect() as db:
         assert db.execute("SELECT COUNT(*) FROM admissions").fetchone()[0] == 12
+
+
+def test_job_daily_limit_counts_videos_across_reports_without_using_other_jobs_slots(tmp_path, monkeypatch):
+    config = tmp_path / "config"
+    jobs = tmp_path / "jobs"
+    state = tmp_path / "state"
+    (config / "matrices").mkdir(parents=True)
+    (config / "matrices/demo.yaml").write_text("name: Demo\njobs: [tutorial, news]\n")
+    (config / "production_policy.yaml").write_text(
+        "schema_version: 1\nmatrices: [demo]\nwindow: {mode: previous_slot}\nautomatic: {daily_limit: null}\n"
+    )
+    jobs.mkdir()
+    (jobs / "tutorial.yaml").write_text(
+        "name: 教程\noutput: output/{date}_tutorial.md\ntopics: {format: items, prefix: ATU, daily_limit: 3}\n"
+    )
+    state.mkdir()
+    with sqlite3.connect(state / "production_admission.db") as db:
+        db.execute("CREATE TABLE admissions (issue TEXT PRIMARY KEY, day TEXT, accepted_at REAL, policy_revision TEXT, mode TEXT)")
+        db.execute("INSERT INTO admissions VALUES ('old','2026-10-31',?,'v1','automatic')", (NOW,))
+    paths = SimpleNamespace(config_dir=str(config), jobs_dir=str(jobs), state_dir=str(state))
+    clock = [NOW]
+    monkeypatch.setattr("core.video.production_admission.time.time", lambda: clock[0])
+
+    def item(number, report):
+        return {
+            "id": f"topic-{number}",
+            "from_item": f"topic-{number}",
+            "from_report": report,
+            "matrix_dedup": {"job": "tutorial"},
+        }
+
+    assert enter(paths, {"id": "news-1", "matrix_dedup": {"job": "news"}}, key="other-job")
+    assert all(enter(paths, item(n, "first.md"), key=f"write-{n}") for n in range(1, 4))
+    assert enter(paths, item(1, "first.md"), key="render-1")
+    assert not enter(paths, item(4, "rerun.md"), key="rerun")
+    assert enter(paths, item(5, "rerun.md"), key="manual", manual=True)
+    clock[0] += 86400
+    assert enter(paths, item(4, "rerun.md"), key="rerun")
+    with Ledger(str(state)).connect() as db:
+        assert db.execute("SELECT mode FROM admissions WHERE issue='old'").fetchone() == ("automatic",)
+        assert db.execute("SELECT COUNT(*) FROM admissions WHERE job='tutorial' AND mode='automatic'").fetchone()[0] == 4

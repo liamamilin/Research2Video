@@ -1,0 +1,80 @@
+{
+ "cast": {
+  "A": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans",
+  "B": "young adult with shoulder-length brown hair, wearing a light gray long-sleeve henley shirt and olive-green trousers"
+ },
+ "scenes": [
+  {
+   "section": 1,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans steps in through a doorway in cold weather, one hand recoiling from a metal door handle, the other hand resting on the wooden door frame; a thermometer on the wall beside them stays blank.",
+   "overlay": [
+    "铁：凉",
+    "木：温"
+   ],
+   "overlay_hint": "在人物左右两侧各画一个空的温度读数框，两个读数相同",
+   "note": "进门时一只手被铁把手冰得缩回，另一只手扶着木门框却没事",
+   "scene_template": "{A} steps in through a doorway in cold weather, one hand recoiling from a metal door handle, the other hand resting on the wooden door frame; a thermometer on the wall beside them stays blank."
+  },
+  {
+   "section": 2,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans stands in a room with a bare forearm, one fingertip pressed against a metal radiator, the other hand held slightly away from it, palm open.",
+   "overlay": [
+    "皮肤 33℃",
+    "物体 20℃"
+   ],
+   "overlay_hint": "在手臂与金属之间画一排由手臂指向金属的小箭头",
+   "note": "手指按在金属上，热从皮肤往外流走",
+   "scene_template": "{A} stands in a room with a bare forearm, one fingertip pressed against a metal radiator, the other hand held slightly away from it, palm open."
+  },
+  {
+   "section": 3,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans on the left and young adult with shoulder-length brown hair, wearing a light gray long-sleeve henley shirt and olive-green trousers on the right sit at a kitchen table, each pressing one fingertip onto a different flat slab, one metal, one wood; two plain glasses of water stand between them.",
+   "overlay": [
+    "金属↑几十到上千倍",
+    "木头"
+   ],
+   "overlay_hint": "从两个指尖往下各画一根管子，金属侧画粗管、木头侧画细吸管",
+   "note": "两人在厨房桌边分别用指尖按住金属台面和木台面",
+   "scene_template": "{A} on the left and {B} on the right sit at a kitchen table, each pressing one fingertip onto a different flat slab, one metal, one wood; two plain glasses of water stand between them."
+  },
+  {
+   "section": 4,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans leans over a kitchen counter pressing a palm flat on a thick metal block, a large plain metal tray and a pot of water beside it; young adult with shoulder-length brown hair, wearing a light gray long-sleeve henley shirt and olive-green trousers in the background touches a thin wooden board.",
+   "overlay": [
+    "金属：大水库",
+    "木头：小坑"
+   ],
+   "overlay_hint": "金属方块下方画一个很大的空水池轮廓，木板下方画一个很小的空水坑轮廓",
+   "note": "手掌按在整块金属上，金属后面连着大块材料",
+   "scene_template": "{A} leans over a kitchen counter pressing a palm flat on a thick metal block, a large plain metal tray and a pot of water beside it; {B} in the background touches a thin wooden board."
+  },
+  {
+   "section": 5,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans sits at a table with one fingertip touching a metal spoon and the other hand resting on a wooden spoon, eyes narrowed slightly as if judging the sensation.",
+   "overlay": [
+    "降温快＝冷",
+    "降温慢＝温"
+   ],
+   "overlay_hint": "在指尖处画两个不同密度的信号小点，金属侧密、木头侧疏",
+   "note": "指尖分别碰金属勺和木勺，感受温度变化的速度",
+   "scene_template": "{A} sits at a table with one fingertip touching a metal spoon and the other hand resting on a wooden spoon, eyes narrowed slightly as if judging the sensation."
+  },
+  {
+   "section": 6,
+   "kind": "scene",
+   "scene": "young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans stands barefoot on a tiled kitchen floor, one foot lifted while the other rests on a small rug; a plain wooden-handled pan sits on the stove nearby.",
+   "overlay": [
+    "瓷砖",
+    "地毯"
+   ],
+   "overlay_hint": "在脚下与地面之间画一排朝下的小箭头，瓷砖侧箭头多、地毯侧箭头少",
+   "note": "光脚踩在瓷砖和地毯上，脚感一凉一暖",
+   "scene_template": "{A} stands barefoot on a tiled kitchen floor, one foot lifted while the other rests on a small rug; a plain wooden-handled pan sits on the stove nearby."
+  }
+ ]
+}

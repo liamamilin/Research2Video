@@ -225,7 +225,7 @@ describe("Platform management", () => {
     expect(screen.getByText("分区更新失败，暂显示上次获取的分区。")).toBeTruthy();
     chooseCategory("默认投稿分区", "知识 / 科学科普");
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
-    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", { auto_upload: false, sync_comments: false, tid: 201, first_comment: { enabled: false, text: "", pin: false }, publish_window: { enabled: true, start: 12, end: 18, spacing: 20 } }, "PUT"));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", { auto_upload: false, sync_comments: false, tid: 201, first_comment: { enabled: false, text: "", pin: false }, publish_window: { enabled: true, start: 8, end: 23, spacing: 20 }, restricted_comment: { enabled: false, text: "", pin: true } }, "PUT"));
   });
 
   it("edits the publish window and blocks an empty range", async () => {
@@ -233,9 +233,10 @@ describe("Platform management", () => {
     vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
     show("/platforms?tab=settings");
     await waitFor(() => expect((screen.getByLabelText("默认投稿分区") as HTMLInputElement).value).toBe("科技 / 数码"));
-    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "19" } });
+    // the default window is 08:00–23:00 (41d649d); a start at the end hour leaves an empty range
+    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "23" } });
     expect((screen.getByRole("button", { name: "保存策略" }) as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.change(screen.getByLabelText("公开时段结束"), { target: { value: "23" } });
+    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "19" } });
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ publish_window: { enabled: true, start: 19, end: 23, spacing: 20 } }), "PUT"));
   });

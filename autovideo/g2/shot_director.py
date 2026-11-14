@@ -32,14 +32,13 @@ def camera_plan(scene: dict, profile: str, speech_text: str | None = None) -> di
     summary = None
     if component == 'flow_diagram':
         nodes = props['nodes']
-        for i, node in enumerate(nodes):
-            # Keep the relationship in view while discussing an individual node.
-            preceding = {n['id'] for n in nodes[:i]}
-            incoming = [e['from'] for e in props['edges'] if e['to'] == node['id'] and e['from'] in preceding]
-            outgoing = [e['to'] for e in props['edges'] if e['from'] == node['id'] and e['to'] not in preceding]
-            neighbor = incoming[-1] if incoming else outgoing[0] if outgoing else None
-            ids = [neighbor, node['id']] if incoming else [node['id'], neighbor]
-            pair = [n for key in ids for n in nodes if n['id'] == key]
+        for node in nodes:
+            # Direct relations do not depend on node-array or narration order.
+            # Keep return paths and all sources/destinations, including parallels.
+            incoming = [e['from'] for e in props['edges'] if e['to'] == node['id']]
+            outgoing = [e['to'] for e in props['edges'] if e['from'] == node['id']]
+            ids = [*incoming, node['id'], *outgoing]
+            pair = [n for key in dict.fromkeys(ids) for n in nodes if n['id'] == key]
             add(f"node:{node['id']}", [f"node:{n['id']}" for n in pair])
     elif component == 'data_chart':
         count = len(props['categories'] if props['kind'] == 'trend' else props['series'])
@@ -120,6 +119,8 @@ def attach(board: dict, saved: dict, pipeline, alignment: dict | None = None,
         timing['cues'].extend(material_timing)
         pipeline.write_json(path, timing)
     if records:
+        from g2.flow_layouts import attach as attach_flow_layouts
+        attach_flow_layouts(board, pipeline)
         pipeline.write_json(pipeline.ARTIFACTS / 'shot-director.json', {
             'version': 1, 'profile': profile, 'scenes': records,
             'timing': 'Measured speech and phrase cues; frame-driven overview, sustained focus, and summary',

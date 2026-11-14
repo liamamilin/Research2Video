@@ -32,6 +32,7 @@ def test_each_recipe_but_comparison_is_one_config_on_the_job_it_picks_from():
     shipped.pop("topic_digest")  # the other domains' whole-report recipe: configs added since
     shipped.pop("chatgpt_acquisition")  # the acquisition matrix was added after the migration
     shipped.pop("theme_research")  # generic manual themes do not have a feed production binding
+    shipped.pop("illustrated_explainer")  # experimental knowledge recipe: no feed production binding yet
     assert sorted(c.recipe for c in every.values()) == sorted(shipped)  # one each, so old scripts map 1:1 by recipe
     for c in every.values():
         column = shipped[c.recipe].column

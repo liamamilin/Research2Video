@@ -40,7 +40,8 @@ def test_a_recipe_says_it_can_be_written_from_a_whole_report():
     every = recipes.expanded(str(ROOT / "config"))
     assert {k for k, r in every.items() if r.whole_report} == {
         "deep_dive", "ai-non_tech-deep_dive-long", "report_digest", "ai-non_tech-digest-long", "top_finding",
-        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest", "theme_research"}
+        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest", "theme_research",
+        "illustrated_explainer"}
     assert not every["flash"].whole_report and not every["ai-developer-roundup-long"].whole_report
 
 
@@ -214,3 +215,25 @@ def test_the_topics_grid_leaves_out_a_recipe_that_only_writes_from_a_whole_repor
     rows = {r["cell"] for r in pilot.coverage()}
     assert {"deep_dive", "flash", "point_short"} <= rows
     assert not rows & {"report_digest", "top_finding", "action_list", "ai-non_tech-digest-long"}
+
+
+def test_a_knowledge_jobs_report_skips_the_news_event_pool_but_keeps_its_matrix(whole_env, monkeypatch):
+    """11-10: an economy explainer's topic-idea links matched every new question to the first video."""
+    from web.services import platform_manager
+
+    job = whole_env / "jobs" / "research" / "loose.yaml"
+    job.write_text("name: x\nknowledge: true\nsearch: false\nprompt: y\noutput: output/x/{date}.md\n", encoding="utf-8")
+    report = str(whole_env / "output" / "x" / "2026-10-20.md")
+    [item] = pilot.pick_topics({"picks": [{"column": "deep_dive", "all": True, "whole": True, "production": "whole"}],
+                                "job": JOB, "report": report})
+    topic = item["topic"]
+    assert "matrix_dedup" not in topic and topic["knowledge_job"] == JOB
+    assert not pilot.story_pool.enabled(topic)
+    from core.video import content_guard
+    assert content_guard.with_policy({"created_by": "autopilot", "topic": topic}, str(whole_env / "jobs"))["topic"] == topic
+    assert platform_manager._matrix_keys({"topic": topic}) == ["ai"]  # filed under its matrix (合集, partition)
+    # a news Job's report still goes through the event pool
+    job.write_text("name: x\nprompt: y\noutput: output/x/{date}.md\n", encoding="utf-8")
+    [item] = pilot.pick_topics({"picks": [{"column": "deep_dive", "all": True, "whole": True, "production": "whole"}],
+                                "job": JOB, "report": report})
+    assert item["topic"]["matrix_dedup"]["job"] == JOB and "knowledge_job" not in item["topic"]

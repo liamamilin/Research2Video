@@ -1,19 +1,24 @@
 import React from 'react';
-import {ContentStyleContext, BrandHeaderContext, type ContentStyle, type BrandHeader} from './ContentStyle';
+import {ContentStyleContext, BrandHeaderContext, VisualScaleContext, type ContentStyle, type BrandHeader} from './ContentStyle';
 import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
-import {ObjectFlow} from './ObjectFlow';
-import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
+import {fitComparison} from './TextFit';
+import {fitFrame,transformFor} from './Framing';
+import {flowPresentation} from './RelationLayout';
+import {RelationIndex} from './RelationIndex';
+import {ObjectFlow,FlowMap} from './ObjectFlow';
+import {flowCameraAt, carriesPicture, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
 import {CodeDemo} from './CodeDemo';
 import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
+import {IllustratedVideo} from './Illustrated';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
-type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene; price_layout?: {number_size: number; side_size: number; label_size: number; label_width: number; badge_size: number; unit_size: number; row_gap: number; unit_gap: number; stacked_label: boolean}};
+type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene; image_reading?: {width:number;height:number;box:number[]}[]; price_layout?: {number_size: number; side_size: number; label_size: number; label_width: number; badge_size: number; unit_size: number; row_gap: number; unit_gap: number; stacked_label: boolean}};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
 type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | 'explanation' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
@@ -59,17 +64,23 @@ const Text = ({children, x, y, size = 34, color = colors.text, anchor = 'middle'
 const Panel = ({x, y, w, h, fill = colors.panel, stroke = colors.border, r = 24, opacity = 1}: any) => <rect x={x} y={y} width={w} height={h} rx={r} fill={fill} stroke={stroke} strokeWidth="2" opacity={opacity}/>;
 
 function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
-  const {layout, nodes, edges, title, takeaway} = scene.props;
+  const scale=React.useContext(VisualScaleContext);
+  const presentation=React.useMemo(()=>flowPresentation(scene,scale),[scene,scale]);
+  if(presentation.mode==='index')return <>
+    <svg width="1920" height="1080" viewBox="0 0 1920 1080"><Text x={960} y={220} size={48} weight={650}>{scene.props.title}</Text></svg>
+    <RelationIndex scene={scene} frame={frame} layout={presentation.index!}/>
+  </>;
+  const {nodes, edges, title, takeaway} = scene.props;
+  const camera = flowCameraAt(scene,frame,presentation.reason==='capacity-unmet'),layout=camera.layout;
   const beats = activeBeats(scene, frame);
   const highlights = beats.filter((b) => b.action === 'highlight');
   const focusFrame = highlights[highlights.length-1]?.frame;
   const focused = new Set(highlights.filter((b) => b.frame === focusFrame).map((b) => b.target_id));
-  const camera = cameraAt(scene, frame, flowRects(scene.props), {x:0,y:0,width:1560,height:500});
   if (camera.shot.kind === 'focus') camera.shot.targets.forEach(target => focused.add(target));
   const revealed = (target: string) => beats.find((b) => b.action === 'reveal' && b.target_id === target);
   const alpha = (target: string) => {
     const beat = revealed(target);
-    return beat ? interpolate(frame-beat.frame, [0, 10], [.18, 1], {extrapolateLeft:'clamp', extrapolateRight:'clamp'}) : .18;
+    return beat ? interpolate(frame-beat.frame, [0, 10], [.65, 1], {extrapolateLeft:'clamp', extrapolateRight:'clamp'}) : .65;
   };
   const complete = nodes.every((n: any) => revealed(`node:${n.id}`)) && edges.every((e: any) => revealed(`edge:${e.id}`));
   const edgeMap = Object.fromEntries(edges.map((e: any) => [e.id, e]));
@@ -91,7 +102,7 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
     <Text x={960} y={220} size={48} weight={650}>{title}</Text>
     <g transform="translate(180 300)">
       <defs><marker id={markerId} viewBox="0 0 12 12" refX="11" refY="6" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill={colors.cyan}/></marker></defs>
-      <defs><clipPath id={`${scene.id}_camera_clip`}><rect width={1560} height={500}/></clipPath></defs>
+      <defs><clipPath id={`${scene.id}_camera_clip`}><rect width={camera.view.width} height={500}/></clipPath></defs>
       <g clipPath={`url(#${scene.id}_camera_clip)`}><g transform={camera.transform}>
       {layout.edges.map((route: any) => {
         const edge=edgeMap[route.id], target=`edge:${route.id}`;
@@ -115,6 +126,7 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
         </g>;
       })}
       </g></g>
+      {camera.showMap&&<FlowMap scene={scene} targets={camera.shot.targets}/>}
     </g>
     {complete && <Text x={960} y={852} size={30} color={colors.muted}>{takeaway}</Text>}
   </svg>;
@@ -258,6 +270,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   {ir: Timeline; badge?: Badge; sceneOverride?:Scene; frameOverride?:number; stageOnly?:boolean; hideStage?:boolean}) {
   const contentStyle = React.useContext(ContentStyleContext);
   const brandHeader = React.useContext(BrandHeaderContext);
+  const visualScale = React.useContext(VisualScaleContext);
   const paper = contentStyle ? {bg:contentStyle.background, ink:contentStyle.text, muted:contentStyle.muted,
     green:contentStyle.accent, line:contentStyle.line} : defaultPaper;
   const currentFrame = useCurrentFrame(), frame=frameOverride??currentFrame;
@@ -273,6 +286,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const shown = reveals.filter((b) => b.frame <= frame);
   const latest = shown[shown.length-1]?.target_id;
   const comparison=scene.component==='comparison'?comparisonAt(scene,frame):undefined;
+  const comparisonFit=React.useMemo(()=>scene.component==='comparison'?fitComparison(p,undefined,large?1.3:1):null,[p,large,scene.component]);
   const motion = (target: string): React.CSSProperties => {
     const beat = reveals.find((b) => b.target_id === target);
     // A comparison needs both subjects as readable context from the beginning.
@@ -297,7 +311,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       <div style={{position:'absolute',top:10,left:0,right:0,height:34,color:paper.muted,fontSize:24,lineHeight:'34px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{scene.props.story?.entities?.length ? <StoryObjects scene={scene} inline/> : badge?.text||ir.video.title}</div>
       <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? chapters[chapterIndex].title : null}</div>
     </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <Tech text={chapters[chapterIndex].title}/> : null}</div></>}
-    {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
+    {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:scene.image_reading?(heading.length>24?40:54):materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
       {recapSources.map((source,i)=>{
@@ -309,7 +323,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
         return <div key={source.id} style={{width,flex:'none',padding:22,...panelStyle,borderTop:`4px solid ${color}`,opacity:alpha,transform:`translateY(${(1-alpha)*16}px)`}}>
           <div style={{position:'relative',width:width-48,height:620*scale,overflow:'hidden',borderRadius:12}}>
             <div style={{position:'absolute',left:-140*scale,top:-270*scale,width:1920,height:1080,transform:`scale(${scale})`,transformOrigin:'0 0'}}>
-              <InformationVideo ir={ir} sceneOverride={source} frameOverride={source.end_frame-1} stageOnly/>
+              <VisualScaleContext.Provider value={visualScale*scale}><InformationVideo ir={ir} sceneOverride={source} frameOverride={source.end_frame-1} stageOnly/></VisualScaleContext.Provider>
             </div>
           </div>
           <div style={{fontSize:takeaway.length>45?26:30,fontWeight:650,color,lineHeight:1.4,marginTop:18,...textStyle}}><Tech text={takeaway}/></div>
@@ -329,19 +343,21 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
           const label = match ? match[1] : line, body = match ? match[2] : '';
           const target=`line:${i}`, active = latest === target, compact = p.lines.length === 4, icon=visualFor(scene,target);
           const labelStyle={...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4};
-          return <div key={i} style={{...panelStyle,...motion(target),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? objectColor(scene,target,paper.green) : paper.line}`}}>
+          // Establish the objects before the narration reaches their details.
+          // Spoken cues still reveal the body and select the active card.
+          return <div key={i} style={{...panelStyle,opacity:ease((frame-scene.start_frame)/12),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? objectColor(scene,target,paper.green) : paper.line}`}}>
             {icon ? compact ? <div style={{display:'flex',alignItems:'center',gap:18}}><VisualObject scene={scene} target={target} frame={frame} size={52} color={objectColor(scene,target)}/><div style={{...labelStyle,flex:1}}><Tech text={label}/></div></div> : <><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}><VisualObject scene={scene} target={target} frame={frame} size={64} color={objectColor(scene,target)}/><span style={{fontSize:20,color:paper.muted}}>{String(i+1).padStart(2,'0')}</span></div><div style={labelStyle}><Tech text={label}/></div></> : <><div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div><div style={labelStyle}><Tech text={label}/></div></>}
-            {body && <div style={{...textStyle,color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
+            {body && <div style={{...textStyle,...motion(target),color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
       </div>}
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
-          const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34),color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
+          const fit=comparisonFit!, fitted=fit.sides[side],color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
           const active=comparison?.target===`side:${side}`;
-          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}${active?'12':'08'}`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${active?color:paper.line}`}}>
-            <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
-            <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
+          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:fit.height,padding:fit.padding,boxSizing:'border-box',background:p.story?`${color}${active?'12':'08'}`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${active?color:paper.line}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:20,height:fitted.headerHeight,marginBottom:fit.headerGap}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={fit.icon} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:fit.label,lineHeight:fit.lineHeight,fontWeight:650}}>{fitted.labels.map((line:string,i:number)=><div key={i}><Tech text={line}/></div>)}</div></div>
+            <div data-comparison-fits={fit.fits} style={{display:'flex',flexDirection:'column',gap:fit.gap}}>{fitted.items.map((lines:string[],i:number)=><div key={i} style={{display:'flex',gap:15,fontSize:fit.body,lineHeight:fit.lineHeight}}><span style={{color:paper.green,width:15,flex:'none'}}>·</span><div style={{...textStyle,minWidth:0}}>{lines.map((line:string,j:number)=><div key={j} style={{whiteSpace:'nowrap'}}><Tech text={line}/></div>)}</div></div>)}</div>
           </div>;
         })}
       </div>}
@@ -349,7 +365,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'scatter_chart' && <ScatterChart scene={scene} frame={frame}/>}
       {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
-        <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
+        {/* The value and its unit form one reading context; a later repeated narration cue must not leave the subject blank. */}
+        <div style={{opacity:ease((frame-scene.start_frame)/12),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
         <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
         {p.note && <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
       </div>}
@@ -378,9 +395,10 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
               return <div key={i} data-price-layout={layout?.stacked_label?'stacked':'row'} style={{...motion('title'),display:'flex',flexDirection:layout?.stacked_label?'column':'row',alignItems:layout?.stacked_label?'stretch':'center',gap:layout?.stacked_label?12:36,lineHeight:1.1}}>
                 {layout?.stacked_label?<div style={{display:'flex',alignItems:'center',gap:36}}>{label}{delta}</div>:label}
                 <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0,justifyContent:layout?.stacked_label?'center':undefined}}>
-                  <Value text={row.before} color={paper.muted} opacity={.18+.82*oldOpacity}/>
-                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.18+.82*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.18+.82*later(8)}/>
+                  {/* Establish a readable comparison immediately; speech strengthens emphasis. */}
+                  <Value text={row.before} color={paper.muted} opacity={.65+.35*oldOpacity}/>
+                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.65+.35*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.65+.35*later(8)}/>
                 </div>
                 {!layout?.stacked_label&&delta}
               </div>;
@@ -453,14 +471,21 @@ function FastCardsVideo({ir, backgrounds}: {ir: Timeline; backgrounds: FastCardB
   const linked={...ir,scenes};
   const scene=scenes.find(s=>frame>=s.start_frame&&frame<s.end_frame)??scenes[scenes.length-1];
   const transition=transitionAt(scene,frame),previous=scene.previous_scene;
-  const picture=(current:Scene,at:number)=><AbsoluteFill>
+  // Fit the shared content stage into the hybrid card's picture slot. The
+  // comparison panel can use the full native stage height without being cut
+  // off by a hand-tuned translate/scale pair in this embedding surface.
+  const picture=(current:Scene,at:number)=>{
+    const stagePose=fitFrame(current.image_reading?{x:140,y:290,width:1640,height:610}:{x:140,y:300,width:1640,height:590},
+      {x:0,y:0,width:1640,height:531},undefined,1),stageTransform=transformFor(stagePose);
+    return <AbsoluteFill>
     <Img src={staticFile(backgrounds[current.id].path)} style={{width:1920,height:1080}}/>
     {!backgrounds[current.id].still&&<div style={{position:'absolute',left:140,top:275,width:1640,height:531,overflow:'hidden'}}>
-      <div style={{position:'absolute',left:13,top:-227,width:1920,height:1080,transform:'scale(.84)',transformOrigin:'0 0'}}>
-        <InformationVideo ir={linked} sceneOverride={current} frameOverride={at} stageOnly/>
+      <div style={{position:'absolute',left:0,top:0,width:1920,height:1080,transform:stageTransform,transformOrigin:'0 0'}}>
+        <VisualScaleContext.Provider value={stagePose.zoom}><InformationVideo ir={linked} sceneOverride={current} frameOverride={at} stageOnly/></VisualScaleContext.Provider>
       </div>
     </div>}
   </AbsoluteFill>;
+  };
   return <AbsoluteFill>{picture(scene,frame)}
     {transition.active&&previous&&<AbsoluteFill style={{opacity:1-transition.progress}}>{picture(previous,previous.end_frame-1)}</AbsoluteFill>}
   </AbsoluteFill>;
@@ -474,6 +499,7 @@ function Video(props: VideoProps) {
 function VideoContent(props: VideoProps) {
   if(props.fastCardBackgrounds)return <FastCardsVideo ir={props.ir} backgrounds={props.fastCardBackgrounds}/>;
   if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
+  if (props.ir.presentation?.preset === 'illustrated_explainer') return <IllustratedVideo ir={props.ir} badge={props.badge}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;
   return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;
 }

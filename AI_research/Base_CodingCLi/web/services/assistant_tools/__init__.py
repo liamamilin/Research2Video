@@ -22,7 +22,13 @@ class Tool:
 
 def registry() -> dict[str, Tool]:
     from . import work, reports, intelligence, administration, video, application, management, activity, operations
-    return {**work.TOOLS, **reports.TOOLS, **intelligence.TOOLS, **administration.TOOLS, **video.TOOLS, **application.TOOLS, **management.TOOLS, **activity.TOOLS, **operations.TOOLS}
+    tools = {**work.TOOLS, **reports.TOOLS, **intelligence.TOOLS, **administration.TOOLS, **video.TOOLS, **application.TOOLS, **management.TOOLS, **activity.TOOLS, **operations.TOOLS}
+    try:  # the optional A/B module (spec/ab-testing.md §2): a missing module leaves the other tools as they are
+        from . import experiments
+        tools.update(experiments.TOOLS)
+    except Exception:  # noqa: BLE001
+        pass
+    return tools
 
 
 def definitions(role: str) -> list[dict]:

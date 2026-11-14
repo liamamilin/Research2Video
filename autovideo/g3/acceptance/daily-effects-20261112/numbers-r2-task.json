@@ -1,0 +1,248 @@
+{
+  "status": "production_entry_verified",
+  "goal": "数字页从进入时就有可理解的主体，不让观众在说明和旁白已展开时等空白数值；保留对讲述重点的引导",
+  "baseline": {
+    "job": "80a78a63-09d5-4b18-b203-3a24c3a4d56d",
+    "seconds": [
+      21.6,
+      55.3
+    ],
+    "impact": "近100% 页面 26.87秒开始，数字39秒附近才显示；观众听见比例后无法在主画面确认",
+    "known_other_waits": [
+      "3天",
+      "6–12个月",
+      "400"
+    ]
+  },
+  "production": "video_autopilot.start_run with original flash_daily from daily batch 49f957e2bb5d45cfb42a2714e7513036 -> normal script/auto-finalization -> video_render -> G3/G2 -> download",
+  "automatic_inputs": [
+    "2026-11-12_ai_flash_discovery.md and unchanged automatic report/material sidecars",
+    "Automatically generated narration, scene values, labels, notes and cue times"
+  ],
+  "config": "Existing actual production recipe, speed and Open Design/opencode fallback; isolate only state/storage; no assets or renderer injection for final workflow",
+  "candidates": [
+    {
+      "name": "baseline",
+      "benefit": "保留现状作为同稿原声控制",
+      "minimum": "21.6–55.3s full original interval"
+    },
+    {
+      "name": "immediate",
+      "benefit": "数字与说明同时建立，直接消除主体空等",
+      "minimum": "same original interval, only value entrance from scene start",
+      "stop": "若数字抢走理解上下文所需注意或与叙事冲突则放弃，不重写稿件适配"
+    },
+    {
+      "name": "cue_emphasis",
+      "benefit": "主体从开始即可阅读，原旁白节点只加强颜色重点",
+      "minimum": "same interval, readable initial value, original cue emphasis",
+      "stop": "若与 immediate 相比收益不明显或产生闪烁/注意干扰，采用更简单的 immediate"
+    }
+  ],
+  "route_limit": "最多两轮无明确观看收益即停止该办法，不新增数字识别、素材系统或新的编排服务；不为个别数值/主题写例外",
+  "holdout": {
+    "job": "9fc7f436-650a-49f1-9ede-98cc5c078092",
+    "structure": "Decisions API 小数价格与成本比例，另含正常价格/比较页边界",
+    "not_used_for_tuning": true,
+    "result": {
+      "reviewed": "sequence-01.jpg through sequence-07.jpg, entire 519.3–545.4s holdout at 1-second intervals",
+      "observations": [
+        "At 520.3s price 0.10 is already readable with its unit; baseline still blank. Later both converge.",
+        "At 537.3–538.3s 20% completes the already-visible comparison label; no new comparison object or animation added.",
+        "Intervening concept scene remains visually unchanged; boundaries, captions, value layout and end state preserved."
+      ],
+      "decision": "Holdout supports immediate value entrance without parameter changes or topic exceptions",
+      "limitations": "Original audio retained and verified; visual sequence review, not continuous human listening or engagement measurement"
+    }
+  },
+  "success_evidence": [
+    "同稿原声视频中数字主体不再长时间空等，仍能跟随讲述",
+    "正常业务入口完整新成片包含未调试不同结构选题并自动用上",
+    "全片顺序检查、完整解码、同声对照、正常下载一致性",
+    "失败、取舍、人工介入和仍未解决问题保留"
+  ],
+  "manual_interventions": [
+    "选择真实成片对照时间段；实验复制冻结渲染器，不改讲稿/分镜/音轨"
+  ],
+  "source_hashes": {
+    "RelationLayout.ts": "cad271cd3cb4574472f947b6e6c50d58d27fc5467b4d975e6684530c4f285bdd",
+    "ShotDirector.tsx": "ff599c068f3586f87a68e5c57775d8e7831278f7ca7dd1ad105dea40baa3a524",
+    "DataChart.tsx": "d40edaed2e598e132b41861eb9c2b313dcdd41a6d146d3bc1b67fdd51be5dae6",
+    "StoryDirection.tsx": "0d1e89bc92acbe7cfbb13000f37024672f667f666e4e5c2e5315fd0a7a6ba59b",
+    "CodeDemo.tsx": "b9f8d4fe0b5b71821a2df424332e67a812db78b9caedcc1cc96c44102c27c893",
+    "Framing.ts": "44d483be0a53670e084f4498ba940dd2393f5f7ff436f237d4d3785417981b45",
+    "CreativeForms.tsx": "b5cd904e704de8aeb436108bed21b1cb1ac0884ba3fbe293efc441861b361261",
+    "TextFit.ts": "ec73a11269d9e983474cd60643b16ee8909e40cc6f1b527005d9a900e76ae5c1",
+    "IllustratedOverlays.tsx": "9ac82204232ed625b49e6cc00e9609638415dfe7f0faa66107a1f2ac54e11c16",
+    "Root.tsx": "b37bf6d13324070ca7ec49f4c343f61a740cf001b741cce9e752d423f8fcd79c",
+    "ObjectFlow.tsx": "2e0cdc78554d394929d41c47a2388fbed45335126e1d0b058d4bcc77215e7d2c",
+    "ObjectMotions.ts": "86a10e83a96abd54f8bad8ad0616391e829d8ee0c517a39eacb386c3495fe03e",
+    "ScatterChart.tsx": "f36ddefcbab6a39ac24d359c4da4d7e90d8e8259e0e1a5c0be036869ad4b1b12",
+    "RelationIndex.tsx": "63d87414322486cce425332930e22d07c893cffe852749d8baef91eba7231b16",
+    "DirectedMaterials.tsx": "3458c8b6e068cb663c6a1a4d7d132dfdfc7f68ac3e9e8a87178eeecf5ee6bc75",
+    "ContentStyle.tsx": "638a0e56a9d9979c0632bbc7ec80b2a06487b67c6912ec2e11b56b3aa382f112",
+    "index.ts": "a58f804bf74bab68b4549aa5c715eb4a89ec5835206d198fc79b462b4fc71ef9",
+    "Illustrated.tsx": "02dbb83d72a5cd4a9d27705b8dfd7c25dc33b20830a0073999f42002b071635b",
+    "VisualObjects.tsx": "e08ac79311a1dcf10596216ee333bb4b6e2912548f5d0741ac0fb98c23cbc7b9",
+    "ImageMaterials.tsx": "111b7ba3dc325a30b03f37f0c838fbc19f1a2e812032b8d59fcadcde8d54e7e2",
+    "Packaging.tsx": "04337d58feeb7200188d3481d02bd3412d91c32f31272dc34d19bdf6461eecaa"
+  },
+  "production_input_check": {
+    "config_equal_except_isolated_storage_archive": true,
+    "automatic_material_checks": [
+      {
+        "same_loaded_text": true,
+        "characters": 760285,
+        "sha256": "6cd1fc471b0dfdc3e4a3ed4a2d543312761546b8c40381095da8b76685b9cc39"
+      }
+    ],
+    "report_sha256": "72cab02117ca238552cd610c4d9a8d2a9ec24d61f20c2d9bbe9b86d738ba9adb",
+    "normal_run_directory": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-effects-20261112/numbers-r2-daily",
+    "history_boundary": {
+      "source": "read-only production SQLite snapshot",
+      "exclude_created_at_or_after": "2026-11-12T07:41:55+0800",
+      "retained_scripts": 584,
+      "historical_updated_fields_not_reconstructed": true
+    }
+  },
+  "experiment_decision": {
+    "amd_review": "Complete interval 21.6–55.3s inspected chronologically at one-second samples, same original audio/timing verified",
+    "selected": "immediate",
+    "discarded": "cue_emphasis: color shift has no clear added comprehension benefit",
+    "next": "untouched decimal-price and cost-ratio holdout before integration",
+    "not_claimed": [
+      "Continuous human listening",
+      "Whole-episode pacing solved",
+      "Production entry verified"
+    ]
+  },
+  "implementation": {
+    "file": "g1/renderer/src/Root.tsx",
+    "change": "Big number value uses same scene entrance as unit/label/note; no compiler/plan/timing change",
+    "sha256": "978f730028405334f911c1c106dfe778334aa779cb524217e5c0abc79b452647"
+  },
+  "normal_run": {
+    "batch": "2d2772e343ae4e29af0f7ef6beadfd50",
+    "script": "9acacbccfd03475eb4d5dc2b69efa6de",
+    "render": "4257eb896a8342cea43279e398fcabb0",
+    "engine_job": "fb592a5d-83d6-44aa-8b5f-68dccb89f4ec",
+    "status": "completed",
+    "actual_input": {
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "video_form": "information_motion",
+      "video_speed": 1.25,
+      "duration_mode": "content",
+      "voice_id": "voxcpm_anchor",
+      "use_draw_things": false,
+      "visual_storytelling": true,
+      "input_mode": "narration",
+      "source_sha256": "5142028fb0223e360c941c5362fc5eb970087ecdb19f0f1910235d384c270f66"
+    },
+    "automatic_chapters": 9,
+    "focus_selection": "After normal plan is available, inspect all big-number pages and select maximum original value-cue delay outside automatic chapter covers for same-audio actual-output comparison; retain different un-tuned topic structures and full chronological review",
+    "measured_voice_seconds": 778.933,
+    "phrase_spans": 132,
+    "freshly_synthesized_segments": 132,
+    "content_frames": 18695,
+    "content_seconds": 623.1666666666666,
+    "presentation": "explanation",
+    "same_audio_comparisons": [
+      {
+        "name": "production-grok",
+        "frames": [
+          11018,
+          11894
+        ],
+        "selection": "All big_number scenes: largest original cue delay 12s, untouched topic, include preceding comparison and next flow"
+      },
+      {
+        "name": "production-emeans",
+        "frames": [
+          16541,
+          17586
+        ],
+        "selection": "Only other big_number scene: fraction 1/10, untouched topic, include previous flow and next concept"
+      }
+    ],
+    "delivered_seconds": 629.166667,
+    "delivered_frames": 18875,
+    "automatic_skips": []
+  },
+  "regression": {
+    "full_suite": "1094 passed, 1 skipped, 2 sandbox temporary-port failures",
+    "isolated_port_retry": "Both failures passed with local port access; total 1096 passed across full suite and targeted retry",
+    "logs": [
+      "g3/data/validation/daily-effects-20261112/numbers-r2/pytest.log",
+      "g3/data/validation/daily-effects-20261112/numbers-r2/pytest-local-port-retry.log"
+    ]
+  },
+  "render_regression": {
+    "early_value_visibility": "All five delayed-cue numeric scenes display a nonempty main value at scene + 0.7s; old MP4 value region is empty",
+    "detail": "g3/data/validation/daily-effects-20261112/numbers-r2/experiments/value-visibility-regression.json",
+    "unchanged_intervening_concept": "8 seconds, 240 frames, SSIM 0.999948; residual compression differences; visually unchanged",
+    "limits": "Pixel visibility and SSIM supplement visual review; not a video quality score"
+  },
+  "completed_at": "2026-11-12T07:09:08.300095+00:00",
+  "result": {
+    "adopted": "Scene-entry numeric context, existing value and unit shown together",
+    "discarded": "Cue-emphasis color change: no clear added value",
+    "actual_output_gain": {
+      "Grok_94_7_percent": "12s original cue delay, same 1.8s chapter card; 10.2s exposed empty subject wait removed",
+      "emeans_1_over_10": "2.9s original cue delay removed; no chapter cover at this numeric scene"
+    },
+    "actual_comparison_frames": [
+      876,
+      1045
+    ],
+    "actual_comparison_audio_correlations": [
+      0.9994973402455738,
+      0.9995254855150091
+    ],
+    "whole_video_review": "20 chronological sheets at 2-second intervals plus full content/delivery decode; all inspected",
+    "all_new_number_scenes_compared": true,
+    "normal_download_hash_matches": true,
+    "manual_materials": [],
+    "manual_script_or_storyboard": false,
+    "published": false,
+    "claims_not_made": [
+      "Continuous human listening",
+      "Whole-episode rhythm solved",
+      "Measured retention or follower growth"
+    ]
+  },
+  "evidence": {
+    "report": "g3/acceptance/daily-effects-20261112/NUMBERS_R2.md",
+    "media": "g3/data/validation/daily-effects-20261112/e2e/fb592a5d-83d6-44aa-8b5f-68dccb89f4ec/media-check.json",
+    "whole_review": "g3/data/validation/daily-effects-20261112/e2e/fb592a5d-83d6-44aa-8b5f-68dccb89f4ec/visual-review.json",
+    "download": "g3/data/validation/daily-effects-20261112/numbers-r2/download-check.json",
+    "source": "g3/data/validation/daily-effects-20261112/numbers-r2/production-source-check.json"
+  },
+  "corrections": [
+    "Acceptance overlay helper defaulted to 25fps; strict frame check rejected both intermediates. Original 30fps restored; failed intermediates preserved.",
+    "Montage-based suspicion of 580–584s card cropping withdrawn after direct actual-frame recheck; review record corrected."
+  ],
+  "remaining_candidates": [
+    {
+      "seconds": [
+        18.4,
+        38.43
+      ],
+      "issue": "static agenda"
+    },
+    {
+      "seconds": [
+        60,
+        76
+      ],
+      "issue": "dense relation index"
+    },
+    {
+      "seconds": [
+        326,
+        334
+      ],
+      "issue": "chart values appear before category labels"
+    }
+  ]
+}

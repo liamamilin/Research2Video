@@ -13,7 +13,6 @@ from pathlib import Path
 from core.platform_store import PlatformStore
 from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
-from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
@@ -165,7 +164,7 @@ def _matrix_keys(script: dict) -> list[str]:
     context = script.get("content_context") or {}
     topic = script.get("topic") or {}
     job = ((topic.get("episode") or {}).get("job") or (topic.get("matrix_dedup") or {}).get("job")
-           or context.get("job", ""))
+           or topic.get("knowledge_job") or context.get("job", ""))
     found = None
     if job:
         found = next((m for m in matrices.load_all(get_settings().paths.config_dir).values()
@@ -183,6 +182,60 @@ def category_for(script: dict) -> int:
         if int(by_matrix.get(key) or 0) >= 1:
             return int(by_matrix[key])
     return int(config.get("tid") or 0)
+
+
+def season_for(script: dict, config: dict) -> int:
+    """The 合集 a script's video joins: its recipe's entry first (e.g. all 快讯), then its matrices, most specific first."""
+    rules = config.get("collections") or {}
+    by_recipe, by_matrix = rules.get("by_recipe") or {}, rules.get("by_matrix") or {}
+    if int(by_recipe.get(script.get("column_key", "")) or 0) > 0:
+        return int(by_recipe[script["column_key"]])
+    for key in _matrix_keys(script):
+        if int(by_matrix.get(key) or 0) > 0:
+            return int(by_matrix[key])
+    return 0
+
+
+COLLECTION_RETRY_SECONDS = 600
+COLLECTION_MAX_ATTEMPTS = 30
+
+
+def process_collection(task: dict) -> None:
+    """Called under the worker lock: put a published video into its 合集, idempotently.
+    A video that is not open yet, or that the platform refuses for now, is retried later."""
+    db = store()
+    season = int(task.get("collection_season") or 0)
+    if not season:
+        script = video_store.get_script(task["script_id"])
+        season = season_for(script, db.settings()) if script else 0
+    if not season:
+        db.set_collection(task["id"], status="NONE")
+        return
+
+    def wait(reason: str) -> None:
+        exhausted = int(task.get("collection_attempts") or 0) + 1 >= COLLECTION_MAX_ATTEMPTS
+        db.set_collection(task["id"], status="FAILED" if exhausted else "WAITING", season=season, error=reason, attempt=True)
+
+    api = client(task["uid"])
+    try:
+        info = api.owned_video(task["bvid"], task["uid"])
+        if info.get("state") != 0:
+            return wait("视频尚未公开，公开后再加入合集。")
+        section = api.season_sections().get(season)
+        if not section:
+            return db.set_collection(task["id"], status="FAILED", season=season,
+                                     error=f"账号里找不到合集 {season}，请检查合集设置。")
+        aid = int(info["aid"])
+        if aid in api.section_aids(section):
+            return db.set_collection(task["id"], status="DONE", season=season)
+        state = api.season_episode_state([aid]).get(aid) or {}
+        if state.get("code"):
+            return wait(state.get("msg") or f"B 站暂不允许加入合集（{state['code']}）。")
+        api.add_to_season(section, [{"aid": aid, "cid": state.get("cid") or info.get("cid"), "title": info.get("title") or ""}])
+    except Error as exc:
+        # Uncertain outcomes are safe to retry: the next pass reads the section before adding again.
+        return wait(str(exc))
+    db.set_collection(task["id"], status="DONE", season=season)
 
 
 def column_for(script: dict):
@@ -217,6 +270,7 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
 
 
 def preview(render_id: str) -> dict:
+    from web.services import bilibili_covers
     from web.services.distributions import preview_draft
     render, script, version = eligible(render_id)
     pack = video_render.publish_pack(script, version, column_for(script), render_id=render_id)
@@ -232,7 +286,7 @@ def preview(render_id: str) -> dict:
             "adaptation": adaptation, "tid": category_for(script), "warnings": warnings,
             "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
-            "credibility": credibility.label(version),
+            "credibility": credibility.label(version), "covers": bilibili_covers.preview(render),
             "existing_upload": next((u for u in script_uploads(script["id"]) if u["version"] == render["version"]), None)}
 
 
@@ -254,43 +308,55 @@ SCHEDULE_LEAD = 4.5 * 3600  # biliup needs dtime more than 4 hours after submiss
 HOLD = "hold"  # wait here and submit once the window opens: the platform's timer cannot reach it
 
 
-def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False) -> int | str | None:
-    """Daytime renders publish now; night renders go public from the window's opening, in order and spaced.
+PRIME = {"prime_start": 19, "prime_end": 22, "prime_heat": 100000}  # B站 evening peak; topics this hot wait for it
 
-    A slot the platform's 4-hour timer can reach becomes a ``dtime``; an earlier one is held here
-    (``HOLD``) and submitted in the window, so a render finished at 11:00 never waits longer than one
-    finished at 12:00. ``held`` uploads leave one per spacing inside the window, around ``taken`` times.
+
+def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False, heat: int = 0) -> int | str | None:
+    """When an automatic upload goes public: ``None`` now, a ``dtime`` timer, or ``HOLD`` (wait here, ask again).
+
+    Every upload keeps ``spacing`` minutes from the others (11-10: in the daytime too, so one topic's videos and a
+    morning's batch no longer go out back to back). A topic at least ``prime_heat`` hot (core/video/heat.py) goes out
+    in the evening peak ``prime_start``–``prime_end`` when a slot there is free; otherwise the ordinary rule applies.
+    Night renders go public from the window's opening, in order and spaced. A slot the platform's 4-hour timer can
+    reach becomes a ``dtime``; an earlier one is held here and submitted at its time.
     """
     if not window.get("enabled"):
         return None
     start, end = int(window.get("start", 8)), int(window.get("end", 23))
-    spacing = max(1, int(window.get("spacing") or 20)) * 60
+    spacing = max(1, int(window.get("spacing") or 30)) * 60
     if not 0 <= start < end <= 24:
         return None
     local = datetime.fromtimestamp(now).astimezone()
-    if start <= local.hour < end:
-        return HOLD if held and any(abs(now - t) < spacing for t in taken) else None
     midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    free = lambda slot: all(abs(slot - t) >= spacing for t in taken)  # noqa: E731
+    prime_start = int(window.get("prime_start", PRIME["prime_start"]))
+    prime_end = int(window.get("prime_end", PRIME["prime_end"]))
+    if heat >= int(window.get("prime_heat", PRIME["prime_heat"])) and start <= prime_start < prime_end <= end:
+        # Only today's peak, and only while it is still ahead: a hot topic is not held a day for tomorrow's.
+        slot = (midnight + timedelta(hours=prime_start)).timestamp()
+        close = (midnight + timedelta(hours=prime_end)).timestamp()
+        while now < slot < close:
+            if free(slot):
+                return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
+            slot += spacing
+    if start <= local.hour < end:
+        return None if free(now) else HOLD
     for offset in range(8):
         day = midnight + timedelta(days=offset)
         slot, close = (day + timedelta(hours=start)).timestamp(), (day + timedelta(hours=end)).timestamp()
         if close <= now:
             continue
         while slot < close:
-            if all(abs(slot - t) >= spacing for t in taken):
+            if free(slot):
                 return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
             slot += spacing
     return int(now + SCHEDULE_LEAD)
 
 
 def held_note(window: dict) -> str:
-    return f"等待白天时段：{int(window.get('start', 8)):02d}:00 起按完成顺序依次投稿。"
-
-
-def _publish_times(db, owner: str, task_id: str) -> list[float]:
-    """When other automatic uploads go (or went) public: their timers and the moments held ones were released."""
-    return [float(t) for u in db.uploads(owner) if u["id"] != task_id and u["status"] in ("QUEUED", "UPLOADING", "SUBMITTED", "PUBLISHED")
-            for t in (u["payload"].get("dtime"), u["payload"].get("released_at")) if t]
+    return (f"等待发布时段：{int(window.get('start', 8)):02d}:00–{int(window.get('end', 23)):02d}:00 内按热度依次投稿，"
+            f"每条至少间隔 {int(window.get('spacing') or 30)} 分钟；热门选题留到 "
+            f"{int(window.get('prime_start', PRIME['prime_start'])):02d}:00 晚高峰。")
 
 
 def scheduled_note(dtime: float) -> str:
@@ -325,8 +391,9 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     first_comment = payload.get("first_comment")
     if first_comment is None:
         first_comment = store().settings()["first_comment"]
+    from web.services.bilibili_covers import for_upload
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
-             "cover": publish_cover(render, title), "automatic": automatic,
+             **for_upload(render, title), "automatic": automatic,
              "first_comment": clean_first_comment(first_comment)}
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)
@@ -399,13 +466,15 @@ def candidates() -> list[dict]:
 
 
 def overview() -> dict:
+    from web.services import comment_restrictions
     profile = account()
     owner = profile.get("uid", "") if profile.get("connected") else ""
     db = store()
     available, summary = candidate_catalog()
     return {"account": profile, "settings": db.settings(), "biliup_ready": bool(bilibili.biliup_binary()), "publication_flow": True,
             "uploads": db.uploads(owner), "videos": db.videos(owner), "comments": db.comments(owner),
-            "candidates": available, "candidate_summary": summary}
+            "candidates": available, "candidate_summary": summary,
+            "restrictions": comment_restrictions.restrictions(owner)}
 
 
 def watch(bvid: str) -> dict:
@@ -626,6 +695,74 @@ def process_first_comment(task: dict) -> None:
             db.finish_first_comment_pin(task["id"], status="PINNED")
 
 
+def topics_of(script_ids: list[str]) -> dict[str, dict]:
+    """Per script: the B站 heat its topic was picked with (0 when none), its topic id, and for an extra angle
+    (core/video/angles.py) the id of the item it retells."""
+    if not script_ids:
+        return {}
+    with video_store.connect() as conn:
+        rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat, "
+                            "COALESCE(json_extract(topic,'$.episode_id'),json_extract(topic,'$.id')) AS topic_id, "
+                            "COALESCE(json_extract(topic,'$.base_id'),json_extract(topic,'$.after_id')) AS base_id, "
+                            "json_extract(topic,'$.after_id') AS after_id, column_key, content_column_id, "
+                            "json_extract(topic,'$.angle') AS angle FROM scripts "
+                            "WHERE id IN (SELECT value FROM json_each(?))", (json.dumps(sorted(set(script_ids))),)).fetchall()
+    return {row["id"]: {"heat": int(row["heat"] or 0), "topic_id": row["topic_id"] or "", "base_id": row["base_id"] or "",
+                        "after_id": row['after_id'] or '', 'timely': row['column_key'] == 'flash' and not row['angle'],
+                        'tutorial': row['content_column_id'] == 'ai_tutorial'}
+            for row in rows}
+
+
+def heat_of(script_ids: list[str]) -> dict[str, int]:
+    """B站 heat each script's topic was picked with (core/video/heat.py); 0 when it had none."""
+    return {sid: info["heat"] for sid, info in topics_of(script_ids).items()}
+
+
+def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float,
+                 published: set[str] | None = None, cancelled: dict[str, str] | None = None) -> bool:
+    """Angles keep their queue ordering. A series waits for actual publication, skipping cancelled slots."""
+    base = (topics.get(upload["script_id"]) or {}).get("base_id")
+    if not base:
+        return False
+    if (topics.get(upload['script_id']) or {}).get('after_id'):
+        seen = set()
+        while base in (cancelled or {}) and base not in (published or set()):
+            if base in seen:
+                return True
+            seen.add(base)
+            base = cancelled[base]
+        return bool(base) and base not in (published or set())
+    return any((topics.get(u["script_id"]) or {}).get("topic_id") == base
+               and (u["status"] == "QUEUED" or float(u["payload"].get("dtime") or 0) > now) for u in pending)
+
+
+def published_episodes(owner: str) -> set[str]:
+    """Only actual publication records, including reconciled uploads, release a series successor."""
+    with video_store.connect() as conn:
+        return {r[0] for r in conn.execute(
+            "SELECT DISTINCT COALESCE(json_extract(s.topic,'$.episode_id'),json_extract(s.topic,'$.id')) "
+            "FROM scripts s JOIN publications p ON p.script_id=s.id "
+            "WHERE p.platform='bilibili' AND p.removed_at='' AND (p.account_uid=? OR p.account_uid='')", (owner,))}
+
+
+def cancelled_episodes() -> dict[str, str]:
+    """An explicitly dropped slot is skipped; a failed slot retains its place for retry."""
+    with video_store.connect() as conn:
+        return {r['episode_id']: r['after_id'] or '' for r in conn.execute(
+            "SELECT COALESCE(json_extract(i.topic,'$.episode_id'),json_extract(i.topic,'$.id')) AS episode_id, "
+            "json_extract(i.topic,'$.after_id') AS after_id FROM autopilot_items i WHERE i.state='CANCELLED' "
+            "AND NOT EXISTS (SELECT 1 FROM autopilot_items r WHERE r.state<>'CANCELLED' AND "
+            "COALESCE(json_extract(r.topic,'$.episode_id'),json_extract(r.topic,'$.id'))="
+            "COALESCE(json_extract(i.topic,'$.episode_id'),json_extract(i.topic,'$.id')))")}
+
+
+def by_priority(waiting: list[dict], heat: dict[str, int] | None = None) -> list[dict]:
+    """The order queued uploads go out (11-10, 发片优先级): what a person queued by hand first, then the hottest topic,
+    then the oldest. A topic told from several angles shares its heat, so its videos follow one another in order."""
+    heat = heat_of([u["script_id"] for u in waiting]) if heat is None else heat
+    return sorted(waiting, key=lambda u: (bool(u["payload"].get("automatic")), -heat.get(u["script_id"], 0), u["created_at"]))
+
+
 def tick() -> None:
     """Single worker across threads/processes; unknown submissions are never automatically retried."""
     folder = directory()
@@ -660,13 +797,27 @@ def tick() -> None:
                     _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
         task, dtime = None, None
-        for waiting in (u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"):
+        pending = db.pending_uploads(owner)
+        queued = [u for u in pending if u["status"] == "QUEUED"]
+        topics = topics_of([u["script_id"] for u in pending])
+        published = published_episodes(owner) if any(t.get('after_id') for t in topics.values()) else set()
+        cancelled = cancelled_episodes() if any(t.get('after_id') for t in topics.values()) else {}
+        heat = {sid: info["heat"] for sid, info in topics.items()}
+        for waiting in by_priority(queued, heat):
             if not waiting["payload"].get("automatic"):
                 task = waiting
                 break
             window = config.get("publish_window") or {}
-            dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),
-                               held=bool(waiting["payload"].get("held")))
+            angle = bool((topics.get(waiting["script_id"]) or {}).get("base_id"))
+            if angle and base_pending(waiting, pending, topics, time.time(), published, cancelled):
+                if not waiting["payload"].get("held"):
+                    db.hold_upload(waiting["id"], "等前一条（同一选题讲发布的那条，或预告它的上一期）先公开，再按间隔接着发。")
+                continue
+            # an extra angle follows its item instead of taking an evening-peak slot of its own
+            dtime = publish_at(time.time(), window, db.reserved_publish_times(owner, waiting["id"]),
+                               held=bool(waiting["payload"].get("held")),
+                               heat=0 if angle or topics.get(waiting['script_id'], {}).get('timely')
+                               else heat.get(waiting["script_id"], 0))
             if dtime != HOLD:
                 task = waiting
                 break
@@ -699,7 +850,10 @@ def tick() -> None:
                                           "lookup_count": 0, "next_lookup_at": 0, "note": ""}, expected="UPLOADING")
             credential = credentials()
             try:
-                bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
+                payload = {**task["payload"], "cover": str(cover)}
+                if (topics.get(task["script_id"]) or {}).get("tutorial"):
+                    payload["ai_generated"] = True
+                bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), payload, work_dir)
                 dtime = task["payload"].get("dtime")
                 db.update_upload(task["id"], status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime else "")
             except bilibili.UploadFailed as exc:
@@ -731,6 +885,14 @@ def tick() -> None:
         comment_tasks = db.first_comment_tasks(owner)
         if comment_tasks:
             process_first_comment(comment_tasks[0])
+        collection_tasks = db.collection_tasks(owner, retry_after=COLLECTION_RETRY_SECONDS)
+        if collection_tasks:
+            process_collection(collection_tasks[0])
+        from web.services import comment_restrictions  # imports this module
+        try:
+            comment_restrictions.tick(owner)
+        except Exception:  # a failed limit check must not stop uploads
+            logger.exception("comment restriction check failed")
         if config["sync_comments"]:
             due = [v for v in db.videos(owner) if (v["last_attempt_at"] or v["synced_at"] or 0) < time.time() - 300]
             if due:

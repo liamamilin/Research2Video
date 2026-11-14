@@ -3,6 +3,7 @@ and saves each week's report and numbers once they are final (core/weekly_review
 from __future__ import annotations
 
 import logging
+import json
 import time
 from typing import Optional
 
@@ -18,6 +19,24 @@ def _form(script: dict) -> str:
     return "整期节目" if (script.get("topic") or {}).get("content_mode") == "episode" else "单篇"
 
 
+def _presentation(publication: dict) -> dict:
+    from core.video import presentation, store as video_store
+    from web.services import video_render
+    render = video_store.get_render(publication.get('render_id') or '') or {}
+    version = video_store.get_version(publication.get('script_id') or '', publication.get('version')) or {}
+    board = None
+    if render:
+        path = video_render.safe_file(render, 'storyboard.json')
+        if path:
+            try:
+                data = json.loads(path.read_text())
+                if isinstance(data, dict) and isinstance(data.get('scenes'), list):
+                    board = data
+            except (OSError, ValueError):
+                pass
+    return presentation.snapshot(version, render.get('submission_request') or render.get('request') or {}, board)
+
+
 def _gather(config_dir: str, collector, uid: str) -> list[dict]:
     """Every published workflow video with its snapshots and the attributes the review cuts by."""
     from core.video import content_columns, store as video_store
@@ -28,6 +47,9 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
     series = collector.storage.view_series(uid, [r["bvid"] for r in rows], since=weekly_review.week_start(first) - 7 * 86400)
     columns = {key: c.name for key, c in content_columns.load_all(config_dir).items()}
     watch = collector.storage.latest_watch(uid, [r["bvid"] for r in rows])
+    from web.services.publish_cover import upload_styles
+    from web.settings import get_settings
+    covers = upload_styles(get_settings().paths.state_dir)
     videos = []
     for row in rows:
         publication = row.get("publication") or {}
@@ -35,6 +57,7 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
         column = script.get("content_column_id") or ""
         fields = (script.get("topic") or {}).get("fields") or {}
         available = bool(row.get("available"))
+        presentation = _presentation(publication)
         videos.append({"bvid": row["bvid"], "title": row.get("title") or "", "pubdate": row["pubdate"],
                        "duration": row.get("duration") or 0,
                        "view": (row.get("metrics") or {}).get("view") if available else None,
@@ -44,6 +67,11 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
                        # before columns existed: the Job it came from (production config names repeat across Jobs)
                        "column": columns.get(column, column) or publication.get("job_name") or "",
                        "structure": weekly_review.structure(str(fields.get("推荐结构") or "")),
+                       # uploaded outside the queue (no upload row): its cover is unknown
+                       "cover": covers.get(publication.get("render_id") or "", ""),
+                       'presentation': presentation, 'programme': presentation['programme'],
+                       'material_usage': presentation['material_usage'],
+                       "experiments": (script.get("content_context") or {}).get("experiments") or [],
                        "watch": watch.get(row["bvid"]) or {}})
     return videos
 
@@ -66,7 +94,18 @@ def load(config_dir: str, state_dir: str, start: Optional[float] = None, stage: 
             return {"connected": True, "missing": True, "start": start, "weeks": weeks, "saved": saved}
         return {"connected": True, **kept, "weeks": weeks, "saved": saved}
     return {"connected": True, "weeks": weeks, "saved": saved, "stage": "",
-            **weekly_review.review(_gather(config_dir, collector, uid), start, now)}
+            **weekly_review.review(_gather(config_dir, collector, uid), start, now),
+            "experiments": _experiments(state_dir, start)}
+
+
+def _experiments(state_dir: str, start: float) -> list[dict]:
+    """「实验进展」(spec/ab-testing.md §9): read-only, and empty whenever the A/B module cannot answer."""
+    try:
+        from core.experiments import progress
+        return progress.week(state_dir, start, start + 7 * 86400)
+    except Exception:  # noqa: BLE001 - the review never depends on the A/B module
+        logger.warning("experiment progress unavailable", exc_info=True)
+        return []
 
 
 def archive_due(config_dir: str, state_dir: str, now: Optional[float] = None) -> list[tuple[float, str]]:

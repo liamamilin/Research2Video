@@ -1,0 +1,170 @@
+{
+  "groups": [
+    {
+      "name": "context-tutorial",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/context-tutorial/before/video.mp4",
+          "sha256": "4b01e489455aa093799876323d373c42565d076aeca9e9c14c86ea33ac82a073",
+          "frames": 1160,
+          "seconds": 38.666666666666664,
+          "decode": "pass"
+        },
+        "all_native": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/context-tutorial/all_native/video.mp4",
+          "sha256": "f7b18531dfe92e31b7f6d989489b00c69c9694e5791af0f14707e1fa74958d9e",
+          "frames": 1160,
+          "seconds": 38.666666666666664,
+          "decode": "pass"
+        },
+        "release": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/context-tutorial/release/video.mp4",
+          "sha256": "68d5002a4f4e2f67460fcaf0fa6fe51d5f41ad3a09c1848f32e3753213202002",
+          "frames": 1160,
+          "seconds": 38.666666666666664,
+          "decode": "pass"
+        }
+      },
+      "audio_correlation": {
+        "all_native": 1.0,
+        "release": 1.0
+      },
+      "narration_and_captions_unchanged": true,
+      "page_boundaries_unchanged": true,
+      "component_changes": [
+        {
+          "id": "card_4",
+          "before": "object_showcase",
+          "after": "comparison"
+        }
+      ]
+    },
+    {
+      "name": "result-tutorial",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/result-tutorial/before/video.mp4",
+          "sha256": "67373417302f718cc913f9d1502b336eaf7e3a79d5de701bda569125a8f4d094",
+          "frames": 1809,
+          "seconds": 60.3,
+          "decode": "pass"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/final-tutorial/after/video.mp4",
+          "sha256": "0e924a56e8428f2434835d5fde698230990762fd292b6adc4cc44261448e98ff",
+          "frames": 1809,
+          "seconds": 60.3,
+          "decode": "pass"
+        }
+      },
+      "audio_correlation": {
+        "after": 1.0
+      },
+      "narration_and_captions_unchanged": true,
+      "page_boundaries_unchanged": true,
+      "component_changes": [
+        {
+          "id": "card_10",
+          "before": "object_showcase",
+          "after": "comparison"
+        }
+      ]
+    },
+    {
+      "name": "holdout-recorder",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/holdout-recorder/before/video.mp4",
+          "sha256": "824522f87402bf9579d7fcb14baa94ce8e2ab262e4d245d7ca920372f2b0adf7",
+          "frames": 848,
+          "seconds": 28.266666666666666,
+          "decode": "pass"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/holdout-recorder/after/video.mp4",
+          "sha256": "b4a1f734b03cdb7541a54dfe706ff9b851acb9195aa8b9082bb82da5e4d29539",
+          "frames": 848,
+          "seconds": 28.266666666666666,
+          "decode": "pass"
+        }
+      },
+      "audio_correlation": {
+        "after": 1.0
+      },
+      "narration_and_captions_unchanged": true,
+      "page_boundaries_unchanged": true,
+      "component_changes": [
+        {
+          "id": "card_8_p1",
+          "before": "object_showcase",
+          "after": "comparison"
+        }
+      ]
+    },
+    {
+      "name": "science-study",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/science-study/before/video.mp4",
+          "sha256": "f208a0ae0d6f912e2cd7c51a11100352fe507ab7c54674fa8142ce8e5586d891",
+          "frames": 1244,
+          "seconds": 41.46666666666667,
+          "decode": "pass"
+        },
+        "large_diagram": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/science-study/large_diagram/video.mp4",
+          "sha256": "91153f8a4b3b8a29597b01693626309dafc5a7e411f686a04ad2f0e4361be3b4",
+          "frames": 1244,
+          "seconds": 41.46666666666667,
+          "decode": "pass"
+        },
+        "stages": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/science-study/stages/video.mp4",
+          "sha256": "4f59791242e3d7efb38e9e7daa5a320e697c40311e06d34c26ebd1130fac2b7d",
+          "frames": 1244,
+          "seconds": 41.46666666666667,
+          "decode": "pass"
+        }
+      },
+      "audio_correlation": {
+        "large_diagram": 1.0,
+        "stages": 1.0
+      },
+      "narration_and_captions_unchanged": true,
+      "page_boundaries_unchanged": false,
+      "component_changes": null
+    }
+  ],
+  "normal_integration_matches_candidate": true,
+  "superseded_flow_handover": {
+    "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/result-tutorial/after/video.mp4",
+    "sha256": "55a10b86ea82b679f74c29ad3fd30ecec80d34acd90aee366eb55d4daa11bfac",
+    "frames": 1809,
+    "seconds": 60.3,
+    "decode": "pass",
+    "decision": "rejected: recap replaced procedural context with benefits/output; final scope keeps comparisons only"
+  },
+  "science_original_pcm_slice_verified": true,
+  "packing": {
+    "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/narrative-expression-20261111/science-study/packing/video.mp4",
+    "sha256": "d5fc63a2951724d8b91eee85456dd47de98dc68b927160b9c066de5b516baabe",
+    "frames": 454,
+    "seconds": 15.133333333333333,
+    "decode": "pass",
+    "audio_correlation_to_same_staged_interval": 0.9625811994841899,
+    "audio_envelope_correlation_10ms": 0.9999776232014158,
+    "fractional_sample_offset_8khz": 0.33333333333333326,
+    "audio_correlation_with_bounded_subsample_alignment": 0.994816922751267,
+    "manual_study_only": true
+  },
+  "tests": {
+    "passed": 1087,
+    "skipped": 1
+  },
+  "production_scope": "Only existing planned comparisons may replace a previously shown single material. Process handovers rejected.",
+  "limits": [
+    "science stage and packing studies are manually authored, not an integrated automatic capability",
+    "DeepSeek returned HTTP 402 after explicit authorization; no new external plan was obtained",
+    "no viewer or retention study; no claim of universal tutorial or science improvement"
+  ]
+}

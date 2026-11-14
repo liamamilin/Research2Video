@@ -194,6 +194,15 @@ def freeze(render: dict, client) -> dict:
         logger.warning("automatic visual preparation failed for render %s (%s); using original request", render["id"], type(exc).__name__)
         payload = copy.deepcopy(render["request"])
         audit = {**(render.get("visuals") or {}), "state": "degraded", "reason": f"自动配图异常，沿用原画面（{type(exc).__name__}）"}
+    try:  # optional opening card (web/services/opening_card.py); any failure keeps the payload as it is
+        from web.services import opening_card
+        script = store.get_script(render["script_id"]) or {}
+        if opening_card.wanted(script.get("content_context")):
+            cache = Path(store.db_path()).parent / "video_renders" / render["id"] / "opening-copy.json"
+            payload, note = opening_card.apply(payload, render, script.get("content_context"), cache)
+            audit["opening_card"] = note
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("opening card skipped for render %s (%s)", render["id"], type(exc).__name__)
     audit["submission_sha256"] = visual_materials.digest(payload)
     return store.freeze_render_submission(render["id"], payload, audit)
 

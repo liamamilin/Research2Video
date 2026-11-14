@@ -1,6 +1,7 @@
 """Event selection is tested before authors/renderers and never touches real accounts."""
 import json
 import sqlite3
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from threading import Barrier
@@ -26,9 +27,9 @@ def event(**overrides):
 def organized(monkeypatch, rows):
     calls = []
 
-    def organize(report, packets, previous, config):
+    def organize(report, packets, previous, config, *, tutorial=False):
         calls.append((report, packets, previous))
-        return pool.validate(rows, packets, previous), {"requests": 1}
+        return pool.validate(rows, packets, previous, tutorial=tutorial), {"requests": 1}
 
     monkeypatch.setattr(pool, "organize", organize)
     return calls
@@ -78,6 +79,95 @@ def test_missing_urls_keep_full_material_and_can_match_an_explicit_event_alias()
     selected = pool.validate([event(same_as=["H1"])], packets, pool.context(peers))[0]
     assert packets[0]["text"] == text and not selected["primary_sources"]
     assert pool.duplicate(selected, peers) == peers
+
+
+def test_roundup_dedup_matches_the_spoken_chapter_instead_of_the_episode_title():
+    packets = pool.packets(f"### 产品登录新入口\n{NEW}")
+    peers = [{"script_id": "episode", "version": 1, "title": "季度账单", "sources": set(),
+              "chapters": [{"chapter": 1, "title": "产品初次发布", "text": "公开了定价和性能。", "sources": set()},
+                           {"chapter": 2, "title": "季度账单", "text": "MCP 和 CLI 的成本对比。", "sources": set()}]}]
+    candidate = event(title="产品接入第三方编辑器", subject="产品第三方接入", action="release")
+    old_context = pool.context([{k: v for k, v in peers[0].items() if k != "chapters"}])
+    old, = pool.validate([{**candidate, "same_as": ["H1"]}], packets, old_context)
+    assert pool.duplicate(old, peers) == []
+    history = pool.context(peers)
+    assert [h["title"] for h in history] == ["产品初次发布", "季度账单"]
+    assert "公开了定价和性能" in history[0]["summary"]
+    repeated, newer = pool.validate([
+        event(title="再次介绍产品发布", same_as=["H1"], event_date="2026-10-22"),
+        candidate,
+    ], packets, history)
+    assert [p["title"] for p in pool.duplicate(repeated, peers)] == ["产品初次发布"]
+    assert pool.duplicate(newer, peers) == []
+
+
+def test_raw_material_pass_skips_report_sources_and_uses_existing_heat_ranking(video_env, monkeypatch):
+    from tests.test_video_flash import DISCOVERY
+
+    root = video_env
+    jobs = root / "jobs/monitoring"
+    jobs.mkdir(parents=True, exist_ok=True)
+    (jobs / "ai_flash_discovery.yaml").write_text(
+        "name: 快讯\noutput: output/flash/{date}_ai_flash_discovery.md\n"
+        "topics: {name: flash, format: flash}\n"
+    )
+    packet_url = "https://example.com/new-release"
+    data = "### 旧题\n" + SNAKE + "\n\n### 新发布\n" + packet_url
+    captured = []
+
+    def organize(report, packets, previous, config, *, from_material):
+        captured.extend(packets)
+        fresh_packet = next(p for p in packets if packet_url in p["links"])
+        return pool.validate([event(title="产品新版本", primary=[fresh_packet["id"]])], packets, previous), {}
+
+    monkeypatch.setattr(pool, "organize", organize)
+    monkeypatch.setattr(auto, "_heat_rank", lambda pick, col, rows, taken: (rows, ""))
+    result = auto.material_story_pool({"id": "unused", "production": "flash_each"}, DISCOVERY, data,
+                                      [{"script_id": "previous", "title": "旧题", "sources": {guard.source_key(SNAKE)}}],
+                                      None, None)
+    assert [p["links"] for p in captured] == [[packet_url]]
+    assert result["events"][0]["title"] == "产品新版本"
+
+
+def test_flash_only_reopens_a_single_slot_after_report_candidates_exhausted(video_env):
+    items = [{"column_key": "flash", "production": "flash_each", "topic": {"id": value, "title": value}}
+             for value in ("old-a", "old-b")]
+    run = ap.create_run({"report": "output/flash/report.md", "report_identity": "revision"}, items)
+    for item in run["items"]:
+        current = {"pool_id": item["id"], "candidates": 1, "selected": "", "decisions": []}
+        auto._replace_candidate(item, {"story_selection": current, "story_attempts": [{"selection": current}]}, "重复")
+    run = ap.get_run(run["id"])
+    first, second = run["items"]
+    assert first["state"] == "PENDING" and first["topic"]["_material_reselection"]
+    assert first["topic"]["id"] == "flash-material:revision"
+    assert second["state"] == "CANCELLED"
+    assert "改选 0" in auto._summary(run)
+    auto._replace_candidate(first, first["gate"], "原始资料里也没有合格题")
+    assert ap.get_run(run["id"])["items"][0]["state"] == "CANCELLED"
+
+
+def test_existing_material_story_reads_its_chosen_packets_for_rewrites(guard_env, monkeypatch):
+    row = fresh(guard_env)
+    raw_pool = create_pool(monkeypatch, material=f"### 新题\n这段只在原始资料里。{NEW}")
+    story, _ = pool.take(row["id"], raw_pool, [])
+    current = store.get_script(row["id"])
+    script = {**current, "current_version": 1, "topic": {**current["topic"], "_material_reselection": True}}
+    body = workflow.report_of(script, version={"meta": {"story": story}})
+    assert "这段只在原始资料里" in body and NEW in body and SNAKE not in body
+
+
+def test_tutorials_sharing_a_guide_are_deduplicated_by_operation():
+    url = "https://example.com/help/workbuddy"
+    packets = [{"id": "S1", "title": "结果区", "text": "把文件放回对话或发给同事。", "links": [url]}]
+    old = pool.validate([event(subject="WorkBuddy 把文件加回对话", action="analysis", event_date="")],
+                        packets, [], tutorial=True)[0]
+    peers = [{"script_id": "old", "title": old["title"], "story": old, "sources": {guard.source_key(url)}}]
+    send, = pool.validate([event(subject="WorkBuddy 把文件发给同事", action="analysis", event_date="")],
+                          packets, pool.context(peers), tutorial=True)
+    repeat, = pool.validate([event(subject="用附件接着改文档", action="analysis", event_date="", same_as=["H1"])],
+                            packets, pool.context(peers), tutorial=True)
+    assert not pool.duplicate(send, peers)
+    assert pool.duplicate(repeat, peers) == peers
 
 
 @pytest.mark.parametrize("override", [
@@ -446,6 +536,34 @@ def test_writer_receives_selected_material_and_frozen_event_metadata(guard_env, 
     assert claim_state(row["id"]) == "COVERED"
 
 
+@pytest.mark.parametrize("has_cached_pool", [True, False])
+def test_published_item_rewrite_keeps_its_frozen_source_scope(guard_env, monkeypatch, llm, has_cached_pool):
+    row = fresh(guard_env)
+    report = f"### 小蛇\n简短发现。{SNAKE}\n\n### 恐龙\n另一条新闻。{NEW}"
+    (guard_env / row["report_path"]).write_text(report)
+    raw_material = f"原始材料中的滚动观察。{SNAKE}\n\n---\n\n原始材料中的另一条。{NEW}"
+    candidates = create_pool(monkeypatch, material=f"### 小蛇\n已锁定的滚动证据。{SNAKE}")
+    selected, _ = pool.take(row["id"], candidates, [])
+    if not has_cached_pool:
+        selected = {**selected, "pool_id": "missing-pool"}
+    current = store.get_script(row["id"])
+    topic = {**current["topic"], "story": selected, "from_item": "frozen-item", "from_item_title": "小蛇"}
+    store.update_script(row["id"], topic=topic, status="APPROVED")
+    version = store.add_version(row["id"], title="原稿", sections=sections(), length_check={}, edit_type="GENERATED")
+    store.add_publication(row["id"], version=version, url="https://www.bilibili.com/video/BV1xx411c7mD", published_on="2026-10-25")
+    monkeypatch.setattr(workflow.report_meta, "get", lambda path: {"material": {"path": "test"}})
+    monkeypatch.setattr(workflow.report_material, "read", lambda *args: raw_material)
+    FakeLLM.replies = [script_json(citations={(0, 0): [SNAKE]})]
+
+    assert workflow.run_rewrite(row["id"], previous_status="APPROVED") == "DRAFT"
+
+    request = FakeLLM.calls[0][-1]["content"]
+    assert NEW not in request and "原始材料中的另一条" not in request
+    assert ("已锁定的滚动证据" if has_cached_pool else "原始材料中的滚动观察") in request
+    assert store.get_script(row["id"])["topic"]["story"] == selected
+    assert store.list_publications(row["id"])[0]["version"] == version
+
+
 def test_adaptation_uses_same_selected_event_and_saves_metadata(guard_env, monkeypatch):
     candidates = create_pool(monkeypatch)
     row = fresh(guard_env)
@@ -497,7 +615,7 @@ def test_no_candidates_finishes_as_shortage_and_batch_explains_counts(guard_env,
     run = ap.get_run(run["id"])
     assert run["items"][0]["state"] == "CANCELLED"
     assert "候选不足" in run["items"][0]["note"]
-    assert "候选 0，采用 0" in auto._summary(run) and "素材不足 1" in auto._summary(run)
+    assert "候选 0，采用 0" in auto._summary(run) and "改选 0，候选耗尽 1" in auto._summary(run)
 
 
 def test_assigned_event_lets_other_config_select_without_waiting_for_body(guard_env, monkeypatch):
@@ -575,6 +693,19 @@ def test_new_topic_ownership_from_source_and_production_context(guard_env, monke
     assert by_source["matrix_dedup"]["job"] == "science/daily"
     assert by_config["matrix_dedup"]["job"] == "science/weekly"
     assert by_source["matrix_dedup"]["policy"] == by_config["matrix_dedup"]["policy"] == pool.POLICY
+
+
+def test_a_knowledge_job_skips_the_news_event_pool(guard_env):
+    paths = get_settings().paths
+    folder = guard_env / "config/matrices"
+    (folder / "science.yaml").write_text("name: 科学\njobs: [science/daily, science/explainer]\n")
+    job = Path(paths.jobs_dir) / "science" / "explainer.yaml"
+    job.parent.mkdir(parents=True, exist_ok=True)
+    job.write_text("name: 讲原理\nknowledge: true\nsearch: false\nprompt: x\noutput: output/science/{date}_x.md\n")
+    knowledge = guard.new_topic({"title": "为什么天是蓝的"}, {"job": "science/explainer"}, paths.config_dir, paths.jobs_dir)
+    news = guard.new_topic({"title": "新发现"}, {"job": "science/daily"}, paths.config_dir, paths.jobs_dir)
+    assert "matrix_dedup" not in knowledge
+    assert news["matrix_dedup"]["job"] == "science/daily"
 
 
 def test_legacy_topic_event_date_is_shared_without_changing_saved_rows(guard_env):

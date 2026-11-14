@@ -1,4 +1,5 @@
 import { usePublishDraft } from "@/lib/use-publish-draft";
+import { BilibiliCovers } from "./BilibiliCovers";
 import { PublishDraftStatus } from "./PublishDraftStatus";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
@@ -61,11 +62,12 @@ function UploadEditor({ initial, onDone, run, busy }: { initial: UploadPreview; 
     <label className="block text-xs">标题（{textCount(title.trim())}/80）<input aria-label="标题" required className="input w-full mt-1" value={title} onChange={e => {setTitle(e.target.value);}} /></label>
     <label className="block text-xs">简介（{textCount(description)}/2000）<textarea aria-label="简介" rows={5} className="input w-full mt-1" value={description} onChange={e => {setDescription(e.target.value);}} /></label>
     <div className="grid sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)] gap-3"><label className="block text-xs">标签（用逗号分隔）<input required className="input w-full mt-1" value={tags} onChange={e => setTags(e.target.value)} /></label><BilibiliCategorySelect label="投稿分区" required value={tid} onChange={setTid} resource={categoryResource} content={{ title, description, tags: tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean) }} /></div>
+    <BilibiliCovers renderId={initial.render_id} accountUid={initial.account_uid ?? ""} busy={busy} run={run} />
     <FirstCommentOptions value={firstComment} onChange={value => { setFirstComment(value); setTemplateSaved(false); }} />
     <PublishAdaptation platform="bilibili" renderId={initial.render_id} accountUid={initial.account_uid} value={content} initial={initial.adaptation} run={run} busy={busy} onApply={next => draft.applySaved({ title: next.title, description: next.description, tags: next.tags.join("，"), firstComment: next.first_comment ?? firstComment, tid: next.tid ?? tid })} />
     {textCheck.issues.length ? <div role="alert" className="text-xs text-warning">{textCheck.issues.map(issue => <p key={issue}>{issue}</p>)}</div> : null}
     {role === "admin" ? <details><summary className="text-xs cursor-pointer">后续投稿默认评论设置</summary><div className="flex flex-wrap items-center gap-3"><button type="button" className="btn text-xs" disabled={busy || (firstComment.enabled && !firstComment.text.trim())} onClick={() => void run(async () => { await platformAction("/first-comment-template", firstComment, "PUT"); setTemplateSaved(true); })}>保存为常用评论</button><span className="text-xs text-text-muted">{templateSaved ? "已保存，后续投稿默认使用；当前还未发送。" : "可将内容和置顶选项保存为后续投稿的默认设置。"}</span></div></details> : null}
-    <p className="text-xs text-text-muted">使用这次成片及已有封面；没有封面时自动截取视频画面。加入队列后会自动开始上传，B 站审核通过并公开后回写发布记录。</p>
+    <p className="text-xs text-text-muted">4:3 与 16:9 封面分别保存并随投稿提交；没有另选封面时沿用成片已有封面。加入队列后会自动开始上传，B 站审核通过并公开后回写发布记录。</p>
     <div className="flex flex-wrap gap-3 items-center"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api("/api/video/distributions/bilibili/draft", { method: "PUT", body: { render_id: initial.render_id, account_uid: initial.account_uid, payload: content } }); draft.markSaved(); })}>保存草稿</button><PublishDraftStatus draft={draft} /></div>
     <button className="btn btn-primary text-xs" disabled={busy || !validCategory || !textCheck.valid || !validComment}><Send className="w-3.5 h-3.5" />提交到 B 站</button>
     </fieldset>
@@ -82,6 +84,7 @@ export function UploadRow({ task, canEdit, run, busy }: { task: UploadTask; canE
     {task.recovery?.note ? <p className="text-xs text-text-muted" role="status">{task.recovery.note}</p> : task.status === "UNKNOWN" ? <p className="text-xs text-text-muted">系统会自动核对 B 站稿件，确认结果前保留原任务。</p> : null}
     <details className="rounded border border-border p-3 text-xs"><summary className="cursor-pointer text-text-muted">投稿时发布包</summary><div className="mt-2 space-y-2"><p className="whitespace-pre-wrap break-words">{task.payload.description}</p><p className="text-text-muted">{task.payload.tags?.join(" · ")}</p></div></details>
     <FirstCommentProgress task={task} canEdit={canEdit} run={run} busy={busy} />
+    {canEdit && task.bvid && ["PUBLISHED", "SUBMITTED"].includes(task.status) ? <details><summary className="text-xs cursor-pointer">修改双比例封面</summary><BilibiliCovers renderId={task.render_id} accountUid={task.uid ?? ""} taskId={task.id} busy={busy} run={run} /></details> : null}
     {canEdit && task.status === "QUEUED" ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/cancel`))}>取消排队</button> : null}
     {canEdit && ["FAILED", "CANCELLED"].includes(task.status) ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/retry`))}>重新检查并排队</button> : null}
     {canEdit && task.status === "REMOVED" ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/reupload`))}>重新投稿</button> : null}

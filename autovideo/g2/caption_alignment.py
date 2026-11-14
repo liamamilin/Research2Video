@@ -71,15 +71,32 @@ def build_cues(segment: dict, items: list[dict]) -> list[dict]:
         return [{"segment_id": segment["id"], "text": segment["text"],
                  "char_start": 0, "char_end": len(segment["text"]),
                  "start_ms": segment["start_ms"], "end_ms": segment["end_ms"]}]
+    # The model reports times on a discrete grid. A zero-width suffix may
+    # land just beyond the measured phrase even when its preceding speech fits.
+    trailing = len(items)
+    while trailing:
+        item = items[trailing - 1]
+        if not duration <= item["start_ms"] == item["end_ms"] <= duration + 100:
+            break
+        trailing -= 1
     previous = 0
-    for item in items:
+    for index, item in enumerate(items):
         start, end = item["start_ms"], item["end_ms"]
-        if not 0 <= start <= end <= duration + 100 or start < previous:
+        if index == len(items) - 1 and start < duration:
+            # The aligner can report an end beyond the available audio.
+            # Clipping only the last end preserves every word onset.
+            end = min(end, duration)
+        if (not 0 <= start <= end <= duration + 100 or start < previous
+                or (start >= duration and index < trailing)):
             raise ValueError(f"{segment['id']} 对齐时间无效")
         previous = end
     result = []
     spans = chunks(segment["text"])
     for a, b, first, last in spans:
+        if first >= trailing and result:
+            result[-1].update(text=segment["text"][result[-1]["char_start"]:b],
+                              char_end=b, end_ms=segment["end_ms"])
+            continue
         start = max(0, items[first]["start_ms"] - 50)
         end = min(duration, items[last - 1]["end_ms"] + 80)
         if first:

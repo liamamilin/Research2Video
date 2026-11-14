@@ -1,5 +1,6 @@
 """The production default is material → script, with no content review loop."""
 import json
+from hashlib import sha256
 
 import pytest
 
@@ -100,6 +101,46 @@ def test_all_default_writer_inputs_share_authoring_and_material_guidance(llm, mo
             assert "让同一个具体任务在中段持续推进" in request
 
 
+@pytest.mark.parametrize("entry_start", [1, 2])
+def test_scoped_episode_opening_can_only_keep_existing_entry_sentences(video_env, llm, entry_start):
+    (video_env / "config/system.yaml").write_text("video:\n  manuscript_workflow: scoped_lead\n")
+    report = video_env / "report.md"
+    report.write_text(REPORT)
+    contents = [
+        ("opening", "四条消息，先看本期目录。"),
+        ("item", "模型单价降了。跑完评测才看到账单，单价只说了一半。"),
+        ("item", "接下来另一个话题讲键盘。"),
+        ("closing", "下期见。"),
+    ]
+    draft = {"title": "账单怎么涨了", "sections": [
+        {"title": role, "episode_role": role, "paragraphs": [{"text": spoken}]}
+        for role, spoken in contents
+    ]}
+    lead = "模型打了折，这笔评测的总账却涨了。"
+    llm.replies = [json.dumps(draft, ensure_ascii=False),
+                   json.dumps({"opening": [{"text": lead}], "entry_start": entry_start}, ensure_ascii=False)]
+    script = store.create_script("report_digest", {
+        "title": "素材试写", "from_report": str(report), "content_mode": "episode",
+    })
+
+    assert video_workflow.run(script["id"], started_by="autopilot", llm_config=object()) == "DRAFT"
+
+    version = store.get_version(script["id"], 1)
+    assert len(llm.calls) == 2 and store.get_script(script["id"])["current_version"] == 1
+    request = llm.calls[1][1]["content"]
+    assert "模型单价降了。" in request and "跑完评测才看到账单" in request
+    assert all(contents[index][1] not in request for index in (0, 2, 3))
+    expected = [text for _, text in contents]
+    receipt = {"method": "scoped_lead", "version": 3}
+    if entry_start == 1:
+        expected[:2] = [lead, "跑完评测才看到账单，单价只说了一半。"]
+        receipt.update(status="rewritten", entry_start=1)
+    else:
+        receipt.update(status="unchanged", reason="entry_start_out_of_range")
+    assert [s["paragraphs"][0]["text"] for s in version["sections"]] == expected
+    assert version["meta"]["introduction"] == receipt
+
+
 def test_recipe_edit_reaches_the_actual_workflow_author(video_env, llm):
     """Changing a recipe must change its author request, not only the settings screen."""
     report = video_env / "report.md"
@@ -130,6 +171,91 @@ def test_reopening_a_completed_generation_does_not_start_an_unrequested_audit(vi
     video_workflow.run(script["id"], llm_config=object())
     assert len(llm.calls) == 1 and not llm.audit_calls
     assert store.get_script(script["id"])["current_version"] == 1
+
+
+@pytest.mark.parametrize("job,enabled_job,production_id", [
+    ("chatgpt_acquisition/t04_testing", None, ""),
+    ("chatgpt_acquisition/t04_testing", "chatgpt_acquisition/t04_testing", ""),
+    ("chatgpt_acquisition/t04_testing", "", ""),
+    ("chatgpt_acquisition/t03_tutorials", "chatgpt_acquisition/t04_testing", ""),
+    ("chatgpt_acquisition/t08_troubleshooting", "chatgpt_acquisition/t08_troubleshooting", ""),
+    ("chatgpt_acquisition/t09_updates", "chatgpt_acquisition/t09_updates", "chatgpt_t09_updates_each"),
+    ("monitoring/ai_flash_discovery", "monitoring/ai_flash_discovery", "flash_each"),
+    ("monitoring/ai_flash_discovery", "monitoring/ai_flash_discovery", "flash_daily"),
+    ("science/science_weekly", "science/science_weekly", ""),
+    ("company/company_weekly", "company/company_weekly", ""),
+    ("culture/culture_daily", "culture/culture_daily", ""),
+    ("culture/culture_weekly", "culture/culture_weekly", ""),
+    ("industry/industry_weekly", "industry/industry_weekly", ""),
+    ("software/software_daily", "software/software_daily", ""),
+    ("analysis/ai_gap_analysis", "analysis/ai_gap_analysis", ""),
+])
+def test_automatic_writing_resolves_the_enabled_job_prompts(video_env, llm, monkeypatch, job, enabled_job, production_id):
+    from core.video import manuscript_workflow, production
+
+    config_dir = video_env / "config"
+    (config_dir / "manuscript.yaml").write_text("jobs: [chatgpt_acquisition/t04_testing]\n")
+    if enabled_job is None:
+        (config_dir / "system.yaml").write_text("video: {}\n")
+        enabled_job = job
+    else:
+        jobs = f"[{enabled_job}]" if enabled_job else "[]"
+        (config_dir / "system.yaml").write_text(f"video:\n  manuscript_jobs: {jobs}\n")
+    profile = manuscript_workflow.JOB_PROMPTS.get(enabled_job)
+    report = video_env / "report.md"
+    report.write_text(REPORT)
+    context = {"job": job, "column": "test", "column_name": "实测", "notes": "原有栏目方向"}
+    if production_id:
+        config = production.Config(key=production_id, name="单条", job=job, recipe="report_digest")
+        monkeypatch.setattr(production, "get", lambda config_dir, jobs_dir, key: config if key == production_id else None)
+        if production_id != "flash_daily":
+            context = {}
+    script = store.create_script("report_digest", {
+        "title": "实测口播", "from_report": str(report),
+        **({"content_mode": "episode"} if context else {}),
+    }, production=production_id, content_context=context)
+    draft = json.loads(script_json(300))
+    draft["sections"][0]["paragraphs"][0]["text"] = "这份报告敢交吗？大家好，我是洛洛，今天看看它怎么验。"
+    llm.replies = [json.dumps(draft, ensure_ascii=False)]
+    edits = []
+
+    def chat(client, prompt, request, schema, *, temperature):
+        edits.append(prompt)
+        if prompt == profile.read:
+            return schema(takeaway="有结果才敢交", keep_quote="这份报告敢交吗",
+                          revision="说清复查的动作", targets=["S2P1"])
+        assert prompt == profile.revise
+        return schema(paragraphs=[{"id": "S2P1", "text": "点开引用，核对原文有没有支持结论。"}])
+
+    monkeypatch.setattr(manuscript_workflow, "LLMClient", lambda *args, **kwargs: object())
+    monkeypatch.setattr(manuscript_workflow, "call_json", chat)
+    assert video_workflow.run(script["id"], started_by="autopilot", llm_config=object()) == "DRAFT"
+    saved = store.get_version(script["id"], 1)
+    if job == enabled_job and (not profile.production_id or profile.production_id == production_id):
+        if profile.episode_prompt:
+            assert llm.calls[0][0]["content"].startswith(
+                profile.episode_prompt.replace(writer.EPISODE_LEAD, profile.episode_lead, 1)
+            )
+        if profile.episode_lead:
+            if not production_id:
+                assert profile.episode_lead in llm.calls[0][0]["content"]
+            assert writer.EPISODE_LEAD not in llm.calls[0][0]["content"]
+        if profile.draft:
+            assert profile.draft in llm.calls[0][1]["content"]
+        else:
+            assert "原有栏目方向" in llm.calls[0][1]["content"]
+            assert writer.EPISODE_LEAD in llm.calls[0][0]["content"]
+        assert edits == [profile.read, profile.revise]
+        receipt = saved["meta"]["manuscript_workflow"]
+        assert receipt["profile"] == profile.version
+        assert receipt["reader_prompt_sha256"] == sha256(edits[0].encode()).hexdigest()
+        assert receipt["revision_prompt_sha256"] == sha256(edits[1].encode()).hexdigest()
+        assert saved["meta"]["author_system_prompt_sha256"] == sha256(llm.calls[0][0]["content"].encode()).hexdigest()
+        assert saved["sections"][1]["paragraphs"][0]["text"] == "点开引用，核对原文有没有支持结论。"
+    else:
+        assert "原有栏目方向" in llm.calls[0][1]["content"]
+        assert writer.EPISODE_LEAD in llm.calls[0][0]["content"]
+        assert not edits and "manuscript_workflow" not in saved["meta"]
 
 
 def test_manual_edit_does_not_reintroduce_content_rules(video_env, llm):
@@ -192,7 +318,7 @@ def test_a_greeting_the_author_already_said_is_not_repeated_and_no_greeting_adds
     plain = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
                          target_minutes=1, llm_config=None)
     assert [p["text"] for p in said.sections[0]["paragraphs"]][:1] == ["大家好，欢迎收看AI 快讯。今天讲一件事。"]
-    assert "问候" not in llm.calls[1][0]["content"]
+    assert "口播开头由节目固定念出问候" not in llm.calls[1][0]["content"]
     assert plain.sections[0]["paragraphs"][0]["text"] == json.loads(script_json(300))["sections"][0]["paragraphs"][0]["text"]
     assert "起承转合" in llm.calls[1][0]["content"]
 
@@ -212,12 +338,25 @@ def test_a_greeting_the_author_worded_differently_is_replaced_not_heard_twice(ll
     assert [p["text"] for p in written.sections[0]["paragraphs"]] == ["大家好，欢迎收看AI 快讯。", "今天聊三件事：额度、价格和账号。"]
 
 
-def test_the_greeting_comes_from_the_column_name_or_its_own_line_and_never_says_a_date():
+def test_only_a_column_s_own_greeting_is_said_and_by_default_the_video_opens_on_the_hook():
     from core.video import episodes
 
     flash = {"column": "ai_flash", "column_name": "AI 快讯"}
-    assert episodes.greeting({}, flash) == "大家好，欢迎收看今日快讯。"
+    assert episodes.greeting({}, flash) == ""
     topic = {"episode": {"publication": {"label": "ChatGPT 订阅与支付", "title": "ChatGPT 订阅与支付｜2026年11月01日"}}}
-    assert episodes.greeting(topic, {"column": "chatgpt_t07_subscription"}) == "大家好，欢迎收看ChatGPT 订阅与支付。"
+    assert episodes.greeting(topic, {"column": "chatgpt_t07_subscription"}) == ""
     assert episodes.greeting(topic, {**flash, "greeting": "各位好，这里是今日快讯。"}) == "各位好，这里是今日快讯。"
     assert episodes.greeting({}, {}) == ""
+
+
+def test_without_a_greeting_the_author_s_own_salutation_is_taken_off_and_the_prompt_asks_for_a_hook(llm):
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"][0]["text"] = "大家好，欢迎收看AI 快讯。先看一个数字：十倍。"
+    payload["sections"][0]["paragraphs"].insert(0, {"text": "哈喽，各位。", "citations": []})
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None)
+    assert written.sections[0]["paragraphs"][0]["text"] == "先看一个数字：十倍。"
+    system = llm.calls[0][0]["content"]
+    assert writer.OPENING_RULE in system and writer.TITLE_RULE in system and writer.ENDING_RULE in system
+    assert "站队" in system and "不打招呼" in system and "一个问题" in system

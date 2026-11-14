@@ -14,6 +14,7 @@ from g2 import creative_library
 FIELDS = {
     "video_form", "production_mode", "visual_style", "duration_mode",
     "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand",
+    "illustration_style",
 }
 DEFAULTS = {
     "video_form": "knowledge_cards", "production_mode": "standard", "visual_style": "legacy",
@@ -139,12 +140,17 @@ def _binding(request: dict) -> dict:
     fields = FIELDS | {"production_recipe", "production_context", "content_notices", "music"}
     if request.get("video_form") in {"object_showcase", "dynamic_collage"}:
         fields |= {"slideshow_images", "slideshow_images_resolved", "image_materials"}
+    if request.get("video_form") == "illustrated_explainer":
+        fields |= {"slideshow_images", "slideshow_images_resolved", "chapter_keywords"}
     if hybrid_enabled(request):
         fields |= {"visual_storytelling", "slideshow_images", "slideshow_images_resolved", "image_materials"}
     if "background_music" not in request:
         fields = fields - {"background_music"}
     if "brand" not in request:
         fields = fields - {"brand"}
+    if request.get("illustration_style") is None:
+        # plans saved before style packs were selectable keep their exact binding
+        fields = fields - {"illustration_style"}
     return {key: copy.deepcopy(request.get(key)) for key in sorted(fields)}
 
 

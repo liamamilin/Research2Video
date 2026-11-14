@@ -26,7 +26,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from core.config import load_system_config
 from core.fileio import file_lock
@@ -219,8 +219,13 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     return {**publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh), "render_id": used}
 
 
-def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
-    """Record a render of the script's approved version. Does not contact AutoVideo."""
+def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None,
+           record: Optional[Callable[..., dict]] = None) -> dict:
+    """Record a render of the script's approved version. Does not contact AutoVideo.
+
+    ``record`` replaces ``store.create_render`` for a caller that needs the request without a render row: the A/B
+    preview (core/experiments/preview.py), whose output must never become a publishable render.
+    """
     if (script.get('topic') or {}).get('local_video'):
         raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     version_no = script.get("approved_version")
@@ -453,8 +458,8 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         if supplied_images and not materials:
             visuals = {'state': 'pending', 'reason': '准备用户材料画面', 'input_kind': 'user_materials',
                        'material_context': user_context, 'decisions': []}
-        return store.create_render(script["id"], version_no, title=title, source_text=text,
-                                   source_sha256=sha, request=request, visuals=visuals)
+        return (record or store.create_render)(script["id"], version_no, title=title, source_text=text,
+                                               source_sha256=sha, request=request, visuals=visuals)
     except store.ActiveRenderError as exc:
         raise RenderError(str(exc)) from exc
     except screenshots.ScreenshotError as exc:
@@ -560,6 +565,15 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
     return _download(render_id, job_id, client)
 
 
+WAITING_DRAW_THINGS = "WAITING_DRAW_THINGS"
+DRAW_THINGS_RETRY_SECONDS = 300
+DRAW_THINGS_WAIT_SECONDS = 6 * 3600
+
+
+def _sleep(seconds: float) -> None:
+    time.sleep(seconds)
+
+
 def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
     timer = time.monotonic()
     from web.services.video_storage import unavailable_reason
@@ -577,14 +591,30 @@ def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
     payload = submission(render)
     if payload.get("input_mode") != "narration":
         payload["source_text"] = render["source_text"]
-    try:
-        created = client.create_job(payload)
-    except AutoVideoUnreachable as exc:
-        logger.warning("render %s: create got no answer (%s); reconciling", render["id"], exc)
-        return _reconcile({**render, "submit_started_at": started.isoformat()}, client)
-    except AutoVideoError as exc:
-        _fail(render["id"], exc.code, exc.message or str(exc))
-        return None
+    waited = 0.0
+    while True:
+        try:
+            created = client.create_job(payload)
+            break
+        except AutoVideoUnreachable as exc:
+            logger.warning("render %s: create got no answer (%s); reconciling", render["id"], exc)
+            return _reconcile({**render, "submit_started_at": started.isoformat()}, client)
+        except AutoVideoError as exc:
+            # Illustrated videos need the local Draw Things app, which is opened by hand. AutoVideo refused before
+            # creating anything, so waiting and asking again cannot duplicate a job.
+            if exc.code == "DRAW_THINGS_NOT_READY" and waited < DRAW_THINGS_WAIT_SECONDS:
+                if not waited:
+                    logger.info("render %s: waiting for Draw Things (%s)", render["id"], exc.message)
+                store.update_render(render["id"], active_stage=WAITING_DRAW_THINGS)
+                _sleep(DRAW_THINGS_RETRY_SECONDS)
+                waited += DRAW_THINGS_RETRY_SECONDS
+                continue
+            if exc.code == "DRAW_THINGS_NOT_READY":
+                _fail(render["id"], exc.code, f"等了 {int(waited // 3600)} 小时 Draw Things 仍未打开：{exc.message}"
+                      "。打开 Draw Things 并开启 HTTP API 后重新出片。")
+            else:
+                _fail(render["id"], exc.code, exc.message or str(exc))
+            return None
     job_id = str(created["job_id"])
     _timing(render["id"], submit_seconds=round(time.monotonic() - timer, 3))
     store.update_render(render["id"], autovideo_job_id=job_id, status=_active(created.get("status")),

@@ -1,0 +1,22 @@
+{
+  "bvid": "BV1kzxi6kEZf",
+  "video_path": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/b86fe699-60c1-45d3-af75-98fbad5471be/attempts/1/g2-run/artifacts/brand/video.mp4",
+  "sha256": "74af8b1690d7a4b1440e9cf401fc8db727a9b8539cc38e7f77fd9567d2456a18",
+  "duration_seconds": 197.166667,
+  "captions_path": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/b86fe699-60c1-45d3-af75-98fbad5471be/attempts/1/g2-run/artifacts/brand/captions.srt",
+  "frame_seconds": [
+    0,
+    12,
+    40,
+    72,
+    90,
+    105,
+    125,
+    140,
+    160,
+    180,
+    190,
+    196
+  ],
+  "scope": "Complete subtitles read; sampled frames; no audio assessment"
+}

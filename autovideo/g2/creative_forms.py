@@ -11,7 +11,7 @@ import json
 import re
 from pathlib import Path
 
-FORMS = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage"}
+FORMS = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage", "illustrated_explainer": "illustration_scene"}
 
 
 def prepare_images(pipeline, narration: dict) -> list[dict]:
@@ -39,6 +39,8 @@ def prepare_images(pipeline, narration: dict) -> list[dict]:
     else:
         if saved.get("video_form") in {"object_showcase", "dynamic_collage"}:
             raise ValueError("对象展示和动态拼贴需要已保存的图片素材")
+        if saved.get("video_form") == "illustrated_explainer":
+            raise ValueError("插画讲解需要每章一张已保存的插画")
         segments = narration['segments']
         for i in range(3):
             local = segments[i * len(segments) // 3:(i + 1) * len(segments) // 3] or [segments[min(i, len(segments)-1)]]
@@ -124,6 +126,42 @@ def attach_images(board: dict, assets: list[dict]) -> dict:
             group = assets[i * len(assets) // count:(i + 1) * len(assets) // count] if len(assets) > count else [assets[i * len(assets) // count]]
         scene['props']['images'] = [{'image_path': a['path'], 'image_asset_id': a['id']} for a in group]
     return {**board, 'image_assets': assets}
+
+
+def chapter_extras(saved: dict, count: int) -> list[dict]:
+    """Keywords supplied with uploaded illustrations (API callers); no overlays on this path."""
+    keywords = saved.get('chapter_keywords') or [[] for _ in range(count)]
+    if len(keywords) != count:
+        raise ValueError('章节关键词须与章节一一对应')
+    return [{'keywords': list(row), 'overlay': None} for row in keywords]
+
+
+def attach_illustrations(board: dict, assets: list[dict], narration: dict, extras: list[dict]) -> dict:
+    """One illustration per chapter, in chapter order; every phrase of a chapter shows the same image.
+
+    Keywords and overlays come from the request or the validated storyboard plan, never from pixels.
+    """
+    chapters = narration.get('chapters') or []
+    if not chapters or len(assets) != len(chapters):
+        raise ValueError(f'插画讲解需要每章一张插画：{len(chapters)} 章，收到 {len(assets)} 张')
+    if len(extras) != len(chapters):
+        raise ValueError('章节关键词须与章节一一对应')
+    owner = {sid: i for i, c in enumerate(chapters) for sid in c['narration_segment_ids']}
+    for scene in board['scenes']:
+        indices = {owner[sid] for sid in scene['narration_segment_ids']}
+        if len(indices) != 1:
+            raise ValueError('插画场景必须只属于一个章节')
+        index = indices.pop()
+        asset = assets[index]
+        scene['props'] = {'title': scene['props']['title'], 'text': scene['props']['text'], 'chapter_index': index,
+                          'image': {'image_path': asset['path'], 'image_asset_id': asset['id']},
+                          'keywords': list(extras[index].get('keywords') or [])}
+        if extras[index].get('overlay'):
+            scene['props']['overlay'] = extras[index]['overlay']
+            if extras[index].get('layout') == 'diagram':
+                scene['props']['layout'] = 'diagram'
+    return {**board, 'image_assets': assets,
+            'illustration_assignment': 'one illustration per chapter in order; keywords and overlays validated before rendering'}
 
 
 def attach_materials(board: dict, assets: list[dict], saved: dict) -> dict:

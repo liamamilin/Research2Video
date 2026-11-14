@@ -384,6 +384,7 @@ class G2ProcessRunner:
             (artifacts_dir / "prepared-source.txt", "prepared-source.txt", "text/plain; charset=utf-8"),
             (artifacts_dir / "creative-form-plan.json", "creative-form-plan.json", "application/json"),
             (artifacts_dir / "slideshow-images.json", "slideshow-images.json", "application/json"),
+            (artifacts_dir / "cover-frame.png", "cover-frame.png", "image/png"),
             (artifacts_dir / "information-plan.json", "information-plan.json", "application/json"),
             (artifacts_dir / "information-timing.json", "information-timing.json", "application/json"),
             (artifacts_dir / "diagram-plan.json", "diagram-plan.json", "application/json"),

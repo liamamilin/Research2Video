@@ -1,0 +1,58 @@
+{
+ "scenes": [
+  {
+   "section": 1,
+   "scene": "A young shop owner in a teal apron stands behind a small counter in a ten-square-meter milk tea shop, pressing five colored stickers onto a cup sleeve.",
+   "overlay": [
+    "五张贴纸",
+    "一杯的账"
+   ],
+   "note": "店长在小店柜台后往杯套上贴五张彩色贴纸。"
+  },
+  {
+   "section": 2,
+   "scene": "The same young shop owner in a teal apron holds a red sticker beside a monthly rent bill pinned to the wall and a staff shift sheet.",
+   "overlay": [
+    "按杯算",
+    "按月算"
+   ],
+   "note": "店长拿着红贴纸，旁边是墙上的月租账单和排班表。"
+  },
+  {
+   "section": 3,
+   "scene": "On a rainy Tuesday, the same young shop owner in a teal apron presses a thick stack of yellow and blue stickers onto a cup sleeve, peeling the white one half off.",
+   "overlay": [
+    "固定开支÷杯数",
+    "分母不同"
+   ],
+   "note": "雨天生意冷清，店长把厚厚的黄色蓝色贴纸叠在杯套上，白贴纸只能撕掉一半。"
+  },
+  {
+   "section": 4,
+   "scene": "The same young shop owner in a teal apron scoops extra ice into a cup and sets two topping jars aside, a thin layer of milk foam on the drink.",
+   "overlay": [
+    "暗着变",
+    "减料"
+   ],
+   "note": "店长往杯里多加冰、撤走两罐小料，奶盖也变薄了。"
+  },
+  {
+   "section": 5,
+   "scene": "A customer in a gray hoodie pulls a suitcase and holds a milk tea cup at an airport counter, while the same young shop owner in a teal apron hands a delivery bag to a rider.",
+   "overlay": [
+    "机场店",
+    "外卖单"
+   ],
+   "note": "机场柜台前顾客拖着行李箱拿奶茶，店长同时把外卖袋递给骑手。"
+  },
+  {
+   "section": 6,
+   "scene": "The customer in a gray hoodie points at the five colored stickers on a cup sleeve while the young shop owner in a teal apron explains at the counter.",
+   "overlay": [
+    "问三件事",
+    "看懂账单"
+   ],
+   "note": "顾客指着杯套上的五张贴纸提问，店长在柜台边解释。"
+  }
+ ]
+}

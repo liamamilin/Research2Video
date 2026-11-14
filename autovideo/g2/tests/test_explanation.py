@@ -23,6 +23,14 @@ def test_planner_uses_upstream_copy_and_registered_visuals():
     assert 'source' not in payload and 'facts' not in payload
 
 
+def test_flow_planner_capacity_matches_runtime_contract_without_computed_layouts():
+    from g1.visual_language import component_schema
+    payload = json.loads(explanation.messages({'title': '关系', 'groups': []})[1]['content'])
+    props = payload['component_props_schemas']['flow_diagram']['properties']
+    assert props['nodes']['maxItems'] == component_schema('flow_diagram')['properties']['nodes']['maxItems'] == 8
+    assert 'layout' not in props and 'layout_views' not in props
+
+
 def test_tutorial_recipe_direction_reaches_the_existing_chapter_planning_call(tmp_path, monkeypatch):
     from g2.creative_library import prepare_request
 
@@ -141,6 +149,25 @@ def test_old_new_and_delta_follow_their_spoken_values():
     assert [c['target_id'] for c in cues] == ['title', 'line:0', 'line:1', 'line:2']
     assert [c['quote'] for c in cues[1:]] == ['20', '25', '5']
     assert [c['character_index'] for c in cues[1:]] == [text.index('20'), text.index('25'), text.rindex('5')]
+
+
+@pytest.mark.parametrize('text,rows', [
+    ('库存从12变成15，增加3。待发订单从20变成8。',
+     [{'label': '库存', 'before': '12', 'after': '15', 'change': '3', 'direction': 'up'},
+      {'label': '待发', 'before': '20', 'after': '8', 'change': '12', 'direction': 'down'}]),
+    ('先看新版：耗时40毫秒，旧版是50毫秒。另一个接口从10降到8。',
+     [{'label': '接口甲', 'before': '50', 'after': '40', 'change': '10', 'direction': 'down'},
+      {'label': '接口乙', 'before': '10', 'after': '8', 'change': '2', 'direction': 'down'}]),
+])
+def test_change_badges_wait_for_their_own_comparison(text, rows):
+    scene = {'component': 'price_change', 'props': {'title': '变化', 'staged': True, 'rows': rows},
+             'narration_segment_ids': ['n1']}
+    cues = motion.automatic_cues(scene, {'n1': {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 8000}})
+    by_target = {cue['target_id']: cue for cue in cues}
+    for i in range(len(rows)):
+        values = [by_target[f'line:{i * 3 + offset}'] for offset in (0, 1)]
+        delta = by_target[f'line:{i * 3 + 2}']
+        assert delta['character_index'] >= max(c['character_index'] + len(c['quote']) for c in values)
 
 
 def test_explicit_process_presentation_and_narration_revisions_keep_their_intent():

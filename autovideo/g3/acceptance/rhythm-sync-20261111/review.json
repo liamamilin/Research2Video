@@ -1,0 +1,99 @@
+{
+  "reviewed_originals": [
+    {
+      "case": "news",
+      "title": "Gemini 4 Carbon 开放：$2/$10 只卖到 12 月 1 日",
+      "props": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/83eb41ab-f555-4993-9e4b-efd2ca2c665e/attempts/1/g2-run/artifacts/render-props.json",
+      "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/83eb41ab-f555-4993-9e4b-efd2ca2c665e/attempts/1/g2-run/artifacts/G2_自动生成.mp4"
+    },
+    {
+      "case": "tutorial",
+      "title": "MarkItDown：一条命令，周报网页变 Markdown",
+      "props": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/5f9f3f47-193e-4b26-98d1-5ca700b83d86/attempts/1/g2-run/artifacts/render-props.json",
+      "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/5f9f3f47-193e-4b26-98d1-5ca700b83d86/attempts/1/g2-run/artifacts/G2_自动生成.mp4"
+    },
+    {
+      "case": "science",
+      "title": "冰块浮在饮料上，不是因为它轻",
+      "props": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/49742ce6-fc7d-4d48-8f64-e389fa55598a/attempts/1/g2-run/artifacts/render-props.json",
+      "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/49742ce6-fc7d-4d48-8f64-e389fa55598a/attempts/1/g2-run/artifacts/G2_自动生成.mp4"
+    },
+    {
+      "case": "comparison",
+      "title": "同一场会：vivo 自动出纪要，微信输入法要你先按一下",
+      "props": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/72e5fba3-b873-4f8b-8151-b4f65f22acf4/attempts/1/g2-run/artifacts/render-props.json",
+      "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/72e5fba3-b873-4f8b-8151-b4f65f22acf4/attempts/1/g2-run/artifacts/G2_自动生成.mp4"
+    },
+    {
+      "case": "qwen",
+      "title": "Qwen Code 1.0 预览版：先别压进生产流水线",
+      "props": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/187e506c-8026-4df9-96c6-21034b3ba260/attempts/1/g2-run/artifacts/render-props.json",
+      "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/187e506c-8026-4df9-96c6-21034b3ba260/attempts/1/g2-run/artifacts/G2_自动生成.mp4"
+    }
+  ],
+  "priority": [
+    {
+      "rank": 1,
+      "issue": "Page arrives after its own explanatory sentence; fine-grained emphasis cannot fix an unavailable page",
+      "case": "news",
+      "range_seconds": [
+        47.33,
+        69.27
+      ],
+      "decision": "repair a boundary only using existing unique explicit narration anchors",
+      "evidence": "low-task sentence at 57.261s; original comparison page begins 61.267s"
+    },
+    {
+      "rank": 2,
+      "issue": "Long illustration chapter has few meaningful changes; unmatched overlay labels fall back to fixed offsets",
+      "case": "science",
+      "range_seconds": [
+        73.67,
+        115.13
+      ],
+      "decision": "leave unresolved; needs a different expression or narration-linked plan, not this boundary repair",
+      "evidence": "water/hexagonal-lattice composition appears early and then persists across later mechanism/analogy narration"
+    },
+    {
+      "rank": 3,
+      "issue": "Long stretches revisit the same screenshot and topic",
+      "case": "tutorial",
+      "range_seconds": [
+        20.37,
+        59.03,
+        99.2,
+        145.3
+      ],
+      "decision": "do not continue screenshot enlargement or add motion merely to create movement",
+      "evidence": "paragraph intent changes but underlying source image stays the same; speech and semantic units matter"
+    },
+    {
+      "rank": 4,
+      "issue": "Long tool roundup has 44 pages across 449 seconds; density needs viewing judgment rather than a fixed cut rate",
+      "case": "qwen",
+      "range_seconds": [
+        0,
+        449.17
+      ],
+      "decision": "holdout: do not alter correct boundaries just to make pace faster"
+    }
+  ],
+  "approaches": [
+    {
+      "method": "keep word-level emphasis within duration-assigned pages",
+      "status": "existing baseline; insufficient for cross-page mismatch",
+      "reason": "low cue has no access to its original sentence when that sentence belongs to previous page"
+    },
+    {
+      "method": "move entire existing speech segments to match planned page anchors",
+      "status": "retained after continuous A/B review",
+      "reason": "same scenes and content; correct conceptual handoff at start of usage discussion"
+    },
+    {
+      "method": "increase cut frequency, speed up voice, or add illustration motion uniformly",
+      "status": "not implemented; not claimed as tested",
+      "reason": "does not establish which picture belongs with the spoken explanation"
+    }
+  ],
+  "review_method": "full narration/timeline audit and scene-boundary / multi-time-point frame review plus rendered continuous A/B; no human audience study"
+}

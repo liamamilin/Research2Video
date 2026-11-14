@@ -163,7 +163,9 @@ def snapshot(config_dir: str, production_id: str, job: str) -> dict:
     if column is None:
         return {}
     source = matrices.of_job(job, config_dir)
-    return {"column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
+    owner = matrices.load_all(config_dir).get(column.matrix) if column.matrix else None
+    premise = str(((owner.content if owner else {}) or {}).get("premise") or "").strip()
+    return {**({"premise": premise} if premise else {}), "column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
             "audience": column.audience, "promise": column.promise, "notes": column.notes,
             "content_mode": column.content_mode, "greeting": column.greeting,
@@ -187,6 +189,9 @@ def apply_script_context(recipe, context: dict):
         direction += "\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。"
     elif context.get("type") == "tutorial":
         direction += f"\n{scope}围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。"
+    premise = (context.get("premise") or "").strip()
+    if premise:  # what the matrix's viewers live with (matrix content.premise), before any column direction
+        direction += f"\n观众前提：{premise}"
     notes = (context.get("notes") or "").strip()
     if notes:
         if programme:

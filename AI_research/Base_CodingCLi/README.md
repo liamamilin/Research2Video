@@ -29,6 +29,10 @@ For the web UI: Node.js 18+ is required for the frontend build (optional — pre
 
 ### System config (`config/system.yaml`)
 
+The project enables accepted job-specific writing workflows in `config/manuscript.yaml`.
+An explicit `video.manuscript_jobs` in `system.yaml` replaces that list for the installation.
+Set it to `[]` to disable all job-specific writing workflows locally.
+
 ```yaml
 ai:                                   # LLM API (OpenAI-compatible)
   model: "deepseek-v4-flash"          # any OpenAI-compatible model id

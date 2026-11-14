@@ -28,7 +28,7 @@ def _engine(config_dir: str) -> ResearchEngine:
 
 
 AI_MEDIA = {"monitoring/ai_flash_discovery", "ai_media/daily_opensource_radar", "ai_media/weekly_model_arena",
-            "ai_media/weekly_business_watch", "ai_media/weekly_deep_research"}
+            "ai_media/weekly_business_watch", "ai_media/weekly_deep_research", "ai_media/ai_tool_tutorials"}
 
 
 def test_every_existing_job_renders_the_prompt_it_rendered_before_matrices():

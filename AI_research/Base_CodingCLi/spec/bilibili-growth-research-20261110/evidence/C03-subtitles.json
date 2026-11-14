@@ -1,0 +1,783 @@
+{
+  "bvid": "BV16y336wEeE",
+  "observed_at": "2026-11-10T09:03:16.007404+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 5.36,
+      "to": 8.16,
+      "sid": 1,
+      "location": 2,
+      "content": "大家家里通常都会有各种各样的家具",
+      "music": 0.0
+    },
+    {
+      "from": 8.16,
+      "to": 10.08,
+      "sid": 2,
+      "location": 2,
+      "content": "这些家具一般是用木头",
+      "music": 0.0
+    },
+    {
+      "from": 10.08,
+      "to": 10.58,
+      "sid": 3,
+      "location": 2,
+      "content": "塑料",
+      "music": 0.0
+    },
+    {
+      "from": 10.58,
+      "to": 12.46,
+      "sid": 4,
+      "location": 2,
+      "content": "金属玻璃等材质做的",
+      "music": 0.0
+    },
+    {
+      "from": 12.46,
+      "to": 13.76,
+      "sid": 5,
+      "location": 2,
+      "content": "在这么多材料里",
+      "music": 0.0
+    },
+    {
+      "from": 13.76,
+      "to": 17.439,
+      "sid": 6,
+      "location": 2,
+      "content": "你有没有见过木头家具发霉腐烂坏掉的情况呢",
+      "music": 0.0
+    },
+    {
+      "from": 17.439,
+      "to": 19.439,
+      "sid": 7,
+      "location": 2,
+      "content": "如果把木头随便扔在野外",
+      "music": 0.0
+    },
+    {
+      "from": 19.439,
+      "to": 21.56,
+      "sid": 8,
+      "location": 2,
+      "content": "等它腐烂以后就会变成碳",
+      "music": 0.0
+    },
+    {
+      "from": 21.56,
+      "to": 24.58,
+      "sid": 9,
+      "location": 2,
+      "content": "但磷这些营养物质重新回到土里",
+      "music": 0.0
+    },
+    {
+      "from": 24.58,
+      "to": 28.06,
+      "sid": 10,
+      "location": 2,
+      "content": "那为什么咱们家里的木头家具却总是好好的呢",
+      "music": 0.0
+    },
+    {
+      "from": 28.06,
+      "to": 29.54,
+      "sid": 11,
+      "location": 2,
+      "content": "这就挺让人纳闷的",
+      "music": 0.0
+    },
+    {
+      "from": 29.54,
+      "to": 29.78,
+      "sid": 12,
+      "location": 2,
+      "content": "是",
+      "music": 0.0
+    },
+    {
+      "from": 29.78,
+      "to": 31.2,
+      "sid": 13,
+      "location": 2,
+      "content": "因为它腐烂的太慢了",
+      "music": 0.0
+    },
+    {
+      "from": 31.2,
+      "to": 32.08,
+      "sid": 14,
+      "location": 2,
+      "content": "我们没看到",
+      "music": 0.0
+    },
+    {
+      "from": 32.08,
+      "to": 35.01,
+      "sid": 15,
+      "location": 2,
+      "content": "还是说家具还没来得及腐烂就被扔了",
+      "music": 0.0
+    },
+    {
+      "from": 35.01,
+      "to": 37.63,
+      "sid": 16,
+      "location": 2,
+      "content": "所以我们才从来没见过它坏掉呢",
+      "music": 0.0
+    },
+    {
+      "from": 37.63,
+      "to": 41.11,
+      "sid": 17,
+      "location": 2,
+      "content": "首先塑料金属玻璃等属于无生命物质",
+      "music": 0.0
+    },
+    {
+      "from": 41.11,
+      "to": 42.35,
+      "sid": 18,
+      "location": 2,
+      "content": "所以不会腐烂",
+      "music": 0.0
+    },
+    {
+      "from": 42.35,
+      "to": 45.23,
+      "sid": 19,
+      "location": 2,
+      "content": "但包括树木在内的植物本身是生命体",
+      "music": 0.0
+    },
+    {
+      "from": 45.23,
+      "to": 46.41,
+      "sid": 20,
+      "location": 2,
+      "content": "随着时间推移",
+      "music": 0.0
+    },
+    {
+      "from": 46.41,
+      "to": 47.61,
+      "sid": 21,
+      "location": 2,
+      "content": "是会发生腐败",
+      "music": 0.0
+    },
+    {
+      "from": 47.61,
+      "to": 48.72,
+      "sid": 22,
+      "location": 2,
+      "content": "慢慢腐烂的",
+      "music": 0.0
+    },
+    {
+      "from": 48.72,
+      "to": 51.58,
+      "sid": 23,
+      "location": 2,
+      "content": "想要弄明白为什么很难见到腐烂的家具",
+      "music": 0.0
+    },
+    {
+      "from": 51.58,
+      "to": 54.28,
+      "sid": 24,
+      "location": 2,
+      "content": "就得先了解构成树木的物质成分",
+      "music": 0.0
+    },
+    {
+      "from": 54.28,
+      "to": 55.52,
+      "sid": 25,
+      "location": 2,
+      "content": "在生态系统中",
+      "music": 0.0
+    },
+    {
+      "from": 55.52,
+      "to": 59.08,
+      "sid": 26,
+      "location": 2,
+      "content": "树木是通过光合作用自行制造养分的生产者",
+      "music": 0.0
+    },
+    {
+      "from": 59.08,
+      "to": 61.8,
+      "sid": 27,
+      "location": 2,
+      "content": "生产者会成为动物等消费者的食物",
+      "music": 0.0
+    },
+    {
+      "from": 61.8,
+      "to": 62.72,
+      "sid": 28,
+      "location": 2,
+      "content": "供给养分",
+      "music": 0.0
+    },
+    {
+      "from": 62.72,
+      "to": 64.16,
+      "sid": 29,
+      "location": 2,
+      "content": "最终又会被细菌",
+      "music": 0.0
+    },
+    {
+      "from": 64.16,
+      "to": 66.01,
+      "sid": 30,
+      "location": 2,
+      "content": "微生物等分解者分解",
+      "music": 0.0
+    },
+    {
+      "from": 66.01,
+      "to": 69.29,
+      "sid": 31,
+      "location": 2,
+      "content": "重新变成可供生产者生长利用的无机物",
+      "music": 0.0
+    },
+    {
+      "from": 69.29,
+      "to": 72.13,
+      "sid": 32,
+      "location": 2,
+      "content": "构成木材的主要物质主要有纤维素",
+      "music": 0.0
+    },
+    {
+      "from": 72.13,
+      "to": 72.81,
+      "sid": 33,
+      "location": 2,
+      "content": "木质素",
+      "music": 0.0
+    },
+    {
+      "from": 72.81,
+      "to": 74.46,
+      "sid": 34,
+      "location": 2,
+      "content": "半纤维素和果胶",
+      "music": 0.0
+    },
+    {
+      "from": 74.46,
+      "to": 76.94,
+      "sid": 35,
+      "location": 2,
+      "content": "在这些成分里被称作纤维质的",
+      "music": 0.0
+    },
+    {
+      "from": 76.94,
+      "to": 79.89,
+      "sid": 36,
+      "location": 2,
+      "content": "纤维素是高等植物细胞壁的主要成分",
+      "music": 0.0
+    },
+    {
+      "from": 79.89,
+      "to": 82.69,
+      "sid": 37,
+      "location": 2,
+      "content": "占所有植物类物质的30%以上",
+      "music": 0.0
+    },
+    {
+      "from": 82.69,
+      "to": 85.7,
+      "sid": 38,
+      "location": 2,
+      "content": "也是自然界中含量最多的有机化合物",
+      "music": 0.0
+    },
+    {
+      "from": 85.7,
+      "to": 89.36,
+      "sid": 39,
+      "location": 2,
+      "content": "而木质素能在细胞壁中赋予植物组织坚硬质地",
+      "music": 0.0
+    },
+    {
+      "from": 89.36,
+      "to": 91.4,
+      "sid": 40,
+      "location": 2,
+      "content": "还是防止腐烂的核心物质",
+      "music": 0.0
+    },
+    {
+      "from": 91.4,
+      "to": 94.66,
+      "sid": 41,
+      "location": 2,
+      "content": "它在植物茎干中承担输送水分的重要作用",
+      "music": 0.0
+    },
+    {
+      "from": 94.66,
+      "to": 97.24,
+      "sid": 42,
+      "location": 2,
+      "content": "还能抵御化学和生物层面的侵害",
+      "music": 0.0
+    },
+    {
+      "from": 97.24,
+      "to": 99.68,
+      "sid": 43,
+      "location": 2,
+      "content": "半纤维素是构成细胞壁的纤维素",
+      "music": 0.0
+    },
+    {
+      "from": 99.68,
+      "to": 102.89,
+      "sid": 44,
+      "location": 2,
+      "content": "纤维中除果胶物质以外的所有多糖类物质",
+      "music": 0.0
+    },
+    {
+      "from": 102.89,
+      "to": 103.89,
+      "sid": 45,
+      "location": 2,
+      "content": "它可溶于碱",
+      "music": 0.0
+    },
+    {
+      "from": 103.89,
+      "to": 106.47,
+      "sid": 46,
+      "location": 2,
+      "content": "还能充当信号传导物质发挥作用",
+      "music": 0.0
+    },
+    {
+      "from": 106.47,
+      "to": 108.79,
+      "sid": 47,
+      "location": 2,
+      "content": "同时也可作为根茎种子",
+      "music": 0.0
+    },
+    {
+      "from": 108.79,
+      "to": 111.61,
+      "sid": 48,
+      "location": 2,
+      "content": "果实中储备碳水化合物来供给营养",
+      "music": 0.0
+    },
+    {
+      "from": 111.61,
+      "to": 112.75,
+      "sid": 49,
+      "location": 2,
+      "content": "最后是果胶",
+      "music": 0.0
+    },
+    {
+      "from": 112.75,
+      "to": 116.11,
+      "sid": 50,
+      "location": 2,
+      "content": "它在初生细胞壁的主要构成成分中占比最高",
+      "music": 0.0
+    },
+    {
+      "from": 116.11,
+      "to": 118.13,
+      "sid": 51,
+      "location": 2,
+      "content": "参与植物的生长发育形态",
+      "music": 0.0
+    },
+    {
+      "from": 118.13,
+      "to": 119.52,
+      "sid": 52,
+      "location": 2,
+      "content": "维持防御机制",
+      "music": 0.0
+    },
+    {
+      "from": 119.52,
+      "to": 120.56,
+      "sid": 53,
+      "location": 2,
+      "content": "细胞间粘附",
+      "music": 0.0
+    },
+    {
+      "from": 120.56,
+      "to": 124.08,
+      "sid": 54,
+      "location": 2,
+      "content": "落叶现象以及果实成熟等一系列生理过程",
+      "music": 0.0
+    },
+    {
+      "from": 124.08,
+      "to": 126.3,
+      "sid": 55,
+      "location": 2,
+      "content": "木质家具不容易腐烂的原因",
+      "music": 0.0
+    },
+    {
+      "from": 126.3,
+      "to": 128.6,
+      "sid": 56,
+      "location": 2,
+      "content": "正是源于这些成分本身的特性",
+      "music": 0.0
+    },
+    {
+      "from": 128.6,
+      "to": 132.14,
+      "sid": 57,
+      "location": 2,
+      "content": "制作木质家具时并不会直接用原木就开工",
+      "music": 0.0
+    },
+    {
+      "from": 132.14,
+      "to": 134.32,
+      "sid": 58,
+      "location": 2,
+      "content": "而是会根据木材种类厚度",
+      "music": 0.0
+    },
+    {
+      "from": 134.32,
+      "to": 135.24,
+      "sid": 59,
+      "location": 2,
+      "content": "干燥环境",
+      "music": 0.0
+    },
+    {
+      "from": 135.24,
+      "to": 137.58,
+      "sid": 60,
+      "location": 2,
+      "content": "要制作的家具类型等多种因素",
+      "music": 0.0
+    },
+    {
+      "from": 137.58,
+      "to": 138.5,
+      "sid": 61,
+      "location": 2,
+      "content": "经过数周",
+      "music": 0.0
+    },
+    {
+      "from": 138.5,
+      "to": 142.32,
+      "sid": 62,
+      "location": 2,
+      "content": "数月甚至数年的人工干燥或自然干燥工序处理",
+      "music": 0.0
+    },
+    {
+      "from": 142.32,
+      "to": 145.8,
+      "sid": 63,
+      "location": 2,
+      "content": "刚砍伐下来的原木虽因树种不同会有差异",
+      "music": 0.0
+    },
+    {
+      "from": 145.8,
+      "to": 148.94,
+      "sid": 64,
+      "location": 2,
+      "content": "含水率大概在30%到50%",
+      "music": 0.0
+    },
+    {
+      "from": 148.94,
+      "to": 150.78,
+      "sid": 65,
+      "location": 2,
+      "content": "而制作家具常用的木材",
+      "music": 0.0
+    },
+    {
+      "from": 150.78,
+      "to": 154.44,
+      "sid": 66,
+      "location": 2,
+      "content": "含水率一般控制在6%到15%左右",
+      "music": 0.0
+    },
+    {
+      "from": 154.44,
+      "to": 156.82,
+      "sid": 67,
+      "location": 2,
+      "content": "如果木材含水率过高或过低",
+      "music": 0.0
+    },
+    {
+      "from": 156.82,
+      "to": 158.18,
+      "sid": 68,
+      "location": 2,
+      "content": "就容易出现开裂",
+      "music": 0.0
+    },
+    {
+      "from": 158.18,
+      "to": 160.05,
+      "sid": 69,
+      "location": 2,
+      "content": "翘曲变形等问题",
+      "music": 0.0
+    },
+    {
+      "from": 160.05,
+      "to": 162.86,
+      "sid": 70,
+      "location": 2,
+      "content": "所以要把含水率维持在合适范围",
+      "music": 0.0
+    },
+    {
+      "from": 162.86,
+      "to": 164.7,
+      "sid": 71,
+      "location": 2,
+      "content": "木材经过充分干燥后",
+      "music": 0.0
+    },
+    {
+      "from": 164.7,
+      "to": 168.3,
+      "sid": 72,
+      "location": 2,
+      "content": "前面提到的那些木质成分会形成稳固防护屏障",
+      "music": 0.0
+    },
+    {
+      "from": 168.3,
+      "to": 170.26,
+      "sid": 73,
+      "location": 2,
+      "content": "让微生物无法侵入滋生",
+      "music": 0.0
+    },
+    {
+      "from": 170.26,
+      "to": 171.76,
+      "sid": 74,
+      "location": 2,
+      "content": "也就不容易腐烂了",
+      "music": 0.0
+    },
+    {
+      "from": 171.76,
+      "to": 174.62,
+      "sid": 75,
+      "location": 2,
+      "content": "作为分解者的微生物想要活跃繁殖",
+      "music": 0.0
+    },
+    {
+      "from": 174.62,
+      "to": 176.18,
+      "sid": 76,
+      "location": 2,
+      "content": "必须要有适宜的温度",
+      "music": 0.0
+    },
+    {
+      "from": 176.18,
+      "to": 177.329,
+      "sid": 77,
+      "location": 2,
+      "content": "湿度等条件",
+      "music": 0.0
+    },
+    {
+      "from": 177.329,
+      "to": 180.369,
+      "sid": 78,
+      "location": 2,
+      "content": "而经过干燥处理的木材缺乏湿度环境",
+      "music": 0.0
+    },
+    {
+      "from": 180.369,
+      "to": 181.649,
+      "sid": 79,
+      "location": 2,
+      "content": "微生物难以活动",
+      "music": 0.0
+    },
+    {
+      "from": 181.649,
+      "to": 183.19,
+      "sid": 80,
+      "location": 2,
+      "content": "自然就不容易腐烂",
+      "music": 0.0
+    },
+    {
+      "from": 183.19,
+      "to": 185.81,
+      "sid": 81,
+      "location": 2,
+      "content": "再加上最后还会做表面涂层防护",
+      "music": 0.0
+    },
+    {
+      "from": 185.81,
+      "to": 187.05,
+      "sid": 82,
+      "location": 2,
+      "content": "更能隔绝潮湿",
+      "music": 0.0
+    },
+    {
+      "from": 187.05,
+      "to": 187.75,
+      "sid": 83,
+      "location": 2,
+      "content": "耐磨损",
+      "music": 0.0
+    },
+    {
+      "from": 187.75,
+      "to": 189.16,
+      "sid": 84,
+      "location": 2,
+      "content": "让家具更耐用",
+      "music": 0.0
+    },
+    {
+      "from": 189.16,
+      "to": 191.78,
+      "sid": 85,
+      "location": 2,
+      "content": "当然如果存放环境杂乱潮湿",
+      "music": 0.0
+    },
+    {
+      "from": 191.78,
+      "to": 193.82,
+      "sid": 86,
+      "location": 2,
+      "content": "这些防护就都失去意义了",
+      "music": 0.0
+    },
+    {
+      "from": 193.82,
+      "to": 195.2,
+      "sid": 87,
+      "location": 2,
+      "content": "所以要定期清洁",
+      "music": 0.0
+    },
+    {
+      "from": 195.2,
+      "to": 198.43,
+      "sid": 88,
+      "location": 2,
+      "content": "尽量减少可能损伤家具表面的杂物污垢",
+      "music": 0.0
+    },
+    {
+      "from": 198.43,
+      "to": 200.13,
+      "sid": 89,
+      "location": 2,
+      "content": "还要定期给家具打蜡",
+      "music": 0.0
+    },
+    {
+      "from": 200.13,
+      "to": 201.89,
+      "sid": 90,
+      "location": 2,
+      "content": "涂木油等防护养护剂",
+      "music": 0.0
+    },
+    {
+      "from": 201.89,
+      "to": 203.5,
+      "sid": 91,
+      "location": 2,
+      "content": "这样会更好保养",
+      "music": 0.0
+    },
+    {
+      "from": 203.5,
+      "to": 205.08,
+      "sid": 92,
+      "location": 2,
+      "content": "还要避免阳光直射",
+      "music": 0.0
+    },
+    {
+      "from": 205.08,
+      "to": 207.17,
+      "sid": 93,
+      "location": 2,
+      "content": "才能防止家具变色开裂",
+      "music": 0.0
+    },
+    {
+      "from": 207.17,
+      "to": 209.05,
+      "sid": 94,
+      "location": 2,
+      "content": "如果放在潮湿环境使用",
+      "music": 0.0
+    },
+    {
+      "from": 209.05,
+      "to": 210.41,
+      "sid": 95,
+      "location": 2,
+      "content": "家具很容易变形",
+      "music": 0.0
+    },
+    {
+      "from": 210.41,
+      "to": 213.37,
+      "sid": 96,
+      "location": 2,
+      "content": "所以平时也要多留意摆放和使用环境",
+      "music": 0.0
+    },
+    {
+      "from": 213.37,
+      "to": 215.92,
+      "sid": 97,
+      "location": 2,
+      "content": "那么今天的冷知识冷到你了吗",
+      "music": 0.0
+    }
+  ]
+}

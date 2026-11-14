@@ -56,7 +56,7 @@ def test_published_column_label_wins_over_internal_topic_number():
            "render": {"packaging": {"label": "产品与能力认知"}}}
     named = episodes.publication_topic(topic(), ctx)
     assert named["episode"]["publication"]["label"] == "ChatGPT 产品与能力认知"
-    assert episodes.greeting(named, ctx) == "大家好，欢迎收看ChatGPT 产品与能力认知。"
+    assert episodes.greeting(named, ctx) == ""  # no default greeting since 11-10: videos open on the hook
     renamed = {**ctx, "column_name": "后来换了一个名称", "render": {}}
     assert episodes.publication_topic(named, renamed) is named
 

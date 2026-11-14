@@ -1,0 +1,354 @@
+{
+ "job_id": "5e6f8e0f-7024-4cd4-9175-0eaa2a505cbe",
+ "title": "新疆昼夜温差能到20℃，关键不在白天晒，而在夜里漏得快",
+ "status": "COMPLETED",
+ "active_stage": "COMPLETE",
+ "attempt_count": 1,
+ "cancel_requested": false,
+ "error_code": null,
+ "error_message": null,
+ "retryable": false,
+ "source_sha256": "33942c27a5e4ab6faca2c046afe0bac31c36d7d3d14b91de408b38dc57de1c5c",
+ "source_char_count": 1169,
+ "target_duration_sec": 60,
+ "theme": "minimal_dark",
+ "voice_id": "voxcpm_anchor",
+ "created_at": "2026-11-09T11:17:15.157+00:00",
+ "updated_at": "2026-11-09T11:32:43.866+00:00",
+ "version": 14,
+ "operation_type": "generate",
+ "parent_job_id": null,
+ "parent_attempt_no": null,
+ "scene_id": null,
+ "creative_intent": {
+  "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+  "purpose": "知识讲解",
+  "tone": "",
+  "focus": "新疆昼夜温差能到20℃，关键不在白天晒，而在夜里漏得快"
+ },
+ "revision_mode": null,
+ "input_mode": "narration",
+ "idempotency_key": null,
+ "background_music_resolved": null,
+ "background_music": {
+  "enabled": false
+ },
+ "production_recipe_resolved": null,
+ "production_plan": {
+  "schema_version": 1,
+  "settings": {
+   "chapter_keywords": null,
+   "content_notices": [],
+   "creative_intent": {
+    "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+    "purpose": "知识讲解",
+    "tone": "",
+    "focus": "新疆昼夜温差能到20℃，关键不在白天晒，而在夜里漏得快"
+   },
+   "duration_mode": "content",
+   "illustration_style": "flat",
+   "music": null,
+   "packaging": {
+    "preset": "common",
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "recipe": "illustrated_explainer",
+    "intro": {
+     "title": "新疆昼夜温差能到20℃"
+    }
+   },
+   "production_context": {
+    "content_recipe": {
+     "id": "research:illustrated_explainer",
+     "settings": {
+      "video_form": "illustrated_explainer",
+      "creative_intent": {
+       "purpose": "知识讲解",
+       "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+       "focus": "新疆昼夜温差能到20℃，关键不在白天晒，而在夜里漏得快"
+      },
+      "packaging": {
+       "preset": "common",
+       "label": "插画讲解",
+       "accent": "#1f7a4d",
+       "recipe": "illustrated_explainer",
+       "intro": {
+        "title": "新疆昼夜温差能到20℃"
+       }
+      },
+      "voice_id": "voxcpm_anchor"
+     }
+    },
+    "matrix": {
+     "id": "research-production:geography_illustrated",
+     "settings": {
+      "video_speed": 1.25,
+      "illustration_style": "flat"
+     }
+    }
+   },
+   "production_mode": "standard",
+   "production_recipe": null,
+   "slideshow_images": [],
+   "slideshow_images_resolved": null,
+   "target_duration_sec": 60,
+   "video_form": "illustrated_explainer",
+   "video_speed": 1.25,
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+   "packaging.label": "content_recipe",
+   "packaging.accent": "content_recipe",
+   "packaging.enabled": "common",
+   "packaging.intro.component": "common",
+   "packaging.intro.enabled": "common",
+   "packaging.intro.seconds": "common",
+   "packaging.intro.title": "content_recipe",
+   "packaging.outro.component": "common",
+   "packaging.outro.enabled": "common",
+   "packaging.outro.seconds": "common",
+   "packaging.badge.component": "common",
+   "packaging.badge.enabled": "common",
+   "packaging.source_card.component": "common",
+   "packaging.source_card.enabled": "common",
+   "packaging.source_card.seconds": "common",
+   "packaging.sound.component": "common",
+   "packaging.sound.enabled": "common",
+   "video_form": "content_recipe",
+   "production_mode": "common",
+   "visual_style": "common",
+   "duration_mode": "request",
+   "target_duration_sec": "common",
+   "voice_id": "content_recipe",
+   "video_speed": "matrix",
+   "creative_intent": "common",
+   "creative_intent.purpose": "content_recipe",
+   "creative_intent.audience": "content_recipe",
+   "creative_intent.focus": "content_recipe",
+   "packaging.preset": "content_recipe",
+   "packaging.recipe": "content_recipe",
+   "illustration_style": "matrix"
+  },
+  "style": {
+   "id": "legacy",
+   "version": 1,
+   "description": "保留各既有形式的原始视觉定义"
+  },
+  "executor": {
+   "id": "remotion",
+   "version": 1
+  },
+  "output": {
+   "width": 1920,
+   "height": 1080,
+   "fps": 30
+  },
+  "packaging_sha256": "0eea444f24bf1d394948d7854ae7ba71eb35e7203a996e3069ad0cbf7782af75",
+  "packaging": {
+   "library": "autovideo-packaging",
+   "version": 2,
+   "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+   "selection": {
+    "preset": "common",
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "recipe": "illustrated_explainer",
+    "intro": {
+     "title": "新疆昼夜温差能到20℃"
+    }
+   },
+   "components": {
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+     "component": "stinger",
+     "enabled": true,
+     "seconds": 1.5,
+     "title": "新疆昼夜温差能到20℃"
+    },
+    "outro": {
+     "component": "end_card",
+     "enabled": true,
+     "seconds": 2.5
+    },
+    "badge": {
+     "component": "corner_badge",
+     "enabled": true
+    },
+    "source_card": {
+     "component": "source_card",
+     "enabled": true,
+     "seconds": 4.5
+    },
+    "sound": {
+     "component": "synth_sting",
+     "enabled": true
+    }
+   },
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "插画讲解",
+    "intro": {
+     "template": "stinger",
+     "title": "新疆昼夜温差能到20℃",
+     "seconds": 1.5,
+     "sound": "synth_sting"
+    },
+    "outro": {
+     "template": "end_card",
+     "title": "插画讲解",
+     "seconds": 2.5,
+     "sound": "synth_sting"
+    }
+   },
+   "badge": {
+    "text": "插画讲解",
+    "color": "#1f7a4d"
+   },
+   "source_card": null,
+   "source_card_state": "no_sources",
+   "component_versions": {
+    "intro": {
+     "id": "stinger",
+     "version": 1
+    },
+    "outro": {
+     "id": "end_card",
+     "version": 2
+    },
+    "badge": {
+     "id": "corner_badge",
+     "version": 1
+    },
+    "source_card": {
+     "id": "source_card",
+     "version": 2
+    },
+    "sound": {
+     "id": "synth_sting",
+     "version": 1
+    }
+   },
+   "sha256": "0eea444f24bf1d394948d7854ae7ba71eb35e7203a996e3069ad0cbf7782af75"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "33942c27a5e4ab6faca2c046afe0bac31c36d7d3d14b91de408b38dc57de1c5c",
+  "music": {
+   "selection": null,
+   "background_music_generated": false
+  },
+  "sha256": "b3587ae92b53c7c604cc96e2163c1f841b8e7baa40a866d1a61e24fb5b3ae714"
+ },
+ "production_mode": "standard",
+ "visual_style": "legacy",
+ "video_speed": 1.25,
+ "video_form": "illustrated_explainer",
+ "duration_mode": "content",
+ "input_analysis": {
+  "requested_form": "illustrated_explainer",
+  "selected_form": "illustrated_explainer",
+  "recommended_form": "illustrated_explainer",
+  "selection_mode": "manual",
+  "status": "ready",
+  "reason": "按指定形式制作，定稿讲稿逐字配音。",
+  "issues": [],
+  "retained_units": 39,
+  "excluded_units": 0
+ },
+ "resolved_video_form": "illustrated_explainer",
+ "attempts": [
+  {
+   "attempt_no": 1,
+   "status": "COMPLETED",
+   "started_at": "2026-11-09T11:17:15.278+00:00",
+   "completed_at": "2026-11-09T11:32:43.866+00:00",
+   "error_code": null,
+   "error_message": null,
+   "stages": [
+    {
+     "stage": "PLAN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:17:15.278+00:00",
+     "completed_at": "2026-11-09T11:17:15.652+00:00",
+     "duration_seconds": 0.0,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "VOICE_ALIGN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:17:15.653+00:00",
+     "completed_at": "2026-11-09T11:22:03.731+00:00",
+     "duration_seconds": 287.98,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "STORYBOARD",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:17:15.655+00:00",
+     "completed_at": "2026-11-09T11:17:15.657+00:00",
+     "duration_seconds": 0.0,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "SCENE_IMAGES",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:22:03.740+00:00",
+     "completed_at": "2026-11-09T11:25:25.879+00:00",
+     "duration_seconds": 202.28,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "BUILD_IR",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:25:25.882+00:00",
+     "completed_at": "2026-11-09T11:25:26.240+00:00",
+     "duration_seconds": 0.26,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "RENDER",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:25:26.243+00:00",
+     "completed_at": "2026-11-09T11:32:01.594+00:00",
+     "duration_seconds": 395.55,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "QUALITY_CHECK",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:32:01.600+00:00",
+     "completed_at": "2026-11-09T11:32:43.866+00:00",
+     "duration_seconds": 12.26,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "PACKAGE",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:32:14.013+00:00",
+     "completed_at": "2026-11-09T11:32:43.813+00:00",
+     "duration_seconds": 29.72,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "AUDIO_MIX",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-09T11:32:43.820+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,335 @@
+{
+  "route": "bounded whole-graph wrap search",
+  "candidates": [
+    180,
+    300,
+    420,
+    540
+  ],
+  "passed": 17,
+  "cases": 40,
+  "records": [
+    {
+      "id": "development-fork-00",
+      "family": "fork",
+      "best_width": "180",
+      "node_px": 35.714285714285715,
+      "edge_px": 27.77777777777778,
+      "meets": true
+    },
+    {
+      "id": "development-merge-01",
+      "family": "merge",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-diamond-02",
+      "family": "diamond",
+      "best_width": "180",
+      "node_px": 21.226415094339625,
+      "edge_px": 16.50943396226415,
+      "meets": false
+    },
+    {
+      "id": "development-ladder-03",
+      "family": "ladder",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-layered-04",
+      "family": "layered",
+      "best_width": "180",
+      "node_px": 24.783759929391,
+      "edge_px": 19.276257722859665,
+      "meets": false
+    },
+    {
+      "id": "development-cycle-05",
+      "family": "cycle",
+      "best_width": "180",
+      "node_px": 23.225806451612904,
+      "edge_px": 18.064516129032256,
+      "meets": false
+    },
+    {
+      "id": "development-disconnected-06",
+      "family": "disconnected",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-parallel-07",
+      "family": "parallel",
+      "best_width": "180",
+      "node_px": 35.725190839694655,
+      "edge_px": 27.786259541984734,
+      "meets": true
+    },
+    {
+      "id": "development-fork-08",
+      "family": "fork",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-merge-09",
+      "family": "merge",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-diamond-10",
+      "family": "diamond",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-ladder-11",
+      "family": "ladder",
+      "best_width": "180",
+      "node_px": 24.324324324324323,
+      "edge_px": 18.91891891891892,
+      "meets": false
+    },
+    {
+      "id": "development-layered-12",
+      "family": "layered",
+      "best_width": "180",
+      "node_px": 20.201438848920862,
+      "edge_px": 15.712230215827336,
+      "meets": false
+    },
+    {
+      "id": "development-cycle-13",
+      "family": "cycle",
+      "best_width": "180",
+      "node_px": 30.323974082073434,
+      "edge_px": 23.585313174946002,
+      "meets": false
+    },
+    {
+      "id": "development-disconnected-14",
+      "family": "disconnected",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-parallel-15",
+      "family": "parallel",
+      "best_width": "180",
+      "node_px": 21.435114503816795,
+      "edge_px": 16.671755725190838,
+      "meets": false
+    },
+    {
+      "id": "development-fork-16",
+      "family": "fork",
+      "best_width": "420",
+      "node_px": 27.863777089783284,
+      "edge_px": 21.671826625387,
+      "meets": false
+    },
+    {
+      "id": "development-merge-17",
+      "family": "merge",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-diamond-18",
+      "family": "diamond",
+      "best_width": "540",
+      "node_px": 17.857142857142858,
+      "edge_px": 13.88888888888889,
+      "meets": false
+    },
+    {
+      "id": "development-ladder-19",
+      "family": "ladder",
+      "best_width": "180",
+      "node_px": 24.324324324324323,
+      "edge_px": 18.91891891891892,
+      "meets": false
+    },
+    {
+      "id": "development-layered-20",
+      "family": "layered",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-cycle-21",
+      "family": "cycle",
+      "best_width": "180",
+      "node_px": 30.323974082073434,
+      "edge_px": 23.585313174946002,
+      "meets": false
+    },
+    {
+      "id": "development-disconnected-22",
+      "family": "disconnected",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-parallel-23",
+      "family": "parallel",
+      "best_width": "180",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-fork-24",
+      "family": "fork",
+      "best_width": "300",
+      "node_px": 26,
+      "edge_px": 20.22222222222222,
+      "meets": false
+    },
+    {
+      "id": "development-merge-25",
+      "family": "merge",
+      "best_width": "420",
+      "node_px": 26.162790697674417,
+      "edge_px": 20.348837209302324,
+      "meets": false
+    },
+    {
+      "id": "development-diamond-26",
+      "family": "diamond",
+      "best_width": "180",
+      "node_px": 27.692307692307693,
+      "edge_px": 21.53846153846154,
+      "meets": false
+    },
+    {
+      "id": "development-ladder-27",
+      "family": "ladder",
+      "best_width": "300",
+      "node_px": 27.315175097276263,
+      "edge_px": 21.245136186770427,
+      "meets": false
+    },
+    {
+      "id": "development-layered-28",
+      "family": "layered",
+      "best_width": "180",
+      "node_px": 11.10759493670886,
+      "edge_px": 8.639240506329113,
+      "meets": false
+    },
+    {
+      "id": "development-cycle-29",
+      "family": "cycle",
+      "best_width": "180",
+      "node_px": 16.774193548387096,
+      "edge_px": 13.046594982078853,
+      "meets": false
+    },
+    {
+      "id": "development-disconnected-30",
+      "family": "disconnected",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-parallel-31",
+      "family": "parallel",
+      "best_width": "180",
+      "node_px": 22.941176470588232,
+      "edge_px": 17.84313725490196,
+      "meets": false
+    },
+    {
+      "id": "development-fork-32",
+      "family": "fork",
+      "best_width": "180",
+      "node_px": 21.73374613003096,
+      "edge_px": 16.904024767801857,
+      "meets": false
+    },
+    {
+      "id": "development-merge-33",
+      "family": "merge",
+      "best_width": "300",
+      "node_px": 35.019455252918284,
+      "edge_px": 27.237354085603112,
+      "meets": true
+    },
+    {
+      "id": "development-diamond-34",
+      "family": "diamond",
+      "best_width": "300",
+      "node_px": 26.961113778204513,
+      "edge_px": 20.969755160825734,
+      "meets": false
+    },
+    {
+      "id": "development-ladder-35",
+      "family": "ladder",
+      "best_width": "180",
+      "node_px": 32.25806451612903,
+      "edge_px": 25.089605734767026,
+      "meets": true
+    },
+    {
+      "id": "development-layered-36",
+      "family": "layered",
+      "best_width": "180",
+      "node_px": 30.789473684210527,
+      "edge_px": 23.94736842105263,
+      "meets": false
+    },
+    {
+      "id": "development-cycle-37",
+      "family": "cycle",
+      "best_width": "180",
+      "node_px": 14.474226804123711,
+      "edge_px": 11.257731958762887,
+      "meets": false
+    },
+    {
+      "id": "development-disconnected-38",
+      "family": "disconnected",
+      "best_width": "300",
+      "node_px": 36,
+      "edge_px": 28,
+      "meets": true
+    },
+    {
+      "id": "development-parallel-39",
+      "family": "parallel",
+      "best_width": "180",
+      "node_px": 22.941176470588232,
+      "edge_px": 17.84313725490196,
+      "meets": false
+    }
+  ],
+  "decision_threshold": 0.95,
+  "limitation": "Whole graph experiment, not a proof that no other graph layout could work."
+}

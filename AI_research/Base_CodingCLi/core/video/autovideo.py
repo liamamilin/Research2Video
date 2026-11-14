@@ -20,7 +20,7 @@ import httpx
 
 TERMINAL_STATUSES = frozenset({"COMPLETED", "FAILED", "CANCELLED"})
 # Same shape AutoVideo enforces; checked again because it becomes a file name.
-ARTIFACT_NAME = re.compile(r"^[a-z][a-z0-9-]{0,40}\.(?:mp4|srt|json|txt)$")
+ARTIFACT_NAME = re.compile(r"^[a-z][a-z0-9-]{0,40}\.(?:mp4|srt|json|txt|png)$")
 
 
 class AutoVideoError(Exception):

@@ -145,6 +145,31 @@ def test_the_starting_user_reaches_the_engine(monkeypatch):
     assert seen["user"] == "editor"
 
 
+def test_flash_trigger_time_reaches_the_worker(monkeypatch):
+    from core import activity, matrices
+    from core.production_policy import FLASH_JOB
+
+    seen = []
+
+    class _Engine:
+        def __init__(self, **kwargs):
+            pass
+
+        def run_job(self, name, verbose=False):
+            seen.append((name, self.run_context))
+            return "output/flash.md"
+
+    monkeypatch.setattr(executor, "ResearchEngine", _Engine)
+    monkeypatch.setattr(executor, "_attach_persistence", lambda *args: None)
+    monkeypatch.setattr(matrices, "cap_block", lambda *args: None)
+    monkeypatch.setattr(activity, "set_running", lambda *args: None)
+    timestamp = 1794645397.0
+    task = executor.start_job(FLASH_JOB, "hot-trigger", flash_triggered_at=timestamp)
+    task.future.result(timeout=5)
+    assert task.status == "success"
+    assert seen == [(FLASH_JOB, {"flash_triggered_at": timestamp})]
+
+
 # --- the log handler lifecycle ----------------------------------------------
 
 def test_the_handler_is_removed_even_when_the_run_explodes(monkeypatch):

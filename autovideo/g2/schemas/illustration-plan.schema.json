@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "illustrated explainer storyboard plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cast",
+    "chapters"
+  ],
+  "properties": {
+    "cast": {
+      "type": "object",
+      "maxProperties": 3,
+      "propertyNames": {
+        "pattern": "^[A-C]$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 200
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chapter",
+          "scene",
+          "keywords",
+          "overlay"
+        ],
+        "properties": {
+          "chapter": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "scene": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 400
+          },
+          "keywords": {
+            "type": "array",
+            "maxItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12
+            }
+          },
+          "overlay": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "layout": {
+            "enum": [
+              "scene",
+              "diagram"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

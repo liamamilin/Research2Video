@@ -1,15 +1,21 @@
 """A submission the creator deleted on B站 stops waiting and can never be re-uploaded by a retry."""
+from pathlib import Path
+
 import pytest
 
+from core.video import store as video_store
 from web.services import platform_manager as pm, publication_state
 
 
 @pytest.fixture
 def task(tmp_path, monkeypatch):
     from core.platform_store import PlatformStore
-    db = PlatformStore(str(tmp_path / "platforms.db"))
+    db = PlatformStore(str(tmp_path))
     monkeypatch.setattr(pm, "store", lambda: db)
     monkeypatch.setattr(pm, "uid", lambda: "u1")
+    monkeypatch.setattr(pm, "directory", lambda: Path(tmp_path) / "bilibili")
+    monkeypatch.setattr(video_store, "_DB_PATH_OVERRIDE", str(tmp_path / "video.db"))
+    video_store.init_db()
     render = {"id": "r1", "script_id": "s1", "version": 1}
     row = db.enqueue("u1", render, {"title": "t", "tags": ["a"], "description": "", "tid": 1, "dtime": 1793688000})
     db.update_upload(row["id"], status="SUBMITTED", bvid="BV1gone", expected="QUEUED")

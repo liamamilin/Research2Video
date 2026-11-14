@@ -207,7 +207,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     # density "large" is the short-form text scale (see g2/information_motion.py); the key is optional.
     information = isinstance(presentation, dict) and presentation.get("preset") in ("information_motion", "explanation") \
         and set(presentation) <= {"preset", "density"}
-    creative_components = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage"}
+    creative_components = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage", "illustrated_explainer": "illustration_scene"}
     creative = isinstance(presentation, dict) and isinstance(presentation.get("preset"), str) and presentation["preset"] in creative_components
     if isinstance(ir, dict) and "presentation" in ir:
         schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
@@ -317,6 +317,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     all_beats = []
     all_beat_ids = set()
     scheduled_scenes = []
+    image_reading_cache = {}
     previous_scene_end_ms = 0
     previous_scene_end_frame = 0
     for scene_index, scene in enumerate(ir["scenes"]):
@@ -403,6 +404,11 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                     image = next((a for a in ir["assets"] if a["id"] == item["image_asset_id"]), None)
                     if not image or image["type"] != "image" or image["path"] != item["image_path"]:
                         _fail("SLIDESHOW_ASSET_MISMATCH", f"{sp}/props/images", "slide must reference a registered image asset")
+            if scene["component"] == "illustration_scene":
+                item = props["image"]
+                image = next((a for a in ir["assets"] if a["id"] == item["image_asset_id"]), None)
+                if not image or image["type"] != "image" or image["path"] != item["image_path"]:
+                    _fail("SLIDESHOW_ASSET_MISMATCH", f"{sp}/props/image", "illustration must reference a registered image asset")
             if scene["component"] in {"object_showcase", "material_collage"}:
                 if any(index >= len(props["images"]) for index in props["focus_indices"]):
                     _fail("MATERIAL_IMAGE_INDEX", f"{sp}/props/focus_indices", "focus must reference an image in this scene")
@@ -455,6 +461,18 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                 scheduled_scenes[-1]["price_layout"] = price_layout(props, (presentation or {}).get("density") == "large")
             except ValueError as exc:
                 _fail("INFORMATION_TEXT_FIT", f"{sp}/props", str(exc))
+        if (scene["component"] in {"object_showcase", "material_collage"}
+                and len(props['images']) <= 2
+                and not any(item.get('focus', {}).get('regions') for item in props['images'])):
+            from g1.image_reading import reading_bounds
+            layouts = []
+            for item in props['images']:
+                key = item['image_asset_id']
+                if key not in image_reading_cache:
+                    image_reading_cache[key] = reading_bounds(project_root / item['image_path'])
+                layouts.append(image_reading_cache[key])
+            if all(layouts):
+                scheduled_scenes[-1]['image_reading'] = layouts
         previous_scene_end_ms, previous_scene_end_frame = end_ms, end_frame
 
     if previous_scene_end_ms != ir["video"]["duration_ms"]:

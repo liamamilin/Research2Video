@@ -16,7 +16,7 @@ class MaintenanceSuperseded(RuntimeError):
 
 
 def busy_work(state: Path) -> list[dict]:
-    """Count executing or queued work, not submitted receipts or waiting comments."""
+    """Count executing or ready work that must finish before a restart."""
     checks = [
         ('video.db', 'scripts', 'status', ('RESEARCHING', 'WRITING')),
         ('video.db', 'renders', 'status', ('SUBMITTING', 'QUEUED', 'RUNNING', 'DOWNLOADING')),
@@ -38,8 +38,17 @@ def busy_work(state: Path) -> list[dict]:
         with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=5) as conn:
             if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
                 continue
-            count = conn.execute(f'SELECT count(*) FROM {table} WHERE {column} IN (' +
-                                 ','.join('?' for _ in statuses) + ')', statuses).fetchone()[0]
+            condition = f"{column} IN ({','.join('?' for _ in statuses)})"
+            if file == 'platforms.db':
+                # Bilibili persists deferred automatic uploads for its next tick.
+                # The worker lock still protects them once a tick starts processing.
+                condition += """ AND NOT (status = 'QUEUED' AND CASE WHEN json_valid(payload)
+                    THEN json_type(payload, '$.automatic') IS 'true'
+                         AND json_type(payload, '$.held') IS 'true'
+                         AND json_extract(payload, '$.dtime') IS NULL
+                         AND json_extract(payload, '$.released_at') IS NULL
+                    ELSE 0 END)"""
+            count = conn.execute(f'SELECT count(*) FROM {table} WHERE {condition}', statuses).fetchone()[0]
         if count:
             busy.append({'database': file, 'table': table, 'count': count})
     return busy

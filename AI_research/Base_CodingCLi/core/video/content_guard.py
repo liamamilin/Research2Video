@@ -43,7 +43,8 @@ def with_policy(script: dict, jobs_dir: str = "") -> dict:
     topic = script.get("topic") or {}
     if topic.get("content_mode") == "episode":
         return script
-    if script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job"):
+    if (script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job")
+            or topic.get("knowledge_job")):
         return script
     job = (script.get("content_context") or {}).get("job", "")
     with store.connect() as conn:
@@ -65,7 +66,8 @@ def policy_topic(topic: dict, job: str) -> dict:
 
 def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dict:
     """New matrix videos share selection across entry points; rewrites keep their event."""
-    if topic.get("matrix_dedup") or topic.get("article") or topic.get("local_video") or topic.get("test_sample"):
+    if (topic.get("matrix_dedup") or topic.get("knowledge_job") or topic.get("article") or topic.get("local_video")
+            or topic.get("test_sample")):
         return topic
     candidates = [context.get("job", "")]
     with store.connect() as conn:
@@ -89,9 +91,29 @@ def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dic
     job = next((value for value in candidates if value in members), "")
     if not job:
         return topic
+    return matrix_topic(topic, job, jobs_dir)
+
+
+def matrix_topic(topic: dict, job: str, jobs_dir: str) -> dict:
+    """A matrix Job's new video: news goes through the shared event pool; a knowledge Job does not.
+
+    A knowledge Job picks one new question per report and avoids repeats by its past titles. Its topic ideas are
+    the same source pages every day, so the event pool would match every new question to the first video by
+    those links (11-10: six new economy questions skipped as “already covered”). The Job is still recorded
+    (``knowledge_job``) so the video is filed under its matrix (合集, partition)."""
+    if _knowledge(jobs_dir, job):
+        return {**topic, "knowledge_job": job}
     from core.video import story_pool
 
     return {**topic, "matrix_dedup": {"job": job, "policy": story_pool.POLICY}}
+
+
+def _knowledge(jobs_dir: str, job: str) -> bool:
+    from core import knowledge_job
+    from core.config import load_job
+
+    found = load_job(jobs_dir, job) if jobs_dir and job else None
+    return bool(found) and knowledge_job.enabled(found)
 
 
 def published(script_id: str) -> bool:
@@ -131,7 +153,16 @@ def source_key(url: str) -> str:
         value = normalize_url(url)
         parts = urlsplit(value)
         path = parts.path.lower().rstrip("/")
-        if (not parts.netloc or not path or "/leaderboards" in path or "/changelog" in path
+        manual = (
+            (parts.netloc == "codebuddy.cn" and path.startswith("/docs/"))
+            or (parts.netloc == "code.claude.com" and path.startswith("/docs/"))
+            or (parts.netloc == "learn.chatgpt.com" and path.startswith("/docs/") and not path.startswith("/docs/whats-new"))
+            or (parts.netloc == "apps.apple.com" and "/app/" in path)
+        )
+        entry_page = re.search(r"/(?:whats-new|updates|changelog)(?:\.[^/]+)?$", path)
+        fragment = urlsplit(url).fragment if entry_page else ""
+        if (not parts.netloc or not path or "/leaderboards" in path or ("/changelog" in path and not fragment)
+                or manual
                 or path.endswith((".rss", ".xml", "/feed", "/feeds", "/rss", "/atom", "/pricing"))
                 or path.startswith(("/rss/", "/feed/", "/feeds/"))
                 or (parts.netloc.startswith(("docs.", "developers.", "help."))
@@ -141,7 +172,8 @@ def source_key(url: str) -> str:
             match = re.search(r"/(?:abs|html|pdf)/(\d{4}\.\d+)", path)
             if match:
                 return "arxiv:" + match[1]
-        return value.removeprefix("http://").removeprefix("https://")
+        key = value.removeprefix("http://").removeprefix("https://")
+        return f"{key}#{fragment}" if fragment else key
     except (TypeError, ValueError):
         return ""
 
@@ -160,8 +192,10 @@ def overlap(left: set[str], right: set[str]) -> set[str]:
     """Reuse the report memory's conservative cross-outlet story matcher, without touching its database."""
     hits = left & right
     for key in left - hits:
+        if "#" in key:  # entry anchors identify independent rows on a single index
+            continue
         host, tokens = _signature(key)
-        if any(events.same_story(tokens, _signature(other)[1], same_host=host == _signature(other)[0])
+        if any("#" not in other and events.same_story(tokens, _signature(other)[1], same_host=host == _signature(other)[0])
                for other in right):
             hits.add(key)
     return hits
@@ -207,10 +241,21 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
     ids = [t["id"] for t in candidates if t.get("id")]
     if not ids:
         return set()
+    from core.video.story_pool import CHAPTER_PROMPT_VERSION, ENTRY_PROMPT_VERSION
+
     with store.connect() as conn:
         skipped = [json.loads(r["topic"]) for r in conn.execute(
-            "SELECT topic FROM scripts WHERE archived=1 AND status='FAILED' AND current_version=0"
-            " AND json_extract(topic,'$.content_archive') IS NOT NULL"
+            "SELECT s.topic FROM scripts s WHERE s.archived=1 AND s.status='FAILED' AND s.current_version=0"
+            " AND json_extract(s.topic,'$.content_archive') IS NOT NULL"
+            " AND NOT EXISTS (SELECT 1 FROM video_story_decisions d JOIN video_story_pools p ON p.id=d.pool_id"
+            " JOIN scripts peer ON peer.id=d.peer_id WHERE d.script_id=s.id AND d.decision='skip' AND ("
+            " (json_extract(peer.topic,'$.content_mode')='episode'"
+            " AND COALESCE(json_extract(p.payload,'$.prompt_version'),0) < ?)"
+            " OR (COALESCE(json_extract(p.payload,'$.prompt_version'),0) < ? AND EXISTS ("
+            " SELECT 1 FROM json_each(p.payload,'$.events') e, json_each(e.value,'$.primary_sources') src"
+            " WHERE json_extract(e.value,'$.title')=d.title AND (src.value LIKE '%/whats-new%#%'"
+            " OR src.value LIKE '%/updates%#%' OR src.value LIKE '%/changelog%#%')))))",
+            (CHAPTER_PROMPT_VERSION, ENTRY_PROMPT_VERSION),
             )]
         peers = {peer for t in skipped for peer in t["content_archive"].get("duplicate_of", [])}
         cutoff = (datetime.now().astimezone() - timedelta(days=MEMORY_DAYS)).isoformat()[:10]
@@ -241,7 +286,7 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
     return {t["id"] for t in candidates if t.get("id") and identity(t) in remembered}
 
 
-def history(config_dir: str, jobs_dir: str) -> list[dict]:
+def history(config_dir: str, jobs_dir: str, *, include_tutorial_archive: bool = False) -> list[dict]:
     """A batch read, with the same ownership rules as the board; unpublished test drafts reserve nothing."""
     from core.video import outputs
 
@@ -256,9 +301,10 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
                             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=v.script_id "
                             "AND (p.version=v.version OR p.version IS NULL)) AS published "
                             "FROM script_versions v JOIN scripts s ON s.id=v.script_id "
-                            "WHERE v.created_at>=? AND (v.version=s.current_version OR EXISTS "
+                            "WHERE (v.created_at>=? OR (? AND s.content_column_id='ai_tutorial')) "
+                            "AND (v.version=s.current_version OR EXISTS "
                             "(SELECT 1 FROM publications p WHERE p.script_id=v.script_id "
-                            "AND (p.version=v.version OR p.version IS NULL)))", (cutoff,)).fetchall()
+                            "AND (p.version=v.version OR p.version IS NULL)))", (cutoff, include_tutorial_archive)).fetchall()
     result = []
     for row in rows:
         script = by_id[row["script_id"]]
@@ -270,7 +316,17 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
         if not source_matrix:
             key = matrix_scopes.get((script["topic"].get("matrix_dedup") or {}).get("job"), key)
         sections = json.loads(row["sections"])
-        story = json.loads(row["meta"]).get("story") or {}
+        meta = json.loads(row["meta"])
+        story = meta.get("story") or {}
+        chapters = []
+        if (meta.get("episode") or {}).get("mode") == "episode":
+            for index, section in enumerate(sections):
+                if section.get("episode_role") != "item":
+                    continue
+                text = " ".join(p.get("text", "") for p in section.get("paragraphs", []))
+                if text.strip():
+                    chapters.append({"chapter": index, "title": section["title"], "text": text,
+                                     "sources": cited_sources([section])})
         fields = script["topic"].get("fields") or {}
         event_date = str(fields.get("发布日期") or script["topic"].get("event_date") or "")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", event_date):
@@ -284,6 +340,7 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
                        "text": " ".join(p.get("text", "") for section in sections for p in section.get("paragraphs", [])),
                        "created_at": script["created_at"],
                        "sequence": row["sequence"],
+                       **({"chapters": chapters} if chapters else {}),
                        "scope": key, "report": script.get("report_path") or script["topic"].get("from_report", ""),
                        "sources": {k for u in story["primary_sources"] if (k := source_key(u))}
                                   if story else cited_sources(sections)})
@@ -295,9 +352,11 @@ def coverage(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str = ""
     key = scope(policy.get("job", ""), config_dir)
     if not key:
         return []
+    tutorial = policy.get("job") == "ai_media/ai_tool_tutorials"
     with store.connect() as conn:
         current = conn.execute("SELECT rowid AS sequence FROM scripts WHERE id=?", (script_id,)).fetchone() if script_id else None
-    return [h for h in history(config_dir, jobs_dir) if h["scope"] == key and h["script_id"] != script_id
+    return [h for h in history(config_dir, jobs_dir, include_tutorial_archive=tutorial)
+            if h["scope"] == key and h["script_id"] != script_id
             and (not current or h["published"] or h["sequence"] < current["sequence"])]
 
 

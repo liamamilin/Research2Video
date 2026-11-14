@@ -59,11 +59,17 @@ def busiest(paths: list[Path]):
     return best
 
 
-def font(size: int):
+#: (file, face index) of a heavy CJK face; the title fonts above are regular weight, too thin at feed size.
+BOLD_FONTS = (('/System/Library/Fonts/Hiragino Sans GB.ttc', 2), ('/System/Library/Fonts/STHeiti Medium.ttc', 1),
+              ('/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc', 2),
+              ('/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc', 2))
+
+
+def font(size: int, *, bold: bool = False):
     from PIL import ImageFont
-    for name in FONTS:
+    for name, index in (BOLD_FONTS if bold else ()) + tuple((name, 0) for name in FONTS):
         try:
-            return ImageFont.truetype(name, size)
+            return ImageFont.truetype(name, size, index=index)
         except OSError:
             continue
     return None
@@ -162,19 +168,111 @@ def compose_portrait(frame, title: str):
     return canvas
 
 
-def make_covers(video: Path, title: str, destinations: dict[str, Path], ffmpeg: str | None) -> dict[str, Path]:
-    """Sample the video once for both orientations; never crop a landscape cover into a portrait."""
+PAPER = (250, 248, 240)
+RED = (214, 40, 40)
+RED_EDGE = (120, 12, 12)
+DARK = (26, 26, 26)
+GREY = (70, 70, 70)
+FEED_OVERLAY = 0.15  # B站 and the short-video apps print play counts and duration over the bottom of the cover
+
+
+def _fit(draw, text: str, start: int, width: int, *, bold: bool = True, smallest: int = 40):
+    """The largest face from ``start`` down at which ``text`` fits on one line of ``width``."""
+    pixels = start
+    while pixels > smallest:
+        face = font(pixels, bold=bold)
+        if face is None:
+            return None, 0
+        if draw.textlength(text, font=face) <= width:
+            return face, pixels
+        pixels = int(pixels * 0.92)
+    return font(smallest, bold=bold), smallest
+
+
+def compose_figure(copy: dict, size: tuple[int, int] = SIZE, *, area: tuple[int, int, int, int] | None = None):
+    """Number-led cover: the big line in red, the comparison below, the subject on a pill above.
+
+    ``area`` is the box (left, top, right, bottom) the text must stay inside; by default the full cover less the
+    strip platforms print their counters over."""
+    from PIL import Image, ImageDraw
+    canvas = Image.new('RGB', size, PAPER)
+    draw = ImageDraw.Draw(canvas)
+    left, top, right, bottom = area or (int(size[0] * .06), int(size[1] * .07), int(size[0] * .94),
+                                        int(size[1] * (1 - FEED_OVERLAY)))
+    width, height = right - left, bottom - top
+    topic = big_face = figure_face = None
+    topic_px = pad = figure_px = 0
+    gap = int(height * .05)
+    if copy.get('topic'):
+        topic, topic_px = _fit(draw, copy['topic'], int(height * .085), width - int(height * .06), smallest=28)
+        if topic is None:
+            return None
+        pad = int(topic_px * .45)
+    rest = height - ((topic_px + pad * 2 + gap) if topic else 0)
+    big_face, big = _fit(draw, copy['big'], int(rest * (.62 if copy.get('figure') else .8)), width, smallest=60)
+    if big_face is None:
+        return None
+    stroke = max(3, big // 45)
+    if copy.get('figure'):
+        figure_face, figure_px = _fit(draw, copy['figure'], int(min(big * .45, (rest - big * 1.12) * .8)), width,
+                                      smallest=36)
+        if figure_face is None:
+            return None
+    block = ((topic_px + pad * 2 + gap) if topic else 0) + int(big * 1.12) + (int(figure_px * 1.2) if figure_face else 0)
+    y = top + max(0, (height - block) // 2)  # centred: a short line does not leave the lower half empty
+    if topic:
+        box_w = draw.textlength(copy['topic'], font=topic) + pad * 2
+        draw.rounded_rectangle((left, y, left + box_w, y + topic_px + pad * 2), int(topic_px * .5), fill=INK)
+        draw.text((left + pad, y + pad), copy['topic'], font=topic, fill='white', anchor='la')
+        y += topic_px + pad * 2 + gap
+    draw.text((left, y), copy['big'], font=big_face, fill=RED, stroke_width=stroke, stroke_fill=RED_EDGE, anchor='la')
+    y += int(big * 1.12)
+    if figure_face:
+        draw.text((left + stroke, y), copy['figure'], font=figure_face, fill=DARK, anchor='la')
+    draw.rectangle((0, size[1] - max(10, size[1] // 90), size[0], size[1]), fill=ACCENT)
+    return canvas
+
+
+def compose_figure_portrait(copy: dict):
+    """3:4 profile cover: the text stays inside the central square profiles show, above the bottom counters."""
+    w, h = PORTRAIT_SIZE
+    square_top = (h - w) // 2
+    return compose_figure(copy, PORTRAIT_SIZE, area=(int(w * .08), square_top + int(w * .08), int(w * .92),
+                                                     square_top + int(w * .85)))
+
+
+def make_covers(video: Path, title: str, destinations: dict[str, Path], ffmpeg: str | None,
+                copy: dict | None = None, frame_image: Path | None = None) -> dict[str, Path]:
+    """Sample the video once for both orientations; never crop a landscape cover into a portrait.
+
+    With ``copy`` (see ``cover_copy``) the cover is number-led and needs no frame; without it, or when that layout
+    cannot be drawn, it is the title over a content frame. ``frame_image`` is a clean picture the render shipped for
+    this (an illustrated explainer's chapter-1 illustration): it replaces the sampled video frame."""
     if not ffmpeg or not title.strip() or not video.is_file():
         return {}
     made = {}
     try:
         with tempfile.TemporaryDirectory() as tmp:
-            frame = busiest(frames(ffmpeg, video, Path(tmp)))
-            if frame is None:
-                return {}
+            def content_frame():
+                if frame_image is not None and frame_image.is_file():
+                    from PIL import Image
+                    try:
+                        return Image.open(frame_image).convert('RGB')
+                    except OSError:
+                        pass  # an unreadable picture: fall back to a frame of the video
+                return busiest(frames(ffmpeg, video, Path(tmp)))
+            frame = None if copy else content_frame()
             for orientation, dest in destinations.items():
-                image = (compose_portrait(frame, title) if orientation == 'portrait' else
-                         compose(frame, title, DOUYIN_LANDSCAPE_SIZE if orientation == 'douyin_landscape' else SIZE))
+                size = DOUYIN_LANDSCAPE_SIZE if orientation == 'douyin_landscape' else SIZE
+                image = None
+                if copy:
+                    image = compose_figure_portrait(copy) if orientation == 'portrait' else compose_figure(copy, size)
+                    if image is None and frame is None:
+                        frame = content_frame()
+                if image is None:
+                    if frame is None:
+                        continue
+                    image = compose_portrait(frame, title) if orientation == 'portrait' else compose(frame, title, size)
                 if image is None:
                     continue
                 dest.parent.mkdir(parents=True, exist_ok=True)

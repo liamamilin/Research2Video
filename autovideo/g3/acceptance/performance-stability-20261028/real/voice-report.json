@@ -1,0 +1,80 @@
+{
+  "voice": "voxcpm_anchor",
+  "steps": 10,
+  "chain": "anchor",
+  "anchor_units_per_second": 4.81,
+  "segments": [
+    {
+      "id": "c1_n1",
+      "chapter": "c1",
+      "seconds": 4.0,
+      "units": 18,
+      "units_per_second": 4.96,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 11.694,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n2",
+      "chapter": "c1",
+      "seconds": 4.64,
+      "units": 24,
+      "units_per_second": 5.44,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 9.567,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n1",
+      "chapter": "c2",
+      "seconds": 2.72,
+      "units": 11,
+      "units_per_second": 4.72,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 5.77,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n2",
+      "chapter": "c2",
+      "seconds": 5.92,
+      "units": 32,
+      "units_per_second": 5.7,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 12.142,
+      "in_range": true,
+      "cache_hit": false
+    }
+  ],
+  "performance": {
+    "compiled": true,
+    "load_seconds": 31.319,
+    "total_seconds": 80.399,
+    "reference_cache": {
+      "hits": 6,
+      "misses": 2,
+      "encode_seconds": 1.297
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 0,
+    "chapter_misses": 2,
+    "segment_hits": 0,
+    "segment_misses": 4,
+    "entry_keys": [],
+    "write_errors": [
+      "cache budget reached; audio still generated normally",
+      "cache budget reached; audio still generated normally"
+    ],
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 86.301
+  }
+}

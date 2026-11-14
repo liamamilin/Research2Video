@@ -227,3 +227,20 @@ def test_assistant_can_submit_from_path_and_workspace_tracks_original_upload(cli
     assert workspace['objects'][0]['local_video']
     assert workspace['tasks'][0]['publications'][0]['status'] == 'QUEUED'
     assert workspace['tasks'][0]['publications'][0]['version'] == 1
+
+
+def test_local_video_pair_is_saved_and_reaches_native_queue(client, movie):
+    from tests.test_bilibili_covers import pair
+    paths = {}
+    for ratio, data in pair().items():
+        path = movie.with_name(f'cover-{ratio}.png')
+        path.write_bytes(data)
+        paths[ratio] = str(path)
+    result = post(client, movie, action='submit', platform='bilibili', covers=paths,
+        fields={'title': '双封面音乐视频', 'description': '本地视频说明', 'tags': ['音乐'], 'tid': 265})
+    assert result.status_code == 200, result.text
+    data = result.json()
+    assert data['submitted'] and set(data['covers']) == {'4x3', '16x9'}
+    task = platform_manager.store().get_upload(data['publication_tasks'][0]['id'])
+    assert Path(task['payload']['cover43']).read_bytes() == pair()['4x3']
+    assert Path(task['payload']['cover']).read_bytes() == pair()['16x9']

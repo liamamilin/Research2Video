@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - economy/economy_daily
 - economy/economy_weekly
+- economy/economy_illustrated
 render:
   video_speed: 1.25
 content:

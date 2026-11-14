@@ -1,0 +1,88 @@
+{
+  "full_video": {
+    "before": {
+      "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/rhythm-sync-20261111/full-news/before/video.mp4",
+      "sha256": "69dbbc1c8171e43f460b9b2c1f7ed336f6e93fbef933832cdaa7cd6530a30b35",
+      "frames": 4882,
+      "seconds": 162.73333333333332,
+      "decode": "pass"
+    },
+    "after": {
+      "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/rhythm-sync-20261111/full-news/after/video.mp4",
+      "sha256": "e82e3616ede7be7f7cdbf090abb80ebc0ddac4e77381fe577a4f4fe81e8bec43",
+      "frames": 4882,
+      "seconds": 162.73333333333332,
+      "decode": "pass"
+    }
+  },
+  "audio_correlation": 1.0,
+  "unchanged_authored_content": true,
+  "continuous_complete_timeline": true,
+  "changed_scenes": [
+    "card_4_p1",
+    "card_4_p2"
+  ],
+  "cut_before_seconds": 61.266666666666666,
+  "cut_after_seconds": 57.06666666666667,
+  "production_equals_reviewed_candidate": true,
+  "holdouts": [
+    {
+      "case": "tutorial",
+      "full_compiled_output_identical": true,
+      "scenes": 13,
+      "seconds": 169.16666666666666
+    },
+    {
+      "case": "comparison",
+      "full_compiled_output_identical": true,
+      "scenes": 16,
+      "seconds": 225.13333333333333
+    },
+    {
+      "case": "qwen",
+      "full_compiled_output_identical": true,
+      "scenes": 44,
+      "seconds": 449.1666666666667
+    }
+  ],
+  "visual_samples": [
+    0.8,
+    13.666666666666668,
+    25.433333333333334,
+    31.066666666666666,
+    48.13333333333333,
+    56.8,
+    57.15,
+    57.6,
+    57.86666666666667,
+    58.3,
+    60.6,
+    61.7,
+    63.6,
+    68.9,
+    70.06666666666666,
+    83.89999999999999,
+    92.36666666666666,
+    101.13333333333333,
+    113.93333333333334,
+    124.13333333333333,
+    134.73333333333335,
+    148.03333333333333,
+    162.53333333333333
+  ],
+  "tests": {
+    "passed": 1078,
+    "skipped": 1
+  },
+  "limits": [
+    "one positive real boundary repair; holdouts demonstrate no regression, not further gains",
+    "no audience study or retention measurement",
+    "illustration pacing remains unresolved"
+  ],
+  "visual_review": {
+    "full_video_samples_reviewed": 23,
+    "boundary_sample_observation": "usage page is settled during the low-use sentence; high emphasis and next-page transition preserved",
+    "opening_and_ending": "reviewed; no change in content, total duration, narration or captions",
+    "diff_check": "pass"
+  }
+}

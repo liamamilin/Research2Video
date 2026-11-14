@@ -1,0 +1,40 @@
+# 插画讲解：和「主题讲解」(theme_research.yaml) 并列的新配方，原配方不改。设计见 spec/illustrated-explainer.md。
+# 一段一个画面：每段围绕一个能画出来的情境（几个人在做一件事、或一个象征物），画面由出片环节按段生成。
+# 插画讲解配方：文稿按节写成能画的情境，出片走 AutoVideo 插画讲解形式（output: illustrated）。
+
+name: 插画讲解
+description: 围绕一个知识问题，用几个能画出来的生活情境，把原理一步步讲明白。
+status: experimental
+tags:
+  domain: {key: themes, name: 主题创作}
+  type: {key: illustrated_explainer, name: 插画讲解}
+  format: {key: long, name: B站横屏长}
+audiences: [general]
+target_minutes: 3
+minutes_range: [2, 5]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众, 补充材料]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style: {depth: intro, tone: explainer}
+  sections: [3, 6]
+  paragraph_units: [60, 160]
+  style: |
+    这是讲知识的视频，不是讲新闻：讲清一个原理、机制或做法为什么是这样，不围绕某天发生的事件。
+    全片只分 4 到 6 节，每节 150 到 300 字。材料里的工序或要点多于 6 个时，挑最能讲明白原理的几个，其余合并或略过。
+    每一节对应一张插画，观众会盯着这张图听几十秒，所以每节只讲一件事，并让这件事能画出来：
+    最好是一两个、最多三个普通人在一个具体地方做一件具体的事，手边有一个关键物件（价牌、钱包、机器、一杯水）；
+    实在没有人物的概念，就围绕一个能画出来的物件或现象来讲。同一组人物或物件尽量贯穿全片，让例子推动解释。
+    开头用一个观众身边的问题进入，结尾回到一句观众能带走的话。
+    上游材料里的数字和结论照用；每节最多说一两个关键数字，其余数字不说，不逐条罗列参数、标准号和牌号。
+    口语化，像对着一个好奇的朋友讲，少用术语；必须用的术语，先用这一节情境里的例子解释它。
+    口播只写观众听到的话：直接讲情境（“想象一个人往空杯子里倒水”），不描述插画、不给画面提要求（不说“画面里可以……”“画面还是……”），插画由出片环节按你讲的情境去画。
+output:
+  use: illustrated
+  packaging:
+    use: common
+    label: 插画讲解

@@ -1,0 +1,56 @@
+{
+  "before": [
+    {
+      "target": "title",
+      "beat": "card_3_p2_b0",
+      "at_seconds": 49.207
+    },
+    {
+      "target": "line:0",
+      "beat": "card_3_p2_b1",
+      "at_seconds": 50.887
+    },
+    {
+      "target": "line:1",
+      "beat": "card_3_p2_b2",
+      "at_seconds": 59.005
+    },
+    {
+      "target": "line:2",
+      "beat": "card_3_p2_b3",
+      "at_seconds": 60.525
+    }
+  ],
+  "after": [
+    {
+      "target": "title",
+      "beat": "card_3_p2_b0",
+      "at_seconds": 49.207
+    },
+    {
+      "target": "line:0",
+      "beat": "card_3_p2_b1",
+      "at_seconds": 49.207
+    },
+    {
+      "target": "line:0",
+      "beat": "card_3_p2_action_0",
+      "at_seconds": 50.887
+    },
+    {
+      "target": "line:1",
+      "beat": "card_3_p2_b2",
+      "at_seconds": 55.325
+    },
+    {
+      "target": "line:1",
+      "beat": "card_3_p2_action_1",
+      "at_seconds": 59.005
+    },
+    {
+      "target": "line:2",
+      "beat": "card_3_p2_b3",
+      "at_seconds": 60.525
+    }
+  ]
+}

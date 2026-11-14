@@ -1,0 +1,180 @@
+{
+  "cases": [
+    {
+      "case": "tutorial",
+      "scene": "card_3",
+      "seconds": 18.533333333333335,
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-tutorial-card_3/before/video.mp4",
+          "sha256": "76ec1e21c3509201876d685dab3b505c5eda6f61545d58729abbda77c72eb8ae"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-tutorial-card_3/after/video.mp4",
+          "sha256": "600392e60a49a75a401fb3cb8b05ff9a99a43fa8861fff837828bf6374fca326"
+        }
+      },
+      "normal_compiler_output_matches": true,
+      "authored_story_and_captions_unchanged": true,
+      "audio_correlation": 1.0,
+      "decode": "pass",
+      "image_checks": [
+        {
+          "path": "assets/slideshow/image-01.png",
+          "sha256": "7faa09c6fee06b71024eabd3c6f5b30e7597d7951d4e20b3fa5705f409f1f760",
+          "box": [
+            34,
+            51,
+            1166,
+            693
+          ],
+          "all_visible_content_inside": true
+        }
+      ],
+      "comparison": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-tutorial-card_3/comparison.jpg"
+    },
+    {
+      "case": "comparison",
+      "scene": "card_3",
+      "seconds": 13.1,
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_3/before/video.mp4",
+          "sha256": "e95f902b25b32592d741ced9196370f8b7b44b5dfe245a07b3eb58be2a6b6222"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_3/after/video.mp4",
+          "sha256": "7d00751f8baaf8c57965c0b7ffad32ecb287708ad276fe1ae75d2a45d0055067"
+        }
+      },
+      "normal_compiler_output_matches": true,
+      "authored_story_and_captions_unchanged": true,
+      "audio_correlation": 1.0,
+      "decode": "pass",
+      "image_checks": [
+        {
+          "path": "assets/slideshow/image-01.png",
+          "sha256": "4ff5a9f111be4cb7a3a98207281d68ea0910776d99bd602d1366923330a829be",
+          "box": [
+            29,
+            0,
+            691,
+            675
+          ],
+          "all_visible_content_inside": true
+        }
+      ],
+      "comparison": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_3/comparison.jpg"
+    },
+    {
+      "case": "comparison",
+      "scene": "card_11",
+      "seconds": 14.233333333333333,
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_11/before/video.mp4",
+          "sha256": "6ca7e70ce89616bd8ebebca1e6693e36fa0327a2735ee36e5b4f152b47120382"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_11/after/video.mp4",
+          "sha256": "ff536de042a3184d5624d5e376d58913abb2ac6655c715ef1115e4aa3d481109"
+        }
+      },
+      "normal_compiler_output_matches": true,
+      "authored_story_and_captions_unchanged": true,
+      "audio_correlation": 1.0,
+      "decode": "pass",
+      "image_checks": [
+        {
+          "path": "assets/slideshow/image-03.png",
+          "sha256": "fd58624100c0ae013cddf2bb97c7d73fd21cc65c2dc0def2ad66429e2ebbb0d9",
+          "box": [
+            0,
+            0,
+            720,
+            528
+          ],
+          "all_visible_content_inside": true
+        }
+      ],
+      "comparison": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-comparison-card_11/comparison.jpg"
+    },
+    {
+      "case": "recorder",
+      "scene": "card_2",
+      "seconds": 20.533333333333335,
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-recorder-card_2/before/video.mp4",
+          "sha256": "a46e959a08bca0ff4d10b8fa111c61657cc13ecce0c01d6f8224d8b3aad89c1e"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-recorder-card_2/after/video.mp4",
+          "sha256": "beef03b6e73b805b16115c5ff5ad51adba178329b6b0898608105c61f92b9566"
+        }
+      },
+      "normal_compiler_output_matches": true,
+      "authored_story_and_captions_unchanged": true,
+      "audio_correlation": 1.0000000000000002,
+      "decode": "pass",
+      "image_checks": [
+        {
+          "path": "assets/slideshow/image-01.png",
+          "sha256": "4ff5a9f111be4cb7a3a98207281d68ea0910776d99bd602d1366923330a829be",
+          "box": [
+            29,
+            0,
+            691,
+            675
+          ],
+          "all_visible_content_inside": true
+        },
+        {
+          "path": "assets/slideshow/image-02.png",
+          "sha256": "7bdd8ceec4e0ab15706d083ccac66c86b664d1a0d71a2980cad780498c86bb53",
+          "box": [
+            0,
+            0,
+            720,
+            478
+          ],
+          "all_visible_content_inside": true
+        }
+      ],
+      "comparison": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-recorder-card_2/comparison.jpg"
+    }
+  ],
+  "hybrid_picture_only": {
+    "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-r2-20261111/final-hybrid-tutorial-card_3/after/video.mp4",
+    "decode": "pass",
+    "scope": "native picture renderer and slot framing; voice/captions mixed by the existing downstream stage"
+  },
+  "not_claimed": [
+    "viewer study",
+    "retention growth",
+    "all screenshot text readable"
+  ],
+  "tests": {
+    "full_suite": {
+      "passed": 1066,
+      "skipped": 1,
+      "stage": "core integration; before final hybrid framing and compatibility refinements"
+    },
+    "final_targeted": {
+      "passed": 48,
+      "command": "python3 -m pytest g2/tests/test_image_reading.py g2/tests/test_shot_director.py g2/tests/test_hybrid_cards.py -q"
+    },
+    "diff_check": "pass"
+  },
+  "visual_review": {
+    "method": "five timeline samples per A/B plus full-resolution spot checks; not a viewer study",
+    "decisions": [
+      "retain larger stable image area and remove competing duplicate paragraph",
+      "retain exact-white exterior framing with all visible image content preserved",
+      "preserve existing multi-image emphasis timing",
+      "do not add OCR or column-specific camera rules for dense low-resolution text"
+    ],
+    "holdout": "recorder/card_2 is another real video and new composition; some image assets are shared with comparison",
+    "boundary": "dense three-column text remains unsuitable for comfortable word-by-word reading"
+  }
+}

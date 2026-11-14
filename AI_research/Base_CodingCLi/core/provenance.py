@@ -45,6 +45,7 @@ def normalize_url(url: str) -> str:
     """Canonical form for comparison: host/scheme lowercased, tracking stripped."""
     try:
         parts = urlsplit(url.strip())
+        port = parts.port
     except ValueError:
         return url.strip().lower()
     if not parts.scheme or not parts.netloc:
@@ -55,8 +56,8 @@ def normalize_url(url: str) -> str:
     if host.startswith("www."):
         host = host[4:]
     netloc = host
-    if parts.port and str(parts.port) != DEFAULT_PORTS.get(scheme):
-        netloc = f"{host}:{parts.port}"
+    if port and str(port) != DEFAULT_PORTS.get(scheme):
+        netloc = f"{host}:{port}"
 
     path = re.sub(r"/{2,}", "/", parts.path or "/")
     if len(path) > 1 and path.endswith("/"):

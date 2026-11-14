@@ -287,8 +287,10 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
         if tries(key) >= limit:
             out["hold"] = f"写稿失败 {limit + 1} 次：{script.get('error')}"
             return out
-        if not can_start_script:
-            if key == "search" and search_health.outage():
+        needs_search = key == "search" or not (script.get("report_path") or script["topic"].get("from_report"))
+        search_down = needs_search and search_health.outage()
+        if not can_start_script or search_down:
+            if search_down:
                 out["item"] = {"note": SEARCH_WAIT_NOTE}
             return out
         failed_step = "research" if not script.get("report_path") else "write"

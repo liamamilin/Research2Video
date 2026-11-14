@@ -316,7 +316,8 @@ def test_dry_run_touches_nothing(tree, capsys):
     import sys as _sys
     argv = _sys.argv
     _sys.argv = ["maintenance.py", "--dry-run",
-                 "--state-dir", str(state), "--logs-dir", str(logs)]
+                 "--state-dir", str(state), "--logs-dir", str(logs),
+                 "--autovideo-data-dir", str(tmp_path / "autovideo-data")]
     try:
         assert maintenance.main() == 0
     finally:
@@ -335,7 +336,8 @@ def test_one_failing_step_does_not_stop_the_others(tree, monkeypatch, capsys):
     monkeypatch.setattr(maintenance, "vacuum_databases", boom)
     import sys as _sys
     argv = _sys.argv
-    _sys.argv = ["maintenance.py", "--state-dir", str(state), "--logs-dir", str(logs)]
+    _sys.argv = ["maintenance.py", "--state-dir", str(state), "--logs-dir", str(logs),
+                 "--autovideo-data-dir", str(tmp_path / "autovideo-data")]
     try:
         code = maintenance.main()
     finally:
@@ -410,3 +412,97 @@ def test_dry_run_still_reports_what_it_would_free(tmp_path):
     report = maintenance.prune_backups(state, keep=1, dry_run=True)
     assert "2 项" in report, report
     assert len(list(root.iterdir())) == 3, "dry-run deleted something"
+
+
+# --- validation scratch ------------------------------------------------------
+
+def _age(path: Path, days: float) -> None:
+    """Backdate a path and everything under it."""
+    stamp = time.time() - days * 86400
+    for p in [path, *path.rglob("*")] if path.is_dir() else [path]:
+        os.utime(p, (stamp, stamp), follow_symlinks=False)
+
+
+@pytest.fixture()
+def scratch(tmp_path):
+    state = tmp_path / "state"
+    data = tmp_path / "autovideo-data"
+    for d in (state / "validation" / "old-run" / "frames", state / "validation" / "fresh-run",
+              state / "automatic_visual_acceptance" / "20261025",
+              data / "validation" / "episode-mode-20261031",
+              data / "acceptance-matrix-visual-20261101", data / "voice-stability-20261027",
+              data / "brands", data / "music-jobs", data / "jobs"):
+        d.mkdir(parents=True)
+    (state / "validation" / "old-run" / "frames" / "f.png").write_bytes(b"x" * 1000)
+    (state / "validation" / "fresh-run" / "run.log").write_text("still going")
+    (data / "focus-sync-regression-20261028.log").write_text("log")
+    (data / "jobs.sqlite3").write_text("db")
+    (data / "brands" / "active.json").write_text("{}")
+    for p in (state / "validation" / "old-run", state / "automatic_visual_acceptance" / "20261025",
+              data / "validation" / "episode-mode-20261031", data / "acceptance-matrix-visual-20261101",
+              data / "voice-stability-20261027", data / "focus-sync-regression-20261028.log",
+              data / "brands", data / "music-jobs", data / "jobs", data / "jobs.sqlite3"):
+        _age(p, 30)
+    _age(state / "validation" / "fresh-run", 30)
+    (state / "validation" / "fresh-run" / "run.log").write_text("written just now")
+    return state, data
+
+
+def test_old_validation_runs_are_deleted(scratch):
+    state, data = scratch
+    report = maintenance.prune_scratch(state, data, 7, dry_run=False)
+    for gone in (state / "validation" / "old-run", state / "automatic_visual_acceptance" / "20261025",
+                 data / "validation" / "episode-mode-20261031", data / "acceptance-matrix-visual-20261101",
+                 data / "voice-stability-20261027", data / "focus-sync-regression-20261028.log"):
+        assert not gone.exists(), gone
+    assert "6 项" in report
+    # The containers themselves stay so the next validation run can write into them.
+    assert (state / "validation").is_dir() and (data / "validation").is_dir()
+
+
+def test_a_run_written_to_recently_is_kept_even_if_the_folder_is_old(scratch):
+    state, data = scratch
+    maintenance.prune_scratch(state, data, 7, dry_run=False)
+    assert (state / "validation" / "fresh-run" / "run.log").is_file()
+
+
+def test_production_data_is_never_touched(scratch):
+    state, data = scratch
+    maintenance.prune_scratch(state, data, 7, dry_run=False)
+    for kept in ("brands", "music-jobs", "jobs", "jobs.sqlite3"):
+        assert (data / kept).exists(), kept
+
+
+def test_a_dated_database_is_never_deleted(tmp_path):
+    data = tmp_path / "data"
+    data.mkdir()
+    db = data / "production-plan-video-before-20261023.db"
+    db.write_text("db")
+    _age(db, 30)
+    maintenance.prune_scratch(tmp_path / "state", data, 7, dry_run=False)
+    assert db.exists()
+
+
+def test_symlinks_to_the_external_disk_are_left_alone(tmp_path):
+    data = tmp_path / "data"
+    target = tmp_path / "external" / "shot-director-20261026-first"
+    target.mkdir(parents=True)
+    (target / "clip.mp4").write_bytes(b"v")
+    data.mkdir()
+    link = data / "shot-director-20261026-first"
+    link.symlink_to(target)
+    _age(target, 30)
+    _age(link, 30)
+    maintenance.prune_scratch(tmp_path / "state", data, 7, dry_run=False)
+    assert link.is_symlink() and (target / "clip.mp4").is_file()
+
+
+def test_dry_run_reports_scratch_without_deleting(scratch):
+    state, data = scratch
+    report = maintenance.prune_scratch(state, data, 7, dry_run=True)
+    assert "6 项" in report
+    assert (state / "validation" / "old-run" / "frames" / "f.png").is_file()
+
+
+def test_missing_directories_are_not_an_error(tmp_path):
+    assert maintenance.prune_scratch(tmp_path / "nope", tmp_path / "nada", 7, dry_run=False) == "验证中间产出: 无可清理"

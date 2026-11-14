@@ -11,7 +11,7 @@ from .fileio import atomic_write
 from .search import SearchResult
 
 
-def prepare(root: Path, job: str, items: list[SearchResult]) -> tuple[str, dict]:
+def prepare(root: Path, job: str, items: list[SearchResult], *, include_current: bool = False) -> tuple[str, dict]:
     folder = root / hashlib.sha256(job.encode()).hexdigest()[:20]
     path = folder / "latest.json"
     previous = json.loads(path.read_text()) if path.exists() else {"items": {}}
@@ -34,7 +34,14 @@ def prepare(root: Path, job: str, items: list[SearchResult]) -> tuple[str, dict]
     note = ("首次采集用于建立基线，不能据此声称刚刚发布。" if not path.exists() else
             "以下仅为相对本任务上次成功报告新增或修改的材料；页面修改不等于产品刚刚发布。")
     block = f"## 信息源变化\n\n{summary}。{note}\n\n"
-    block += SearchClient.format_results(changed) if changed else "本次没有新增或修改材料。请说明暂无新题材，不要重复生成旧题。"
+    if changed:
+        block += SearchClient.format_results(changed)
+    else:
+        block += "本次没有新增或修改材料。"
+        if not include_current:
+            block += "请说明暂无新题材，不要重复生成旧题。"
+    if include_current:
+        block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
     return block, {"folder": str(folder), "job": job, "at": datetime.now(timezone.utc).isoformat(), "items": current}
 
 

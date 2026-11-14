@@ -621,19 +621,28 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
         numbers = list(re.finditer(r'(?<![\d.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\d.])', text))
         used, matched_end = {}, 0
         for cue, value in zip(result[1:], phrases):
+            target_index = int(cue['target_id'].split(':')[1])
+            is_delta = target_index % 3 == 2
+            if target_index % 3 == 0:
+                matched_end = 0
             number = re.search(r'[-+]?\d[\d,]*(?:\.\d+)?', value)
             key = number[0].lstrip('+-').replace(',', '') if number else ''
             matches = [m for m in numbers if m[0].replace(',', '') == key]
+            if is_delta:
+                # A change belongs to this row's comparison. A matching number
+                # spoken earlier for another value must not reveal its badge.
+                matches = [m for m in matches if m.start() >= matched_end]
             if matches:
                 # Narration can introduce the new value before the old one.
                 # Match each value independently, keeping repeated occurrences
                 # ordered only when the exact same number appears again.
-                occurrence = used.get(key, 0)
+                occurrence = 0 if is_delta else used.get(key, 0)
                 match = matches[min(occurrence, len(matches) - 1)]
-                used[key] = occurrence + 1
+                if not is_delta:
+                    used[key] = occurrence + 1
                 at, phrase = match.start(), match[0]
                 matched_end = max(matched_end, match.end())
-            elif cue['target_id'].startswith('line:') and int(cue['target_id'].split(':')[1]) % 3 == 2:
+            elif is_delta:
                 # A spoken delta may be "涨了五个多百分点". Keep the supplied
                 # numeric delta, revealing it at the explanation after values.
                 tail = text[matched_end:]
@@ -685,7 +694,8 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                             cue['quote'] = phrases[index]
                         break
                     at -= len(row['text'])
-    visual_language.align_object_cues(scene, result, speech)
+    placed = visual_language.align_object_cues(scene, result, speech)
+    visual_language.align_label_cues(scene, result, speech, placed)
     return result
 
 
@@ -715,7 +725,7 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
             beats.append(beat)
             timing.append({"scene_id": scene["id"], "beat_id": beat['id'], **cue, "automatic": automatic,
                            "estimated_start_ms": row["start_ms"] + offset})
-        beats.extend(visual_language.action_beats(scene, rows))
+        beats.extend(visual_language.action_beats(scene, rows, timing))
         beats.sort(key=lambda b: (order.index(b["trigger"]["segment_id"]), b["trigger"].get("offset_ms", 0)))
         scenes.append({"id": scene["id"], "component": scene["component"], "props": scene["props"],
                        "narration_segment_ids": scene["narration_segment_ids"], "purpose": scene["headline"],

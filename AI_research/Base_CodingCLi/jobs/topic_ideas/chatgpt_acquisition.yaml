@@ -1,0 +1,10 @@
+name: ChatGPT 获客矩阵 · 参考题型出题
+enabled: true
+description: 参考保留的题目和题型，按栏目生成新问题，不额外联网搜索。
+topic_ideas: chatgpt_acquisition
+idea_request: aabfe18d016c4d1dadf746fdd7aa470f
+prompt: 根据矩阵和参考库生成候选题目。
+runtime:
+  timeout_seconds: 1200
+  skip_if_running: true
+output: output/topic_ideas/chatgpt_acquisition/{date}.md

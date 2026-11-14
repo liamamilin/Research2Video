@@ -61,7 +61,7 @@ def test_model_entities_connect_material_to_native_chart_and_revisions_use_exist
     assert result['entities'][0]['color'] == seeds[1]['color']
 
 
-def test_recap_reuses_two_existing_visuals_prefers_key_and_avoids_nested_recaps(tmp_path):
+def test_recap_keeps_its_scene_when_previous_images_and_key_charts_are_unrelated(tmp_path):
     scenes = [scene('picture1', 'object_showcase', {'images': [{'caption': '本地方案', 'image_asset_id': 'i1'}]}),
               scene('picture2', 'object_showcase', {'images': [{'caption': '本地方案', 'image_asset_id': 'i1'}]}),
               scene('plot', 'data_chart', chart()),
@@ -69,28 +69,46 @@ def test_recap_reuses_two_existing_visuals_prefers_key_and_avoids_nested_recaps(
               scene('recap2', 'concept_reveal', {'lines': ['总结已有重点']})]
     pages = [{}, {}, {'importance': 'key'}, {'story_role': 'recap'}, {'story_role': 'recap'}]
     stories = apply(tmp_path, scenes, pages)
-    assert stories[3]['recap'] == ['picture2', 'plot']
-    assert stories[4]['recap'] == ['picture2', 'plot']
+    assert 'recap' not in stories[3] and 'recap' not in stories[4]
+    assert scenes[3]['props']['lines'] == ['回顾已有重点']
+    assert scenes[4]['props']['lines'] == ['总结已有重点']
     validate_story(scenes[3], scenes[:3])
     scenes[3]['props']['story']['recap'] = ['recap']
     with pytest.raises(ValueError, match='前面已有'):
         validate_story(scenes[3], scenes[:3])
 
 
-def test_recap_prefers_shared_objects_and_references_follow_earlier_scenes(tmp_path):
+def test_shared_object_names_do_not_replace_a_recap_with_an_earlier_scene(tmp_path):
     scenes = [scene('a', 'comparison', {'left': {'label': '本地方案'}, 'right': {'label': '云端方案'}}),
               scene('b', 'concept_reveal', {'lines': ['其他工具：搜索']}),
               scene('c', 'concept_reveal', {'lines': ['本地方案：已有结论']})]
     stories = apply(tmp_path, scenes, [{'importance': 'key'}, {'importance': 'key'}, {'story_role': 'recap'}])
-    assert stories[-1]['recap'] == ['a']
+    assert 'recap' not in stories[-1]
+    assert stories[-1]['entities'][0]['id'] == stories[0]['entities'][0]['id']
+    assert scenes[-1]['props']['lines'] == ['本地方案：已有结论']
 
 
-def test_explicit_spoken_recap_keeps_the_visual_review_when_model_calls_it_a_result(tmp_path):
+def test_explicit_spoken_recap_keeps_role_without_replacing_the_planned_content(tmp_path):
     scenes = [scene('a', 'comparison', {'left': {'label': '本地方案'}, 'right': {'label': '云端方案'}}),
               scene('b', 'concept_reveal', {'lines': ['本地方案：更省']})]
     stories = apply(tmp_path, scenes, [{'importance': 'key'}, {'story_role': 'result'}],
                     texts=['两个方案放在一起看。', '最后回顾两个方案的区别。'])
-    assert stories[-1]['role'] == 'recap' and stories[-1]['recap'] == ['a']
+    assert stories[-1]['role'] == 'recap' and 'recap' not in stories[-1]
+    assert scenes[-1]['props']['lines'] == ['本地方案：更省']
+
+
+def test_recap_preserves_flow_and_camera_continuity_across_topics(tmp_path):
+    scenes = [scene('first', 'flow_diagram', {'nodes': [{'id': 'x', 'label': '上下文'}],
+              'edges': [], 'shot_plan': {'closing': {'targets': ['node:x']}}}),
+              scene('summary', 'flow_diagram', {'nodes': [{'id': 'y', 'label': '上下文'}],
+              'edges': [], 'scene_flow': {'entry': 'carry'}})]
+    before = copy.deepcopy(scenes)
+    stories = apply(tmp_path, scenes, [{}, {'story_role': 'recap'}])
+    assert 'recap' not in stories[-1]
+    for original, actual in zip(before, scenes):
+        actual_without_story = copy.deepcopy(actual)
+        actual_without_story['props'].pop('story')
+        assert actual_without_story == original
 
 
 def test_planner_exposes_roles_and_same_chapter_request_carries_object_names(tmp_path, monkeypatch):

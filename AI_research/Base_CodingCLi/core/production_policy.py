@@ -14,6 +14,7 @@ from core import cron, matrices
 from core.yaml_cache import load_yaml
 
 FILE = "production_policy.yaml"
+FLASH_JOB = "monitoring/ai_flash_discovery"
 
 
 def load(config_dir: str) -> dict:
@@ -132,6 +133,24 @@ def plan_for(state_dir: str, job: str) -> dict | None:
     return dict(row) if row else None
 
 
+def _latest_collection_end(state_dir: str, job: str, before: datetime) -> datetime | None:
+    from core.state import StateManager
+
+    latest = None
+    # Failed attempts must not hide the last successful collection cutoff.
+    for run in StateManager.get_history(job, limit=0, state_dir=state_dir):
+        if run.get("status") != "success":
+            continue
+        window = (run.get("usage") or {}).get("collection_window") or {}
+        try:
+            cutoff = datetime.fromisoformat(window.get("end", ""))
+        except (TypeError, ValueError):
+            continue
+        if cutoff.tzinfo is not None and cutoff < before and (latest is None or cutoff > latest):
+            latest = cutoff
+    return latest
+
+
 def issue(
     config_dir: str,
     state_dir: str,
@@ -150,12 +169,15 @@ def issue(
     from core.schedule_store import slot
     from core.schedule_store import zone as schedule_zone
 
-    plan = context or plan_for(state_dir, name)
+    due = (context or {}).get("due_at")
+    triggered_at = (context or {}).get("flash_triggered_at") if name == FLASH_JOB and due is None else None
+    plan = context if context and triggered_at is None else plan_for(state_dir, name)
     timezone = (plan or {}).get("timezone") or rule.get("timezone", "Asia/Shanghai")
     zone = schedule_zone(timezone)
     current = now.replace(tzinfo=zone) if now.tzinfo is None else now.astimezone(zone)
     expression = (plan or {}).get("expression") or (plan or {}).get("schedule")
-    due = (context or {}).get("due_at")
+    if triggered_at is not None:
+        current = datetime.fromtimestamp(triggered_at, zone)
     if due is None:
         due = (
             slot(expression, current.timestamp(), timezone, backwards=True)
@@ -171,8 +193,15 @@ def issue(
         from datetime import timedelta
 
         start = end - timedelta(days=rule.get("days", job.get("collection_days", 7)))
+    mode = rule["mode"]
+    if triggered_at is not None:
+        end = current
+        previous_end = _latest_collection_end(state_dir, name, end)
+        if previous_end is not None:
+            start = previous_end.astimezone(zone)
+        mode = "since_last_collection"
     window = {
-        "mode": rule["mode"],
+        "mode": mode,
         "days": max(1, int((end - start).total_seconds() + 86399) // 86400),
         "start": start.isoformat(),
         "end": end.isoformat(),

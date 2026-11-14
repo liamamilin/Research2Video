@@ -45,6 +45,7 @@ import { ScriptPolish } from "@/components/ScriptPolish";
 import { workflowReturn } from "@/lib/platform-links";
 import { SelectionSkipLinks, skipLabel } from "@/components/SelectionSkip";
 import { useScriptEditor } from "@/lib/use-script-editor";
+import { ExperimentBadge } from "@/components/ExperimentBadge";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
   CITED: { label: "有出处", cls: "bg-success/15 text-success border-success/30" },
@@ -383,6 +384,7 @@ export function VideoScriptViewPage() {
             {!localVideo && <CredibilityBadge value={detail.credibility} />}
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.topic.content_mode === "episode" ? <span className="badge border border-accent text-accent">整期节目</span> : null}
+            <ExperimentBadge marks={detail.content_context?.experiments} />
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.content_context?.column_name ? <Link className="text-xs text-accent hover:underline"
               to={`/matrices/${detail.content_context.matrix}?tab=columns`}>栏目：{detail.content_context.column_name}</Link> : null}

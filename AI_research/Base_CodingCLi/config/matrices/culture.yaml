@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - culture/culture_daily
 - culture/culture_weekly
+- culture/culture_illustrated
 render:
   video_speed: 1.25
 content:

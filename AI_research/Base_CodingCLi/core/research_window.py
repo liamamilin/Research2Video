@@ -31,8 +31,11 @@ def freeze(job: dict, now: datetime) -> dict:
 def instruction(window: dict | None) -> str:
     if not window:
         return ""
+    period = f"{window['start']} 至 {window['end']}（{window['timezone']}）"
+    if window.get("mode") != "since_last_collection":
+        period = f"近 {window['days']} 天：{period}"
     return (
-        f"\n\n## 本期采集范围\n近 {window['days']} 天：{window['start']} 至 {window['end']}（{window['timezone']}）。"
+        f"\n\n## 本期采集范围\n{period}。"
         "围绕此范围的新发布、更新和案例组织本期材料；联网检索也使用这个时间范围。"
         "当前产品说明、价格与排行榜快照可作解释背景，不把采集日期当成发布日期。"
         "标为“页面新增带生效时间的公告”的条目，公告本身可作为本期变化选题。"

@@ -1,0 +1,6 @@
+{
+  "at": "2026-11-11T10:09:34.246931+00:00",
+  "file": "g1/renderer/src/Root.tsx",
+  "sha256": "ababd987515998252c06e7657999881eb7c46655e7a981c5d94b55837c9f3444",
+  "reason": "Integration review found legacy ProcessDiagram owns its title; its new early return omitted it. Restored original title without changing relation selection/layout/thresholds/evaluation. No holdout-specific rule adjustment. Preserve original legacy render and validate corrected render separately."
+}
