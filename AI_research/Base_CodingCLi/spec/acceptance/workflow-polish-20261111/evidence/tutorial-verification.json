@@ -1,0 +1,150 @@
+{
+  "receipt": {
+    "status": "PASS",
+    "run_id": "593423ffb1344e0eb37791885c9173c8",
+    "script_id": "851c18b7b93d4aa58aa99cb1fba8ed87",
+    "render_id": "2d8d12ce7c0844ea9087ec5721c56811",
+    "job_id": "5f9f3f47-193e-4b26-98d1-5ca700b83d86",
+    "production": "ai_media_opensource_digest",
+    "content_context": {
+      "column": "ai_opensource",
+      "column_name": "AI 开源发现",
+      "type": "explainer",
+      "matrix": "ai_media",
+      "source_matrix": "ai_media",
+      "job": "ai_media/daily_opensource_radar",
+      "revision": "a5d536e1260ad98289eceb794c2ce7b41db4ef03d650d1e0504d49f54a4b6806",
+      "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+      "promise": "帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点",
+      "notes": "每项内容介绍一个值得观众认识的项目，尽早把它放进一个具体任务。沿同一份输入讲清项目处理哪一环、输出是什么，以及最有辨识度的动作或能力。参数、原理和相关项目各自帮助解释这条任务线中的一个作用，说明后让该项目继续推进；材料里的输入与输出例子成为讲述的抓手。该项结尾回到项目带来的任务结果与适用场合，让观众记住这个项目能接在自己工作中的哪个位置。项目热度与开发背景作为补充，作者自主决定切入点和展开方式。",
+      "content_mode": "episode",
+      "greeting": "",
+      "type_definition": {
+        "key": "explainer",
+        "name": "解读",
+        "promise": "理解事件或概念背后的原因",
+        "structure": [
+          "问题",
+          "机制",
+          "例子",
+          "结论"
+        ],
+        "preferred_visuals": [
+          "图表",
+          "流程",
+          "截图",
+          "解释卡"
+        ]
+      },
+      "render_inheritance": "source_compatible",
+      "render": {
+        "packaging": {
+          "label": "AI 开源发现",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+        "preferred_visuals": [
+          "项目截图",
+          "产品画面",
+          "输入输出对照",
+          "任务流程",
+          "重点卡"
+        ]
+      }
+    },
+    "files_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-workflow-polish-20261111/tutorial-1/state/video_renders/2d8d12ce7c0844ea9087ec5721c56811",
+    "render_attempts": 1,
+    "automatic_pick_write_approve_render_download": true,
+    "manual_script_or_storyboard": false,
+    "automatic_visual_selection": true
+  },
+  "decode": {
+    "video.mp4": {
+      "exit_code": 0,
+      "stderr": "",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "duration": "175.166667"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "sample_rate": "48000",
+          "duration": "175.166000"
+        }
+      ],
+      "duration": 175.166667
+    },
+    "content.mp4": {
+      "exit_code": 0,
+      "stderr": "",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "duration": "169.166667"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "sample_rate": "48000",
+          "duration": "169.152000"
+        }
+      ],
+      "duration": 169.166667
+    }
+  },
+  "engine_qa": {
+    "qa.json": {
+      "status": "PASS",
+      "audio": {
+        "codec": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "decoded_tts_correlation": 0.9999525794081883,
+        "decoded_rms": 0.05647335946559906,
+        "full_decode": "PASS"
+      }
+    },
+    "brand-qa.json": {
+      "status": "PASS"
+    },
+    "package-qa.json": {
+      "status": "PASS"
+    },
+    "narration-check.json": {
+      "status": "PASS"
+    }
+  },
+  "presentation": {
+    "programme": "p13-3e71aa3c",
+    "writer_prompt_version": 13,
+    "requested_images": 2,
+    "material_scenes": 6,
+    "used_images": 2,
+    "components": {
+      "title_card": 1,
+      "flow_diagram": 1,
+      "object_showcase": 5,
+      "concept_reveal": 2,
+      "code_demo": 2,
+      "material_collage": 1,
+      "comparison": 1
+    },
+    "diagram_chapters": 0,
+    "evidence": "storyboard",
+    "material_usage": "含素材画面"
+  },
+  "visual_review": {
+    "inspected": "all 13 scene samples; enlarged command and input/output comparison frames",
+    "result": "Input webpage, install and conversion commands, Markdown result, and side-by-side comparison are visible. The original table rows and Markdown markers remain readable in the comparison sample. No new conversion was performed."
+  }
+}

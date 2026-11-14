@@ -1,0 +1,398 @@
+{
+  "split": "development",
+  "corpus_sha256": "e674e93167f47b5f27fa57c8dd7267d190c077d38fc808f5dcd7a5b9996c59d2",
+  "summary": {
+    "comparison": {
+      "cases": 8,
+      "with_issues": 3
+    },
+    "flow": {
+      "cases": 20,
+      "with_issues": 9
+    },
+    "material": {
+      "cases": 8,
+      "with_issues": 0
+    },
+    "motion": {
+      "cases": 8,
+      "with_issues": 2
+    },
+    "timing": {
+      "cases": 8,
+      "with_issues": 8
+    }
+  },
+  "cases": [
+    {
+      "id": "development-flow-00",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 32.99647473560517,
+      "node_count": 5
+    },
+    {
+      "id": "development-flow-01",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 15.901060070671377,
+      "node_count": 7
+    },
+    {
+      "id": "development-flow-02",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 15.280135823429543,
+      "node_count": 6
+    },
+    {
+      "id": "development-flow-03",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 53.69024856596559,
+      "node_count": 3
+    },
+    {
+      "id": "development-flow-04",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 23.57682619647355,
+      "node_count": 6
+    },
+    {
+      "id": "development-flow-05",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 41.86046511627907,
+      "node_count": 3
+    },
+    {
+      "id": "development-flow-06",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 42.05607476635514,
+      "node_count": 4
+    },
+    {
+      "id": "development-flow-07",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 34.81624758220503,
+      "node_count": 3
+    },
+    {
+      "id": "development-flow-08",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 41.86046511627907,
+      "node_count": 3
+    },
+    {
+      "id": "development-flow-09",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 53.69024856596559,
+      "node_count": 3
+    },
+    {
+      "id": "development-flow-10",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 23.57682619647355,
+      "node_count": 6
+    },
+    {
+      "id": "development-flow-11",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 16.24548736462094,
+      "node_count": 7
+    },
+    {
+      "id": "development-flow-12",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 31.914893617021274,
+      "node_count": 5
+    },
+    {
+      "id": "development-flow-13",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 11.976047904191617,
+      "node_count": 8
+    },
+    {
+      "id": "development-flow-14",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 23.596638655462186,
+      "node_count": 6
+    },
+    {
+      "id": "development-flow-15",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 32.99647473560517,
+      "node_count": 5
+    },
+    {
+      "id": "development-flow-16",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 15.901060070671377,
+      "node_count": 7
+    },
+    {
+      "id": "development-flow-17",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 16.94915254237288,
+      "node_count": 5
+    },
+    {
+      "id": "development-flow-18",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 32.846715328467155,
+      "node_count": 6
+    },
+    {
+      "id": "development-flow-19",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "node_count": 4
+    },
+    {
+      "id": "development-material-00",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-01",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-02",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-03",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-04",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-05",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-06",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-material-07",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "development-comparison-00",
+      "family": "comparison",
+      "issues": [],
+      "estimated_height": 482.8
+    },
+    {
+      "id": "development-comparison-01",
+      "family": "comparison",
+      "issues": [
+        "comparison_text_exceeds_panel"
+      ],
+      "estimated_height": 615.6
+    },
+    {
+      "id": "development-comparison-02",
+      "family": "comparison",
+      "issues": [],
+      "estimated_height": 266.6
+    },
+    {
+      "id": "development-comparison-03",
+      "family": "comparison",
+      "issues": [],
+      "estimated_height": 266.6
+    },
+    {
+      "id": "development-comparison-04",
+      "family": "comparison",
+      "issues": [
+        "comparison_text_exceeds_panel"
+      ],
+      "estimated_height": 756.8
+    },
+    {
+      "id": "development-comparison-05",
+      "family": "comparison",
+      "issues": [
+        "comparison_text_exceeds_panel"
+      ],
+      "estimated_height": 632.6
+    },
+    {
+      "id": "development-comparison-06",
+      "family": "comparison",
+      "issues": [],
+      "estimated_height": 479.6
+    },
+    {
+      "id": "development-comparison-07",
+      "family": "comparison",
+      "issues": [],
+      "estimated_height": 479.6
+    },
+    {
+      "id": "development-motion-00",
+      "family": "motion",
+      "issues": [
+        "spoken_target_dropped"
+      ],
+      "missing_targets": [
+        "node:n4",
+        "node:n5",
+        "node:n6"
+      ]
+    },
+    {
+      "id": "development-motion-01",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-motion-02",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-motion-03",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-motion-04",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-motion-05",
+      "family": "motion",
+      "issues": [
+        "spoken_target_dropped"
+      ],
+      "missing_targets": [
+        "node:n0",
+        "node:n1",
+        "node:n2",
+        "node:n3",
+        "node:n4"
+      ]
+    },
+    {
+      "id": "development-motion-06",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-motion-07",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": []
+    },
+    {
+      "id": "development-timing-00",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-01",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-02",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-03",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-04",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-05",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-06",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    },
+    {
+      "id": "development-timing-07",
+      "family": "timing",
+      "issues": [
+        "repeated_emphasis_lost_or_early"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,229 @@
+{
+  "verified_at": "2026-11-11T10:19:20.756514+00:00",
+  "decision": "End this bounded relation-layout investigation. Do not invest further in complex graph forms. Geometry passing is not proof of better viewing; choose simple expression by actual finished-video effect.",
+  "cohorts": {
+    "development-final": {
+      "1": {
+        "cases": 40,
+        "failed": 0,
+        "index": 23
+      },
+      "0.9": {
+        "cases": 40,
+        "failed": 2,
+        "index": 25
+      }
+    },
+    "holdout-final": {
+      "1": {
+        "cases": 40,
+        "failed": 0,
+        "index": 22
+      },
+      "0.9": {
+        "cases": 40,
+        "failed": 0,
+        "index": 27
+      }
+    },
+    "previous-final": {
+      "1": {
+        "cases": 20,
+        "failed": 0,
+        "index": 8
+      },
+      "0.9": {
+        "cases": 20,
+        "failed": 0,
+        "index": 11
+      }
+    }
+  },
+  "retained_failures": [
+    {
+      "cohort": "development-final",
+      "id": "development-layered-12",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [
+        "small_text"
+      ],
+      "minimum_node_px": 16.36461446503288,
+      "duration_frames": 720
+    },
+    {
+      "cohort": "development-final",
+      "id": "development-layered-28",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [
+        "small_text"
+      ],
+      "minimum_node_px": 9.599579242636748,
+      "duration_frames": 450
+    }
+  ],
+  "frozen_implementation_changes": {
+    "files": [
+      "g1/renderer/src/Root.tsx"
+    ],
+    "reason": "Integration review found legacy ProcessDiagram owns its title; its new early return omitted it. Restored original title without changing relation selection/layout/thresholds/evaluation. No holdout-specific rule adjustment. Preserve original legacy render and validate corrected render separately."
+  },
+  "media": [
+    {
+      "run": "holdout-native",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/holdout-native/video.mp4",
+      "sha256": "6e7575c4d9bae1a605d4dbfb2b25eea8b423b54fd13b24d14755e72e2b3a914e",
+      "frames": 6300,
+      "duration_seconds": 210.005,
+      "full_decode": "PASS",
+      "snapshots": 36,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/holdout-native/qa"
+    },
+    {
+      "run": "holdout-hybrid",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/holdout-hybrid/video.mp4",
+      "sha256": "0b216e8f4e8d035f8320cd10e9545aa8df0cf3497f60df2ac7d0a7d90b879551",
+      "frames": 6300,
+      "duration_seconds": 210.0,
+      "full_decode": "PASS",
+      "snapshots": 36,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/holdout-hybrid/qa"
+    },
+    {
+      "run": "legacy-final",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/legacy-final/video.mp4",
+      "sha256": "035a18cd0accddbba0cbdf272bf50b2dae9b7bcec0d6dbf1f5156a3e12b38fd6",
+      "frames": 1140,
+      "duration_seconds": 38.016,
+      "full_decode": "PASS",
+      "snapshots": 6,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/legacy-final/qa"
+    },
+    {
+      "run": "capacity-boundary",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/capacity-boundary/video.mp4",
+      "sha256": "f9acef95921c6977da7a6f6c56e122d92f86e5976f94ab0bb4b58d6703a2eeef",
+      "frames": 1170,
+      "duration_seconds": 39.0,
+      "full_decode": "PASS",
+      "snapshots": 6,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/capacity-boundary/qa"
+    },
+    {
+      "run": "spoken",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken/artifacts/G2_CaseA_通信噪声.mp4",
+      "sha256": "627e57f1657851aa38b788b530a7fa22fa003d0ec745953e16796e0a211be02f",
+      "frames": 813,
+      "duration_seconds": 27.115,
+      "full_decode": "PASS",
+      "snapshots": 12,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken/qa"
+    },
+    {
+      "run": "spoken-1.5",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken-1.5/artifacts/G2_CaseA_通信噪声.mp4",
+      "sha256": "bc8190741236f748f48c160e0c8cd6453eb3a0be16a827fbb6243ff567c0e89a",
+      "frames": 543,
+      "duration_seconds": 18.112,
+      "full_decode": "PASS",
+      "snapshots": 12,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken-1.5/qa"
+    },
+    {
+      "run": "spoken-hybrid-final",
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken-hybrid-final/artifacts/G2_CaseA_通信噪声.mp4",
+      "sha256": "549f36867c456826aafcf586422292a3aa7d01e6ce90be2e1f6f68b88b8b3e22",
+      "frames": 813,
+      "duration_seconds": 27.1,
+      "full_decode": "PASS",
+      "snapshots": 12,
+      "qa": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/spoken-hybrid-final/qa"
+    }
+  ],
+  "speech": {
+    "anchors": 12,
+    "maximum_frame_rounding_error_ms": 16.333,
+    "real_speed_preserves_expression_and_index_geometry": true,
+    "note": "Forced-alignment evidence and frame inspection; no claim of independent human listening or measured viewer comprehension."
+  },
+  "visual_inspection": {
+    "contact_sheets": "All six native/hybrid held-out contact sheets inspected in the task; 72 sampled frames covering the preselected 12 scenes on each surface. Contact sheets establish composition and stability, not full-size text legibility.",
+    "full_resolution_examples": [
+      "development-stills/development-fork-16.png",
+      "development-stills/development-merge-17.png",
+      "development-stills/development-layered-20.png",
+      "holdout-hybrid/qa/holdout-merge-17-1.png",
+      "holdout-hybrid/qa/holdout-merge-33-1.png",
+      "legacy-final/qa/holdout-fork-16-1.png",
+      "spoken/qa/b3-1.png",
+      "spoken-hybrid-final/qa/b3-1.png",
+      "capacity-boundary/qa/development-layered-12-1.png"
+    ],
+    "findings": "Inspected readable examples preserve full labels, conditions, arrows, active-object emphasis and title; spoken hybrid separates captions from the picture. Known capacity-boundary image has visibly undersized text and remains a failure. Spatial overview is less intuitive in the numbered expression."
+  },
+  "tests": {
+    "full": "1060 passed, 1 skipped",
+    "after_title_fix": "67 passed",
+    "logs": [
+      "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/full-regression.log",
+      "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/relation-layout-20261111/final-targeted.log"
+    ]
+  },
+  "requirement_audit": [
+    {
+      "requirement": "Bounded alternatives and stopping rule",
+      "evidence": [
+        "PLAN.md",
+        "experiment.py",
+        "results/width-experiment.json",
+        "REPORT.md"
+      ],
+      "outcome": "Four-width graph experiment rejected; no expansion of that production route."
+    },
+    {
+      "requirement": "Fresh structures, held-out freeze, old seven only regression",
+      "evidence": [
+        "manifest.json",
+        "corpus.py",
+        "implementation-freeze.json",
+        "freeze-amendment.json",
+        "results/holdout-final.json",
+        "results/previous-final.json"
+      ],
+      "outcome": "40 new development and 40 frozen hold-out cases; 20 old flow cases only regression."
+    },
+    {
+      "requirement": "Shared bounded implementation with no case-specific fitting",
+      "evidence": [
+        "g1/renderer/src/RelationLayout.ts",
+        "g1/renderer/src/RelationIndex.tsx",
+        "g2/shot_director.py",
+        "g2/tests/test_relation_layout.py"
+      ],
+      "outcome": "One measured expression selector, complete object/edge indexing and adjacency context; capacity shortfalls retained."
+    },
+    {
+      "requirement": "Real rendering, decode, speech and compatibility",
+      "evidence": [
+        "media_qa.py",
+        "speech.py",
+        "speech_speed.py",
+        "speech_hybrid.py",
+        "speech-timing.json"
+      ],
+      "outcome": "Seven final MP4s decoded; 120 full-resolution screenshots exported; twelve real speech anchors and old-entry title correction verified."
+    },
+    {
+      "requirement": "Preserve attempts, scope and unresolved boundaries",
+      "evidence": [
+        "REPORT.md",
+        "RUN.md",
+        "results/development-final.json"
+      ],
+      "outcome": "Two visual capacity failures remain explicit. Old attempts and unrelated work preserved; no publishing or account changes."
+    }
+  ]
+}

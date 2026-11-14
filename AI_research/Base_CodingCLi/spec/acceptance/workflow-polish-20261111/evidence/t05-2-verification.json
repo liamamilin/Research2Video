@@ -1,0 +1,150 @@
+{
+  "receipt": {
+    "status": "PASS",
+    "run_id": "8aab37f88c7349bd9fdb8440743dfef2",
+    "script_id": "791d813fc7314e269f7c9c0967b48a07",
+    "render_id": "3d632102b6a04a7f8e08e7d707f28637",
+    "job_id": "72e5fba3-b873-4f8b-8151-b4f65f22acf4",
+    "production": "chatgpt_t05_comparison",
+    "content_context": {
+      "premise": "国内用户使用 ChatGPT 的现实：国内应用商店下载不到，要有海外账号（海外手机号或海外区 Apple ID、Google Play）和能访问海外服务的网络，付费方式也和国内 App 不同；真正在用的人大多在电脑网页端使用。讲到 ChatGPT 时按这个前提：把使用门槛当作选择的一部分讲清楚，不把它当成手机上和国产 App 并列、能直接下载的选项；和国产产品比较时，先说清各自在国内能不能直接用。",
+      "column": "chatgpt_t05_comparison",
+      "column_name": "T05 · AI 产品横向选择",
+      "type": "comparison",
+      "matrix": "chatgpt_acquisition",
+      "source_matrix": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t05_comparison",
+      "revision": "966b0576ee2f0d9b4439e9f51c59898d21fb33ca51b3ee5957dd19869bcaad5f",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "promise": "ChatGPT 和其他 AI 哪个好？",
+      "notes": "题材编号 T05；获客作用：影响选择。节目「同一笔钱，怎么选」（11-10 涨粉研究首选节目，spec/bilibili-growth-research-20261110/PROGRAMMES.md）：每条只回答一个选择问题——一笔钱加一件具体任务（如“只为改好周报，要不要另买会员”），不把各家功能讲全；开头 15–20 秒提出这笔钱和这件任务，先给最关键的条件结论；只比较 3 个维度（选题核心角度里点名的比较点必须在其中，比如 ChatGPT 在国内的使用门槛），同一组产品贯穿到底，每个维度先说结果再解释差异；加一个会改变选择的条件（如集中用还是零散用）；结尾给一张“如果你是这种情况，就选……”的决策表。下面的结构按材料选用，都要服从这条主线。每条视频讲一个对比，至少两家不同公司的产品放在同一任务或同一维度上比较，讲清输入、操作、输出差异、费用和适用场景，结尾给出不同需求下的选择。开头 15 秒内亮出反差或结论预告，不先讲品牌背景。结构按材料从下面选一种，不要每条都用同一种：\nA 价格反差与分任务对决：先抛一个钱的反差（如都开最高档与都开基础档差几倍），再用 2–3 个日常任务给同样输入看各家输出，最后讲钱和选择顺序。适合多家套餐与能力都有材料时。\nB 同题盲测：同一道题去掉名字展示几家答案，请观众先猜，再揭晓并说明差在哪、什么情况选谁。适合有可直接展示的输出时。\nC 按人群选购：先给一张结论表，再按学生、职场写作、开发者、预算有限、国内可用等人群各给选择和理由，补一个反例。适合问题是“我该买哪个”时。\nD 新功能同台：某家刚上新功能或新模型，先讲变化，再看其他家同一件事做到哪一步，最后说现在值不值得换。适合动态类材料。\nE 单项擂台：只比一个维度（长文档、中文写作、免费额度、联网搜索、语音等），说清规则后逐家排序，点出最大意外，收在总表。\nF 误区纠正：先摆一个流行说法（越贵越好、排名第一最适合你），用价格或实测把它拆掉，再给正确的判断方法。\nG 换用成本：从一家换到另一家能得到什么、会失去什么（记忆、项目、插件、价格、付款方式），适合换的人和怎么迁移。\n无论哪种结构，都用对比表或并排画面收尾，标题写出具体对象和反差，不用日期当标题。只比较 ChatGPT 自家档位的题目交给 T06。直接使用上游已有材料，公开说明按公开说明介绍，不声称亲测。",
+      "content_mode": "individual",
+      "greeting": "",
+      "type_definition": {
+        "key": "comparison",
+        "name": "横评",
+        "promise": "理解多个对象的差异与适用条件",
+        "structure": [
+          "对象",
+          "比较维度",
+          "关键差异",
+          "适用情形"
+        ],
+        "preferred_visuals": [
+          "对比图",
+          "价格卡",
+          "真实画面",
+          "原理图"
+        ]
+      },
+      "render_inheritance": "content_matrix",
+      "render": {
+        "packaging": {
+          "label": "AI 产品横向选择",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+        "preferred_visuals": [
+          "并排输出对比",
+          "价格卡",
+          "对比表",
+          "产品真实截图",
+          "操作步骤"
+        ]
+      }
+    },
+    "files_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-workflow-polish-20261111/t05-2/state/video_renders/3d632102b6a04a7f8e08e7d707f28637",
+    "render_attempts": 1,
+    "automatic_pick_write_approve_render_download": true,
+    "manual_script_or_storyboard": false,
+    "automatic_visual_selection": true
+  },
+  "decode": {
+    "video.mp4": {
+      "exit_code": 0,
+      "stderr": "",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "duration": "231.133333"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "sample_rate": "48000",
+          "duration": "231.133000"
+        }
+      ],
+      "duration": 231.133333
+    },
+    "content.mp4": {
+      "exit_code": 0,
+      "stderr": "",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "duration": "225.133333"
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "sample_rate": "48000",
+          "duration": "225.152000"
+        }
+      ],
+      "duration": 225.152
+    }
+  },
+  "engine_qa": {
+    "qa.json": {
+      "status": "PASS",
+      "audio": {
+        "codec": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "decoded_tts_correlation": 0.9999520719427293,
+        "decoded_rms": 0.056138694286346436,
+        "full_decode": "PASS"
+      }
+    },
+    "brand-qa.json": {
+      "status": "PASS"
+    },
+    "package-qa.json": {
+      "status": "PASS"
+    },
+    "narration-check.json": {
+      "status": "PASS"
+    }
+  },
+  "presentation": {
+    "programme": "p13-e4e45572",
+    "writer_prompt_version": 13,
+    "requested_images": 3,
+    "material_scenes": 9,
+    "used_images": 3,
+    "components": {
+      "concept_reveal": 5,
+      "material_collage": 3,
+      "object_showcase": 6,
+      "comparison": 1,
+      "flow_diagram": 1
+    },
+    "diagram_chapters": 0,
+    "evidence": "storyboard",
+    "material_usage": "含素材画面"
+  },
+  "visual_review": {
+    "inspected": "all 16 scene samples; enlarged output, transcript, decision, and branching flow frames",
+    "result": "Three actual images appear in nine material scenes; input, output and comparison paragraphs correspond. Source screenshots contain small text at overview scale; side explanation text remains the main readable guide. A cropped branching flow was found and repaired in a separate render-only full-video revision.",
+    "final_revision": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/workflow-polish-20261111/flow-2/receipt.json"
+  }
+}

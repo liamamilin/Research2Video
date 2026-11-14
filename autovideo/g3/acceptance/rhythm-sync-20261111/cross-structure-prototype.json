@@ -1,0 +1,60 @@
+[
+  {
+    "case": "news",
+    "pages": 14,
+    "changes": [
+      {
+        "left": "card_4_p1",
+        "right": "card_4_p2",
+        "before": [
+          [
+            "c2_n1",
+            "c2_n2",
+            "c2_n3"
+          ],
+          [
+            "c2_n4",
+            "c2_n5"
+          ]
+        ],
+        "after": [
+          [
+            "c2_n1",
+            "c2_n2"
+          ],
+          [
+            "c2_n3",
+            "c2_n4",
+            "c2_n5"
+          ]
+        ],
+        "previous_boundary_ms": 61354,
+        "boundary_ms": 57261,
+        "reason": "unique explicit spoken anchors belong on their own page"
+      }
+    ],
+    "pages_unchanged": true,
+    "seconds": 162.73333333333332
+  },
+  {
+    "case": "tutorial",
+    "pages": 13,
+    "changes": [],
+    "pages_unchanged": true,
+    "seconds": 169.16666666666666
+  },
+  {
+    "case": "comparison",
+    "pages": 16,
+    "changes": [],
+    "pages_unchanged": true,
+    "seconds": 225.13333333333333
+  },
+  {
+    "case": "qwen",
+    "pages": 44,
+    "changes": [],
+    "pages_unchanged": true,
+    "seconds": 449.1666666666667
+  }
+]

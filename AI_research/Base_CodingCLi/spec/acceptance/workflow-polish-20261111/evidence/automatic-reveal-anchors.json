@@ -1,0 +1,92 @@
+{
+  "job_id": "50020470-c849-41e4-91d7-c55a938a6dc8",
+  "count": 9,
+  "automatically_generated": true,
+  "anchors": [
+    {
+      "scene": "card_1",
+      "target": "side:left",
+      "icon": "users",
+      "reveal_phrase": "线下开会、你记得按开始",
+      "phrase": "它够用"
+    },
+    {
+      "scene": "card_1",
+      "target": "side:right",
+      "icon": "network",
+      "reveal_phrase": "电话会议多的人",
+      "phrase": "别把希望全押在它身上"
+    },
+    {
+      "scene": "card_3",
+      "target": "line:0",
+      "icon": "clock",
+      "action": "complete",
+      "reveal_phrase": "另一场 Mac 内容排期会",
+      "phrase": "时间轴式工作计划"
+    },
+    {
+      "scene": "card_3",
+      "target": "line:1",
+      "icon": "file",
+      "action": "complete",
+      "reveal_phrase": "聊《影之刃零》时",
+      "phrase": "《只狼》和《影之刃零》的格挡机制做成对照卡片"
+    },
+    {
+      "scene": "card_3",
+      "target": "line:2",
+      "icon": "cloud",
+      "reveal_phrase": "iPhone 上录完",
+      "phrase": "换关联的 Android 或鸿蒙手机打开历史记录就能看到"
+    },
+    {
+      "scene": "card_6",
+      "target": "side:left",
+      "icon": "brain",
+      "reveal_phrase": "ChatGPT 得先把国内的使用门槛说清楚",
+      "phrase": "所以它不是手机上和微信输入法并列、点开就录的选项。"
+    },
+    {
+      "scene": "card_7",
+      "target": "side:left",
+      "icon": "brain",
+      "reveal_phrase": "ChatGPT 免费版只有有限的语音聊天",
+      "phrase": "它不是一个按一下就开始录会的录音笔。"
+    },
+    {
+      "scene": "card_9",
+      "target": "side:left",
+      "icon": "user",
+      "reveal_phrase": "每次手动点一下开始"
+    },
+    {
+      "scene": "card_9",
+      "target": "side:right",
+      "icon": "settings",
+      "reveal_phrase": "宁可让系统自动录"
+    }
+  ],
+  "opening_cues": [
+    {
+      "id": "card_1_b0",
+      "target": "side:left",
+      "ms": 11245
+    },
+    {
+      "id": "card_1_action_0",
+      "target": "side:left",
+      "ms": 13005
+    },
+    {
+      "id": "card_1_b1",
+      "target": "side:right",
+      "ms": 13818
+    },
+    {
+      "id": "card_1_action_1",
+      "target": "side:right",
+      "ms": 14698
+    }
+  ]
+}
