@@ -149,6 +149,30 @@ def test_maintenance_keeps_receipts_and_waiting_comments_but_blocks_real_workers
     assert db.get(queued['id'])['status'] == 'QUEUED'
 
 
+def test_maintenance_preserves_held_bilibili_uploads_and_blocks_released_work(tmp_path):
+    import fcntl
+    from core.platform_store import PlatformStore
+
+    db = PlatformStore(str(tmp_path))
+    upload = db.enqueue('123', {'id': 'render', 'script_id': 'script', 'version': 1}, {'automatic': True})
+    lock = tmp_path / 'platforms/bilibili/worker.lock'
+    lock.parent.mkdir(parents=True)
+    lock.touch()
+    assert busy_work(tmp_path)[0]['count'] == 1
+    assert db.hold_upload(upload['id'], '等待前置集发布')
+    before = db.pending_uploads('123')
+    assert not busy_work(tmp_path)
+    with restart_gate(tmp_path, timeout=1):
+        with lock.open('a') as probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    assert db.pending_uploads('123') == before
+    assert db.schedule_upload(upload['id'], None)
+    assert busy_work(tmp_path)[0]['count'] == 1
+    assert db.update_upload(upload['id'], status='UPLOADING', expected='QUEUED')
+    assert busy_work(tmp_path)[0]['count'] == 1
+
+
 def test_old_web_receipt_replacement_can_be_repaired_without_overwriting_public_result(tmp_path):
     from scripts.repair_publishing_lookups import retain_douyin_receipts
     folder = tmp_path / 'platforms/douyin'; folder.mkdir(parents=True)

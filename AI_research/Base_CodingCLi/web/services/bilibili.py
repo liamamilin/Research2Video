@@ -537,6 +537,8 @@ def upload(credentials: dict, video_path: Path, payload: dict, work_dir: Path) -
                 "--tag", ",".join(payload["tags"])]
         args += ["--cover", str(cover)]
         extra_fields = {}
+        if payload.get("ai_generated"):
+            extra_fields["creation_statement"] = {"id": 1}
         if payload.get('cover43'):
             try:
                 from web.services.bilibili_covers import image_data

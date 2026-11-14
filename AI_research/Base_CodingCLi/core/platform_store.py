@@ -113,6 +113,16 @@ class PlatformStore:
             rows = conn.execute("SELECT * FROM uploads WHERE uid=? ORDER BY created_at DESC LIMIT 200", (uid,)).fetchall()
         return [self._upload(row) for row in rows]
 
+    def reserved_publish_times(self, uid: str, excluding: str) -> list[float]:
+        """Read account reservations, including submissions still being reconciled."""
+        with self.connect() as conn:
+            rows = conn.execute(
+                "SELECT json_extract(payload,'$.dtime'), json_extract(payload,'$.released_at') "
+                "FROM uploads WHERE uid=? AND id!=? AND status IN ('QUEUED','UPLOADING','SUBMITTED','PUBLISHED','UNKNOWN')",
+                (uid, excluding),
+            ).fetchall()
+        return [float(value) for row in rows for value in row if value]
+
     def upload_versions(self, uid: str) -> set[tuple[str, int]]:
         """All versions already represented in the outbox, including older rows outside the UI page."""
         with self.connect() as conn:

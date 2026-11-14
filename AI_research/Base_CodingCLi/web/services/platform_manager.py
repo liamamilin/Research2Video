@@ -359,12 +359,6 @@ def held_note(window: dict) -> str:
             f"{int(window.get('prime_start', PRIME['prime_start'])):02d}:00 晚高峰。")
 
 
-def _publish_times(db, owner: str, task_id: str) -> list[float]:
-    """When other automatic uploads go (or went) public: their timers and the moments held ones were released."""
-    return [float(t) for u in db.uploads(owner) if u["id"] != task_id and u["status"] in ("QUEUED", "UPLOADING", "SUBMITTED", "PUBLISHED")
-            for t in (u["payload"].get("dtime"), u["payload"].get("released_at")) if t]
-
-
 def scheduled_note(dtime: float) -> str:
     return "定时发布：将于 " + datetime.fromtimestamp(dtime).astimezone().strftime("%m-%d %H:%M") + " 公开。"
 
@@ -708,10 +702,14 @@ def topics_of(script_ids: list[str]) -> dict[str, dict]:
         return {}
     with video_store.connect() as conn:
         rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat, "
-                            "json_extract(topic,'$.id') AS topic_id, "
-                            "COALESCE(json_extract(topic,'$.base_id'),json_extract(topic,'$.after_id')) AS base_id FROM scripts "
+                            "COALESCE(json_extract(topic,'$.episode_id'),json_extract(topic,'$.id')) AS topic_id, "
+                            "COALESCE(json_extract(topic,'$.base_id'),json_extract(topic,'$.after_id')) AS base_id, "
+                            "json_extract(topic,'$.after_id') AS after_id, column_key, content_column_id, "
+                            "json_extract(topic,'$.angle') AS angle FROM scripts "
                             "WHERE id IN (SELECT value FROM json_each(?))", (json.dumps(sorted(set(script_ids))),)).fetchall()
-    return {row["id"]: {"heat": int(row["heat"] or 0), "topic_id": row["topic_id"] or "", "base_id": row["base_id"] or ""}
+    return {row["id"]: {"heat": int(row["heat"] or 0), "topic_id": row["topic_id"] or "", "base_id": row["base_id"] or "",
+                        "after_id": row['after_id'] or '', 'timely': row['column_key'] == 'flash' and not row['angle'],
+                        'tutorial': row['content_column_id'] == 'ai_tutorial'}
             for row in rows}
 
 
@@ -720,14 +718,42 @@ def heat_of(script_ids: list[str]) -> dict[str, int]:
     return {sid: info["heat"] for sid, info in topics_of(script_ids).items()}
 
 
-def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float) -> bool:
-    """An extra angle waits while the video that tells its item is still queued or not yet public on its timer; so does
-    the next episode of a series (``after_id``), so its promise is never older than the video that made it."""
+def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float,
+                 published: set[str] | None = None, cancelled: dict[str, str] | None = None) -> bool:
+    """Angles keep their queue ordering. A series waits for actual publication, skipping cancelled slots."""
     base = (topics.get(upload["script_id"]) or {}).get("base_id")
     if not base:
         return False
+    if (topics.get(upload['script_id']) or {}).get('after_id'):
+        seen = set()
+        while base in (cancelled or {}) and base not in (published or set()):
+            if base in seen:
+                return True
+            seen.add(base)
+            base = cancelled[base]
+        return bool(base) and base not in (published or set())
     return any((topics.get(u["script_id"]) or {}).get("topic_id") == base
                and (u["status"] == "QUEUED" or float(u["payload"].get("dtime") or 0) > now) for u in pending)
+
+
+def published_episodes(owner: str) -> set[str]:
+    """Only actual publication records, including reconciled uploads, release a series successor."""
+    with video_store.connect() as conn:
+        return {r[0] for r in conn.execute(
+            "SELECT DISTINCT COALESCE(json_extract(s.topic,'$.episode_id'),json_extract(s.topic,'$.id')) "
+            "FROM scripts s JOIN publications p ON p.script_id=s.id "
+            "WHERE p.platform='bilibili' AND p.removed_at='' AND (p.account_uid=? OR p.account_uid='')", (owner,))}
+
+
+def cancelled_episodes() -> dict[str, str]:
+    """An explicitly dropped slot is skipped; a failed slot retains its place for retry."""
+    with video_store.connect() as conn:
+        return {r['episode_id']: r['after_id'] or '' for r in conn.execute(
+            "SELECT COALESCE(json_extract(i.topic,'$.episode_id'),json_extract(i.topic,'$.id')) AS episode_id, "
+            "json_extract(i.topic,'$.after_id') AS after_id FROM autopilot_items i WHERE i.state='CANCELLED' "
+            "AND NOT EXISTS (SELECT 1 FROM autopilot_items r WHERE r.state<>'CANCELLED' AND "
+            "COALESCE(json_extract(r.topic,'$.episode_id'),json_extract(r.topic,'$.id'))="
+            "COALESCE(json_extract(i.topic,'$.episode_id'),json_extract(i.topic,'$.id')))")}
 
 
 def by_priority(waiting: list[dict], heat: dict[str, int] | None = None) -> list[dict]:
@@ -774,6 +800,8 @@ def tick() -> None:
         pending = db.pending_uploads(owner)
         queued = [u for u in pending if u["status"] == "QUEUED"]
         topics = topics_of([u["script_id"] for u in pending])
+        published = published_episodes(owner) if any(t.get('after_id') for t in topics.values()) else set()
+        cancelled = cancelled_episodes() if any(t.get('after_id') for t in topics.values()) else {}
         heat = {sid: info["heat"] for sid, info in topics.items()}
         for waiting in by_priority(queued, heat):
             if not waiting["payload"].get("automatic"):
@@ -781,14 +809,15 @@ def tick() -> None:
                 break
             window = config.get("publish_window") or {}
             angle = bool((topics.get(waiting["script_id"]) or {}).get("base_id"))
-            if angle and base_pending(waiting, pending, topics, time.time()):
+            if angle and base_pending(waiting, pending, topics, time.time(), published, cancelled):
                 if not waiting["payload"].get("held"):
                     db.hold_upload(waiting["id"], "等前一条（同一选题讲发布的那条，或预告它的上一期）先公开，再按间隔接着发。")
                 continue
             # an extra angle follows its item instead of taking an evening-peak slot of its own
-            dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),
+            dtime = publish_at(time.time(), window, db.reserved_publish_times(owner, waiting["id"]),
                                held=bool(waiting["payload"].get("held")),
-                               heat=0 if angle else heat.get(waiting["script_id"], 0))
+                               heat=0 if angle or topics.get(waiting['script_id'], {}).get('timely')
+                               else heat.get(waiting["script_id"], 0))
             if dtime != HOLD:
                 task = waiting
                 break
@@ -821,7 +850,10 @@ def tick() -> None:
                                           "lookup_count": 0, "next_lookup_at": 0, "note": ""}, expected="UPLOADING")
             credential = credentials()
             try:
-                bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
+                payload = {**task["payload"], "cover": str(cover)}
+                if (topics.get(task["script_id"]) or {}).get("tutorial"):
+                    payload["ai_generated"] = True
+                bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), payload, work_dir)
                 dtime = task["payload"].get("dtime")
                 db.update_upload(task["id"], status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime else "")
             except bilibili.UploadFailed as exc:

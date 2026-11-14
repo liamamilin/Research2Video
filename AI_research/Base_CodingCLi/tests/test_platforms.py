@@ -854,10 +854,17 @@ def test_a_hot_topic_waits_for_the_evening_peak_and_falls_back_when_it_is_full()
     assert manager.publish_at(_at(9), {**WINDOW, "prime_start": 20, "prime_end": 22}, [], heat=hot) == _at(20)
 
 
-def test_held_upload_waits_here_then_submits_without_timer_in_order(platform_env, monkeypatch):
-    first, second = render(), render()
+def test_tutorial_uploads_use_the_account_window_and_spacing(platform_env, monkeypatch):
+    renders = [render() for _ in range(3)]
+    for row in renders:
+        video_store.update_script(row["script_id"], content_column_id="ai_tutorial")
     db = manager.store()
-    tasks = [manager.enqueue(row["id"], PAYLOAD, automatic=True) for row in (first, second)]
+    for hour in (12, 20):
+        scheduled = render()
+        video_store.update_script(scheduled["script_id"], content_column_id="ai_tutorial")
+        previous = db.enqueue("123", scheduled, {**PAYLOAD, "dtime": _at(hour, 30)})
+        db.update_upload(previous["id"], status="SUBMITTED")
+    tasks = [manager.enqueue(row["id"], PAYLOAD, automatic=True) for row in renders]
     clock = [_at(6)]
     monkeypatch.setattr(manager.time, "time", lambda: clock[0])
     sent = []
@@ -874,6 +881,58 @@ def test_held_upload_waits_here_then_submits_without_timer_in_order(platform_env
     clock[0] = _at(8, 31)
     manager.tick()
     assert len(sent) == 2 and db.get_upload(tasks[1]["id"])["status"] == "SUBMITTED"
+    clock[0] = _at(9, 1)
+    manager.tick()
+    assert len(sent) == 3 and db.get_upload(tasks[2]["id"])["status"] == "SUBMITTED"
+    assert all(payload["ai_generated"] for payload in sent)
+
+
+def test_automatic_upload_spaces_from_a_timer_outside_upload_history_page(platform_env, monkeypatch):
+    db = manager.store()
+    clock = [_at(6)]
+    monkeypatch.setattr(manager.time, "time", lambda: clock[0])
+    previous = db.enqueue("123", render(), {**PAYLOAD, "dtime": _at(8, 10)})
+    db.update_upload(previous["id"], status="SUBMITTED")
+    clock[0] += 1
+    for n in range(200):
+        row = db.enqueue("123", {"id": f"past-render-{n}", "script_id": f"past-script-{n}", "version": 1}, {})
+        db.update_upload(row["id"], status="PUBLISHED")
+    assert previous["id"] not in {row["id"] for row in db.uploads("123")}
+    new = render()
+    video_store.update_script(new["script_id"], content_column_id="ai_tutorial")
+    task = manager.enqueue(new["id"], PAYLOAD, automatic=True)
+    sent = []
+    monkeypatch.setattr(bilibili, "upload", lambda *args: sent.append(args[2]) or BV)
+    clock[0] = _at(8)
+    manager.tick()
+    assert not sent and db.get_upload(task["id"])["status"] == "QUEUED"
+    clock[0] = _at(8, 40)
+    manager.tick()
+    assert len(sent) == 1
+    assert db.get_upload(previous["id"])["payload"]["dtime"] == _at(8, 10)
+
+
+def test_uncertain_timed_submission_reserves_its_slot_without_blocking_other_uploads(platform_env, monkeypatch):
+    first, second = render(), render()
+    db = manager.store()
+    original = manager.enqueue(first["id"], PAYLOAD, automatic=True)
+    later = manager.enqueue(second["id"], PAYLOAD, automatic=True)
+    monkeypatch.setattr(manager.time, "time", lambda: _at(2))
+    sent = []
+
+    def upload(_credential, _video, payload, _folder):
+        sent.append(payload["dtime"])
+        if len(sent) == 1:
+            raise bilibili.BilibiliError("投稿回执未确认")
+        return BV
+
+    monkeypatch.setattr(bilibili, "upload", upload)
+    manager.tick()
+    assert db.get_upload(original["id"])["status"] == "UNKNOWN"
+    manager.tick()
+    assert sent == [_at(8), _at(8, 30)]
+    assert db.get_upload(later["id"])["status"] == "SUBMITTED"
+    assert db.get_upload(original["id"])["status"] == "UNKNOWN"
 
 
 def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform_env, monkeypatch):

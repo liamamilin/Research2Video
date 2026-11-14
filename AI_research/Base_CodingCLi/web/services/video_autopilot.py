@@ -175,16 +175,19 @@ def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Opt
 
 
 def _chain_episodes(pick: dict, picked: list[dict]) -> None:
-    """``selection.next_episode`` (11-10, growth research: give viewers a reason to follow): each item of the batch
-    ends by promising the next one, and the next goes public only after it (web/services/platform_manager.py), so
-    the promise is kept. Extra angles are not links of the chain; the last item promises nothing."""
+    """Keep stable series slots across candidate changes; _prepare names only a completed sequel.
+
+    The next slot publishes after its predecessor. Extra angles stay outside the chain.
+    """
     paths = get_settings().paths
     config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
     if not (config is not None and config.selection.get("next_episode")):
         return
     chain = [i for i in picked if not i["topic"].get("angle")]
+    for item in chain:
+        item['topic'] = {**item['topic'], 'episode_id': item['topic']['id']}
     for before, after in zip(chain, chain[1:]):
-        before["topic"] = {**before["topic"], "next_episode": after["topic"].get("title", "")}
+        before["topic"] = {**before["topic"], "next_episode_id": after['topic']['episode_id']}
         after["topic"] = {**after["topic"], "after_id": before["topic"]["id"]}
 
 
@@ -568,7 +571,13 @@ def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
     for index, topic in enumerate(alternatives):
         if topic["id"] in taken:
             continue
-        replacement = {**topic, "_story_fallbacks": alternatives[index+1:]}
+        # Episode identity belongs to the slot, not the candidate. Retrying B as D
+        # must leave C waiting for that same slot, rather than a discarded topic.
+        links = {key: item['topic'][key] for key in ('episode_id', 'after_id', 'next_episode_id')
+                 if item['topic'].get(key)}
+        if item['topic'].get('after_id') or item['topic'].get('next_episode'):
+            links.setdefault('episode_id', item['topic']['id'])  # older batches
+        replacement = {**topic, **links, "_story_fallbacks": alternatives[index+1:]}
         ap.update_item(item["id"], topic=replacement, script_id=None, state="PENDING", retries={},
                        gate={k: v for k, v in gate.items() if k != "story_selection"}, note=f"旧事件已覆盖，自动改选：{topic['title']}")
         return
@@ -578,6 +587,17 @@ def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
 
 def _prepare(item: dict) -> dict:
     topic = dict(item["topic"])
+    # A selected candidate can still change or fail. Promise a named sequel only
+    # when its video exists; ordinary farewells still work for an unfinished batch.
+    topic.pop('next_episode', None)
+    if topic.get('next_episode_id'):
+        run = ap.get_run(item['run_id']) or {}
+        following = next((row for row in run.get('items', [])
+                          if row['topic'].get('episode_id') == topic['next_episode_id']), None)
+        if following and following['state'] == 'DONE' and following.get('render_id'):
+            render = store.get_render(following['render_id'])
+            if render and render['status'] == 'COMPLETED':
+                topic['next_episode'] = following['topic'].get('title', '')
     config_dir = get_settings().paths.config_dir
     column = video_columns.get(config_dir, item["column_key"])
     job = research_dossier.PRODUCTIONS.get(item.get("production"), "")

@@ -158,11 +158,37 @@ def test_a_series_batch_promises_each_next_item_and_angles_stay_out_of_the_chain
     base = [t for t in topics if not t.get("angle")]
     assert len(base) >= 2
     for before, after in zip(base, base[1:]):
-        assert before["next_episode"] == after["title"] and after["after_id"] == before["id"]
-    assert "next_episode" not in base[-1] and "after_id" not in base[0]
+        assert before["next_episode_id"] == after["episode_id"] and after["after_id"] == before["episode_id"]
+        assert "next_episode" not in before
+    assert "next_episode_id" not in base[-1] and "after_id" not in base[0]
     assert all("next_episode" not in t and "after_id" not in t for t in topics if t.get("angle"))
 
 
 def test_next_episode_is_validated():
     assert production._selection({"next_episode": True}) == ({"next_episode": True}, "")
     assert production._selection({"next_episode": "yes"})[1]
+
+
+def test_replacing_middle_episode_keeps_its_slot_and_sequel_waits_for_replacement(video_env, monkeypatch):
+    from core.video import autopilot_store as ap
+    from web.services import video_autopilot as pilot, platform_manager as pm
+    monkeypatch.setattr(guard, 'known_duplicate_ids', lambda *args: set())
+    items = [
+        {'column_key': 'flash', 'topic': {'id': 'A', 'title': '甲', 'episode_id': 'A', 'next_episode_id': 'B'}},
+        {'column_key': 'flash', 'topic': {'id': 'B', 'title': '乙', 'episode_id': 'B', 'after_id': 'A',
+                                        'next_episode_id': 'C', '_story_fallbacks': [{'id': 'D', 'title': '丁'}]}},
+        {'column_key': 'flash', 'topic': {'id': 'C', 'title': '丙', 'episode_id': 'C', 'after_id': 'B'}}]
+    run = ap.create_run({}, items)
+    pilot._replace_candidate(run['items'][1], {}, '重复')
+    a, b, c = ap.get_run(run['id'])['items']
+    assert b['topic']['id'] == 'D' and b['topic']['episode_id'] == 'B'
+    assert b['topic']['after_id'] == 'A' and b['topic']['next_episode_id'] == 'C'
+    assert c['topic']['after_id'] == 'B' and a['topic']['next_episode_id'] == 'B'
+    script = store.create_script('flash', b['topic'])
+    assert pm.topics_of([script['id']])[script['id']]['topic_id'] == 'B'
+    assert 'next_episode' not in pilot._prepare(a)
+    ap.update_item(b['id'], state='DONE', render_id='render-D')
+    monkeypatch.setattr(store, 'get_render', lambda key: {'status': 'COMPLETED'})
+    assert pilot._prepare(a)['next_episode'] == '丁'
+    ap.update_item(b['id'], state='FAILED')
+    assert 'next_episode' not in pilot._prepare(a)
