@@ -37,6 +37,56 @@ def test_an_entire_utterance_too_short_to_read_still_fails():
                    [{'text': '是', 'start_ms': 0, 'end_ms': 100}])
 
 
+def test_last_word_end_is_clipped_without_moving_cue_boundaries_inside_speech():
+    text = '前两次的记录都留在原文件里，第三次才会把新的结果写入这一列 256K。'
+    row = {'id': 'n1', 'text': text, 'start_ms': 1000, 'end_ms': 3867}
+    items = [{'text': word, 'start_ms': i * 80, 'end_ms': (i + 1) * 80}
+             for i, (word, _, _) in enumerate(word_spans(text))]
+    items[-1]['end_ms'] = 3040
+    expected = build_cues(row, [*items[:-1], {**items[-1], 'end_ms': 2867}])
+    cues = build_cues(row, items)
+    assert cues == expected
+    assert len(cues) > 1 and ''.join(cue['text'] for cue in cues) == text
+    assert cues[-1]['end_ms'] == row['end_ms']
+    assert items[-1]['end_ms'] == 3040
+
+
+def test_zero_width_suffix_within_model_tolerance_stays_in_the_last_caption():
+    text = 'llama.cpp b12001 对比，GPU 上重写一个文件，LFM3 1.7B 从 229.7 t/s 到 1033.7 t/s。'
+    row = {'id': 'c3_n4', 'text': text, 'start_ms': 127815, 'end_ms': 137088}
+    edges = [80, 640, 960, 2640, 2800, 3280, 3600, 3920, 4080, 4240, 4320, 4320, 4480,
+             4800, 5440, 5520, 6240, 6400, 6720, 7120, 7520, 7680, 7920, 8320, 9280, 9280, 9280]
+    items = [{'text': word, 'start_ms': edges[i], 'end_ms': edges[i + 1]}
+             for i, (word, _, _) in enumerate(word_spans(text))]
+    items[-3]['end_ms'] = 8800
+    cues = build_cues(row, items)
+    assert ''.join(cue['text'] for cue in cues) == text
+    assert cues[-1]['text'].endswith('1033.7 t/s。')
+    assert cues[-1]['end_ms'] == row['end_ms']
+    assert items[-1]['start_ms'] == 9280
+
+
+def test_caption_without_in_bounds_words_merges_into_the_previous_caption():
+    text = '字' * 24 + '。'
+    row = {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 1000}
+    times = [i * 60 for i in range(16)] + [1040] * 8
+    items = [{'text': word, 'start_ms': ms, 'end_ms': ms} for (word, _, _), ms in zip(word_spans(text), times)]
+    cues = build_cues(row, items)
+    assert len(cues) == 1
+    assert cues[0]['text'] == text
+    assert cues[0]['end_ms'] == 1000
+
+
+@pytest.mark.parametrize('intervals', [[(0, 300), (1000, 1100)], [(0, 400), (300, 600)],
+                                       [(0, 300), (1101, 1101)]])
+def test_word_outside_audio_or_overlapping_previous_word_still_fails(intervals):
+    row = {'id': 'n1', 'text': '好了。', 'start_ms': 0, 'end_ms': 1000}
+    items = [{'text': word, 'start_ms': start, 'end_ms': end}
+             for (word, _, _), (start, end) in zip(word_spans(row['text']), intervals)]
+    with pytest.raises(ValueError, match='对齐时间无效'):
+        build_cues(row, items)
+
+
 def test_old_punctuation_only_voice_segment_keeps_its_text_and_timing():
     from g2.caption_alignment import verify_plan
     row = {'id': 'c1_n4', 'text': '”', 'start_ms': 7041, 'end_ms': 7106}
