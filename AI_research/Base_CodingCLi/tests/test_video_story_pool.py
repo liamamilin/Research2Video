@@ -258,6 +258,19 @@ def test_explicit_new_release_edition_is_new_even_without_redundant_change_text(
     assert not equivalent["changes"] and pool.duplicate(equivalent, peers)
 
 
+def test_edition_listing_an_already_told_release_is_not_a_new_edition():
+    packets = pool.packets(f"### 发布\n{SNAKE}")
+    old = pool.validate([event(action="release", edition="Gemini 4 Carbon")], packets, [])[0]
+    peers = [{"script_id": "old", "title": "已有发布", "story": old, "sources": {guard.source_key(SNAKE)}}]
+    listed = pool.validate([event(action="release", edition="llm-gemini 0.36；Gemini 4 Carbon", same_as=["H1"])],
+                           packets, pool.context(peers))[0]
+    assert not listed["changes"] and listed["event_key"] == old["event_key"]
+    assert pool.duplicate(listed, peers)
+    newer = pool.validate([event(action="release", edition="Gemini 4.1 Carbon", same_as=["H1"])],
+                          packets, pool.context(peers))[0]
+    assert newer["changes"] and not pool.duplicate(newer, peers)
+
+
 def test_dated_release_remains_one_event_despite_different_change_descriptions():
     packets = pool.packets(f"### 发布\n{SNAKE}")
     first = pool.validate([event(action="release", edition="2.0", changes=[

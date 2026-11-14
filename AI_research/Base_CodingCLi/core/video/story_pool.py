@@ -75,6 +75,10 @@ def _edition(value: str) -> str:
     return re.sub(r"^(?:version|v|版本)[:：]?(?=\d)", "", _value(value))
 
 
+def _edition_parts(value: str) -> set[str]:
+    return {_edition(part) for part in re.split(r"[；;，,、/|]+", value) if part.strip()}
+
+
 def _hash(*values) -> str:
     return hashlib.sha256(json.dumps(values, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
@@ -255,7 +259,10 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
         if event["action"] == "release" and event["edition"] and not event["changes"]:
             previous_editions = [(by_peer[ref].get("story") or {}).get("edition", "") for ref in same_as]
             previous_editions = [v for v in previous_editions if v]
-            if previous_editions and _edition(event["edition"]) not in {_edition(v) for v in previous_editions}:
+            # An edition listing several items ("llm-gemini 0.36；Gemini 4 Carbon")
+            # that still names an edition already told is that release, not a new one.
+            told = {part for v in previous_editions for part in _edition_parts(v)}
+            if previous_editions and not (_edition_parts(event["edition"]) & told):
                 event["changes"] = [{"dimension": "edition", "before": previous_editions[0], "after": event["edition"]}]
         event["primary"], event["background"] = list(dict.fromkeys(primary)), list(dict.fromkeys(background))
         event["previous"] = list(dict.fromkeys(by_peer[k]["script_id"] for k in same_as))
