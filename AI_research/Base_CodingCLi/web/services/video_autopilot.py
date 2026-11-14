@@ -180,7 +180,8 @@ def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Opt
 def _chain_episodes(pick: dict, picked: list[dict]) -> None:
     """Keep stable series slots across candidate changes; _prepare names only a completed sequel.
 
-    The next slot publishes after its predecessor. Extra angles stay outside the chain.
+    A slot its predecessor previewed by name publishes after it (platform_manager.base_pending);
+    an unannounced slot keeps the normal spacing. Extra angles stay outside the chain.
     """
     paths = get_settings().paths
     config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None

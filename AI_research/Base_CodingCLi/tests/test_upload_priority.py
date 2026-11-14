@@ -51,6 +51,14 @@ def test_the_next_episode_waits_for_the_one_that_promised_it():
     assert not pm.base_pending(ep2, [ep2], topics, now=1000, published={"r/F1"})
 
 
+def test_only_an_episode_its_predecessor_previewed_waits_for_it():
+    topics = {"ep1": {"heat": 0, "topic_id": "r/F1", "base_id": ""}, "ep2": {"heat": 0, "topic_id": "r/F2", "base_id": "r/F1", "after_id": "r/F1"}}
+    ep2 = {"script_id": "ep2", "status": "QUEUED", "payload": {}}
+    ep1 = {"script_id": "ep1", "status": "QUEUED", "payload": {}}
+    assert pm.base_pending(ep2, [ep1, ep2], topics, now=1000, promised={"r/F2"})
+    assert not pm.base_pending(ep2, [ep1, ep2], topics, now=1000, promised=set())  # "我们下期见" names no episode
+
+
 def test_cancelled_episode_is_skipped_but_preceding_unpublished_episode_still_matters():
     topics = {'c': {'base_id': 'B', 'after_id': 'B'}}
     c = {'script_id': 'c'}

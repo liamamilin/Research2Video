@@ -719,12 +719,18 @@ def heat_of(script_ids: list[str]) -> dict[str, int]:
 
 
 def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float,
-                 published: set[str] | None = None, cancelled: dict[str, str] | None = None) -> bool:
-    """Angles keep their queue ordering. A series waits for actual publication, skipping cancelled slots."""
+                 published: set[str] | None = None, cancelled: dict[str, str] | None = None,
+                 promised: set[str] | None = None) -> bool:
+    """Angles keep their queue ordering. A series waits for actual publication, skipping cancelled slots.
+
+    ``promised``: the episodes an earlier video previewed by name. Only those wait; an episode nobody announced has
+    no order to keep (series items are written in chain order, so most never get a named preview)."""
     base = (topics.get(upload["script_id"]) or {}).get("base_id")
     if not base:
         return False
     if (topics.get(upload['script_id']) or {}).get('after_id'):
+        if promised is not None and (topics.get(upload['script_id']) or {}).get('topic_id') not in promised:
+            return False
         seen = set()
         while base in (cancelled or {}) and base not in (published or set()):
             if base in seen:
@@ -743,6 +749,15 @@ def published_episodes(owner: str) -> set[str]:
             "SELECT DISTINCT COALESCE(json_extract(s.topic,'$.episode_id'),json_extract(s.topic,'$.id')) "
             "FROM scripts s JOIN publications p ON p.script_id=s.id "
             "WHERE p.platform='bilibili' AND p.removed_at='' AND (p.account_uid=? OR p.account_uid='')", (owner,))}
+
+
+def promised_episodes() -> set[str]:
+    """Episodes a written script names in its closing preview (topic.next_episode, set by video_autopilot._prepare)."""
+    with video_store.connect() as conn:
+        return {r[0] for r in conn.execute(
+            "SELECT DISTINCT json_extract(topic,'$.next_episode_id') FROM scripts "
+            "WHERE COALESCE(json_extract(topic,'$.next_episode'),'')<>'' "
+            "AND json_extract(topic,'$.next_episode_id') IS NOT NULL")}
 
 
 def cancelled_episodes() -> dict[str, str]:
@@ -802,6 +817,7 @@ def tick() -> None:
         topics = topics_of([u["script_id"] for u in pending])
         published = published_episodes(owner) if any(t.get('after_id') for t in topics.values()) else set()
         cancelled = cancelled_episodes() if any(t.get('after_id') for t in topics.values()) else {}
+        promised = promised_episodes() if any(t.get('after_id') for t in topics.values()) else set()
         heat = {sid: info["heat"] for sid, info in topics.items()}
         for waiting in by_priority(queued, heat):
             if not waiting["payload"].get("automatic"):
@@ -809,7 +825,7 @@ def tick() -> None:
                 break
             window = config.get("publish_window") or {}
             angle = bool((topics.get(waiting["script_id"]) or {}).get("base_id"))
-            if angle and base_pending(waiting, pending, topics, time.time(), published, cancelled):
+            if angle and base_pending(waiting, pending, topics, time.time(), published, cancelled, promised):
                 if not waiting["payload"].get("held"):
                     db.hold_upload(waiting["id"], "等前一条（同一选题讲发布的那条，或预告它的上一期）先公开，再按间隔接着发。")
                 continue
