@@ -94,3 +94,19 @@ def test_busy_or_cooling_down_hot_word_can_start_after_the_next_check(tmp_path):
     assert "快讯正在运行" in make(tmp_path, [word], [at(13)], outcome="快讯正在运行").check()
     assert "已加跑" in make(tmp_path, [word], [at(13, 30)]).check()
     assert make(tmp_path, [word], [at(14)]).check() == ""
+
+
+def test_memes_tutorials_and_esports_picks_do_not_start_a_run(tmp_path):
+    clock, started = [at(14)], []
+    words = ["DeepSeek翻唱说谎的马卡龙", "Claude分析BLG怎么赢", "DeepSeek Harness教程", "Claude57页路演PPT解读"]
+    assert make(tmp_path, words, clock, started).check() == ""
+    assert started == []
+    assert "已加跑" in make(tmp_path, ["DeepSeek开放全家桶应用API"], [at(15)], started).check()
+
+
+def test_a_reworded_headline_about_an_already_burst_product_waits(tmp_path):
+    started = []
+    assert "已加跑" in make(tmp_path, ["GPT-6.2发布"], [at(10)], started).check()
+    assert make(tmp_path, ["GPT6.2全网首测"], [at(14)], started).check() == ""
+    assert "已加跑" in make(tmp_path, ["Kimi新模型发布"], [at(14, 31)], started).check()
+    assert len(started) == 2

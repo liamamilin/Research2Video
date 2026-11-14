@@ -2,7 +2,9 @@
 
 Hits win on timeliness ("夜间突发", "深夜突袭"); our flash ran at fixed times, so news broke and waited. Every
 ``CHECK_EVERY`` seconds between ``ACTIVE_HOURS`` this reads B站热搜 (no login) and picks its AI words
-(core/bili_hot.HOT_TERMS). A word not seen today and not already in today's flash reports starts one flash run,
+(core/bili_hot.HOT_TERMS) that also say something happened (``NEWS_TERMS``: 发布/上线/降价…; memes, covers,
+tutorials and match predictions do not). A word whose product had no burst today and that is not already in today's
+flash reports starts one flash run,
 through the same guards as the 「立即运行」 button, at most ``MAX_PER_DAY`` times a day and never within ``MIN_GAP``
 of the last flash report. The run's own sources (bili_hot) then bring the word and its news in; heat, angles and
 publishing follow as for any flash report. The program decides; a failure only means the next fixed run covers it.
@@ -29,10 +31,22 @@ CHECK_EVERY = 1800
 ACTIVE_HOURS = (8, 22)
 MAX_PER_DAY = 2
 MIN_GAP = 3 * 3600
+#: B站 pairs product names with memes, covers, tutorials and esports picks ("DeepSeek翻唱说谎的马卡龙",
+#: "Claude分析BLG怎么赢", "DeepSeek Harness教程", 11-14). A burst is for news: the word must say something happened.
+NEWS_TERMS = re.compile(r"发布|推出|上线|官宣|宣布|开源|开放|首发|首测|内测|公测|更新|升级|新模型|新版|新功能|"
+                        r"降价|涨价|免费|收费|取消|额度|限制|下线|停用|封禁|宕机|故障|崩了|泄露|曝光|收购|融资|"
+                        r"架构|提升|超越|登顶")
 
 
 def _clean(text: str) -> str:
     return re.sub(r"\s+", "", str(text or "")).lower()
+
+
+def _product(word: str) -> str:
+    from core.bili_hot import HOT_TERMS
+
+    match = HOT_TERMS.search(word)
+    return re.sub(r"[-\s]", "", match.group(0)).lower() if match else _clean(word)
 
 
 class HotTrigger:
@@ -78,13 +92,14 @@ class HotTrigger:
         from core.bili_hot import HOT_TERMS
 
         try:
-            words = [w for w in self.trending() if HOT_TERMS.search(w)]
+            words = [w for w in self.trending() if HOT_TERMS.search(w) and NEWS_TERMS.search(w)]
         except Exception as exc:  # noqa: BLE001 - the fixed runs still cover the day
             return f"热搜取不到（{type(exc).__name__}）"
         reports = self.reports_today(day)
         told = _clean(" ".join(Path(p).read_text(encoding="utf-8", errors="ignore") for p in reports))
-        served = {_clean(word) for run in state["runs"] for word in run["words"]}
-        fresh = [w for w in words if _clean(w) not in served and _clean(w) not in told]
+        # One burst per product a day: a reworded headline about the same product is the same story.
+        served = {_product(word) for run in state["runs"] for word in run["words"]}
+        fresh = [w for w in words if _product(w) not in served and _clean(w) not in told]
         if not fresh:
             return ""
         if len(state["runs"]) >= MAX_PER_DAY:
