@@ -228,6 +228,12 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
 
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
     """Combine paragraph pictures and native data/text scenes on the same measured timeline."""
+    from g2.scene_boundaries import reconcile
+    plan, boundary_changes = reconcile(plan, alignment, float(saved.get('video_speed', 1)))
+    pipeline.write_json(pipeline.ARTIFACTS / 'scene-boundaries.json', {
+        'version': 1, 'changes': boundary_changes,
+        'timing': 'whole measured speech segments; unique explicit planned phrases',
+        'extra_model_calls': 0})
     scenes, direction_pages = [], []
     from g2.material_expression import keep_planned_explanation
     shown_materials: set[int] = set()

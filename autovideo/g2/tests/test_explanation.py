@@ -151,6 +151,25 @@ def test_old_new_and_delta_follow_their_spoken_values():
     assert [c['character_index'] for c in cues[1:]] == [text.index('20'), text.index('25'), text.rindex('5')]
 
 
+@pytest.mark.parametrize('text,rows', [
+    ('库存从12变成15，增加3。待发订单从20变成8。',
+     [{'label': '库存', 'before': '12', 'after': '15', 'change': '3', 'direction': 'up'},
+      {'label': '待发', 'before': '20', 'after': '8', 'change': '12', 'direction': 'down'}]),
+    ('先看新版：耗时40毫秒，旧版是50毫秒。另一个接口从10降到8。',
+     [{'label': '接口甲', 'before': '50', 'after': '40', 'change': '10', 'direction': 'down'},
+      {'label': '接口乙', 'before': '10', 'after': '8', 'change': '2', 'direction': 'down'}]),
+])
+def test_change_badges_wait_for_their_own_comparison(text, rows):
+    scene = {'component': 'price_change', 'props': {'title': '变化', 'staged': True, 'rows': rows},
+             'narration_segment_ids': ['n1']}
+    cues = motion.automatic_cues(scene, {'n1': {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 8000}})
+    by_target = {cue['target_id']: cue for cue in cues}
+    for i in range(len(rows)):
+        values = [by_target[f'line:{i * 3 + offset}'] for offset in (0, 1)]
+        delta = by_target[f'line:{i * 3 + 2}']
+        assert delta['character_index'] >= max(c['character_index'] + len(c['quote']) for c in values)
+
+
 def test_explicit_process_presentation_and_narration_revisions_keep_their_intent():
     saved = {'visual_storytelling': True, 'chapters': [{'paragraphs': ['内容。']}], 'video_form': 'process_diagram'}
     assert not explanation.enabled(saved, 'process_diagram')

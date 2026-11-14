@@ -1,4 +1,4 @@
-"""Organize narrative roles, object continuity and recaps in the existing plan."""
+"""Organize narrative roles and object continuity in the existing plan."""
 from __future__ import annotations
 
 import hashlib
@@ -78,30 +78,12 @@ def attach(board: dict, pages: list[dict], groups: list[dict], pipeline, seeds: 
         story = {'version': 1, 'role': role, 'importance': importance,
                  'density': 'dense' if objects>4 else 'light' if objects<2 else 'normal',
                  'entities': list(entities.values())[:12]}
-        if role == 'recap':
-            current_ids = {e['id'] for e in story['entities']}
-            eligible = [s for s in board['scenes'][:i]
-                        if s['props']['story']['importance']!='support'
-                        and s['props']['story']['role'] not in {'recap', 'bridge', 'question'}
-                        and s['component']!='title_card']
-            related = [s for s in eligible if current_ids & {e['id'] for e in s['props']['story']['entities']}]
-            seen, references = set(), []
-            ranked = sorted(related or eligible, key=lambda s: (s['props']['story']['importance']=='key',
-                            next(j for j, item in enumerate(board['scenes']) if item['id']==s['id'])), reverse=True)
-            for source in ranked:
-                props = source['props']
-                identity = tuple(image['image_asset_id'] for image in props['images']) if 'images' in props else (source['id'],)
-                if identity not in seen:
-                    seen.add(identity)
-                    references.append(source['id'])
-                if len(references) == 2:
-                    break
-            if references:
-                story['recap'] = [s['id'] for s in board['scenes'][:i] if s['id'] in references]
-        if story.get('recap') and p.get('scene_flow', {}).get('entry') == 'carry':
-            p['scene_flow']['entry'] = 'dissolve'
-            board['scenes'][i-1]['props']['shot_plan'].pop('closing', None)
+        # The planned component already expresses this paragraph's summary.
+        # Shared names (such as "context") and recency do not identify a visual
+        # worth repeating; inferred thumbnails can replace it with another topic.
+        # Keep the recap role for pacing, and keep its own scene and transitions.
         p['story'] = story
         records.append({'scene_id': scene['id'], 'component': component, **story})
     pipeline.write_json(pipeline.ARTIFACTS/'story-direction.json', {'version': 4,
-        'extra_model_calls': 0, 'entities': list(registry.values()), 'scenes': records})
+        'extra_model_calls': 0, 'recap_policy': 'planned_scene',
+        'entities': list(registry.values()), 'scenes': records})

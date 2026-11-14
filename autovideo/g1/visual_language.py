@@ -22,6 +22,7 @@ def visuals_schema() -> dict:
             'target': {'type': 'string', 'pattern': r'^(line:[0-3]|side:(left|right)|node:[a-z][a-z0-9_]{0,47})$'},
             'icon': {'enum': [row['id'] for row in vocabulary['objects']]},
             'action': {'enum': ['none', *vocabulary['actions']]},
+            'reveal_phrase': {'type': 'string', 'minLength': 1, 'maxLength': 80},
             'phrase': {'type': 'string', 'minLength': 1, 'maxLength': 80}}}}
 
 

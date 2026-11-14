@@ -343,9 +343,11 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
           const label = match ? match[1] : line, body = match ? match[2] : '';
           const target=`line:${i}`, active = latest === target, compact = p.lines.length === 4, icon=visualFor(scene,target);
           const labelStyle={...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4};
-          return <div key={i} style={{...panelStyle,...motion(target),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? objectColor(scene,target,paper.green) : paper.line}`}}>
+          // Establish the objects before the narration reaches their details.
+          // Spoken cues still reveal the body and select the active card.
+          return <div key={i} style={{...panelStyle,opacity:ease((frame-scene.start_frame)/12),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? objectColor(scene,target,paper.green) : paper.line}`}}>
             {icon ? compact ? <div style={{display:'flex',alignItems:'center',gap:18}}><VisualObject scene={scene} target={target} frame={frame} size={52} color={objectColor(scene,target)}/><div style={{...labelStyle,flex:1}}><Tech text={label}/></div></div> : <><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}><VisualObject scene={scene} target={target} frame={frame} size={64} color={objectColor(scene,target)}/><span style={{fontSize:20,color:paper.muted}}>{String(i+1).padStart(2,'0')}</span></div><div style={labelStyle}><Tech text={label}/></div></> : <><div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div><div style={labelStyle}><Tech text={label}/></div></>}
-            {body && <div style={{...textStyle,color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
+            {body && <div style={{...textStyle,...motion(target),color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
       </div>}
@@ -363,7 +365,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'scatter_chart' && <ScatterChart scene={scene} frame={frame}/>}
       {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
-        <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
+        {/* The value and its unit form one reading context; a later repeated narration cue must not leave the subject blank. */}
+        <div style={{opacity:ease((frame-scene.start_frame)/12),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
         <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
         {p.note && <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
       </div>}
@@ -392,9 +395,10 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
               return <div key={i} data-price-layout={layout?.stacked_label?'stacked':'row'} style={{...motion('title'),display:'flex',flexDirection:layout?.stacked_label?'column':'row',alignItems:layout?.stacked_label?'stretch':'center',gap:layout?.stacked_label?12:36,lineHeight:1.1}}>
                 {layout?.stacked_label?<div style={{display:'flex',alignItems:'center',gap:36}}>{label}{delta}</div>:label}
                 <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0,justifyContent:layout?.stacked_label?'center':undefined}}>
-                  <Value text={row.before} color={paper.muted} opacity={.18+.82*oldOpacity}/>
-                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.18+.82*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.18+.82*later(8)}/>
+                  {/* Establish a readable comparison immediately; speech strengthens emphasis. */}
+                  <Value text={row.before} color={paper.muted} opacity={.65+.35*oldOpacity}/>
+                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.65+.35*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.65+.35*later(8)}/>
                 </div>
                 {!layout?.stacked_label&&delta}
               </div>;
