@@ -1,0 +1,23 @@
+{
+  "research_backend": "cd AI_research/Base_CodingCLi && ../.AI_research/bin/python -m pytest tests -q -ra --junitxml=<evidence>/research-backend.xml",
+  "research_baseline": "cd AI_research/Base_CodingCLi && bash scripts/check.sh (first sandbox run interrupted after loopback permission failures; phases rerun independently)",
+  "research_frontend": [
+    "npx --no-install tsc --noEmit --noUnusedLocals --noUnusedParameters",
+    "npm run lint --silent",
+    "npm test -- --reporter=default --reporter=junit --outputFile.junit=<evidence>/research-ui.xml",
+    "npm run build"
+  ],
+  "research_config": "cd AI_research/Base_CodingCLi && ../.AI_research/bin/python run.py --validate",
+  "autovideo_backend": "cd autovideo && python3 -m pytest tests g4/tests g3/tests g2/tests g1/tests -q -ra",
+  "autovideo_loopback": "cd autovideo && python3 -m pytest g3/tests/test_local_launcher.py -q -ra (outside network sandbox)",
+  "pronunciation": "cd autovideo && g0/.venv/bin/python -m pytest g2/tests/test_pronunciation.py -q -ra",
+  "autovideo_build": "cd autovideo/g3/web && NODE_PATH=../../g0/vendor/remotion-audiogram/node_modules ../../g0/vendor/remotion-audiogram/node_modules/.bin/esbuild src/main.tsx --bundle --minify --format=esm --jsx=automatic --outdir=<evidence>/autovideo-web --entry-names=app",
+  "renderer_strict_types": "cd autovideo && g0/vendor/remotion-audiogram/node_modules/.bin/tsc -p g3/acceptance/matrix-visual-20261101/tsconfig.json",
+  "design_snapshot": "cd autovideo && python3 g0/verify_design_snapshot.py",
+  "music_workshop": [
+    "python3 -m pytest tests -q -ra",
+    "node --check web/app.js"
+  ],
+  "python_syntax": "compile every git-tracked .py file without importing or executing it",
+  "whitespace": "git diff --check"
+}

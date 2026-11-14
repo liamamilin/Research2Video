@@ -1,0 +1,29 @@
+{
+  "/api/config/status": {
+    "ready": true,
+    "checks": {
+      "llm": true,
+      "kokoro_zh": true,
+      "remotion_renderer": true,
+      "draw_things": true,
+      "diagram_layout": true
+    },
+    "blockers": []
+  },
+  "/api/jobs/1ed19eea-ec89-423a-a5eb-2477006b0abf": {
+    "job_id": "1ed19eea-ec89-423a-a5eb-2477006b0abf",
+    "status": "FAILED",
+    "error_code": "MODEL_COST_BUDGET_EXCEEDED",
+    "error_message": "recorded model cost upper bound exceeded the per-video cap",
+    "current_stage": null,
+    "retryable": true
+  },
+  "/api/jobs/b8616d64-8291-410c-a125-b0f002cda11e": {
+    "job_id": "b8616d64-8291-410c-a125-b0f002cda11e",
+    "status": "FAILED",
+    "error_code": "MODEL_COST_BUDGET_EXCEEDED",
+    "error_message": "recorded model cost upper bound exceeded the per-video cap",
+    "current_stage": null,
+    "retryable": true
+  }
+}

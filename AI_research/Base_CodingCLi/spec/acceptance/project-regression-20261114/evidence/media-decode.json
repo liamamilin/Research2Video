@@ -1,0 +1,18 @@
+{
+  "method": "ffmpeg -v error -xerror -i <local completed artifact URL> -f null -",
+  "checks": [
+    {
+      "job_id": "5773e389-7929-48d2-b869-0c6a863dee61",
+      "route": "简洁信息动效",
+      "exit_code": 0,
+      "log": "latest-video-decode.log"
+    },
+    {
+      "job_id": "7e79c3cb-3490-41c3-91f4-3a2dbea82d04",
+      "route": "信息卡片 · 快速",
+      "exit_code": 0,
+      "log": "fast-video-decode.log"
+    }
+  ],
+  "scope": "既有成片完整音视频解码，不是本轮重新生成或主观听审"
+}

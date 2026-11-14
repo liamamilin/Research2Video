@@ -1,0 +1,7 @@
+{
+  "case": "paid_to_zero_priced_fallback_then_authored_chapter_planning",
+  "budget_before": 1.968,
+  "budget_after": 0.0,
+  "previous_failed_request_reserved_cost": 0.123,
+  "next_successful_zero_cost_call_would_fail": true
+}
