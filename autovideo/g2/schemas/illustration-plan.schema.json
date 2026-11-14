@@ -66,6 +66,12 @@
           "note": {
             "type": "string",
             "maxLength": 120
+          },
+          "layout": {
+            "enum": [
+              "scene",
+              "diagram"
+            ]
           }
         }
       }

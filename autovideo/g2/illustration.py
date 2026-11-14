@@ -37,7 +37,9 @@ SYSTEM = """你是插画分镜师。视频每一章配一张插画，观众会�
 
 三、每章 keywords：最多 2 个中文关键词，每个不超过 12 字，取自本章讲稿。
 
-四、每章 overlay：画在画面左侧留白里的一个示意，帮助观众看懂本章最关键的关系。只能从下面五种里选一种，没有合适的就写 null。优先用能表达关系的对比、算式、流向、构成；清单只用在本章确实是并列的几条做法或几个问题时，全片清单最多 2 次。所有文字必须来自本章讲稿，数字必须是本章讲稿里出现过的数字，不要编造。
+四、每章 layout：日常场景用 scene；本章重点解释机制、传递方向、数量关系或组成时用 diagram，示意成为主画面，人物插画缩为旁边的情境图。diagram 必须配非清单的 overlay；不要整片都用同一种布局。
+
+五、每章 overlay：帮助观众看懂本章最关键的关系。scene 时放左侧留白，diagram 时放大成为主画面。只能从下面五种里选一种，没有合适的就写 null。优先用能表达关系的对比、算式、流向、构成；清单只用在本章确实是并列的几条做法或几个问题时，全片清单最多 2 次。所有文字必须来自本章讲稿，数字必须是本章讲稿里出现过的数字，不要编造。
 1. 对比 {"kind":"compare","glyph":"pipe|pool|arrows|dots|bar|reading","relation":"big_small|small_big|same","items":[{"label":"≤6字","note":"≤12字，可省略"},{"label":"...","note":"..."}]}
    两项用同一种图形比大小或多少。glyph：pipe 粗细管子、pool 大小水池、arrows 箭头多少、dots 圆点疏密、bar 柱子高低、reading 两个读数框。relation：big_small 表示第一项大，small_big 表示第二项大，same 表示一样。
 2. 构成 {"kind":"composition","items":["≤6字",...2到5项],"total":"≤12字，合起来是什么"}
@@ -46,7 +48,7 @@ SYSTEM = """你是插画分镜师。视频每一章配一张插画，观众会�
 4. 清单 {"kind":"steps","style":"number|question","items":["≤10字",...2到4项]}
 5. 流向 {"kind":"flow","source":"≤6字","target":"≤6字","label":"≤10字"}
 
-只输出 JSON：{"cast":{"A":"..."},"chapters":[{"chapter":1,"scene":"... {A} ...","keywords":["..."],"overlay":{...} 或 null,"note":"中文一句说明画的是什么"}]}"""
+只输出 JSON：{"cast":{"A":"..."},"chapters":[{"chapter":1,"scene":"... {A} ...","layout":"scene 或 diagram","keywords":["..."],"overlay":{...} 或 null,"note":"中文一句说明画的是什么"}]}"""
 
 _component = None
 
@@ -182,7 +184,9 @@ def finalize(plan: dict, context: dict) -> tuple[list[dict], list[dict]]:
         if problem:
             dropped.append({"chapter": row["chapter"], "overlay": overlay, "reason": problem})
             overlay = None
-        chapters.append({"scene": scene, "keywords": keywords, "overlay": overlay, "note": row.get("note", "")})
+        layout = 'diagram' if row.get('layout') == 'diagram' and overlay and overlay['kind'] != 'steps' else 'scene'
+        chapters.append({"scene": scene, "keywords": keywords, "overlay": overlay, 'layout': layout,
+                         "note": row.get("note", "")})
     return chapters, dropped
 
 
@@ -238,8 +242,8 @@ def generate(pipeline, narration: dict, style_key: str = DEFAULT_STYLE) -> tuple
     pipeline.write_json(pipeline.ARTIFACTS / "illustrations.json", {
         "style": {"key": style["key"], "name": style["name"], "version": style["version"]},
         "cast": plan.get("cast") or {}, "seed": seed, "images": records,
-        "chapters": [{"keywords": c["keywords"], "overlay": c["overlay"]} for c in chapters],
+        "chapters": [{"keywords": c["keywords"], "overlay": c["overlay"], 'layout': c['layout']} for c in chapters],
         "overlays_dropped": dropped})
     pipeline.write_json(pipeline.ARTIFACTS / "slideshow-images.json", {
         "mode": "local_generated", "assignment": "one illustration per chapter", "images": assets})
-    return assets, [{"keywords": c["keywords"], "overlay": c["overlay"]} for c in chapters]
+    return assets, [{"keywords": c["keywords"], "overlay": c["overlay"], 'layout': c['layout']} for c in chapters]

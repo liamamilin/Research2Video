@@ -31,6 +31,8 @@ def component_schema(component: str) -> dict:
     schema = json.loads((ROOT / f'schemas/components/{component}.schema.json').read_text(encoding='utf-8'))
     if component in COMPONENTS:
         schema['properties']['visuals'] = visuals_schema()
+    if component == 'illustration_scene':
+        schema['properties']['layout'] = {'enum': ['scene', 'diagram']}
     if component == 'flow_diagram':
         layout = deepcopy(schema['properties']['layout'])
         layout['properties']['nodes']['minItems'] = 1

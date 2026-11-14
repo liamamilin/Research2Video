@@ -214,3 +214,20 @@ def test_more_than_two_lists_earns_one_revision_hint():
 
 def test_prompt_says_bars_show_the_result():
     assert 'bars 画的是 result 本身的大小' in illustration.SYSTEM and '全片清单最多 2 次' in illustration.SYSTEM
+
+
+def test_mechanism_layout_survives_plan_attachment_and_runtime_validation(tmp_path):
+    planned = plan(OVERLAYS['steps'])
+    for chapter in planned['chapters']:
+        chapter['layout'] = 'diagram'
+    chapters, dropped = illustration.finalize(planned, context())
+    assert not dropped
+    assert chapters[0]['layout'] == 'scene'  # a checklist is not a mechanism picture
+    assert chapters[1]['layout'] == 'diagram'
+    board = forms.attach_illustrations(forms.plan_storyboard(None, narration(), 'illustrated_explainer'),
+                                     assets(2), narration(), chapters)
+    assert 'layout' not in board['scenes'][0]['props']
+    assert board['scenes'][4]['props']['layout'] == 'diagram'
+    ir, root = creative_ir(tmp_path, 'illustrated_explainer')
+    ir['scenes'][0]['props'].update(layout='diagram', overlay=OVERLAYS['flow'])
+    assert validate_video_ir(ir, root)['scenes'][0]['props']['layout'] == 'diagram'

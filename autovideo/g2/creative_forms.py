@@ -158,6 +158,8 @@ def attach_illustrations(board: dict, assets: list[dict], narration: dict, extra
                           'keywords': list(extras[index].get('keywords') or [])}
         if extras[index].get('overlay'):
             scene['props']['overlay'] = extras[index]['overlay']
+            if extras[index].get('layout') == 'diagram':
+                scene['props']['layout'] = 'diagram'
     return {**board, 'image_assets': assets,
             'illustration_assignment': 'one illustration per chapter in order; keywords and overlays validated before rendering'}
 
