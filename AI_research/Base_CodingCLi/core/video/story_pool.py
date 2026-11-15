@@ -308,8 +308,22 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
 
 
 def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
-                   references: bool = False, *, tutorial: bool = False,
+                   references: bool = False, *, tutorial: bool = False, evergreen: bool = False,
                    material_packets: list[dict] | None = None) -> dict:
+    """``evergreen``: a comparison column drawn from a few standing reference pages (one table of five
+    assistants answers many questions). Sharing that page is not sharing a story, so only the event
+    identity and the organizer's same_as links count as repeats (see duplicate()). Applied on read,
+    so pools already saved are judged the same way without a new model call."""
+    pool = _load_or_create(scope, report, material, peers, llm_config, references, tutorial=tutorial,
+                           material_packets=material_packets)
+    if evergreen:
+        pool = {**pool, "events": [{**event, "evergreen": True} for event in pool["events"]]}
+    return pool
+
+
+def _load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
+                    references: bool = False, *, tutorial: bool = False,
+                    material_packets: list[dict] | None = None) -> dict:
     variant = ["references"] if references else []
     if tutorial:
         variant.extend(("tutorial", TUTORIAL_PROMPT_VERSION))
@@ -462,15 +476,15 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
         if _same_event(event, peer.get("story") or {}) or alias(peer):
             result.append(peer)
             continue
-        if event.get("tutorial"):
-            continue  # An official guide can document several independent operations.
+        if event.get("tutorial") or event.get("evergreen"):
+            continue  # An official guide (or a comparison table) documents several independent questions.
         # Legacy scripts have no structured story. Match a named edition on its
         # core article as well, so omitted semantic aliases cannot bypass history.
         edition = event.get("edition", "")
         named_edition = bool(edition and _normal(edition) in _normal(peer["title"]))
         if named_edition and guard.overlap(evidence, peer["sources"]):
             result.append(peer)
-    if not event.get("tutorial"):
+    if not (event.get("tutorial") or event.get("evergreen")):
         result += guard.duplicate_peers(evidence, unchanged)
     by_id = {}
     for peer in result:

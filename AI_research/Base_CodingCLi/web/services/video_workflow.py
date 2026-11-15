@@ -390,7 +390,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                             original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
                                                                      if story_pool.cited_packet(p, cited))
                         selection_report = research_dossier.selection_brief(report, script)
-                        options = {"tutorial": True} if context.get("type") == "tutorial" else {}
+                        options = ({"tutorial": True} if context.get("type") == "tutorial"
+                                   else {"evergreen": True} if context.get("type") == "comparison" else {})
                         pool = story_pool.load_or_create(key, selection_report, original, peers, config,
                                                          references=bool(topic.get("from_item")), **options)
                     story, _ = story_pool.take(script_id, pool, peers)

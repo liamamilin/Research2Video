@@ -380,6 +380,30 @@ def test_same_entity_without_edition_or_date_is_not_blanket_banned():
     assert not pool._same_event(a, b)
 
 
+def test_comparison_questions_from_one_reference_table_are_not_one_story():
+    # 11-15: every T05 comparison cites the same 元宝 vs others table; a new question is not a repeat.
+    packets = pool.packets(f"### 对比表\n{SNAKE}")
+    told = pool.validate([event(action="analysis", subject="长文档 PDF 工具选择", edition="附录 B")], packets, [])[0]
+    peers = [{"script_id": "old", "title": "200页招股书", "story": told, "sources": {guard.source_key(SNAKE)}}]
+    asked = event(action="analysis", subject="元宝与豆包的小红书文案对比", edition="附录 B")
+    news = pool.validate([asked], packets, pool.context(peers))[0]
+    assert pool.duplicate(news, peers)  # news keeps the shared-source rule
+    comparison = {**news, "evergreen": True}
+    assert not pool.duplicate(comparison, peers)
+    linked = {**pool.validate([{**asked, "same_as": ["H1"]}], packets, pool.context(peers))[0], "evergreen": True}
+    assert pool.duplicate(linked, peers)  # the organizer said it was already told
+    again = {**pool.validate([event(action="analysis", subject="长文档 PDF 工具选择", edition="附录 B")],
+                             packets, [])[0], "evergreen": True}
+    assert pool.duplicate(again, peers)  # same question, same identity
+
+
+def test_evergreen_is_applied_to_saved_pools_on_read(guard_env, monkeypatch):
+    saved = {"id": "p", "scope": "s", "packets": [], "events": [{"title": "a"}], "usage": {}}
+    monkeypatch.setattr(pool, "_load_or_create", lambda *a, **k: saved)
+    assert pool.load_or_create("s", "", "", [], None, evergreen=True)["events"] == [{"title": "a", "evergreen": True}]
+    assert pool.load_or_create("s", "", "", [], None)["events"] == [{"title": "a"}]
+
+
 def test_main_event_alias_blocks_changed_links_and_extra_background(guard_env, monkeypatch):
     previous = script(guard_env, "science/daily")
     peers = history(guard_env)
