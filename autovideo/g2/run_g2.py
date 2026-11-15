@@ -129,6 +129,18 @@ def model_cost_budget(env_path: Path, environ: dict[str, str] | None = None) -> 
 MAX_PROJECTED_API_COST_USD = model_cost_budget(PROJECT / ".env")
 LLM_TIMEOUT_SECONDS = 240
 HTTP_RETRY_DELAYS = (2, 4)
+#: HTTP 429 is a rate limit, not an outage: wait longer on the same model before switching or failing (11-11: nine
+#: renders failed on their first 429). A Retry-After header, when given, replaces the default wait, up to the cap.
+RATE_LIMIT_RETRY_DELAYS = (15, 45, 90)
+RATE_LIMIT_MAX_WAIT = 120
+
+
+def rate_limit_wait(headers, http_attempt: int) -> float:
+    try:
+        given = float((headers or {}).get("Retry-After") or "")
+    except (TypeError, ValueError):
+        given = 0.0
+    return min(given if given > 0 else RATE_LIMIT_RETRY_DELAYS[http_attempt - 1], RATE_LIMIT_MAX_WAIT)
 RETRYABLE_HTTP_STATUSES = {500, 502, 503, 504, 520, 521, 522, 523, 524}
 PROJECT_INPUT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")))
 NARRATION_SCHEMA_PATH = ROOT / "schemas/narration-plan.schema.json"
@@ -398,11 +410,22 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request("HTTPError", http_status=exc.code)
+        headers = exc.headers
         exc.close()
         previous = PROVIDER
         if exc.code in SWITCH_HTTP_STATUSES and _next_model():
             _switch_note(previous, f"answered HTTP {exc.code}")
             return deepseek_json_call(stage, messages, schema, attempt, _request_no=_request_no + 1)
+        if exc.code == 429 and _http_attempt <= len(RATE_LIMIT_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
+            delay = rate_limit_wait(headers, _http_attempt)
+            append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage, "http_status": 429,
+                "http_attempt": _http_attempt, "next_http_attempt": _http_attempt + 1,
+                "wait_seconds": delay, "remaining_call_budget": MAX_TOTAL_CALLS - len(CALL_RECORDS)})
+            print(f"{PROVIDER.label}: HTTP 429 (rate limited); retrying the same model in {delay:g}s "
+                  f"({_http_attempt + 1}/{len(RATE_LIMIT_RETRY_DELAYS) + 1})", flush=True)
+            time.sleep(delay)
+            return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
+                                      _request_no=_request_no + 1)
         if exc.code in RETRYABLE_HTTP_STATUSES and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
             delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
             append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage, "http_status": exc.code,

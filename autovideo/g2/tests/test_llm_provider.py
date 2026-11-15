@@ -118,6 +118,8 @@ def test_deepseek_still_asks_for_thinking(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("status, suffix", [(401, "AUTH_FAILED"), (402, "HTTP_ERROR"), (429, "RATE_LIMIT")])
 def test_http_failures_are_named_after_the_provider_in_use(monkeypatch, tmp_path, status, suffix):
+    monkeypatch.setattr(g2.time, "sleep", lambda _: None)  # a 429 waits before giving up
+
     def urlopen(request, timeout=None):
         raise urllib.error.HTTPError(request.full_url, status, "x", {}, io.BytesIO(b"{}"))
 
@@ -344,7 +346,7 @@ def test_transport_retries_respect_the_shared_call_budget(monkeypatch, tmp_path)
     assert len(g2.CALL_RECORDS) == 1 and delays == []
 
 
-@pytest.mark.parametrize("status", [400, 401, 402, 403, 429])
+@pytest.mark.parametrize("status", [400, 401, 402, 403])
 def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypatch, tmp_path, status):
     sent = []
     monkeypatch.setattr(g2.time, "sleep", lambda _: pytest.fail("client errors must not wait and retry"))
@@ -356,6 +358,38 @@ def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypat
     with pytest.raises(g2.G2Fault):
         _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
     assert len(sent) == len(g2.CALL_RECORDS) == 1
+
+
+def test_rate_limit_waits_and_retries_the_same_model(monkeypatch, tmp_path):
+    # 11-11: opencode answered 429 "inference service is overloaded" between successful calls; nine renders failed.
+    calls, delays = [], []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        calls.append(request)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(request.full_url, 429, "x", {}, None)
+        if len(calls) == 2:
+            raise urllib.error.HTTPError(request.full_url, 429, "x", {"Retry-After": "600"}, None)
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'},
+                                               "finish_reason": "stop"}], "usage": {}}).encode())
+
+    assert _call(monkeypatch, tmp_path, lp.PRESETS["opencode"], urlopen) == {"ok": True}
+    assert delays == [g2.RATE_LIMIT_RETRY_DELAYS[0], g2.RATE_LIMIT_MAX_WAIT]  # Retry-After, capped
+    assert len(g2.CALL_RECORDS) == 3
+
+
+def test_rate_limit_that_persists_still_fails_as_rate_limit(monkeypatch, tmp_path):
+    delays = []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        raise urllib.error.HTTPError(request.full_url, 429, "x", {"Retry-After": "2"}, None)
+
+    with pytest.raises(g2.G2Fault, match="LLM_RATE_LIMIT"):
+        _call(monkeypatch, tmp_path, lp.PRESETS["opencode"], urlopen)
+    assert delays == [2.0] * len(g2.RATE_LIMIT_RETRY_DELAYS)
+    assert len(g2.CALL_RECORDS) == len(g2.RATE_LIMIT_RETRY_DELAYS) + 1
 
 
 @pytest.mark.parametrize("failure", [http.client.RemoteDisconnected("secret provider message"),
