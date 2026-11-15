@@ -30,6 +30,7 @@ import json
 import logging
 import os
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -49,9 +50,31 @@ FEED_EXCERPT_CHARS = 3000
 _TAG_RE = re.compile(r"<[^>]+>")
 
 
+_MAX_PERMANENT_REDIRECTS = 5
+
+
+def _open_following_308(request: urllib.request.Request, timeout: int):
+    """``urlopen`` that also follows HTTP 308. Python 3.10's redirect handler stops at 308 (3.11 follows it), so
+    pages that moved permanently failed and fell back to the paid content API (11-15: 27 fetches in three days).
+    Only for requests without credentials; only to http(s), as urllib does for the codes it follows."""
+    for _ in range(_MAX_PERMANENT_REDIRECTS + 1):
+        try:
+            return urllib.request.urlopen(request, timeout=timeout)
+        except urllib.error.HTTPError as exc:
+            location = exc.headers.get("Location") if exc.code == 308 and exc.headers else None
+            if not location:
+                raise
+            target = urllib.parse.urljoin(request.full_url, location)
+            if urllib.parse.urlsplit(target).scheme not in ("http", "https"):
+                raise
+            exc.close()
+            request = urllib.request.Request(target, headers=dict(request.header_items()))
+    raise urllib.error.URLError(f"too many permanent redirects from {request.full_url}")
+
+
 def _get_text(url: str, timeout: int, accept: str = "*/*") -> str:
     request = urllib.request.Request(url, headers={"User-Agent": _UA, "Accept": accept})
-    with urllib.request.urlopen(request, timeout=timeout) as resp:
+    with _open_following_308(request, timeout) as resp:
         return resp.read().decode("utf-8", "replace")
 
 
@@ -182,7 +205,7 @@ _BROWSER_UA = "Mozilla/5.0 (compatible; BaseCodingCLi/2.0)"  # some sites refuse
 
 def _get_page(url: str, timeout: int, accept: str = "text/html,application/json") -> str:
     request = urllib.request.Request(url, headers={"User-Agent": _BROWSER_UA, "Accept": accept})
-    with urllib.request.urlopen(request, timeout=timeout) as resp:
+    with _open_following_308(request, timeout) as resp:
         return resp.read().decode("utf-8", "replace")
 
 
