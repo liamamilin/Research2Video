@@ -653,6 +653,26 @@ def test_approved_hold_older_than_the_first_fifty_is_resumed(pilot_env):
     assert ap.get_run(run["id"])["status"] == "RUNNING"
 
 
+def test_failed_render_hold_is_left_to_retry_instead_of_reopened_every_tick(pilot_env, monkeypatch):
+    # 11-15: reopening an approved script held for failed renders re-held it on the next step, every tick.
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    draft(item["script_id"])
+    pilot.tick()
+    pilot.tick()
+    render = store.list_renders(item["script_id"])[0]
+    store.update_render(render["id"], status="FAILED", error_message="caption-forced-alignment exited 1")
+    ap.update_item(item["id"], state="HELD", note="出片失败 3 次：caption-forced-alignment exited 1")
+    ap.update_run(run["id"], status="DONE")
+
+    assert pilot.reopen_approved() == 0
+    assert item_of(run["id"], 0)["state"] == "HELD" and ap.get_run(run["id"])["status"] == "DONE"
+
+    store.update_render(render["id"], status="COMPLETED")  # rendered again by hand: adopt it
+    assert pilot.reopen_approved() == 1
+
+
 @pytest.mark.parametrize("render_status, expected_state", [("RUNNING", "WORKING"), ("COMPLETED", "DONE")])
 def test_held_batch_adopts_a_manual_render_without_submitting_again(pilot_env, monkeypatch, render_status, expected_state):
     run = batch(monkeypatch, 1)

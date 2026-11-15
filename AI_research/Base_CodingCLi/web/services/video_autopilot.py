@@ -735,6 +735,10 @@ def tick() -> int:
         return 0
 
 
+#: Holds that video_executor._render_auto sets on an approved script: they wait for the render, not the user.
+RENDER_HOLDS = ("出片失败", "提交结果尚未确认", "成片已生成但复制失败", "不能出片")
+
+
 def reopen_approved() -> int:
     """A held item whose script the user has since approved goes on to its render, in its batch.
 
@@ -751,6 +755,13 @@ def reopen_approved() -> int:
             reopened += 1
             continue
         if script["status"] == "APPROVED":
+            if item["note"].startswith(RENDER_HOLDS) and not any(
+                    r["version"] == script["approved_version"]
+                    and r["status"] in ("COMPLETED", *store.ACTIVE_RENDER_STATUSES)
+                    for r in store.list_renders(script["id"])):
+                # A render hold is not waiting for approval: reopening it only re-holds it on the
+                # next step, every tick (11-15). retry_held_renders resumes it once its cause is fixed.
+                continue
             # Reconcile this approval even when a manual render already exists.
             # advance_auto selects only approved_version and adopts its active
             # or completed render before considering a new submission.
