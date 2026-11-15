@@ -129,3 +129,32 @@ def test_guide_with_outside_link_is_refused():
     with pytest.raises(bilibili.BilibiliError):
         cr.clean_settings({"enabled": True, "text": "https://prodclub.xyz/r/x"})
     assert cr.clean_settings({"enabled": True, "text": "私信我"})["pin"] is True
+
+
+def test_a_video_limited_again_after_a_lift_is_cleaned_again(env):
+    # 11-15: a lifted video that was limited again kept its old CLEANED state and was never handled again.
+    db, fake = env
+    fake.listing = [archive("BV1lim")]
+    cr.tick(OWNER)
+    assert fake.deleted == ["1"]
+    fake.listing = [archive("BV1lim", limited=False)]
+    cr.tick(OWNER, force=True)
+    fake.comments.append({"rpid": "4", "message": "新的链接 https://prodclub.xyz/r/new"})
+    fake.listing = [archive("BV1lim")]
+    cr.tick(OWNER, force=True)
+    row = cr.restrictions(OWNER)[0]
+    assert fake.deleted == ["1", "4"] and row["active"] and row["status"] == "CLEANED"
+
+
+def test_an_unconfirmed_guide_is_not_posted_again_when_limited_again(env):
+    db, fake = env
+    guide(db)
+    fake.post_error = RuntimeError("timeout")
+    fake.listing = [archive("BV1lim")]
+    cr.tick(OWNER)
+    fake.post_error = None
+    fake.listing = [archive("BV1lim", limited=False)]
+    cr.tick(OWNER, force=True)
+    fake.listing = [archive("BV1lim")]
+    cr.tick(OWNER, force=True)
+    assert cr.restrictions(OWNER)[0]["status"] == "UNKNOWN" and not fake.posted

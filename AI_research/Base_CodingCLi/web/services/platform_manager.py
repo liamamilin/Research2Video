@@ -637,10 +637,22 @@ def _lookup_upload(task_id: str) -> dict:
     return db.get_upload(task_id)
 
 
+#: An unconfirmed submission is looked up automatically for this long; after it, only by hand (11-15: one from
+#: 11-07 had been looked up 181 times). The task stays UNKNOWN and is never re-uploaded on its own.
+UNKNOWN_LOOKUP_DAYS = 7
+
+
 def _recover_unknown_uploads(owner: str) -> None:
     now = time.time()
-    for row in store().unknown_uploads(owner):
+    db = store()
+    for row in db.unknown_uploads(owner):
         recovery = row["recovery"]
+        if now - float(row["created_at"]) > UNKNOWN_LOOKUP_DAYS * 86400:
+            if not recovery.get("auto_stopped"):
+                db.update_recovery(row["id"], {"auto_stopped": True, "next_lookup_at": 0,
+                                               "note": f"超过 {UNKNOWN_LOOKUP_DAYS} 天仍未匹配到稿件，已停止自动核对；"
+                                                       "请在创作中心确认后回填 BV 号，或手动核对。"}, expected="UNKNOWN")
+            continue
         if row["updated_at"] > now-60 or recovery.get("next_lookup_at", 0) > now:
             continue
         _lookup_upload(row["id"])
@@ -771,6 +783,13 @@ def cancelled_episodes() -> dict[str, str]:
             "COALESCE(json_extract(i.topic,'$.episode_id'),json_extract(i.topic,'$.id')))")}
 
 
+def connection_lost(exc: Exception) -> bool:
+    """B站 could not be reached (transport failure or a 5xx), as opposed to an answer such as a refusal or 412."""
+    if isinstance(exc, bilibili.BilibiliRejected) or not hasattr(exc, "http_status"):
+        return False
+    return exc.http_status is None or exc.http_status >= 500
+
+
 def by_priority(waiting: list[dict], heat: dict[str, int] | None = None) -> list[dict]:
     """The order queued uploads go out (11-10, 发片优先级): what a person queued by hand first, then the hottest topic,
     then the oldest. A topic told from several angles shares its heat, so its videos follow one another in order."""
@@ -854,6 +873,12 @@ def tick() -> None:
                 # Cover extraction has no remote side effects; failures here are safe to retry.
                 cover = bilibili.prepare_cover(video_render.safe_file(render, "video.mp4"), work_dir, task["payload"].get("cover", ""))
             except Error as exc:
+                if connection_lost(exc):
+                    # Nothing was sent yet: a dropped connection while checking the login is not a verdict on the
+                    # upload. Keep it queued for the next pass instead of a FAILED nobody retries (11-15).
+                    db.update_upload(task["id"], status="QUEUED", error=f"{exc}（投稿前检查，稍后自动重试）",
+                                     expected="QUEUED")
+                    return
                 db.update_upload(task["id"], status="FAILED", error=str(exc), expected="QUEUED")
                 return
             if task["payload"].get("automatic"):

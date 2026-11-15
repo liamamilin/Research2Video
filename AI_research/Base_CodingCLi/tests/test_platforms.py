@@ -1002,3 +1002,44 @@ def test_published_video_deleted_on_bilibili_can_be_published_again(platform_env
     manager.tick()  # the removed record of the deleted video does not stop the new upload
     assert manager.store().get_upload(task["id"])["status"] == "SUBMITTED"
     assert manager.store().get_upload(task["id"])["bvid"] == second
+
+
+def test_a_dropped_connection_before_upload_keeps_the_task_queued(platform_env, monkeypatch):
+    # 11-15: a pre-upload login check that could not reach B站 marked the task FAILED, and nothing retried it.
+    job = manager.enqueue(render()["id"], PAYLOAD)
+    lost = bilibili.BilibiliError("B 站连接失败，操作结果可能尚未确认。")
+    lost.http_status = None
+    monkeypatch.setattr(bilibili.BilibiliClient, "verify", lambda self: (_ for _ in ()).throw(lost))
+    monkeypatch.setattr(bilibili, "upload", lambda *args: pytest.fail("nothing is uploaded while B站 is unreachable"))
+    manager.tick()
+    task = manager.store().get_upload(job["id"])
+    assert task["status"] == "QUEUED" and "稍后自动重试" in task["error"]
+
+    monkeypatch.setattr(bilibili.BilibiliClient, "verify", lambda self: {"uid": "123", "name": "测试UP主", "verified_at": time.time()})
+    monkeypatch.setattr(bilibili, "upload", lambda *args: BV)
+    manager.tick()
+    assert manager.store().get_upload(job["id"])["status"] == "SUBMITTED"
+
+
+def test_an_expired_login_before_upload_still_fails(platform_env, monkeypatch):
+    job = manager.enqueue(render()["id"], PAYLOAD)
+    monkeypatch.setattr(bilibili.BilibiliClient, "verify",
+                        lambda self: (_ for _ in ()).throw(bilibili.BilibiliRejected("B 站登录已失效，请重新扫码。", code=-101)))
+    manager.tick()
+    assert manager.store().get_upload(job["id"])["status"] == "FAILED"
+    assert not manager.connection_lost(bilibili.BilibiliRejected("x", code=-412))
+
+
+def test_week_old_unknown_upload_is_no_longer_looked_up_automatically(platform_env, monkeypatch):
+    # 11-15: an unconfirmed submission from 11-07 had been looked up 181 times.
+    job = manager.enqueue(render()["id"], PAYLOAD)
+    db = manager.store()
+    db.update_upload(job["id"], status="UNKNOWN", error="投稿结果需核对")
+    with db.connect(write=True) as conn:
+        conn.execute("UPDATE uploads SET created_at=?, updated_at=? WHERE id=?",
+                     (time.time() - 8 * 86400, time.time() - 3600, job["id"]))
+    monkeypatch.setattr(bilibili.BilibiliClient, "archives", lambda *a, **k: pytest.fail("no automatic lookup"))
+    manager._recover_unknown_uploads("123")
+    task = db.get_upload(job["id"])
+    assert task["status"] == "UNKNOWN" and task["recovery"]["auto_stopped"]
+    assert "停止自动核对" in task["recovery"]["note"]

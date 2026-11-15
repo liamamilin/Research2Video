@@ -151,11 +151,26 @@ def distribute(a, request, user):
         return reports.list_shares(include_expired=True, user=user)
     if a.action == 'revoke':
         return reports.revoke_share(a.jti, request, user=user)
+    typed = _typed(request)
     if a.action == 'share':
+        if not any(word in typed for word in ('分享', '链接', 'share', 'link')):
+            raise ValueError('生成分享链接需要你在本条消息里明确要求分享')
         return reports.create_share({'path': a.path, 'ttl_hours': a.ttl_hours}, request, user=user)
     if not a.recipients or any('@' not in address or '\n' in address or '\r' in address for address in a.recipients):
         raise ValueError('发送邮件需要明确且有效的收件地址')
+    import re
+    typed_addresses = set(re.findall(
+        r"[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", typed))
+    unseen = [address for address in a.recipients if address.strip().lower() not in typed_addresses]
+    if unseen:
+        # A recipient must come from the user, not from text the model read (a report or fetched page).
+        raise ValueError('收件地址须由你在本条消息里写明：' + '、'.join(unseen))
     return reports.email_report({'path': a.path, 'to': a.recipients}, request, user=user)
+
+
+def _typed(request) -> str:
+    """What the user typed this turn (assistant_runtime.run), lower-cased; empty outside an assistant turn."""
+    return str(getattr(getattr(request, 'state', None), 'assistant_message', '') or '').lower()
 
 
 TOOLS = {

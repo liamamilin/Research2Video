@@ -85,7 +85,14 @@ def record(uid: str, archives: list[dict], *, complete: bool) -> list[str]:
                             "VALUES (?,?,?,?,'DETECTED',?,?)", (uid, bvid, a.get("title", ""), reason, now, now)).rowcount:
                 new.append(bvid)
             else:
-                conn.execute("UPDATE restrictions SET active=1 WHERE uid=? AND bvid=?", (uid, bvid))
+                # Limited again after it was lifted: a new link comment caused it, so handle it once more. A video
+                # still limited from before keeps its state (no repeated deleting).
+                if conn.execute("UPDATE restrictions SET active=1,status='DETECTED',error='',reason=?,updated_at=? "
+                                "WHERE uid=? AND bvid=? AND active=0 AND status NOT IN ('CLEANING','POSTING','UNKNOWN')",
+                                (reason, now, uid, bvid)).rowcount:
+                    new.append(bvid)
+                else:
+                    conn.execute("UPDATE restrictions SET active=1 WHERE uid=? AND bvid=?", (uid, bvid))
         for (bvid,) in conn.execute("SELECT bvid FROM restrictions WHERE uid=? AND active=1", (uid,)).fetchall():
             if bvid not in limited and (bvid in seen or complete):
                 conn.execute("UPDATE restrictions SET active=0,updated_at=? WHERE uid=? AND bvid=?", (now, uid, bvid))

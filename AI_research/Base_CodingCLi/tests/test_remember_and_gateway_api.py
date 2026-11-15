@@ -106,7 +106,7 @@ def test_remember_flag_does_not_change_authentication(client, web_env):
 # The report was "I have to type my password again and again". Two separate
 # defects, both about a cookie outliving or not outliving the thing it guards.
 
-def test_the_csrf_cookie_outlives_the_access_cookie(client, web_env):
+def test_the_csrf_cookie_outlives_the_access_cookie(client, web_env, monkeypatch):
     """Refresh is CSRF-protected and runs *after* the access token expired.
 
     The CSRF cookie was issued with the access lifetime (15 min), so the browser
@@ -114,6 +114,11 @@ def test_the_csrf_cookie_outlives_the_access_cookie(client, web_env):
     403 csrf_failed, the client gave up, and a session whose refresh cookie still
     had 30 days left was logged out on every idle timeout.
     """
+    # Token creation and cookie issuance can straddle a wall-clock second.
+    # Freeze their shared clock so the exact 30-day assertion is deterministic.
+    import time
+    now = time.time()
+    monkeypatch.setattr(time, "time", lambda: now)
     response = client.post('/api/auth/login', json={
         'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
 

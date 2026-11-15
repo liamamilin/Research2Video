@@ -121,6 +121,10 @@ def origin_of(request) -> str:
 def run(message, history, llm, request, user, on_event=None, cancel_token: Event | None = None,
         store=None, request_id=None, conversation_id=None, refs=None):
     refs = list(refs or [])
+    try:  # what the user typed this turn: tools that send data out check their destination against it
+        request.state.assistant_message = str(message or '')
+    except AttributeError:
+        pass
     messages = [{'role': 'system', 'content': SYSTEM.format(
         now='见当前请求上下文', role=user['role'], refs='见当前请求上下文')},
         {'role': 'system', 'content': '当前请求上下文：' + assistant_context.dumps({

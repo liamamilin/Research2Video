@@ -366,3 +366,16 @@ def test_the_assistant_reads_the_weekly_review_but_cannot_purge_analytics(client
     assert not [a for a in actions["actions"] if a["write"]] and "POST /api/telemetry/purge" not in ids
     assert "每周复盘" in actions["domains"]["analytics"]
     assert not application.describe(request, {"role": "viewer"}, domain_key="analytics")["actions"]  # admin pages stay admin
+
+
+def test_assistant_cannot_move_a_job_s_report_folder(client, web_env, monkeypatch):
+    # 11-15: an assistant-set absolute runtime.output_root let the next run overwrite any .md file.
+    path = write_job(web_env)
+    original = path.read_text()
+    moved = original + 'output: AGENTS.md\nruntime:\n  output_root: /tmp/elsewhere\n'
+    fake_llm(monkeypatch, [tool("operate_application", action_id="PUT /api/jobs/{name}", path={"name": "research/memory"},
+                                body={"yaml_content": moved, "expected_mtime": path.stat().st_mtime}),
+                           ChatResponse(content="未修改。")])
+    result = client.post("/api/assistant", headers=login(client), json={"message": "改一下 memory"}).json()
+    assert not result["actions"][0]["ok"] and "output_root" in json.dumps(result["actions"][0], ensure_ascii=False)
+    assert path.read_text() == original
