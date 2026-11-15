@@ -415,6 +415,7 @@ class G2ProcessRunner:
                     raise ValueError("mix QA missing")
             except Exception:
                 self.store.mark_failed(job_id, attempt_no, "AUDIO_MIX", "MIX_UNVERIFIED", "混音缺少通过的验收报告", False)
+                self._write_failure_report(attempt_root, "MIX_UNVERIFIED", "混音缺少通过的验收报告", "AUDIO_MIX")
                 return
             artifact_specs = [(path, "unmixed.mp4" if name == "video.mp4" else name, kind) for path, name, kind in artifact_specs]
             artifact_specs += [(mix_dir / "video.mp4", "video.mp4", "video/mp4"),
@@ -431,6 +432,7 @@ class G2ProcessRunner:
                     raise ValueError("brand QA missing")
             except (OSError, ValueError):
                 self.store.mark_failed(job_id, attempt_no, "PACKAGE", "BRAND_UNVERIFIED", "品牌成片缺少通过的检查报告", False)
+                self._write_failure_report(attempt_root, "BRAND_UNVERIFIED", "品牌成片缺少通过的检查报告", "PACKAGE")
                 return
             artifact_specs = [(path, "unbranded.mp4" if name == "video.mp4" else name, kind)
                               for path, name, kind in artifact_specs]
@@ -448,6 +450,7 @@ class G2ProcessRunner:
         if not any(item["name"] == "video.mp4" for item in artifacts):
             self.store.mark_failed(job_id, attempt_no, "QUALITY_CHECK", "OUTPUT_MISSING",
                                    "视频文件缺失，不能将任务标记为完成", False)
+            self._write_failure_report(attempt_root, "OUTPUT_MISSING", "视频文件缺失", "QUALITY_CHECK")
             return
         self.store.mark_completed(job_id, attempt_no, artifacts)
 

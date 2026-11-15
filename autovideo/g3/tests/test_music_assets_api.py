@@ -95,6 +95,8 @@ def test_worker_never_publishes_music_without_passing_mix_qa(tmp_path, monkeypat
         result=store.get_job(r.json()['job_id'])
         assert result['status']=='FAILED' and result['error_code']=='MIX_UNVERIFIED'
         assert result['active_stage']=='AUDIO_MIX' and not store.get_artifacts(result['job_id'])
+        report=next((settings.data_dir/'jobs'/result['job_id']).glob('attempts/*/failure-report.json'))
+        assert json.loads(report.read_text())['error_code']=='MIX_UNVERIFIED'
 
 
 def test_fast_and_standard_share_music_plan_and_frozen_identity(tmp_path):
