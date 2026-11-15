@@ -51,7 +51,14 @@ KEYWORD_PROMPT = (
 
 
 class Unavailable(RuntimeError):
-    """B站 would not answer a search now (refused, rate-limited, timed out or not logged in)."""
+    """B站 would not answer a search now (refused, rate-limited, timed out or not logged in).
+
+    ``transient``: the connection itself failed (timeout, reset). Such a failure says nothing about the rest of the
+    day, so it does not switch heat off the way a refusal, a missing login or a missing signature does."""
+
+    def __init__(self, message: str, *, transient: bool = False):
+        super().__init__(message)
+        self.transient = transient
 
 
 def _clean(text: str) -> str:
@@ -109,7 +116,8 @@ class Search:
                 response.raise_for_status()
                 return response.json()
         except (httpx.HTTPError, ValueError) as exc:
-            raise Unavailable(f"B站连接失败（{type(exc).__name__}）") from exc
+            raise Unavailable(f"B站连接失败（{type(exc).__name__}）",
+                              transient=isinstance(exc, httpx.TransportError)) from exc
 
     def _sign(self, params: dict) -> dict:
         if not self._mixin:
@@ -223,16 +231,17 @@ class Heat:
             try:
                 rows = self.search.videos(keyword, end - WINDOW_DAYS * 86400, end)
                 value: Optional[dict] = score(rows, keyword)
-                blocked = ""
+                blocked, transient = "", False
             except Unavailable as exc:
                 value, blocked = None, str(exc)
+                transient = exc.transient
             with file_lock(str(self.path), timeout=30):
                 state = self._load()
                 state["searches"] += 1
-                if value is None:
-                    state["blocked"] = blocked
-                else:
+                if value is not None:
                     state["scores"][keyword] = value
+                elif not transient:  # a timeout leaves the next ranking free to try again
+                    state["blocked"] = blocked
                 self._save(state)
             if value is None:
                 why = blocked

@@ -76,6 +76,57 @@ def test_when_bilibili_refuses_every_item_is_kept_in_order_and_the_day_stops_sea
     assert search.calls == ["A"] and [c["id"] for c in again[0]] == ["r/F1", "r/F2"]  # blocked for the day
 
 
+def test_a_dropped_connection_skips_this_ranking_but_not_the_rest_of_the_day(tmp_path, words):
+    # Before 11-15 one timeout switched heat off for the day, so every later batch kept its items unranked.
+    class Flaky(FakeSearch):
+        def videos(self, keyword, begin, end):
+            self.calls.append(keyword)
+            if len(self.calls) == 1:
+                raise heat.Unavailable("B站连接失败（ConnectTimeout）", transient=True)
+            return [row(f"{keyword} 实测", 30000)]
+
+    search = Flaky()
+    words.update({"r/F1": "A", "r/F2": "B"})
+    kept, _, note = make(tmp_path, search).rank(cands("a", "b"), 20000, None)
+    assert [c["id"] for c in kept] == ["r/F1", "r/F2"] and "ConnectTimeout" in note and "按原顺序保留" in note
+    kept, _, note = make(tmp_path, search).rank(cands("a", "b"), 20000, None)
+    assert search.calls == ["A", "A", "B"] and note == ""
+    assert all(c["heat"]["score"] == 30000 for c in kept)
+
+
+def test_only_transport_failures_count_as_transient(monkeypatch):
+    import httpx
+
+    def failing(error):
+        class Client:
+            def __init__(self, *a, **k):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def get(self, *a, **k):
+                raise error
+        return Client
+
+    request = httpx.Request("GET", "https://api.bilibili.com/x")
+    for error, transient in ((httpx.ConnectTimeout("t", request=request), True),
+                             (httpx.HTTPStatusError("412", request=request, response=httpx.Response(412, request=request)), False)):
+        monkeypatch.setattr(httpx, "Client", failing(error))
+        with pytest.raises(heat.Unavailable) as caught:
+            _get(heat)
+        assert caught.value.transient is transient
+
+
+def _get(module):
+    search = module.Search.__new__(module.Search)
+    search.cookies, search.timeout, search._mixin = {}, 1, ""
+    return search._get("https://api.bilibili.com/x", {})
+
+
 def test_a_keyword_is_searched_once_a_day_and_the_daily_cap_holds(tmp_path, words):
     search = FakeSearch({"A": [30000], "B": [30000], "C": [30000]})
     words.update({"r/F1": "A", "r/F2": "B", "r/F3": "C"})
