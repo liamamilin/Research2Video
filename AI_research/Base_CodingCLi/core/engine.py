@@ -190,7 +190,7 @@ class ResearchEngine:
                 print(f"  [{job_name}] Building prompt...")
                 output_path = self._resolve_output_path(job)
                 prompt = base_prompt = self._build_prompt(job)
-                fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
+                fetch_only = job.get("search") is False  # Initial research reads declared sources; optional enrichment runs later.
                 fetched = None
                 from . import knowledge_job
                 if knowledge_job.enabled(job):
@@ -321,6 +321,51 @@ class ResearchEngine:
 
                 cleaned = extract_report(raw_content, self.sys,
                                          cancel_token=self._cancel)
+                from .video import audience_strategy, question_material
+                audience_detail = {}
+                supplement_material = ""
+                if audience_strategy.job_channel(job):
+                    self._progress({"type": "phase", "phase": "organizing_topics"})
+                    initial_report = cleaned
+                    import hashlib
+                    import json
+                    initial_path = output_path + ".audience-initial-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+                    atomic_write(initial_path, json.dumps({"report": initial_report}, ensure_ascii=False) + "\n")
+                    cleaned, audience_detail = audience_strategy.prepare_report(
+                        job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+                        LLMConfig.from_system(self.sys, "ai"), cancel_token=self._cancel)
+                    cleaned, supplement_material, supplement_detail = question_material.enhance(
+                        job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+                        {**audience_detail, "initial_report": initial_report}, self.sys,
+                        cancel_token=self._cancel, progress_cb=self._progress)
+                    if supplement_detail:
+                        audience_detail["question_material"] = supplement_detail
+                        # These URLs were actually read by the supplemental stage.
+                        # Keep the existing citation display consistent with its inputs.
+                        self._prompt_urls.update(
+                            source["url"] for topic in supplement_detail.get("topics", [])
+                            for source in topic.get("retrieved_sources", []) if source.get("text"))
+                        for name, value in supplement_detail.get("usage", {}).items():
+                            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                                usage[name] = usage.get(name, 0) + value
+                    if self._supply_pending:
+                        cleaned += "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
+                    if self._cancel.is_set():
+                        raise CancelledError("Job cancelled after topic organization")
+                    audience_detail["initial_report_path"] = initial_path
+                    receipt_path = output_path + ".audience-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+                    atomic_write(receipt_path, json.dumps({"initial_report": initial_report, **audience_detail}, ensure_ascii=False) + "\n")
+                    usage["audience_strategy"] = {
+                        **{key: audience_detail[key] for key in
+                           ("strategy", "version", "channel", "status", "candidate_count", "selection_mode", "error")
+                           if key in audience_detail},
+                        "receipt": receipt_path,
+                        **({"question_material_status": audience_detail["question_material"].get("status")}
+                           if audience_detail.get("question_material") else {}),
+                    }
+                    for name, value in audience_detail.get("usage", {}).items():
+                        if isinstance(value, (int, float)) and not isinstance(value, bool):
+                            usage[name] = usage.get(name, 0) + value
                 actual_path = self._save_output(cleaned, output_path)
                 from .report_identity import publish
                 publish(os.path.abspath(actual_path), self.workspace_dir)
@@ -346,7 +391,7 @@ class ResearchEngine:
                     from .report_material import save as save_material
 
                     material = save_material(actual_path, cleaned,
-                                             [source_block, *getattr(agent, "materials", [])])
+                                             [source_block, *getattr(agent, "materials", []), supplement_material])
                 except OSError as exc:
                     logger.warning("Original material snapshot skipped: %s", exc)
 
@@ -359,6 +404,7 @@ class ResearchEngine:
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation, "material": material,
+                                         **({"audience_strategy": {"strategy": audience_detail["strategy"], "channel": audience_detail["channel"], "candidate_count": audience_detail.get("candidate_count"), "receipt": receipt_path, **({"question_material": question_material.MARKER} if audience_detail.get("question_material", {}).get("status") == "enriched" else {})}} if audience_detail and audience_detail.get("status") != "kept_original" else {}),
                                          **({'production_issue':usage['production_issue']} if (usage or {}).get('production_issue') else {}),
                                          **({"research_dossier": dossier_detail} if dossier_detail else {})})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional

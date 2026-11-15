@@ -118,17 +118,12 @@ def scripts_of(report_path: str, column_key: str) -> list[dict]:
 
 
 def title_of(full_path: str) -> str:
-    """The report's first level-1 heading, else its file name: the title a video written from it starts with."""
+    """The report's main heading, skipping editorial prefaces; else its file name."""
+    from core.report_title import title_from_text
     try:
-        with open(full_path, encoding="utf-8") as f:
-            for _ in range(60):
-                line = f.readline()
-                if not line:
-                    break
-                if line.startswith("# "):
-                    title = line[2:].strip().strip("#").strip()
-                    if title:
-                        return title
+        with open(full_path, encoding="utf-8") as handle:
+            if title := title_from_text(handle.read()):
+                return title
     except OSError:
         pass
     return os.path.splitext(os.path.basename(full_path))[0]
@@ -140,8 +135,13 @@ def topic_for(report: dict, workspace: str, title: str = "", angle: str = "", au
     Nothing goes into the topic pool (spec/product-redesign.md: a topic is no longer a required step)."""
     path = report["report_path"]
     fields = {key: value for key, value in (("核心角度", angle.strip()), ("目标受众", audience.strip())) if value}
+    from core import report_meta
+    from . import audience_strategy
+    strategy = (report_meta.get(path) or {}).get("audience_strategy") or {}
+    channel = strategy.get("channel") if strategy.get("strategy") == audience_strategy.MARKER else ""
+    marked = {"audience_strategy": channel} if isinstance(channel, str) and channel in audience_strategy.CHANNELS else {}
     return {"id": None, "title": title.strip() or title_of(path if os.path.isabs(path) else os.path.join(workspace, path)),
-            "fields": fields}
+            "fields": fields, **marked}
 
 
 def _scripts(conn, report_id: str, *, started: bool = False) -> list[dict]:

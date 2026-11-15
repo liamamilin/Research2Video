@@ -20,15 +20,17 @@ discovery_objective: 为「历史与文明」寻找可持续读取的机构栏�
 jobs:
   history/history_daily:
     mode: context
-    direction: 回到历史现场理解对象、处境和行动；保留器物、地点和事件过程
+    direction: 回到历史现场理解对象、处境和行动；保留器物、地点和事件过程；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - museum archaeology history discoveries collections stories RSS
     - 历史 考古 博物馆 馆藏 故事 研究 新闻 订阅
     - historical archive archaeology museum research stories publication
+    - 历史 考古 人物处境 制度 为什么 原始资料 历史与考古动态
   history/history_weekly:
     mode: context
-    direction: 一个关键转折怎样形成；沿当时人物的行动与具体材料解释前因后果
+    direction: 一个关键转折怎样形成；沿当时人物的行动与具体材料解释前因后果；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - history museum archives historical turning points essays collections
     - historical research archive exhibition stories institutions
     - 历史 文明 转折 档案 博物馆 专题 文章
+    - 历史 考古 人物处境 制度 为什么 原始资料 历史专题周读

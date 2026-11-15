@@ -160,21 +160,32 @@ coverage:
 jobs:
   monitoring/ai_flash_discovery:
     mode: changes
-    direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化
-    query: AI coding tools official release notes changelog pricing usage limits
+    direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化；补充中文普通用户的购买疑问、额度困惑、工作生活中的具体使用案例，按需求线索与变化/案例/比较背景搭配。
+    query:
+    - AI coding tools official release notes changelog pricing usage limits
+    - AI 订阅 值不值 使用限制 普通用户 实际案例
+    - AI 工作 生活 使用体验 选择 困惑
   ai_media/daily_opensource_radar:
     mode: context
-    direction: 开源 AI 工具与项目，实际输入、安装用法、处理过程与输出
-    query: open source AI developer tools releases project blog examples
+    direction: 开源 AI 工具与项目，实际输入、安装用法、处理过程与输出；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - open source AI developer tools releases project blog examples
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 开源雷达
   ai_media/weekly_model_arena:
     mode: context
-    direction: 模型能力、价格、延迟、上下文与真实任务比较
-    query: AI model evaluation benchmark pricing latency methodology updates
+    direction: 模型能力、价格、延迟、上下文与真实任务比较；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI model evaluation benchmark pricing latency methodology updates
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 模型竞技场
   ai_media/weekly_business_watch:
     mode: context
-    direction: AI 产品商业模式、企业采用、参与者与用户的交付关系
-    query: AI enterprise product adoption engineering case study company blog
+    direction: AI 产品商业模式、企业采用、参与者与用户的交付关系；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI enterprise product adoption engineering case study company blog
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 商业观察
   ai_media/weekly_deep_research:
     mode: context
-    direction: 智能体、模型机制、工程实践，有具体任务、实验与过程解释
-    query: AI agents model research engineering blog experiments mechanisms
+    direction: 智能体、模型机制、工程实践，有具体任务、实验与过程解释；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI agents model research engineering blog experiments mechanisms
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 深度研究

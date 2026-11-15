@@ -86,6 +86,16 @@ CONCRETE_RULE = ("写具体，不写远：每条内容跟着一个具体的人�
                  "判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；"
                  "正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；"
                  "上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。")
+# Optional audience-scope adjustment: retain the established voice and narrative rules.
+SCOPE_CONCRETE_RULE = CONCRETE_RULE.replace(
+    "每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），"
+    "每个结论都落到这个场景里发生的事；",
+    "标题、开场和最终判断面向选题指定的目标受众。用具体人物、时刻、动作和例子帮助他们理解共同问题，"
+    "但不把某个例子的职业、身份或单项任务变成观看前提，也不把整篇的适用范围缩成这个例子。"
+    "若选题本来只面向专业人群，就保留该范围，不扩大成人人适用；"
+)
+
+
 PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
@@ -229,6 +239,11 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
         throughline = ("各独立内容中的具体例子持续推进；同一问题的章节沿用共同主例子、按解释层次展开，参数贴着当前一步出现。"
                        if programme else
                        "让同一个具体任务在中段持续推进，参数贴着它解释的作用出现，结尾回到任务的结果与本期形成的认识。")
+        if topic.get("preserve_audience_scope") is True and not programme:
+            throughline = (
+                "中段沿本期问题展开，让具体例子中的动作和结果帮助目标观众理解；"
+                "例子不限定整篇受众，结尾回到目标观众共同关心的问题与本期形成的认识。"
+            )
         material = (
             f"## 讲述节奏\n{pacing}"
             "优先把主例子的关键动作、机制和结果讲清楚，片长作为节奏参考，不机械按字数压缩。\n\n"
@@ -508,6 +523,11 @@ def author_system_prompt(topic: dict, persona: dict, *, greeting: str | None = N
     """Build the complete system message for the first drafting call."""
     programme = topic.get("content_mode") == "episode"
     system = (TUTORIAL_PROMPT if tutorial else episode_prompt or EPISODE_PROMPT) if programme else SYSTEM_PROMPT
+    from .audience_profiles import CHANNELS
+    channel = topic.get("audience_strategy")
+    if topic.get("preserve_audience_scope") is True and (
+            not programme or (isinstance(channel, str) and channel in CHANNELS)):
+        system = system.replace(CONCRETE_RULE, SCOPE_CONCRETE_RULE, 1)
     if programme and not tutorial and episode_lead:
         system = system.replace(EPISODE_LEAD, episode_lead, 1)
     if greeting:

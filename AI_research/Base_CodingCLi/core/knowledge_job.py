@@ -37,7 +37,7 @@ def problem(job: dict) -> str | None:
 
 
 def past_titles(job: dict, workspace_dir: str) -> list[str]:
-    """Titles (first ``# `` line) of this Job's earlier reports, newest first.
+    """Substantive titles of this Job's earlier reports, newest first.
 
     A second report on the same day is saved as ``<name>_1.md`` (``_2`` …); it counts as well."""
     template = os.path.join(workspace_dir, str(job["output"]))
@@ -54,11 +54,9 @@ def past_titles(job: dict, workspace_dir: str) -> list[str]:
     for _, path in sorted(found, reverse=True):
         try:
             with open(path, encoding="utf-8") as handle:
-                for line in handle:
-                    match = re.match(r"#\s+(.+)", line.strip())
-                    if match:
-                        titles.append(match.group(1).strip())
-                        break
+                from core.report_title import title_from_text
+                if title := title_from_text(handle.read()):
+                    titles.append(title)
         except OSError:
             continue
         if len(titles) >= MAX_TITLES:

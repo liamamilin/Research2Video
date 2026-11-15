@@ -1,5 +1,5 @@
 name: "AI 开源雷达"
-description: "本期值得开发者关注的 AI 开源项目、热门模型和论文（读 GitHub、Hugging Face、TLDR 抓取的内容，不联网搜索）"
+description: "本期值得开发者关注的 AI 开源项目、热门模型和论文（读 GitHub、Hugging Face、TLDR 抓取的内容，初稿沿用固定材料，选题后按问题补材）"
 enabled: true
 keywords:
   - 开源项目
@@ -38,4 +38,12 @@ prompt: |
   输出语言：{language}
 
   数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+  选题与材料组织：开源工具：先选观众有什么问题值得解决，再说明项目如何做到；保留部署条件、操作与结果，专业工具不伪装成零门槛大众工具。
+  选题分别考虑与观众切身相关的收益或损失、情绪动机、有趣的新发现和可带走的理解，不要求每题全部具备。优先在栏目范围内覆盖较广的共同问题，具体例子不等于整篇受众；专业问题保留真实适用范围，不伪装成人人适用。说明观看动机、新意与实际收获；商业关联可以较弱，不硬接购买、不预测转化。热度是辅助线索，不等于本题需求；不把多个维度合成总分。材料按需求线索、变化或事实材料、具体案例、比较或解释背景搭配，不必凑齐四类。
+  候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
+  原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: "output/radar/{date}_ai_opensource_radar.md"
+content_strategy: audience-v1
+
+# After initial research and audience-led selection; preserves the existing writer.
+question_material: question-v1

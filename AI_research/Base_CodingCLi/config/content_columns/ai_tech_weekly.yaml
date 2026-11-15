@@ -2,7 +2,7 @@ schema_version: 1
 name: 科技周解读
 matrix: ai_media
 type: explainer
-audience: 关注 AI 产品、技术与应用的观众
+audience: 希望理解技术原理、发展变化和实际用途的中文观众
 promise: 理解一周变化之间的联系与实际用途
 production_ids:
 - tech_weekly

@@ -18,6 +18,7 @@ from .lock import LockAcquireError, LockManager
 from .state import StateManager
 from .theme_library import ThemeLibrary
 from .theme_store import ThemeStore
+from .video.audience_profiles import EDITORIAL_GUIDANCE
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ format 是你从参考例子归纳的提问结构，包含 name、title_pattern�
 已有题型只返回 pattern_id，省略 format 和大纲；只有确实需要新题型时才添加 format。
 输出 JSON {themes:[{category,title,question,topic_key,reason,angle,audience,example_ids:[],pattern_id}]}。
 question 是不含修辞的核心问题，topic_key 是简短稳定的主题标识；不同具体问题可共用同一个题型。
-"""
+""" + EDITORIAL_GUIDANCE
 
 
 def select(response: str, categories: list[dict], library: ThemeLibrary, matrix: str,

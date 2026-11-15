@@ -20,7 +20,7 @@ from core.video import store
 CHAPTER_PROMPT_VERSION = 6
 ENTRY_PROMPT_VERSION = 7
 PROMPT_VERSION = ENTRY_PROMPT_VERSION
-TUTORIAL_PROMPT_VERSION = 1
+TUTORIAL_PROMPT_VERSION = 2
 SAID_CHARS = 2400  # what an earlier video told viewers, for comparing against a price/plan page
 POLICY = "matrix-story-v3"
 ACTIONS = {"release", "pricing", "results", "policy", "financing", "earnings", "discovery", "event", "analysis"}
@@ -178,7 +178,8 @@ def context(peers: list[dict], said: bool = False) -> list[dict]:
 
 
 def organize(report: str, source_packets: list[dict], previous: list[dict], llm_config, *,
-             tutorial: bool = False, from_material: bool = False) -> tuple[list[dict], dict]:
+             tutorial: bool = False, from_material: bool = False,
+             audience_brief: dict | None = None) -> tuple[list[dict], dict]:
     """One cached organization call over existing text, not a research or fact-check step."""
     from core.llm import LLMClient
 
@@ -195,32 +196,81 @@ JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"rele
 "summary":"事件与本次看点","primary":["S1"],"background":[],"same_as":[],
 "changes":[{"dimension":"明确变化的维度","before":"原值","after":"新值"}]}]}"""
     if tutorial:
-        schema = system[system.index("JSON:"):]
+        schema = system[system.index("JSON:"):].replace('"action":"release"', '"action":"analysis"')
         system = """把给定底稿和对应材料整理成教程候选，只使用输入。保持底稿指定的动作和结果。
 每条候选讲一个可学会的操作。subject 写产品和具体操作，summary 交代入口、关键动作和可观察结果。
 比较 covered 中已经讲过的内容。只有旧稿已经教过同一个操作并让观众得到相同结果，才在 same_as 填它的 H 编号。
 换标题、对象或示例，操作与结果一样，仍是同题。共用产品、文档、功能区、起始文件或“不用下载”等便利不构成重复。
 例如把附件放回对话继续改，与把附件发给同事，是两种操作。分别看实际点击的动作及最终结果。
-primary 填支撑关键动作的 S 编号，background 填辅助材料。常青教程用 analysis，日期、版本、变化在无材料支持时留空。
+primary 填支撑关键动作的 S 编号，background 填辅助材料。这里登记的是操作讲解，action 固定为 analysis；具体操作写入 subject 和 summary，不把 create、tutorial 等动作词放进 action。日期、版本、变化在无材料支持时留空。
 """ + schema
     if from_material:
         system += ("\n本轮从报告未采用的原始资料重新找题。只提出具体、有独立报道价值的 AI 新事件，最多 6 条。"
                    "日期不明的背景、热搜关键词、产品常驻页面和材料中提到的旧事不单独立题。"
                    "已有足够覆盖或没有合适候选时，返回空 events。")
+    if audience_brief:
+        system += ("\n本期选题已由上游完成。只把这一个观看问题登记为一个事件以便沿用排重，不另选题、"
+                   "不缩成一个案例、不拆开比较对象。title保持已选标题，summary解释共同问题。"
+                   "已有覆盖仍按same_as/changes表达。已选题：" + json.dumps(audience_brief, ensure_ascii=False))
     request = {"report": report,
                "materials": [{**p, "text": p["text"][:2400]} for p in source_packets],
                "covered": [{k: v for k, v in p.items() if k != "script_id"} for p in previous]}
     client = LLMClient(llm_config)
-    with telemetry.track("story-pool"):
-        reply = client.chat([{"role": "system", "content": system},
-                             {"role": "user", "content": json.dumps(request, ensure_ascii=False)}], temperature=0)
+    messages = [{"role": "system", "content": system},
+                {"role": "user", "content": json.dumps(request, ensure_ascii=False)}]
+    attempts = []
     try:
-        raw = reply.content.strip()
-        start, end = raw.find("{"), raw.rfind("}")
-        items = json.loads(raw[start:end+1])["events"]
-        return validate(items, source_packets, previous, tutorial=tutorial), dict(client.usage)
-    except (ValueError, KeyError, TypeError) as exc:
-        raise SelectionError("候选事件返回格式无效") from exc
+        for attempt in range(3):
+            with telemetry.track("story-pool"):
+                reply = client.chat(messages, temperature=0)
+            try:
+                from core.video.adapt.common import parse_json, AdaptError
+                items = parse_json(reply.content)["events"]
+                if audience_brief and isinstance(items, list) and items:
+                    if not all(isinstance(item, dict) for item in items):
+                        raise SelectionError("候选事件格式无效")
+                    if len(items) > 1:
+                        # Register the upstream question, not the first example. Keep
+                        # only coverage shared by every part. One covered example
+                        # cannot make the whole comparison a duplicate.
+                        aliases, deltas = [], []
+                        for item in items:
+                            refs = item.get("same_as") or []
+                            if not isinstance(refs, list) or not all(isinstance(ref, str) for ref in refs):
+                                raise SelectionError("候选必须引用已有历史编号")
+                            if set(refs) - {peer["ref"] for peer in previous}:
+                                raise SelectionError("候选必须引用已有历史编号")
+                            aliases.append(set(refs))
+                            delta = item.get("changes") or []
+                            if not isinstance(delta, list):
+                                raise SelectionError("新进展应为列表")
+                            deltas.extend(changes(delta))
+                        shared = set.intersection(*aliases)
+                        items = [{"title": audience_brief["title"], "subject": audience_brief["title"],
+                                  "action": "analysis", "summary": audience_brief.get("promise") or audience_brief["title"],
+                                  "same_as": sorted(shared), "changes": deltas if shared else []}]
+                    items[0].update(title=audience_brief["title"],
+                                    primary=[p["id"] for p in source_packets], background=[])
+                return validate(items, source_packets, previous, tutorial=tutorial), dict(client.usage)
+            except (AdaptError, ValueError, KeyError, TypeError, SelectionError) as exc:
+                problem = str(exc) if isinstance(exc, SelectionError) else "候选事件返回格式无效"
+                attempts.append({"reply": reply.content, "problem": problem})
+                messages += [{"role": "assistant", "content": reply.content or ""},
+                             {"role": "user", "content": "请纠正JSON格式后重发完整events：" + problem
+                              + "。每个事件必须有title、subject、summary和有效action；保留原问题、已有材料和历史编号，不新增事实。"}]
+        # Keep the failed responses outside run history so the next diagnosis can
+        # name the actual missing field instead of guessing from a generic error.
+        from core.fileio import atomic_write
+        diagnostic = Path(store.db_path()).parent / "story-pool-errors" / (
+            _hash(report, source_packets)[:16] + "-" + uuid.uuid4().hex + ".json")
+        try:
+            diagnostic.parent.mkdir(parents=True, exist_ok=True)
+            atomic_write(str(diagnostic), json.dumps({"attempts": attempts}, ensure_ascii=False))
+        except OSError:
+            pass
+        raise SelectionError(f"候选事件3次格式纠正失败：{attempts[-1]['problem']}；诊断：{diagnostic}")
+    finally:
+        client.close()
 
 
 def validate(items, source_packets: list[dict], previous: list[dict], *, tutorial: bool = False) -> list[dict]:
@@ -235,8 +285,15 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
             raise SelectionError("候选事件格式无效")
         event = {key: str(raw[key]).strip() if raw.get(key) is not None else "" for key in
                  ("title", "subject", "action", "edition", "event_date", "summary")}
-        if not all(event[k] for k in ("title", "subject", "summary")) or event["action"] not in ACTIONS:
-            raise SelectionError("候选缺少主事件信息")
+        if tutorial:
+            # A tutorial registers an operation, not a product launch. Its action
+            # family is determined by the production, not a model-generated verb.
+            event["action"] = "analysis"
+        missing = [key for key in ("title", "subject", "summary") if not event[key]]
+        if event["action"] not in ACTIONS:
+            missing.append("action")
+        if missing:
+            raise SelectionError("候选缺少主事件信息：" + ", ".join(missing))
         primary, background, same_as = (raw.get(k) or [] for k in ("primary", "background", "same_as"))
         if (not isinstance(primary, list) or not primary or not isinstance(background, list)
                 or not isinstance(same_as, list) or not all(isinstance(k, str) for k in primary+background+same_as)
@@ -309,13 +366,13 @@ def validate(items, source_packets: list[dict], previous: list[dict], *, tutoria
 
 def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
                    references: bool = False, *, tutorial: bool = False, evergreen: bool = False,
-                   material_packets: list[dict] | None = None) -> dict:
+                   material_packets: list[dict] | None = None, audience_brief: dict | None = None) -> dict:
     """``evergreen``: a comparison column drawn from a few standing reference pages (one table of five
     assistants answers many questions). Sharing that page is not sharing a story, so only the event
     identity and the organizer's same_as links count as repeats (see duplicate()). Applied on read,
     so pools already saved are judged the same way without a new model call."""
     pool = _load_or_create(scope, report, material, peers, llm_config, references, tutorial=tutorial,
-                           material_packets=material_packets)
+                           material_packets=material_packets, audience_brief=audience_brief)
     if evergreen:
         pool = {**pool, "events": [{**event, "evergreen": True} for event in pool["events"]]}
     return pool
@@ -323,8 +380,10 @@ def load_or_create(scope: str, report: str, material: str, peers: list[dict], ll
 
 def _load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
                     references: bool = False, *, tutorial: bool = False,
-                    material_packets: list[dict] | None = None) -> dict:
+                    material_packets: list[dict] | None = None, audience_brief: dict | None = None) -> dict:
     variant = ["references"] if references else []
+    if audience_brief:
+        variant.extend(("audience-v1", audience_brief))
     if tutorial:
         variant.extend(("tutorial", TUTORIAL_PROMPT_VERSION))
     if material_packets is not None:
@@ -337,8 +396,14 @@ def _load_or_create(scope: str, report: str, material: str, peers: list[dict], l
         if row:
             return json.loads(row["payload"])
         source_packets = packets(report, material, references) if material_packets is None else material_packets
+        if audience_brief:
+            from . import audience_strategy
+            source_packets = [{**p, "links": [p["url"]] if p["url"] else []}
+                              for p in audience_strategy.packets(material or report)]
         said = any(p.get("reference") for p in source_packets)
         options = {"tutorial": True} if tutorial else {}
+        if audience_brief:
+            options["audience_brief"] = audience_brief
         if material_packets is not None:
             options["from_material"] = True
         events, usage = organize(report, source_packets, context(peers, said), llm_config, **options) if source_packets else ([], {})

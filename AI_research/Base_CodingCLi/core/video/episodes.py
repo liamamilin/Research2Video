@@ -34,7 +34,11 @@ def topic(report: dict, workspace: str, *, job: str, source=None, production: st
     if source is not None:
         _, candidates = topic_store.read_report(source, report["report_path"], workspace)
         items = [{"id": t.id, "title": t.title} for t in candidates]
-    return {**value, "content_mode": MODE, "from_report": report["report_path"],
+    from . import audience_strategy
+    strategy = (report_meta.get(report['report_path']) or {}).get('audience_strategy') or {}
+    selected_strategy = strategy.get('channel') if strategy.get('strategy') == audience_strategy.MARKER else ''
+    return {**value, **({'audience_strategy': selected_strategy} if isinstance(selected_strategy, str) and selected_strategy in audience_strategy.CHANNELS else {}),
+            "content_mode": MODE, "from_report": report["report_path"],
             "report_id": report["id"], "episode": {"job": job, "production": production,
             "items": items, "report_path": report["report_path"], "report_identity": identity,
             **({'issue':copy.deepcopy(issue)} if issue else {})}}

@@ -18,16 +18,18 @@ discovery_objective: 为「产业与制造业」寻找可持续读取的机构�
 jobs:
   industry/industry_daily:
     mode: context
-    direction: 产业链的一处变化怎样影响生产和交付，保留工艺、部件和协作细节
+    direction: 产业链的一处变化怎样影响生产和交付，保留工艺、部件和协作细节；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - manufacturing supply chain semiconductor industrial technology institute news
       RSS
     - 制造 产业链 工艺 半导体 研究机构 新闻 订阅
     - industrial engineering supply chain manufacturing company newsroom
+    - 制造 供应链 日常产品 成本 工序 案例 产业动态日报
   industry/industry_weekly:
     mode: context
-    direction: 一件东西怎样造出来：材料、关键工序、设备和供应商怎样连接
+    direction: 一件东西怎样造出来：材料、关键工序、设备和供应商怎样连接；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - manufacturing process engineering case studies institute features
     - industrial production materials process supply chain engineering blog
     - 制造 工艺 生产 过程 工程 案例 专题
+    - 制造 供应链 日常产品 成本 工序 案例 产业链周观察

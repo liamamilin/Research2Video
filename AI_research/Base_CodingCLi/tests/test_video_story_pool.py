@@ -206,6 +206,9 @@ def test_organizer_model_transport_uses_only_supplied_ids(monkeypatch):
         def __init__(self, config):
             pass
 
+        def close(self):
+            pass
+
         def chat(self, messages, **kwargs):
             calls.append(messages)
             return SimpleNamespace(content=json.dumps({"events": [event()]}))

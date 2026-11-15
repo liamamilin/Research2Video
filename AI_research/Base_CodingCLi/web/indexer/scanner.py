@@ -23,21 +23,13 @@ MAX_INDEX_BYTES = 2 * 1024 * 1024
 
 
 def extract_title(file_path: str) -> str:
-    """Extract the first markdown heading (# title) from a file."""
+    """Extract the same main question used by video topics and research history."""
+    from core.report_title import title_from_text
     try:
-        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("# ") and len(line) > 2:
-                    return line[2:].strip()
-                if line.startswith("#"):  # h2-h6, not title
-                    continue
-                # Stop after first non-empty non-heading line
-                if line:
-                    break
+        with open(file_path, "r", encoding="utf-8", errors="replace") as handle:
+            return title_from_text(handle.read(MAX_INDEX_BYTES))
     except OSError:
-        pass
-    return ""
+        return ""
 
 
 def infer_job_name(rel_path: str) -> str:

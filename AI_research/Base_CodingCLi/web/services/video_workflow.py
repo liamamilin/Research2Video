@@ -357,7 +357,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         column = replace(column, script_style=column.script_style + visual_brief(settings.paths.state_dir, report_images))
     from core.video import episodes
     is_episode = episodes.enabled(topic)
-    joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    from core.video import audience_strategy
+    audience_channel = audience_strategy.topic_channel(topic)
+    if audience_strategy.PRODUCTIONS.get(script.get("production")) != audience_channel:
+        audience_channel = ""
+    if audience_channel:
+        topic = {**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
+        script = {**script, "topic": topic}
+    selected_audience_report = report
+    audience_material = bool(audience_channel) and audience_channel not in audience_strategy.KNOWLEDGE
+    joint_input = audience_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
@@ -387,18 +396,27 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         if topic.get("from_item") and original:
                             # A report item may only use the material it cites.
                             cited = story_pool.cited(report)
-                            original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
-                                                                     if story_pool.cited_packet(p, cited))
+                            if audience_channel:
+                                original = audience_strategy.material_for_report(report, original)
+                            else:
+                                original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                         if story_pool.cited_packet(p, cited))
                         selection_report = research_dossier.selection_brief(report, script)
                         options = ({"tutorial": True} if context.get("type") == "tutorial"
                                    else {"evergreen": True} if context.get("type") == "comparison" else {})
+                        if audience_channel:
+                            options["audience_brief"] = {"title": topic.get("from_item_title") or topic["title"],
+                                                         "audience": (topic.get("fields") or {}).get("目标受众", ""),
+                                                         "promise": (topic.get("fields") or {}).get("核心角度", "")}
                         pool = story_pool.load_or_create(key, selection_report, original, peers, config,
                                                          references=bool(topic.get("from_item")), **options)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
                 filtered_material = story_pool.material_for(pool, story)
-                if joint_input:
+                if audience_channel:
+                    dossier_report, dossier_selection = selected_audience_report, "audience_selection"
+                elif joint_input:
                     dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool, script)
                     if dossier_selection == "column_explanation":
                         selected = content_guard.sources(dossier_report)
@@ -468,9 +486,17 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         if topic.get("from_item") and not (guarded and topic.get("story")):
             # Rewriting a published item skips deduplication, but its story
             # and source scope are still frozen to the selected item.
-            material = story_pool.material_for_report_item(report, material, topic.get("story"))
+            material = (audience_strategy.material_for_report(report, material) if audience_channel else
+                        story_pool.material_for_report_item(report, material, topic.get("story")))
+        if audience_material and not guarded:
+            material = audience_strategy.material_for_report(dossier_report, material)
+        if audience_channel in audience_strategy.KNOWLEDGE:
+            # Idea snippets and supplemental pages never replace the knowledge
+            # dossier, including when no supplement was needed or collection failed.
+            material = ""
         material, material_fit = fit_material(dossier_report if joint_input else report, material)
-        writing_topic = topic
+        writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
+                         if audience_channel else topic)
         told = _episode_told(script, topic, dossier_report) if is_episode else []
         if told:
             items = topic["episode"]["items"]
@@ -500,6 +526,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             **({"original_material": material} if joint_input else {}),
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
+        if audience_channel:
+            written.meta["audience_strategy"] = {"strategy": audience_strategy.MARKER, "channel": audience_channel,
+                                                 "writer": "original_with_audience_scope"}
         written.meta['programme_direction'] = programme_direction
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)

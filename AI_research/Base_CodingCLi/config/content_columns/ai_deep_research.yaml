@@ -2,7 +2,7 @@ schema_version: 1
 name: AI 深度解读
 matrix: ai_media
 type: deep_research
-audience: 希望理解 AI 技术如何影响实际工作的开发者和高频使用者
+audience: 希望理解 AI 原理及其工作、学习和生活影响的中文观众；专业主题保留实际理解门槛
 promise: 陪观众从一个 AI 疑问走到机制理解，并能用于认识类似问题
 production_ids:
 - ai_media_deep_dive

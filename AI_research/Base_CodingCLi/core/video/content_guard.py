@@ -121,6 +121,29 @@ def published(script_id: str) -> bool:
         return bool(conn.execute("SELECT 1 FROM publications WHERE script_id=? LIMIT 1", (script_id,)).fetchone())
 
 
+
+def _upload_rows(path: Path, table: str) -> list[sqlite3.Row]:
+    """Read a queue through transient SQLite/WAL initialization races.
+
+    Never treat a persistent read failure as an empty publication ledger.
+    """
+    from contextlib import closing
+    import time
+
+    for attempt in range(3):
+        try:
+            with closing(sqlite3.connect(f"file:{path}?mode=ro", uri=True)) as conn:
+                conn.row_factory = sqlite3.Row
+                if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
+                    return []  # newly created queue, schema not initialized yet
+                return conn.execute(f"SELECT * FROM {table}").fetchall()
+        except sqlite3.OperationalError:
+            if attempt == 2:
+                raise
+            time.sleep(0.05)
+    raise AssertionError("unreachable")
+
+
 def upload_protected(state: Path) -> set[str]:
     """Include pending/uncertain platform receipts before the publication ledger catches up."""
     protected = set()
@@ -129,17 +152,13 @@ def upload_protected(state: Path) -> set[str]:
     for path, table in files:
         if not path.is_file():
             continue
-        with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
-            conn.row_factory = sqlite3.Row
-            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
-                continue  # a worker may have created its DB before initializing the queue
-            for raw in conn.execute(f"SELECT * FROM {table}"):
-                row = dict(raw)
-                if table == "jobs" and row.get("kind") != "UPLOAD":
-                    continue
-                if row.get("script_id") and (row["status"] not in ("FAILED", "CANCELLED")
-                                              or row.get("work_id") or row.get("bvid")):
-                    protected.add(row["script_id"])
+        for raw in _upload_rows(path, table):
+            row = dict(raw)
+            if table == "jobs" and row.get("kind") != "UPLOAD":
+                continue
+            if row.get("script_id") and (row["status"] not in ("FAILED", "CANCELLED")
+                                          or row.get("work_id") or row.get("bvid")):
+                protected.add(row["script_id"])
     return protected
 
 

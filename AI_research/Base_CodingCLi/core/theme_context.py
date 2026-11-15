@@ -7,6 +7,7 @@ from . import matrices
 from .config import load_job
 from .video import content_columns
 from .yaml_cache import load_yaml
+from .video.audience_profiles import EDITORIAL_GUIDANCE
 
 
 def categories(config_dir: str, matrix_key: str, *, include_legacy: bool = False) -> list[dict]:
@@ -54,6 +55,8 @@ def research_spec(theme: dict, category: dict, matrix, *, sources: list[str]) ->
 “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
 保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
 优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+{EDITORIAL_GUIDANCE}
+题目已经确定，以上原则用于组织材料和保持受众范围，不重新换题。需求线索说明为什么有人在意，具体材料和案例展开怎么发生，比较背景解释差异；不把这些内部角色写成口播章节要求。
 
 输出一份 Markdown 主题研究底稿：
 # 主题标题

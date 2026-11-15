@@ -118,6 +118,9 @@ class FakeLLM:
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
 
+    def close(self):
+        pass
+
     def chat(self, messages, **kwargs):
         from core.video import audit as video_audit
         from core.video import editorial

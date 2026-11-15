@@ -2,7 +2,7 @@ schema_version: 1
 name: AI 开源发现
 matrix: ai_media
 type: explainer
-audience: 想把开源工具用于实际工作的开发者和 AI 高频使用者
+audience: 关注开源 AI 用途的中文工作、学习与技术观众；开发与部署题按实际前置知识说明受众
 promise: 帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点
 production_ids:
 - ai_media_opensource_digest

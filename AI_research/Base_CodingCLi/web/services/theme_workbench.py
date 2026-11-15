@@ -211,7 +211,8 @@ def production_input(key: str, value: dict, minutes: float = 4, *, automatic: bo
     if recipe and recipe.minutes_range and recipe.minutes_range[0] <= minutes <= recipe.minutes_range[1]:
         recipe_key = recipes.variant_column_key(recipe_key, minutes=minutes)
     sources = theme_context.source_specs(found, paths().config_dir, paths().jobs_dir, matrix(key))
-    topic = {"title": value["title"], "fields": {"核心角度": value["angle"], "目标受众": value["audience"],
+    topic = {"title": value["title"], "preserve_audience_scope": True,
+              "fields": {"核心角度": value["angle"], "目标受众": value["audience"],
               "一句话": found["promise"], "补充材料": value["notes"]}, "theme_task_id": value["id"],
               "theme_research": theme_context.research_spec(value, found, matrix(key), sources=sources)}
     if binding:

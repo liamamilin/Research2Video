@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import yaml
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -33,7 +34,9 @@ def test_all_twelve_candidates_enter_even_with_legacy_auto_one(pilot_env):
 def test_configured_report_limit_caps_automatic_production(pilot_env):
     env, _, _ = pilot_env
     job = env / "jobs/monitoring/ai_flash_discovery.yaml"
-    job.write_text(job.read_text().rstrip() + "\n  daily_limit: 3\n", encoding="utf-8")
+    config = yaml.safe_load(job.read_text())
+    config['topics']['daily_limit'] = 3
+    job.write_text(yaml.safe_dump(config, allow_unicode=True), encoding="utf-8")
     _report(env).write_text(report_items(5), encoding="utf-8")
     now = _fresh(env)
     assert pilot.fire_auto(now) == 1

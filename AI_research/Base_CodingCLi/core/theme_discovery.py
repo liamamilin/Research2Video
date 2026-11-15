@@ -21,6 +21,7 @@ from .state import StateManager
 from .theme_store import ThemeStore, similar
 from .theme_metrics import BilibiliMetrics
 from .theme_library import ThemeLibrary
+from .video.audience_profiles import EDITORIAL_GUIDANCE
 
 logger = logging.getLogger(__name__)
 PLATFORMS = {"bilibili": ("B站", "bilibili.com"), "zhihu": ("知乎", "zhihu.com"),
@@ -59,7 +60,7 @@ def search_terms(category: dict, engine, matrix, config: dict) -> list[str]:
     return [f"{(matrix.keywords or [matrix.domain or matrix.name])[0]} {category['name']}"[:120]]
 
 
-def select(response: str, categories: list[dict], signals: list[dict]) -> list[dict]:
+def select(response: str, categories: list[dict], signals: list[dict], *, audience_first: bool = False) -> list[dict]:
     text = response.strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
@@ -91,7 +92,8 @@ def select(response: str, categories: list[dict], signals: list[dict]) -> list[d
                        "audience": category_map[key]["audience"], "signals": actual,
                        "ranking": theme_ranking.rank(actual, item.get("relevance", 70))})
     chosen, occupied = [], set()
-    for item in sorted(candidates, key=lambda c: c["ranking"]["score"], reverse=True):
+    ordered = candidates if audience_first else sorted(candidates, key=lambda c: c["ranking"]["score"], reverse=True)
+    for item in ordered:
         if item["category"] in occupied or any(similar(item["title"], old["title"]) for old in chosen):
             continue
         occupied.add(item["category"])
@@ -171,19 +173,19 @@ def run(engine, job: dict) -> str | None:
             response = llm.chat([
                 {"role": "system", "content": (
                     "你是视频选题编辑。按提供的矩阵栏目分类，从公开内容线索提炼值得讲给目标观众的问题。"
-                    "每类提出最多三个不同的候选问题，最终程序会结合真实计数选每类一条；不同类不重复同一问题。"
+                    "每类提出最多三个不同的候选问题，按观看动机、覆盖范围与实际收获排序，最终每类采用排在最前的可用题；不同类不重复同一问题。"
                     "栏目交付目标决定角度，不能把所有栏目都变成新闻。避开已推荐和已制作的相近主题。"
                     "推荐理由说明观众问题及具体线索，使用自然语言，不出现s1等内部编号。不要编造热度、播放量、增长率或用户规模。"
                     "提供relevance为0至100的栏目与观众相关性分值，避免用高播放但不相关的作品凑题。"
                     "indexed_content 只有搜索索引线索，不能称为流量榜；public_metrics 的数字仅适用于对应作品。"
-                    "输出 JSON 对象 {themes:[{category,title,angle,reason,relevance,source_ids:[]}]}；source_ids只能引用本栏目提供的ID。")},
+                    "输出 JSON 对象 {themes:[{category,title,angle,reason,relevance,source_ids:[]}]}；source_ids只能引用本栏目提供的ID。" + EDITORIAL_GUIDANCE)},
                 {"role": "user", "content": json.dumps({"matrix": matrix.name, "audience": matrix.content.get("audience", ""),
                     "categories": categories, "recent_topics": [r["title"] for r in previous],
                     "extra_direction": config.get("direction", ""), "feedback": storage.feedback_profile(key),
                     "signals": signals}, ensure_ascii=False)},
             ], tools=None)
             usage.update(llm.usage)
-            candidates = select(response.content, categories, signals)
+            candidates = select(response.content, categories, signals, audience_first=True)
             if engine._cancel.is_set():
                 raise CancelledError("主题发现已取消")
             made = storage.publish(key, day, candidates, refresh=True)

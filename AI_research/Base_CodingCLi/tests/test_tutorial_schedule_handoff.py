@@ -15,7 +15,7 @@ from core.research import _FETCH_SYSTEM_PROMPT
 from core.research_window import select
 from core.schedule_store import ScheduleStore
 from core.search import SearchResult
-from core.video import autopilot_store, manuscript_workflow, store
+from core.video import autopilot_store, manuscript_workflow, store, audience_strategy
 from tests.test_platforms import BV, CREDENTIAL, PAYLOAD
 from tests.test_video_scripts import FakeLLM, ROOT, autovideo, llm, script_json, video_env  # noqa: F401
 from web.services import bilibili, platform_manager, video_autopilot, video_render, video_workflow
@@ -86,6 +86,13 @@ def test_morning_tutorial_handoff(video_env, llm, autovideo, monkeypatch, has_to
             result = (f"### {title}\n- **系列**：WorkBuddy\n- **一句话**：定位已生成的文件。\n"
                       f"- **操作与演示**：在结果区找到文件卡片。\n- **来源网址**：{url}\n  - [结果区概览]({overview})"
                       if has_topic else "本次暂无新题材")
+        elif system.startswith(audience_strategy.SELECT_PROMPT):
+            candidates = [{"title":title,"audience":"WorkBuddy 用户","stake":"找到自己的产物",
+                "novelty":"结果入口","promise":"定位已生成的文件","commercial":"工具使用",
+                "structure":"work","priority_reason":"常见操作","source_ids":["S1"],
+                "material":f"在结果区找到文件卡片。概览：{overview}","series":"WorkBuddy",
+                "topic_kind":"功能与技巧","demonstration":"在结果区找到文件卡片"}] if has_topic else []
+            result = json.dumps({"candidates":candidates,"tradeoffs":"只选本期有材料的操作"},ensure_ascii=False)
         elif "整理成教程候选" in system:
             assert "同一个操作" in system and "相同结果" in system
             packet = json.loads(request)["materials"][0]["id"]

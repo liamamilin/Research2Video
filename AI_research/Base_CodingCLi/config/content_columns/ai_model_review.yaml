@@ -2,7 +2,7 @@ schema_version: 1
 name: AI 模型观察
 matrix: ai_media
 type: comparison
-audience: 需要为实际工作选择模型的开发者和 AI 高频使用者
+audience: 需要理解不同 AI 模型能力、成本与适用情形的中文用户
 promise: 帮观众围绕一个使用场景看懂模型差异，理解选择背后的取舍
 production_ids:
 - ai_media_arena_digest

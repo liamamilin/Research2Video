@@ -2,7 +2,7 @@ schema_version: 1
 name: AI 产业观察
 matrix: ai_media
 type: explainer
-audience: 关心 AI 产品与使用生态的开发者、产品从业者和高频使用者
+audience: 关注 AI 如何影响产品、服务、工作与消费选择的中文观众
 promise: 帮观众理解一件 AI 商业变化如何影响产品、用户与实际用法
 production_ids:
 - ai_media_business_digest

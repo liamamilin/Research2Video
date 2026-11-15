@@ -133,6 +133,9 @@ def _heat_rank(pick: dict, column, candidates: list[dict], taken: set) -> tuple[
         return candidates, ""
     from core.video import heat
 
+    from core.video import audience_strategy
+    if candidates and all(audience_strategy.topic_channel(c) for c in candidates):
+        return candidates, "按观看动机、受众收获与材料组织的已选顺序制作"
     fresh = [c for c in candidates if c["id"] not in taken]
     try:
         kept, _, note = heat.Heat(paths.state_dir).rank(fresh, int(minimum), video_workflow._llm_configs(None, column)[0])
@@ -160,6 +163,9 @@ def _item_text(topic: dict) -> str:
 def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Optional[str], list[dict], str]:
     """(base id, its variants, note): the hottest new item at or above ``selection.angle_min``, told again from
     every angle its material supports (core/video/angles.py). Only scored items qualify: no heat, no variants."""
+    from core.video import audience_strategy
+    if any(audience_strategy.topic_channel(c) for c in candidates):
+        return None, [], ""
     paths = get_settings().paths
     config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
     minimum = (config.selection if config is not None else {}).get("angle_min")
@@ -257,7 +263,8 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
         for item in items:
             if item["pick"] is pick and story_pool.enabled(item["topic"]):
                 item["topic"] = {**item["topic"], "_story_fallbacks": [dict(c) for c in candidates if c["id"] not in taken]}
-        if spec.get("report") and pick.get("production") == FLASH_PRODUCTION and not any(i["pick"] is pick for i in items):
+        if (spec.get("report") and pick.get("production") == FLASH_PRODUCTION
+                and not any(i["pick"] is pick for i in items)):
             fallback = _material_topic(spec["report"], spec.get("report_identity"))
             if fallback["id"] not in taken:
                 taken.add(fallback["id"])
@@ -583,6 +590,7 @@ def _material_topic(report: str, revision: str | None = None) -> dict:
     """One bounded second pass per report and production batch."""
     return {"id": f"flash-material:{revision or os.path.basename(report)}", "title": "从快讯原始资料重新选题",
             "from_report": report, "fields": {}, "_material_reselection": True,
+            "preserve_audience_scope": True,
             **({"report_identity": revision} if revision else {}),
             "matrix_dedup": {"job": FLASH_JOB, "policy": story_pool.POLICY}}
 
@@ -678,7 +686,10 @@ def _prepare(item: dict) -> dict:
     column = video_columns.get(config_dir, item["column_key"])
     job = research_dossier.PRODUCTIONS.get(item.get("production"), "")
     domain = job and not job.startswith(("ai_media/", "monitoring/"))
-    business = content_columns.for_production(config_dir, item["production"]) if domain else None
+    from core.video import audience_strategy
+    marked = audience_strategy.topic_channel(topic)
+    scoped = marked and audience_strategy.PRODUCTIONS.get(item.get("production")) == marked
+    business = content_columns.for_production(config_dir, item["production"]) if domain or scoped else None
     audience = (business.audience if business else "") or column.audience
     fields = topic.setdefault("fields", {})
     if audience and not (fields.get("目标受众") or "").strip():

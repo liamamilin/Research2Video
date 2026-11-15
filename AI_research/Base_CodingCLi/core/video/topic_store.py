@@ -377,6 +377,12 @@ def report_has_content(source: Source | None, path: str, root: str) -> bool:
     Prose research reports have no declared topic parser and remain whole reports.
     This uses the existing topic format, without another model or content review.
     """
+    from core import report_meta
+    from .audience_strategy import MARKER
+    relative = os.path.relpath(os.path.join(root, path), root)
+    selection = ((report_meta.get(path) or report_meta.get(relative) or {}).get("audience_strategy") or {})
+    if selection.get("strategy") == MARKER and selection.get("candidate_count") == 0:
+        return False
     if source is None:
         return True
     with open(os.path.join(root, path), encoding="utf-8") as handle:
