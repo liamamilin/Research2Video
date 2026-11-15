@@ -130,6 +130,27 @@ def test_an_unhandled_exception_is_contained_and_reported(monkeypatch):
     assert any(e.get("type") == "error" for e in task.log_bus.events)
 
 
+def test_invalid_config_at_worker_start_finishes_the_registered_task(tmp_path, monkeypatch):
+    from core import activity
+
+    monkeypatch.setattr(activity, "set_running", lambda *args: None)
+    config = tmp_path / "config"
+    config.mkdir()
+    (config / "system.yaml").write_text("ai: [\n")
+    task = _task()
+    registry = TaskRegistry()
+    registry._tasks[task.job_name] = task
+    handlers = list(logging.getLogger().handlers)
+
+    executor.run_job_in_thread(task, str(config), str(tmp_path / "jobs"))
+
+    assert task.status == "failed"
+    assert not registry.is_running(task.job_name)
+    assert any(event["type"] == "error" for event in task.log_bus.events)
+    assert task.log_bus.events[-1] == {"type": "status", "status": "failed"}
+    assert list(logging.getLogger().handlers) == handlers
+
+
 def test_the_starting_user_reaches_the_engine(monkeypatch):
     seen = {}
 

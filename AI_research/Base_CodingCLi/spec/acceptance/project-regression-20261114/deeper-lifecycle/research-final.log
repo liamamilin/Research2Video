@@ -1,0 +1,14 @@
+........................................................................ [ 49%]
+........................................................................ [ 98%]
+..                                                                       [100%]
+=============================== warnings summary ===============================
+tests/test_pipeline_api.py::test_round_diff_errors
+  /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/routes/pipeline.py:224: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    previous = _require_date(against, "against")
+
+tests/test_pipeline_api.py::test_round_diff_errors
+  /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/routes/pipeline.py:213: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    _require_date(date, "date")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+146 passed, 2 warnings in 8.67s

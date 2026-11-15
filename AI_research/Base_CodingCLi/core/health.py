@@ -18,7 +18,6 @@ import time
 import tempfile
 from datetime import datetime
 from typing import Optional
-from typing import Optional
 
 OK = "ok"
 WARN = "warn"

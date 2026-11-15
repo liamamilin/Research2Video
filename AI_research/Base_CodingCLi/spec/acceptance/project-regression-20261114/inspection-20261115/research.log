@@ -1,0 +1,168 @@
+........................................................................ [  1%]
+........................................................................ [  3%]
+........................................................................ [  4%]
+........................................................................ [  6%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 19%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+........................................................................ [ 24%]
+........................................................................ [ 25%]
+........................................................................ [ 27%]
+..........s............................................................. [ 28%]
+........................................................................ [ 30%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 40%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+........................................................................ [ 65%]
+........................................................................ [ 67%]
+......................................................s................. [ 68%]
+...................F.................................................... [ 70%]
+........................................................................ [ 72%]
+....................................................s................... [ 73%]
+........................................................................ [ 75%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 84%]
+....s................................................................... [ 86%]
+...........................................s............................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 94%]
+........................................................................ [ 96%]
+........................................................................ [ 97%]
+........................................................................ [ 99%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+________ test_the_job_pool_starts_each_run_with_the_callers_attribution ________
+
+db = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-407/test_the_job_pool_starts_each_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1553a4910>
+
+    def test_the_job_pool_starts_each_run_with_the_callers_attribution(db, monkeypatch):
+        from web.runner import executor
+        seen = []
+        monkeypatch.setattr(executor, "ResearchEngine", lambda **k: object())
+        monkeypatch.setattr(executor, "_attach_persistence", lambda *a: None)
+        monkeypatch.setattr(executor, "run_job_in_thread", lambda *a, **k: seen.append(telemetry.current()))
+        monkeypatch.setattr("core.matrices.cap_block", lambda *a, **k: "")
+        registry = NS(start=lambda name, by, engine: NS(log_bus=NS(write=lambda e: None), future=None))
+        monkeypatch.setattr(executor, "TaskRegistry", lambda: registry)
+        with telemetry.bind(script_id="s1"):
+>           executor.start_job("daily", "video").future.result(timeout=5)
+
+tests/test_telemetry.py:348:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/concurrent/futures/_base.py:458: in result
+    return self.__get_result()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/concurrent/futures/_base.py:403: in __get_result
+    raise self._exception
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def run_submitted():
+        submitted.wait()
+>       if task.status == "failed":
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'status'
+
+web/runner/executor.py:142: AttributeError
+=============================== warnings summary ===============================
+tests/test_assistant_api.py: 1 warning
+tests/test_assistant_overview.py: 1 warning
+tests/test_assistant_task_center.py: 1 warning
+tests/test_matrices.py: 6 warnings
+tests/test_periods.py: 1 warning
+tests/test_platforms.py: 1 warning
+tests/test_report_filters.py: 1 warning
+tests/test_scheduler_api.py: 1 warning
+tests/test_social_publishing.py: 2 warnings
+tests/test_telemetry.py: 1 warning
+tests/test_theme_workbench.py: 1 warning
+tests/test_tracking_api.py: 1 warning
+tests/test_video_articles.py: 1 warning
+tests/test_video_autopilot.py: 1 warning
+tests/test_video_plan_pause.py: 1 warning
+tests/test_video_topic_store.py: 1 warning
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/starlette/_exception_handler.py:59: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    response = await handler(conn, exc)  # type: ignore[arg-type]
+
+tests/test_auth.py: 1 warning
+tests/test_config_secrets.py: 2 warnings
+tests/test_qa.py: 2 warnings
+tests/test_render.py: 1 warning
+tests/test_reports_api.py: 2 warnings
+tests/test_security_hardening.py: 1 warning
+tests/test_share.py: 1 warning
+tests/test_tracking_api.py: 1 warning
+tests/test_vector_lifecycle.py: 2 warnings
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/fastapi/telemetry/_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+tests/test_config_api.py: 5 warnings
+tests/test_harness_configuration.py: 8 warnings
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/config.py:374: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return _update_system_config_locked(payload, request, user)
+
+tests/test_config_api.py::test_a_key_in_the_env_name_field_is_rejected
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/config.py:232: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    walk(value, f"{path}{key}.")
+
+tests/test_p0_hardening.py::test_job_run_limit_is_keyed_per_principal
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/.AI_research/lib/python3.10/site-packages/jwt/api_jwt.py:147: InsecureKeyLengthWarning: The HMAC key is 1 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_pipeline_api.py::test_round_diff_errors
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/pipeline.py:224: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    previous = _require_date(against, "against")
+
+tests/test_pipeline_api.py::test_round_diff_errors
+tests/test_security_hardening.py::test_round_diff_rejects_non_date
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/pipeline.py:213: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    _require_date(date, "date")
+
+tests/test_report_filters.py::test_api_rejects_a_malformed_date
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/reports.py:255: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    since=_validate_date(since, "since"), until=_validate_date(until, "until"),
+
+tests/test_report_filters.py::test_api_rejects_a_malformed_date
+  /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/web/routes/reports.py:107: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    since=_validate_date(since, "since"), until=_validate_date(until, "until"),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_launcher.py:162: AREC.app not built in this checkout
+SKIPPED [1] tests/test_state_isolation.py:29: 工作区没有 state/ 与 output/（CI 全新检出），无真实数据可保护
+SKIPPED [1] tests/test_upstream_and_validation.py:162: no round output on this machine
+SKIPPED [1] tests/test_video_publish.py:63: the first flash render is not on this machine
+SKIPPED [1] tests/test_video_quality_handoff.py:47: unusable production config: 没有这个 Job：research/ai
+FAILED tests/test_telemetry.py::test_the_job_pool_starts_each_run_with_the_callers_attribution
+1 failed, 4484 passed, 5 skipped, 55 warnings in 515.18s (0:08:35)

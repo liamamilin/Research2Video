@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import threading
 from collections import deque
-from typing import Optional
 
 _LOG_BUFFER_SIZE = 5000
 
@@ -26,7 +25,7 @@ class LogBus:
     def __init__(self, task_id: str):
         self.task_id = task_id
         self._buffer: deque[dict] = deque(maxlen=_LOG_BUFFER_SIZE)
-        self._subscribers: set[asyncio.Queue] = set()
+        self._subscribers: dict[asyncio.Queue, asyncio.AbstractEventLoop] = {}
         self._lock = threading.Lock()
         self._counter = 0
 
@@ -38,18 +37,22 @@ class LogBus:
         with self._lock:
             self._counter += 1
             event["_id"] = self._counter
-            self._buffer.append(event)
-            # Snapshot subscribers under lock, then deliver
-            subs = list(self._subscribers)
+            self._buffer.append(event.copy())
+            # Schedule under the lock so concurrent writers preserve event-ID order.
+            for q, loop in self._subscribers.items():
+                try:
+                    loop.call_soon_threadsafe(self._deliver, q, event.copy())
+                except RuntimeError:
+                    # A disconnected subscriber's event loop may have closed.
+                    pass
 
-        for q in subs:
-            try:
-                loop = q._loop if hasattr(q, "_loop") else None
-                if loop and loop.is_running():
-                    loop.call_soon_threadsafe(q.put_nowait, event.copy())
-            except Exception:
-                # Silently drop failed deliveries
-                pass
+    @staticmethod
+    def _deliver(q: asyncio.Queue, event: dict) -> None:
+        # Slow clients retain the newest events, including the terminal status.
+        # This runs on the subscriber loop, never on a producer thread.
+        if q.full():
+            q.get_nowait()
+        q.put_nowait(event)
 
     def replay(self, since_id: int = 0) -> list[dict]:
         """Return all events with _id > since_id (for SSE reconnection)."""
@@ -61,13 +64,14 @@ class LogBus:
     def subscribe(self) -> asyncio.Queue:
         """Add a subscriber queue. Returns the queue."""
         q: asyncio.Queue = asyncio.Queue(maxsize=1000)
+        loop = asyncio.get_running_loop()
         with self._lock:
-            self._subscribers.add(q)
+            self._subscribers[q] = loop
         return q
 
     def unsubscribe(self, q: asyncio.Queue):
         with self._lock:
-            self._subscribers.discard(q)
+            self._subscribers.pop(q, None)
 
     @property
     def last_event_id(self) -> int:

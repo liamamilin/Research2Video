@@ -65,7 +65,7 @@ def test_atomic_claim_only_assigns_each_job_once_under_contention(tmp_path):
     assert store.claim_next() is None
 
 
-def test_startup_recovery_marks_running_attempt_failed_and_retryable(tmp_path):
+def test_startup_recovery_marks_running_attempt_failed_and_retryable(tmp_path, monkeypatch):
     settings = make_settings(tmp_path)
     store = JobStore(settings.data_dir)
     store.initialize()
@@ -74,13 +74,16 @@ def test_startup_recovery_marks_running_attempt_failed_and_retryable(tmp_path):
     store.set_runner_pid(job_id, claim["attempt_no"], 987654)
     store.update_stage(job_id, 1, "STORYBOARD", "RUNNING")
 
-    with TestClient(create_app(settings, start_worker=False)) as restarted_app:
+    reaped = []
+    monkeypatch.setattr(G2ProcessRunner, "reap_orphan", lambda self, pid: reaped.append(pid))
+    with TestClient(create_app(settings)) as restarted_app:
         job = restarted_app.get(f"/api/jobs/{job_id}").json()
         assert job["status"] == "FAILED"
         assert job["error_code"] == "WORKER_INTERRUPTED"
         assert job["retryable"] is True
         assert job["attempts"][0]["stages"][2]["status"] == "INTERRUPTED"
         assert restarted_app.app.state.store.claim_next() is None
+        assert reaped == [987654]
 
 
 def test_retry_creates_a_separate_attempt_and_preserves_first_workspace(tmp_path):
@@ -115,6 +118,21 @@ def test_queued_cancel_is_terminal_and_running_cancel_is_cooperative(tmp_path):
     assert store.cancel_requested(running_id) is True
     store.mark_cancelled(running_id, 1)
     assert store.get_job(running_id)["status"] == "CANCELLED"
+
+
+def test_accepted_cancel_wins_over_a_concurrent_generation_failure(tmp_path):
+    store = make_store(tmp_path)
+    job_id = new_job(store)
+    store.claim_next()
+    store.request_cancel(job_id)
+    # A failure may already be on its way after the runner's last cancel check.
+    store.mark_failed(job_id, 1, "STORYBOARD", "MODEL_TIMEOUT", "timed out", True)
+    job = store.get_job(job_id)
+    assert job["status"] == "CANCELLED"
+    assert not job["retryable"] and not job["cancel_requested"]
+    assert job["attempts"][0]["status"] == "CANCELLED"
+    assert not any(stage["status"] in {"RUNNING", "PENDING", "FAILED"}
+                   for stage in job["attempts"][0]["stages"])
 
 
 def test_artifact_download_checks_workspace_and_sha256(tmp_path):

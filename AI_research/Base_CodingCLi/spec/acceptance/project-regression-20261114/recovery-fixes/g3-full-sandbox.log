@@ -1,0 +1,75 @@
+........................................................................ [ 28%]
+........................................................................ [ 57%]
+..................FF.................................................... [ 86%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+____ test_launcher_reuses_verified_service_without_starting_another_process ____
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-383/test_launcher_reuses_verified_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x134d34190>
+
+>   ???
+
+/Users/milin/2026/软件开发/autovideo/g3/tests/test_local_launcher.py:49:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+../../../../.pyenv/versions/3.10.13/lib/python3.10/contextlib.py:135: in __enter__
+    return next(self.gen)
+/Users/milin/2026/软件开发/autovideo/g3/tests/test_local_launcher.py:27: in service
+    ???
+../../../../.pyenv/versions/3.10.13/lib/python3.10/socketserver.py:452: in __init__
+    self.server_bind()
+../../../../.pyenv/versions/3.10.13/lib/python3.10/http/server.py:137: in server_bind
+    socketserver.TCPServer.server_bind(self)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <http.server.ThreadingHTTPServer object at 0x134c25210>
+
+    def server_bind(self):
+        """Called by constructor to bind the socket.
+
+        May be overridden.
+
+        """
+        if self.allow_reuse_address:
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+>       self.socket.bind(self.server_address)
+E       PermissionError: [Errno 1] Operation not permitted
+
+../../../../.pyenv/versions/3.10.13/lib/python3.10/socketserver.py:466: PermissionError
+__________ test_launcher_preserves_unrelated_service_on_occupied_port __________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-383/test_launcher_preserves_unrela0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1360d3940>
+
+>   ???
+
+/Users/milin/2026/软件开发/autovideo/g3/tests/test_local_launcher.py:61:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+../../../../.pyenv/versions/3.10.13/lib/python3.10/contextlib.py:135: in __enter__
+    return next(self.gen)
+/Users/milin/2026/软件开发/autovideo/g3/tests/test_local_launcher.py:27: in service
+    ???
+../../../../.pyenv/versions/3.10.13/lib/python3.10/socketserver.py:452: in __init__
+    self.server_bind()
+../../../../.pyenv/versions/3.10.13/lib/python3.10/http/server.py:137: in server_bind
+    socketserver.TCPServer.server_bind(self)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <http.server.ThreadingHTTPServer object at 0x1360d3640>
+
+    def server_bind(self):
+        """Called by constructor to bind the socket.
+
+        May be overridden.
+
+        """
+        if self.allow_reuse_address:
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+>       self.socket.bind(self.server_address)
+E       PermissionError: [Errno 1] Operation not permitted
+
+../../../../.pyenv/versions/3.10.13/lib/python3.10/socketserver.py:466: PermissionError
+=========================== short test summary info ============================
+FAILED g3/tests/test_local_launcher.py::test_launcher_reuses_verified_service_without_starting_another_process
+FAILED g3/tests/test_local_launcher.py::test_launcher_preserves_unrelated_service_on_occupied_port
+2 failed, 248 passed in 16.01s

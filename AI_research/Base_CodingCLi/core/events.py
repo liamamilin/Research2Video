@@ -15,7 +15,7 @@ import sqlite3
 import threading
 import time
 from contextlib import contextmanager
-from typing import Iterable, Optional
+from typing import Iterable, Iterator, Optional
 from urllib.parse import unquote, urlparse
 
 from core import sqlite_util

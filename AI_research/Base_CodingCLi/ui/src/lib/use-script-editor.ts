@@ -11,9 +11,11 @@ export function useScriptEditor(id: string, username: string, version: ScriptVer
   const [draft, setDraft] = useState<Draft | null>(null);
   const [recovery, setRecovery] = useState<Draft | null>(null);
   const [storageError, setStorageError] = useState(false);
+  const [draftKey, setDraftKey] = useState(key);
   const dirty = Boolean(draft && content(draft.title, draft.sections) !== draft.original);
 
   useEffect(() => {
+    setDraftKey(key);
     setEditing(false); setDraft(null); setRecovery(null); setStorageError(false);
     if (!key) return;
     try {
@@ -25,13 +27,15 @@ export function useScriptEditor(id: string, username: string, version: ScriptVer
   }, [key, version?.version]);
 
   useEffect(() => {
-    if (!editing || !draft || !key) return;
+    // Effects from the scope-changing render still see the previous draft.
+    // Wait for the reset before persisting under the new owner's/version's key.
+    if (!editing || !draft || !key || draftKey !== key) return;
     try {
       if (dirty) { localStorage.setItem(key, JSON.stringify(draft)); setRecovery(draft); }
       else { localStorage.removeItem(key); setRecovery(null); }
       setStorageError(false);
     } catch { setStorageError(true); }
-  }, [key, editing, draft, dirty]);
+  }, [key, draftKey, editing, draft, dirty]);
 
   function start() {
     if (!version) return;

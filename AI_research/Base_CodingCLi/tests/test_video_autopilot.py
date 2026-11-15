@@ -611,6 +611,69 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
 
 
+def test_old_completed_video_does_not_block_a_new_approved_version(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    script_id = item["script_id"]
+    draft(script_id)
+    pilot.tick()
+    pilot.tick()
+    old = store.list_renders(script_id)[0]
+    store.update_render(old["id"], status="COMPLETED")
+    draft(script_id)
+    store.update_script(script_id, status="APPROVED", approved_version=2)
+    ap.update_item(item["id"], state="HELD", note="等待新版定稿")
+    ap.update_run(run["id"], status="DONE")
+
+    pilot.tick()
+
+    renders = store.list_renders(script_id)
+    assert {r["version"] for r in renders} == {1, 2}
+    assert store.get_render(old["id"])["status"] == "COMPLETED"
+    assert item_of(run["id"], 0)["state"] == "WORKING"
+
+
+def test_approved_hold_older_than_the_first_fifty_is_resumed(pilot_env):
+    run = ap.create_run({}, [{"column_key": "flash", "topic": topic(i)} for i in range(51)])
+    for item in run["items"]:
+        ap.update_item(item["id"], state="HELD", note="等待处理")
+    oldest = run["items"][0]
+    script = store.create_script("flash", oldest["topic"])
+    draft(script["id"])
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    ap.update_item(oldest["id"], script_id=script["id"])
+    with store.connect(write=True) as db:
+        db.execute("UPDATE autopilot_items SET updated_at=? WHERE id=?",
+                   ("2000-01-01T00:00:00+0800", oldest["id"]))
+    ap.update_run(run["id"], status="DONE")
+
+    assert pilot.reopen_approved() == 1
+    assert item_of(run["id"], 0)["state"] == "WORKING"
+    assert ap.get_run(run["id"])["status"] == "RUNNING"
+
+
+@pytest.mark.parametrize("render_status, expected_state", [("RUNNING", "WORKING"), ("COMPLETED", "DONE")])
+def test_held_batch_adopts_a_manual_render_without_submitting_again(pilot_env, monkeypatch, render_status, expected_state):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    draft(item["script_id"])
+    pilot.tick()
+    pilot.tick()
+    render = store.list_renders(item["script_id"])[0]
+    store.update_render(render["id"], status=render_status)
+    ap.update_item(item["id"], state="HELD", render_id=None, note="此前等待定稿")
+    ap.update_run(run["id"], status="DONE")
+
+    pilot.tick()
+
+    assert len(store.list_renders(item["script_id"])) == 1
+    current = item_of(run["id"], 0)
+    assert current["state"] == expected_state
+    assert current["render_id"] == render["id"]
+
+
 @pytest.mark.parametrize("code", ["SUBMIT_UNCONFIRMED", "DOWNLOAD_FAILED"])
 def test_uncertain_submissions_and_completed_copies_are_not_generated_again(pilot_env, monkeypatch, code):
     run = batch(monkeypatch, 1)

@@ -1,0 +1,301 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+______________ test_cancel_notifies_a_subscriber_waiting_for_logs ______________
+
+self = <Queue at 0x113850be0 maxsize=1000>
+
+    async def get(self):
+        """Remove and return an item from the queue.
+
+        If queue is empty, wait until an item is available.
+        """
+        while self.empty():
+            getter = self._get_loop().create_future()
+            self._getters.append(getter)
+            try:
+>               await getter
+E               asyncio.exceptions.CancelledError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:159: CancelledError
+
+During handling of the above exception, another exception occurred:
+
+fut = <Task cancelled name='Task-2' coro=<Queue.get() done, defined at /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:150>>
+timeout = 0.2
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+>                   return fut.result()
+E                   asyncio.exceptions.CancelledError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:456: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+registry = <web.runner.registry.TaskRegistry object at 0x1137569b0>
+
+    def test_cancel_notifies_a_subscriber_waiting_for_logs(registry):
+        task = registry.start("demo", "test", None)
+        task.future = Future()  # Cancellation is cooperative: work has not exited yet.
+
+        async def run():
+            q = task.log_bus.subscribe()
+            waiting = asyncio.create_task(q.get())
+            await asyncio.sleep(0)
+            assert registry.cancel("demo")
+            try:
+                event = await asyncio.wait_for(waiting, 0.2)
+                assert event["type"] == "status" and event["status"] == "cancelled"
+                assert task.cancel_token.is_set()
+                assert task in registry.all_tasks().values() and not task.future.done()
+            finally:
+                task.log_bus.unsubscribe(q)
+
+>       asyncio.run(run())
+
+tests/test_task_lifecycle.py:39:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+tests/test_task_lifecycle.py:32: in run
+    event = await asyncio.wait_for(waiting, 0.2)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+fut = <Task cancelled name='Task-2' coro=<Queue.get() done, defined at /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:150>>
+timeout = 0.2
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+                    return fut.result()
+                except exceptions.CancelledError as exc:
+>                   raise exceptions.TimeoutError() from exc
+E                   asyncio.exceptions.TimeoutError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:458: TimeoutError
+_____________ test_cancelled_queued_task_never_initializes_engine ______________
+
+registry = <web.runner.registry.TaskRegistry object at 0x113cc3940>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x113cc3ac0>
+
+    def test_cancelled_queued_task_never_initializes_engine(registry, monkeypatch):
+        task = registry.start("demo", "test", None)
+        registry.cancel("demo")
+        initialized = []
+        monkeypatch.setattr(executor, "ResearchEngine", lambda **kwargs: initialized.append(kwargs))
+        executor.run_job_in_thread(task, "unused", "unused")
+>       assert initialized == []
+E       AssertionError: assert [{'cancel_tok...unused', ...}] == []
+E
+E         Left contains one more item: {'cancel_token': <threading.Event object at 0x113cc3910>, 'config_dir': 'unused', 'date_override': None, 'jobs_dir': 'unused', ...}
+E         Use -v to get more diff
+
+tests/test_task_lifecycle.py:48: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    ai_research.web.runner:executor.py:88 Job demo failed with unhandled error
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/runner/executor.py", line 76, in run_job_in_thread
+    result = engine.run_job(job_name, verbose=verbose)
+AttributeError: 'NoneType' object has no attribute 'run_job'
+_________ test_error_during_cooperative_cancel_keeps_cancelled_status __________
+
+registry = <web.runner.registry.TaskRegistry object at 0x113a039d0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x113a03b50>
+
+    def test_error_during_cooperative_cancel_keeps_cancelled_status(registry, monkeypatch):
+        task = registry.start("demo", "test", None)
+
+        def run_job(*args, **kwargs):
+            registry.cancel("demo")
+            raise OSError("connection closed during cancellation")
+
+        monkeypatch.setattr(executor, "ResearchEngine", lambda **kw: SimpleNamespace(run_job=run_job))
+        executor.run_job_in_thread(task, "unused", "unused")
+>       assert task.status == "cancelled"
+E       AssertionError: assert 'failed' == 'cancelled'
+E
+E         - cancelled
+E         + failed
+
+tests/test_task_lifecycle.py:61: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    ai_research.web.runner:executor.py:88 Job demo failed with unhandled error
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/runner/executor.py", line 76, in run_job_in_thread
+    result = engine.run_job(job_name, verbose=verbose)
+  File "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/tests/test_task_lifecycle.py", line 57, in run_job
+    raise OSError("connection closed during cancellation")
+OSError: connection closed during cancellation
+______________ test_pool_rejection_does_not_leave_a_running_task _______________
+
+registry = <web.runner.registry.TaskRegistry object at 0x1086858a0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11387cf40>
+
+    def test_pool_rejection_does_not_leave_a_running_task(registry, monkeypatch):
+        from core import matrices
+        monkeypatch.setattr(matrices, "cap_block", lambda *args: None)
+        monkeypatch.setattr(executor, "ResearchEngine", lambda **kwargs: object())
+        monkeypatch.setattr(executor, "_attach_persistence", lambda *args: None)
+
+        def reject(*args, **kwargs):
+            raise RuntimeError("cannot schedule new futures after shutdown")
+
+        monkeypatch.setattr(executor, "_executor", SimpleNamespace(submit=reject))
+        with pytest.raises(RuntimeError, match="cannot schedule"):
+            executor.start_job("demo", "test")
+        task = registry.get("demo")
+>       assert task.status == "failed" and not registry.is_running("demo")
+E       AssertionError: assert ('running' == 'failed'
+E
+E         - failed
+E         + running)
+
+tests/test_task_lifecycle.py:79: AssertionError
+____________ test_replaced_task_is_tracked_before_future_assignment ____________
+
+registry = <web.runner.registry.TaskRegistry object at 0x113cc3a60>
+
+    def test_replaced_task_is_tracked_before_future_assignment(registry):
+        first = registry.start("demo", "test", None)
+        second = registry.start("demo", "test", None)
+        assert first.cancel_token.is_set()
+>       assert set(registry.all_tasks().values()) == {first, second}
+E       assert {<web.runner.... 0x113cc28c0>} == {<web.runner.... 0x113cc37f0>}
+E
+E         Extra items in the right set:
+E         <web.runner.registry.RunningTask object at 0x113cc37f0>
+E         Use -v to get more diff
+
+tests/test_task_lifecycle.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_task_lifecycle.py::test_cancel_notifies_a_subscriber_waiting_for_logs
+FAILED tests/test_task_lifecycle.py::test_cancelled_queued_task_never_initializes_engine
+FAILED tests/test_task_lifecycle.py::test_error_during_cooperative_cancel_keeps_cancelled_status
+FAILED tests/test_task_lifecycle.py::test_pool_rejection_does_not_leave_a_running_task
+FAILED tests/test_task_lifecycle.py::test_replaced_task_is_tracked_before_future_assignment
+5 failed in 0.58s

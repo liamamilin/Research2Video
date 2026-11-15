@@ -3,7 +3,7 @@
 Features:
 - ruamel.yaml preserves comments, ordering, block scalars (| >)
 - Atomic write via .tmp + os.rename
-- Automatic backup to state/backups/{job}_{ts}.yaml
+- Automatic backup to state/backups/{job}_{ts}_{unique}.yaml
 - Mtime-based conflict detection
 - Soft validation (warns, never blocks save)
 """
@@ -18,12 +18,18 @@ from pathlib import Path
 from typing import Optional
 
 from ruamel.yaml import YAML
-from ruamel.yaml.parser import ParserError
-from ruamel.yaml.scanner import ScannerError
+from ruamel.yaml.error import YAMLError
 
-_yaml = YAML()
-_yaml.indent(mapping=2, sequence=4, offset=2)
-_yaml.width = 120
+from core.fileio import file_lock
+
+
+def _new_yaml() -> YAML:
+    # ruamel's parser/emitter keeps mutable state throughout each operation.
+    # FastAPI sync routes may execute concurrently in different threads.
+    parser = YAML()
+    parser.indent(mapping=2, sequence=4, offset=2)
+    parser.width = 120
+    return parser
 
 BACKUP_DIR = "state/backups"
 
@@ -34,8 +40,8 @@ RECOMMENDED_FIELDS = {"name", "enabled", "output"}
 def parse_yaml(content: str) -> dict:
     """Parse YAML string into a dict. Raises ValueError on parse error."""
     try:
-        data = _yaml.load(content)
-    except (ParserError, ScannerError) as e:
+        data = _new_yaml().load(content)
+    except YAMLError as e:
         raise ValueError(f"YAML 解析错误: {e}")
     if not isinstance(data, dict):
         raise ValueError("YAML 根结构必须是一个字典")
@@ -55,7 +61,7 @@ def dump_yaml(data: dict) -> str:
             if isinstance(val, str) and "\n" in val:
                 data[key] = LiteralScalarString(val)
     buf = StringIO()
-    _yaml.dump(data, buf)
+    _new_yaml().dump(data, buf)
     return buf.getvalue()
 
 
@@ -123,17 +129,14 @@ def check_conflict(file_path: str, expected_mtime: float) -> Optional[float]:
     """Check if the file was modified since `expected_mtime`.
     Returns the current mtime if different, None if no conflict.
 
-    The 10ms tolerance absorbs filesystem timestamp jitter, not real edits: two
-    writes in quick succession can land tens of microseconds apart, and treating
-    that as a conflict would reject saves nobody made in conflict. No edit a
-    person or a script performs is that fast, so tightening this trades a real
-    protection for a phantom one.
+    Compare the same float returned to the client without a tolerance: concurrent
+    API requests and script edits can legitimately arrive less than 10ms apart.
     """
     try:
         current_mtime = os.path.getmtime(file_path)
     except OSError:
         return None
-    if abs(current_mtime - expected_mtime) > 0.01:
+    if current_mtime != expected_mtime:
         return current_mtime
     return None
 
@@ -153,9 +156,9 @@ def save_backup(file_path: str, content: str) -> str:
     os.makedirs(backup_dir, exist_ok=True)
     ts = time.strftime("%Y%m%d_%H%M%S")
     base = Path(file_path).stem
-    backup_path = os.path.join(backup_dir, f"{base}_{ts}.yaml")
     try:
-        with open(backup_path, "w", encoding="utf-8") as f:
+        fd, backup_path = tempfile.mkstemp(dir=backup_dir, prefix=f"{base}_{ts}_", suffix=".yaml")
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(content)
     except OSError as e:
         raise IOError(f"备份写入失败: {e}")
@@ -235,6 +238,17 @@ def save_job_yaml(
     new_content: str,
     expected_mtime: Optional[float] = None,
     backup: bool = True,
+) -> dict:
+    """Serialize conflict checking, backup and replacement for one job file."""
+    with file_lock(os.path.realpath(file_path)):
+        return _save_job_yaml_locked(file_path, new_content, expected_mtime, backup)
+
+
+def _save_job_yaml_locked(
+    file_path: str,
+    new_content: str,
+    expected_mtime: Optional[float],
+    backup: bool,
 ) -> dict:
     """Validate and save a job YAML file.
 

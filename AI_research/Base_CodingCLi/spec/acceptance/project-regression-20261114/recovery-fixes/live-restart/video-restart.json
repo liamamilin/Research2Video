@@ -1,0 +1,13 @@
+{
+  "status": "ready",
+  "action": "started",
+  "pid": 7448,
+  "url": "http://127.0.0.1:8011/#new",
+  "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log",
+  "old_pid": 15545,
+  "rows_unchanged": true,
+  "before_counts": {
+    "jobs": 586,
+    "music_jobs": 3
+  }
+}

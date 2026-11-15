@@ -510,14 +510,19 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     store = JobStore(settings.data_dir)
     processor = G2ProcessRunner(settings, store)
     music_generation = MusicGeneration(settings)
-    worker = SingleWorker(settings, store, processor, idle_task=music_generation.run_one, on_start=music_generation.recover)
+
+    def recover_abandoned() -> None:
+        # Only the exclusive queue owner can declare another run abandoned.
+        for abandoned in store.recover_running():
+            processor.reap_orphan(abandoned.get("runner_pid"))
+        music_generation.recover()
+
+    worker = SingleWorker(settings, store, processor, idle_task=music_generation.run_one, on_start=recover_abandoned)
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
         store.initialize()
         music_generation.jobs.initialize()
-        for abandoned in store.recover_running():
-            processor.reap_orphan(abandoned.get("runner_pid"))
         if start_worker:
             application.state.worker_primary = worker.start()
         else:
@@ -564,7 +569,10 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
 
     @application.get("/api/health")
     def health():
-        return {"status": "ok", "worker_primary": bool(application.state.worker_primary)}
+        primary = bool(application.state.worker_primary)
+        alive = bool(worker.thread and worker.thread.is_alive())
+        return {"status": "degraded" if primary and not alive else "ok",
+                "worker_primary": primary and alive}
 
     @application.get("/api/config/status")
     def config_status():

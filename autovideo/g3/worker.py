@@ -480,10 +480,16 @@ class SingleWorker:
             self._lock_file.close()
             self._lock_file = None
             return False
-        if self.on_start:
-            self.on_start()
-        self.thread = threading.Thread(target=self._loop, name="autovideo-single-worker", daemon=True)
-        self.thread.start()
+        try:
+            if self.on_start:
+                self.on_start()
+            self.thread = threading.Thread(target=self._loop, name="autovideo-single-worker", daemon=True)
+            self.thread.start()
+        except Exception:
+            self.thread = None
+            self._lock_file.close()
+            self._lock_file = None
+            raise
         return True
 
     def stop(self) -> None:
@@ -521,5 +527,15 @@ class SingleWorker:
             try:
                 self.processor.execute(job, self.stop_event)
             except Exception as exc:
-                self.store.mark_failed(job["job_id"], job["attempt_no"], job.get("active_stage") or "PLAN",
-                                       "WORKER_UNEXPECTED_ERROR", f"{type(exc).__name__}: {str(exc)[:300]}", True)
+                # Resolve this claimed job before consuming another. A temporary
+                # DB outage must neither kill the consumer nor strand RUNNING rows.
+                while True:
+                    try:
+                        self.store.mark_failed(job["job_id"], job["attempt_no"], job.get("active_stage") or "PLAN",
+                                               "WORKER_UNEXPECTED_ERROR", f"{type(exc).__name__}: {str(exc)[:300]}", True)
+                        break
+                    except Exception:
+                        logger.exception("Could not record failure for video job %s; retrying", job["job_id"])
+                        if self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds)):
+                            # Startup recovery will finish this persisted RUNNING job.
+                            return

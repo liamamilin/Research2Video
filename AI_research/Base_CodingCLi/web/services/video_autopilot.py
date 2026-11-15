@@ -740,16 +740,20 @@ def reopen_approved() -> int:
 
     Items an earlier version of the pipeline held at its quality gate (there is none now) are let through too."""
     reopened = 0
-    for item in ap.held_items():
+    for item in ap.held_items(limit=None):
         script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not script or script.get("archived"):
+            continue
         old_gate = script and script["status"] == "DRAFT" and not script.get("stage") and item["note"].startswith("闸门没通过")
         if old_gate:
             ap.update_item(item["id"], state="WORKING", note="不再设闸门，继续")
             ap.update_run(item["run_id"], status="RUNNING")
             reopened += 1
             continue
-        if script and script["status"] == "APPROVED" and not any(
-                r["status"] in ("COMPLETED", *store.ACTIVE_RENDER_STATUSES) for r in store.list_renders(script["id"])):
+        if script["status"] == "APPROVED":
+            # Reconcile this approval even when a manual render already exists.
+            # advance_auto selects only approved_version and adopts its active
+            # or completed render before considering a new submission.
             ap.update_item(item["id"], state="WORKING", note="你已定稿，继续出片")
             ap.update_run(item["run_id"], status="RUNNING")
             reopened += 1
@@ -761,7 +765,7 @@ def retry_held_renders() -> int:
     (an account's balance, a key, the model the renders use). Only items whose script is approved and not archived (an
     archived one was put away on purpose: it would be rendered again behind the user's back). Returns how many."""
     reopened = 0
-    for item in ap.held_items(limit=500):
+    for item in ap.held_items(limit=None):
         script = store.get_script(item["script_id"]) if item["script_id"] else None
         if not (script and script["status"] == "APPROVED" and not script.get("archived")
                 and item["note"].startswith("出片失败")):
@@ -784,7 +788,7 @@ def retry_search_holds() -> int:
 
     themes = ThemeStore(get_settings().paths.state_dir)
     reopened = 0
-    for item in ap.held_items(limit=500):
+    for item in ap.held_items(limit=None):
         script = store.get_script(item["script_id"]) if item["script_id"] else None
         if not (script and script["status"] == "FAILED" and not script.get("archived")
                 and search_health.is_outage_error(script.get("error"))):

@@ -743,36 +743,29 @@ async def stream_job(name: str, request: Request, user=Depends(require_viewer)):
         except (ValueError, TypeError):
             pass
 
-    # Replay events since last_id
-    initial_events = task.log_bus.replay(since_id=last_id)
-
-    # If the task is finished and no new events, return a single SSE status event
-    if not task.is_running and not initial_events:
-        async def final_event():
-            yield _sse_format({"type": "status", "status": task.status})
-
-        return StreamingResponse(
-            final_event(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
-            },
-        )
-
     async def event_stream():
-        # Flush initial replay
-        for event in initial_events:
-            yield _sse_format(event)
-
-        # Subscribe for new events
+        # Subscribe first: events written during replay are queued as well.
+        # The bus binds its loop at subscription, before the first q.get().
         q = task.log_bus.subscribe()
+        cursor = last_id
         try:
+            events = task.log_bus.replay(since_id=cursor)
             while True:
-                event = await q.get()
-                yield _sse_format(event)
-                if event.get("type") in ("status", "error"):
-                    break
+                for event in events:
+                    if event["_id"] <= cursor:
+                        continue
+                    cursor = event["_id"]
+                    yield _sse_format(event)
+                    if event.get("type") == "status":
+                        return
+                if not task.is_running:
+                    # Include final logs written while the replay was sent.
+                    events = task.log_bus.replay(since_id=cursor)
+                    if events:
+                        continue
+                    yield _sse_format({"type": "status", "status": task.status})
+                    return
+                events = [await q.get()]
         except asyncio.CancelledError:
             pass
         finally:

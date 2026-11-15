@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import os
 import contextvars
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from core.engine import ResearchEngine, CancelledError
@@ -53,19 +54,6 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
         """Route engine progress events to the task's LogBus."""
         task.log_bus.write(wrap_progress_event(event))
 
-    engine = ResearchEngine(
-        config_dir=config_dir,
-        jobs_dir=jobs_dir,
-        workspace_dir=os.path.dirname(os.path.abspath(config_dir)),
-        cancel_token=task.cancel_token,
-        progress_cb=progress_cb,
-        date_override=date_override,
-        user=task.started_by,
-        prompt_vars=getattr(task, "prompt_vars", None),
-    )
-    if flash_triggered_at is not None:
-        engine.run_context = {"flash_triggered_at": flash_triggered_at}
-
     # Attach handler to the ROOT logger to capture core/engine log output
     root_logger = logging.getLogger()
     handler = LogBusHandler(task.log_bus, level=logging.INFO)
@@ -74,6 +62,20 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
     job_name = task.job_name
 
     try:
+        if task.cancel_token.is_set():
+            raise CancelledError("Job cancelled while queued")
+        engine = ResearchEngine(
+            config_dir=config_dir,
+            jobs_dir=jobs_dir,
+            workspace_dir=os.path.dirname(os.path.abspath(config_dir)),
+            cancel_token=task.cancel_token,
+            progress_cb=progress_cb,
+            date_override=date_override,
+            user=task.started_by,
+            prompt_vars=getattr(task, "prompt_vars", None),
+        )
+        if flash_triggered_at is not None:
+            engine.run_context = {"flash_triggered_at": flash_triggered_at}
         result = engine.run_job(job_name, verbose=verbose)
         if task.cancel_token.is_set():
             task.status = "cancelled"
@@ -84,11 +86,16 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
     except CancelledError:
         task.status = "cancelled"
     except Exception as e:
-        task.status = "failed"
-        task.log_bus.write({"type": "error", "message": f"Unhandled error: {e}"})
-        logger.exception("Job %s failed with unhandled error", job_name)
+        if task.cancel_token.is_set():
+            task.status = "cancelled"
+        else:
+            task.status = "failed"
+            task.log_bus.write({"type": "error", "message": f"Unhandled error: {e}"})
+            logger.exception("Job %s failed with unhandled error", job_name)
     finally:
         root_logger.removeHandler(handler)
+        if task.cancel_token.is_set():
+            task.status = "cancelled"
         task.log_bus.write({"type": "status", "status": task.status})
         # The launcher keeps the window open while runs are in flight.
         try:
@@ -126,10 +133,28 @@ def start_job(job_name: str, started_by: str,
         "message": f"Job '{job_name}' started by {started_by}",
     })
 
-    # the pool's thread starts with an empty context: carry the caller's attribution (which video this research is for)
-    future = _executor.submit(contextvars.copy_context().run, run_job_in_thread, task,
-                              config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at)
-    task.future = future
+    # submit() may enqueue the work before failing to start a new thread. Only
+    # release execution once admission succeeded and its Future is registered.
+    submitted = threading.Event()
+
+    def run_submitted():
+        submitted.wait()
+        if task.status == "failed":
+            return
+        run_job_in_thread(task, config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at)
+
+    # Carry the caller's attribution (which video this research is for).
+    try:
+        task.future = _executor.submit(contextvars.copy_context().run, run_submitted)
+    except Exception as exc:
+        task.status = "cancelled" if task.cancel_token.is_set() else "failed"
+        if task.status == "failed":
+            task.log_bus.write({"type": "error", "message": f"Could not start job: {exc}"})
+        task.log_bus.write({"type": "status", "status": task.status})
+        registry._publish_activity()
+        raise
+    finally:
+        submitted.set()
 
     return task
 

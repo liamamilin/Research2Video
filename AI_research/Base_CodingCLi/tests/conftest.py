@@ -22,6 +22,17 @@ if str(ROOT) not in sys.path:
 
 
 @pytest.fixture(autouse=True)
+def _activity_per_test(tmp_path, monkeypatch):
+    """Executor bookkeeping must never overwrite the running app's activity file."""
+    from core import activity
+    monkeypatch.setattr(activity, "_state_dir", str(tmp_path / "activity-state"))
+    monkeypatch.setattr(activity, "_last_write", 0.0)
+    monkeypatch.setattr(activity, "_dirty", False)
+    monkeypatch.setattr(activity, "_last_activity", "")
+    monkeypatch.setattr(activity, "_running", 0)
+
+
+@pytest.fixture(autouse=True)
 def _root_logging_per_test():
     """CLI entry points replace the root logger's handlers; put them back so later tests neither inherit a file
     handler nor log into a console stream pytest has already closed."""

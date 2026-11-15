@@ -52,8 +52,8 @@ class JobStore:
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
-        conn.execute("BEGIN IMMEDIATE")
         try:
+            conn.execute("BEGIN IMMEDIATE")
             yield conn
             conn.commit()
         except Exception:
@@ -525,12 +525,17 @@ class JobStore:
     def mark_cancelled(self, job_id: str, attempt_no: int) -> None:
         now = utc_now()
         with self._transaction() as conn:
-            conn.execute("UPDATE stages SET status='CANCELLED',completed_at=? WHERE job_id=? AND attempt_no=? AND status IN ('RUNNING','PENDING')",
-                         (now, job_id, attempt_no))
-            conn.execute("UPDATE attempts SET status='CANCELLED',completed_at=?,runner_pid=NULL WHERE job_id=? AND attempt_no=?",
-                         (now, job_id, attempt_no))
-            conn.execute("UPDATE jobs SET status='CANCELLED',active_stage=NULL,cancel_requested=0,updated_at=?,version=version+1 WHERE job_id=?",
-                         (now, job_id))
+            self._cancel_attempt(conn, job_id, attempt_no, now)
+
+    @staticmethod
+    def _cancel_attempt(conn: sqlite3.Connection, job_id: str, attempt_no: int, now: str) -> None:
+        conn.execute("UPDATE stages SET status='CANCELLED',completed_at=? WHERE job_id=? AND attempt_no=? AND status IN ('RUNNING','PENDING')",
+                     (now, job_id, attempt_no))
+        conn.execute("UPDATE attempts SET status='CANCELLED',completed_at=?,runner_pid=NULL WHERE job_id=? AND attempt_no=?",
+                     (now, job_id, attempt_no))
+        conn.execute("""UPDATE jobs SET status='CANCELLED',active_stage=NULL,cancel_requested=0,
+            retryable=0,error_code=NULL,error_message=NULL,updated_at=?,version=version+1 WHERE job_id=?""",
+                     (now, job_id))
 
     def retry(self, job_id: str) -> dict:
         with self._transaction() as conn:
@@ -548,6 +553,13 @@ class JobStore:
                     error_message: str, retryable: bool) -> None:
         now = utc_now()
         with self._transaction() as conn:
+            job = conn.execute("SELECT cancel_requested FROM jobs WHERE job_id=? AND status='RUNNING' AND attempt_count=?",
+                               (job_id, attempt_no)).fetchone()
+            if job is None:
+                return
+            if job["cancel_requested"]:
+                self._cancel_attempt(conn, job_id, attempt_no, now)
+                return
             if stage in STAGES:
                 conn.execute("UPDATE stages SET status='FAILED',completed_at=?,error_code=?,error_message=? WHERE job_id=? AND attempt_no=? AND stage=?",
                              (now, error_code, error_message[:500], job_id, attempt_no, stage))
@@ -568,12 +580,7 @@ class JobStore:
             if job is None:
                 return False
             if job["cancel_requested"]:
-                conn.execute("UPDATE stages SET status='CANCELLED',completed_at=? WHERE job_id=? AND attempt_no=? AND status IN ('RUNNING','PENDING')",
-                             (now, job_id, attempt_no))
-                conn.execute("UPDATE attempts SET status='CANCELLED',completed_at=?,runner_pid=NULL WHERE job_id=? AND attempt_no=?",
-                             (now, job_id, attempt_no))
-                conn.execute("UPDATE jobs SET status='CANCELLED',active_stage=NULL,cancel_requested=0,updated_at=?,version=version+1 WHERE job_id=?",
-                             (now, job_id))
+                self._cancel_attempt(conn, job_id, attempt_no, now)
                 return False
             conn.execute("UPDATE stages SET status='SUCCEEDED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage='QUALITY_CHECK'",
                          (now, job_id, attempt_no))
