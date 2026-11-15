@@ -91,11 +91,12 @@ def read_page(url: str, *, limit: int = 80, timeout: int = 15, search_client=Non
     except Exception:
         if not browser:
             raise
-        from .video.screenshots import page_for_capture
+        from .video.screenshots import page_for_capture, wait_unless_csp
         from .source_pages import parse_page, parse_catalog
         with page_for_capture(url, timeout_seconds=timeout) as page:
-            page.wait_for_function("(document.querySelector('article, main') || document.body).innerText.length > 120",
-                                   timeout=timeout * 1000)
+            # Under a CSP that forbids eval, read what has rendered; the parser rejects a page with no text.
+            wait_unless_csp(page, "(document.querySelector('article, main') || document.body).innerText.length > 120",
+                            timeout * 1000)
             return (parse_catalog(page.content(), page.url, limit) if catalog else
                     parse_page(page.content(), page.url, limit, section_chars=24000))
 

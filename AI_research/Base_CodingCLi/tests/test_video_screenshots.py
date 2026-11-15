@@ -155,3 +155,23 @@ def test_image_upload_client_uses_multipart_and_validates_uuid():
         return httpx.Response(201, json={"image_id": "not-a-uuid"})
     with pytest.raises(AutoVideoError, match="BAD_IMAGE_RESPONSE"):
         AutoVideoClient("http://engine.test", transport=httpx.MockTransport(handler)).upload_creative_image(png(), "test.png")
+
+
+def test_a_csp_refused_readiness_wait_is_skipped_but_a_timeout_is_not():
+    import pytest
+    from core.video.screenshots import wait_unless_csp
+
+    class Page:
+        def __init__(self, error):
+            self.error = error
+
+        def wait_for_function(self, expression, timeout=None):
+            if self.error:
+                raise self.error
+
+    csp = RuntimeError("Page.wait_for_function: EvalError: Evaluating a string as JavaScript violates the following "
+                       "Content Security Policy directive")
+    assert wait_unless_csp(Page(None), "true", 1000) is True
+    assert wait_unless_csp(Page(csp), "true", 1000) is False
+    with pytest.raises(TimeoutError):
+        wait_unless_csp(Page(TimeoutError("Timeout 1000ms exceeded")), "true", 1000)
