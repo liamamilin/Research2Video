@@ -1,30 +1,61 @@
-2026-11-16 从选题开始的跨 Job 真实出片验证（进行中）
+2026-11-16 从选题开始的跨 Job 真实出片验证：完成
 
-用户目标：用 video workflow 从选题开始生成几条视频，检查整轮选题与材料组织优化，而非只看最新联合规划补修。
-范围：45 个已接入内容 Job 的配置核查；AI 快讯、T09、T05、AI 工具教程、科学周读、消费科技插画六类真实样本。AI 快讯和 T09 各同时选择合集与单条，其余各选择一条，目标约 8 条；材料不足不强凑。
-已核查 45/45 Job 启用 audience-v1、question-v1，Job 均启用且有可用 production。自动出片开关沿用原设置；手动栏目不因此变为自动栏目。
+结果与边界
+本轮启动时，45/45 个已接入日常内容 Job 的配置核查通过，均启用 audience-v1 与 question-v1 且有可用 production。通用选题、材料组织和受众范围修正覆盖这些 Job；合集与单条共同规划仅在同时具有两种生产入口的栏目执行，当前是 AI 快讯和 T09。没有把原手动栏目改为自动栏目。
+六类 Job 参与真实试跑：AI 快讯、T09、T05、AI 工具教程、科学周读、消费科技插画。五类产出 8 条隔离视频；工具教程的本次候选被历史稿完整覆盖，正常跳过，另核对并提供一条已采用新流程的日常生产教程。45 项配置覆盖不等于 45 个 Job 都已重新研究或出片。
+用户要求的顺序已满足：先让维护时的 4 个既有生产批次全部 DONE，再开始样本渲染。既有 5 个视频 COMPLETED、1 个历史重复候选正常 CANCELLED；证据 scope-fix/deployment/production-completed.json。样本没有投稿，没有修改生产调度。
 
-入口与输入：ResearchEngine.run_job 重新采集和研究 → 原引擎选题/材料组织/按问题补材 → start_run → 后台 TOPICS/事务入队 → 原作者、自动定稿 → 原生产配方 → 现有 AutoVideo 服务 → 回传 MP4。
-使用当前部署代码、实际 Job/recipe/production 配置、现有模型服务和自动取得的材料。不手选网页，不手改讲稿、分镜或画面。保留原作者风格与受众修正。
-样本按正常手动制作 count=1 选择每种 production；双入口包含整份报告合集与一条单条。该数量与每日自动 all=true 不同，不能把本轮有限手动样本说成全部日常自动数量验收；已有自动分配/历史条件回归证据另存。
+成片清单（秒；相对证据目录）
+- consumer / consumer_illustrated：USB-C线看着一样，为什么快充和投屏差很多？；225.70 秒
+  script=fab967c3d82d4068be3afd092f911a19；render=1105973a7e7043a1a625ab59c3d297fd；AutoVideo=c2b547c8-641c-41fc-bcdf-3f234a971aa2
+  consumer/state/video_renders/1105973a7e7043a1a625ab59c3d297fd/video.mp4
+- t05 / chatgpt_t05_comparison：Claude用70万笔触画画，混元Hy4照截图做播放器：该选谁；360.10 秒
+  script=bcce155f211341969d2fc3a80def3b55；render=a0469712b9ae4dcca1249dacd11447b2；AutoVideo=21ae4bae-e457-4d02-8ea2-c411b3ae3446
+  t05/state/video_renders/a0469712b9ae4dcca1249dacd11447b2/video.mp4
+- science / science_weekly：深睡脑脊液波：每20秒一次，为什么老了变弱；409.07 秒
+  script=4e0f39c75a4d4ffcb09b1050d3d51560；render=5a8ac984ea424dd9ab83cfe2c72518d2；AutoVideo=a11dc2fe-dff9-4041-b942-0ecfd01d0f03
+  science/state/video_renders/5a8ac984ea424dd9ab83cfe2c72518d2/video.mp4
+- t09_scope / chatgpt_t09_updates：ChatGPT 语音换模型，钱包只给美国 Pro；256.93 秒
+  script=7f9ec5cf98f5417e9fd40976e04caab2；render=424b282a49ac4777a5176504939a5f22；AutoVideo=2cc69a2a-5bfb-4647-8d0c-ef05ce28b19d
+  t09_scope/state/video_renders/424b282a49ac4777a5176504939a5f22/video.mp4
+- t09_scope / chatgpt_t09_updates_each：旧语音 12 月 11 日退役，GPT-Live 现在怎么切？；227.10 秒
+  script=0902eef62ec1437883fb507733231ef9；render=4eaf5b32243f45afb93e71826b428e0b；AutoVideo=f3cf036f-639b-4a08-9fab-af2bb063aab0
+  t09_scope/state/video_renders/4eaf5b32243f45afb93e71826b428e0b/video.mp4
+- t09_scope / chatgpt_t09_updates_each：ChatGPT 商家认领：四种验证，Persona 是硬门槛；287.93 秒
+  script=fa4438443e18488b85add9b8d6971474；render=731093fe0d8047c1b1c9d6095f0bd61e；AutoVideo=b327742f-a067-4d7e-8ec9-6e550b6c8d55
+  t09_scope/state/video_renders/731093fe0d8047c1b1c9d6095f0bd61e/video.mp4
+- flash / flash_daily：豆包工作能选Kimi了，额度按倍率扣；493.53 秒
+  script=3ff520c0067e401889a2ef30e215ba2a；render=3a353982f3794f5a8d74e6de1c125142；AutoVideo=e5e6955e-93f9-4bff-a031-6f922e577969
+  flash/state/video_renders/3a353982f3794f5a8d74e6de1c125142/video.mp4
+- flash / flash_each：豆包工作标了倍率：0.01x的模型，别急着当预算；371.80 秒
+  script=80440bb3f6544867be85629a084538dc；render=8dd929170d774dce821f270ad2105af7；AutoVideo=9618c3a0-a470-4690-80e3-4038993e93f9
+  flash/state/video_renders/8dd929170d774dce821f270ad2105af7/video.mp4
 
-隔离措施：每个样本独立数据库、输出、日志和配置副本；保留生产历史数据库一致快照以覆盖真实历史排重，历史批次不被驱动。复制同名旧报告供正常保存函数分配新后缀，避免与今日生产 topic ID 冲突。关闭隔离通知，不启动调度器或投稿；研究最多两组并行；共享渲染资源只在现有生产队列空闲后逐组使用。
-既有模型与搜索参数、生产配方和生成输入不改。隔离 storage/state 路径是记录位置变更，不是呈现能力变更。
+补充日常生产教程：一份调查CSV，让Claude分清PPT、PDF、Excel；210.47 秒；render=d3993ba232d64d9190f367725c4012ba；script=79bf565c1ac6453db05dc713e3dc079f；batch=9de424dbd20841dfa97e5a3647861b77。原片在 /Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/d3993ba232d64d9190f367725c4012ba/video.mp4。报告于 11 月 16 日 10:42:37 生成，选题 version=4、补材 enriched，写稿材料引用与报告元数据一致。证据 production-tutorial/verification.json。
 
-成功证据：每类从新研究得到选题与补材收据，选题和材料进入实际稿件、旁白与 MP4；双入口有共同规划引用且各自生成，不被历史空 ID 错挡；绝对报告路径正确读取原始材料。逐条记录生成结果、完整解码与逐字旁白证据，检查代表性画面和内容是否仍与分配一致。不会把样本成功外推为 45 个 Job 的全量成片验证或播放提升。
-视频效果边界：本轮主要验收内容流程可达性与成片交付，没有修改视觉表达，不做整体质量提升或新旧涨粉结论。观看中发现问题再记录具体时间段与影响，不因测试通过掩盖观看问题。
-停止点：无法形成独立单条时换候选或保留不足原因，不硬凑；正常入口连续失败先定位修复，不用手改稿或跳过关键步骤通过。保留失败尝试与人工介入清单。
+生产入口与自动输入
+ResearchEngine.run_job 自动采集和研究 → 原引擎候选比较/材料组织/按问题补材 → start_run → TOPICS/事务入队 → 原作者自动定稿 → 原 production/recipe → 现有 AutoVideo 服务 → 回传 MP4。没有手选网页或手改文稿、分镜、画面。受众范围修正保留，本轮没有引入新的写稿风格。
+每类使用独立状态、数据库、输出和配置副本，保留生产视频/事件历史以覆盖真实排重；通知关闭，不启动隔离调度器或投稿。复制同名旧报告，让正常保存函数生成新后缀，避免 topic ID 冲突。后续四类另复制材料归档和公开来源缓存；最先开始的快讯/T09 是冷缓存采集，不称所有样本缓存条件相同。消费知识栏目仅有一份旧报告，隔离历史与生产一致，consumer/history-check.json 留档。
+一般样本使用正常手动 count=1/production。T09 修复复验使用正常 all=true，规划 1 合集＋3 单条，其中 Wallet 单条与历史完整流程稿重复，实际出 1 合集＋2 单条。T09 复验直接重用本轮已自动采集的研究底稿与原始全文，从选题重新执行；仅按旧收据精确移除旧补材后缀，哈希留档。这是自动研究重放，不是第二轮全新采集。
+共享渲染容量按原 MAX_RENDERS=1 顺序使用，消费科技→T05→科学周读→T09→快讯。样本配置副本及定稿冻结在各自启动阶段；不将本轮之后工作区的其他写稿实验视为本批输入。
 
-证据目录：state/acceptance-content-value-20261115/joint-planning-20261116/all-jobs-video-20261116/
-configuration-audit.json 为 45 Job 清单；各样本包含配置快照、研究与补材收据、输入说明、队列状态、文稿和成片。
+真实试跑发现并修复的问题
+原 T09 自动研究围绕 ChatGPT，二次选题却从共用原始来源中选择了豆包工作。原因是 audience select 只有宽泛频道信息，没有原 Job 的题材范围。修复将 name/description/keywords/prompt 四项编辑字段传入两次选题，明确保留原任务边界；跨品牌比较栏目仍允许跨品牌。收据版本 3→4，作者提示词未因本修复改变。
+原 T09 尝试 f153bc0b27c84006909a6af8ce153dee 在写稿前停止并保留材料；没有输出跑题视频。相同自动研究的修复后候选恢复为 ChatGPT 语音、Wallet、Business Agent，scope-fix/real-selection-comparison.json 留档。新增 T09/T05/教程/科学四项回归旧代码均失败，修复后相关 192 项通过。修复已推送 696c1131。
+部署时先发现生产写稿仍活动，第一次维护预检主动退出且未变更状态；等写稿结束后，在 dispatch 锁和维护回执下将研究服务 PID 21144→34461，健康正常。4 个批次、队列条目及远端视频任务 ID 保持不变，AutoVideo 服务和样本子进程未重启。证据 scope-fix/deployment/。
 
-采集环境说明：最先启动的 AI 快讯与 T09 使用新建采集缓存（保留真实视频历史、事件历史和原配置），属于正常冷启动采集；后续四类复制生产材料归档及公开来源池/交付历史到隔离目录再实时采集。没有复制账号数据库或发布凭证。此差别保留在记录中，不称六组拥有完全相同的缓存条件。
+关键路径结果
+人工读稿复核确认这批合集与单条分工进入实际定稿：快讯单条新增倍率/预算方法，T09 单条新增语音切换与商家认领步骤；不是只靠分配哈希判断有新增价值。背景信息仍有必要重叠，详见 joint-manuscript-review.txt。
+- AI 快讯：10 个候选，9 个 enriched、1 个 already_sufficient，规划包含 10 项的合集与 1 条独立问题视频，均实际出片。候选未被固定压缩到 3–4 个。手动 count=1 不代表每日全量单条数量验收。
+- T09：合集＋语音操作单条＋商家认领单条均出片；Wallet 单条是被旧稿 3ac88ef2e6304502a04a0e4325d541f1 的完整链路排重，并非被本期合集误挡。未重置历史或强行放行。
+- T05：四候选均补材；前三候选已被历史覆盖，自动采用第四个 AI 交付路线。失败尝试保留，没有死磕原题。
+- 科学周读：围绕一个研究问题组织底稿与材料后出片；消费插画：保持 knowledge_dossier 单题模式，未强制改成新闻清单。
+- 隔离工具教程：唯一候选与既有 Make primary 教程重复，新增 0 条，不能算新视频成功；用另一次日常生产教程提供非配对栏目真实上线证据。
 
-真实试跑发现并补修：选题丢失原 Job 题材边界
-T09 新研究底稿 4 个主题均围绕 ChatGPT，但 audience-v3 二次选题从共用来源中将“豆包工作接入 Kimi、GLM、DeepSeek”排为首选。T09 原任务及栏目承诺明确是 ChatGPT 用户变化，属于跨栏目跑题，非受众拓宽。原尝试 f153bc0b27c84006909a6af8ce153dee 在研究/补材收据保存、写稿尚未开始时停止；未渲染。
-根因：select 只有宽泛 channel 描述，未收到原 Job 名称、说明、关键词和任务范围；第二次读全文也没有这些边界。
-修复：两次选题均传递四项编辑字段，并明确只在原栏目范围内比较候选；原任务要求跨品牌比较时保留跨品牌，不把所有栏目强行限定到 ChatGPT。不转发整个配置，不修改原作者提示词。选题收据版本升为 4，已有冻结稿件不重写。
-新增四条回归覆盖 T09、T05、教程、科学的范围保留，两次请求都需带原任务且不带无关配置；旧版 4 失败，修复后相关 192 项通过。测试均在隔离目录。
-真实模型复验进行中：t09_scope 直接复用本轮新研究的 initial_report 与原始采集全文；仅按已保存的补材收据精确移除旧补材后缀，哈希留档，重新选题、补材和写稿。为完整验证配对生产，重跑使用正常 all=true 候选池，与首轮手动 count=1 分开记录。
+核验与未宣称的内容
+8 条隔离成片均核对交付 SHA、文稿与渲染输入、model_rewrite=false、exact_text_check=PASS；完整 ffmpeg 解码通过。5 条配对规划视频还核对分配报告 SHA 与实际写稿 research_dossier 一致。media-verification.json 为逐条结果；每条 acceptance/ 保留完整解码和抽帧记录，draft-verification.json 保留定稿输入。
+人工检查每条六处代表性画面，必要时补看动画终态；这是抽帧视觉检查，并未冒称逐秒完整听看。T05 126 秒图表是动画中间帧，129 秒终态正确，补查图保留。消费插画部分图解条件较简化；快讯合集片头十项总览文字较小、74秒长标题换行较挤；快讯单条55–58秒已讲1.48与0.65倍率比较，但1.48图条到63秒采样才出现，存在画面晚于旁白的时机问题（终态数据完整），留作呈现待办；T05 用不同任务案例推导产品选择的判断问题仍在，按用户此前要求留作写稿待办，本轮未扩展打磨。
+本轮验收的是生产入口、材料分配、实际稿件和 MP4 交付，没有修改视觉表达；不以候选数、回归数量或成功出片声称整稿全面胜出、整片质量提升或播放增长。主生产最新报告检查时只有 8 个 Job 带新策略收据，其他 37 个多为变更前旧报告，不会被静默重写；详见 latest-production-reports.json。
 
-真实选题复验结果：t09_scope 的 audience-v4 候选为 ChatGPT 语音、Wallet、Business Agent，未再将豆包工作列为本栏目主题。同一自动研究和原始材料的版本 3/4 对照保存在 scope-fix/real-selection-comparison.json。这里只证明本次材料上题材范围恢复；尚不代表稿件或成片质量整体胜出。
+证据根目录：state/acceptance-content-value-20261115/joint-planning-20261116/all-jobs-video-20261116/
+configuration-audit.json、progress.json、各 case/input.json / result.json / 原研究与补材收据、scope-fix/、draft-verification.json、media-verification.json、production-tutorial/。过程记录保留在 acceptance-progress-history.txt 和各次 runner 日志。
