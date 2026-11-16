@@ -17,7 +17,7 @@ from core.video.adapt.common import call_json
 from .audience_profiles import (CHANNELS, JOBS, PRODUCTIONS, KNOWLEDGE, SINGLE,
                                 candidate_limit, selection_context, QUESTION_MATERIAL_DEFAULT)
 
-VERSION = 3
+VERSION = 4
 MARKER = "audience-v1"
 SELECT_PROMPT = """你为中文大众制作有商业价值的知识视频，从已有素材选值得讲的问题。
 覆盖钱与消费选择、工作与能力、生活安全、意外发现；候选数量遵循入口要求，材料不足可以更少，不凑题。
@@ -89,9 +89,20 @@ def validate_sources(selection: Selection, items: list[dict]) -> None:
             raise ValueError("选题引用了不存在或未入选的素材编号")
 
 
-def select(client, channel: str, items: list[dict], report: str) -> Selection:
+def select(client, channel: str, items: list[dict], report: str, *, job: dict | None = None) -> Selection:
     """Choose from an index, then reconsider using the selected complete sources."""
     context = selection_context(channel)
+    if job is not None:
+        # Shared sources contain other products and subjects. The refinement
+        # must retain the original Job's scope in both passes, not just a broad
+        # audience/channel description. Forward only editorial fields.
+        scope = {key: job[key] for key in ("name", "description", "keywords", "prompt") if key in job}
+        context += ("\n栏目原始研究任务（题材、产品范围、主问题和适用对象以此为准；"
+                    "其中报告排版要求不改变本步骤的JSON输出格式）：\n"
+                    + json.dumps(scope, ensure_ascii=False)
+                    + "\n只在本栏目范围内比较候选。共用来源中的其他产品或主题只能作为必要背景，"
+                    "不能因为更热门或覆盖更广就替换栏目的主问题。原任务要求跨品牌比较时继续跨品牌比较，"
+                    "不把所有栏目统一限制到某一品牌。拓宽受众不等于改变栏目范围。")
     first = call_json(client, SELECT_PROMPT, context + "\n原报告供了解已写角度，可重新选择：\n" + report
                       + "\n来源索引：\n" + source_index(items), Selection, temperature=0.4,
                       validator=lambda value: validate_sources(value, items))
@@ -195,7 +206,7 @@ def prepare_report(job: dict, report: str, material: str, llm_config, *, cancel_
     client = None
     try:
         client = LLMClient(llm_config, cancel_token=cancel_token)
-        chosen = select(client, channel, items, report)
+        chosen = select(client, channel, items, report, job=job)
         return render_report(chosen, items, channel, original_report=report), {
             "strategy": MARKER, "version": VERSION, "channel": channel,
             "selection": chosen.model_dump(), "candidate_count": len(chosen.candidates), "usage": dict(client.usage),

@@ -116,7 +116,7 @@ def test_research_business_entry_publishes_marked_report_and_keeps_initial(tmp_p
         def __init__(self,*a,**kw): self.usage={'total_tokens':20,'requests':2}
         def close(self): pass
     seen=[]
-    def select(client,channel,items,initial):
+    def select(client,channel,items,initial,**kwargs):
         seen.append((channel,items,initial));return chosen()
     monkeypatch.setattr('core.engine.ResearchAgent',Agent)
     monkeypatch.setattr('core.llm.LLMClient',Client)
@@ -214,7 +214,7 @@ def test_selection_reads_full_sources_and_closes_on_failure(monkeypatch):
         def __init__(self,*a,**kw): self.usage={'requests':1}
         def close(self): closed.append(True)
     monkeypatch.setattr('core.llm.LLMClient',Client)
-    def fail(*a): raise RuntimeError('provider failed')
+    def fail(*a, **kwargs): raise RuntimeError('provider failed')
     monkeypatch.setattr(strategy,'select',fail)
     report, detail = strategy.prepare_report(
         {'_file':'chatgpt_acquisition/t05_comparison','content_strategy':strategy.MARKER}, 'report', MATERIAL, None)
