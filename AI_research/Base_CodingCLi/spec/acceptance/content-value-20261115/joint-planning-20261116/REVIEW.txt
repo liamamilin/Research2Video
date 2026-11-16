@@ -63,3 +63,6 @@ state/acceptance-content-value-20261115/joint-planning-20261116/
   tested-source/、source-hashes.json：最终开发源文件快照
   joint-planning-*.log：测试证据
 旧样本 A 另保留在 state/acceptance-content-value-20261115/question-rollout/closeout-20261116/flash-joint-real/。
+
+2026-11-16 后续生产核查更正
+今早 4 条单条成片使用了联合规划简报，但历史 null topic ID 导致两份合集漏出，绝对路径元数据查询导致原始材料未进入规划。这两处已补修并增加回归；截至核查时完整合集＋单条成片尚未验证，详见 PRODUCTION_CHECK.txt。此前隔离试跑和回归没有覆盖这两个实际生产条件，不能据此宣称完整生产生效。

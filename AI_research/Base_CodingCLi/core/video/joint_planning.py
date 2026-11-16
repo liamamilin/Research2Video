@@ -9,6 +9,7 @@ import copy
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 import re
 
@@ -169,6 +170,20 @@ def history_context(peers: list[dict]) -> list[dict]:
             for row in story_pool.context(peers)]
 
 
+def _episode_key(production: str, topic: dict) -> tuple | None:
+    """Whole-report topics intentionally have id=None; never use that as coverage."""
+    episode = topic.get("episode") or {}
+    revision = episode.get("report_identity") or topic.get("report_identity")
+    if revision:
+        return production, "revision", revision
+    if topic.get("report_id"):
+        return production, "report", topic["report_id"]
+    path = topic.get("from_report") or episode.get("report_path")
+    if path:
+        return production, "path", str(Path(path).resolve())
+    return (production, "topic", topic["id"]) if topic.get("id") else None
+
+
 def available_items(items: list[dict], connection=None) -> list[dict]:
     """Recheck the final angle IDs, including claims made while the model ran.
 
@@ -184,26 +199,30 @@ def available_items(items: list[dict], connection=None) -> list[dict]:
             taken.add(topic.get("id"))
             taken.update(topic.get("items") or [])
             if topic.get("content_mode") == "episode" and not row["archived"] and row["status"] != "FAILED":
-                episodes.add((row["production"], topic.get("id")))
+                key = _episode_key(row["production"], topic)
+                if key is not None:
+                    episodes.add(key)
         for row in db.execute("SELECT topic,production FROM autopilot_items WHERE state NOT IN ('FAILED','CANCELLED')"):
             topic = json.loads(row["topic"])
             taken.add(topic.get("id"))
             if topic.get("content_mode") == "episode":
-                episodes.add((row["production"], topic.get("id")))
+                key = _episode_key(row["production"], topic)
+                if key is not None:
+                    episodes.add(key)
         dismissed = {r[0] for r in db.execute("SELECT topic_id FROM dismissed_topics")}
     taken.discard(None)
     result = []
     for item in items:
         topic = item["topic"]
         identity = topic.get("id")
-        key = (item.get("production", ""), identity)
         episode = topic.get("content_mode") == "episode"
+        key = _episode_key(item.get("production", ""), topic) if episode else None
         if identity in dismissed or (key in episodes if episode else identity in taken):
             continue
         result.append(item)
-        if episode:
+        if episode and key is not None:
             episodes.add(key)
-        elif identity:
+        elif not episode and identity:
             taken.add(identity)
     return result
 
@@ -259,7 +278,10 @@ def apply(spec: dict, items: list[dict], config_dir: str, jobs_dir: str, workspa
         episode = episodes[0]
         report_path = Path(workspace) / spec["report"]
         report = report_path.read_text()
-        metadata = report_meta.get(spec["report"]) or {}
+        # Production reconciliation supplies an absolute path; metadata is keyed
+        # by workspace-relative output paths, unlike isolated/manual batches.
+        metadata = (report_meta.get(spec["report"])
+                    or report_meta.get(os.path.relpath(report_path, workspace)) or {})
         material = report_material.read(metadata.get("material") or {}, str(report_path), report) or report
         packets = [{"id": p["id"], "text": p["text"], "links": [p["url"]] if p["url"] else []}
                    for p in audience_strategy.packets(material)]
