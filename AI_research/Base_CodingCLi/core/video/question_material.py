@@ -17,7 +17,7 @@ from .adapt.common import call_json
 from . import audience_strategy as strategy
 
 MARKER = "question-v1"
-VERSION = 5
+VERSION = 6
 
 PLAN_PROMPT = """你为已经选定的中文视频主问题补材料，不重新选题、不改变受众或承诺、不改写口播风格。
 先判断现有材料已讲清什么。只有能增加理解、兴趣或实际用途时，才提出最多两个补材问题；够用时返回空数组。
@@ -195,16 +195,16 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
             units = [c.model_dump() for c in selected.candidates]
         cache, actual_material, changed = {}, [], False
         knowledge_addition = ""
-        for index, unit in enumerate(units):
+        for candidate_index, unit in enumerate(units):
             _check_cancel(cancel_token)
             entry = {"title": unit["title"], "status": "unchanged"}
             receipt["topics"].append(entry)
             try:
                 if progress_cb:
                     progress_cb({"type": "phase", "phase": "supplementing_materials",
-                                 "detail": unit["title"], "topic": index + 1, "topics": len(units)})
+                                 "detail": unit["title"], "topic": candidate_index + 1, "topics": len(units)})
                 # Plan from the selected brief, not the entire unselected source pool.
-                original = report if knowledge else strategy.author_material(selected.candidates[index], packets)
+                original = report if knowledge else strategy.author_material(selected.candidates[candidate_index], packets)
                 context = {k: v for k, v in unit.items() if k != "material"}
                 if not knowledge:
                     context["prior_brief"] = unit["material"]
@@ -245,18 +245,18 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                 used = [s for s in added if s["id"] in used_ids]
                 # Model paragraphs cannot manufacture new topic headings or scope fields.
                 for key, value in replacements.items():
-                    index = 2 * positions[key]
+                    part_index = 2 * positions[key]
                     present = set(extract_urls(value))
                     # Inline citations often make up the end of a news brief.
                     # Preserve their exact links even if the merge omits them.
-                    links = list(dict.fromkeys(url for url in extract_urls(parts[index]) if url not in present))
-                    parts[index] = value + ("\n" + " ".join(links) if links else "")
+                    links = list(dict.fromkeys(url for url in extract_urls(parts[part_index]) if url not in present))
+                    parts[part_index] = value + ("\n" + " ".join(links) if links else "")
                 revised = "".join(parts)
                 sources = "\n\n补充材料来源：\n" + "\n".join(f"- {s['id']} {s['title']} {s['url']}" for s in used)
                 if knowledge:
                     knowledge_addition = revised + ("\n\n## 补充解释与例子\n\n" + extra if extra else "") + sources
                 else:
-                    selected.candidates[index].material = revised + ("\n\n补充解释与例子：\n" + extra if extra else "") + sources
+                    selected.candidates[candidate_index].material = revised + ("\n\n补充解释与例子：\n" + extra if extra else "") + sources
                 actual_material.extend(s["text"] for s in used)
                 entry["status"] = "enriched"
                 changed = True

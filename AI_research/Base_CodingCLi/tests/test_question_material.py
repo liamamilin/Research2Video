@@ -167,6 +167,31 @@ def test_news_prose_with_inline_citations_can_be_merged_without_losing_links(pro
     assert old not in report
 
 
+def test_each_flash_candidate_keeps_its_own_replaced_paragraph(providers, monkeypatch):
+    selection = chosen()
+    first = selection.candidates[0]
+    first.material = "第一件新闻的原始说明，发布范围还要用新材料补足。"
+    second = first.model_copy(update={"title": "另一份产品发布公告", "material": "第二件新闻的原始说明，费用范围还要用新材料补足。"})
+    selection.candidates.append(second)
+    replacements = {first.title: "第一件新闻新增的上线范围", second.title: "第二件新闻新增的付费条件"}
+    prior = qm.call_json
+
+    def model(client, system, user, schema, **kw):
+        if schema is qm.Addition:
+            request = json.loads(user)
+            assert list(request["editable_paragraphs"]) == ["B1"]
+            value = replacements[request["topic"]["title"]]
+            return qm.Addition(addition="", used_ids=["E1"], replacements={"B1": value})
+        return prior(client, system, user, schema, **kw)
+
+    monkeypatch.setattr(qm, "call_json", model)
+    report, _, receipt = qm.enhance(job("flash"), "初选报告", MATERIAL, detail(selection), SYSTEM)
+    assert [t["status"] for t in receipt["topics"]] == ["enriched", "enriched"]
+    first_section, second_section = report.split("### 1.2 ")
+    assert replacements[first.title] in first_section and replacements[second.title] in second_section
+    assert replacements[second.title] not in first_section and replacements[first.title] not in second_section
+
+
 @pytest.mark.parametrize('mode', ['off', 'empty', 'sufficient', 'no_value', 'bad_ids', 'error'])
 def test_optional_stage_never_resurrects_empty_or_requires_success(providers, monkeypatch, mode):
     config = job(); data = detail()
