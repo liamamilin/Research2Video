@@ -1,0 +1,28 @@
+2026-11-16 02:39 二次复查修复接入
+
+状态：已安装并通过等待式重启生效。原 AI 快讯/T09 的联合规划开关、作者和栏目配置不变。
+本次部署 3 个实现文件和 1 个新测试文件；未修改 AutoVideo、前端、旧批次或稿件。
+
+验证
+scripts/check.sh 全部通过：后端 4733 passed、11 skipped（55 个依赖/弃用等 warning）；前端 96 个文件、751 项测试通过。配置、类型检查、lint、构建均通过。前端仍有既有大 chunk 提示。
+新增 12 个回归用例；旧实现上 8 个复现用例失败，新实现全通过。
+相关回归共 169 项通过；合集先完成、单条先完成、并发入队、取消竞争、事务失败回滚、旧队列恢复、冻结材料写稿/重写均覆盖。
+AI 快讯与 T09 的真实冻结规划兼容重放通过；竞争批次均未重复领取。
+已部署文件与完整回归期间冻结的源文件 SHA256 逐项一致；git diff --check 通过。
+
+运行安全
+操作前研究 PID 95530，manual_runs、rounds、busy_work 为空。
+维护入口 action=restart、active_runs=wait；回执 107c606cfc874269b541c449fbf653f6 completed，affected_runs=[]。
+新研究 PID 97917，instance_id 5e21d51411b94a2bace9607cda31a50d。
+8766 和 8775 健康，均返回相同的新 instance_id。
+AutoVideo 8011 健康，worker_primary=true，PID 89183 前后不变。
+恢复后 manual_runs、rounds、busy_work 仍为空，没有取消或中断任务。
+
+证据
+state/acceptance-content-value-20261115/joint-planning-20261116/review-20261116/
+  joint-review-repro.log、joint-review-integration.log、joint-review-full.log
+  replay-flash/result.json、replay-t09-cached/result.json
+  baseline-hashes.json、source-hashes.json、deployed-files.json
+  service-before.json、service-after.json、restart-receipt.json
+
+限制：此次是代码正确性与缓存/调度回归，不是新的整稿、MP4 或发布效果试验。

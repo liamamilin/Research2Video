@@ -67,6 +67,10 @@ def _read_report(report_path: str) -> str:
 def report_of(script: dict, report_path: str = "", *, version: dict | None = None) -> str:
     """The text a script is written and checked against: its report, or for an item written without research that
     item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
+    from core.video import joint_planning
+    planned = joint_planning.assignment(script.get("topic") or {})
+    if planned is not None:
+        return planned["report"]
     if script.get("topic", {}).get("user_materials"):
         from web.services.assistant_materials import source_of
         from core.video import material_context
@@ -357,6 +361,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         column = replace(column, script_style=column.script_style + visual_brief(settings.paths.state_dir, report_images))
     from core.video import episodes
     is_episode = episodes.enabled(topic)
+    from core.video import joint_planning
+    planned = joint_planning.assignment(topic)
+    if planned is not None:
+        column = replace(column, script_style=column.script_style + "\n" + planned["direction"])
     from core.video import audience_strategy
     audience_channel = audience_strategy.topic_channel(topic)
     if audience_strategy.PRODUCTIONS.get(script.get("production")) != audience_channel:
@@ -366,7 +374,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         script = {**script, "topic": topic}
     selected_audience_report = report
     audience_material = bool(audience_channel) and audience_channel not in audience_strategy.KNOWLEDGE
-    joint_input = audience_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    joint_input = planned is not None or audience_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
@@ -376,7 +384,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         topic = script["topic"]
         reference = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
+        original = (planned["material"] if planned is not None else
+                    report_material.read(reference, full_path, _read_report(report_path)) if reference else "")
         try:
             if story_pool.enabled(topic):
                 store.update_script(script_id, stage="选题")
@@ -404,7 +413,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         selection_report = research_dossier.selection_brief(report, script)
                         options = ({"tutorial": True} if context.get("type") == "tutorial"
                                    else {"evergreen": True} if context.get("type") == "comparison" else {})
-                        if audience_channel:
+                        if audience_channel or planned is not None:
                             options["audience_brief"] = {"title": topic.get("from_item_title") or topic["title"],
                                                          "audience": (topic.get("fields") or {}).get("目标受众", ""),
                                                          "promise": (topic.get("fields") or {}).get("核心角度", "")}
@@ -475,7 +484,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         store.update_script(script_id, stage="写稿")
         material_ref = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        if guarded:
+        if planned is not None:
+            material = planned["material"]
+        elif guarded:
             material = filtered_material
         elif topic.get("_material_reselection"):
             # An existing raw-material story is bound to the packets already
@@ -494,6 +505,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             # Idea snippets and supplemental pages never replace the knowledge
             # dossier, including when no supplement was needed or collection failed.
             material = ""
+        if planned is not None:
+            # Both outputs consume their own frozen allocation, including on rewrite.
+            # In particular, do not refill a brief episode from the complete dossier.
+            dossier_report, material = planned["report"], planned["material"]
         material, material_fit = fit_material(dossier_report if joint_input else report, material)
         writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
                          if audience_channel else topic)
@@ -526,6 +541,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             **({"original_material": material} if joint_input else {}),
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
+        if planned is not None:
+            written.meta["joint_plan"] = dict(topic["joint_plan"])
         if audience_channel:
             written.meta["audience_strategy"] = {"strategy": audience_strategy.MARKER, "channel": audience_channel,
                                                  "writer": "original_with_audience_scope"}

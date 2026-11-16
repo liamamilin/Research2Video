@@ -23,6 +23,7 @@ import os
 import threading
 import time
 import uuid
+from concurrent.futures import Future
 from typing import Optional
 
 from core.fileio import file_lock
@@ -269,6 +270,13 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
             if fallback["id"] not in taken:
                 taken.add(fallback["id"])
                 items.append({"column_key": pick["column"], "topic": fallback, "production": FLASH_PRODUCTION, "pick": pick})
+    from core.video import joint_planning
+
+    items = joint_planning.apply(spec, items, config_dir, paths.jobs_dir, video_workflow.workspace_dir(),
+                                lambda key: video_workflow._llm_configs(None, video_columns.get(config_dir, key))[0], notes,
+                                rank_raw=lambda rows: _heat_rank(
+                                    {"production": rows[0]["production"]}, video_columns.get(config_dir, rows[0]["column_key"]),
+                                    [{k: v for k, v in row["topic"].items() if k != "audience_strategy"} for row in rows], taken))
     for item in items:
         del item["pick"]
     return items
@@ -638,6 +646,10 @@ def material_story_pool(script: dict, report: str, original: str, peers: list[di
 def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
     from core.video import content_guard
 
+    if item["topic"].get("joint_plan"):
+        ap.update_item(item["id"], state="CANCELLED", gate=gate,
+                       note=f"共同规划的独立问题已覆盖，本条结束：{reason}")
+        return
     alternatives = list(item["topic"].get("_story_fallbacks") or [])
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     taken |= content_guard.known_duplicate_ids(alternatives, get_settings().paths.config_dir)
@@ -839,7 +851,57 @@ def _in_flight(runs: list[dict]) -> dict:
     return counts
 
 
+_topic_picks: dict[tuple[str, str], Future] = {}
+_topic_picks_lock = threading.Lock()
+
+
+def _background_topics(run: dict) -> tuple[list[dict], list[str]] | None:
+    """Wait across ticks, never inside the dispatch lock. Only one picker at a time."""
+    key = (store.db_path(), run["id"])
+    with _topic_picks_lock:
+        # A cancelled batch never receives its late result.
+        for old_key, future in list(_topic_picks.items()):
+            if old_key[0] == key[0] and future.done():
+                owner = ap.get_run(old_key[1])
+                if not owner or owner["status"] != "RUNNING" or owner["stage"] != "TOPICS":
+                    del _topic_picks[old_key]
+        future = _topic_picks.get(key)
+        if future is not None:
+            if not future.done():
+                return None
+            del _topic_picks[key]
+            return future.result()
+        if any(not f.done() for f in _topic_picks.values()):
+            return None
+        future = Future()
+        _topic_picks[key] = future
+
+        def work():
+            try:
+                # Multiple app/CLI processes must not concurrently plan one run.
+                lock = os.path.join(get_settings().paths.state_dir, f"joint-picking-{run['id']}")
+                with file_lock(lock, timeout=0):
+                    notes = []
+                    result = (pick_topics(run["spec"], notes), notes)
+            except TimeoutError:
+                future.set_result(None)
+            except BaseException as exc:
+                future.set_exception(exc)
+            else:
+                future.set_result(result)
+
+        threading.Thread(target=work, name="joint-topic-picker", daemon=True).start()
+        return None
+
+
 def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
+    run = ap.get_run(run["id"])
+    if not run or run["status"] != "RUNNING":
+        return 0
+    if run["stage"] == "TOPICS" and run["items"]:
+        if not _add_items(run["id"], []):
+            return 0
+        run = ap.get_run(run["id"])
     spec = run["spec"]
     if run["stage"] == "TOPICS":
         if spec.get("report_identity"):
@@ -850,14 +912,17 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
         if not fresh_topics(spec, run):
             return 0
         notes: list[str] = []
-        items = pick_topics(spec, notes)
-        if not items:
-            # keep why the topics were not fresh: that, not the empty pick, is usually what went wrong
-            cause = (ap.get_run(run["id"]) or {}).get("note") or ""
-            ap.update_run(run["id"], status="DONE", note="；".join(filter(None, [cause, *notes, "没有可写的新选题"])))
+        from core.video import joint_planning
+        background = joint_planning.enabled_for(spec, get_settings().paths.config_dir)
+        if background:
+            picked = _background_topics(run)
+            if picked is None:
+                return 0
+            items, notes = picked
+        else:
+            items = pick_topics(spec, notes)
+        if not _add_items(run["id"], items, notes, recheck=background):
             return 0
-        _add_items(run["id"], items)
-        ap.update_run(run["id"], stage="ITEMS", **({"note": "；".join(notes)} if notes else {}))
         run = ap.get_run(run["id"])
     if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
         counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))
@@ -889,14 +954,36 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
     return 1
 
 
-def _add_items(run_id: str, items: list[dict]) -> None:
+def _add_items(run_id: str, items: list[dict], notes: list[str] | None = None, *, recheck: bool = False) -> bool:
+    """Admit a completed pick and change stage in one transaction, only if still wanted."""
     now = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    notes = list(notes or [])
     with store.connect(write=True) as conn:
+        run = conn.execute("SELECT status,stage,note FROM autopilot_runs WHERE id=?", (run_id,)).fetchone()
+        if not run or run["status"] != "RUNNING" or run["stage"] != "TOPICS":
+            return False
+        if conn.execute("SELECT 1 FROM autopilot_items WHERE run_id=? LIMIT 1", (run_id,)).fetchone():
+            # Resume a batch cut off between the old two separate commits.
+            conn.execute("UPDATE autopilot_runs SET stage='ITEMS',updated_at=? WHERE id=?", (now, run_id))
+            return True
+        if recheck:
+            from core.video import joint_planning
+            available = joint_planning.available_items(items, conn)
+            if len(available) < len(items):
+                notes.append(f"等待规划期间已有其他任务占用，跳过 {len(items) - len(available)} 项")
+            items = available
+        if not items:
+            note = "；".join(filter(None, [run["note"], *notes, "没有可写的新选题"]))
+            conn.execute("UPDATE autopilot_runs SET status='DONE',note=?,updated_at=? WHERE id=?", (note, now, run_id))
+            return False
         for i, item in enumerate(items):
             conn.execute("INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"
                          " VALUES (?, ?, ?, ?, ?, ?, ?)",
                          (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False),
                           item.get("production", ""), now))
+        conn.execute("UPDATE autopilot_runs SET stage='ITEMS',note=?,updated_at=? WHERE id=?",
+                     ("；".join(notes) if notes else run["note"], now, run_id))
+        return True
 
 
 def _summary(run: dict) -> str:
