@@ -169,3 +169,9 @@ Jobs can be referenced by basename (`daily_ai_agents`) or full path (`monitoring
 | `viewer` | Browse jobs, reports, logs. Read-only. |
 | `editor` | Viewer + trigger/cancel runs, edit job YAML |
 | `admin` | Editor + system config, user management, audit log |
+
+## 文稿质量优化偏好
+
+质量不稳定时，优先检查并改善交给写稿 Agent 的输入：选题价值、具体材料、解释过程、上下文及材料之间的关系。写稿提示保持简短，以内容目标和软建议为主；不要用新增固定句式、段落顺序、角度/步骤/例子数量或必备结论补救不稳定。自然写出几条或条件句不等于八股，重点看是否被提示词强迫，以及是否有助于理解。
+
+在用 job 的提示词调整要检查研究、栏目/配方、共用作者、材料交接和启用的改稿提示，避免约束在另一层被加回来。未归档矩阵即使未开周期任务也在范围内；归档任务不作本地修改或生成验证。保留数据接口与实际业务所需格式，不把技术格式扩成内容模板。

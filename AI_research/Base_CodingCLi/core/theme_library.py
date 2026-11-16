@@ -82,7 +82,7 @@ class ThemeLibrary:
             allowed = {r[0] for r in db.execute("SELECT id FROM examples WHERE matrix=? AND category=?", (matrix, category))}
             refs = [ref for ref in dict.fromkeys(example_ids) if ref in allowed]
             db.execute("INSERT OR IGNORE INTO patterns VALUES (?,?,?,?,?,?,?,?)",
-                       (key, matrix, category, name[:100], title_pattern[:300], json.dumps(outline[:8], ensure_ascii=False),
+                       (key, matrix, category, name[:100], title_pattern[:300], json.dumps(outline, ensure_ascii=False),
                         json.dumps(refs), time.time()))
         return key
 

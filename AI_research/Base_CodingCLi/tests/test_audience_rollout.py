@@ -34,9 +34,58 @@ def test_report_import_keeps_audience_and_full_source_scope(channel, prefix):
     assert parsed[0].title == chosen().candidates[0].title
     assert strategy.topic_channel(parsed[0].as_dict()) == channel
     assert parsed[0].fields['目标受众'] == '学生和日常工作人群'
+    assert parsed[0].fields['核心角度'] == chosen().candidates[0].promise
+    assert text.count(chosen().candidates[0].promise) == 1
     assert '内部待办' not in text
     selected = strategy.material_for_report(text, MATERIAL + f'\n### [无关]({OTHER})\n引用{URL}也不应被选中')
     assert selected == MATERIAL
+
+
+def test_selection_can_omit_editorial_diagnostics_and_choose_its_own_structure():
+    payload = {'title': '教程为什么从这个页面开始', 'audience': '遇到同样入口的读者',
+               'promise': '知道要从哪里进入', 'source_ids': ['S1'], 'material': '已有的过程和结果'}
+    selected = strategy.Selection.model_validate({'candidates': [payload]})
+    strategy.validate_sources(selected, strategy.packets(MATERIAL))
+    text = strategy.render_report(selected, strategy.packets(MATERIAL), 't05')
+    assert '已有的过程和结果' in text
+    assert '为什么有人在乎' not in text and '新意' not in text
+    assert strategy.Candidate(**payload, structure='入口之后跟结果').structure == '入口之后跟结果'
+    notes = strategy.Selection.model_validate({'candidates': [{**payload, 'missing': ['适用地区'],
+                                                               'source_roles': '比较出发点'}],
+                                               'tradeoffs': ['材料只有一个版本']})
+    strategy.validate_sources(notes, strategy.packets(MATERIAL))
+    assert notes.candidates[0].missing == ['适用地区']
+
+
+def test_selected_comparison_keeps_all_available_source_packets():
+    material = '\n\n'.join(f'### [产品资料 {i}](https://example.com/source-{i})\n来源正文 {i}' for i in range(1, 10))
+    packets = strategy.packets(material)
+    ids = [p['id'] for p in packets]
+    payload = {'candidates': [{'title': '相同任务的跨产品比较', 'audience': '需要做同一任务的用户',
+                              'promise': '理解实际比较条件', 'source_ids': ids}]}
+    selected = strategy.Selection.model_validate(payload)
+    strategy.validate_sources(selected, packets)
+    assert all(p['text'] in strategy.author_material(selected.candidates[0], packets) for p in packets)
+
+
+def test_refinement_reads_originals_without_inheriting_index_stage_claims(llm):
+    from core.llm import LLMClient
+
+    first = chosen()
+    candidate = first.candidates[0]
+    candidate.series = '产品教程'
+    candidate.topic_kind = '怎么做一件事'
+    candidate.demonstration = '上传已保存的示例，查看输出'
+    second = chosen()
+    second.candidates[0].material = '查阅所选原文后形成的解释'
+    llm.replies = [first.model_dump_json(), second.model_dump_json()]
+    refined = strategy.select(LLMClient(object()), 't03', strategy.packets(MATERIAL), '初次研究')
+    request = llm.calls[1][-1]['content'].split('\n初选：\n', 1)[1]
+    summary, sources = request.split('\n原文：\n', 1)
+    assert json.loads(summary) == {'candidates': [{key: getattr(candidate, key) for key in
+        ('title', 'audience', 'source_ids', 'series', 'topic_kind', 'demonstration')}]}
+    assert json.loads(sources) == strategy.packets(MATERIAL)
+    assert refined.candidates[0].material == second.candidates[0].material
 
 
 def test_old_work_and_other_jobs_never_opt_in_by_production_name():
@@ -199,6 +248,49 @@ def test_old_reports_do_not_inherit_new_scope_during_rewrite(video_env, llm, mon
     assert workflow.run(row['id'],llm_config=object())=='DRAFT'
     assert writer.CONCRETE_RULE in llm.calls[0][0]['content']
     assert 'audience_strategy' not in store.get_version(row['id'],1)['meta']
+
+
+@pytest.mark.parametrize("guarded", [False, True])
+def test_legacy_t05_keeps_full_selected_comparison(video_env, llm, monkeypatch, guarded):
+    second = "https://example.com/second"
+    title = "两家工具怎样处理同一份表"
+    text = (
+        f"### 1.1 {title}\n- **一句话**：比较导出的表\n"
+        f"- **证据来源**：{URL} {second}\n"
+        "#### 同一输入的不同结果\n保留横评中的输入与输出条件。\n"
+        "### 1.2 无关条目\n无关底稿细节。\n"
+    )
+    path = video_env / "old-t05.md"
+    path.write_text(text)
+    material = (f"### [甲工具原文]({URL})\n甲工具的实际输出\n\n---\n\n"
+                f"### [乙工具原文]({second})\n乙工具的实际输出\n\n---\n\n"
+                f"### [第三项材料]({OTHER})\n无关来源细节")
+    ref = report_material.save(str(path), text, [material])
+    monkeypatch.setattr(report_meta, "get", lambda _: {"material": ref})
+    job = "chatgpt_acquisition/t05_comparison"
+    topic = {"title": title, "from_report": str(path), "from_item": "CGE1", "from_item_title": title}
+    if guarded:
+        topic["matrix_dedup"] = {"job": job, "policy": story_pool.POLICY}
+        llm.replies = [json.dumps({"events": [{
+            "title": "缩成甲工具发布", "subject": "甲工具", "action": "release",
+            "summary": "重新选成单厂发布的摘要", "primary": ["S1"],
+        }]}, ensure_ascii=False)]
+    llm.replies.append(script_json(300))
+    row = store.create_script("report_digest", topic, production="chatgpt_t05_comparison")
+
+    assert workflow.run(row["id"], llm_config=object()) == "DRAFT"
+    request = llm.calls[-1][1]["content"]
+    assert all(detail in request for detail in (
+        title, "保留横评中的输入与输出条件", "甲工具的实际输出", "乙工具的实际输出",
+    ))
+    assert not any(detail in request for detail in (
+        "重新选成单厂发布的摘要", "无关底稿细节", "无关来源细节",
+    ))
+    version = store.get_version(row["id"], 1)
+    assert "audience_strategy" not in version["meta"]
+    if guarded:
+        actual = store.get_script(row["id"])["topic"]
+        assert actual["story"]["title"] == title
 
 
 def test_selection_reads_full_sources_and_closes_on_failure(monkeypatch):

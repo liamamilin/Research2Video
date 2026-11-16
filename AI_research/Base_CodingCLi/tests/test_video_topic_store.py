@@ -58,8 +58,10 @@ def test_successful_quiet_collection_is_not_a_report_format_error(video_env):
 
 
 def test_report_can_explicitly_decline_to_supply_a_topic(video_env):
-    write(video_env, "output/flash/2026-10-19_ai_flash_discovery.md",
-          "**本期时间范围**：2026-10-18 至 2026-10-19\n\n本次暂无新题材。\n")
+    from core.video import audience_strategy
+
+    text = audience_strategy.render_report(audience_strategy.Selection(candidates=[]), [], "flash")
+    write(video_env, "output/flash/2026-10-19_ai_flash_discovery.md", text)
     pilot.sync_topics()
     with store.connect() as conn:
         row = conn.execute("SELECT count, error FROM topic_imports WHERE source='flash'").fetchone()

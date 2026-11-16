@@ -33,8 +33,8 @@ feedback 是用户在本矩阵的选择记录。优先借鉴被选用或感兴�
 not_now 只代表暂时不用，不作为负面偏好。不能因少量反馈放弃其他栏目，仍保持栏目多样性。
 reason 说明观众的具体问题和本题内容价值，不把少量选择记录描述成高热度、高需求或显著趋势。
 有参考题时必须引用本栏目提供的 example_ids。已有题型引用 pattern_id；提炼新题型时提供 format。
-format 是你从参考例子归纳的提问结构，包含 name、title_pattern（带槽位的题目格式）、outline（3至6项讲述步骤）。
-每条理由用一至两句说明，reason 不超过90个汉字，angle 不超过100个汉字；不抄回参考例题正文。
+format 是你从参考例子归纳的提问结构，包含 name 和 title_pattern（带槽位的题目格式）。如果有能帮助理解的讲述关系，可以在 outline 中记录，长短由题型决定。
+reason 和 angle 写能帮助选题的具体理由与切入点，便于浏览。参考题目提供启发，正文留给后续研究。
 已有题型只返回 pattern_id，省略 format 和大纲；只有确实需要新题型时才添加 format。
 输出 JSON {themes:[{category,title,question,topic_key,reason,angle,audience,example_ids:[],pattern_id}]}。
 question 是不含修辞的核心问题，topic_key 是简短稳定的主题标识；不同具体问题可共用同一个题型。
@@ -74,11 +74,12 @@ def select(response: str, categories: list[dict], library: ThemeLibrary, matrix:
             fmt = item.get("format") or {}
             if not isinstance(fmt, dict) or not all(isinstance(fmt.get(k), str) and fmt[k].strip() for k in ("name", "title_pattern")):
                 continue
-            outline = fmt.get("outline")
-            if not isinstance(outline, list) or not 3 <= len(outline) <= 6 or any(not isinstance(s, str) or not s.strip() for s in outline):
+            outline = fmt.get("outline", [])
+            if not isinstance(outline, list) or any(not isinstance(s, str) or not s.strip() for s in outline):
                 continue
+            outline = [s.strip()[:300] for s in outline]
             key = library.add_pattern(matrix, category, name=fmt["name"], title_pattern=fmt["title_pattern"],
-                                      outline=[s[:300] for s in outline], example_ids=[r["id"] for r in refs])
+                                      outline=outline, example_ids=[r["id"] for r in refs])
             chosen = {"id": key, "name": fmt["name"][:100], "title_pattern": fmt["title_pattern"][:300], "outline": outline}
         now = time.time()
         signals = [{"id": r["id"], "category": category, "platform": "参考库", "title": r["title"], "url": r["url"],

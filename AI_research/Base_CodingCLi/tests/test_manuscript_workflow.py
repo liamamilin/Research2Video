@@ -165,7 +165,9 @@ def test_focused_author_returns_one_manuscript_without_ranking(monkeypatch, repl
         assert result is draft and result.meta["manuscript_workflow"]["result"] == "draft"
 
 
-def test_revision_keeps_a_connected_introduction_and_applies_the_body_edit(monkeypatch):
+@pytest.mark.parametrize("opening, retained", [("这份报告敢直接交吗？", False),
+    ("这份报告敢直接交吗？我是洛洛。", False), ("我是洛洛。先看结果。我是洛洛。", True)])
+def test_revision_allows_optional_identity_but_keeps_an_opening_when_identity_repeats(monkeypatch, opening, retained):
     draft = _draft("这份报告敢直接交吗？大家好，我是洛洛，今天就来看看怎么验。")
     draft.sections.append({"title": "例子", "paragraphs": [{"text": "先核对报告。"}]})
     monkeypatch.setattr(workflow.persona, "load", lambda: {"name": "洛洛", "introduce": "我是洛洛。"})
@@ -177,7 +179,7 @@ def test_revision_keeps_a_connected_introduction_and_applies_the_body_edit(monke
                           revision="收紧开头并讲清怎么核对", targets=["S1P1", "S2P1"])
         assert prompt == workflow.FOCUSED_WRITE
         return schema(paragraphs=[
-            {"id": "S1P1", "text": "这份报告敢直接交吗？我是洛洛。"},
+            {"id": "S1P1", "text": opening},
             {"id": "S2P1", "text": "先点开引用，再看它能不能支持那句话。"},
         ])
 
@@ -187,8 +189,14 @@ def test_revision_keeps_a_connected_introduction_and_applies_the_body_edit(monke
         column=SimpleNamespace(script_style="风格", target_minutes=3, voice_id=None),
     )
 
-    assert result.sections[0] == draft.sections[0]
+    if retained:
+        assert result.sections[0] == draft.sections[0]
+    else:
+        assert result.sections[0]["paragraphs"][0]["text"] == opening
     assert result.sections[1]["paragraphs"][0]["text"] == "先点开引用，再看它能不能支持那句话。"
     receipt = result.meta["manuscript_workflow"]
-    assert receipt["retained_opening"] == "revision_broke_introduction"
-    assert [change["id"] for change in receipt["changes"]] == ["S2P1"]
+    if retained:
+        assert receipt["retained_opening"] == "revision_broke_introduction"
+    else:
+        assert "retained_opening" not in receipt
+    assert [change["id"] for change in receipt["changes"]] == (["S2P1"] if retained else ["S1P1", "S2P1"])

@@ -81,9 +81,13 @@ def test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience(
 
 def test_shared_flash_brief_addresses_each_selected_audience():
     every = recipes.expanded(CONFIG)
-    assert "从开发者熟悉" in every["flash"].column.script_style
+    developer = every["flash"].column
     public = every["ai-non_tech-quick_take-short"].column
-    assert "从普通用户熟悉" in public.script_style and "开发者" not in public.script_style
+    assert developer.audience == "开发者"
+    assert public.audience == "普通用户"
+    # Audience binding remains explicit; the shared brief does not prescribe
+    # a particular audience's workplace as every story's opening scene.
+    assert public.script_style == developer.script_style
 
 
 def test_each_audience_is_a_column_named_by_the_cell_its_tags_spell(tmp_path):

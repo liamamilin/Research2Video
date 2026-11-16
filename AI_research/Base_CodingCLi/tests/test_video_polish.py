@@ -21,16 +21,17 @@ def _reply(**texts):
     return json.dumps({"paragraphs": [{"id": key, "text": text} for key, text in texts.items()]}, ensure_ascii=False)
 
 
-def test_final_polish_keeps_connected_opening_and_applies_body_edit(llm, monkeypatch):
+def test_final_polish_accepts_an_opening_without_introduction_and_applies_body_edit(llm, monkeypatch):
     monkeypatch.setattr(polish.persona, "load", lambda: {"name": "洛洛", "opening_greeting": "大家好"})
     opening = "这份报告能直接交吗？大家好，我是洛洛，今天就来看看怎么验。材料里写过一种做法。"
     sections = _sections(["材料里写过一种做法。"])
     sections[0]["paragraphs"] = [_p(opening)]
     llm.polish_replies = [_reply(S1P1="这份报告能直接交吗？先看看怎么验。", S2P1="先从报告里的引用查起。")]
     result, record = polish.polish(llm(None), sections)
-    assert result[0]["paragraphs"][0]["text"] == opening
+    assert result[0]["paragraphs"][0]["text"] == "这份报告能直接交吗？先看看怎么验。"
     assert result[1]["paragraphs"][0]["text"] == "先从报告里的引用查起。"
-    assert [item["id"] for item in record["rejected"]] == ["S1P1"]
+    assert record["rejected"] == []
+    assert [item["id"] for item in record["changes"]] == ["S1P1", "S2P1"]
 
 
 def test_the_program_finds_production_notes_and_stock_endings():

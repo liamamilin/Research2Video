@@ -339,6 +339,40 @@ def test_every_news_original_is_read_exa_comes_last_and_its_quota_stops_the_run(
         supply.collect(engine, job, profile)
 
 
+def test_optional_article_details_keep_available_material_after_exa_quota_failure(setup, monkeypatch):
+    engine, job, profile, _ = setup
+    del profile["detail_pages"]
+    profile["jobs"][JOB]["optional_article_details"] = True
+    job["sources"].append("rss:https://news.example/feed")
+    feed = [replace(item(i, text=f"feed excerpt {i}", provider="rss"),
+                    url=f"https://news.example/a{i}", publish_date="2026-11-02") for i in range(3)]
+    monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: feed)
+    paid_reads = []
+
+    def read(url, *, search_client=None, **kwargs):
+        if url == "https://source.example/notes":
+            return [item(text="Official release notes")]
+        if url == feed[2].url:
+            return [SearchResult("Article 2", url, excerpts=["Usable original text"])]
+        if search_client is not None:
+            paid_reads.append(url)
+            raise RuntimeError("HTTP 402: insufficient credits")
+        raise ValueError("Direct page unavailable")
+
+    monkeypatch.setattr(supply, "read_page", read)
+    got, _, pending, receipt = supply.collect(engine, job, profile)
+
+    assert paid_reads == [feed[0].url]
+    details = {row["url"]: row for row in receipt["details"]}
+    assert details[feed[0].url]["status"] == details[feed[1].url]["status"] == "unavailable"
+    assert "HTTP 402" in details[feed[1].url]["fallback_error"]
+    assert details[feed[2].url]["status"] == "read"
+    block = supply.material_block(got, receipt)
+    assert "Official release notes" in block and "Usable original text" in block
+    assert "feed excerpt 0" in block and block.count("原网页未能补读") == 2
+    assert all("原网页未能补读" not in row["item"]["excerpts"] for row in pending["candidates"])
+
+
 def test_news_a_run_did_not_hand_over_is_owed_to_the_next_run(setup, monkeypatch):
     engine, job, profile, storage = setup
     day = {"days": 1, "timezone": "Asia/Shanghai"}

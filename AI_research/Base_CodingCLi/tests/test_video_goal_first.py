@@ -92,13 +92,12 @@ def test_all_default_writer_inputs_share_authoring_and_material_guidance(llm, mo
     assert written.meta["prompt_version"] == writer.PROMPT_VERSION
     if original:
         assert original in request
+        assert "## 本期研究底稿" in request and "## 对应原始材料" in request
         if mode == "episode":
-            assert "各独立内容中的具体例子持续推进" in request
-            assert "同一问题的章节沿用共同主例子" in request
-            assert "让同一个具体任务在中段持续推进" not in request
             assert "配方参考片长约" not in request
         else:
-            assert "让同一个具体任务在中段持续推进" in request
+            assert "配方参考片长约" in request
+
 
 
 @pytest.mark.parametrize("entry_start", [1, 2])
@@ -234,7 +233,7 @@ def test_automatic_writing_resolves_the_enabled_job_prompts(video_env, llm, monk
     if job == enabled_job and (not profile.production_id or profile.production_id == production_id):
         if profile.episode_prompt:
             assert llm.calls[0][0]["content"].startswith(
-                profile.episode_prompt.replace(writer.EPISODE_LEAD, profile.episode_lead, 1)
+                profile.episode_prompt.replace(writer.EPISODE_LEAD, profile.episode_lead, 1) if profile.episode_lead else profile.episode_prompt
             )
         if profile.episode_lead:
             if not production_id:
@@ -301,8 +300,8 @@ def test_a_programme_opens_with_the_fixed_greeting_and_viewer_facing_titles(llm)
                            column_style="", target_minutes=1, llm_config=None, greeting="大家好，欢迎收看今日快讯。")
     system = llm.calls[0][0]["content"]
     assert "「大家好，欢迎收看今日快讯。」" in system and "不再另外问候" in system and "道别" in system
-    assert "最抓人的那一条" in system and "直接切换" in system and "不重新打招呼" in system
-    assert "不逐条复述" in system and writer.STYLE_RULE in system
+    assert writer.EPISODE_LEAD in system and writer.ENDING_RULE in system
+    assert writer.STYLE_RULE in system
     opening = written.sections[0]
     assert [p["text"] for p in opening["paragraphs"]] == ["大家好，欢迎收看今日快讯。", "今天有两件事。"]
     assert [s["title"] for s in written.sections] == [writer.OPENING_TITLE, "额度上调", writer.CLOSING_TITLE]
@@ -320,7 +319,6 @@ def test_a_greeting_the_author_already_said_is_not_repeated_and_no_greeting_adds
     assert [p["text"] for p in said.sections[0]["paragraphs"]][:1] == ["大家好，欢迎收看AI 快讯。今天讲一件事。"]
     assert "口播开头由节目固定念出问候" not in llm.calls[1][0]["content"]
     assert plain.sections[0]["paragraphs"][0]["text"] == json.loads(script_json(300))["sections"][0]["paragraphs"][0]["text"]
-    assert "起承转合" in llm.calls[1][0]["content"]
 
 
 def test_a_greeting_the_author_worded_differently_is_replaced_not_heard_twice(llm):
@@ -359,4 +357,3 @@ def test_without_a_greeting_the_author_s_own_salutation_is_taken_off_and_the_pro
     assert written.sections[0]["paragraphs"][0]["text"] == "先看一个数字：十倍。"
     system = llm.calls[0][0]["content"]
     assert writer.OPENING_RULE in system and writer.TITLE_RULE in system and writer.ENDING_RULE in system
-    assert "站队" in system and "不打招呼" in system and "一个问题" in system

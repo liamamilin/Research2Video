@@ -127,7 +127,6 @@ def test_all_job_yaml_and_source_supply_entries_keep_their_contracts():
         assert isinstance(data['prompt'],str) and data['output']
         if channel in profiles.KNOWLEDGE:
             assert data['knowledge'] is True and data['search'] is False
-            assert '## 核心机制' in data['prompt']
     for p in (ROOT/'config/source_supply').glob('*.yaml'):
         for job,row in yaml.safe_load(p.read_text())['jobs'].items():
             assert isinstance(row['query'],(str,list)),job

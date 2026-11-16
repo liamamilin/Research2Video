@@ -94,7 +94,8 @@ def report_of(script: dict, report_path: str = "", *, version: dict | None = Non
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
                                 summary=(topic.get("fields") or {}).get("一句话") or "",
-                                include_nested=research_dossier.enabled(script))
+                                include_nested=(research_dossier.enabled(script)
+                                                or script.get("production") == "chatgpt_t05_comparison"))
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -374,11 +375,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         script = {**script, "topic": topic}
     selected_audience_report = report
     audience_material = bool(audience_channel) and audience_channel not in audience_strategy.KNOWLEDGE
-    joint_input = planned is not None or audience_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    # The selected T05 report item is a comparison even in reports saved before
+    # audience marking. Its products are evidence for one editorial question.
+    legacy_comparison = (not audience_channel and script.get("production") == "chatgpt_t05_comparison"
+                         and bool(topic.get("from_item")))
+    scoped_material = audience_material or legacy_comparison
+    joint_input = planned is not None or scoped_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
-    dedup_meta, filtered_material = {}, ""
+    dedup_meta, filtered_material, comparison_material = {}, "", ""
     if guarded:
         store.update_script(script_id, topic=script["topic"])
         topic = script["topic"]
@@ -386,6 +392,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         original = (planned["material"] if planned is not None else
                     report_material.read(reference, full_path, _read_report(report_path)) if reference else "")
+        if legacy_comparison:
+            comparison_material = audience_strategy.material_for_report(report, original)
         try:
             if story_pool.enabled(topic):
                 store.update_script(script_id, stage="选题")
@@ -405,7 +413,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         if topic.get("from_item") and original:
                             # A report item may only use the material it cites.
                             cited = story_pool.cited(report)
-                            if audience_channel:
+                            if legacy_comparison:
+                                original = comparison_material
+                            elif audience_channel:
                                 original = audience_strategy.material_for_report(report, original)
                             else:
                                 original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
@@ -413,7 +423,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         selection_report = research_dossier.selection_brief(report, script)
                         options = ({"tutorial": True} if context.get("type") == "tutorial"
                                    else {"evergreen": True} if context.get("type") == "comparison" else {})
-                        if audience_channel or planned is not None:
+                        if audience_channel or legacy_comparison or planned is not None:
                             options["audience_brief"] = {"title": topic.get("from_item_title") or topic["title"],
                                                          "audience": (topic.get("fields") or {}).get("目标受众", ""),
                                                          "promise": (topic.get("fields") or {}).get("核心角度", "")}
@@ -423,7 +433,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
                 filtered_material = story_pool.material_for(pool, story)
-                if audience_channel:
+                if legacy_comparison:
+                    dossier_report, dossier_selection = selected_audience_report, "comparison_item"
+                elif audience_channel:
                     dossier_report, dossier_selection = selected_audience_report, "audience_selection"
                 elif joint_input:
                     dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool, script)
@@ -434,10 +446,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         filtered_material = "\n\n---\n\n".join(related) or filtered_material
                 report = story_pool.brief(story) + "\n\n" + filtered_material
                 dedup_meta = story_pool.selection(script_id)
-                # News keeps the selected event as its writing scope. A coherent
-                # domain explainer follows its completed dossier main question;
-                # the stored event and coverage reservation remain unchanged.
-                if dossier_selection != "column_explanation":
+                # The regular author already receives the event in writer._request.
+                # Retain the direction for the separate adaptation path.
+                if (column.writer == "adapt" and not is_episode
+                        and dossier_selection not in {"column_explanation", "comparison_item"}):
                     column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
             else:
                 report, filtered_material, dedup_meta = content_guard.prepare(
@@ -486,6 +498,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         if planned is not None:
             material = planned["material"]
+        elif guarded and legacy_comparison:
+            material = comparison_material
         elif guarded:
             material = filtered_material
         elif topic.get("_material_reselection"):
@@ -497,7 +511,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         if topic.get("from_item") and not (guarded and topic.get("story")):
             # Rewriting a published item skips deduplication, but its story
             # and source scope are still frozen to the selected item.
-            material = (audience_strategy.material_for_report(report, material) if audience_channel else
+            material = (audience_strategy.material_for_report(report, material) if scoped_material else
                         story_pool.material_for_report_item(report, material, topic.get("story")))
         if audience_material and not guarded:
             material = audience_strategy.material_for_report(dossier_report, material)
@@ -512,6 +526,11 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         material, material_fit = fit_material(dossier_report if joint_input else report, material)
         writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
                          if audience_channel else topic)
+        if legacy_comparison:
+            # Old event claims remain available for deduplication. The selected
+            # comparison owns the writer's title and evidence, including on redo.
+            writing_topic = {key: value for key, value in writing_topic.items() if key != "story"}
+            writing_topic["title"] = topic.get("from_item_title") or topic["title"]
         told = _episode_told(script, topic, dossier_report) if is_episode else []
         if told:
             items = topic["episode"]["items"]

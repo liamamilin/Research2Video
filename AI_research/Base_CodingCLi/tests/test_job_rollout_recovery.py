@@ -113,7 +113,7 @@ def test_selection_cancellation_never_becomes_success(monkeypatch):
         def __init__(self, *a, **kw): pass
         def close(self): pass
     monkeypatch.setattr('core.llm.LLMClient', Client)
-    def cancel(*a): raise CancelledError('cancel')
+    def cancel(*a, **kw): raise CancelledError('cancel')
     monkeypatch.setattr(strategy, 'select', cancel)
     with pytest.raises(CancelledError):
         strategy.prepare_report({'_file':'monitoring/ai_flash_discovery', 'content_strategy':strategy.MARKER},

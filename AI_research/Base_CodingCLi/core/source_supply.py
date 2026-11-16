@@ -158,7 +158,9 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
     scan = int(profile.get("scan_limit", 80))
     per_source = int(job.get("sources_limit", 10))
-    mode = profile["jobs"][canonical].get("mode", "context")
+    job_profile = profile["jobs"][canonical]
+    mode = job_profile.get("mode", "context")
+    optional_details = job_profile.get("optional_article_details", False)
     client = engine._source_options(["page:https://example.org"])["search_client"]
     pending = {"profile": profile["key"], "job": canonical, "at": now, "delivered": {}, "sources": {},
                "initial_baseline": {}, "candidates": []}
@@ -328,14 +330,15 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         if item.provider in {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"} and detail_left:
             target = canonical_url(item.url)
             if target not in detailed:
-                candidates.append((target, row, material_id, news))
+                candidates.append((target, row, material_id, news, len(items) - 1))
                 detailed.add(target)
         stats[spec] = row["delivered"]
     attempts = 0
+    exa_detail_error = ""
     max_attempts = float(profile.get('detail_attempts') or "inf")
     article_chars = int(profile.get('detail_chars', PAGE_CHARS))
     # News articles are all read in full; page-context articles share what is left of the budget.
-    for url, row, material_id, news in sorted(candidates, key=lambda c: not c[3]):
+    for url, row, material_id, news, seed_index in sorted(candidates, key=lambda c: not c[3]):
         if detail_left <= 0 or attempts >= max_attempts or (not news and used_chars >= budget):
             continue
         if engine._cancel.is_set():
@@ -351,12 +354,17 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             except Exception:
                 if client is None:
                     raise
+                if exa_detail_error:
+                    detail["fallback_error"] = exa_detail_error
+                    raise
                 detail["reader"] = "exa"  # the paid reader, only after direct and browser reads fail
                 try:
                     parts = read_page(url, limit=scan, search_client=client, browser=False)
                 except RuntimeError as exc:
                     if re.search(r"HTTP (401|402|429)\b", str(exc)):
-                        raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc  # out of quota: stop, don't thin out
+                        if not optional_details:
+                            raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc
+                        exa_detail_error = str(exc)[:300]
                     raise
             from .ai_dossier_sources import detail_sections
             room = article_chars if news else min(article_chars, budget - used_chars)
@@ -384,6 +392,11 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
+            if optional_details:
+                seed = items[seed_index]
+                items[seed_index] = replace(seed, excerpts=[
+                    *seed.excerpts, "原网页未能补读，以上是该来源已取得的内容。"
+                ])
     # A delivered change is not automatically an adopted story. Re-offer a bounded
     # number on a later day; baseline comparison and editorial adoption stay separate.
     from .search import SearchResult

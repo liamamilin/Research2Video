@@ -102,6 +102,71 @@ def test_knowledge_keeps_original_question_and_all_body(providers):
     assert 'selection' not in receipt
 
 
+@pytest.mark.parametrize("channel", ["t05", "science_weekly", "consumer_illustrated"])
+def test_related_evidence_replaces_its_prose_instead_of_repeating_it(providers, monkeypatch, channel):
+    old = "已有的描述没有区分两类充电条件，所以需要新增正文澄清。"
+    merged = "两类条件分别对应不同充电环境。" + NEW_TEXT
+    knowledge = channel in strategy.KNOWLEDGE
+    original = "# 原题\n\n" + old + "\n \n## 保留章节\n\n" + URL
+    selection = chosen()
+    selection.candidates[0].material = old + "\n\n## 原稿其余内容"
+    data = {"candidate_count": 1} if knowledge else detail(selection)
+    prior = qm.call_json
+
+    def model(client, system, user, schema, **kw):
+        if schema is qm.Addition:
+            paragraphs = json.loads(user)["editable_paragraphs"]
+            assert list(paragraphs.values()) == [old]
+            return qm.Addition(addition="", used_ids=["E1"], replacements={next(iter(paragraphs)): merged})
+        return prior(client, system, user, schema, **kw)
+
+    monkeypatch.setattr(qm, "call_json", model)
+    report, raw, receipt = qm.enhance(job(channel), original, MATERIAL, data, SYSTEM)
+    assert old not in report and report.count(merged) == 1
+    assert NEW_TEXT in raw and NEW_URL in report and receipt["status"] == "enriched"
+    if knowledge:
+        assert report.startswith("# 原题\n\n" + merged + "\n \n## 保留章节\n\n" + URL)
+    else:
+        assert "原稿其余内容" in report
+        if channel in strategy.SINGLE:
+            assert "原始机制解释" in report
+
+
+def test_invalid_replacement_keeps_the_previous_report(providers, monkeypatch):
+    prior = qm.call_json
+
+    def model(client, system, user, schema, **kw):
+        if schema is qm.Addition:
+            return qm.Addition(addition="", used_ids=["E1"], replacements={"B999": NEW_TEXT})
+        return prior(client, system, user, schema, **kw)
+
+    monkeypatch.setattr(qm, "call_json", model)
+    original = "# 原题\n\n原有完整内容"
+    report, raw, receipt = qm.enhance(job("consumer_illustrated"), original, MATERIAL,
+                                    {"candidate_count": 1}, SYSTEM)
+    assert (report, raw) == (original, "")
+    assert receipt["topics"][0]["status"] == "kept_original"
+
+
+def test_news_prose_with_inline_citations_can_be_merged_without_losing_links(providers, monkeypatch):
+    old = "简报此前只说明该功能开始分批推出，原有公布范围见 " + URL
+    selection = chosen()
+    selection.candidates[0].material = old
+    prior = qm.call_json
+
+    def model(client, system, user, schema, **kw):
+        if schema is qm.Addition:
+            paragraphs = json.loads(user)["editable_paragraphs"]
+            assert paragraphs == {"B1": old}
+            return qm.Addition(addition="", used_ids=["E1"], replacements={"B1": NEW_TEXT})
+        return prior(client, system, user, schema, **kw)
+
+    monkeypatch.setattr(qm, "call_json", model)
+    report, _, receipt = qm.enhance(job("flash"), "初选报告", MATERIAL, detail(selection), SYSTEM)
+    assert receipt["selection"]["candidates"][0]["material"].startswith(NEW_TEXT + "\n" + URL)
+    assert old not in report
+
+
 @pytest.mark.parametrize('mode', ['off', 'empty', 'sufficient', 'no_value', 'bad_ids', 'error'])
 def test_optional_stage_never_resurrects_empty_or_requires_success(providers, monkeypatch, mode):
     config = job(); data = detail()

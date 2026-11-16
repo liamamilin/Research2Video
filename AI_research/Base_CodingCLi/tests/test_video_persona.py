@@ -1,4 +1,4 @@
-"""The account's narrator (core/video/persona.py): first person, introduced right after the hook, never faking tests."""
+"""The account's narrator (core/video/persona.py): identity without a compulsory introduction or fake personal tests."""
 
 from __future__ import annotations
 
@@ -25,15 +25,11 @@ def test_the_persona_file_names_the_narrator_and_its_absence_turns_it_off(tmp_pa
     assert real.load(str(tmp_path)) == {}
 
 
-def test_the_prompt_asks_for_the_first_person_and_forbids_claiming_tests():
+def test_persona_keeps_identity_and_farewell_without_an_opening_template():
     text = narrator.prompt(LUOLUO)
-    assert "第一人称" in text and "大家好，我是洛洛，今天我们聊聊" in text and "我是洛洛，我们下期见。" in text
-    assert "不把名字单独写成一句或一段" in text
-    assert "不说“我实测”" in text and "据某某报道" in text
+    assert "洛洛" in text and LUOLUO["farewell"] in text
     assert narrator.prompt({}) == ""
-    opening = narrator.prompt(LUOLUO, opening_only=True)
-    assert "大家好，我是洛洛，今天我们聊聊" in opening
-    assert LUOLUO["farewell"] not in opening
+    assert LUOLUO["farewell"] not in narrator.prompt(LUOLUO, opening_only=True)
 
 
 def _paragraphs(*texts):
@@ -41,39 +37,23 @@ def _paragraphs(*texts):
 
 
 @pytest.mark.parametrize("texts, expected", [
-    (("先看一张毕业照。", "我是洛洛。", "女孩接受采访。"), True),
-    (("降价了。我是洛洛。这笔账怎么算？",), True),
-    (("先看这个结果。", "大家好，我是洛洛。"), True),
-    (("大家好，我是洛洛。你是不是也遇到过这种情况？",), True),
-    (("先看这个结果。", "大家好，我是洛洛。", "今天讲讲原因。"), True),
-    (("同一段代码，11 月跑和 12 月跑，账单能差一倍。", "大家好，我是洛洛。今天聊聊你的账单和流水线。"), False),
-    (("一个问题。", "先说背景。", "我是洛洛，今天聊聊这个问题。"), False),
-    (("先看一个数字。", "大家好，我是洛洛，今天算算每次任务的花费。"), False),
-    (("一键就能完成吗？", "大家好，我是洛洛，今天用同一份表格走一遍操作。"), False),
-    (("先看结果。",), True),
+    (("先看一张毕业照。", "我是洛洛。", "女孩接受采访。"), False),
+    (("降价了。我是洛洛。这笔账怎么算？",), False),
+    (("先看结果。",), False),
+    (("大家好，我是洛洛。今天看看原因。",), False),
+    (("先看结果。我是洛洛。", "我是洛洛，今天看看原因。"), True),
 ])
-def test_opening_identity_is_kept_with_its_topic(texts, expected):
+def test_identity_is_optional_but_not_repeated(texts, expected):
     assert narrator.opening_needs_introduction(_paragraphs(*texts), LUOLUO) is expected
     assert not narrator.opening_needs_introduction(_paragraphs(*texts), {})
 
 
-def test_a_configured_identity_is_not_replaced_with_luoluo():
-    persona = {"name": "阿青", "introduce": "这里是阿青。", "farewell": "下次见。"}
-    assert "大家好，这里是阿青，今天" in narrator.prompt(persona)
-    assert narrator.opening_needs_introduction(_paragraphs("结果出乎意料。", "这里是阿青。"), persona)
-    assert not narrator.opening_needs_introduction(_paragraphs("结果出乎意料。", "这里是阿青，今天看看原因。"), persona)
-
-
-@pytest.mark.parametrize("opening, expected", [
-    ("大家好，我是洛洛，今天来看看账单。", True),
-    ("账单翻倍了。大家好，我是洛洛，今天来看看账单。", False),
-    ("账单翻倍了。我是洛洛，今天来看看账单。", True),
-    ("账单翻倍了。大家好，我是洛洛。", True),
-    ("账单翻倍了。大家好，我是洛洛，今天聊账单。我是洛洛。", True),
-])
-def test_configured_greeting_follows_the_hook_and_flows_into_topic(opening, expected):
-    persona = {**LUOLUO, "opening_greeting": "大家好"}
-    assert narrator.opening_needs_introduction([{"text": opening}], persona) is expected
+def test_configured_identity_and_greeting_do_not_impose_an_opening_order():
+    persona = {"name": "阿青", "introduce": "这里是阿青。", "farewell": "下次见。", "opening_greeting": "各位好"}
+    assert "阿青" in narrator.prompt(persona)
+    for text in ("结果出乎意料。", "这里是阿青。", "各位好，这里是阿青。结果出乎意料。"):
+        assert not narrator.opening_needs_introduction(_paragraphs(text), persona)
+    assert narrator.opening_needs_introduction(_paragraphs("这里是阿青。", "这里是阿青。"), persona)
 
 
 @pytest.mark.parametrize("separator", ["，", "。"])
@@ -91,26 +71,37 @@ def test_a_written_script_keeps_a_natural_introduction_without_an_extra_call(llm
 
 
 @pytest.mark.parametrize("intro", ["我是洛洛。", "先看背景。"])
-def test_bare_or_missing_introduction_is_authored_in_context_not_spliced(llm, monkeypatch, intro):
+def test_bare_or_missing_introduction_does_not_rewrite_the_opening(llm, monkeypatch, intro):
     monkeypatch.setattr(narrator, "load", lambda config_dir=None: LUOLUO)
     payload = json.loads(script_json(300))
-    payload["sections"][0]["paragraphs"] = [{"text": "同样的预算，能跑多少次？"}, {"text": intro}]
-    revised = {"title": "模型试图换标题", "paragraphs": [
-        {"text": "同样的预算，能跑多少次？"},
-        {"text": "大家好，我是洛洛，今天算算每次运行的花费，再看哪些任务更划算。"}]}
+    opening = [{"text": "同样的预算，能跑多少次？"}, {"text": intro}]
+    payload["sections"][0]["paragraphs"] = opening
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None)
+    assert [p["text"] for p in written.sections[0]["paragraphs"]] == [p["text"] for p in opening]
+    assert len(llm.calls) == 1
+    assert written.meta["introduction"] == {"status": "authored", "requests": 0}
+
+
+def test_repeated_identity_is_repaired_once_without_rewriting_other_sections(llm, monkeypatch):
+    monkeypatch.setattr(narrator, "load", lambda config_dir=None: LUOLUO)
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"] = [{"text": "我是洛洛。先看两个数。"}, {"text": "大家好，我是洛洛。现在看结果。"}]
+    revised = {"title": "model changed heading", "paragraphs": [{"text": "我是洛洛。先看两个数。现在看结果。"}]}
     llm.replies = [json.dumps(payload, ensure_ascii=False), json.dumps(revised, ensure_ascii=False)]
     written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
                            target_minutes=1, llm_config=None)
-    assert written.sections[0]["paragraphs"][1]["text"] == revised["paragraphs"][1]["text"]
+    assert written.sections[0]["paragraphs"][0]["text"] == revised["paragraphs"][0]["text"]
     assert written.sections[0]["title"] == payload["sections"][0]["title"]
     assert written.sections[1]["paragraphs"][0]["text"] == payload["sections"][1]["paragraphs"][0]["text"]
     assert len(llm.calls) == 2
-    assert written.meta["introduction"] == {"status": "rewritten", "requests": 1}
 
 
 def test_an_unsuccessful_opening_rewrite_preserves_the_draft_without_looping():
     from core.llm import ChatResponse
     source = writer._parse(script_json(300))
+    source.sections[0].paragraphs[0].text = "我是洛洛。先看结果。我是洛洛。"
     client = SimpleNamespace(chat=lambda *args, **kwargs: ChatResponse(content='not JSON'))
     result, receipt = writer.introduce_opening(source, LUOLUO, client)
     assert result is source
@@ -142,11 +133,12 @@ def test_a_series_item_promises_its_next_episode(llm):
     llm.replies = [script_json(300)]
     writer.write(report=REPORT, citation_check=None, topic={"title": "本期", "next_episode": "额度没用完为什么停了"},
                  column_style="", target_minutes=1, llm_config=None)
-    assert "「额度没用完为什么停了」" in llm.calls[0][0]["content"] and "道别前用一句话预告它" in llm.calls[0][0]["content"]
+    prompt = llm.calls[0][0]["content"]
+    assert "「额度没用完为什么停了」" in prompt and "预告已排好的下一期" in prompt
 
 
 def test_hooks_stay_with_the_viewer_and_the_named_angle_is_kept():
-    assert "不用和观众无关的全球或海外统计开场" in writer.OPENING_RULE
+    assert writer.OPENING_RULE in writer.SYSTEM_PROMPT and writer.OPENING_RULE in writer.EPISODE_PROMPT
     assert writer.ANGLE_RULE in writer.SYSTEM_PROMPT and writer.ANGLE_RULE in writer.EPISODE_PROMPT
 
 

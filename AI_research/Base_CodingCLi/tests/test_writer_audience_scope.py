@@ -32,10 +32,7 @@ def test_scope_handoff_only_replaces_single_task_throughline():
                 topic_fields=('操作与演示',), original_material='完整原始材料及其结尾')
     old = writer._request('研究底稿', topic, **args)
     actual = writer._request('研究底稿', topic | {'preserve_audience_scope': True}, **args)
-    assert actual == old.replace(
-        '让同一个具体任务在中段持续推进，参数贴着它解释的作用出现，结尾回到任务的结果与本期形成的认识。',
-        '中段沿本期问题展开，让具体例子中的动作和结果帮助目标观众理解；'
-        '例子不限定整篇受众，结尾回到目标观众共同关心的问题与本期形成的认识。', 1)
+    assert actual.replace("例子帮助目标观众理解本题，不把例中人的身份当作整篇的观看前提。", "", 1) == old
     for value in ('约 3 分钟', '学生与日常办公用户', '原栏目风格', '完整原始材料及其结尾'):
         assert value in actual
 

@@ -160,6 +160,7 @@ coverage:
 jobs:
   monitoring/ai_flash_discovery:
     mode: changes
+    optional_article_details: true
     direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化；补充中文普通用户的购买疑问、额度困惑、工作生活中的具体使用案例，按需求线索与变化/案例/比较背景搭配。
     query:
     - AI coding tools official release notes changelog pricing usage limits

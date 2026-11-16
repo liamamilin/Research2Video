@@ -47,7 +47,8 @@ def test_the_item_and_its_angles_claim_the_same_event_and_only_a_same_angle_repe
     assert "angle" not in told
     with pytest.raises(pool.NoCandidate):
         pool.take(money_again["id"], candidates, [])  # 算账 of this event is already being written
-    assert "算账值不值" in pool.brief(by_money) and "算账值不值" not in pool.brief(told)
+    assert angles.ANGLES["money"]["prompt"] in pool.brief(by_money)
+    assert angles.ANGLES["money"]["prompt"] not in pool.brief(told)
     # the gate after writing sees the same thing: siblings are no duplicates of each other
     for row, story in ((base, told), (money, by_money), (howto, by_howto)):
         script = {**store.get_script(row["id"]), "topic": {**store.get_script(row["id"])["topic"], "story": story}}

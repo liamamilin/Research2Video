@@ -573,6 +573,7 @@ def test_writer_receives_selected_material_and_frozen_event_metadata(guard_env, 
     request = FakeLLM.calls[0][-1]["content"]
     assert NEW in request and SNAKE not in request
     assert "已选主事件" in request
+    assert request.count(pool.brief(version["meta"]["story"])) == 1
     assert claim_state(row["id"]) == "COVERED"
 
 

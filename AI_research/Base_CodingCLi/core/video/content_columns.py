@@ -195,7 +195,7 @@ def apply_script_context(recipe, context: dict):
     notes = (context.get("notes") or "").strip()
     if notes:
         if programme:
-            direction += "\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。"
+            direction += "\n以下是可参考的创作方向。各项独立内容可采用适合自己的例子与讲法；同一问题的章节以连贯、好理解为目标，安排由作者结合材料决定。"
         direction += f"\n{'单项内容创作方向' if programme else '栏目创作方向'}：{notes}"
     # A concrete business-column brief owns the creative goal. The reused
     # recipe continues to own its input mode, writer and output contract.
