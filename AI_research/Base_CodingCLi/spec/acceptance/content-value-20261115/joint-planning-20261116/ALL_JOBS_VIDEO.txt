@@ -59,3 +59,41 @@ ResearchEngine.run_job 自动采集和研究 → 原引擎候选比较/材料组
 
 证据根目录：state/acceptance-content-value-20261115/joint-planning-20261116/all-jobs-video-20261116/
 configuration-audit.json、progress.json、各 case/input.json / result.json / 原研究与补材收据、scope-fix/、draft-verification.json、media-verification.json、production-tutorial/。过程记录保留在 acceptance-progress-history.txt 和各次 runner 日志。
+
+2026-11-16 续验：真实生产批次、局部补材和观看问题
+
+本轮用标准 Job 命令自动采集新报告，交给生产 autopilot 自动接单。实际启用候选比较 7、补材 4、作者 20；产线继续用原配置串行渲染。没有手选网页、手改正文或分镜，没有强行放行历史重复项。首次 T09 Web 试跑因并行维护重启中断，独立 Job 入口重跑成功。维护辅助进程现会等待旧 Web 进程持有的研究任务锁，避免只核对数据库而漏过进行中的研究。
+
+- 快讯最新研究通过原路径生成 6 个候选，合集另用 2 件原材料填成 8 项。一次辅助正文补读仍遇到 Exa 402，本轮并行修改后的快讯路径成功读取其余 16 篇并继续生产。共享计划将 4 个单条的问题与材料单独分配，合集脚本保留概述。生产批次 edd50958f7aa44c1b3cc014278255fb5。
+- T09 最新研究得到唯一 Wallet 候选。合集 render 21ba735b740d4e148b1fd1140854a519（236.37 秒）交付。单条命中同样讲 Wallet 完整步骤的历史成片 180b80a4f53846619d66afaab4cd7e5f，保留排重。生产批次 5f838542ed7443059348851585f6e34d。
+- 补材组织现在可原位合并相关正文、保留独立新增解释。用 T05、消费插画和快讯实料核对。快讯真实材料还暴露了行内 URL 使旧段落被略过的问题，版本 5 修复并保存原链接。快讯同一原材料在版本 5 实际替换 B1，原链接仍在，走通常作者入口写出 20 版稿。新生产批次的报告已冻结在版本 4，版本 5 的验证范围到报告和文稿。
+- 针对旧快讯抽出的 55–63 秒倍率图，保留原声和原时间轴，让含 1.48× 的三组数据在入场即齐，后续用强调跟随旁白。十项总览采用较大两行标题，保全 App、Face ID。长图表标题尽量保持连贯，标题和限定词与图同时可见。保留旧片、同声局部新片和相关数据。另在新快讯自动生成的合集复查 8 项总览及长标题，修复数值与“倍”分行，以及带小于号的标题晚显；用该生产片同声重渲染复验。
+- 同一个真实 DeepSeek 选题的作者版本 20 重跑中，开头采用受影响场景和已给出的规则，原出现的“三周论文”虚构经历没有复现。此项只对该重跑成立。
+
+本轮证据根目录 state/acceptance-content-value-20261115/joint-planning-20261116/followup-20261116/，包括 execution-notes.txt、content-comparison.txt、production-status.json、production-media/ 与 flash-live/merged/。原声局部对照位于 autovideo/g3/data/validation/joint-followup-20261116/，scope.txt 和 media-check.json 记录范围和验证方法。成片验证包括完整解码、交付哈希、写稿分配报告哈希、定稿与旁白输入、代表画面抽帧。
+
+T05 同材料补验保留旧报告、两个强度的写稿试验和重新候选比较的收据。同题旧稿把绘画和网页结果外推成工具推荐，增加写稿提示后仍可复现。编辑范围调整后，通常两轮候选比较在原自动材料上选到同一份长 PDF 的页数和读图条件；DRAFT 给出对照试法，但仍出现由产品说明推断实际回答表现的句子。T05 本轮验证到文稿，见 followup-20261116/content-comparison.txt。
+
+真实输出发现 Wallet 在 AI 快讯单条与 T09 合集中仍有跨 Job 内容重叠，涉及加卡、付款批准和售后；两个 Job 有各自的共同计划。T09 在本栏目没有新增 Wallet 单条，具名历史成片排重仍成立。快讯 Wallet 成片及画面证据见 followup-20261116/production-media/9029a37cedbc4947abb0764f3826f92b/。
+
+生产结果 22:00 核验完毕。快讯 8 项合集 346.07 秒，4 条单条分别为同一 3D 网页成本（334.53 秒）、Wallet 批准（233.77 秒）、Cursor 防护（322.20 秒）、CarPlay 设置（278.23 秒）；T09 Wallet 合集 236.37 秒。6 条均通过全片解码，交付、计划分配、定稿与旁白输入哈希一致，并分别抽查五处画面。已有生产结束、预检为空闲后，用项目等待维护流程重载研究服务 PID 45572→71124，回执 bf699d54b4314939aab2368b3b193e51，健康 ok。补材5的生产后成片边界仍以以上同源文稿验证为准。
+
+本次使用生产链路时漏查现有 B 站自动投稿设置，部分验收成片由生产发布器正常接单。已有平台回执保留；仍排队的 Cursor 与 CarPlay 自动投稿已逐项取消，成片与历史保留。逐条状态和 BV 号见 followup-20261116/publication-status.json。
+
+22:18 线上即时复验
+
+线上研究服务 PID 71124 经标准 /api/jobs/consumer/consumer_illustrated/run 接受手动研究 EE6GkFUnj-qGZ9v-。该 Job 的生产绑定 auto: 0，通知关闭。22:24:29 自动生成 output/consumer/2026-11-16_consumer_illustrated.md，实际收据 selector 7、question 5、enriched。USB-C 线材题的五段合并编号为 B15、B16、B22、B23、B35。原报告未经人工改写，证据 online-now-20261116/live-proof.json。
+
+AI 快讯另从常规 CLI 在隔离状态做一次新采集。为了先对照最新画面，在线 8011 空闲后使用内置无发布预览入口，以 8 项旧快讯真实定稿为输入。原旁白哈希 fbf7b3ceccdf9d1b931a78376164670b1a8ca45ed3c6833d5c0343201c34ccc8。首次隔离预览因原报告未复制，取消该预览；补齐原报告和原材料分配后，接受完整重试 4021cad1-ac61-46e1-b4d3-bf67c10f8311。两次记录保留。预览不建生产 renders 记录，独立状态不连投稿平台。补材、栏目及渲染输入 113 项、AutoVideo 总览 18 项回归均已通过。
+
+23:01 线上 AutoVideo 预览完成，整片通过解码和交付 SHA，旁白文本核验通过，当前受信渲染源与实际 worker 快照一致。生产 renders 表不存在该预览任务。frame-comparison/comparison-0.jpg 在 5 秒显示片头“5倍”整体换行；comparison-1.jpg 在 171.5 和 173.5 秒对比图注与数据同步出现，旧片直到后段才显示限定条件。预览使用同一定稿文本，重新走分镜和画面生成。完整 MP4、抽帧、原始输入与 worker 回执见 online-now-20261116/preview-proof.json。
+
+23:26 隔离快讯新采集结束。收据显示十题均 enriched，正文逐题核对时发现十段合并均未出现在对应标题下，最后一个候选的合并结果落在第一题。触发原因是候选下标和 Markdown 段落位置共用变量：题的第一个段落 B1 会把候选下标覆盖为 0。旧报告及已开始的隔离计划只作故障证据，未进入生产报告、视频队列或投稿。22:24 的单题线上知识报告五处替换均已落入正文。
+
+版本 6 使用独立候选下标和段落位置。新双候选测试修前红、修后绿，相关回归 210 项通过。保存的十组真实来源正文、搜索结果与模型回答原样重放，正文归属由 0/10 变为 10/10，并逐段检查没有落入其他题。重放证据为 online-now-20261116/fixed-flash/verification.json 和 report.md。
+
+确认主流程手动、轮次、调度和渲染为空闲后，用等待模式重载 8766 研究端 71124→92529，维护回执 46865790efe44494820b0e5b6986b37a，健康 ok。AutoVideo 测试使用当前在线服务。q6-live-job.json 是新实例复验的正常入口任务。旧方案另保留于 fresh-plan-proof.json，新方案使用修正后的报告单独验证。
+
+第 6 版线上真实入口结果。新实例经同一项目 API 启动 WcK9TnuBkXA1610W，23:36:35 完成消费科技新题「手机参数上的 12GB+8GB」。报告 output/consumer/2026-11-16_consumer_illustrated_1.md，收据 version=6、status=enriched，13 段在实际报告原位匹配。22:01–23:38 的生产记录只有单题消费科技的第 5 版、第 6 版报告，出现串题的十题第 5 版报告全程位于独立验收目录。证据 online-now-20261116/q6-live-proof.json 与 deployment.json。
+
+23:39 修正后的十题快讯材料走正式共同规划函数，得到共享计划 0c45e855779677e3d356217dae8a2d746bed90cbce21d350a4bb75746264ab86，包括 1 个合集和 8 个单条分配，九项均指向同一计划和各自存在的材料条目。结果保留在 online-now-20261116/fixed-flash/plan-proof.json。第 6 版多题复验覆盖补材、实际报告正文和共同规划；线上整片视觉对照使用先前真实快讯定稿。
