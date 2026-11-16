@@ -3,12 +3,12 @@ import {ContentStyleContext, BrandHeaderContext, VisualScaleContext, type Conten
 import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
-import {fitComparison} from './TextFit';
+import {fitComparison,fitHeading,measureText} from './TextFit';
 import {fitFrame,transformFor} from './Framing';
 import {flowPresentation} from './RelationLayout';
 import {RelationIndex} from './RelationIndex';
 import {ObjectFlow,FlowMap} from './ObjectFlow';
-import {flowCameraAt, carriesPicture, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
+import {flowCameraAt, carriesPicture, linkScenes, transitionAt, comparisonAt, visualStart} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
 import {CodeDemo} from './CodeDemo';
 import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
@@ -299,19 +299,30 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const textStyle = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal', textWrap:'pretty'} as React.CSSProperties;
   const panelStyle: React.CSSProperties = {background:contentStyle?.surface??'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
-  const heading = chartLike ? scene.purpose : p.title;
+  const originalHeading = chartLike ? scene.purpose : p.title;
+  const chartHeading = scene.component === 'bar_chart' || scene.component === 'data_chart';
+  const [heading, chartSubhead] = React.useMemo(() => {
+    if (!chartHeading) return [originalHeading, ''];
+    const split = originalHeading.lastIndexOf(' · ');
+    const main = split > 0 ? originalHeading.slice(0, split) : originalHeading;
+    if (split <= 0 || measureText(main, 46, 700) > 1600) return [originalHeading, ''];
+    const detail = originalHeading.slice(split + 3);
+    // The bars already repeat their explicit unit next to each value.
+    return [main, scene.component === 'bar_chart' && detail === p.unit ? '' : detail];
+  }, [chartHeading, originalHeading, p.unit, scene.component]);
+  const headingSize = React.useMemo(()=>chartHeading ? fitHeading(heading,1600,64,46) : undefined,[chartHeading,heading]);
   const materialScene = ['object_showcase','material_collage'].includes(scene.component);
   const previous=scene.previous_scene;
   const recapSources=(p.story?.recap??[]).map((id:string)=>ir.scenes.find(s=>s.id===id)).filter(Boolean) as Scene[];
-  const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===heading;
-  const headingMotion=carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
-    ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
+  const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===originalHeading;
+  const headingMotion=chartHeading||carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
+    ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
   return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly||contentStyle?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
     {!stageOnly&&<>{brandHeader ? <div data-brand-header="content" style={{position:'absolute',left:brandHeader.left,top:brandHeader.top,width:1920-brandHeader.left-brandHeader.right-brandHeader.width-brandHeader.gap,height:brandHeader.height,overflow:'hidden'}}>
       <div style={{position:'absolute',top:10,left:0,right:0,height:34,color:paper.muted,fontSize:24,lineHeight:'34px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{scene.props.story?.entities?.length ? <StoryObjects scene={scene} inline/> : badge?.text||ir.video.title}</div>
       <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? chapters[chapterIndex].title : null}</div>
     </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <Tech text={chapters[chapterIndex].title}/> : null}</div></>}
-    {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:scene.image_reading?(heading.length>24?40:54):materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
+    {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:headingSize??(scene.image_reading?(heading.length>24?40:54):materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64),fontWeight:700,lineHeight:chartHeading?1.16:1.3,...textStyle,...(chartHeading?{textWrap:'balance'}:{}),...headingMotion}}><Tech text={heading}/>{chartSubhead&&<div style={{fontSize:30,fontWeight:500,color:paper.muted,marginTop:6}}><Tech text={chartSubhead}/></div>}</div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
       {recapSources.map((source,i)=>{
@@ -417,16 +428,17 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       </div>}
       {scene.component === 'bar_chart' && (() => {
         const top = Math.max(...p.values, 0) || 1, count = p.categories.length;
+        // Even an explanation can read multiple bars in one sentence. Keep
+        // the full frame of reference visible and let beats select emphasis.
+        const focus = reveals.filter(b => b.target_id.startsWith('bar:') && visualStart(scene,b.frame)<=frame).at(-1)?.target_id;
         const shownValue = (value: number) => `${value.toLocaleString('en-US', {maximumFractionDigits: 3})} ${p.unit}`;
         return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:count > 4 ? 22 : 34}}>
           {p.categories.map((category: string, i: number) => {
-            const beat = reveals.find((b) => b.target_id === `bar:${i}`);
-            const t = beat ? ease((frame-beat.frame)/20) : 0;
-            return <div key={i} style={{display:'flex',alignItems:'center',gap:32,opacity:Math.min(1, t*2.2)}}>
+            return <div key={i} style={{display:'flex',alignItems:'center',gap:32}}>
               <div style={{...textStyle,width:large ? 440 : 360,flex:'none',fontSize:S(count > 4 ? 30 : 34),fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
               <div style={{flex:1,display:'flex',alignItems:'center',gap:20,minWidth:0}}>
-                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:objectColor(scene,`bar:${i}`,paper.green),width:`${Math.max(1.2, p.values[i]/top*72*t)}%`,flex:'none'}}/>
-                <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
+                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:objectColor(scene,`bar:${i}`,paper.green),width:`${Math.max(1.2, p.values[i]/top*72)}%`,flex:'none'}}/>
+                <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:focus===`bar:${i}`?750:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
               </div>
             </div>;
           })}

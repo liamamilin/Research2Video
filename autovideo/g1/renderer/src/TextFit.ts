@@ -22,6 +22,14 @@ export function wrapMeasured(text:string,width:number,size:number,weight:number,
   if(line)lines.push(line);
   return lines.length?lines:[''];
 }
+
+/** Favor a single line for a chart so the heading leaves room for its data. */
+export function fitHeading(text:string,width:number,preferred:number,minimum:number,measure:Measure=measureText):number {
+  for(let size=preferred;size>=minimum;size--) {
+    if(measure(text,size,700)<=width)return size;
+  }
+  return minimum;
+}
 export function fitComparison(props:{left:Side;right:Side},measure:Measure=measureText,scale=1){
   let result:any;
   for(let step=0;step<=12;step++){

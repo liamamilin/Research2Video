@@ -260,7 +260,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         raise RenderError(f"这个栏目不能用视频形式 {form}")
     request: dict[str, Any] = {
         "input_mode": "narration",
-        **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
+        **({"episode": {"items": [{"title": chapter_list[i]["title"], "chapter_indexes": [i]}
             for i, s in enumerate(spoken_sections) if s.get("episode_role", "item") == "item"]}}
             if programme else {}),
         "chapters": chapter_list,
