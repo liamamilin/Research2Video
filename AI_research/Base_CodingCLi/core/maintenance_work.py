@@ -54,6 +54,19 @@ def busy_work(state: Path) -> list[dict]:
     return busy
 
 
+def _web_research_active(state: Path, pid: int) -> bool:
+    # The detached helper cannot read the web process's in-memory task
+    # registry. ResearchEngine holds these locks until its run is finished.
+    for path in (state / 'locks').glob('*.lock'):
+        try:
+            record = json.loads(path.read_text())
+        except (FileNotFoundError, ValueError):
+            continue
+        if isinstance(record, dict) and record.get('pid') == pid:
+            return True
+    return False
+
+
 @contextmanager
 def restart_gate(state: Path, *, timeout: float = 3600, expected_runtime: dict | None = None):
     """Wait for current workers, then hold their existing locks across the handover.
@@ -79,7 +92,8 @@ def restart_gate(state: Path, *, timeout: float = 3600, expected_runtime: dict |
             for root in roots:
                 lock = workers.enter_context((root / 'worker.lock').open('a'))
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            acquired = not busy_work(state)
+            web_busy = expected_runtime is not None and _web_research_active(state, expected_runtime['pid'])
+            acquired = not web_busy and not busy_work(state)
         except BlockingIOError:
             pass
         except BaseException:

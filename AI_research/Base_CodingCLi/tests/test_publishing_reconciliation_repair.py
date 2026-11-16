@@ -211,3 +211,21 @@ def test_new_instance_ends_obsolete_maintenance_even_while_upload_is_queued(tmp_
         with restart_gate(tmp_path, expected_runtime={'pid': 11, 'instance_id': 'old'}):
             pytest.fail('must not restart an already replaced instance')
     assert caught.value.runtime['pid'] == 22 and db.get(queued['id'])['status'] == 'QUEUED'
+
+
+def test_detached_maintenance_waits_for_research_owned_by_the_web_process(tmp_path):
+    runtime = {'pid': 1234, 'instance_id': 'web'}
+    (tmp_path / 'app_runtime.json').write_text(json.dumps(runtime))
+    locks = tmp_path / 'locks'
+    locks.mkdir()
+    manual = locks / 'manual_research.lock'
+    manual.write_text(json.dumps({'pid': runtime['pid']}))
+    (locks / 'independent.lock').write_text(json.dumps({'pid': 2345}))
+
+    assert not busy_work(tmp_path)  # The web research has no row in a worker database.
+    with pytest.raises(RuntimeError, match='未发送重启信号'):
+        with restart_gate(tmp_path, timeout=0.01, expected_runtime=runtime):
+            pytest.fail('the detached helper must wait for the web research lock')
+    manual.unlink()
+    with restart_gate(tmp_path, timeout=1, expected_runtime=runtime):
+        assert (locks / 'independent.lock').is_file()
