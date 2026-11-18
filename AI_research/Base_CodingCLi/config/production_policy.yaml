@@ -1,13 +1,11 @@
-# 排期在「周期调度」维护；默认研究窗口随相邻计划槽位变化。
 schema_version: 1
 matrices:
-  - ai_media
-  - chatgpt_acquisition
-  - ai_science_updates
+- ai_media
+- chatgpt_acquisition
+- ai_science_updates
 window:
   mode: previous_slot
   timezone: Asia/Shanghai
-# 可在 jobs 中为任意任务指定 rolling + days，独立调整研究范围而不修改出片周期。
 jobs:
   chains/ai_science_updates:
     mode: rolling
@@ -15,21 +13,20 @@ jobs:
     timezone: Asia/Shanghai
 collection:
   enabled: true
-  schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
+  schedule: 20 7 * * *
   timezone: Asia/Shanghai
   retention_days: 60
   limit_per_source: 80
   max_sources: 100
   timeout_seconds: 15
 automatic:
-  # 每天新接纳的自动节目数；留空（null）表示不限。每期仍只记一次，重试不重复占位。
   daily_limit: null
   timezone: Asia/Shanghai
   recommendations: false
 sources:
   reference:
-    - source:cg_pro_tiers
-    - source:cg_pricing
-    - source:cg_help
-    - source:cg_capabilities
-    - source:cg_errors
+  - source:cg_pro_tiers
+  - source:cg_pricing
+  - source:cg_help
+  - source:cg_capabilities
+  - source:cg_errors
