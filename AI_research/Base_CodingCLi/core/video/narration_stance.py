@@ -1,12 +1,16 @@
 """Keep new narration on the subject, and keep the limits the audience can use.
 
-A research gap is not said as "I will not make this up" or "go check the
+A research memo is not said as "I will not make this up" or "go check the
 website". It is also not rewritten into "the official source never published
-it" or "the product cannot do that". A comparison that never received an item
-says that this comparison does not include it. Facts that were not withdrawn
-stay. Quotations, tutorials, and real conditions stay.
+it" or "the product cannot do that". Facts that were not withdrawn stay.
+Quotations, tutorials, and real conditions stay.
 
-Approved and verbatim manuscripts are not passed through ``apply_to_script``.
+A missing price or score is a lookup memo. A missing control group, sample
+size, independent check, or disclosed evaluation condition can change whether
+a comparison holds. That limit stays when it is already said to the audience.
+When the only copy is an internal memo and a safe sentence cannot be made
+without inventing an official statement, the paragraph is marked for another
+draft and automatic approval stops. Already approved scripts are not rewritten.
 """
 from __future__ import annotations
 
@@ -17,6 +21,7 @@ import re
 LISTENING_DIRECTION = (
     "从材料里挑值得讲的发现和判断，用具体变化把它讲清。"
     "影响理解或用法的条件，直接说它会怎样改变结果。"
+    "对照组、样本量、预印本、评测是否独立、条件有没有披露，会改变比较能不能成立，就照实说。"
     "研究和制作备忘留在稿外。"
     "材料里没有的细节就不要念；留下已经成立的事实。"
     "不要用「这次比较没有包括」或「这次没有讲」填掉删去的备忘。"
@@ -48,7 +53,14 @@ _OFFICIAL = re.compile(r"官方.{0,8}?(?:没有|未|没)(?:公布|披露|公开|
 _DENIAL = re.compile(r"不会|不支持|并不具备|做不到")
 _COMPLETENESS = re.compile(r"五家|这几家都|全部|每一家|所有(?:产品|这些)|都能")
 _NEGATED_SCOPE = re.compile(r"不能|不是|并不|不代表|尚未|还没|不要以为|别当成|没法说")
+_CONSEQUENTIAL = re.compile(
+    r"对照组|样本量|样本数|个样本|小样本|预印本|非独立|未独立|独立复现|评测条件|评价条件|实验条件|未披露"
+)
+_AUDIENCE_LIMIT = re.compile(
+    r"尚未|还没验证|还没有|不能推广|不代表|只在|仅在|预印本|非独立|未独立|未披露|不能据此|样本量|对照组|个样本|样本数"
+)
 _NOTE = "口播去掉了自我免责或取材备忘。没有补「这次没有讲」，也没有改写成官方未公布或能力不存在。"
+REVIEW_REASON = "比较还缺对照组、样本量，或评测是否独立、条件有没有披露。已有的描述和范围可以留下，但不能当成可靠比较。请重写给观众的限制，不要编官方没公布。"
 
 
 def _protect(text: str) -> tuple[str, list[str]]:
@@ -86,6 +98,11 @@ def _misleading_completeness(clause: str) -> bool:
     so it stays.
     """
     return bool(_COMPLETENESS.search(clause)) and not _NEGATED_SCOPE.search(clause)
+
+
+def _consequential_gap(clause: str) -> bool:
+    """An internal memo about evidence that can change whether a result holds."""
+    return _gap(clause) and bool(_CONSEQUENTIAL.search(clause))
 
 
 def defects(text: str) -> list[dict]:
@@ -163,12 +180,19 @@ def repair(text: str) -> tuple[str, list[dict]]:
             spoken = "，".join(part for part in facts if part)
             if not spoken.endswith(("。", "！", "？")):
                 spoken += "。"
-        attention = not facts and (retracts or bool(_COMPLETENESS.search(visible)) or bool(_gap(visible)))
+        consequential = any(_consequential_gap(clause) for clause in clauses)
+        attention = consequential or (not facts and (retracts or bool(_COMPLETENESS.search(visible)) or bool(_gap(visible))))
+        record = _NOTE
+        if consequential:
+            record += "缺的是会改变比较能不能成立的证据，没有编官方没公布。请重写给观众的限制。"
+        elif attention:
+            record += "剩下的话会让比较显得已经做完，或没有任何可念的事实。请重写这一处，不要自动补范围套话。"
         notes.append({
             "omitted": visible,
             "spoken_instead": spoken,
             "needs_attention": attention,
-            "record": _NOTE if not attention else _NOTE + "剩下的话会让比较显得已经做完，或没有任何可念的事实。请重写这一处，不要自动补范围套话。",
+            "consequential": consequential,
+            "record": record,
         })
         if spoken:
             kept.append(spoken)
@@ -189,19 +213,30 @@ def settle_sections(sections: list[dict], *, locked: bool = False) -> tuple[list
             if after == before:
                 kept.append(paragraph)
                 continue
+            consequential = any(gap.get("consequential") for gap in gaps)
+            if consequential:
+                record["blocks_auto_approval"] = True
             if not after:
                 record["changes"].append({"section": si, "paragraph": pi, "before": before, "after": ""})
                 record["gaps"].extend(gaps)
+                if consequential:
+                    record["unresolved"].append({"section": si, "paragraph": pi, "reason": REVIEW_REASON})
                 continue
             if launders(before, after):
                 record["unresolved"].append({"section": si, "paragraph": pi, "reason": "收窄会把缺口说重，保留原文"})
+                if consequential:
+                    paragraph["evidence"] = "NEEDS_REVIEW"
+                    paragraph["review_reason"] = REVIEW_REASON
                 kept.append(paragraph)
                 continue
             paragraph["text"] = after
             record["changes"].append({"section": si, "paragraph": pi, "before": before, "after": after})
             record["gaps"].extend(gaps)
-            if any(gap.get("needs_attention") for gap in gaps):
-                record["unresolved"].append({"section": si, "paragraph": pi, "reason": "需要重写，不要自动补范围套话"})
+            if consequential or any(gap.get("needs_attention") for gap in gaps):
+                record["unresolved"].append({"section": si, "paragraph": pi, "reason": REVIEW_REASON if consequential else "需要重写，不要自动补范围套话"})
+            if consequential:
+                paragraph["evidence"] = "NEEDS_REVIEW"
+                paragraph["review_reason"] = REVIEW_REASON
             kept.append(paragraph)
         section["paragraphs"] = kept
     out = [section for section in out if section.get("paragraphs")]

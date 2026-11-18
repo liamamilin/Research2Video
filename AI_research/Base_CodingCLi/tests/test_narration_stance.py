@@ -8,7 +8,7 @@ from core.video import manuscript_workflow as workflow
 from core.video import polish, production, writer
 from core.video.article_writer import draft as article_draft
 from core.video.narration_stance import LISTENING_DIRECTION, launders, repair
-from tests.test_video_scripts import llm  # noqa: F401
+from tests.test_video_scripts import llm, video_env  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[1]
 NEGATIVES = [
@@ -236,16 +236,23 @@ def test_read_aloud_keeps_every_character_and_an_only_gap_does_not_erase_the_scr
     assert record["kept_original"] and only[0]["paragraphs"][0]["text"] == source["text"]
 
 
-def test_science_chain_draft_revision_and_polish_keep_the_result(llm, monkeypatch):
-    candidates = [
-        Path("/tmp/science-overlay/AI_research/Base_CodingCLi/config/video_recipes/chain_ai_science_updates.yaml"),
-        ROOT / "config/video_recipes/chain_ai_science_updates.yaml",
-    ]
-    recipe = next((path for path in candidates if path.is_file()), None)
-    if recipe is None:
-        pytest.skip("science-chain overlay is not on this machine")
+def _science_excerpt() -> dict:
     import yaml
-    style = yaml.safe_load(recipe.read_text())["writing"]["style"]
+    return yaml.safe_load((ROOT / "tests/fixtures/narration/science_chain_excerpt.yaml").read_text())
+
+
+def test_science_chain_draft_revision_and_polish_keep_the_result(llm, monkeypatch):
+    excerpt = _science_excerpt()
+    style = excerpt["writing"]["style"]
+    live_recipe = ROOT / "config/video_recipes/chain_ai_science_updates.yaml"
+    live_job = ROOT / "jobs/chains/ai_science_updates.yaml"
+    if live_recipe.is_file():
+        import yaml
+        live = yaml.safe_load(live_recipe.read_text())
+        assert live["writing"]["pipeline"] == excerpt["writing"]["pipeline"]
+        assert excerpt["writing"]["style"] in live["writing"]["style"]
+    if live_job.is_file():
+        assert excerpt["prompt_requirement"] in live_job.read_text(encoding="utf-8")
     draft = {
         "title": "蛋白质折叠误差下降",
         "sections": [{"title": "结果", "paragraphs": [{
@@ -263,8 +270,10 @@ def test_science_chain_draft_revision_and_polish_keep_the_result(llm, monkeypatc
     assert "沿用上游" in llm.calls[0][0]["content"]
     spoken = written.sections[0]["paragraphs"][0]["text"]
     assert "误差从 8 降到 3" in spoken and "还没验证" in spoken
-    assert "材料没有给" not in spoken and "这次没有讲" not in spoken
+    assert "材料没有给" not in spoken and "这次没有讲" not in spoken and "官方" not in spoken
     assert written.meta.get("narration_gaps")
+    assert written.meta.get("narration_blocks_auto_approval") is True
+    assert written.sections[0]["paragraphs"][0]["evidence"] == "NEEDS_REVIEW"
 
     def chat(client, prompt, request, schema, *, temperature):
         if prompt == workflow.FOCUSED_READ:
@@ -286,18 +295,75 @@ def test_science_chain_draft_revision_and_polish_keep_the_result(llm, monkeypatc
     assert "误差从 8 降到 3" in text and "公开测试集" in text
     assert "材料没给" not in text and "我不会编" not in text
     assert "这次没有讲" not in text and "官方" not in text
-    assert record["gaps"]
-
-
-def test_live_science_chain_uses_the_single_writer_when_the_overlay_is_present():
-    recipe = Path("/tmp/science-overlay/AI_research/Base_CodingCLi/config/video_recipes/chain_ai_science_updates.yaml")
-    job = Path("/tmp/science-overlay/AI_research/Base_CodingCLi/jobs/chains/ai_science_updates.yaml")
-    if not recipe.is_file():
-        pytest.skip("science-chain overlay is not on this machine")
-    import yaml
-    loaded = yaml.safe_load(recipe.read_text())
-    assert loaded["writing"]["pipeline"] == "single"
-    prompt = yaml.safe_load(job.read_text())["prompt"]
-    assert "适用范围" in prompt and "尚待验证" in prompt
+    assert record["gaps"] and record.get("blocks_auto_approval") is True
+    assert polished[0]["paragraphs"][0]["evidence"] == "NEEDS_REVIEW"
+    assert excerpt["writing"]["pipeline"] == "single"
+    assert excerpt["prompt_requirement"] == "说明适用范围和尚待验证的部分"
     assert "chains/ai_science_updates" not in workflow.JOB_PROMPTS
     assert LISTENING_DIRECTION in writer.author_system_prompt({"title": "科研进展"}, {})
+
+
+KEEP_LIMITS = [
+    "这次只有 12 个样本，不能推广到所有患者。",
+    "这篇是预印本，结果还没有独立复现。",
+    "评测条件没有披露，不能据此比较两家的速度。",
+    "厂商称快了 30%，我们没有独立验证。",
+    "故障已经标记 Resolved，不代表你每一个失败的请求都已经恢复。",
+]
+
+
+def test_audience_limits_stay_and_a_bare_comparison_is_not_cleared():
+    for text in KEEP_LIMITS:
+        assert repair(text) == (text, []), text
+    bare, notes = repair("新模型把蛋白质折叠的误差从 8 降到 3。材料没有给对照组的样本量，所以我不会编。")
+    assert bare == "新模型把蛋白质折叠的误差从 8 降到 3。"
+    assert notes[0]["consequential"] and notes[0]["needs_attention"]
+    assert "官方" not in bare and "这次没有讲" not in bare
+    faster, faster_notes = repair("A 比 B 快一倍。材料没给评测条件，所以我不会编。")
+    assert faster == "A 比 B 快一倍。"
+    assert faster_notes[0]["consequential"]
+    assert "官方" not in faster
+    small = repair("这项研究只有 12 个样本，材料没给企业版价格。")[0]
+    assert small == "这项研究只有 12 个样本。"
+    lookup, lookup_notes = repair("Team 也含月度 API credits，不过材料没给具体额度。")
+    assert lookup == "Team 也含月度 API credits。"
+    assert not any(note.get("consequential") for note in lookup_notes)
+
+
+def test_consequential_gap_holds_a_new_draft_and_an_approved_script_still_renders(video_env, llm, monkeypatch):
+    from core.video import store
+    from web.services import video_executor, video_render, video_workflow
+    report = video_env / "report.md"
+    report.write_text("公开测试集上，折叠误差从 8 降到 3。")
+    payload = {"title": "误差", "sections": [{"title": "结果", "paragraphs": [{
+        "text": "新模型把蛋白质折叠的误差从 8 降到 3。材料没有给对照组的样本量，所以我不会编。",
+        "citations": [],
+    }]}]}
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    script = store.create_script("report_digest", {"title": "误差", "from_report": str(report)})
+    assert video_workflow.run(script["id"], llm_config=object()) == "DRAFT"
+    saved = store.get_version(script["id"], 1)
+    assert saved["sections"][0]["paragraphs"][0]["evidence"] == "NEEDS_REVIEW"
+    assert saved["meta"]["narration_blocks_auto_approval"] is True
+    assert "官方" not in saved["sections"][0]["paragraphs"][0]["text"]
+    created = []
+    monkeypatch.setattr(video_render, "create", lambda *args, **kwargs: created.append(True))
+    decision = video_executor.advance_auto(store.get_script(script["id"]), {}, can_start_script=True, can_start_render=True)
+    assert store.get_script(script["id"])["status"] == "DRAFT"
+    assert decision["hold"] and decision["item"]["gate"]["approved"] is False
+    assert created == []
+
+    approved = store.create_script("report_digest", {"title": "已定稿", "from_report": str(report)})
+    store.add_version(
+        approved["id"], title="已定稿",
+        sections=[{"title": "价格", "paragraphs": [{"text": "Plus 是每月 20 美元。", "citations": []}]}],
+        length_check={"status": "OK"}, edit_type="GENERATED",
+        meta={"checks": {"mode": "on_request", "model_ran": False, "issues": [], "summary": {}}},
+        created_by="editor",
+    )
+    store.update_script(approved["id"], status="APPROVED", approved_version=1)
+    seen = {}
+    monkeypatch.setattr(video_executor, "_render_auto", lambda *args, **kwargs: seen.setdefault("hit", True) or args[2])
+    video_executor.advance_auto(store.get_script(approved["id"]), {}, can_start_script=True, can_start_render=True)
+    assert seen["hit"] is True
+    assert store.get_script(approved["id"])["status"] == "APPROVED"

@@ -608,6 +608,7 @@ def write(
               "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
               **({"narration_gaps": stance["gaps"]} if stance.get("gaps") else {}),
+              **({"narration_blocks_auto_approval": True} if stance.get("blocks_auto_approval") else {}),
               "creative_direction": column_style.strip(),
               "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
               "trusted_urls": len(allowed),

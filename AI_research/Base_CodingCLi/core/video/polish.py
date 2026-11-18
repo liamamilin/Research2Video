@@ -118,6 +118,8 @@ def _fallback(sections: list[dict], record: dict) -> list[dict]:
         })
     record["gaps"] = list(record.get("gaps") or []) + stance["gaps"]
     record["unresolved"] = stance["unresolved"]
+    if stance.get("blocks_auto_approval"):
+        record["blocks_auto_approval"] = True
     return settled
 
 
@@ -205,6 +207,8 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
     written.meta["polish"] = record
     if record.get("gaps"):
         written.meta["narration_gaps"] = list(written.meta.get("narration_gaps") or []) + record["gaps"]
+    if record.get("blocks_auto_approval"):
+        written.meta["narration_blocks_auto_approval"] = True
     if not record["changes"]:
         return
     written.sections = sections
