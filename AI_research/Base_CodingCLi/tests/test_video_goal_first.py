@@ -266,10 +266,10 @@ def test_automatic_writing_resolves_the_enabled_job_prompts(video_env, llm, monk
 
     def chat(client, prompt, request, schema, *, temperature):
         edits.append(prompt)
-        if prompt == profile.read:
+        if prompt == manuscript_workflow._with_direction(profile.read):
             return schema(takeaway="有结果才敢交", keep_quote="这份报告敢交吗",
                           revision="说清复查的动作", targets=["S2P1"])
-        assert prompt == writer.LISTENING_DIRECTION + "\n" + profile.revise
+        assert prompt == manuscript_workflow._with_direction(profile.revise)
         return schema(paragraphs=[{"id": "S2P1", "text": "点开引用，核对原文有没有支持结论。"}])
 
     monkeypatch.setattr(manuscript_workflow, "LLMClient", lambda *args, **kwargs: object())
@@ -290,7 +290,8 @@ def test_automatic_writing_resolves_the_enabled_job_prompts(video_env, llm, monk
         else:
             assert "原有栏目方向" in llm.calls[0][1]["content"]
             assert writer.EPISODE_LEAD in llm.calls[0][0]["content"]
-        assert edits == [profile.read, writer.LISTENING_DIRECTION + "\n" + profile.revise]
+        assert edits == [manuscript_workflow._with_direction(profile.read),
+                         manuscript_workflow._with_direction(profile.revise)]
         receipt = saved["meta"]["manuscript_workflow"]
         assert receipt["profile"] == profile.version
         assert receipt["reader_prompt_sha256"] == sha256(edits[0].encode()).hexdigest()

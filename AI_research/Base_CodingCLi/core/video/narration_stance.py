@@ -18,8 +18,10 @@ LISTENING_DIRECTION = (
     "从材料里挑值得讲的发现和判断，用具体变化把它讲清。"
     "影响理解或用法的条件，直接说它会怎样改变结果。"
     "研究和制作备忘留在稿外。"
-    "材料里没有的细节，就留下已经成立的事实，或说明这次比较没有包括它；"
-    "不要表演谨慎，也不要改写成官方没公布或这项能力不存在。"
+    "材料里没有的细节就不要念；留下已经成立的事实。"
+    "不要用「这次比较没有包括」或「这次没有讲」填掉删去的备忘。"
+    "只有剩下的话会让人以为比较已经覆盖全部对象时，才保留准确的范围。"
+    "拿不准就留在备注，不要编官方没公布，也不要把没写到说成做不到。"
 )
 
 _SENTENCE = re.compile(r"[^。！？]*[。！？]|[^。！？]+$")
@@ -44,13 +46,8 @@ _GAP = re.compile(
 _WITHDRAWAL = re.compile(r"不能(?:替[^。！？，,]{0,24}?)?下结论|我(?:也)?不会(?:说|编)|打包票")
 _OFFICIAL = re.compile(r"官方.{0,8}?(?:没有|未|没)(?:公布|披露|公开|发布)|并(?:未|没有)(?:公布|披露|公开)")
 _DENIAL = re.compile(r"不会|不支持|并不具备|做不到")
-_ATTRIBUTE = re.compile(
-    r"((?:[A-Za-z0-9\u4e00-\u9fff][^、的。！？，,]{0,24})"
-    r"(?:、(?:[A-Za-z0-9\u4e00-\u9fff][^、的。！？，,]{0,24}))*)"
-    r"\s*的(地区清单|地区|跑分|额度|倍率|清单)"
-)
-_CAPABILITY = re.compile(r"(材料|资料|底稿)(?:里|中)?(?:没有|没)说(.+?)会(.+)")
-_NOTE = "口播去掉了自我免责。没有改写成官方未公布，也没有改写成能力不存在。"
+_COMPLETENESS = re.compile(r"五家|这几家都|全部|每一家|所有(?:产品|这些)|都能")
+_NOTE = "口播去掉了自我免责或取材备忘。没有补「这次没有讲」，也没有改写成官方未公布或能力不存在。"
 
 
 def _protect(text: str) -> tuple[str, list[str]]:
@@ -119,40 +116,18 @@ def launders(before: str, after: str) -> str:
         for clause in _clauses(_protect(before_open)[0]):
             if _performance(clause) or _gap(clause) or len(clause) < 6:
                 continue
-            if clause in after_open and "这次比较没有包括" not in after_open and "这次没有讲" not in after_open:
+            if clause in after_open:
                 return "删掉了撤下的结论限制，留下了过满的判断"
     return ""
 
 
-def _scope(sentence: str) -> str:
-    protected, quotes = _protect(sentence)
-    visible = _restore(protected, quotes)
-    names = list(_ATTRIBUTE.finditer(visible))
-    if names:
-        who = names[-1].group(1)
-        who = re.split(r"材料|资料|底稿|没有|没给|没说", who)[-1]
-        who = who.split("给")[-1].strip("，,、 ")
-        attr = "地区" if names[-1].group(2).startswith("地区") else names[-1].group(2)
-        if who and "没有" not in who:
-            return f"这次比较没有包括{who}的{attr}。"
-    capability = _CAPABILITY.search(visible)
-    if capability:
-        subject = capability.group(2).strip("，,、 ")
-        actions = capability.group(3).strip("。")
-        if subject and actions:
-            return f"这次没有讲{subject}会不会{actions}。"
-    return ""
-
-
-def _finish_scope(text: str) -> str:
-    text = text.strip()
-    if text and not text.endswith(("。", "！", "？")):
-        text += "。"
-    return text
-
-
 def repair(text: str) -> tuple[str, list[dict]]:
-    """Rewrite one paragraph. Unchanged text is returned as-is."""
+    """Drop self-exoneration and internal gap talk. Keep facts that still stand.
+
+    Do not invent a replacement sentence such as 「这次比较没有包括」 or
+    「这次没有讲」. When a completeness claim was withdrawn and nothing safe
+    remains, the note asks for another draft instead of filling the gap.
+    """
     if not defects(text):
         return text, []
     protected, quotes = _protect(text)
@@ -168,26 +143,24 @@ def repair(text: str) -> tuple[str, list[dict]]:
         for clause in clauses:
             if _performance(clause) or _gap(clause):
                 continue
-            if retracts:
+            if retracts or (_COMPLETENESS.search(clause) and any(_gap(item) for item in clauses)):
                 continue
             facts.append(_restore(clause, quotes).strip("。"))
-        scope = _finish_scope(_scope(visible)) if (retracts or not facts) else ""
         spoken = ""
         if facts:
             spoken = "，".join(part for part in facts if part)
             if not spoken.endswith(("。", "！", "？")):
                 spoken += "。"
-        elif scope:
-            spoken = scope
-        notes.append({"omitted": visible, "spoken_instead": spoken, "record": _NOTE})
+        attention = not facts and (retracts or bool(_COMPLETENESS.search(visible)) or bool(_gap(visible)))
+        notes.append({
+            "omitted": visible,
+            "spoken_instead": spoken,
+            "needs_attention": attention,
+            "record": _NOTE if not attention else _NOTE + "剩下的话会让比较显得已经做完，或没有任何可念的事实。请重写这一处，不要自动补范围套话。",
+        })
         if spoken:
             kept.append(spoken)
     return "".join(kept), notes
-
-
-def _fix_capability_scope(text: str) -> str:
-    """The capability scope helper above is completed here if a period is missing."""
-    return text
 
 
 def settle_sections(sections: list[dict], *, locked: bool = False) -> tuple[list[dict], dict]:
@@ -215,6 +188,8 @@ def settle_sections(sections: list[dict], *, locked: bool = False) -> tuple[list
             paragraph["text"] = after
             record["changes"].append({"section": si, "paragraph": pi, "before": before, "after": after})
             record["gaps"].extend(gaps)
+            if any(gap.get("needs_attention") for gap in gaps):
+                record["unresolved"].append({"section": si, "paragraph": pi, "reason": "需要重写，不要自动补范围套话"})
             kept.append(paragraph)
         section["paragraphs"] = kept
     out = [section for section in out if section.get("paragraphs")]

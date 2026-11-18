@@ -47,22 +47,23 @@ def test_shared_direction_reaches_every_author_and_revision_prompt():
 
 def test_examples_keep_facts_and_do_not_invent_absence():
     spoken = {text: repair(text)[0] for text in NEGATIVES}
-    assert spoken[NEGATIVES[0]] == "这次比较没有包括Gemini、Mistral、Grok的地区。"
+    assert spoken[NEGATIVES[0]] == ""
     assert spoken[NEGATIVES[1]] == "Team 也含月度 API credits。"
-    assert spoken[NEGATIVES[2]] == "这次没有讲豆包会不会代打电话、设预算上限、逐项确认付款或给通话转录。"
-    assert spoken[NEGATIVES[3]] == "这次比较没有包括Code Mode的跑分。"
-    assert spoken[NEGATIVES[4]] == ""
+    assert spoken[NEGATIVES[2]] == ""
+    assert spoken[NEGATIVES[3]] == ""
+    assert "这次比较没有包括" not in "".join(spoken.values())
+    assert "这次没有讲" not in "".join(spoken.values())
     assert "官方" not in "".join(spoken.values())
-    assert "豆包不会" not in spoken[NEGATIVES[2]] and "不支持" not in spoken[NEGATIVES[2]]
     mixed = repair("材料没给具体额度，Team 也含月度 API credits。")[0]
     assert mixed == "Team 也含月度 API credits。"
-    withdrawn = repair("Gemini 也能在这些地区用，不过材料没给具体清单，所以我不能下结论。")[0]
-    assert "也能在这些地区用" not in withdrawn
+    withdrawn, withdrawn_notes = repair("五家都能在中国区用，不过材料没给 Gemini 的地区，所以我不能下结论。")
+    assert withdrawn == "" and withdrawn_notes[0]["needs_attention"]
     comparison = repair("ChatGPT 和 Claude 能在中国区用。Gemini、Mistral、Grok 的地区清单，这批材料里没有，所以我不能替它们下结论。")[0]
-    assert comparison.startswith("ChatGPT 和 Claude 能在中国区用。")
-    assert "这次比较没有包括Gemini、Mistral、Grok的地区。" in comparison
+    assert comparison == "ChatGPT 和 Claude 能在中国区用。"
     kept_fact = repair("上限是 5 小时，不过材料没给具体倍率，我也不会编。")[0]
     assert kept_fact == "上限是 5 小时。"
+    piled = repair("先看免费额度。我不会替它们打包票。也不能替它们下结论。你最好自己再看看官网，比听我讲稳妥。材料没有给具体倍率数字，我也不会编。")[0]
+    assert piled == "先看免费额度。"
     for text in KEEP:
         assert repair(text) == (text, [])
     assert launders(NEGATIVES[2], "豆包不会代打电话。")
@@ -88,7 +89,7 @@ def test_polish_rejects_laundering_and_a_failed_call_still_keeps_the_fact(llm):
     llm.polish_replies = ["不是 JSON"] * 5
     out, record = polish.polish(llm(None), failed)
     spoken = "\n".join(p["text"] for s in out for p in s["paragraphs"])
-    assert "我不能替" not in spoken and "DeepSeek" in spoken and "这次比较没有包括" in spoken
+    assert "我不能替" not in spoken and "DeepSeek" in spoken and "这次比较没有包括" not in spoken
     assert "error" in record
     again, second = polish.polish(llm(None), out)
     assert again == out and not any(item["rule"] == "audience_stance" for item in second["findings"])

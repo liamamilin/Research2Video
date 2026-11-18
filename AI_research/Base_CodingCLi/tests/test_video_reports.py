@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from core.video import length, reports, store
+from core.video import length, reports, store, writer
 from core.video import columns as video_columns
 from tests.test_video_scripts import (FLASH_REPORT, GOOD, ROOT, _csrf, _login, _wait, autovideo, llm,  # noqa: F401
                                       research, script_json, video_env)
@@ -121,7 +121,7 @@ def test_manual_report_and_rewrite_keep_the_job_prompts(client, video_env, llm, 
 
     def chat(self, messages, **kwargs):
         system, request = (message["content"] for message in messages[:2])
-        if system == profile.read:
+        if system == writer.LISTENING_DIRECTION + "\n" + profile.read:
             prompts.append("reader")
             return ChatResponse(content=json.dumps({
                 "takeaway": "能操作", "keep_quote": "说明", "targets": [],
