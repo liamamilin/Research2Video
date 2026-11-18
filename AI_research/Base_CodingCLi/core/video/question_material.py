@@ -17,7 +17,7 @@ from .adapt.common import call_json
 from . import audience_strategy as strategy
 
 MARKER = "question-v1"
-VERSION = 6
+VERSION = 8
 
 PLAN_PROMPT = """你为已经选定的中文视频主问题补材料，不重新选题、不改变受众或承诺、不改写口播风格。
 先判断现有材料已讲清什么。只有能增加理解、兴趣或实际用途时，才提出最多两个补材问题；够用时返回空数组。
@@ -186,6 +186,8 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                               cancel_token=cancel_token)
         knowledge = channel in strategy.KNOWLEDGE
         selected = None if knowledge else strategy.Selection.model_validate(audience_detail["selection"])
+        initial_report = audience_detail.get("initial_report", "")
+        dossier = strategy.author_dossier(channel, initial_report)
         packets = strategy.packets(material or report)
         if knowledge:
             from core.report_title import title_from_text
@@ -195,6 +197,7 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
             units = [c.model_dump() for c in selected.candidates]
         cache, actual_material, changed = {}, [], False
         knowledge_addition = ""
+        updated_dossier = dossier
         for candidate_index, unit in enumerate(units):
             _check_cancel(cancel_token)
             entry = {"title": unit["title"], "status": "unchanged"}
@@ -207,7 +210,7 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                 original = report if knowledge else strategy.author_material(selected.candidates[candidate_index], packets)
                 context = {k: v for k, v in unit.items() if k != "material"}
                 if not knowledge:
-                    context["prior_brief"] = unit["material"]
+                    context["prior_brief"] = dossier or unit["material"]
                 plan = call_json(client, PLAN_PROMPT, json.dumps({"channel": strategy.CHANNELS[channel],
                     "topic": context, "original_material": original}, ensure_ascii=False), Plan, temperature=0.3)
                 entry["plan"] = plan.model_dump()
@@ -219,7 +222,7 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                 if not added:
                     entry["status"] = "no_useful_material"
                     continue
-                original_text = report if knowledge else unit["material"]
+                original_text = report if knowledge else dossier or unit["material"]
                 parts = re.split(r"(\n[ \t]*\n)", original_text)
                 blocks = parts[::2]
                 positions = _editable_paragraphs(blocks)
@@ -229,7 +232,7 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                     **({"original_material": original} if not knowledge else {}),
                     "editable_paragraphs": {key: blocks[i] for key, i in positions.items()},
                     **({"dossier_context": [by_position.get(i, block) for i, block in enumerate(blocks)]}
-                       if knowledge else {}),
+                       if knowledge or dossier else {}),
                     "questions": plan.model_dump(), "added": added}, ensure_ascii=False), Addition, temperature=0.3)
                 used_ids = set(addition.used_ids)
                 if len(used_ids) != len(addition.used_ids) or not used_ids <= {s["id"] for s in added}:
@@ -255,6 +258,8 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
                 sources = "\n\n补充材料来源：\n" + "\n".join(f"- {s['id']} {s['title']} {s['url']}" for s in used)
                 if knowledge:
                     knowledge_addition = revised + ("\n\n## 补充解释与例子\n\n" + extra if extra else "") + sources
+                elif dossier:
+                    updated_dossier = revised + ("\n\n补充解释与例子：\n" + extra if extra else "") + sources
                 else:
                     selected.candidates[candidate_index].material = revised + ("\n\n补充解释与例子：\n" + extra if extra else "") + sources
                 actual_material.extend(s["text"] for s in used)
@@ -273,7 +278,7 @@ def enhance(job: dict, report: str, material: str, audience_detail: dict, system
         else:
             # Keep the original thematic dossier, not a second copy of the organized report.
             result = strategy.render_report(selected, packets, channel,
-                                             original_report=audience_detail.get("initial_report", ""))
+                                             original_report=updated_dossier or initial_report)
             receipt["selection"] = selected.model_dump()
         return result, "\n\n---\n\n".join(dict.fromkeys(actual_material)), receipt
     except CancelledError:

@@ -100,6 +100,50 @@ def test_all_default_writer_inputs_share_authoring_and_material_guidance(llm, mo
 
 
 
+def test_narration_input_keeps_content_and_omits_collection_status(llm):
+    llm.replies = [script_json(300)]
+    report = REPORT + (
+        "\n\n**本次未取得内容的来源**：RSS 握手失败，HN Show 缺失。\n"
+        "\n页面无法连接时不会上传你的数据，这会影响怎么用。\n"
+        "\n## 采集范围说明\n\n- 未覆盖 10 月 18 日。\n"
+        "\n## 来源清单\n- https://example.org/actual-note\n"
+    )
+    raw = (
+        "## Fetched sources\n\n- tracker: SSL 失败\n- releases: 3 items\n\n"
+        "本次未取得内容的来源：\n- tracker: E_CONN\n\n"
+        "## 正文材料\n实际操作是在同一个设置里开关。\n"
+        "```markdown\n**本次未取得内容的来源**：这是示例标签\n```\n"
+    )
+    writer.write(report=report, citation_check=None, topic={"title": "软件日报", "content_mode": "episode"},
+                 original_material=raw, column_style="", target_minutes=1, llm_config=None)
+    request = llm.calls[0][1]["content"]
+    assert all(x not in request for x in ("HN Show 缺失", "未覆盖 10 月 18 日", "E_CONN", "tracker: SSL", "Fetched sources"))
+    assert all(x in request for x in ("不会上传你的数据", "https://example.org/actual-note",
+                                      "同一个设置里开关", "这是示例标签"))
+    assert "RSS 握手失败" in report and "E_CONN" in raw
+
+
+def test_writer_keeps_use_conditions_when_old_report_appends_a_shot_note(llm):
+    llm.replies = [script_json(300)]
+    report = (
+        "### 2.1 自托管安装验证\n"
+        "**值得追问**：容器起来了，还是能登录、能建第一条数据？**画面**：主持人随机点三个。\n"
+        "**画面**：终端与密码框特写。\n"
+        "**用法**：第一次打开要先建账户。\n"
+        "```markdown\n**画面**：这是软件的格式示例。\n```\n"
+    )
+    raw = "网站说明里用 **画面**：高对比模式，描述的是播放器设置。"
+    writer.write(report=report, citation_check=None, topic={"title": "软件周读", "content_mode": "episode"},
+                 original_material=raw, column_style="", target_minutes=1, llm_config=None)
+
+    request = llm.calls[0][1]["content"]
+    assert "能登录、能建第一条数据？\n" in request
+    assert "第一次打开要先建账户" in request
+    assert "这是软件的格式示例" in request and raw in request
+    assert "主持人随机点三个" not in request and "终端与密码框特写" not in request
+
+
+
 @pytest.mark.parametrize("entry_start", [1, 2])
 def test_scoped_episode_opening_can_only_keep_existing_entry_sentences(video_env, llm, entry_start):
     (video_env / "config/system.yaml").write_text("video:\n  manuscript_workflow: scoped_lead\n")

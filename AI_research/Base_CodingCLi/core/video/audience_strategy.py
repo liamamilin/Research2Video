@@ -16,7 +16,7 @@ from core.video.adapt.common import call_json
 from .audience_profiles import (CHANNELS, JOBS, PRODUCTIONS, KNOWLEDGE, SINGLE,
                                 candidate_limit, selection_context, QUESTION_MATERIAL_DEFAULT)
 
-VERSION = 7
+VERSION = 10
 MARKER = "audience-v1"
 SELECT_PROMPT = """你为中文大众制作有商业价值的知识视频，从已有素材选值得讲的问题。
 覆盖钱与消费选择、工作与能力、生活安全、意外发现；候选数量遵循入口要求，材料不足可以更少，不凑题。
@@ -148,6 +148,11 @@ def topic_channel(topic: dict) -> str:
     return value if isinstance(value, str) and value in CHANNELS else ""
 
 
+def author_dossier(channel: str, report: str) -> str:
+    """Use the weekly research text as the body, with selection framing it."""
+    return report if channel == "software_weekly" and report.strip() else ""
+
+
 def render_report(selection: Selection, items: list[dict], channel: str, *, original_report: str = "") -> str:
     """Keep normal report parsers and source scoping; diagnostics stay in the receipt."""
     from core.provenance import extract_urls, normalize_url
@@ -157,6 +162,7 @@ def render_report(selection: Selection, items: list[dict], channel: str, *, orig
     title = (flat(selection.candidates[0].title) if channel in SINGLE and selection.candidates
              else title_from_text(original_report) or "本期选题与研究材料")
     lines = ["# " + title, ""]
+    dossier = author_dossier(channel, original_report)
     for index, candidate in enumerate(selection.candidates, 1):
         lines += [f"### 1.{index} {flat(candidate.title)}"]
         links = [by_id[sid]["url"] for sid in candidate.source_ids if by_id[sid]["url"]]
@@ -172,9 +178,12 @@ def render_report(selection: Selection, items: list[dict], channel: str, *, orig
                        ("系列", candidate.series), ("题材分类", candidate.topic_kind),
                        ("操作与演示", candidate.demonstration)) if value.strip()})
         lines += [f"- **{key}**：{flat(value)}" for key, value in fields.items()]
-        # A model's subheadings must not become new report items or terminate an excerpt.
-        detail = re.sub(r"(?m)^\s*#{1,6}\s+", "", candidate.material).replace("**", "")
-        lines += ["", detail, ""]
+        if not dossier:
+            # A model's subheadings must not become new report items or terminate an excerpt.
+            detail = re.sub(r"(?m)^\s*#{1,6}\s+", "", candidate.material).replace("**", "")
+            lines += ["", detail, ""]
+        else:
+            lines.append("")
     if not selection.candidates:
         lines += ["本次暂无新题材。"]
     if channel in SINGLE and selection.candidates and original_report:

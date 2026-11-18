@@ -17,7 +17,7 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
-from core import telemetry
+from core import report_material, telemetry
 from core.errors import CancelledError
 from core.provenance import extract_urls, normalize_url
 
@@ -54,7 +54,7 @@ class _EpisodeEntrance(BaseModel):
     entry_start: int = Field(ge=0)
 
 
-PROMPT_VERSION = 20
+PROMPT_VERSION = 27
 # Title examples are suggestions; the material decides what is worth naming.
 TITLE_RULE = ("标题围绕本题最值得看的具体内容，可点名产品、作品、现象或人物；"
               "问题、对比或有依据的判断都可以成为标题，数字有助于说明看点时再使用。"
@@ -212,7 +212,9 @@ TOPIC_FIELDS = ("核心角度", "目标受众", "条目数", "条目", "对比�
 def _request(report: str, topic: dict, column_style: str, target_minutes: float, budget: int,
              paragraph_units: Optional[tuple] = None, topic_fields: Optional[tuple] = None,
              original_material: Optional[str] = None) -> str:
-    report = report_body(report)
+    report = report_material.for_narration(report_body(report), research_report=original_material is not None)
+    if original_material:
+        original_material = report_material.for_narration(original_material)
     fields = topic.get("fields") or {}
     names = set(topic_fields or TOPIC_FIELDS) - {"核心角度", "建议大纲", "评分", "条目数"}
     selected = "\n".join(f"- {name}：{value}" for name, value in fields.items() if name in names and name != "目标受众" and value)

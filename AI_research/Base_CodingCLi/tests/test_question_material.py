@@ -102,6 +102,37 @@ def test_knowledge_keeps_original_question_and_all_body(providers):
     assert 'selection' not in receipt
 
 
+def test_software_weekly_writer_gets_research_and_supplements_without_selection_notes(providers, monkeypatch):
+    original_paragraph = "接口提供按天聚合的数据，可以看发版前后的变化。"
+    original_report = "# 统计接口\n\n" + original_paragraph
+    selection = chosen()
+    candidate = selection.candidates[0]
+    candidate.material = "截取文本没有给出换算过程，后续补读。"
+    receipt = {**detail(selection), "initial_report": original_report}
+    initial = strategy.render_report(selection, strategy.packets(MATERIAL), "software_weekly",
+                                     original_report=original_report)
+    assert original_paragraph in initial and candidate.material not in initial
+    assert candidate.title in initial and candidate.audience in initial and URL in initial
+    prior = qm.call_json
+
+    def model(client, system, user, schema, **kwargs):
+        request = json.loads(user)
+        if schema is qm.Plan:
+            assert request["topic"]["prior_brief"] == original_report
+        if schema is qm.Addition:
+            assert request["editable_paragraphs"] == {"B2": original_paragraph}
+            return qm.Addition(addition="", used_ids=["E1"], replacements={"B2": NEW_TEXT})
+        return prior(client, system, user, schema, **kwargs)
+
+    monkeypatch.setattr(qm, "call_json", model)
+    report, raw, added = qm.enhance(job("software_weekly"), initial, MATERIAL, receipt, SYSTEM)
+    assert added["status"] == "enriched" and added["selection"] == receipt["selection"]
+    assert report.count(NEW_TEXT) == 1 and NEW_TEXT in raw and NEW_URL in report
+    assert candidate.material not in report and original_paragraph not in report
+    assert candidate.title in report and candidate.audience in report
+    assert NEW_TEXT in strategy.material_for_report(report, MATERIAL + "\n" + raw)
+
+
 @pytest.mark.parametrize("channel", ["t05", "science_weekly", "consumer_illustrated"])
 def test_related_evidence_replaces_its_prose_instead_of_repeating_it(providers, monkeypatch, channel):
     old = "已有的描述没有区分两类充电条件，所以需要新增正文澄清。"

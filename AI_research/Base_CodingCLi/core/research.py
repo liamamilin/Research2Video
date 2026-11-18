@@ -196,8 +196,7 @@ class _NoSearch:
         raise RuntimeError("this Job reads only its declared sources; web search is switched off for it")
 
 
-_FETCH_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-当前步骤：研究事情本身，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
+_FETCH_SYSTEM_PROMPT = """根据素材写研究报告，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
 报告使用任务给定的语言和数据格式。"""
 
 

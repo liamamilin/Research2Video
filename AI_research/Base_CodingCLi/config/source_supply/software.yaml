@@ -25,6 +25,7 @@ jobs:
     - 软件 日常 工作 学习 使用场景 输入 输出 教程 每日软件发现
   software/software_weekly:
     mode: context
+    optional_article_details: true
     direction: 围绕同一任务比较软件或串联工作流；保留过程、输入输出与实际交付物；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - open source software workflow tutorials official engineering blog
