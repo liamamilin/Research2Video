@@ -98,10 +98,10 @@ def test_morning_tutorial_handoff(video_env, llm, autovideo, monkeypatch, has_to
             packet = json.loads(request)["materials"][0]["id"]
             result = json.dumps({"events": [{"title": title, "subject": title, "action": "analysis",
                                              "summary": "在结果区找到文件卡片", "primary": [packet]}]})
-        elif system == profile.read:
+        elif system == manuscript_workflow._with_direction(profile.read):
             result = json.dumps({"takeaway": "定位结果", "keep_quote": "找到文件", "issue_quote": "结果区",
                                  "revision": "简短介绍结果区", "targets": [paragraph]})
-        elif system == profile.revise:
+        elif system == manuscript_workflow._with_direction(profile.revise):
             result = json.dumps({"paragraphs": [{"id": paragraph, "text": revision}]})
         else:
             return stock_reply(self, messages, **kwargs)

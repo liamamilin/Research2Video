@@ -23,6 +23,7 @@ from core.provenance import extract_urls, normalize_url
 
 from . import length, persona as narrator
 from .audience_copy import findings as audience_findings
+from .narration_stance import LISTENING_DIRECTION, settle_sections
 
 MIN_CHINESE_SHARE = 0.5
 
@@ -54,7 +55,7 @@ class _EpisodeEntrance(BaseModel):
     entry_start: int = Field(ge=0)
 
 
-PROMPT_VERSION = 27
+PROMPT_VERSION = 28
 # Title examples are suggestions; the material decides what is worth naming.
 TITLE_RULE = ("标题围绕本题最值得看的具体内容，可点名产品、作品、现象或人物；"
               "问题、对比或有依据的判断都可以成为标题，数字有助于说明看点时再使用。"
@@ -97,7 +98,7 @@ AUTHORING_PROMPT = GOAL + """
 沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。
 有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。
 研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。
-""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE
+""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE + "\n" + LISTENING_DIRECTION
 SYSTEM_PROMPT = AUTHORING_PROMPT + "\n" + OPENING_RULE + """
 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
 接口输出 JSON：
@@ -589,6 +590,11 @@ def write(
     sections, check = _finalize(script, allowed, target_minutes, voice)
     if programme:
         check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
+    sections, stance = settle_sections(sections)
+    if stance["changes"] and not stance.get("kept_original"):
+        check = {**length.measure(sections, None if programme else target_minutes, voice=voice),
+                 "dropped_citations": check.get("dropped_citations", 0),
+                 **({"duration_policy": "content"} if programme else {})}
     from core.video import episodes
     title = episodes.publication_title(topic, script.title.strip())
     return WrittenScript(
@@ -601,6 +607,8 @@ def write(
               "model_switches": list(getattr(client, "model_switches", [])),
               "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
+              **({"narration_gaps": stance["gaps"]} if stance.get("gaps") else {}),
+              **({"narration_blocks_auto_approval": True} if stance.get("blocks_auto_approval") else {}),
               "creative_direction": column_style.strip(),
               "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
               "trusted_urls": len(allowed),

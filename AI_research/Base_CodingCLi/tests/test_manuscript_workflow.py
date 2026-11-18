@@ -140,6 +140,7 @@ def test_focused_author_returns_one_manuscript_without_ranking(monkeypatch, repl
             return schema(takeaway="判断", keep_quote="保留这个推论", revision="讲清开头",
                           targets=[] if reply == "no_edit" else [target])
         assert prompt == workflow.FOCUSED_WRITE
+        assert prompt.count(writer.LISTENING_DIRECTION) == 1
         assert reply != "no_edit"
         assert "原始素材" in request and "讲清开头" in request
         replacement = target if reply == "targeted_edit" else workflow.pid(1, 0)
@@ -178,6 +179,7 @@ def test_revision_allows_optional_identity_but_keeps_an_opening_when_identity_re
             return schema(takeaway="能核验再交付", keep_quote="这份报告敢直接交吗",
                           revision="收紧开头并讲清怎么核对", targets=["S1P1", "S2P1"])
         assert prompt == workflow.FOCUSED_WRITE
+        assert prompt.count(writer.LISTENING_DIRECTION) == 1
         return schema(paragraphs=[
             {"id": "S1P1", "text": opening},
             {"id": "S2P1", "text": "先点开引用，再看它能不能支持那句话。"},
