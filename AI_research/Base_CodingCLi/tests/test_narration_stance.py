@@ -68,6 +68,99 @@ def test_examples_keep_facts_and_do_not_invent_absence():
         assert repair(text) == (text, [])
     assert launders(NEGATIVES[2], "豆包不会代打电话。")
     assert launders("材料没给具体额度。", "官方没有公布具体额度。")
+    scope, scope_notes = repair("五家都能直接开通，不过材料没给 Gemini 的地区，所以不能说五家都能。")
+    assert scope == "所以不能说五家都能。"
+    assert not any(note["needs_attention"] for note in scope_notes)
+    assert "这次没有讲" not in scope and "这次比较没有包括" not in scope
+
+
+def test_paragraph_keeps_later_facts_and_does_not_grow_a_disclaimer():
+    paragraph = (
+        "Team 也含月度 API credits。"
+        "不过材料没给具体额度。"
+        "页面上先按 20 美元这一档来看。"
+        "价格可能在下一次账单日调整，目前还没验证。"
+        "实验只测了室温，这种样品材料没有覆盖低温。"
+        "所以不能说五家都能直接开通。"
+    )
+    spoken, notes = repair(paragraph)
+    assert spoken == (
+        "Team 也含月度 API credits。"
+        "页面上先按 20 美元这一档来看。"
+        "价格可能在下一次账单日调整，目前还没验证。"
+        "实验只测了室温，这种样品材料没有覆盖低温。"
+        "所以不能说五家都能直接开通。"
+    )
+    assert "材料没给" not in spoken
+    assert "这次没有讲" not in spoken and "这次比较没有包括" not in spoken
+    assert notes and notes[0]["spoken_instead"] == ""
+    extra = repair("底稿没写明企业版价格，Team 仍是每月 20 美元。写提示词时把没核对的数标成待核实。")[0]
+    assert extra == "Team 仍是每月 20 美元。写提示词时把没核对的数标成待核实。"
+    quoted = "讲师把不合格旁白念出来：「材料没有给具体倍率数字，我也不会编。」下一句才是操作：先点开引用。"
+    assert repair(quoted) == (quoted, [])
+
+
+def test_sections_keep_sibling_facts_when_one_paragraph_is_only_a_gap():
+    from core.video.narration_stance import settle_sections
+    sections = [{"title": "比较", "paragraphs": [
+        {"text": "ChatGPT 和 Claude 能在中国区用。", "citations": ["https://example.com/a"]},
+        {"text": NEGATIVES[0], "citations": []},
+        {"text": "DeepSeek 的免费额度先到顶。价格可能还会变，目前还没验证。", "citations": ["https://example.com/b"]},
+    ]}]
+    out, record = settle_sections(sections)
+    spoken = [paragraph["text"] for paragraph in out[0]["paragraphs"]]
+    assert spoken == [
+        "ChatGPT 和 Claude 能在中国区用。",
+        "DeepSeek 的免费额度先到顶。价格可能还会变，目前还没验证。",
+    ]
+    assert out[0]["paragraphs"][0]["citations"] == ["https://example.com/a"]
+    assert any(item.get("needs_attention") for item in record["gaps"])
+    assert "这次没有讲" not in "\n".join(spoken)
+
+
+def test_direction_prefixes_planning_and_revision_without_replacing_the_job():
+    assert workflow.PLAN.startswith(LISTENING_DIRECTION) and workflow.PLAN.count(LISTENING_DIRECTION) == 1
+    assert "viewer_value" in workflow.PLAN
+    assert workflow.READ.count(LISTENING_DIRECTION) == 1
+    assert "沿用上游给出的事实、数据和计算。" in writer.AUTHORING_PROMPT
+    assert writer.AUTHORING_PROMPT.count(LISTENING_DIRECTION) == 1
+    assert "不要编官方没公布" in LISTENING_DIRECTION
+    assert LISTENING_DIRECTION in polish.SYSTEM_PROMPT
+    from core.video import audit
+    assert audit.REVISE_PROMPT.startswith(LISTENING_DIRECTION)
+    assert "根据提供的反馈修改成稿" in audit.REVISE_PROMPT
+    for profile in workflow.JOB_PROMPTS.values():
+        read = workflow._with_direction(profile.read)
+        revise = workflow._with_direction(profile.revise)
+        assert read.count(LISTENING_DIRECTION) == 1
+        assert revise.count(LISTENING_DIRECTION) == 1
+        assert profile.read.strip() in read
+        assert profile.revise.strip() in revise
+        assert not profile.draft.startswith("这次没有讲")
+
+
+def test_audit_keeps_a_useful_sentence_when_the_rewrite_launders_or_empties(monkeypatch):
+    from core.video import audit
+    sections = [{"title": "价格", "paragraphs": [
+        {"text": "Team 也含月度 API credits。", "citations": []},
+        {"text": "材料没有说豆包会代打电话。", "citations": []},
+    ]}]
+
+    def call_json(client, prompt, request, schema, *, temperature):
+        assert prompt.startswith(LISTENING_DIRECTION)
+        return schema(paragraphs=[
+            {"id": "S1P1", "text": "官方没有公布 Team 的额度。", "citations": []},
+            {"id": "S1P2", "text": "豆包不会代打电话。", "citations": []},
+        ])
+
+    monkeypatch.setattr(audit, "call_json", call_json)
+    out, _changed = audit.revise(object(), sections, "报告", {"S1P1": ["额度"], "S1P2": ["能力"]})
+    assert out[0]["paragraphs"][0]["text"] == "Team 也含月度 API credits。"
+    assert "evidence" not in out[0]["paragraphs"][0]
+    assert out[0]["paragraphs"][1]["text"] == "材料没有说豆包会代打电话。"
+    assert out[0]["paragraphs"][1]["evidence"] == "NEEDS_REVIEW"
+    assert "不要自动补「这次没有讲」" in out[0]["paragraphs"][1]["review_reason"]
+    assert "官方没公布" in out[0]["paragraphs"][1]["review_reason"]
 
 
 def test_polish_rejects_laundering_and_a_failed_call_still_keeps_the_fact(llm):

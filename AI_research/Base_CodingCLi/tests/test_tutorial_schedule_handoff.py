@@ -15,7 +15,7 @@ from core.research import _FETCH_SYSTEM_PROMPT
 from core.research_window import select
 from core.schedule_store import ScheduleStore
 from core.search import SearchResult
-from core.video import autopilot_store, manuscript_workflow, store, audience_strategy, writer
+from core.video import autopilot_store, manuscript_workflow, store, audience_strategy
 from tests.test_platforms import BV, CREDENTIAL, PAYLOAD
 from tests.test_video_scripts import FakeLLM, ROOT, autovideo, llm, script_json, video_env  # noqa: F401
 from web.services import bilibili, platform_manager, video_autopilot, video_render, video_workflow
@@ -98,10 +98,10 @@ def test_morning_tutorial_handoff(video_env, llm, autovideo, monkeypatch, has_to
             packet = json.loads(request)["materials"][0]["id"]
             result = json.dumps({"events": [{"title": title, "subject": title, "action": "analysis",
                                              "summary": "在结果区找到文件卡片", "primary": [packet]}]})
-        elif system == profile.read:
+        elif system == manuscript_workflow._with_direction(profile.read):
             result = json.dumps({"takeaway": "定位结果", "keep_quote": "找到文件", "issue_quote": "结果区",
                                  "revision": "简短介绍结果区", "targets": [paragraph]})
-        elif system == writer.LISTENING_DIRECTION + "\n" + profile.revise:
+        elif system == manuscript_workflow._with_direction(profile.revise):
             result = json.dumps({"paragraphs": [{"id": paragraph, "text": revision}]})
         else:
             return stock_reply(self, messages, **kwargs)

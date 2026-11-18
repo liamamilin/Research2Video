@@ -21,7 +21,7 @@ from .adapt.common import AdaptError, call_json, numbered_script, pid, paragraph
 from .policy import SOURCE_GUIDANCE, is_core_issue
 from .audience_copy import GUIDANCE as AUDIENCE_GUIDANCE
 from .claim_bounds import lost_conditions
-from .narration_stance import LISTENING_DIRECTION, repair, launders
+from .narration_stance import LISTENING_DIRECTION, defects as stance_defects, repair, launders
 from .writer import report_body
 from core.provenance import normalize_url
 
@@ -256,11 +256,21 @@ def revise(client, sections: list[dict], report: str, targets: dict[str, list[st
                     invalid.append(url)
                 elif url not in citations:
                     citations.append(url)
+            attention = False
             if text:
-                narrowed, _gaps = repair(text)
-                if narrowed and not launders(text, narrowed):
-                    text = narrowed
-            if text is None or (text == para["text"] and citations == (para.get("citations") or []) and not invalid):
+                narrowed, gaps = repair(text)
+                candidate = narrowed or ""
+                if candidate and not launders(para["text"], candidate) and not launders(text, candidate):
+                    text = candidate
+                else:
+                    attention = bool(stance_defects(para["text"]) or any(item.get("needs_attention") for item in gaps))
+                    text = para["text"]
+            if attention and text == para["text"] and citations == (para.get("citations") or []) and not invalid:
+                flagged = {**para, "evidence": "NEEDS_REVIEW",
+                           "review_reason": "这一处还有取材备忘或撤下后的判断，需要重写。不要自动补「这次没有讲」，也不要写成官方没公布。"}
+                kept.append(flagged)
+                changed.append(flagged)
+            elif text is None or (text == para["text"] and citations == (para.get("citations") or []) and not invalid):
                 kept.append(para)
             elif text:
                 lost = lost_conditions(para["text"], text, report)

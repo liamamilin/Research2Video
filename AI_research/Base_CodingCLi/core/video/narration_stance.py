@@ -47,6 +47,7 @@ _WITHDRAWAL = re.compile(r"不能(?:替[^。！？，,]{0,24}?)?下结论|我(?:
 _OFFICIAL = re.compile(r"官方.{0,8}?(?:没有|未|没)(?:公布|披露|公开|发布)|并(?:未|没有)(?:公布|披露|公开)")
 _DENIAL = re.compile(r"不会|不支持|并不具备|做不到")
 _COMPLETENESS = re.compile(r"五家|这几家都|全部|每一家|所有(?:产品|这些)|都能")
+_NEGATED_SCOPE = re.compile(r"不能|不是|并不|不代表|尚未|还没|不要以为|别当成|没法说")
 _NOTE = "口播去掉了自我免责或取材备忘。没有补「这次没有讲」，也没有改写成官方未公布或能力不存在。"
 
 
@@ -76,6 +77,15 @@ def _performance(clause: str) -> bool:
 
 def _gap(clause: str) -> bool:
     return bool(_GAP.search(clause)) and "毒性" not in clause and "导电" not in clause
+
+
+def _misleading_completeness(clause: str) -> bool:
+    """A positive claim that the comparison already covers every item.
+
+    A negated limit such as 「不能说五家都能」 is the scope the audience needs,
+    so it stays.
+    """
+    return bool(_COMPLETENESS.search(clause)) and not _NEGATED_SCOPE.search(clause)
 
 
 def defects(text: str) -> list[dict]:
@@ -143,7 +153,7 @@ def repair(text: str) -> tuple[str, list[dict]]:
         for clause in clauses:
             if _performance(clause) or _gap(clause):
                 continue
-            if retracts or (_COMPLETENESS.search(clause) and any(_gap(item) for item in clauses)):
+            if retracts or (_misleading_completeness(clause) and any(_gap(item) for item in clauses)):
                 continue
             facts.append(_restore(clause, quotes).strip("。"))
         spoken = ""
