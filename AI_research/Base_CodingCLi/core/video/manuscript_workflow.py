@@ -16,6 +16,7 @@ from core.yaml_cache import load_yaml
 
 from . import length, persona, writer
 from .adapt.common import AdaptError, call_json
+from .narration_stance import LISTENING_DIRECTION
 from .polish import pid
 
 PLAN_VERSION = 2
@@ -721,7 +722,7 @@ def revise_passage(
                 column.target_minutes, 0, original_material=inputs.get("original_material"),
             )
             request = json.dumps({**manuscript, "feedback": reading.model_dump()}, ensure_ascii=False)
-            revise_prompt = profile.revise if profile else FOCUSED_WRITE
+            revise_prompt = LISTENING_DIRECTION + "\n" + (profile.revise if profile else FOCUSED_WRITE)
             receipt["revision_prompt_sha256"] = sha256(revise_prompt.encode()).hexdigest()
             revision = call_json(client, revise_prompt, material + "\n\n" + request,
                                  FocusedRevision, temperature=0.4)

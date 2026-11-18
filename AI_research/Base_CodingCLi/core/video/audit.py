@@ -21,6 +21,7 @@ from .adapt.common import AdaptError, call_json, numbered_script, pid, paragraph
 from .policy import SOURCE_GUIDANCE, is_core_issue
 from .audience_copy import GUIDANCE as AUDIENCE_GUIDANCE
 from .claim_bounds import lost_conditions
+from .narration_stance import LISTENING_DIRECTION, repair, launders
 from .writer import report_body
 from core.provenance import normalize_url
 
@@ -33,7 +34,7 @@ STYLE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继�
 
 READER_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：作为目标观众反馈观看体验。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P1","questions":[],"lost":[]}]}'
 
-REVISE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：根据提供的反馈修改成稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的口播","citations":["https://..."]}]}'
+REVISE_PROMPT = LISTENING_DIRECTION + '\n当前步骤：根据提供的反馈修改成稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的口播","citations":["https://..."]}]}'
 
 
 
@@ -255,6 +256,10 @@ def revise(client, sections: list[dict], report: str, targets: dict[str, list[st
                     invalid.append(url)
                 elif url not in citations:
                     citations.append(url)
+            if text:
+                narrowed, _gaps = repair(text)
+                if narrowed and not launders(text, narrowed):
+                    text = narrowed
             if text is None or (text == para["text"] and citations == (para.get("citations") or []) and not invalid):
                 kept.append(para)
             elif text:

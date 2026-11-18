@@ -46,7 +46,8 @@ def test_concrete_internal_copy_gets_repaired_and_reaudited(client, video_env, r
     _login(client)
     script = _make(client, "point_short", "不按预设问题改稿")
     shown = script["version_shown"]
-    assert shown["sections"][0]["paragraphs"][0]["text"] == text
+    assert shown["sections"][0]["paragraphs"][0]["text"] == "这是一个开源工具。"
+    assert shown["meta"].get("narration_gaps")
     assert not llm.revise_calls and not llm.audit_calls and shown["checks"]["issues"] == []
 
 
