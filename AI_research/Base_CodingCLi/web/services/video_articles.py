@@ -21,6 +21,9 @@ def write(script: dict, *, started_by: str, llm_config=None) -> str:
     with telemetry.track("write"):
         written = article_writer.draft(source, mode=article["mode"], kind=article["kind"], topic=script["topic"],
                                        column=column, config=config)
+        if article["mode"] != "read":
+            from core.video import polish
+            polish.apply(written, config, voice=column.voice_id or None)
     initial = review.assemble([], None, None, None, written.sections)
     initial.update(scope="article_fidelity", external_facts_checked=False)
     meta = {**written.meta, "input_kind": "article", "article": article,

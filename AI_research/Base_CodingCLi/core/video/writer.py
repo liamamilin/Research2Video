@@ -21,6 +21,7 @@ from core.provenance import extract_urls, normalize_url
 
 from . import length
 from .audience_copy import findings as audience_findings
+from .narration_stance import PRIORITY
 
 MIN_CHINESE_SHARE = 0.5
 
@@ -47,7 +48,7 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 7
+PROMPT_VERSION = 8
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name.
 TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；"
@@ -65,7 +66,7 @@ AUTHORING_PROMPT = GOAL + """
 沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
 素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
 影响观众理解和实际使用的条件随对应内容讲清。
-""" + STYLE_RULE
+""" + PRIORITY + STYLE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """

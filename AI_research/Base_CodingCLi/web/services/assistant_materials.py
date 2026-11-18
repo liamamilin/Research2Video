@@ -242,6 +242,9 @@ def write(script: dict, *, started_by: str, llm_config=None, style=None) -> str:
         result = writer.write_for_column(column=recipe, content_context=script.get('content_context') or {},
                                          report=body, citation_check=None, topic=script["topic"],
                                          column_style=goal, llm_config=config)
+        from core.video import episodes, polish
+        polish.apply(result, config, greeting=episodes.greeting(script["topic"], script.get("content_context") or {}) or "",
+                     voice=getattr(recipe, "voice_id", None) or None)
     store.add_version(script["id"], title=result.title, sections=result.sections, length_check=result.length_check,
                       edit_type="GENERATED", created_by=started_by,
                       meta={**result.meta, "input_kind": "user_materials", "user_materials": info,

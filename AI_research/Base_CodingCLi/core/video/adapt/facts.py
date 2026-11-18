@@ -25,7 +25,7 @@ from .common import CONFIDENCE, DERIVED, UNVERIFIED, call_json
 #: rewriting the one older script versions point at.
 PROMPT_VERSION = 12
 
-SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：把素材整理成接口数据。\n接口输出 JSON：\n{"question":"报告的主题","answer":"主要发现","facts":[{"id":"F1","claim":"含来源归属与实际条件的具体内容","confidence":"厂商自述","sources":["https://..."],"derived_from":[],"formula":""}],"concepts":[{"term":"","meaning":"","needs":[]}],"research_notes":[]}'
+SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：把素材整理成接口数据。材料缺口写入 research_notes，不要写进 claim，也不要写成官方没公布或能力不存在。\n接口输出 JSON：\n{"question":"报告的主题","answer":"主要发现","facts":[{"id":"F1","claim":"含来源归属与实际条件的具体内容","confidence":"厂商自述","sources":["https://..."],"derived_from":[],"formula":""}],"concepts":[{"term":"","meaning":"","needs":[]}],"research_notes":[]}'
 
 
 class _Fact(BaseModel):

@@ -346,7 +346,8 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
 def messages(context: dict, correction: str | None = None) -> list[dict]:
     system = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：为讲述设计信息动效。让观众看见数字的大小、对象的差别或事物间的关系，画面随着讲述帮助理解。接口输出 JSON，使用 component_props_schemas 中的受控组件。场景连续覆盖旁白，场景 id 为 s1、s2…；headline 与有 title 字段的 props.title 一致。结构见 required_schema。'
     from g2.audience_copy import GUIDANCE
-    system += "\n" + GUIDANCE + "\n" + visual_language.GUIDANCE
+    from g2.narration_stance import PRIORITY
+    system += "\n" + GUIDANCE + "\n" + PRIORITY + "\n" + visual_language.GUIDANCE
     if context.get("verbatim"):
         system += VERBATIM_RULES
     if context.get("large_text"):

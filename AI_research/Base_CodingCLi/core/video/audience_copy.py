@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import re
 
+from .narration_stance import defects as stance_defects
+
 
 GUIDANCE = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。'
 
@@ -50,10 +52,15 @@ def unverified_source_absences(version: dict) -> list[dict]:
 
 def findings(text: str) -> list[dict[str, str]]:
     """Flag concrete process leaks, without banning words such as 材料 or 不能."""
-    return [{"quote": match.group(),
-             "problem": "内部资料缺口进入口播，观众不知道所指资料，且容易误解为原来源缺少信息",
-             "suggestion": "将研究缺口留在审校记录；删除或收窄无依据的结论，保留与具体主张相关的事实限定"}
-            for match in _INTERNAL_GAP.finditer(text)]
+    found = [{"quote": match.group(),
+              "problem": "内部资料缺口进入口播，观众不知道所指资料，且容易误解为原来源缺少信息",
+              "suggestion": "将研究缺口留在审校记录；删除或收窄无依据的结论，保留与具体主张相关的事实限定"}
+             for match in _INTERNAL_GAP.finditer(text)]
+    for item in stance_defects(text):
+        if any(item["quote"] in found_item["quote"] or found_item["quote"] in item["quote"] for found_item in found):
+            continue
+        found.append({"quote": item["quote"], "problem": item["problem"], "suggestion": item["suggestion"]})
+    return found
 
 
 def section_findings(sections: list[dict]) -> list[dict]:

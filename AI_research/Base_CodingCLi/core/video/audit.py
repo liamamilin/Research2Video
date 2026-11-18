@@ -20,20 +20,21 @@ from .adapt import review
 from .adapt.common import AdaptError, call_json, numbered_script, pid, paragraphs, quantities, untraced
 from .policy import SOURCE_GUIDANCE, is_core_issue
 from .audience_copy import GUIDANCE as AUDIENCE_GUIDANCE
+from .narration_stance import PRIORITY, settle_in_place
 from .claim_bounds import lost_conditions
 from .writer import report_body
 from core.provenance import normalize_url
 
 PROMPT_VERSION = 17
 
-PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：反馈现有成稿的问题。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"D1","severity":"严重","problem":"实际差异","why":"影响","suggestion":"如何处理"}],"verifications":[{"id":"S1P1","status":"verified 或 needs_review 或 not_factual","reason":"依据","sources":["https://..."]}]}'
+PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：反馈现有成稿的问题。自我免责和取材备忘是表达问题，不是把缺口改写成更强的事实。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"D1","severity":"严重","problem":"实际差异","why":"影响","suggestion":"如何处理"}],"verifications":[{"id":"S1P1","status":"verified 或 needs_review 或 not_factual","reason":"依据","sources":["https://..."]}]}'
 
 
-STYLE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：反馈成稿的观看体验。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"S1","severity":"一般","problem":"具体听感","why":"影响","suggestion":"编辑想法","editorial":true}]}'
+STYLE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：反馈成稿的观看体验。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"S1","severity":"一般","problem":"具体听感","why":"影响","suggestion":"编辑想法","editorial":true}]}'
 
-READER_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：作为目标观众反馈观看体验。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P1","questions":[],"lost":[]}]}'
+READER_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：作为目标观众反馈观看体验。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P1","questions":[],"lost":[]}]}'
 
-REVISE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：根据提供的反馈修改成稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的口播","citations":["https://..."]}]}'
+REVISE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：根据提供的反馈修改成稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的口播","citations":["https://..."]}]}'
 
 
 
@@ -289,6 +290,7 @@ def revise(client, sections: list[dict], report: str, targets: dict[str, list[st
     out = [section for section in out if section["paragraphs"]]
     if not out:
         raise AdaptError("改写删除了整篇文稿，已保留原稿")
+    settle_in_place(out)
     old_ids = {id(p) for _, _, p in paragraphs(sections)}
     changed = [p for _, _, p in paragraphs(out) if id(p) not in old_ids]
     return out, changed

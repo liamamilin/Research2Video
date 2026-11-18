@@ -35,6 +35,7 @@ from pydantic import BaseModel, Field
 from .. import length
 from ..policy import SOURCE_GUIDANCE, is_core_issue
 from ..audience_copy import GUIDANCE as AUDIENCE_GUIDANCE, section_findings as audience_findings
+from ..narration_stance import PRIORITY
 from ..audience_copy import unverified_source_absences
 from .common import (VERSIONED, WEAK, call_json, fact_line, facts_by_id, numbered_script,
                      paragraphs, pid, quantities, untraced)
@@ -156,9 +157,9 @@ def current_issues(saved: list[dict], sections: list[dict], meta: dict | None = 
 
 # --- Model audits ------------------------------------------------------------------------
 
-NEWCOMER_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：作为目标观众反馈观看体验。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P1","questions":[],"lost":[]}],"answers":[{"id":"G1","answer":""}],"retell":"","scores":{},"comments":""}'
+NEWCOMER_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：作为目标观众反馈观看体验。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P1","questions":[],"lost":[]}],"answers":[{"id":"G1","answer":""}],"retell":"","scores":{},"comments":""}'
 
-FACT_AUDIT_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：反馈现有成稿的问题。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"D2","severity":"严重","problem":"差异","why":"影响","suggestion":"处理方法"}],"actions":[{"id":"S1P1","relies_on":"依据","simulate":"推演","works":true,"severity":"","quote":"","problem":"","suggestion":""}],"core_message_match":true,"core_message_note":"","grades":[{"id":"G1","correct":true,"note":""}]}'
+FACT_AUDIT_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：反馈现有成稿的问题。自我免责和取材备忘不是需要补成更强事实的缺口。\n接口输出 JSON：\n{"issues":[{"id":"S1P1","quote":"原句","rule":"D2","severity":"严重","problem":"差异","why":"影响","suggestion":"处理方法"}],"actions":[{"id":"S1P1","relies_on":"依据","simulate":"推演","works":true,"severity":"","quote":"","problem":"","suggestion":""}],"core_message_match":true,"core_message_note":"","grades":[{"id":"G1","correct":true,"note":""}]}'
 
 
 
