@@ -122,7 +122,7 @@ def test_direction_prefixes_planning_and_revision_without_replacing_the_job():
     assert workflow.PLAN.startswith(LISTENING_DIRECTION) and workflow.PLAN.count(LISTENING_DIRECTION) == 1
     assert "viewer_value" in workflow.PLAN
     assert workflow.READ.count(LISTENING_DIRECTION) == 1
-    assert "沿用上游给出的事实、数据和计算。" in writer.AUTHORING_PROMPT
+    assert "沿用上游" in writer.AUTHORING_PROMPT and "事实" in writer.AUTHORING_PROMPT
     assert writer.AUTHORING_PROMPT.count(LISTENING_DIRECTION) == 1
     assert "不要编官方没公布" in LISTENING_DIRECTION
     assert LISTENING_DIRECTION in polish.SYSTEM_PROMPT
@@ -234,6 +234,59 @@ def test_read_aloud_keeps_every_character_and_an_only_gap_does_not_erase_the_scr
     only, record = __import__("core.video.narration_stance", fromlist=["settle_sections"]).settle_sections(
         [{"title": "只剩这句", "paragraphs": [{"text": source["text"]}]}])
     assert record["kept_original"] and only[0]["paragraphs"][0]["text"] == source["text"]
+
+
+def test_science_chain_draft_revision_and_polish_keep_the_result(llm, monkeypatch):
+    candidates = [
+        Path("/tmp/science-overlay/AI_research/Base_CodingCLi/config/video_recipes/chain_ai_science_updates.yaml"),
+        ROOT / "config/video_recipes/chain_ai_science_updates.yaml",
+    ]
+    recipe = next((path for path in candidates if path.is_file()), None)
+    if recipe is None:
+        pytest.skip("science-chain overlay is not on this machine")
+    import yaml
+    style = yaml.safe_load(recipe.read_text())["writing"]["style"]
+    draft = {
+        "title": "蛋白质折叠误差下降",
+        "sections": [{"title": "结果", "paragraphs": [{
+            "text": "新模型把蛋白质折叠的误差从 8 降到 3。材料没有给对照组的样本量，所以我不会编。这个变化只在这一个公开测试集上成立，还没验证别的数据集。",
+            "citations": [],
+        }]}],
+    }
+    llm.replies = [json.dumps(draft, ensure_ascii=False)]
+    written = writer.write(
+        report="公开测试集上，折叠误差从 8 降到 3。", citation_check=None,
+        topic={"title": "蛋白质折叠", "fields": {"目标受众": "关心这项实验的人"}},
+        column_style=style, target_minutes=1.25, llm_config=object(),
+    )
+    assert LISTENING_DIRECTION in llm.calls[0][0]["content"]
+    assert "沿用上游" in llm.calls[0][0]["content"]
+    spoken = written.sections[0]["paragraphs"][0]["text"]
+    assert "误差从 8 降到 3" in spoken and "还没验证" in spoken
+    assert "材料没有给" not in spoken and "这次没有讲" not in spoken
+    assert written.meta.get("narration_gaps")
+
+    def chat(client, prompt, request, schema, *, temperature):
+        if prompt == workflow.FOCUSED_READ:
+            return schema(takeaway="误差下降", keep_quote="误差从 8 降到 3",
+                          revision="留下测试集范围", targets=["S1P1"])
+        assert prompt == workflow._with_direction(workflow.FOCUSED_WRITE)
+        assert prompt.count(LISTENING_DIRECTION) == 1
+        return schema(paragraphs=[{"id": "S1P1", "text": "误差从 8 降到 3。材料没给对照组样本量，所以我不会编。这个变化只在公开测试集上成立。"}])
+
+    monkeypatch.setattr(workflow, "call_json", chat)
+    monkeypatch.setattr(workflow, "LLMClient", lambda *args, **kwargs: object())
+    column = type("C", (), {"script_style": style, "target_minutes": 1.25, "voice_id": "zf_xiaoxiao"})()
+    revised = workflow.revise_passage(
+        written, report="公开测试集上，折叠误差从 8 降到 3。", topic={"title": "蛋白质折叠"},
+        llm_config=object(), column=column,
+    )
+    polished, record = polish.polish(llm(None), revised.sections)
+    text = polished[0]["paragraphs"][0]["text"]
+    assert "误差从 8 降到 3" in text and "公开测试集" in text
+    assert "材料没给" not in text and "我不会编" not in text
+    assert "这次没有讲" not in text and "官方" not in text
+    assert record["gaps"]
 
 
 def test_live_science_chain_uses_the_single_writer_when_the_overlay_is_present():

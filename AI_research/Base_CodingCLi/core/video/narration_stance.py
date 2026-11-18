@@ -122,8 +122,10 @@ def launders(before: str, after: str) -> str:
     denial_before = _DENIAL.search(before_open.replace("会不会", ""))
     if _gap(before_open) and "说" in before_open and denial_after and not denial_before:
         return "把没写到说成能力不存在"
-    if re.search(r"所以", before_open) and _WITHDRAWAL.search(before_open):
-        for clause in _clauses(_protect(before_open)[0]):
+    for sentence in [part.strip() for part in _SENTENCE.findall(before_open) if part.strip()]:
+        if not (re.search(r"所以", sentence) and _WITHDRAWAL.search(sentence)):
+            continue
+        for clause in _clauses(sentence):
             if _performance(clause) or _gap(clause) or len(clause) < 6:
                 continue
             if clause in after_open:
