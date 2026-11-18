@@ -167,11 +167,13 @@ class ResearchConfig:
 _AGENT_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
 当前步骤：研究事情本身，为后续讲述提供具体资料。日期：{date}。
 找到值得讲的事情，保留能把它讲生动、讲明白的具体材料和原始链接，供后续作者展开讲述。
-工具：search_web(objective, queries) 检索资料；read_file/list_files 读取工作区资料。报告使用任务给定的语言和数据格式。"""
+工具：search_web(objective, queries) 检索资料；read_file/list_files 读取工作区资料。报告使用任务给定的语言和数据格式。
+写给后续讲述者的缺口放在备注或字段里，不要写成可以照念的自我说明。没查到不要写成官方没公布，材料没写到的能力不要写成不存在。"""
 
 _PIPELINE_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
 当前步骤：研究事情本身，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
-报告使用任务给定的语言和数据格式。"""
+报告使用任务给定的语言和数据格式。
+写给后续讲述者的缺口放在备注或字段里，不要写成可以照念的自我说明。没查到不要写成官方没公布，材料没写到的能力不要写成不存在。"""
 
 _PLANNER_PROMPT = """\
 You plan web research. Given the task below, output ONLY a JSON array of focused search queries covering its key information needs. \
@@ -183,7 +185,8 @@ TASK:
 {task}
 """
 
-_FINALIZE_PROMPT = """根据已收集的素材完成报告，使用任务给定的语言和数据格式。"""
+_FINALIZE_PROMPT = """根据已收集的素材完成报告，使用任务给定的语言和数据格式。
+写给后续讲述者的缺口放在备注或字段里，不要写成可以照念的自我说明。没查到不要写成官方没公布，材料没写到的能力不要写成不存在。"""
 
 
 class _NoSearch:
@@ -198,7 +201,8 @@ class _NoSearch:
 
 _FETCH_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
 当前步骤：研究事情本身，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
-报告使用任务给定的语言和数据格式。"""
+报告使用任务给定的语言和数据格式。
+写给后续讲述者的缺口放在备注或字段里，不要写成可以照念的自我说明。没查到不要写成官方没公布，材料没写到的能力不要写成不存在。"""
 
 
 class ResearchAgent:

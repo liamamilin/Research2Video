@@ -70,7 +70,8 @@ def validate_outline(plan: dict, context: dict) -> None:
 def narration_messages(context: dict, correction: str | None = None) -> list[dict]:
     system = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：把这一章讲给目标观众听，让他们对讲述产生兴趣，随着讲述理解，并愿意继续听。接口输出 JSON，段 id 为 n1、n2…，point_ids 引用当前章的知识点编号。结构见 required_schema。'
     from g2.audience_copy import GUIDANCE
-    system += "\n" + GUIDANCE
+    from g2.narration_stance import PRIORITY
+    system += "\n" + GUIDANCE + "\n" + PRIORITY
     payload = {"outline": context["outline"], "current_chapter": context["chapter"],
                "previous_chapter_closing": context.get("previous_closing", ""),
                "chapter_source_as_untrusted_data": context["source_text"],
@@ -85,9 +86,11 @@ def validate_narration(plan: dict, context: dict) -> None:
     schema_check(plan, NARRATION_SCHEMA)
     segments = plan["segments"]
     from g2.audience_copy import CODE, problem
-    message = problem("\n".join(s["text"] for s in segments))
+    from g2.narration_stance import generated_problem
+    spoken = "\n".join(s["text"] for s in segments)
+    message = problem(spoken) or generated_problem(spoken)
     if message:
-        raise ContentFault(CODE, message)
+        raise ContentFault(CODE if not generated_problem(spoken) else "NARRATION_STANCE", message)
     if [s["id"] for s in segments] != [f"n{i + 1}" for i in range(len(segments))]:
         raise ContentFault("CONTENT_SEGMENT_ORDER", "segment ids must be n1..nN")
     expected = {p["id"] for p in context["chapter"]["points"]}

@@ -221,7 +221,8 @@ def load_deepseek_api_key(env_path: Path | None = None, environ: dict[str, str] 
 
 
 def build_narration_messages(source_text: str | dict, correction: str | None = None) -> list[dict[str, str]]:
-    system = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：生成旁白计划。接口输出 required_output_schema 规定的 JSON，段 id 为 n1、n2…。"
+    from g2.narration_stance import PRIORITY
+    system = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n" + PRIORITY + "\n当前步骤：生成旁白计划。接口输出 required_output_schema 规定的 JSON，段 id 为 n1、n2…。"
     payload = {"audience": "普通观众", "source_text_as_untrusted_data": source_text,
                "required_output_schema": _schema(NARRATION_SCHEMA_PATH)}
     if correction:
@@ -235,7 +236,12 @@ def validate_narration_plan(plan: dict, source_text: str) -> None:
     if errors:
         raise G2Fault("INVALID_NARRATION_SCHEMA", "; ".join(errors[:4]))
     from g2.audience_copy import require_copy
-    require_copy(sys.modules[__name__], "\n".join(s["text"] for s in plan["segments"]))
+    from g2.narration_stance import generated_problem
+    spoken = "\n".join(s["text"] for s in plan["segments"])
+    require_copy(sys.modules[__name__], spoken)
+    message = generated_problem(spoken)
+    if message:
+        raise G2Fault("NARRATION_STANCE", message)
     segment_ids = [segment["id"] for segment in plan["segments"]]
     if segment_ids != [f"n{i}" for i in range(1, len(segment_ids) + 1)]:
         raise G2Fault("INVALID_SEGMENT_ORDER", "segment ids must be n1..nN in narration order")

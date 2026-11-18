@@ -11,7 +11,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-PROMPT_VERSION = 3
+from . import narration_stance
+from .narration_stance import PRIORITY, launders
+
+PROMPT_VERSION = 4
 #: "不是 A，而是 B" is a fine turn of phrase once or twice an episode; past this it becomes a tic.
 CONTRAST_ALLOWED = 2
 
@@ -42,14 +45,17 @@ RULES = {
     "contrast_overuse": "「不是……而是……」在本期用得太多，变成口头禅",
     "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
     "hedge": "像免责声明一样的套话，观众听着生硬",
+    "audience_stance": "把研究备忘或自我免责说给了观众，口播应讲事情本身",
 }
 
 SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+""" + PRIORITY + """
 当前步骤：润色口播稿中被指出问题的段落。
-只改列出的段落，每段改成一段，意思、事实、数字、名称和条件保持不变，只换说法。
+只改列出的段落，每段改成一段。影响用法的条件保留，事实、数字和名称不新增。
 制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成一句贴合本段内容的短判断；
 硬造的过渡句改成直接进入本条（比如“再说 Gemini。”），或用一句话说出两条真实的关系；免责套话删去，必要的前提用半句话自然带过；
 「不是……而是……」改为直接说出肯定的那一半，被否定的一半不必要就删去，不换成「……反而没那么重要」「……倒在其次」之类的新套话。
+研究备忘和自我免责整句删去。前面已经说出的事实留下。不要补“官方没公布”，也不要把没写到的能力说成不存在。
 保持段落与前后文的衔接，不加新内容，不打招呼；段落里原有的道别句原样保留。
 输出 JSON：{"paragraphs":[{"id":"S1P2","text":"改好的口播"}]}"""
 
@@ -85,6 +91,7 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
                 hits += [("stock_ending", m.group()) for m in _STOCK_ENDING.finditer(text)]
                 hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
             hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
+            hits += [("audience_stance", item["quote"]) for item in narration_stance.defects(text)]
             for match in _CONTRAST.finditer(text):
                 contrasts += 1
                 if contrasts > CONTRAST_ALLOWED:
@@ -107,10 +114,35 @@ def _script_text(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _fallback(sections: list[dict], record: dict) -> list[dict]:
+    """When the model misses a stance problem, narrow it without inventing a stronger claim."""
+    settled, stance = narration_stance.settle_sections(sections)
+    if stance.get("kept_original"):
+        record["unresolved"] = stance["unresolved"]
+        return sections
+    for change in stance["changes"]:
+        section = sections[change["section"]]
+        record["changes"].append({
+            "id": pid(change["section"], change["paragraph"]),
+            "where": f"{section['title']} · 第 {change['paragraph'] + 1} 段",
+            "rules": ["audience_stance"],
+            "before": change["before"],
+            "after": change["after"],
+            "fallback": True,
+        })
+    record["gaps"] = list(record.get("gaps") or []) + stance["gaps"]
+    record["unresolved"] = stance["unresolved"]
+    return settled
+
+
 def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[dict], dict]:
-    """(sections, record). With nothing found no model call is made; any failure keeps the draft as it was."""
+    """(sections, record). With nothing found no model call is made.
+
+    A failed or rejected stance rewrite falls back to omitting the aside. Other
+    polish rules keep the draft when the call fails. Nothing here blocks approval.
+    """
     found = findings(sections, greeting=greeting)
-    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": []}
+    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": [], "gaps": []}
     if not found:
         return sections, record
     targets: dict[str, list[dict]] = {}
@@ -124,6 +156,10 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         reply = call_json(client, SYSTEM_PROMPT, request, _Reply, temperature=0.4)
     except Exception as exc:  # noqa: BLE001 - polishing is optional; a failed call never costs the draft
         record["error"] = f"{type(exc).__name__}: {exc}"[:500]
+        if any(item["rule"] == "audience_stance" for item in found):
+            settled = _fallback(sections, record)
+            record["remaining"] = findings(settled, greeting=greeting)
+            return settled, record
         return sections, record
     out = json.loads(json.dumps(sections))
     where = {f["id"]: (f["section"], f["paragraph"]) for f in found}
@@ -138,13 +174,23 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
             after = after.rstrip() + goodbye
         if after == before:
             continue
-        if _numbers(after) != _numbers(before):
+        stance = any(item["rule"] == "audience_stance" for item in targets[rewrite.id])
+        if _numbers(after) != _numbers(before) and not (stance and _numbers(after) <= _numbers(before)):
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
+            continue
+        reason = launders(before, after) if stance else ""
+        if reason or (stance and narration_stance.defects(after)):
+            record["rejected"].append({"id": rewrite.id, "reason": reason or "改写仍在表演谨慎", "text": after})
             continue
         out[si]["paragraphs"][pi]["text"] = after
         record["changes"].append({"id": rewrite.id, "where": f"{out[si]['title']} · 第 {pi + 1} 段",
                                   "rules": sorted({f["rule"] for f in targets[rewrite.id]}),
                                   "before": before, "after": after})
+        if stance:
+            _, gaps = narration_stance.narrow(before)
+            record["gaps"].extend(gaps)
+    if any(item["rule"] == "audience_stance" for item in findings(out, greeting=greeting)):
+        out = _fallback(out, record)
     record["remaining"] = findings(out, greeting=greeting)
     return out, record
 
@@ -155,7 +201,28 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
     from core import telemetry
     from core.llm import LLMClient
     from . import length
-    client = LLMClient(llm_config, cancel_token=cancel_token)
+    if not findings(written.sections, greeting=greeting or ""):
+        written.meta["polish"] = {"version": PROMPT_VERSION, "findings": [], "changes": [], "rejected": [], "gaps": []}
+        return
+    try:
+        client = LLMClient(llm_config, cancel_token=cancel_token)
+    except Exception as exc:
+        found = findings(written.sections, greeting=greeting or "")
+        if not any(item["rule"] == "audience_stance" for item in found):
+            raise
+        record = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": [], "gaps": [],
+                  "error": f"{type(exc).__name__}: {exc}"[:500]}
+        sections = _fallback(written.sections, record)
+        written.meta["polish"] = record
+        if record.get("gaps"):
+            written.meta["narration_gaps"] = record["gaps"]
+        if record["changes"]:
+            written.sections = sections
+            check = written.length_check
+            keep = {k: check[k] for k in ("dropped_citations", "duration_policy") if k in check}
+            target = None if check.get("duration_policy") == "content" else check.get("target_minutes")
+            written.length_check = {**length.measure(sections, target, voice=voice), **keep}
+        return
     with telemetry.track("polish") as span:
         try:
             sections, record = polish(client, written.sections, greeting=greeting or "")
@@ -166,6 +233,8 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
             span["status"] = "failed"
     record["usage"] = dict(client.usage)
     written.meta["polish"] = record
+    if record.get("gaps"):
+        written.meta["narration_gaps"] = record["gaps"]
     if not record["changes"]:
         return
     written.sections = sections

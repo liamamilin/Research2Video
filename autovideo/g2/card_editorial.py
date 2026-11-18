@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 
 from g2.audience_copy import INTERNAL_GAP
+from g2.narration_stance import defects as narration_defects
 
 SCHEMA = Path(__file__).parent / "schemas/card-editorial.schema.json"
 LIMITS = re.compile(r"尚未实测|未经独立验证|未独立验证|不能据此|不等于|仅限|标称|条件下|测试中")
@@ -47,7 +48,7 @@ def candidates(group: dict) -> list[dict]:
     if group["overview"]:
         return [{"text": text, "quote": text} for text in group["overview"]]
     text = group["text"]
-    if INTERNAL_GAP.search(text):
+    if INTERNAL_GAP.search(text) or narration_defects(text):
         raise ValueError("原稿含内部资料缺口，请先修订文稿，不能将研究备注自动变成画面重点")
     choices = []
     for sentence in re.split(r"(?<=[。！？；;])", text):

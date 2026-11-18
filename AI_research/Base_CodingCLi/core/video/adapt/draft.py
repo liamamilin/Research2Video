@@ -26,14 +26,15 @@ from pydantic import BaseModel, Field
 
 from .common import (AdaptError, WEAK, call_json, fact_ids, material_line, facts_by_id, numbered_script, paragraphs, pid,
                      remove_sentence)
+from ..narration_stance import PRIORITY, launders, narrow, settle_sections
 
 PROMPT_VERSION = 17
 
 RULES = ""
 
-SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：生成视频文稿。\n接口输出 JSON：\n{"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","facts":["F1"],"introduces":[],"recap":false}]}],"description":{"summary":"","details":[],"open_questions":[]}}'
+SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：生成视频文稿。\n接口输出 JSON：\n{"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","facts":["F1"],"introduces":[],"recap":false}]}],"description":{"summary":"","details":[],"open_questions":[]}}'
 
-REVISE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：根据反馈修改文稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的正文","facts":["F1"],"introduces":[],"recap":false}]}'
+REVISE_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：根据反馈修改文稿。\n接口输出 JSON：\n{"paragraphs":[{"id":"S1P2","text":"改后的正文","facts":["F1"],"introduces":[],"recap":false}]}'
 
 
 class _Para(BaseModel):
@@ -176,7 +177,11 @@ def write(client, plan: dict, sheet: dict, style, column) -> tuple[str, list[dic
     """(title, sections, the model's description). Build the final description with ``description``."""
     request = "## 目标观众\n" + json.dumps(plan.get("audience") or {}, ensure_ascii=False) + "\n\n## 素材\n" + "\n".join(material_line(f) for f in sheet["facts"])
     draft = call_json(client, SYSTEM_PROMPT, request, _Draft, temperature=0.6).model_dump()
-    return draft["title"].strip(), finalize(draft["sections"], sheet), draft["description"]
+    sections, stance = settle_sections(finalize(draft["sections"], sheet))
+    description = dict(draft["description"])
+    if stance.get("gaps"):
+        description["_narration_gaps"] = stance["gaps"]
+    return draft["title"].strip(), sections, description
 
 
 def revise(client, sections: list[dict], targets: dict[str, list[str]], plan: dict, sheet: dict,
@@ -202,6 +207,12 @@ def revise(client, sections: list[dict], targets: dict[str, list[str]], plan: di
             if pid(si, pi) == rewrite.id:
                 out[si]["paragraphs"][pi] = finalize_paragraph(rewrite.model_dump(), known)
                 changed.add(rewrite.id)
+    for si, pi, para in paragraphs(out):
+        after, _gaps = narrow(para["text"])
+        if after == para["text"] or launders(para["text"], after):
+            continue
+        para["text"] = after
+        changed.add(pid(si, pi))
     structural = any(not p["text"].strip() for _, _, p in paragraphs(out))
     if structural:
         old_ids = {pid(si, pi) for si, pi, _ in paragraphs(sections)}

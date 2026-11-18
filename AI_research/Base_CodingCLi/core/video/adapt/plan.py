@@ -24,11 +24,12 @@ from pydantic import BaseModel, Field
 
 from .. import length
 from .common import WEAK, call_json, fact_ids, material_line, facts_by_id
+from ..narration_stance import PRIORITY
 
 PROMPT_VERSION = 14
 
 
-SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：整理本次创作思路。\n接口输出 JSON：\n{"audience":{"knows":[],"lacks":[],"cares":"","takeaway":""},"core_message":"这期讲什么","hook":{"kind":"","idea":"","facts":["F1"]},"beats":[{"title":"画面标签","point":"讲什么","facts":["F1"],"terms":[],"connection":""}]}'
+SYSTEM_PROMPT = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n' + PRIORITY + '\n当前步骤：整理本次创作思路。取材缺口留在方案外，不要安排成口播句子。\n接口输出 JSON：\n{"audience":{"knows":[],"lacks":[],"cares":"","takeaway":""},"core_message":"这期讲什么","hook":{"kind":"","idea":"","facts":["F1"]},"beats":[{"title":"画面标签","point":"讲什么","facts":["F1"],"terms":[],"connection":""}]}'
 
 
 

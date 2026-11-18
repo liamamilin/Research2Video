@@ -43,16 +43,21 @@ def test_material_mode_validates_generated_copy_but_keeps_source_notes_as_eviden
     assert GUIDANCE in run_g2.build_narration_messages(source)[0]["content"]
     run_g2.validate_narration_plan(plan, source + BAD)
     plan["segments"][0]["text"] = BAD
-    run_g2.validate_narration_plan(plan, source + BAD)
+    with pytest.raises(run_g2.G2Fault, match="NARRATION_STANCE"):
+        run_g2.validate_narration_plan(plan, source + BAD)
 
 
 def test_content_mode_validates_generated_copy_and_has_repair_guidance():
     context, plan = narration_case()
     context["outline"] = {}
     assert GUIDANCE in content_video.narration_messages(context)[0]["content"]
+    from g2.narration_stance import PRIORITY
+    assert PRIORITY in content_video.narration_messages(context)[0]["content"]
+    assert PRIORITY in run_g2.build_narration_messages("价格从 20 变成 25。")[0]["content"]
     content_video.validate_narration(plan, context)
     plan["segments"][0]["text"] = BAD
-    content_video.validate_narration(plan, context)
+    with pytest.raises(content_video.ContentFault, match="NARRATION_STANCE"):
+        content_video.validate_narration(plan, context)
 
 
 @pytest.mark.parametrize("operation", ["visual_revision", "media_revision"])

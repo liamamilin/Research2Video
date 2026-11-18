@@ -340,6 +340,7 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
         "checks": checks,
         **({"headline": headline_result} if headline_result else {}),
         "description": draft.description(raw_description, sections, plan, sheet),
+        **({"narration_gaps": raw_description.get("_narration_gaps")} if isinstance(raw_description, dict) and raw_description.get("_narration_gaps") else {}),
         "usage": _sum_usage(usage_before, client.usage) if usage_before else dict(client.usage),
         **({"editorial_attempt": editorial.retained_attempt(editorial_attempts),
             "editorial_attempts": editorial_attempts} if editorial_attempt is not None else {}),
