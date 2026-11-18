@@ -26,13 +26,13 @@ def test_episode_and_tutorial_prompts_unchanged(tutorial):
     assert actual == old
 
 
-def test_scope_handoff_only_replaces_single_task_throughline():
+def test_scope_handoff_preserves_audience_and_does_not_repeat_instructions():
     topic = {'title': '国内工具怎样搭配', 'fields': {'目标受众': '学生与日常办公用户'}}
     args = dict(column_style='原栏目风格', target_minutes=3, budget=0,
                 topic_fields=('操作与演示',), original_material='完整原始材料及其结尾')
     old = writer._request('研究底稿', topic, **args)
     actual = writer._request('研究底稿', topic | {'preserve_audience_scope': True}, **args)
-    assert actual.replace("例子帮助目标观众理解本题，不把例中人的身份当作整篇的观看前提。", "", 1) == old
+    assert actual == old  # The scope guidance is already in the system prompt.
     for value in ('约 3 分钟', '学生与日常办公用户', '原栏目风格', '完整原始材料及其结尾'):
         assert value in actual
 

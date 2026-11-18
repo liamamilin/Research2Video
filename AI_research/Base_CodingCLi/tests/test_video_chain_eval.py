@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from core import engine, events
-from scripts import eval_video_chain as evaluation
+from scripts import eval_video_chain as evaluation, trial_storage
 
 
 def test_report_attempts_do_not_share_production_workspace_or_event_memory(tmp_path, monkeypatch):
@@ -66,6 +66,23 @@ def test_validation_output_compatibility_link_resolves_to_isolated_root(tmp_path
     link.parent.mkdir()
     link.symlink_to(target, target_is_directory=True)
     assert evaluation.validation_output(link) == target
+
+
+def test_external_trial_refuses_local_storage_and_does_not_replace_offline_link(tmp_path, monkeypatch):
+    alias = tmp_path / "autovideo/g3/data/trials"
+    alias.mkdir(parents=True)
+    with pytest.raises(ValueError, match="仍在本机"):
+        trial_storage.trial_directory("autovideo", "trial", tmp_path)
+    assert list(alias.iterdir()) == []
+
+    alias.rmdir()
+    mount = Path("/Volumes/offline-trial-test")
+    alias.symlink_to(mount / "storage", target_is_directory=True)
+    monkeypatch.setattr(trial_storage.os.path, "ismount", lambda path: False)
+    with pytest.raises(ValueError, match="外接盘未挂载"):
+        trial_storage.trial_directory("autovideo", "trial", tmp_path)
+    assert alias.is_symlink()
+    assert alias.readlink() == mount / "storage"
 
 
 def test_active_scope_includes_ungrouped_jobs_and_excludes_archived_and_generated(tmp_path, monkeypatch):

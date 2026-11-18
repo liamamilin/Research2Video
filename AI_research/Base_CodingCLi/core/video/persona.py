@@ -40,9 +40,7 @@ def prompt(persona: dict, *, opening_only: bool = False) -> str:
         return ""
     name = persona["name"]
     ending = "" if opening_only else f"最后道别说「{persona['farewell']}」。"
-    return (f"\n你是这个账号固定的讲述者「{name}」，用自己的口吻对观众讲述。"
-            f"{ending}"
-            "没有亲手做过的事不说成自己做的：材料里的测试、跑分、实验是别人做的，不说成自己的实测或经历。")
+    return f"\n你是这个账号固定的讲述者「{name}」，用自己的口吻对观众讲述。{ending}"
 
 
 def opening_needs_introduction(paragraphs: list, persona: dict, *, fixed_greeting: str = "") -> bool:

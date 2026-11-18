@@ -3,5 +3,10 @@ description: 矩阵运营验收用研究任务：跟踪本地编程 Agent 公开
 enabled: false
 keywords: []
 language: zh
-prompt: 跟踪本地编程 Agent 的公开进展，整理开发者关心的新能力和实际取舍
+search: false
+sources_limit: 6
+sources:
+  - "rss:https://github.com/anomalyco/opencode/releases.atom"
+prompt: |
+  从公开发行说明中挑一项会改变开发者日常动作的进展。围绕一次具体任务，说清升级前后能怎样运行、查看进度或接着做，以及取舍在哪里。整理动作和可用的例子供作者取材，附发行说明。
 output: output/{date}_Assistant_Ops_Acceptance_20261025.md

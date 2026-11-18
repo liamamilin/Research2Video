@@ -402,6 +402,18 @@ def _write(**kwargs):
     return writer.write(**{**defaults, **kwargs})
 
 
+def test_episode_accepts_titled_citations_without_bypassing_source_filter(llm):
+    llm.replies = [script_json(citations={
+        (0, 0): [{"url": GOOD, "title": "公开的资料"}, {"url": OUTSIDE, "title": "无关资料"}],
+    })]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期", "content_mode": "episode"},
+                           column_style="", target_minutes=2, llm_config=None)
+    paragraph = written.sections[0]["paragraphs"][0]
+    assert len(llm.calls) == 1
+    assert paragraph["citations"] == [GOOD]
+    assert paragraph["evidence"] == "NEEDS_REVIEW"
+
+
 def test_writer_keeps_only_citations_the_report_traced(llm):
     llm.replies = [script_json(citations={(0, 0): [GOOD], (0, 1): [BAD], (0, 2): [OUTSIDE, GOOD_2]})]
     written = _write()

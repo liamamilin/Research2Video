@@ -1,0 +1,6 @@
+# Test-only excerpt of the untracked science-chain narration contract.
+# This is not a production recipe, job, or schedule.
+writing:
+  pipeline: single
+  style: "面向本条选题的目标观众，讲清这件新事。"
+prompt_requirement: "说明适用范围和尚待验证的部分"

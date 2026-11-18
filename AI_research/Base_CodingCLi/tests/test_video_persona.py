@@ -138,7 +138,7 @@ def test_a_series_item_promises_its_next_episode(llm):
 
 
 def test_hooks_stay_with_the_viewer_and_the_named_angle_is_kept():
-    assert writer.OPENING_RULE in writer.SYSTEM_PROMPT and writer.OPENING_RULE in writer.EPISODE_PROMPT
+    assert writer.OPENING_RULE in writer.SYSTEM_PROMPT and writer.EPISODE_LEAD in writer.EPISODE_PROMPT
     assert writer.ANGLE_RULE in writer.SYSTEM_PROMPT and writer.ANGLE_RULE in writer.EPISODE_PROMPT
 
 

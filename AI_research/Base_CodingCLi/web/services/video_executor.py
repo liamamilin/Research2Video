@@ -328,6 +328,13 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
             out["hold"] = f"文稿没过审（{verdict['text']}），没有出片：" + "；".join(verdict["reasons"][:3]) + "。看过文稿、确认后再出片"
             out["item"] = {"gate": {**verdict, "approved": False}}
             return out
+        current = store.get_version(script["id"], script["current_version"])
+        if (current.get("meta") or {}).get("narration_blocks_auto_approval"):
+            # A new draft still has a comparison limit the repair could not say safely.
+            # This does not reopen a script that is already approved.
+            out["hold"] = "文稿还有会改变结论的证据缺口，没有自动定稿，也没有出片。请重写这一处，不要编官方没公布。"
+            out["item"] = {"gate": {**verdict, "approved": False, "narration_blocks_auto_approval": True}}
+            return out
         # any other label: the video is made, the label is shown next to it, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
         steps.log(script["id"], "approve", "approve", f"自动定稿 v{verdict['version']}（{verdict['text']}）", by="autopilot")

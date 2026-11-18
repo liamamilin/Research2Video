@@ -149,3 +149,27 @@ def test_stock_memorable_lines_made_up_bridges_and_disclaimer_hedges_are_found()
     closing = _sections()
     closing[-1]["paragraphs"].insert(0, _p("今天最值得记住的是：额度是钱，不是配额。"))
     assert polish.findings(closing, greeting=GREETING) == []
+
+
+def test_polish_can_drop_an_irrelevant_number_and_reuse_the_sections_own_result(llm):
+    sections = [{"title": "模型差别", "paragraphs": [
+        _p("Kimi K3.1 Pro 拿到 55 分。"),
+        _p("底稿另引 Kimi K3 的 25.5 分，只是背景，不是效果承诺。"),
+    ]}]
+    llm.polish_replies = [_reply(S1P2="55 分是综合成绩，选型可以先拿自己的任务试一遍。")]
+    revised, record = polish.polish(llm(None), sections)
+    assert revised[0]["paragraphs"][0] == sections[0]["paragraphs"][0]
+    assert revised[0]["paragraphs"][1]["text"] == "55 分是综合成绩，选型可以先拿自己的任务试一遍。"
+    assert not record["rejected"]
+
+
+
+def test_replacement_does_not_repeat_the_preceding_paragraph(llm):
+    prior = "女王的措辞也有秘书的声音。"
+    sections = _sections([prior, "材料里写过，公开信强调了对手的行动。"])
+    llm.polish_replies = [_reply(S2P2=prior + "公开信强调了对手的行动。")]
+    revised, record = polish.polish(llm(None), sections)
+    assert [paragraph["text"] for paragraph in revised[1]["paragraphs"]] == [
+        prior, "公开信强调了对手的行动。",
+    ]
+    assert record["changes"][0]["after"] == "公开信强调了对手的行动。"

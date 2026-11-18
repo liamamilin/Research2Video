@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from core import report_material, telemetry
 from core.errors import CancelledError
@@ -23,6 +23,7 @@ from core.provenance import extract_urls, normalize_url
 
 from . import length, persona as narrator
 from .audience_copy import findings as audience_findings
+from .narration_stance import LISTENING_DIRECTION, settle_sections
 
 MIN_CHINESE_SHARE = 0.5
 
@@ -36,6 +37,16 @@ class _Paragraph(BaseModel):
     citations: list[str] = Field(default_factory=list)
     needs_review: bool = False
     review_reason: str = ""
+
+    @field_validator("citations", mode="before")
+    @classmethod
+    def _citation_urls(cls, values: Any) -> Any:
+        # Some providers include a source title with its URL. Keep the same
+        # URL-only contract and let the existing source filter check it.
+        if isinstance(values, list):
+            return [item["url"] if isinstance(item, dict) and isinstance(item.get("url"), str) else item
+                    for item in values]
+        return values
 
 
 class _Section(BaseModel):
@@ -55,68 +66,41 @@ class _EpisodeEntrance(BaseModel):
 
 
 PROMPT_VERSION = 27
-# Title examples are suggestions; the material decides what is worth naming.
-TITLE_RULE = ("标题围绕本题最值得看的具体内容，可点名产品、作品、现象或人物；"
-              "问题、对比或有依据的判断都可以成为标题，数字有助于说明看点时再使用。"
-              "尽量简洁，方便观众快速理解，不把标题写成参数清单。")
+# The material decides what is worth naming.
+TITLE_RULE = "标题点出本期最有意思的具体事，数字有助于理解看点时再用。"
 #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
 OPENING_RULE = '从本期最值得理解的内容进入，切入点由材料和目标观众决定。'
-ENDING_RULE = ("结尾可落在本期值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；"
-               "避免把正文讲清的取舍硬凑成站队。")
+ENDING_RULE = "结尾留一个值得带走的判断、发现或下一步。有值得聊的实际体验，再问观众。"
 #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
-STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。"
-              "数字优先选对理解有用的，结合实际含义和比较口径解释；钱可以说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币）。具体的动作、现象和原话往往比概括更有帮助。"
-              "陌生术语可以换成中文或结合上下文解释；前提与限制放在有助于理解的地方，尽量避免重复。")
+STYLE_RULE = "像对一个懂行的朋友讲，多用短句。说数字时讲出实际含义，陌生术语放在情境里解释。"
 #: Narration is what viewers hear; a note to the picture ("画面里可以……") was read out and subtitled (11-10 research,
 #: spec/bilibili-growth-research-20261110/SAMPLE-O03.md). The program also rewrites what slips through (``spoken_only``).
 #: An item's 核心角度 names what it is about; the 11-10 trial narrowed to three dimensions and dropped the one point
 #: its angle named (ChatGPT's barrier for Chinese users).
-ANGLE_RULE = "选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。"
-# Concrete material supports understanding without prescribing a scene for every passage.
-CONCRETE_RULE = ("写具体，不写远：可以用材料中的具体人物、动作、现象或实际输出帮助理解，"
-                 "让解释与支持它的细节连起来；有帮助时可以引用材料中的原话、真实输出、按钮名或页面文字；"
-                 "判断可以结合实际后果解释，例如等待、操作或费用怎样改变；"
-                 "转场与解释尽量自然，让听众跟得上内容的关系；开场自我介绍可以简短说明本期具体问题；"
-                 "事实、人物、数字和亲历按材料实际记载来讲；素材只给出受影响的人群时，可用假设场景帮助理解，把设想与已有个案分清。"
-                 "把“待实测”这类制作备注留在稿外。")
-# Optional audience-scope adjustment: retain the established voice and narrative rules.
-SCOPE_CONCRETE_RULE = CONCRETE_RULE.replace(
-    "可以用材料中的具体人物、动作、现象或实际输出帮助理解，"
-    "让解释与支持它的细节连起来；",
-    "标题、开场和最终判断面向选题指定的目标受众。用具体人物、时刻、动作和例子帮助他们理解共同问题，"
-    "但不把某个例子的职业、身份或单项任务变成观看前提，也不把整篇的适用范围缩成这个例子。"
-    "若选题本来只面向专业人群，就保留该范围，不扩大成人人适用；"
-)
+ANGLE_RULE = "讲清选题答应观众要解决的问题。"
+CONCRETE_RULE = ("用材料中的人物、动作、原话或可见结果把事讲具体。"
+                 "抽象的地方可以用日常场景讲明白。")
+SCOPE_CONCRETE_RULE = (CONCRETE_RULE + "标题、开场和判断面向选题的目标受众，用例子解释他们关心的问题。"
+                       "若选题本来只面向专业人群，就把适用对象说清。")
 
 
-PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
+PICTURE_RULE = "口播只写观众听到的话，分镜和屏幕说明留给制作。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
-AUTHORING_PROMPT = GOAL + """
-当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
-找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
-沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。
-有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。
-研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。
-""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE
-SYSTEM_PROMPT = AUTHORING_PROMPT + "\n" + OPENING_RULE + """
-让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
+AUTHORING_PROMPT = "\n".join((GOAL, LISTENING_DIRECTION, "沿用上游的事实、数字和计算。",
+                              STYLE_RULE, PICTURE_RULE, ANGLE_RULE, CONCRETE_RULE))
+SYSTEM_PROMPT = "\n".join((AUTHORING_PROMPT, OPENING_RULE, TITLE_RULE, ENDING_RULE)) + """
 接口输出 JSON：
 {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
 EPISODE_LEAD = "整期可以从最值得听的具体内容进入，需要帮助观众建立方向时再简短预告。"
 EPISODE_PROMPT = AUTHORING_PROMPT + """
-你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容；同一问题的内容按解释层次组织。
-各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。
-各独立内容可以使用适合自己的对象、例子和讲述线索；同一问题的章节可以借助连贯的例子帮助理解，具体安排由材料决定。
-""" + EPISODE_LEAD + OPENING_RULE + """
-各项内容可按关联、对比或递进自然衔接；独立内容也可以直接切换。条目讲清后进入下一项，是否补充判断由内容决定。
-收尾可以留下最有价值的理解或尚值得追问的问题，尽量避免复述已经讲清的内容。""" + ENDING_RULE + """
-每个内容一个 section，内部可有多个 paragraphs。正文用 item，有独立开场或收尾时分别用 opening 或 closing。
-整期不受单条视频的篇幅限制。具体看点体现在各内容标题中；整期总标题围绕本期最值得看的内容来写，""" + TITLE_RULE + """
+这期有多个条目，各自讲清看点和必要细节；同一问题可按解释层次展开。条目之间有关系就说出关系，也可以直接切换。
+""" + EPISODE_LEAD + "\n" + ENDING_RULE + "\n" + TITLE_RULE + """
+正文每个条目用一个 item section。独立开场和结尾分别用 opening 和 closing。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
 
 EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解研究底稿中的科学问题。可以从具体现象建立疑问，用实验、观察、模型或不同尺度的例子解释因果。建议保留研究者做了什么、看到了什么，以及这些材料怎样支持解释。相关背景与例子按理解需要展开。
-""" + EPISODE_LEAD + OPENING_RULE + """
+""" + EPISODE_LEAD + """
 解释章节用 section 组织，标题体现具体内容；讲述顺序与收束方式可随本题的推理安排。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
@@ -125,7 +109,7 @@ EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
 
 BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解一门生意怎样运转。具体交易可用来说明客户需求、付款、交付和协作；成本、收益、风险及参与者关系值得展开。可以按实际材料选择业务过程、对比或其它清楚的讲法。
-""" + EPISODE_LEAD + OPENING_RULE + """
+""" + EPISODE_LEAD + """
 业务章节用 section 组织，标题体现具体内容；收束可落在本题有依据的经营认识上。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
@@ -134,7 +118,7 @@ BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
 
 ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众读懂作品的表达。构图、材质、声音、创作动作和观看感受可以成为理解的入口；历史背景或相邻作品有助于解释时也可展开。建议让评论与可以辨认的细节相连。
-""" + EPISODE_LEAD + OPENING_RULE + """
+""" + EPISODE_LEAD + """
 讲述章节用 section 组织，标题体现具体作品或值得理解的内容；切入和收束可由材料决定。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
@@ -143,7 +127,7 @@ ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
 
 CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期围绕选定的文化问题解释它的来路。代表作品、创作者行动、展示或传播处境可以帮助观众理解现象怎样形成或改变；相关作品之间的联系与差别按本题需要展开。建议把文化认识落在具体细节与背景上。
-""" + EPISODE_LEAD + OPENING_RULE + """
+""" + EPISODE_LEAD + """
 讲述章节用 section 组织，标题体现具体内容；可以按本题的因果、时间或作品关系展开。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
@@ -152,7 +136,7 @@ CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
 
 MANUFACTURING_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解产品或部件怎样制造和交付。可以沿实际工序解释工具的作用、材料或结构的变化以及前后依赖；规格、伙伴、对照工艺与交付条件有助于理解时展开。建议保留能说明制造难点的具体过程与结果。
-""" + EPISODE_LEAD + OPENING_RULE + """
+""" + EPISODE_LEAD + """
 制造章节用 section 组织，标题体现具体内容；可以按理解需要选择切入点和收束。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
@@ -226,22 +210,10 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
     material = f"## 素材\n{report}"
     if original_material is not None:
         programme = topic.get("content_mode") == "episode"
-        pacing = ("整期篇幅由内容决定，各项分别安排解释的深浅。" if programme else
-                  f"配方参考片长约 {target_minutes:g} 分钟，按栏目目标安排解释的深浅。")
-        throughline = "具体例子、参数与背景可按对本题的解释价值取用，组织方式由材料决定。"
-        if topic.get("preserve_audience_scope") is True and not programme:
-            throughline += "例子帮助目标观众理解本题，不把例中人的身份当作整篇的观看前提。"
-        material = (
-            f"## 讲述节奏\n{pacing}"
-            "优先把关键动作、机制和结果讲清楚，片长作为节奏参考，不机械按字数压缩。\n\n"
-            "## 本期研究底稿\n" + report
-            + "\n\n## 对应原始材料\n" + (original_material or "本期沿用研究底稿，未附独立原始材料。")
-            + "\n\n## 创作衔接\n"
-            "结合底稿中的背景、关系与机制解释，以及原始材料的具体细节，围绕本期问题写完整口播。"
-            "让具体例子中的对象、操作过程与结果帮助观众理解；重要机制可以充分展开。"
-            + throughline
-            + "篇幅与顺序服务于理解，不按固定比例缩写底稿，也不逐节复述。"
-        )
+        pacing = "整期篇幅由内容决定。" if programme else f"配方参考片长约 {target_minutes:g} 分钟。"
+        material = f"## 讲述节奏\n{pacing}\n\n## 本期研究底稿\n{report}"
+        if original_material:
+            material += f"\n\n## 对应原始材料\n{original_material}"
     return (
         f"## 目标观众\n{fields.get('目标受众') or '普通观众'}\n\n"
         f"{direction}"
@@ -589,6 +561,11 @@ def write(
     sections, check = _finalize(script, allowed, target_minutes, voice)
     if programme:
         check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
+    sections, stance = settle_sections(sections)
+    if stance["changes"] and not stance.get("kept_original"):
+        check = {**length.measure(sections, None if programme else target_minutes, voice=voice),
+                 "dropped_citations": check.get("dropped_citations", 0),
+                 **({"duration_policy": "content"} if programme else {})}
     from core.video import episodes
     title = episodes.publication_title(topic, script.title.strip())
     return WrittenScript(
@@ -601,6 +578,8 @@ def write(
               "model_switches": list(getattr(client, "model_switches", [])),
               "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
+              **({"narration_gaps": stance["gaps"]} if stance.get("gaps") else {}),
+              **({"narration_blocks_auto_approval": True} if stance.get("blocks_auto_approval") else {}),
               "creative_direction": column_style.strip(),
               "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
               "trusted_urls": len(allowed),
