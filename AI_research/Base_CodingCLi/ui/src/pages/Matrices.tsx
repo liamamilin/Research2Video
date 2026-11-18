@@ -1,3 +1,4 @@
+import { useChainScope } from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Activity, ArrowUpRight, Boxes, ChevronRight, RefreshCw, Search, TriangleAlert } from "lucide-react";
@@ -153,6 +154,7 @@ function MatrixMaintenance({ rows, canEdit }: { rows: Matrix[]; canEdit: boolean
 }
 
 export function MatricesPage() {
+  const chainScope=useChainScope();
   const navigate = useNavigate();
   const canEdit = useCanEdit();
   const [data, setData] = useState<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] } | null>(null);
@@ -180,7 +182,7 @@ export function MatricesPage() {
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); flight.current?.abort(); flight.current = null; };
   }, [load]);
-  const rows = data?.matrices ?? [];
+  const rows = (data?.matrices ?? []).filter(m=>!chainScope.key||m.key===chainScope.data?.matrix_key);
   const active = rows.filter((m) => !m.archived && (!m.content?.role || m.content.role === "domain"));
   const sources = rows.filter((m) => !m.archived && m.content?.role && m.content.role !== "domain");
   const scope = archived === "1" ? rows.filter((m) => m.archived) : archived === "sources" ? sources : active;
@@ -456,6 +458,7 @@ function CopyForm({ matrix, onDone }: { matrix: Matrix; onDone: (key: string) =>
 }
 
 export function MatrixDetailPage() {
+  const chainScope = useChainScope();
   const { key = "" } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -464,7 +467,7 @@ export function MatrixDetailPage() {
   const [params, setParams] = useSearchParams();
   const [matrix, setMatrix] = useState<Matrix | null>(null);
   const business = matrix?.content?.role === "domain";
-  const tab = ["columns", "themes", "jobs", "runs", "week", "settings"].includes(params.get("tab") ?? "")
+  const tab = chainScope.key ? "jobs" : ["columns", "themes", "jobs", "runs", "week", "settings"].includes(params.get("tab") ?? "")
     ? params.get("tab")! : params.get("job") ? "jobs" : business ? "columns" : "jobs";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -524,6 +527,25 @@ export function MatrixDetailPage() {
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [anyRunning, load, business, tab]);
   if (!matrix || matrix.key !== key) return <div className="space-y-4"><Link className="text-xs text-accent hover:underline" to="/matrices">← 全部矩阵</Link>{error ? <ErrorState error={error} onRetry={load} /> : <div className="card p-8 text-sm text-text-muted" role="status">正在读取矩阵…</div>}</div>;
+  if (chainScope.key) {
+    if (!chainScope.data) return <p role={chainScope.error ? "alert" : "status"} className="card p-6 text-sm">{chainScope.error || "正在读取链路范围…"}</p>;
+    const scopedMembers = matrix.members.filter((member) => chainScope.job(member.job));
+    const scopedConfigs = configs?.filter((config) => chainScope.output(config.key));
+    return <div className="space-y-5">
+      <header className="space-y-2"><h1 className="text-xl font-semibold">{matrix.content?.name || matrix.name} · {chainScope.data.name}</h1>
+        <p className="text-xs text-text-muted">只显示当前链路的研究和视频输出。矩阵的共用栏目、关键词、预算和主题设置会影响其他链路，请在整个矩阵中管理。</p>
+        <div className="flex flex-wrap gap-3 text-xs"><Link className="text-accent" to={`/chains/${chainScope.key}`}>返回链路与运行记录</Link>
+          <Link className="text-accent" to={`/scheduler?chain=${encodeURIComponent(chainScope.key)}`}>本链路周期</Link>
+          <Link data-chain-exit="true" className="text-accent" to={`/matrices/${encodeURIComponent(matrix.key)}`}>查看整个矩阵与共用设置</Link></div>
+      </header>
+      {error ? <ErrorState error={error} onRetry={load} compact /> : null}
+      {configError ? <ErrorState error={configError} onRetry={() => setConfigRetry((n) => n + 1)} compact /> : null}
+      <section aria-label="当前链路研究" className="space-y-3">{scopedMembers.map((member) => <MemberCard key={member.job} member={member} matrixKey={matrix.key}
+        canEdit={canEdit} isAdmin={isAdmin} configs={scopedConfigs ? { count: scopedConfigs.length, auto: scopedConfigs.filter((c) => c.auto > 0).length } : null}
+        onChanged={(next) => { if (next) setMatrix(next); else void load(); }} />)}</section>
+      <ProductionConfigs key={`${matrix.key}-${chainScope.key}`} members={scopedMembers} canEdit={canEdit} />
+    </div>;
+  }
   const stats = summary(matrix);
   const jobs = matrix.members.map((m) => m.job);
   const save = async (fields: { domain?: string; keywords?: string[]; jobs?: string[] }) => {

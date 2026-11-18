@@ -26,8 +26,8 @@ def snapshot() -> dict:
 def validate_entry(key: str, fields: dict) -> None:
     if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}', key):
         raise ValueError('信息源 ID 使用字母、数字、下划线、点或连字符')
-    if set(fields) - {'name', 'spec', 'tags', 'note'}:
-        raise ValueError('仅支持 name、spec、tags、note')
+    if set(fields) - {'name', 'spec', 'tags', 'note', 'enabled'}:
+        raise ValueError('仅支持 name、spec、tags、note、enabled')
     spec = fields.get('spec', '')
     kind, _, target = spec.partition(':')
     if kind not in sources._ADAPTERS or not target.strip():
@@ -50,6 +50,12 @@ def usages(registry: dict, key: str) -> list[dict]:
         data = load_job(paths.jobs_dir, job) or {}
         refs = [s for s in data.get('sources') or [] if s == 'source:' + key or
                 str(s).startswith('tag:') and str(s)[4:] in entry.get('tags', [])]
+        if entry.get('spec') in (data.get('sources') or []):
+            refs.append(entry['spec'])
+        from core import source_supply, source_coverage
+        profile=source_supply.for_job(paths.config_dir,{**data,'_file':job})
+        if profile and any(x['spec']==entry.get('spec') for x in source_coverage.targets(profile,job)):
+            refs.append(entry['spec'])
         if refs:
             result.append({'job': job, 'name': data.get('name') or job, 'references': refs})
     return result

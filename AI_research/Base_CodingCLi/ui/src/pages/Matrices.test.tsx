@@ -74,6 +74,28 @@ const at = (path: string) =>
   );
 
 describe("Matrices", () => {
+  it("keeps the linked matrix on its own research and outputs and exposes shared settings explicitly", async () => {
+    const original = vi.mocked(fetch).getMockImplementation()!;
+    PRODUCTION = [{ key: "own", job: "monitoring/ai_flash_discovery", recipe: "flash", name: "本链路输出", auto: 1, errors: [], split: "each" },
+      { key: "other", job: "research/deep", recipe: "deep", name: "其他链路输出", auto: 1, errors: [], split: "each" }];
+    vi.mocked(fetch).mockImplementation(async (url, init) => {
+      if (String(url).endsWith("/api/chains/flash/scope")) return { ok: true, status: 200, text: async () => JSON.stringify({
+        key: "flash", name: "快讯链路", job: "monitoring/ai_flash_discovery", matrix_key: "ai", outputs: ["own"], script_ids: [] }) } as Response;
+      return original(url, init);
+    });
+    at("/matrices/ai?chain=flash&tab=settings");
+    expect(await screen.findByRole("region", { name: "当前链路研究" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "AI Flash Discovery" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "AI 深度" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "矩阵设置" })).toBeNull();
+    const shared = screen.getByRole("link", { name: "查看整个矩阵与共用设置" });
+    expect(shared.getAttribute("href")).toBe("/matrices/ai");
+    expect(shared.getAttribute("data-chain-exit")).toBe("true");
+    expect(screen.getByText(/共用栏目、关键词、预算和主题设置会影响其他链路/)).toBeTruthy();
+    expect(await screen.findByText("本链路输出")).toBeTruthy();
+    expect(screen.queryByText("其他链路输出")).toBeNull();
+  });
+
   it("keeps business domains in the main list and research groups in the source view", async () => {
     const business = { ...AI, content: { role: "domain", name: "AI 与科技", audience: "开发者" },
       content_summary: { columns: 5, configured: 5, planned: 0 } };

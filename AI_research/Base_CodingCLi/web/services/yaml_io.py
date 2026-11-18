@@ -177,6 +177,9 @@ def atomic_create(file_path: str, content: str):
         FileExistsError: the path is already taken.
         IOError: any other write failure.
     """
+    from core.config_transaction import before_write
+    before_write(file_path, content)
+
     directory = os.path.dirname(file_path) or "."
     fd, tmp_path = tempfile.mkstemp(dir=directory, prefix=os.path.basename(file_path) + ".tmp.")
     try:
@@ -212,6 +215,9 @@ def atomic_write(file_path: str, content: str):
 
     Does NOT back up; that is the caller's choice.
     """
+    from core.config_transaction import before_write
+    before_write(file_path, content)
+
     directory = os.path.dirname(file_path) or "."
     fd, tmp_path = tempfile.mkstemp(dir=directory,
                                     prefix=os.path.basename(file_path) + ".tmp.")

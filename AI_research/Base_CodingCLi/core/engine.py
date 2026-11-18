@@ -404,6 +404,7 @@ class ResearchEngine:
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation, "material": material,
+                                         **({"chain_run_id": context["chain_run_id"]} if context.get("chain_run_id") else {}),
                                          **({"audience_strategy": {"strategy": audience_detail["strategy"], "channel": audience_detail["channel"], "candidate_count": audience_detail.get("candidate_count"), "receipt": receipt_path, **({"question_material": question_material.MARKER} if audience_detail.get("question_material", {}).get("status") == "enriched" else {})}} if audience_detail and audience_detail.get("status") != "kept_original" else {}),
                                          **({'production_issue':usage['production_issue']} if (usage or {}).get('production_issue') else {}),
                                          **({"research_dossier": dossier_detail} if dossier_detail else {})})

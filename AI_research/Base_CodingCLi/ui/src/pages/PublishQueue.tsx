@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { documentPublishLink } from "@/lib/platform-links";
 import { useTopicPosition } from "@/lib/use-topic-position";
 import { useCallback, useRef, useState } from "react";
@@ -49,6 +50,7 @@ export function matchesTodo(row: Shipment, value: string, platform: string) {
 }
 
 export function PublishQueuePage() {
+  const chainScope=useChainScope();
   const root = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [params, setParams] = useSearchParams();
@@ -71,7 +73,7 @@ export function PublishQueuePage() {
 
   const { values: f } = filters;
   const limit = Math.max(PAGE_SIZE, Math.min(100000, Number(params.get("limit")) || PAGE_SIZE));
-  const scope = (rows ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
+  const scope = (rows ?? []).filter((s) => chainScope.script(s.script_id) && (!f.matrix || (s.matrix || "_independent") === f.matrix));
   const matrixOptions = [...new Map((rows ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
   const shown = scope.filter(
     (s) =>

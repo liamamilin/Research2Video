@@ -65,7 +65,13 @@ def index_file(output_dir: str, rel_path: str) -> bool:
         size = stat.st_size
         title = extract_title(full_path)
         category = Path(rel_path).parts[0] if len(Path(rel_path).parts) > 1 else ""
-        job_name = infer_job_name(rel_path)
+        from core import report_meta
+        from web.settings import get_settings
+        from core.config import load_job
+        metadata = report_meta.load_all().get(rel_path, {})
+        declared = metadata.get("job")
+        job = load_job(get_settings().paths.jobs_dir, declared) if declared else None
+        job_name = (job.get("_file", declared) if job else None) or infer_job_name(rel_path)
 
         # Read the document for full-text indexing. Reports used to be
         # truncated at 100KB and files >= 500KB were skipped entirely, so

@@ -563,7 +563,7 @@ def load_registry(config_dir: str = "config") -> dict[str, dict]:
             raise RegistryError(f"信息源 {key} 的 spec 不对：{spec or '（空）'}")
         tags = entry.get("tags") or []
         out[str(key)] = {"name": str(entry.get("name") or key), "spec": spec,
-                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or "")}
+                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or ""), "enabled": entry.get("enabled", True)}
     return out
 
 
@@ -573,11 +573,10 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
     Raises ``RegistryError`` for an id or tag the registry does not have: a Job must not run on fewer sources than it
     asked for without anyone being told. A caller resolving many Jobs may supply one already loaded registry
     so the entire operation sees the same configuration snapshot."""
-    if not any(str(s).startswith(("source:", "tag:")) for s in specs or []):
-        return list(specs or [])
     if registry is None:
         registry = load_registry(config_dir)
     out: list[str] = []
+    disabled = {e["spec"] for e in registry.values() if not e.get("enabled", True)}
     for spec in specs:
         spec = str(spec).strip()
         kind, _, target = spec.partition(":")
@@ -591,7 +590,7 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
                 raise RegistryError(f"信息源注册表里没有标签 {target.strip()} 的源")
         else:
             found = [spec]
-        out += [f for f in found if f not in out]
+        out += [f for f in found if f not in out and f not in disabled]
     return out
 
 

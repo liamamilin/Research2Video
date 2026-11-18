@@ -97,7 +97,7 @@ describe("Layout sidebar", () => {
     expect(aside?.className).toContain("translate-x-0");
     expect(aside?.className).not.toContain("-translate-x-full");
     const links = Array.from(container.querySelectorAll("nav a"));
-    expect(links.slice(0, 7).map((link) => link.textContent)).toEqual(["矩阵", "产出", "视频看板", "文稿", "成片与发布", "平台管理", "助手"]);
+    expect(links.slice(0, 8).map((link) => link.textContent)).toEqual(["链路管理", "矩阵", "产出", "视频看板", "文稿", "成片与发布", "平台管理", "助手"]);
     // 选题、信息源和文稿配方还在，放进「高级」
     const names = links.map((link) => link.textContent);
     expect(names.slice(names.indexOf("选题"), names.indexOf("选题") + 3)).toEqual(["选题", "信息源", "文稿配方"]);

@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
@@ -97,6 +98,7 @@ export function minutes(seconds: number | null | undefined): string {
 }
 
 export function VideoScriptsPage() {
+  const chainScope=useChainScope();
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
   const toast = useToast();
@@ -188,7 +190,7 @@ export function VideoScriptsPage() {
     const stage = stageOf(x);
     return stage === "WRITING" ? "RESEARCHING" : stage;
   };
-  const scope = (scripts ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
+  const scope = (scripts ?? []).filter((s) => chainScope.script(s.id) && (!f.matrix || (s.matrix || "_independent") === f.matrix));
   const matrixOptions = [...new Map((scripts ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
   const columnName = (key: string) => (scripts ?? []).find((s) => s.column_key === key)?.column_label || cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") || configNames[key] || key;
   const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : key === "published" ? Boolean(x.published) : chipOf(x) === key;

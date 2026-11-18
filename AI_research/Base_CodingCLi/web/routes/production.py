@@ -5,6 +5,7 @@ recipe (the same path as the topics page), with the config recorded on the scrip
 """
 
 from __future__ import annotations
+from web.services.chains import mutation
 
 from typing import Optional
 
@@ -74,6 +75,7 @@ class RenderSettingsIn(BaseModel):
 
 
 @router.patch('/{key}/settings')
+@mutation
 def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(require_editor)) -> dict:
     import hashlib
     from pathlib import Path
@@ -182,6 +184,7 @@ class ConfigIn(BaseModel):
 
     job: str
     recipe: str
+    chain_key: str = Field(default="", max_length=60)
     audience: str = ""
     minutes: Optional[float] = None
     reverify: Optional[bool] = None
@@ -197,14 +200,22 @@ class ConfigIn(BaseModel):
 
 
 @router.post("", status_code=201)
+@mutation
 def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     paths = get_settings().paths
     every = _all()
     recipe, audience = body.recipe.strip(), body.audience.strip()
     column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience, body.minutes, body.reverify)
     stem = column if production.KEY.fullmatch(column) else "config"  # named after the column it writes with
+    from web.services import chains
+    reserved = set(every)
+    for chain in chains.metadata().values():
+        reserved.update(chain.get("outputs", []))
+        reserved.update(chain.get("retired_outputs", []))
+    with store.connect() as db:
+        reserved.update(row[0] for row in db.execute("SELECT DISTINCT production FROM scripts WHERE production!=''"))
     key, n = stem, 2
-    while key in every:
+    while key in reserved:
         key, n = f"{stem}-{n}", n + 1
     production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience,
                     minutes=body.minutes, reverify=body.reverify, auto=body.auto, render=body.render)
@@ -212,6 +223,8 @@ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write
         raise _error(422, "invalid_config", "；".join(made.errors) if made else "建不起来")
+    if body.chain_key:
+        chains.attach_output(body.chain_key, key)
     audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience, "minutes": body.minutes,
                                                    "reverify": body.reverify, "auto": body.auto})
     return {**made.as_dict(), "scripts": 0}
@@ -224,6 +237,7 @@ class AutoIn(BaseModel):
 
 
 @router.patch("/{key}")
+@mutation
 def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
     """Turn the unattended writing of a config on or off. Only reports that come out afterwards are written."""
     config = _get(key)
@@ -244,9 +258,11 @@ def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
 
 
 @router.delete("/{key}")
+@mutation
 def remove_config(key: str, user=Depends(require_editor)) -> dict:
     _get(key)
-    production.remove(get_settings().paths.config_dir, key)
+    from web.services import chains
+    chains.remove_output(key)
     audit.log("production_remove", user=user["username"], target=key)
     return {"ok": True, "note": "已经写好的文稿和成片都还在"}
 

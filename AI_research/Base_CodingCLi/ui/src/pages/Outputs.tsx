@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, ChevronRight, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
@@ -77,6 +78,7 @@ function ByOwner({ data, rows, matrix, onSelect, limit }: { data: Outputs; rows:
 }
 
 export function OutputsPage() {
+  const chainScope=useChainScope();
   const filters = useFilters(["matrix", "render", "range", "archived"]);
   const [params, setParams] = useSearchParams();
   const { q, matrix, render, range } = filters.values;
@@ -112,12 +114,12 @@ export function OutputsPage() {
   const scoped = useMemo(() => {
     if (!data) return [];
     const since = range ? Date.now() - Number(range) * 86400000 : 0;
-    return data.scripts.filter((s) => (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
+    return data.scripts.filter((s) => chainScope.output(s.production) && (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
       && matchesText(q, s.title, s.production_name, s.column_key, s.report_path, s.report_date, s.job, s.matrix, jobName(data, s.job), matrixName(data, ownerKey(s))))
       .sort((a, b) => newest ? b.created_at.localeCompare(a.created_at) : a.created_at.localeCompare(b.created_at));
-  }, [data, range, render, newest, q]);
+  }, [data, range, render, newest, q, chainScope]);
   const rows = useMemo(() => scoped.filter((s) => !matrix || ownerKey(s) === matrix), [scoped, matrix]);
-  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })) : [];
+  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })).filter(x=>!chainScope.key||x.count>0) : [];
   const dates = new Map<string, OutputScript[]>();
   for (const row of rows.slice(0, limit)) { const day = row.created_at.slice(0, 10); const group = dates.get(day) || []; group.push(row); dates.set(day, group); }
   const units = view === "owner" && !matrix ? new Set(rows.map(ownerKey)).size : rows.length;

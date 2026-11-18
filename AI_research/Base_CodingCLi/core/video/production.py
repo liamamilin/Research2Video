@@ -29,6 +29,7 @@ reports turn into, and every script records which config made it.
 
 from __future__ import annotations
 
+from core.config_transaction import remove as remove_config_file
 import os
 import time
 from dataclasses import dataclass, field, replace
@@ -352,7 +353,7 @@ def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:
 
 def remove(config_dir: str, key: str) -> bool:
     try:
-        os.remove(os.path.join(directory(config_dir), f"{key}.yaml"))
+        remove_config_file(os.path.join(directory(config_dir), f"{key}.yaml"))
         return True
     except FileNotFoundError:
         return False

@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useLayoutEffect, useRef, type ReactNode, type SyntheticEvent } from "react";
-import { Link, Outlet, useLocation, useNavigationType } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigationType, useNavigate } from "react-router-dom";
+import { ChainContext } from "./ChainContext";
 import { PageLoading } from "./PageLoading";
 import { AssistantDrawer } from "./AssistantDrawer";
 import { Sidebar } from "./Sidebar";
@@ -25,6 +26,8 @@ export function Layout() {
   const { sidebarOpen, toggleSidebar, closeSidebar, setSidebar } = useAppStore();
   const main = useRef<HTMLElement>(null);
   const location = useLocation();
+  const navigate=useNavigate();
+  const chain=new URLSearchParams(location.search).get("chain") || /^\/chains\/(?!new$)([^/]+)$/.exec(location.pathname)?.[1];
   const from = new URLSearchParams(location.search).get("from") ?? "";
   const navigation = useNavigationType();
   const page = location.pathname === "/reports/view"
@@ -62,7 +65,13 @@ export function Layout() {
   ) : null;
 
   return (
-    <div className="flex h-screen overflow-hidden" onPointerOverCapture={preloadDestination}
+    <div className="flex h-screen overflow-hidden" onClickCapture={e=>{
+      const anchor=e.target instanceof Element?e.target.closest('a[href]'):null;
+      if(!chain||!(anchor instanceof HTMLAnchorElement)||anchor.dataset.chainExit||anchor.target||anchor.hasAttribute('download')||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
+      const to=new URL(anchor.href,window.location.href);
+      if(to.origin!==window.location.origin||to.pathname.startsWith('/chains')||to.pathname.startsWith('/api/')||to.searchParams.has('chain'))return;
+      to.searchParams.set('chain',chain);e.preventDefault();e.stopPropagation();navigate(to.pathname+to.search+to.hash);handleNavigate();
+    }} onPointerOverCapture={preloadDestination}
       onFocusCapture={preloadDestination} onTouchStartCapture={preloadDestination}>
       {backdrop}
       <Sidebar open={sidebarOpen} onNavigate={handleNavigate} />
@@ -81,6 +90,7 @@ export function Layout() {
           <Link className="text-accent font-medium hover:underline" to={`/video/${encodeURIComponent(from)}?tab=draft`}>← 返回文稿，继续迭代</Link>
           <span className="text-text-muted">保存配置后回到文稿重新生成，已有结果会保留。</span>
         </div> : null}
+        <ChainContext />
         <Suspense fallback={<PageLoading />}><Outlet /></Suspense>
         </main>
       </div>

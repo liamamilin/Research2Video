@@ -33,6 +33,8 @@ def profiles(config_dir: str) -> dict[str, dict]:
 
 
 def for_job(config_dir: str, job: dict) -> dict | None:
+    if job.get("source_supply_enabled") is False:
+        return None
     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
 
 
@@ -153,7 +155,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     metadata = {r['spec']: r for r in automatic}
     metadata.update({r['spec']: r for r in coverage})
     reference_specs.update(r['spec'] for r in coverage if r['role'] in {'state', 'snapshot'})
-    specs = list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic]))
+    specs = resolve(list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic])), engine.config_dir)
     # Snapshot volume is useful context but cannot displace product changes and articles.
     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
     scan = int(profile.get("scan_limit", 80))

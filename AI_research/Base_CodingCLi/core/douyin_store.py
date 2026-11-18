@@ -15,6 +15,9 @@ ACTIVE = ("QUEUED", "RUNNING")
 class DouyinStore:
     def __init__(self, state_dir: str):
         self.path = str(Path(state_dir) / "douyin.db")
+        sqlite_util.initialize_schema_once(self.path, self._initialize_schema)
+
+    def _initialize_schema(self):
         with self.connect(write=True) as conn:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS jobs (

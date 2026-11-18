@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import re
+import sqlite3
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -475,7 +476,14 @@ def start(render_id: str, *, client: Optional[AutoVideoClient] = None) -> None:
 
     def _target() -> None:
         try:
-            process(render_id, client=client)
+            while True:
+                try:
+                    process(render_id, client=client)
+                    break
+                except sqlite3.OperationalError as exc:
+                    if not _database_busy(exc):raise
+                    logger.warning('Render %s waits for local database; preserving the existing remote task',render_id)
+                    time.sleep(2)
         finally:
             with _running_lock:
                 _running.discard(render_id)
@@ -493,6 +501,10 @@ def resume_active() -> int:
     for render_id in ids:
         start(render_id)
     return len(ids)
+
+
+def _database_busy(exc: Exception) -> bool:
+    return isinstance(exc,sqlite3.OperationalError) and any(word in str(exc).lower() for word in ('locked','busy'))
 
 
 def process(render_id: str, *, client: Optional[AutoVideoClient] = None) -> str:
@@ -517,6 +529,7 @@ def process(render_id: str, *, client: Optional[AutoVideoClient] = None) -> str:
                         _timing(render_id, process_seconds=round(previous.get("process_seconds", 0)
                                                                  + time.monotonic() - started, 3))
             except Exception as exc:  # noqa: BLE001 - a crashed render must not look in-flight
+                if _database_busy(exc):raise
                 logger.exception("video render %s crashed", render_id)
                 return _fail(render_id, "INTERNAL_ERROR", f"{type(exc).__name__}: {exc}")
     except TimeoutError:

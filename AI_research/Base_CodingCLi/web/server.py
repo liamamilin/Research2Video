@@ -134,6 +134,13 @@ async def lifespan(app: FastAPI):
         logger.info("Indexed %d reports from %s", scan_result["indexed"], settings.paths.output_dir)
     elif scan_result["indexed"] == 0:
         logger.info("No reports found in %s", settings.paths.output_dir)
+    def associate_chain_reports():
+        try:
+            from web.services.chain_reports import reconcile
+            reconcile()
+        except Exception:
+            logger.exception('Report producer association deferred')
+    # Run after video initialization below; no replacement of the native lifespan.
     # Start incremental file watcher
     start_watcher(settings.paths.output_dir, state_dir=settings.paths.state_dir)
 
@@ -152,6 +159,7 @@ async def lifespan(app: FastAPI):
 
     video_store.use_state_dir(settings.paths.state_dir)
     video_store.init_db()
+    threading.Thread(target=associate_chain_reports,name="chain-report-association",daemon=True).start()
     from web.services import distributions
     distributions.migrate_confirmed_accounts()
     recover_video_work()
@@ -183,7 +191,10 @@ async def lifespan(app: FastAPI):
             try:
                 from web.services import video_storage
                 if not video_storage.migration_pending():
+                    from web.services import chain_runner
+                    chain_runner.tick()
                     video_autopilot.tick()
+                    chain_runner.tick()
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
@@ -294,10 +305,28 @@ async def lifespan(app: FastAPI):
         except Exception:  # noqa: BLE001
             logger.exception("experiments module did not start")
 
+    # Keep WAL databases open without a read transaction. On external storage,
+    # closing the last short-lived reader repeatedly checkpoints/reopens the WAL.
+    import sqlite3
+    from web.services import chains
+    with chains.db():
+        pass
+    database_anchors = []
+    database_paths = [Path(settings.paths.state_dir) / name for name in
+                      ('video.db', 'reports.db', 'schedules.db', 'users.db', 'platforms.db', 'douyin.db', 'chains.db')]
+    database_paths.extend((Path(settings.paths.state_dir) / 'platforms').glob('*/queue.db'))
+    for path in database_paths:
+        if path.is_file():
+            anchor = sqlite3.connect(str(path), timeout=10)
+            anchor.execute('SELECT name FROM sqlite_master LIMIT 1').fetchall()
+            database_anchors.append(anchor)
+
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
     yield
     sweep_stop.set()
+    for anchor in database_anchors:
+        anchor.close()
     # Shutdown: cancel all running tasks
     registry = TaskRegistry()
     running = registry.all_running()
@@ -459,6 +488,8 @@ def create_app() -> FastAPI:
     app.include_router(video_brands_router)
     app.include_router(sources_router)
     app.include_router(production_router)
+    from web.routes.chains import router as chains_router
+    app.include_router(chains_router)
     app.include_router(outputs_router)
     app.include_router(platforms_router)
     app.include_router(douyin_router)

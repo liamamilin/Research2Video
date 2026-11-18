@@ -103,6 +103,12 @@ def autopilot_due(state_dir: str, now: float, runtime: Runtime | None = None) ->
     Reads video.db directly (stdlib only) so this works while the web app is down. With ``runtime`` it also asks whether a
     Job with auto configs has a new report to write from."""
     import sqlite3
+    chain_path=Path(state_dir)/'chains.db'
+    if chain_path.is_file():
+        try:
+            with sqlite3.connect(f'file:{chain_path}?mode=ro',uri=True,timeout=2) as db:
+                if db.execute("SELECT 1 FROM runs WHERE json_extract(data,'$.status') IN ('RUNNING','CANCELLING') LIMIT 1").fetchone():return True
+        except sqlite3.Error:pass
     path = Path(state_dir) / 'video.db'
     if not path.is_file():
         return False
@@ -196,7 +202,7 @@ def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = No
     except Exception:
         logger.exception('Video pipeline wake-up failed')
     store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity(),
-                     'issue_context_version': 1})
+                     'issue_context_version': 1, 'chain_tracking_version': 1})
     return launched
 
 

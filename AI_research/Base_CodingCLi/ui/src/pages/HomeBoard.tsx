@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Activity, ArrowUpRight, CheckCircle2, ChevronRight, ClipboardCheck, Layers, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
@@ -59,6 +60,7 @@ function VideoRow({ item }: { item: BoardItem }) {
 }
 
 export function HomeBoardPage() {
+  const chainScope=useChainScope();
   const [board, setBoard] = useState<VideoBoard | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,7 +122,7 @@ export function HomeBoardPage() {
     return [...names].map(([key, name]) => ({ key, name, count: items.filter((i) => (i.matrix || INDEPENDENT) === key).length }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
   }, [board, items]);
-  const scope = items.filter((i) => !matrix || (i.matrix || INDEPENDENT) === matrix);
+  const scope = items.filter((i) => chainScope.script(i.script_id) && (!matrix || (i.matrix || INDEPENDENT) === matrix));
   const scopeName = matrix === INDEPENDENT ? "独立视频" : matrix ? matrices.find((m) => m.key === matrix)?.name ?? "该矩阵" : "全部矩阵";
   const counts = { todo: scope.filter((i) => i.group === "todo").length, publish: scope.filter((i) => i.group === "publish").length,
     working: scope.filter((i) => i.group === "working").length, all: scope.length };

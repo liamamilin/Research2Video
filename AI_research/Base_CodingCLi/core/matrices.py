@@ -17,6 +17,7 @@ Job editor never saves the matrix's keywords into the Job file.
 
 from __future__ import annotations
 
+from core.config_transaction import remove as remove_config_file
 import os
 import re
 from dataclasses import dataclass, field
@@ -258,7 +259,7 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
 
 def remove(config_dir: str, key: str) -> bool:
     try:
-        os.remove(os.path.join(directory(config_dir), f"{key}.yaml"))
+        remove_config_file(os.path.join(directory(config_dir), f"{key}.yaml"))
         return True
     except FileNotFoundError:
         return False

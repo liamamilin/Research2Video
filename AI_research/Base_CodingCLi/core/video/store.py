@@ -197,6 +197,15 @@ def init_db() -> None:
         if "content_context" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_production ON scripts(production,created_at DESC)")
+        for name, definition in (
+            ("idx_scripts_chain_summary", "scripts(production,created_at DESC,id,status,current_version,archived)"),
+            ("idx_script_versions_summary", "script_versions(script_id,version,title)"),
+        ):
+            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='index' AND name=?", (name,)).fetchone():
+                conn.execute(f"CREATE INDEX {name} ON {definition}")
+                conn.execute(f"ANALYZE {name}")
+
         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
             if name not in pub_columns:

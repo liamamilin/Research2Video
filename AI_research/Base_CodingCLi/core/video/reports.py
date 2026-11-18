@@ -70,6 +70,10 @@ def init(conn) -> None:
     columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
     if "report_id" not in columns:
         conn.execute("ALTER TABLE scripts ADD COLUMN report_id TEXT")
+    # Only unmatched legacy/new rows need backfilling. Keep this small set
+    # indexed so startup does not reread every historical topic payload.
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_missing_reports ON scripts(created_at) "
+                 "WHERE report_path != '' AND (report_id IS NULL OR report_id = '')")
     rows = conn.execute("SELECT id, report_path, research_job, topic, created_by FROM scripts"
                         " WHERE report_path != '' AND (report_id IS NULL OR report_id = '') ORDER BY created_at").fetchall()
     import json

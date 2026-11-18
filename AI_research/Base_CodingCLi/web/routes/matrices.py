@@ -7,7 +7,9 @@ start manual, so a copy never runs or spends anything until someone starts it.
 """
 
 from __future__ import annotations
+from web.services.chains import mutation
 
+from core.config_transaction import remove as remove_config_file
 import os
 import re
 import string
@@ -223,6 +225,7 @@ def _members(jobs: list[str], keep: matrices.Matrix | None) -> list[matrices.Mem
 
 
 @router.post("", status_code=201)
+@mutation
 def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
     key = _new_key(payload.key)
     if not payload.name.strip():
@@ -235,6 +238,7 @@ def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
 
 
 @router.put("/{key}")
+@mutation
 def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
     import hashlib
     from core.fileio import file_lock
@@ -246,6 +250,11 @@ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
         if not payload.name.strip():
             raise _error(422, "missing_name", "矩阵要有名字")
         members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
+        from core.video import production
+        removed = set(matrix.jobs) - {m.job for m in members}
+        used = [p.name or p.key for p in production.load_all(*_dirs()).values() if p.job in removed]
+        if used:
+            raise _error(409, 'matrix_member_in_use', '移除研究会改变视频继承设置：'+'、'.join(used)+'。请先在链路中处理其输出。')
         matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
                       keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
                       render=payload.render, content=payload.content)
@@ -255,8 +264,17 @@ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
 
 
 @router.delete("/{key}")
+@mutation
 def delete_matrix(key: str, user=Depends(require_editor)):
     _get(key)
+    from core.video import content_columns, production
+    owned_jobs=set(_get(key).jobs)
+    bound=[p.name or p.key for p in production.load_all(*_dirs()).values() if p.job in owned_jobs]
+    if bound:
+        raise _error(409, "matrix_in_use", "矩阵仍为视频输出提供研究归属和默认设置："+"、".join(bound)+"。请先处理关联链路。")
+    referenced = [c.name for c in content_columns.load_all(_dirs()[0]).values() if c.matrix == key]
+    if referenced:
+        raise _error(409, 'matrix_in_use', '矩阵仍被栏目使用：' + '、'.join(referenced) + '。请先迁移栏目或从链路管理删除对应链路。')
     matrices.remove(_dirs()[0], key)
     audit.log("matrix_delete", user=user["username"], target=key)
     return {"ok": True, "note": "只删了分组，里面的 Job 都还在"}
@@ -273,6 +291,7 @@ def _prefix(base: str, key: str, taken: set[str]) -> str:
 
 
 @router.post("/{key}/copy", status_code=201)
+@mutation
 def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
     """A new matrix with new keywords: each picked member is made again from its template, manual, in jobs/<new key>/."""
     from core.video import topic_store
@@ -335,7 +354,7 @@ def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
     except Exception:
         for path in written:  # all or nothing: a half-made matrix would leave Jobs nobody groups
             try:
-                os.remove(path)
+                remove_config_file(path)
             except OSError:
                 pass
         raise
@@ -399,6 +418,7 @@ def preview_period(key: str, job: str, kind: str, time: str = "05:00", days: str
 
 
 @router.put("/{key}/jobs/{job:path}/period")
+@mutation
 def set_period(key: str, job: str, body: PeriodIn, user=Depends(require_admin)):
     """Change a member's period. ``manual`` removes its plan; a timed one saves it (and turns a paused one back on)."""
     from web.routes.scheduler import _mutate
@@ -544,6 +564,7 @@ class ArchiveIn(BaseModel):
 
 
 @router.post("/{key}/archive")
+@mutation
 def archive_matrix(key: str, body: Optional[ArchiveIn] = None, user=Depends(require_editor)):
     """Put a matrix away (or bring it back). Nothing is deleted or stopped: its Jobs keep belonging to it, and the
     matrix list just stops showing it."""
@@ -556,6 +577,7 @@ def archive_matrix(key: str, body: Optional[ArchiveIn] = None, user=Depends(requ
 
 
 @router.post("/{key}/pause")
+@mutation
 def pause_matrix(key: str, user=Depends(require_admin)):
     """Stop every member's timed runs. Each Job keeps its own period (resuming turns the same ones back on) and can
     still be run by hand. Runs missed while paused are not made up."""
@@ -576,6 +598,7 @@ def pause_matrix(key: str, user=Depends(require_admin)):
 
 
 @router.post("/{key}/resume")
+@mutation
 def resume_matrix(key: str, body: ResumeIn, user=Depends(require_admin)):
     """Turn back on the timed runs that pausing stopped (the ones switched off by hand meanwhile stay as they are)."""
     from web.routes.scheduler import _mutate

@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sqlite3
 import threading
 import time
 import uuid
@@ -528,9 +529,12 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool, searc
     if script is None:
         _fail(item, "文稿记录丢失")
         return took
-    selection = story_pool.selection(script["id"])
-    gate = {**(item.get("gate") or {}), **({"story_selection": selection} if selection else {})}
-    if selection:
+    # Once approved, the chosen story is frozen in this item's writing result.
+    # Video progress polling must not reread every selection decision or rewrite it.
+    previous_gate = item.get("gate") or {}
+    selection = (previous_gate.get("story_selection") or {}) if script["status"] == "APPROVED" and not script.get("archived") else story_pool.selection(script["id"])
+    gate = {**previous_gate, **({"story_selection": selection} if selection else {})}
+    if selection and gate != previous_gate:
         ap.update_item(item["id"], gate=gate)
     if script.get("archived"):
         # Only our explicit exhausted selection can replace an item. A manual
@@ -743,6 +747,10 @@ def tick() -> int:
                     if run.get('dispatch_failures'):
                         ap.update_run(run['id'], dispatch_failures=0)
                 except Exception as exc:
+                    if isinstance(exc, sqlite3.OperationalError) and any(
+                            word in str(exc).lower() for word in ('locked', 'busy')):
+                        logger.warning('Batch %s waits for its database; retaining original work', run['id'])
+                        continue
                     failures = run.get('dispatch_failures', 0) + 1
                     note = f'批次调度失败 {failures} 次（{type(exc).__name__}）'
                     ap.update_run(run['id'], dispatch_failures=failures, note=note)
@@ -1009,13 +1017,33 @@ def _summary(run: dict) -> str:
 
 # --- plans -----------------------------------------------------------------
 
-def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
+def _start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
     """A batch from ``spec`` (the default one when none is given). Items are picked on the first tick."""
     spec = spec or DEFAULT_SPEC
     for pick in spec.get("picks", []):
         pick = resolve_pick(pick)
         video_columns.for_new_script(get_settings().paths.config_dir, pick["column"])  # unknown or blocked raises
     return ap.create_run(spec, [], plan_id=plan_id, started_by=started_by)
+
+
+def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
+    """Serialize report handoffs so manual chains and automatic reports share one owner."""
+    chosen=spec or DEFAULT_SPEC
+    if not chosen.get('report_identity') or not chosen.get('job'):
+        return _start_run(chosen,plan_id=plan_id,started_by=started_by)
+    lock_path=os.path.join(get_settings().paths.state_dir,'report-video-handoff')
+    with file_lock(lock_path,timeout=30):
+        mine={p.get('production') for p in chosen.get('picks',[]) if p.get('production')}
+        for previous in ap.list_runs(limit=None):
+            other=previous.get('spec') or {}
+            if other.get('job')!=chosen['job'] or other.get('report_identity')!=chosen['report_identity']:
+                continue
+            theirs={p.get('production') for p in other.get('picks',[]) if p.get('production')}
+            if (chosen.get('chain_run_id') or other.get('chain_run_id')) and mine and mine & theirs:
+                if not mine.issubset(theirs):
+                    raise ValueError('报告部分输出已有批次，请从已有批次继续，避免重复生产')
+                return previous
+        return _start_run(chosen,plan_id=plan_id,started_by=started_by)
 
 
 def save_plan(name: str, expression: str, spec: Optional[dict] = None, *, created_by: str = "") -> dict:

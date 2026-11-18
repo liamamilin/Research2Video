@@ -40,7 +40,7 @@ def wrap_progress_event(event: dict) -> dict:
 
 def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
                       verbose: bool = False, date_override: str = None, *,
-                      flash_triggered_at: float | None = None):
+                      flash_triggered_at: float | None = None, run_context: dict | None = None):
     """Run a job inside a thread.
 
     Creates a ResearchEngine with the task's cancel token and a progress callback
@@ -74,13 +74,21 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
             user=task.started_by,
             prompt_vars=getattr(task, "prompt_vars", None),
         )
+        engine.run_context = dict(run_context or {})
         if flash_triggered_at is not None:
-            engine.run_context = {"flash_triggered_at": flash_triggered_at}
+            engine.run_context["flash_triggered_at"] = flash_triggered_at
         result = engine.run_job(job_name, verbose=verbose)
         if task.cancel_token.is_set():
             task.status = "cancelled"
         elif result is not None:
+            task.output_path = result
             task.status = "success"
+            try:
+                from core import state
+                from web.services.chain_reports import record
+                record(job_name, result)
+            except Exception:
+                logger.exception("Report indexing will need retry: %s",job_name)
         else:
             task.status = "failed"
     except CancelledError:
@@ -112,7 +120,7 @@ class MatrixLimitReached(RuntimeError):
 
 def start_job(job_name: str, started_by: str,
               config_dir: str = "config", jobs_dir: str = "jobs",
-              verbose: bool = False, *, flash_triggered_at: float | None = None) -> RunningTask:
+              verbose: bool = False, *, flash_triggered_at: float | None = None, run_context: dict | None = None) -> RunningTask:
     """Start a job asynchronously. Returns the RunningTask immediately.
 
     Raises ``MatrixLimitReached`` when the Job's matrix has used up the month's searches (spec/matrices.md)."""
@@ -141,7 +149,7 @@ def start_job(job_name: str, started_by: str,
         submitted.wait()
         if task.status == "failed":
             return
-        run_job_in_thread(task, config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at)
+        run_job_in_thread(task, config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at, run_context=run_context)
 
     # Carry the caller's attribution (which video this research is for).
     try:

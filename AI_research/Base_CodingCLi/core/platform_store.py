@@ -13,6 +13,9 @@ from core import sqlite_util
 class PlatformStore:
     def __init__(self, state_dir: str):
         self.path = str(Path(state_dir) / "platforms.db")
+        sqlite_util.initialize_schema_once(self.path, self._initialize_schema)
+
+    def _initialize_schema(self):
         with self.connect() as conn:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT NOT NULL);

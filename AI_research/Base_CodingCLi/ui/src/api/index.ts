@@ -497,8 +497,8 @@ export async function getReportRaw(path: string, signal?: AbortSignal): Promise<
   return api("/api/reports/raw", { query: { path }, signal });
 }
 
-export async function searchReports(q: string, limit = 20): Promise<{ results: any[]; total: number }> {
-  return api("/api/reports/search", { query: { q, limit } });
+export async function searchReports(q: string, limit = 20, job?: string): Promise<{ results: any[]; total: number }> {
+  return api("/api/reports/search", { query: { q, limit, job } });
 }
 
 export async function getReportStats(signal?: AbortSignal): Promise<{ total: number; total_size_bytes: number; categories: number }> {

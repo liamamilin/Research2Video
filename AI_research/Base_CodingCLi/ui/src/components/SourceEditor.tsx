@@ -10,6 +10,7 @@ export function SourceEditor({ id, revision, onClose, onSaved }: {
   const [spec, setSpec] = useState('');
   const [tags, setTags] = useState('');
   const [note, setNote] = useState('');
+  const [enabled,setEnabled]=useState(true);
   const [usedBy, setUsedBy] = useState<{ job: string; name: string }[]>([]);
   const [loading, setLoading] = useState(!!id);
   const [saving, setSaving] = useState(false);
@@ -20,7 +21,7 @@ export function SourceEditor({ id, revision, onClose, onSaved }: {
     let active = true;
     void getSource(id).then(data => {
       if (!active) return;
-      setName(data.name); setSpec(data.spec); setTags(data.tags.join(', ')); setNote(data.note); setVersion(data.revision); setUsedBy(data.used_by);
+      setEnabled(data.enabled!==false); setName(data.name); setSpec(data.spec); setTags(data.tags.join(', ')); setNote(data.note); setVersion(data.revision); setUsedBy(data.used_by);
     }).catch(e => { if (active) setError(e instanceof Error ? e.message : '来源读取失败'); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id]);
@@ -28,7 +29,7 @@ export function SourceEditor({ id, revision, onClose, onSaved }: {
     setSaving(true); setError('');
     try {
       if (remove) await deleteSource(key, version);
-      else await saveSource(key.trim(), version, { name: name.trim(), spec: spec.trim(), tags: [...new Set(tags.split(/[,，]/).map(t => t.trim()).filter(Boolean))], note }, !id);
+      else await saveSource(key.trim(), version, { name: name.trim(), spec: spec.trim(), tags: [...new Set(tags.split(/[,，]/).map(t => t.trim()).filter(Boolean))], note, enabled }, !id);
       onSaved(); onClose();
     } catch (e) { setError(e instanceof Error ? e.message : '保存失败'); }
     finally { setSaving(false); }
@@ -51,6 +52,7 @@ export function SourceEditor({ id, revision, onClose, onSaved }: {
           {id && !confirmDelete && <button className="btn text-xs text-danger" type="button" onClick={() => setConfirmDelete(true)}>删除来源</button>}
           {confirmDelete && <button className="btn text-xs text-danger" type="button" onClick={() => void save(true)}>确认删除此来源</button>}
         </div>
+        <label className="flex gap-2 text-sm"><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/>全局启用此来源（影响所有引用研究）</label>
       </fieldset>
       <button className="btn text-xs" type="button" disabled={saving} onClick={onClose}>关闭</button>
     </form>

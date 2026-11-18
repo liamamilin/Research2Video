@@ -256,6 +256,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
     tries = lambda key: int((retries or {}).get(key, 0))  # noqa: E731
     if status in ("RESEARCHING", "WRITING"):
         return out
+    if status == "APPROVED":
+        # Following an existing render (or waiting for capacity) spends no new
+        # attempt. Keep the history check at the point a new render can start,
+        # instead of rereading the entire archive on every progress poll.
+        renders = store.list_renders(script["id"])
+        current = [row for row in renders if row["version"] == script["approved_version"]]
+        if not can_start_render or any(row["status"] in (*store.ACTIVE_RENDER_STATUSES, "COMPLETED") for row in current):
+            return _render_auto(script, can_start_render, out, retries)
     if status in ("DRAFT", "APPROVED") and script.get("current_version"):
         from core.video import content_guard
 
@@ -355,6 +363,7 @@ def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optio
         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"
         return out
     if not can_start_render:
+        out['item']={'note':'上次出片失败；等待渲染名额后自动重试' if latest and latest['status']=='FAILED' else '等待渲染名额，已有讲稿保留'}
         return out
     from core.video import production_admission
     from core.research_window import date_of

@@ -5,7 +5,9 @@ build is refused with the reason, so a bad edit cannot break writing for that re
 """
 
 from __future__ import annotations
+from web.services.chains import mutation
 
+from core.config_transaction import remove as remove_config_file
 import os
 import re
 from typing import Optional
@@ -147,6 +149,7 @@ def get_part(kind: str, name: str, user=Depends(require_viewer)) -> dict:
 
 
 @router.put("/parts/{kind}/{name}")
+@mutation
 def save_part(kind: str, name: str, body: PartSaveIn, user=Depends(require_editor)) -> dict:
     current = _part(kind, name)
     _check_part(kind, name, body.content, current.get("used_by") or [])
@@ -167,6 +170,7 @@ class PartCreateIn(BaseModel):
 
 
 @router.post("/parts/{kind}", status_code=201)
+@mutation
 def create_part(kind: str, body: PartCreateIn, user=Depends(require_editor)) -> dict:
     content = _part(kind, body.copy_from)["content"]
     path = _part_path(kind, body.name)
@@ -218,6 +222,7 @@ class RecipeSaveIn(BaseModel):
 
 
 @router.put("/{key}")
+@mutation
 def save_recipe(key: str, body: RecipeSaveIn, user=Depends(require_editor)) -> dict:
     path = _existing(key)
     _check(key, body.content)
@@ -240,6 +245,7 @@ class RecipeCreateIn(BaseModel):
 
 
 @router.post("", status_code=201)
+@mutation
 def create_recipe(body: RecipeCreateIn, user=Depends(require_editor)) -> dict:
     if (body.copy_from is None) == (body.content is None):
         raise HTTPException(422, detail=ApiError.make("recipe_source", "新配方要么从已有配方复制（copy_from），要么给出内容（content）"))
@@ -265,6 +271,7 @@ def create_recipe(body: RecipeCreateIn, user=Depends(require_editor)) -> dict:
 
 
 @router.delete("/{key}")
+@mutation
 def delete_recipe(key: str, user=Depends(require_editor)) -> dict:
     path = _existing(key)
     counts = store.count_scripts_by_column()
@@ -283,6 +290,6 @@ def delete_recipe(key: str, user=Depends(require_editor)) -> dict:
                              f"先到那些 Job 的视频配置页删掉它们"))
     with open(path, encoding="utf-8") as fh:
         backup = yaml_io.save_backup(f"video_recipe_{key}.yaml", fh.read())
-    os.remove(path)
+    remove_config_file(path)
     audit.log("video_recipe_delete", user=user["username"], target=key, result="success", details={"backup": backup})
     return {"ok": True, "backup": backup}
