@@ -18,7 +18,7 @@ def align(ir_path: Path, output: Path) -> None:
     import soundfile as sf
     from scipy.signal import resample_poly
     from mlx_audio.stt.utils import load_model
-    from g2.caption_alignment import build_cues, narration_hash, verify_plan, word_spans
+    from g2.caption_alignment import align_segment, narration_hash, verify_plan, word_spans
     started = time.monotonic()
     from g2.workspace import project_path
     try:
@@ -51,10 +51,14 @@ def align(ir_path: Path, output: Path) -> None:
             result = model.generate(speech, text=row["text"], language="Chinese")
             items = [{"text": item.text, "start_ms": round(item.start_time * 1000), "end_ms": round(item.end_time * 1000)}
                      for item in result.items]
-        cues.extend(build_cues(row, items))
-        evidence.append({"segment_id": row["id"], "items": items})
-        print(f"ALIGNED {row['id']}: {len(items)} units", flush=True)
-    plan = {"version": 2, "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+        segment_cues, segment_evidence = align_segment(row, items)
+        cues.extend(segment_cues)
+        evidence.append(segment_evidence)
+        if segment_evidence.get("method") == "measured_phrase":
+            print(f"ALIGNED {row['id']}: using measured phrase (word timestamps outside audio)", flush=True)
+        else:
+            print(f"ALIGNED {row['id']}: {len(items)} units", flush=True)
+    plan = {"version": 2, "method": "local Qwen3 forced alignment with measured phrase fallback; original transcript and PCM unchanged",
             "narration_sha256": narration_hash(ir), "audio_sha256": audio_sha,
             "model": json.loads((model_dir / "autovideo-model-source.json").read_text()),
             "model_sha256": hashlib.sha256((model_dir / "model.safetensors").read_bytes()).hexdigest(),

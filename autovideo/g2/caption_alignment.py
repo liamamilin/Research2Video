@@ -8,6 +8,10 @@ import re
 import unicodedata
 
 
+class CaptionTimingOutsideAudio(ValueError):
+    """The aligner's word timestamps extend beyond the measured phrase."""
+
+
 def word_spans(text: str) -> list[tuple[str, int, int]]:
     result, pending, start = [], "", 0
     for i, char in enumerate(text):
@@ -80,16 +84,19 @@ def build_cues(segment: dict, items: list[dict]) -> list[dict]:
             break
         trailing -= 1
     previous = 0
+    outside_audio = False
     for index, item in enumerate(items):
         start, end = item["start_ms"], item["end_ms"]
         if index == len(items) - 1 and start < duration:
             # The aligner can report an end beyond the available audio.
             # Clipping only the last end preserves every word onset.
             end = min(end, duration)
-        if (not 0 <= start <= end <= duration + 100 or start < previous
-                or (start >= duration and index < trailing)):
+        if not 0 <= start <= end or start < previous:
             raise ValueError(f"{segment['id']} 对齐时间无效")
+        outside_audio |= end > duration + 100 or (start >= duration and index < trailing)
         previous = end
+    if outside_audio:
+        raise CaptionTimingOutsideAudio(f"{segment['id']} 对齐时间无效：逐词时间超出语音段")
     result = []
     spans = chunks(segment["text"])
     for a, b, first, last in spans:
@@ -108,6 +115,21 @@ def build_cues(segment: dict, items: list[dict]) -> list[dict]:
         result.append({"segment_id": segment["id"], "text": segment["text"][a:b], "char_start": a, "char_end": b,
                        "start_ms": segment["start_ms"] + start, "end_ms": segment["start_ms"] + end})
     return result
+
+
+def align_segment(segment: dict, items: list[dict]) -> tuple[list[dict], dict]:
+    """Keep a single short caption on its measured phrase when word times overshoot."""
+    try:
+        return build_cues(segment, items), {"segment_id": segment["id"], "items": items}
+    except CaptionTimingOutsideAudio:
+        text = segment["text"]
+        if segment["end_ms"] - segment["start_ms"] < 200 or len(chunks(text)) != 1:
+            raise
+        cue = {"segment_id": segment["id"], "text": text, "char_start": 0, "char_end": len(text),
+               "start_ms": segment["start_ms"], "end_ms": segment["end_ms"]}
+        evidence = {"segment_id": segment["id"], "items": [], "method": "measured_phrase",
+                    "rejected_items": items}
+        return [cue], evidence
 
 
 def narration_hash(ir: dict) -> str:

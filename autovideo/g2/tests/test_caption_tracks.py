@@ -5,7 +5,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from g2.caption_alignment import build_cues, chunks, narration_hash, render_cues, srt_text, supports_short_captions, word_spans
+from g2.caption_alignment import (
+    align_segment, build_cues, chunks, narration_hash, render_cues, srt_text, supports_short_captions,
+    verify_plan, word_spans,
+)
 
 
 def test_short_final_syllable_stays_with_a_readable_phrase_and_original_timing():
@@ -87,8 +90,44 @@ def test_word_outside_audio_or_overlapping_previous_word_still_fails(intervals):
         build_cues(row, items)
 
 
+def test_short_spoken_caption_uses_phrase_timing_when_aligner_reports_words_past_audio():
+    row = {'id': 'c2_n8', 'text': '算一笔。', 'start_ms': 106637, 'end_ms': 107085}
+    items = [
+        {'text': '算', 'start_ms': 0, 'end_ms': 240},
+        {'text': '一', 'start_ms': 800, 'end_ms': 960},
+        {'text': '笔', 'start_ms': 1120, 'end_ms': 1200},
+    ]
+    cues, evidence = align_segment(row, items)
+    assert cues == [{'segment_id': 'c2_n8', 'text': '算一笔。', 'char_start': 0, 'char_end': 4,
+                     'start_ms': 106637, 'end_ms': 107085}]
+    assert evidence == {'segment_id': 'c2_n8', 'items': [], 'method': 'measured_phrase',
+                        'rejected_items': items}
+    ir = {'narration': {'segments': [row]}}
+    verify_plan(ir, {'version': 2, 'narration_sha256': narration_hash(ir), 'cues': cues})
+
+
+def test_overshoot_does_not_replace_the_timing_of_a_multi_caption_utterance():
+    row = {'id': 'n1', 'text': '字' * 24, 'start_ms': 0, 'end_ms': 1000}
+    items = [{'text': word, 'start_ms': i * 80, 'end_ms': (i + 1) * 80}
+             for i, (word, _, _) in enumerate(word_spans(row['text']))]
+    with pytest.raises(ValueError, match='逐词时间超出语音段'):
+        align_segment(row, items)
+
+
+@pytest.mark.parametrize('text, duration, intervals, message', [
+    ('不对', 500, [(0, 200), (650, 700)], '对齐文本与原文不一致'),
+    ('好了', 500, [(0, 700), (650, 800)], '对齐时间无效'),
+    ('好了', 150, [(0, 80), (240, 320)], '逐词时间超出语音段'),
+])
+def test_short_caption_fallback_requires_matching_words_order_and_readable_duration(text, duration, intervals, message):
+    row = {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': duration}
+    items = [{'text': word, 'start_ms': start, 'end_ms': end}
+             for word, (start, end) in zip('好了', intervals)]
+    with pytest.raises(ValueError, match=message):
+        align_segment(row, items)
+
+
 def test_old_punctuation_only_voice_segment_keeps_its_text_and_timing():
-    from g2.caption_alignment import verify_plan
     row = {'id': 'c1_n4', 'text': '”', 'start_ms': 7041, 'end_ms': 7106}
     ir = {'narration': {'segments': [row]}}
     cues = build_cues(row, [])
@@ -98,7 +137,6 @@ def test_old_punctuation_only_voice_segment_keeps_its_text_and_timing():
 
 
 def test_missing_spoken_segment_still_reports_its_identity():
-    from g2.caption_alignment import verify_plan
     ir = {'narration': {'segments': [{'id': 'c1_n4', 'text': '继续。', 'start_ms': 0, 'end_ms': 1000}]}}
     with pytest.raises(ValueError, match='缺少配音段：c1_n4'):
         verify_plan(ir, {'version': 2, 'narration_sha256': narration_hash(ir), 'cues': []})
