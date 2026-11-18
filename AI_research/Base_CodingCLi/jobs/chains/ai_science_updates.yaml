@@ -1,0 +1,24 @@
+name: AI 科研进展
+enabled: true
+language: zh
+keywords: []
+search: false
+sources:
+- source:chain_source_mwlrtqz9
+- source:cg_openai_news
+sources_limit: 10
+runtime:
+  timeout_seconds: 3600
+  skip_if_running: true
+prompt: '跟踪 AI 在科学发现与科研方法上的公开进展。为关注 AI 的中文观众讲清具体研究问题、AI 在哪一步帮了忙、证据支持到哪里。首期优先从 OpenAI
+  科学博客选择一个粒子物理或数学案例，附原文链接，说明适用范围和尚待验证的部分。
+
+
+  日期：{date}。根据取得的材料形成可供视频作者使用的研究底稿。保留具体变化、例子、解释及原始链接。使用条目格式：\n### 1.1 选题标题\n- **一句话**：内容\n-
+  **发布日期**：日期\n- **证据来源**：链接\n正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。'
+output: output/chains/ai_science_updates/{date}.md
+topics:
+  alias: ai_science_updates
+  format: flash
+  prefix: AAA
+  refresh: true

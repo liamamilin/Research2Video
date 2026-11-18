@@ -1,0 +1,10 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，auto 只控制自动制作开关，开启后处理全部不重复选题。
+name: AI 科研进展 · 单条
+job: chains/ai_science_updates
+recipe: chain_ai_science_updates
+reverify: false
+auto: 1
+render:
+  video_speed: 1.25
+  voice_id: zf_xiaoxiao
+auto_enabled_at: 1794985272.1795719

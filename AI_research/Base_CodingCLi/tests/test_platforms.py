@@ -33,8 +33,8 @@ def platform_env(web_env, monkeypatch):
     return tmp
 
 
-def render():
-    script = video_store.create_script("flash", {"title": "测试视频"})
+def render(topic=None):
+    script = video_store.create_script("flash", {"title": "测试视频", **(topic or {})})
     video_store.add_version(script["id"], title="测试视频", sections=[], length_check={}, edit_type="GENERATED", meta={})
     video_store.update_script(script["id"], status="APPROVED", approved_version=1)
     row = video_store.create_render(script["id"], 1, title="测试视频", source_text="内容", source_sha256="a" * 64, request={})
@@ -420,6 +420,25 @@ def test_auto_upload_skips_existing_videos_and_quality_holds(platform_env, monke
     manager.tick()
     assert len(calls) == 1
     assert manager.store().uploads("123")[0]["render_id"] == made["id"]
+
+
+def test_auto_upload_excludes_only_the_selected_research_chain(platform_env, monkeypatch):
+    from pathlib import Path
+
+    config = Path(manager.get_settings().paths.config_dir) / "bilibili_auto_upload.yaml"
+    config.write_text("excluded_jobs:\n  - chains/ai_science_updates\n")
+    manager.store().save_settings({"auto_upload": True, "tid": 188})
+    held = render({"matrix_dedup": {"job": "chains/ai_science_updates"}})
+    ordinary = render({"matrix_dedup": {"job": "chains/another_chain"}})
+    monkeypatch.setattr(manager, "preview", lambda _: {
+        **PAYLOAD, "credibility": {"tier": "trusted"}, "freshness_warnings": [],
+    })
+    calls = []
+    monkeypatch.setattr(bilibili, "upload", lambda *args: calls.append(args) or BV)
+    manager.tick()
+    assert [row["render_id"] for row in manager.store().uploads("123")] == [ordinary["id"]]
+    assert len(calls) == 1
+    assert manager.eligible(held["id"])[0]["id"] == held["id"]
 
 
 def test_duplicate_sync_preserves_drafts_and_handled_status(platform_env):

@@ -1184,3 +1184,8 @@ bili_hot_ai:
   spec: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI
   tags: [ai_hot]
   note: B站热搜里的 AI 词 + 这些产品近 7 天在 B站的热度，最热的几个附最新网页报道；让快讯覆盖观众正在看的国内热点（11-10 选题热度）
+chain_source_mwlrtqz9:
+  name: OpenAI 科学博客
+  tags: []
+  note: 通过链路创建向导添加
+  spec: catalog:https://openai.com/news/science/

@@ -10,6 +10,8 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import yaml
+
 from core.platform_store import PlatformStore
 from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
@@ -249,6 +251,30 @@ def column_for(script: dict):
     return column
 
 
+def automatic_upload_excluded(script: dict) -> bool:
+    """Apply the publishing hold to the research job recorded on the script."""
+    path = Path(get_settings().paths.config_dir) / "bilibili_auto_upload.yaml"
+    try:
+        settings = yaml.safe_load(path.read_text(encoding="utf-8"))
+        excluded_jobs = settings["excluded_jobs"]
+        if not isinstance(excluded_jobs, list) or not all(isinstance(job, str) for job in excluded_jobs):
+            raise ValueError("excluded_jobs must be a list of job names")
+    except FileNotFoundError:
+        return False
+    except (OSError, yaml.YAMLError, KeyError, TypeError, ValueError) as exc:
+        raise Error("B 站自动投稿排除配置无法读取，请检查配置。") from exc
+
+    topic = script.get("topic") or {}
+    context = script.get("content_context") or {}
+    jobs = (
+        context.get("job"),
+        (topic.get("episode") or {}).get("job"),
+        (topic.get("matrix_dedup") or {}).get("job"),
+        topic.get("knowledge_job"),
+    )
+    return any(job in excluded_jobs for job in jobs)
+
+
 def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, dict]:
     render = video_store.get_render(render_id)
     script = video_store.get_script(render["script_id"]) if render else None
@@ -258,6 +284,8 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
         raise Error(reason)
     if automatic and (script.get('topic') or {}).get('local_video'):
         raise Error('本地视频按指定平台投稿，不加入全局自动投稿。')
+    if automatic and automatic_upload_excluded(script):
+        raise Error("此研究链路保留成片供人工查看，跳过 B 站自动投稿。")
     if automatic and (script.get("archived") or script["status"] != "APPROVED" or
                       script.get("approved_version") != render["version"] or script.get("current_version") != render["version"]):
         raise Error("自动投稿只处理未归档文稿的当前定稿成片。")

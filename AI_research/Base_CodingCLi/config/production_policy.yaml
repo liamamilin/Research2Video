@@ -3,11 +3,16 @@ schema_version: 1
 matrices:
   - ai_media
   - chatgpt_acquisition
+  - ai_science_updates
 window:
   mode: previous_slot
   timezone: Asia/Shanghai
 # 可在 jobs 中为任意任务指定 rolling + days，独立调整研究范围而不修改出片周期。
-jobs: {}
+jobs:
+  chains/ai_science_updates:
+    mode: rolling
+    days: 7
+    timezone: Asia/Shanghai
 collection:
   enabled: true
   schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
