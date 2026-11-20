@@ -519,11 +519,19 @@ def strip_schema_echo(result, schema: dict):
     request's ``response_format`` value ``"json_object"``.
 
     It happens about once per job (narration-form and chapter plans), is never a real field, and each
-    occurrence wasted a whole model call on a retry.
+    occurrence wasted a whole model call on a retry. Also gently normalizes a known adjacent-field confusion
+    where a model writes ``story_role: "support"`` (an ``importance`` value) into an explanation page.
     """
     if isinstance(result, dict) and result.get("type") in ("object", "json_object") \
             and "type" not in (schema.get("properties") or {}):
-        return {key: value for key, value in result.items() if key != "type"}
+        result = {key: value for key, value in result.items() if key != "type"}
+    if isinstance(result, dict) and isinstance(result.get("pages"), list):
+        role_enum = ((((schema.get("properties") or {}).get("pages") or {}).get("items") or {})
+                     .get("properties") or {}).get("story_role", {}).get("enum")
+        if isinstance(role_enum, list) and "support" not in role_enum and "explain" in role_enum:
+            for page in result["pages"]:
+                if isinstance(page, dict) and page.get("story_role") == "support":
+                    page["story_role"] = "explain"
     return result
 
 
@@ -1062,11 +1070,10 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
     if frames != checked["total_frames"] or not duration_is_acceptable(seconds, expected_range):
         raise G2Fault("MEDIA_DURATION_MISMATCH",
                       f"{frames} frames / {seconds:.3f}s; expected {expected_range[0]}–{expected_range[1]}s")
-    _run_fixed_command("full-decode", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-i", VIDEO_PATH,
-                         "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"], PROJECT)
     decoded_path = ARTIFACTS / "decoded-audio.wav"
-    _run_fixed_command("decoded-audio", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", VIDEO_PATH,
-                         "-vn", "-ac", "1", "-ar", str(SAMPLE_RATE), decoded_path], PROJECT)
+    _run_fixed_command("full-decode", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-y", "-i", VIDEO_PATH,
+                         "-map", "0:v:0", "-f", "null", "-",
+                         "-map", "0:a:0", "-ac", "1", "-ar", str(SAMPLE_RATE), decoded_path], PROJECT)
     original, _ = sf.read(ASSETS / "communications_noise.wav", dtype="float32")
     decoded, _ = sf.read(decoded_path, dtype="float32")
     n = min(len(original), len(decoded))

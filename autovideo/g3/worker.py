@@ -231,15 +231,18 @@ class G2ProcessRunner:
                 )
                 self.store.set_runner_pid(job_id, attempt_no, process.pid)
                 self.store.update_stage(job_id, attempt_no, active_stage, "RUNNING")
+                poll_tick = 0
                 while True:
-                    if not input_analysis_loaded:
+                    check_slow = (poll_tick % 5 == 0)
+                    poll_tick += 1
+                    if check_slow and not input_analysis_loaded:
                         try:
                             brief = json.loads((run_dir / "artifacts/input-brief.json").read_text())
                             self.store.record_input_analysis(job_id, attempt_no, brief)
                             input_analysis_loaded = True
                         except (OSError, ValueError, KeyError):
                             pass
-                    is_cancelled = self.store.cancel_requested(job_id)
+                    is_cancelled = self.store.cancel_requested(job_id) if check_slow else False
                     is_stopping = stop_event.is_set()
                     if is_cancelled or is_stopping:
                         self._stop_process(process)
@@ -250,7 +253,7 @@ class G2ProcessRunner:
                             self.store.mark_failed(job_id, attempt_no, active_stage, "WORKER_INTERRUPTED",
                                                    "服务停止时任务进程被中断，可以重启后重试", True)
                         return
-                    if job.get("duration_mode") == "content" and not workload_timeout_loaded:
+                    if check_slow and job.get("duration_mode") == "content" and not workload_timeout_loaded:
                         try:
                             measured = json.loads((run_dir / "artifacts/alignment.json").read_text())
                             # Preserve the startup/model allowance and add time for measured render work.

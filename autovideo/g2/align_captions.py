@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 
 def align(ir_path: Path, output: Path) -> None:
+    import mlx.core as mx
     import numpy as np
     import soundfile as sf
     from scipy.signal import resample_poly
@@ -55,6 +56,8 @@ def align(ir_path: Path, output: Path) -> None:
                          for item in result.items]
             except Exception as exc:
                 align_error = f"{type(exc).__name__}: {str(exc)[:200]}"
+            finally:
+                mx.clear_cache()
         if align_error is not None:
             segment_cues = proportional_cues(row)
             segment_evidence = {"segment_id": row["id"], "items": [], "method": "proportional_fallback",
