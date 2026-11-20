@@ -1,0 +1,9 @@
+{
+  "basis": "用户此前明确授权现有模型服务，并在本轮要求按组合再生成AI快讯/T05/T06对照",
+  "destinations": [
+    "opencode.ai",
+    "已配置的Open Design回退"
+  ],
+  "data": "同三份已冻结研究文本及自动采集材料",
+  "production_queue": false
+}

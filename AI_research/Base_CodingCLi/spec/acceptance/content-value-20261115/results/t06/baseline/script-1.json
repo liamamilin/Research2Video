@@ -1,0 +1,270 @@
+{
+  "title": "贴一份长PDF就断？三个数字判断要不要买ChatGPT Plus",
+  "sections": [
+    {
+      "title": "先看你撞的是不是免费版那面墙",
+      "paragraphs": [
+        {
+          "text": "你把一份二十来页的PDF拖进对话框，进度条走完，它只读了前面一半，后面几页像没发生过。先别急着掏钱——免费版的墙到底在哪，其实页面给了三个数字，看完你就知道该不该付。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "大家好，我是洛洛。这期就聊这一件事：用免费版的人，怎么在下单之前先判断自己撞的到底是免费版的限制，还是网络、账号、用法的问题。三个数字：27K、12页、Limited。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第一个数字是上下文窗口。价格页的模型对照表里，GPT Instant 这一行的总上下文，Free 是 27K，Go 和 Plus 都是 54K，Pro 是 128K。你不需要记住K是什么，只要知道：你贴进去的文档、之前的对话、系统指令，全都挤在这一个窗口里，窗口满了，最早的内容就被挤出去。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第二个数字更直观：单次输入上限。同一张表上写着，Free 大约12页文本，Go 和 Plus 大约40页，Pro 大约250页。注意这是“大约”，而且页面脚注明说，真正留给你输入的空间比总窗口小，因为系统指令、记忆、内部处理都要占地方。所以一份12页的合同，你贴进去，剩下的余量已经不多，再追问两轮，前面就掉出去了。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第三个数字不是数字，是一个词：响应速度。Free 和 Go 这一行写的都是“Limited on bandwidth & availability”，带宽和可用性受限；Plus 写的是 Fast，Pro 写的是 Ultrafast。这解释了一个很多人以为是自己网络问题的现象——同样的网络，免费版有时候就是慢，或者干脆转圈。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我把这三个放在一起看：27K、12页、Limited。它们不是三个毛病，是同一件事的三个面——免费版给你的是“试一下”的容量，不是“干活”的容量。官方对免费版的定位也写得很直白：对所有人开放，升级买的是更多模型和功能的访问权。所以我猜你如果只是日常问答，压根碰不到这三条线；但只要你开始往对话框里塞长文档，就一定撞得上。",
+          "citations": [
+            "https://chatgpt.com/pricing/#:~:text=Is%20ChatGPT%20free%20to%20use%3F",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "同一个任务，免费版输在哪一步",
+      "paragraphs": [
+        {
+          "text": "假设你手上是一份40页的行业报告，你要它提炼五个要点，再针对第三点追问三轮。这就是那个一直往下推的具体任务。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第一步上传，免费版就卡住了：12页对40页。你不用等它报错，你自己就知道塞不进去。硬塞的结果是它只看到一部分，然后基于残缺的内容给你一个看起来完整的总结——这比报错更危险，因为你不知道它漏了哪几页。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第二步追问。就算你手动把文档拆成几段分批喂，27K的窗口意味着每追问一轮，前面的内容都在往外掉。问到第三轮，它可能已经不记得第一轮你让它重点看的是哪一章。这不是它变笨了，是窗口装不下了。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第三步等结果。同样一份文档，免费版在带宽受限的状态下，你可能要多等几分钟，甚至要重发一次。这三步连起来，就是你那天下午的体验：不是不能做，是每一步都在跟你较劲。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的判断是：如果你每周都要处理超过十几页的材料，或者需要连着追问好几轮，你撞的不是网络，是免费版的结构性上限。这类需求，加钱是有明确回报的——窗口翻倍、页数从12到40、速度从受限变 Fast。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "但别急着买：三个反过来的条件",
+      "paragraphs": [
+        {
+          "text": "第一，如果你只是偶尔贴一份两三页的东西、问几个问题就完事，你一辈子碰不到那条12页的线。为这种用法付每月20美元，是买了个你用不上的余量。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第二，很多人想付费其实是为了隐私。这条得说清楚：价格页的隐私区，Free、Go、Plus、Pro 四档写的是同一句话——内容会被用于训练模型，可以退出。四档一模一样。付费买到的是能力，不是数据待遇；不想被训练，去设置里退出，不用付钱。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Privacy",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=Data%20Privacy"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第三，也是最容易被忽略的一点：付费不解决“模型选不到”的问题。价格表上，GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol 这些在免费档标的是 No，而 Go 档同样标 No，要 Plus 才是 Yes。反过来，Luna 系列免费档就是 Yes。所以你要是冲着某个特定模型去的，得先看清它在哪一档才放行。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我把这几条摆在一起，意思不是劝你别买，是让你买的理由对得上。为了40页的文档和Fast的速度买，成立；为了隐私买，不成立；为了“反正升级总没错”买，大概率用两周就闲置。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/pricing#:~:text=Privacy"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "真要买，先看清钱怎么扣",
+      "paragraphs": [
+        {
+          "text": "如果你算下来确实该升级，那 Plus 的官方价是每月20美元，网页订阅。有两个细节值得先知道：它目前不支持年付，也不支持预付多月，就是按月扣。所以不存在“买一年更便宜”这个选项，别去找。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=What%20is%20ChatGPT%20Plus%3F",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=Is%20there%20an%20annual%20plan%20available%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一个坑，第一次付款的人最好先记一下：钱扣了但账号还显示 Free，最常见的原因是登错了邮箱。网页端进设置里的账号页，看订阅绑的是哪个邮箱；如果你当初用苹果注册还选了隐藏邮箱，账号可能是一串以 privaterelay.appleid.com 结尾的地址，得用同一个苹果账号点继续用苹果登录，才能进到那个号。手机上则是设置里的恢复购买。真不行再联系客服，附上收据或扣款卡后四位。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=Troubleshooting%3A%20Charged%20but%20still%20on%20Free%20plan"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "至于 Go 和 Pro 的具体价格，我这次看到的页面上是占位文字，没有取到可用数字，所以我不报，你也别信任何我这边没核过的数。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "回到那份四十页的报告",
+      "paragraphs": [
+        {
+          "text": "回到开头那份40页的报告。如果你每周都要做一次这样的活，免费版的12页和27K确实会一直拦着你，那每月20美元买的是把这件事做完的能力，值。如果那只是你一年碰两次的场合，把文档拆开、分段问，慢一点也能过，那就先别升级。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我更看重的是这三个数字的用法：下次你觉得卡了，先问自己——是页数超了12，是窗口撑不住追问，还是它在受限状态下就是慢。三条对上一条，再掏钱；一条都对不上，先查网络和账号。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你自己的那份文档有多少页、你要追问几轮？这两个数一报出来，该不该付其实就有答案了。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1791,
+    "estimated_seconds": 402,
+    "segments": 69,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 1.341,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先看你撞的是不是免费版那面墙",
+        "spoken_length": 591,
+        "budget": 261
+      },
+      {
+        "title": "同一个任务，免费版输在哪一步",
+        "spoken_length": 379,
+        "budget": 261
+      },
+      {
+        "title": "但别急着买：三个反过来的条件",
+        "spoken_length": 324,
+        "budget": 261
+      },
+      {
+        "title": "真要买，先看清钱怎么扣",
+        "spoken_length": 278,
+        "budget": 261
+      },
+      {
+        "title": "回到那份四十页的报告",
+        "spoken_length": 219,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 28597,
+      "completion_tokens": 2129,
+      "total_tokens": 30726,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 0,
+      "cost_usd": 0.00556695,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 31.855,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 37
+  }
+}

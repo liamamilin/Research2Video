@@ -1,0 +1,280 @@
+{
+  "scope": "isolated workbench only",
+  "files": [
+    {
+      "component": "research",
+      "path": "core/platform_store.py",
+      "sha256": "b2451ac3febb6922e6bca470aeb542419f8a2aaae9b784b48e9352d909643b6c"
+    },
+    {
+      "component": "research",
+      "path": "core/source_supply.py",
+      "sha256": "421b75e98046026f4c57aa2e8d0ff7d34ab293dd16756792fc246119f95c2e1d"
+    },
+    {
+      "component": "research",
+      "path": "core/sources.py",
+      "sha256": "86f764bc07c069294eb81e02c9696cad71cd0b62e7f6764af8a9fbb474eed72c"
+    },
+    {
+      "component": "research",
+      "path": "core/schedule_store.py",
+      "sha256": "f4cd681e85d10788132e5bdec05a31df1ecd0680de3575cf92e3aa97be2485c0"
+    },
+    {
+      "component": "research",
+      "path": "core/source_coverage.py",
+      "sha256": "7758a9f3fdd44f3ce1ea0612f39acec56d3a2c761cdf67e49993aa3b0b41a6e5"
+    },
+    {
+      "component": "research",
+      "path": "core/douyin_store.py",
+      "sha256": "64e97aab57bfd95689391ad3123c10cf9524f17b5445de997806c00e071f534c"
+    },
+    {
+      "component": "research",
+      "path": "core/sqlite_util.py",
+      "sha256": "25baff5f29575ee8f5c4945b98e5c704fbd3f74a40281ad137021a2fd8b358d3"
+    },
+    {
+      "component": "research",
+      "path": "core/video/store.py",
+      "sha256": "69fb2f45f0a4ba15b64cfcf51512cc75a08c58213d4d49491f24d2e03bbab646"
+    },
+    {
+      "component": "research",
+      "path": "core/video/reports.py",
+      "sha256": "ecb4758356b3cea46444d692fddf9dc925a66479543394bed634e86e6921461a"
+    },
+    {
+      "component": "research",
+      "path": "web/runner/executor.py",
+      "sha256": "514836404f04c1491b9f6a45062fd0dc9849494543f03ca5a75c1fd9ac62ed05"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/chains.py",
+      "sha256": "190472f525b6d89986b4fd5a45ecebc8c5e1046ef7b8ff86f00b65637f28b872"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/matrices.py",
+      "sha256": "13ac11e6fb0233a7dd3308e3c58356c6a706559d22ccac711edcb54f8afb1d3e"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/content_columns.py",
+      "sha256": "28bf2a6367f9c5c14b0277498281b24fbaae66a852d7ef03443f60599bceb878"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/jobs.py",
+      "sha256": "46556fb7aa8ca3ca08ee07399ec5d948f5279eee0259bd0b407ba37fc1e15ce4"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/sources.py",
+      "sha256": "4d6b73df58f3772b82ea38e057c047270a4f5094181ff64f316874c389d08554"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/reports.py",
+      "sha256": "016fda88cbefb6afd947ebac9d29fafdbb196d8daae83f00a1cca02a5a2878ce"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/scheduler.py",
+      "sha256": "0cef543630b66ba83ca6a714dbafcfa22a5dd4bff35ce616bebb850a31fee091"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/production.py",
+      "sha256": "135c5b9131aad862e4f86fd80d7a56936d4582d2cb390053b40c36a87118f04a"
+    },
+    {
+      "component": "research",
+      "path": "web/routes/video_recipes.py",
+      "sha256": "ea29797576b01ed3ef4791483d95809335ee864245999470da82bb3a1101468c"
+    },
+    {
+      "component": "research",
+      "path": "web/services/chains.py",
+      "sha256": "65850a18c9369a7f625ae02a1efdc608fac9b2dd81f19b208abf90e12d924c6d"
+    },
+    {
+      "component": "research",
+      "path": "web/services/video_autopilot.py",
+      "sha256": "ea11a3aec5e260352f5b37f39d1cbc2b9e0af55038dee4e6d951470974c8e6d9"
+    },
+    {
+      "component": "research",
+      "path": "web/services/video_executor.py",
+      "sha256": "3b3e25def0da707162811a9726d2bc5ee1d215839ff66c7268fd8676d2baf1ad"
+    },
+    {
+      "component": "research",
+      "path": "web/services/chain_runner.py",
+      "sha256": "f6fea57883c5aa605a19ff4ddf8cd097760d0dabcd155fb78d267bd7511e73fa"
+    },
+    {
+      "component": "research",
+      "path": "web/services/distributions.py",
+      "sha256": "32337162371ecda65815bec499b47e9c1ca05c42ba45410c4aa390634df47f15"
+    },
+    {
+      "component": "research",
+      "path": "web/services/video_render.py",
+      "sha256": "d293adfe0609e393f3a82d96daa318297ab3ebf6669f2758524cd10aa55ec32f"
+    },
+    {
+      "component": "research",
+      "path": "web/services/chain_reports.py",
+      "sha256": "ea1ed38c0da824d8d3977fdd1469fc08c5895acbe40e67d778b4797fd660cf6f"
+    },
+    {
+      "component": "research",
+      "path": "web/services/source_registry.py",
+      "sha256": "0b0396524cc14de59077dbb76eacf904d58c88ad6ffbde725e40a38e6215bd63"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/App.tsx",
+      "sha256": "0450f053056d9ecda28d143c4d4efed27f49fc9d1f8882e158d3a0c5171fded4"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/components/ChainContext.test.tsx",
+      "sha256": "1e1b148e180de3b8eda2782eef0799af5fef0187fbe521c6007a63d3a9eb5139"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/components/SourceEditor.tsx",
+      "sha256": "16b973ced177a6913c68c10ce2f8b4cf188a599d10f6461fc7681fb1a91909bd"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/components/ChainContext.tsx",
+      "sha256": "26e3fe314e0098cbcbe698c1a6f83554a3877cbe18caa0f6912fca7e85818953"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/components/Layout.tsx",
+      "sha256": "a278506d975814342eecd3d92dfd45d30b8a6cab0949a547678229153ecc8b54"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/components/Sidebar.tsx",
+      "sha256": "e584e1a4e0d5d0580b2d3974f39085759d3ca0513c30509245f755f681844cdc"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/lib/use-chain-scope.test.tsx",
+      "sha256": "e4e1009d719404961144f8c801c8b9069b38e078627568da361673557d98bf31"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/lib/use-chain-scope.ts",
+      "sha256": "4dd8c2ec919acd25bc2c9eb765aeb72836e09267df10271057b5c0bae4383fb8"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/api/sources.ts",
+      "sha256": "801571e9834e9b362a5e183bd1ed805aef2b22d3f8b8c127ad42c5d3e346aa72"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/api/index.ts",
+      "sha256": "0c6db2cc1328ba0487927610259bf4b9bb9198c37c3334076d455f5396ded081"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Sources.tsx",
+      "sha256": "0addfc151c35b18d9f2feda36d95dad18e9e69d47fc8f4f92a4d7403218149a1"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Reports.tsx",
+      "sha256": "beb3a2f2291d50a127f32d870cbcc661949f3e519c62e8683c7815fe5d7ab712"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/PublishQueue.tsx",
+      "sha256": "c1c2fd3ab157927f49187601424e4d1ca2c66eb291a4c695d22ee41771aa9d8f"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/VideoRecipes.tsx",
+      "sha256": "6db4c9d39b9a5aff1016121ea2c499e2983ed16188bb6227151e7e69ce4045df"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/VideoScripts.tsx",
+      "sha256": "a67c88e32ab64a2c70ccbbb0bd9df1a1e9f825357ae89109415aa6a6e4c9e3cd"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Chains.test.tsx",
+      "sha256": "04037bbfff2ed510199ea99c375d545783b372ec9568af0a52ae7b0cb2968ed3"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Outputs.tsx",
+      "sha256": "6281ff51e67e7ef81f7ae8c654dd827a87ffe6cc53b112d6a4275173d7ec1c52"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Matrices.tsx",
+      "sha256": "b4db649fd63de4bf55d568f1fe6b8e08bce182a80b9bf7801e236bd9eb067305"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Scheduler.tsx",
+      "sha256": "15c8eb813c9dd41f1d2cbeb326edf1aa6fd0ebfb158ea8779769127f041af971"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/JobsList.tsx",
+      "sha256": "0bc3c8a049bac120d2ed62fd0f23e9864333f3283b291a138a8bb08c184d46df"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Scheduler.test.tsx",
+      "sha256": "90ad3e0fa12b7ee1bb45f2e7a1bfa1dc19d7337fab1292b199c756a99568cb0c"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Chains.tsx",
+      "sha256": "ae25df289ec28d99b24eb5ff9e6ca403d0b1977596af79e813d5d19444646320"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/HomeBoard.tsx",
+      "sha256": "9c423849a6126868acebb904b626b528529d9e26ac32bcc04cec7b84804f2e0a"
+    },
+    {
+      "component": "research",
+      "path": "ui/src/pages/Sources.test.tsx",
+      "sha256": "553c2169955cbb55ffebcb93655a63edfb5396dc20cc38c53e6d4dc043811d44"
+    },
+    {
+      "component": "renderer",
+      "path": "g2/align_captions.py",
+      "sha256": "7cd1141b24acc9f2d9c4a66699e0a4a4378aef33d3986cf7fae85e69956681f9"
+    },
+    {
+      "component": "renderer",
+      "path": "g2/explanation.py",
+      "sha256": "1a599a7bcd21751ae82e62a51063f54e0154d469f75d5ec6ab2288a086485842"
+    },
+    {
+      "component": "renderer",
+      "path": "g2/workspace.py",
+      "sha256": "0390fc236de562342e34e378dae8641767a3631607494f6d456b7bd5a215caab"
+    },
+    {
+      "component": "renderer",
+      "path": "g2/caption_alignment.py",
+      "sha256": "79444fb74eb1ba5f973da16a2e25722c5c5b9cad878cffaa839d5c636e63e413"
+    }
+  ]
+}

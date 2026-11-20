@@ -1,0 +1,5 @@
+{
+  "busy_database_retries_same_render": true,
+  "no_false_failure": true,
+  "no_new_remote_submission": true
+}

@@ -1,0 +1,38 @@
+{
+  "scheduled_chain_run": "5c74ee94552a4b4e9897a8ee6554485a",
+  "schedule_run": {
+    "id": "878007a820ea46968d7aa709216fd775",
+    "schedule_id": "2c1436a4a7c9487ca9fed4b4dec81170",
+    "job_name": "chains/scheduler_check",
+    "version": 1,
+    "due_at": 1794922020.0,
+    "status": "cancelled",
+    "attempt": 1,
+    "max_retries": 2,
+    "ready_at": 1794922032.046998,
+    "lease_until": null,
+    "pid": null,
+    "started_at": 1794922025.595687,
+    "finished_at": 1794922032.046998,
+    "error": "用户取消；不会自动重试",
+    "output_path": null,
+    "created_at": 1794922024.796476,
+    "timezone": "Asia/Shanghai",
+    "cancel_requested": 1,
+    "context": "{\"schedule_id\": \"2c1436a4a7c9487ca9fed4b4dec81170\", \"version\": 1, \"expression\": \"* * * * *\", \"timezone\": \"Asia/Shanghai\", \"due_at\": 1794922020.0, \"prepared\": true, \"policy_revision\": \"102d6e67841f1a6264d5d04b35c5cd1d53f4ceecb33fbf319feda3a870dcd410\", \"policy\": {\"schema_version\": 1, \"matrices\": [\"ai_media\", \"chatgpt_acquisition\", \"science_trial\", \"research_updates\", \"acceptance_science\", \"scheduler_check\"], \"window\": {\"mode\": \"previous_slot\", \"timezone\": \"Asia/Shanghai\"}, \"jobs\": {\"chains/science_trial\": {\"mode\": \"rolling\", \"days\": 7, \"timezone\": \"Asia/Shanghai\"}, \"chains/research_updates\": {\"mode\": \"rolling\", \"days\": 7, \"timezone\": \"Asia/Shanghai\"}, \"chains/acceptance_science\": {\"mode\": \"rolling\", \"days\": 7, \"timezone\": \"Asia/Shanghai\"}, \"chains/scheduler_check\": {\"mode\": \"rolling\", \"days\": 7, \"timezone\": \"Asia/Shanghai\"}}, \"collection\": {\"enabled\": true, \"schedule\": \"20 7 * * *\", \"timezone\": \"Asia/Shanghai\", \"retention_days\": 60, \"limit_per_source\": 80, \"max_sources\": 100, \"timeout_seconds\": 15}, \"automatic\": {\"daily_limit\": null, \"timezone\": \"Asia/Shanghai\", \"recommendations\": false}, \"sources\": {\"reference\": [\"source:cg_pro_tiers\", \"source:cg_pricing\", \"source:cg_help\", \"source:cg_capabilities\", \"source:cg_errors\"]}, \"revision\": \"102d6e67841f1a6264d5d04b35c5cd1d53f4ceecb33fbf319feda3a870dcd410\"}, \"issue_id\": \"e5c63448c13b37568e887aaab0dbcb05987f8f897aa93fbb0bb9f51972e83c5c\", \"research_window\": {\"mode\": \"rolling\", \"days\": 7, \"start\": \"2026-11-10T21:27:00+08:00\", \"end\": \"2026-11-17T21:27:00+08:00\", \"timezone\": \"Asia/Shanghai\"}, \"job\": {\"name\": \"调度验收链路\", \"enabled\": true, \"language\": \"zh\", \"keywords\": [], \"search\": false, \"sources\": [\"source:cg_openai_news\"], \"sources_limit\": 10, \"runtime\": {\"timeout_seconds\": 3600, \"skip_if_running\": true}, \"prompt\": \"研究科学进展\\n\\n日期：{date}。根据取得的材料形成可供视频作者使用的研究底稿。保留具体变化、例子、解释及原始链接。使用条目格式：\\\\n### 1.1 选题标题\\\\n- **一句话**：内容\\\\n- **发布日期**：日期\\\\n- **证据来源**：链接\\\\n正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。\", \"output\": \"output/chains/scheduler_check/{date}.md\", \"topics\": {\"alias\": \"scheduler_check\", \"format\": \"flash\", \"prefix\": \"AAD\", \"refresh\": true}, \"_file\": \"chains/scheduler_check\", \"_mtime\": 1794921992.6145542, \"_matrix\": \"scheduler_check\", \"_domain\": \"调度验收链路\"}}"
+  },
+  "unrelated_plans_unchanged": 66,
+  "scope": {
+    "key": "scheduler_check",
+    "name": "调度验收链路",
+    "job": "chains/scheduler_check",
+    "outputs": [
+      "scheduler_check_each"
+    ],
+    "script_ids": [],
+    "matrix_key": "scheduler_check",
+    "recipes": [
+      "chain_scheduler_check"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "5fdf6f53eed8409590a19fb1f6c2405e",
+  "action": "restart",
+  "active_runs": "wait",
+  "status": "completed",
+  "pid": 19211,
+  "runtime": {
+    "pid": 19211,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794813132.196945,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "ee99a72a7d89492a9aee2c8af3b9ab40"
+  },
+  "state_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state",
+  "user_id": "local-natural-writing-t05-kept-item",
+  "created": 1794813659.7472482,
+  "new_pid": 20525,
+  "updated": 1794813662.202473,
+  "actual": {
+    "pid": 20525,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794813661.469096,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "7a4201dbc55245098195d05e321d140b"
+  },
+  "health": "ok"
+}

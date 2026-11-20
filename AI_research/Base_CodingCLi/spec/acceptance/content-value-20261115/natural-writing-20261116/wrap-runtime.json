@@ -1,0 +1,50 @@
+{
+  "t03": {
+    "production": "chatgpt_t03_tutorials",
+    "same_saved_report_and_material": true,
+    "same_actual_author_user_request": true,
+    "author_context_change": "T03 system sentence only",
+    "scripts": {
+      "control": {
+        "title": "三份 PDF 一起丢给 ChatGPT，先让它找矛盾",
+        "sha256": "5a2164a7b262ee04a7c1c4ce304aff16a1d4246a93bb186b02ff58853b189307"
+      },
+      "candidate": {
+        "title": "别只丢一句话：三步让 ChatGPT 写出能直接发的邮件",
+        "sha256": "b9d27110f39c37fdea3a02f9c4ec5296e0326f3a0cc0b58914a3fd00ca058a12"
+      }
+    }
+  },
+  "flash_daily": {
+    "production": "flash_daily",
+    "same_saved_report_and_material": true,
+    "same_actual_author_user_request": false,
+    "author_context_change": "flash column notes only",
+    "scripts": {
+      "control": {
+        "title": "DeepSeek把App拆成API，语音3毛9一小时",
+        "sha256": "dce9ba15aeccd474a8d88e726bdb59098ddf6a1bacc423922bdb44930ac6418c"
+      },
+      "candidate": {
+        "title": "DeepSeek 把整个 App 拆成 API 卖了",
+        "sha256": "014599dfbcda6813b04cf16128bd9c3ee406952114dde2dbb4397934b65acd29"
+      }
+    }
+  },
+  "t05": {
+    "production": "chatgpt_t05_comparison",
+    "same_saved_report_and_material": true,
+    "same_actual_author_user_request": false,
+    "author_context_change": "T05 preview system wording; new automatic story packets differ",
+    "scripts": {
+      "control": {
+        "title": "Gemini 4 Carbon 开放：104 万上下文、$2/$10 首发价，普通用户得先订 Ultra",
+        "sha256": "64e8439dce5bdd31fde155456a60cd60226cea65119bff22ca185071356ffeec"
+      },
+      "candidate": {
+        "title": "Gemini 4 Carbon 开放：成本只有对手六分之一，优惠价只剩 20 天",
+        "sha256": "ebca220b36ad89f6bd16f5a64e69ddd4f80d1dc6135fe98db8aa40e8af485a6b"
+      }
+    }
+  }
+}

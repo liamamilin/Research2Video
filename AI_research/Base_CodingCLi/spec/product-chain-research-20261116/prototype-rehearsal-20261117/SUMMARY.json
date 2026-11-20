@@ -1,0 +1,336 @@
+{
+  "captured_at": "2026-11-17T13:55:20.663262+08:00",
+  "job": "monitoring/ai_flash_discovery",
+  "schedules": [
+    {
+      "job_name": "monitoring/ai_flash_discovery",
+      "schedule": "30 7,18 * * *",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 2,
+      "version": 13,
+      "deleted": 0
+    },
+    {
+      "job_name": "source_discovery/ai_media",
+      "schedule": "30 5 * * 0",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 1,
+      "version": 5,
+      "deleted": 0
+    },
+    {
+      "job_name": "system/material_collection",
+      "schedule": "20 7 * * *",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 0,
+      "version": 2,
+      "deleted": 0
+    }
+  ],
+  "sources": {
+    "declared_entries": 13,
+    "expanded_declared_specs": 26,
+    "receipt_source_entries": 65,
+    "automatic_added": [
+      "rss:https://ratelimitnow.com/whats-new.xml"
+    ],
+    "items": 528,
+    "collection_window": {
+      "mode": "previous_slot",
+      "days": 1,
+      "start": "2026-11-16T18:30:00+08:00",
+      "end": "2026-11-17T07:30:00+08:00",
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "report": {
+    "path": "output/flash/2026-11-17_ai_flash_discovery.md",
+    "metadata": {
+      "schema": "research-report/v1",
+      "id": "fe1be2f4a73a1e02e446ff44e44eed66430bc613abcf867d3447d97979b7e648",
+      "path": "output/flash/2026-11-17_ai_flash_discovery.md",
+      "sha256": "6b7d2ea72c40fbe2fee6962a398f6f27d521867e9a8cea0167b4304286800eb6"
+    }
+  },
+  "report_candidates": 10,
+  "outputs": [
+    {
+      "production": "flash_daily",
+      "title": "豆包21个工作台，苹果给Siri上日限额",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T09:39:01+0800",
+      "render_id": "ec87040f39264626899723fd969b73d7",
+      "topic_id": null,
+      "from_item": null,
+      "episode_items": 16,
+      "raw_items": 6,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_daily",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "production": "flash_each",
+      "title": "豆包工作台月费68元起，金融投研为什么可能还要再买一份数据",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T10:03:32+0800",
+      "render_id": "32e2aa9467a847379e4ae0c59aa05a8e",
+      "topic_id": "2026-11-17/F1@rfe1be2f4a73a1e02~money",
+      "from_item": "2026-11-17/F1@rfe1be2f4a73a1e02",
+      "episode_items": 0,
+      "raw_items": 0,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "production": "flash_each",
+      "title": "FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T10:31:42+0800",
+      "render_id": "b12ae81883bf4a90b302c8b7e930dfbd",
+      "topic_id": "2026-11-17/F2@rfe1be2f4a73a1e02~howto",
+      "from_item": "2026-11-17/F2@rfe1be2f4a73a1e02",
+      "episode_items": 0,
+      "raw_items": 0,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "production": "flash_each",
+      "title": "Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T10:59:36+0800",
+      "render_id": "fdfaafa43eab42b88e9ddbd33ebabc78",
+      "topic_id": "2026-11-17/F3@rfe1be2f4a73a1e02~money",
+      "from_item": "2026-11-17/F3@rfe1be2f4a73a1e02",
+      "episode_items": 0,
+      "raw_items": 0,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "production": "flash_each",
+      "title": "Poppy 支持名单很长，但真能读到文件的只有 16 家",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T11:23:38+0800",
+      "render_id": "4c338a7420574a268c228878706d2d24",
+      "topic_id": "2026-11-17/F5@rfe1be2f4a73a1e02~howto",
+      "from_item": "2026-11-17/F5@rfe1be2f4a73a1e02",
+      "episode_items": 0,
+      "raw_items": 0,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "production": "flash_each",
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "status": "COMPLETED",
+      "completed_at": "2026-11-17T11:52:01+0800",
+      "render_id": "d657281aef1f46a8a4bc93b5db145b0b",
+      "topic_id": "2026-11-17/F9@rfe1be2f4a73a1e02~howto",
+      "from_item": "2026-11-17/F9@rfe1be2f4a73a1e02",
+      "episode_items": 0,
+      "raw_items": 0,
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    }
+  ],
+  "bindings": {
+    "flash_daily": {
+      "job": "monitoring/ai_flash_discovery",
+      "recipe": "flash-nr",
+      "split": "whole",
+      "auto": 1,
+      "reverify": false,
+      "content_mode": "episode",
+      "content_column_id": "ai_flash",
+      "audience": "开发者",
+      "minutes": 0.0,
+      "render": {},
+      "selection": {},
+      "errors": []
+    },
+    "flash_each": {
+      "job": "monitoring/ai_flash_discovery",
+      "recipe": "flash-nr",
+      "split": "each",
+      "auto": 1,
+      "reverify": false,
+      "content_mode": "individual",
+      "content_column_id": "",
+      "audience": "开发者",
+      "minutes": 0.0,
+      "render": {},
+      "selection": {
+        "heat_min": 20000,
+        "angle_min": 500000
+      },
+      "errors": []
+    }
+  },
+  "recent_research_runs": [
+    {
+      "id": "d66c9d7093324995887aa43f197599d8",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "success",
+      "attempt": 1,
+      "started_at": 1794871804.104573,
+      "finished_at": 1794875076.627136,
+      "output_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-17_ai_flash_discovery.md",
+      "error": ""
+    },
+    {
+      "id": "5666710f98dd436681edc306bd83a25f",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "failed",
+      "attempt": 3,
+      "started_at": 1794825808.538487,
+      "finished_at": 1794826021.336607,
+      "output_path": null,
+      "error": "联网搜索不可用，已中止，没有生成报告。exa: HTTP 402: {\"requestId\":\"a73f47a3487d1f86d859826e2dc11f7b\",\"error\":\"You have exceeded your credits limit. Please top up to keep using Exa at dashboard.exa.ai\",\"tag\":\"NO_MORE_CREDITS\"}。请到「设置 → 搜索」检查服务商额度和 Key，或换一个搜索服务商后重新运行。"
+    },
+    {
+      "id": "b2ebd1b9304f48e6bd40e567398a290e",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "success",
+      "attempt": 1,
+      "started_at": 1794785408.553608,
+      "finished_at": 1794786877.352849,
+      "output_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md",
+      "error": ""
+    }
+  ],
+  "all_job_bindings": [
+    {
+      "id": "ai-developer-roundup-long",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "some"
+    },
+    {
+      "id": "ai-non_tech-one_point-short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "ai-non_tech-quick_take-short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "flash",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "flash_daily",
+      "auto": 1,
+      "usable": true,
+      "content_column": "ai_flash",
+      "split": "whole"
+    },
+    {
+      "id": "flash_each",
+      "auto": 1,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "point_short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    }
+  ]
+}

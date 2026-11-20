@@ -1,0 +1,43 @@
+2026-11-18 12:45更新
+原生最终复验PASS：真实研究→单条及合集两条成片均完成、完整解码和浏览器播放通过；两个自然周期成功并显示历史。
+整份报告型存量链路管理、共享删除及真实CLI回退PASS。最终UI54项，管理7项，事务/回退9项通过；原管线115项与其他回归通过。
+正式备份18个库/432份配置回执完成；源码71个受控文件已封装并回退预检。
+正式维护701fe9c486264de4889d698ffdc6d365/helper90759正在等待现有制作，未强制中止；finalize_formal.py会在受管重启成功后加载新UI、入口并核验历史。
+正式现有浏览器admin会话可通过Chrome原生AX操作；CDP绑定超时，不重复调用。当前仍是旧矩阵页面。
+原生Web92568，dispatcher87789；原生数据保留。正式Web5557，dispatcher2627，网关2629/8775、渲染8011仍保留，须读取运行回执确认后续变化。
+详见ACCEPTANCE.txt和ROLLBACK.txt；正式加载与浏览器验收未完成前长任务不标记完成。
+
+最后一处兼容修正：旧Flash的split=some盘点输出不能一键启用自动；已修正并从真实HTTP恢复→暂停验证PASS，证据manual-roundup-resume.json。最终新UI54项与构建/lint复验通过，source-release.json已重新冻结71文件，rollback_source预检PASS。
+正式维护仍为applying，helper90759由原service_maintenance.perform等待busy_work退出；不要强制中止在途视频。当前1条远端2442df7a-73a4-4ba8-bf22-b800229d3c20在VOICE_ALIGN，4条已APPROVED等出片。只读inspector inspect_formal.py（需要本机HTTP权限）可查看维护与在途状态。
+finalize_formal.py在session95063等待receipt完成；成功后会自动复制新UI（保留旧哈希资源）、写chain_access.yaml enabled/all/create、平滑重启原受管dispatcher（不安装新OS服务）、校验旧ID集合保留并写formal-activation.json。需检查该session/log实际结果；若维护1小时超时则依据在途进展重新提交安全维护，勿强杀。
+正式Chrome现有admin会话已解锁可用，但CDP getTab持续Emulation超时，使用chromeApp原生AX，当前矩阵页http://127.0.0.1:8775/matrices；正式切换后原生地址栏访问/chains可验收。IAB3 nativeTab目前旧Flash详情，nativeVideoTab是单条成片。CUA未写completion_summary，最终正式页面验收后必须写一次，随后才用其他工具。
+剩余：正式安全加载实际完成→正式浏览器查看Flash/创建向导/关联页→验证计划和生产YAML保持及旧历史ID→最终DOC/状态更新→CUA completion_summary→完成goal。不提前结束。
+
+12:54：旧正式render deee0e0e414941c09b8cc68196860813字幕forced-alignment失败（c2_n8时间无效），原后台已跟进下一条render71c52d7450674b39b815a86f48dcddc5。AutoVideo相关3个文件git干净，不是本轮改动；只记录，未修renderer。维护仍在等待2个AP批次，目前剩余4条WORKING，不强杀。
+
+13:20新增修正并验证：原native_schedule失败重试此前错误地用当前窗口且outputs=[]；现在明确“手动重跑本期研究”，沿用冻结Job/原时间窗口，视频用当前开启输出，保留原失败并记录retry_of。无快照的老期次拒绝冒充原期次重跑。engine._run_job清空self.run_context后写meta原来丢chain_run_id，现从局部context记录。管理/原生接续/上述回归14项PASS，UI54/build/lint PASS。native最终服务已同步新代码/引擎/UI，Web3247、dispatcher87789；实际API产生新研究baa3df1d0583476189a670c62b59c064并保存output/chains/native_schedule/2026-11-18_2.md，回执带同一chain_run_id，real-report-run-receipt.json为PASS。未生成额外视频。
+source-package.log正在/已重新封装最新71文件，需检查最后输出与rollback_source预检。finalize_formal.py仍session95063等待正式701fe9c486264de4889d698ffdc6d365维护回执；13:34左右1小时会超时，若旧制作仍在推进就重新安全提交request_formal_restart.py并重启finalize_formal.py，勿强杀。
+formal最新原生render395dce023d8f48fcad525f12200252c7（远端可用local_checkpoint.py查）在BUILD_IR，当前仍2个AP RUNNING，5→4剩余WORKING，1个HELD。前条2cb的两次字幕失败被保留；不修原有AutoVideo代码。local_checkpoint.py日志保存formal-local-progress.jsonl。
+正式加载后剩余：用Chrome原生AX（chromeApp，getAXState重新定位）访问8775/chains；现有admin会话已登录，CDP绑定一直超时不要再试。查看原Flash7输出/来源/周期/历史，进入创建向导及关联Tab确认范围；配置/计划与formal-before比较、历史ID保留，补ACCEPTANCE/STATUS。清理本轮nativeWeb/dispatcher前先busy=0、核对PID归属并SIGTERM，保留9253与正式8011。最后CUA completion_summary（尚未写）→再其他工具更新文档/goalcomplete/最终回复。
+
+13:32策略纠偏（真实证据）：旧维护等待时新增第3个AP批次5ec46caa59cf4283b5e890e9ed7752cb，队列无法自然清空。新增显式handoff_waiting_video维护模式：先等TOPICS规划变成持久ITEMS，再持有原autopilot-tick.lock，冻结新派发；真正写稿、远端出片/下载、研究/发布仍必须完成，已准备AP行不作为执行工作阻塞，ID/状态不改。默认维护行为不变。40项保护/锁/队列保留测试+真实服务生命周期1项PASS。
+已只停止旧等待助手90759，旧Web5557未动；旧维护701fe...标interrupted及保留旧request/log/ID快照。新维护342a72fa1bf243a9ab550abe9af8231b，helper7647，持有state/autopilot-tick.lock（lsof已确认唯一持有），截止约14:29。新finalize_formal.py session10727等待新回执，旧session95063已按预期退出。新监视器快照包含autopilot_items ID。
+目前真实render678bb2bcc01843208d4f4dcc14624aa8在VOICE_ALIGN，前条395dce...已完成，AP有DONE4/HELD1/PENDING1/WORKING8，冻结后未再增长。实际写稿已0；主题工作台自动主题8项全部由AP管理（无独立主题派发），当前提交冻结覆盖这些链路。保持等待该条成片完成后安全切换，无需等全部排队视频逐个做完。source-package.log最新71源文件及回退预检PASS。
+request_formal_restart.py现支持--action shutdown用于回退；ROLLBACK.txt和rollback_source.py已适配保留准备队列的受管关停，要求completed回执、无实际执行工作，绝不回写数据库。
+
+13:36：确认额外6ca746dba07d40cb91c53ce294a806f9来自13:31:58管理员手动render API（正式audit和server日志），不是AP穿过提交锁。当前冻结有效，真正写稿0，自动主题8个都在AP里。维护会等待实际f4f515f2...和该手动排队ea4a0054...两远端任务；已在commentary请用户短暂暂缓新手动出片。formal-queue-handoff-before.json保存原批次/条目IDs与spec用于接续核对。
+
+14:11最后跨Tab修正：旧ProductionConfigs按query chain过滤同Job输出并提交chain_key；production API把新增输出归入精确链路；已有导入链路会归并全局旧页面新增输出。公用remove_output同步当前/退休输出与最后模板，保留历史；生产配置ID分配避开历史脚本和链路退休ID，避免删除后重建混历史。后端管理/接续/原生产40项PASS、相关UI68项PASS，build/lint PASS。新增3个原文件有修改前备份，source_release现在74文件，回退预检PASS。
+native同步上述服务及production路由/maintenance后Web21317、dispatcher87789。verify_cross_tab_http.py第1次因端口尚未绑定连接拒绝未变更，启动后重试在进行；看cross-tab-http.log（当前session稍后输出）。需把真实HTTP结果补到ACCEPTANCE。
+正式当前只有手动render6ca746dba07d40cb91c53ce294a806f9在RENDER，其余已封装完成，提交锁仍由helper7647持有。新维护342a...和finalizer session10727仍在等待；预计剩余该条封装后即切换。务必马上看formal-finalize.log/formal-activation.json真实结果，再用Chrome原生AX开新标签验证，避免覆盖用户可能正在编辑的原视频页。
+
+14:35：首轮正式加载PASS，Web22904/instance5628...，dispatcher23191/chain_tracking_version1，入口enabled/all/create。原790脚本672renders405AP695items、64计划、6547周期运行377上传ID子集保留。formal-after-verification.json PASS：原YAML/64计划不变、3批16项spec/IDs保留、原两在途视频远端ID均COMPLETED；原排队脚本ddce...已自动续为新render67b50646e28443f8afb7b678f7e6816a，源队列真实接续。
+正式Chrome已看到/chains，Flash显示13来源/7输出/253文稿、43补充候选每次4、原周期30 7,18 * * *、next18:30。修改表单各字段和盘点手动限制已查看并取消（未保存）。历史列表出现真实DONE批次带HELD2，列表/详情状态不一致；已修正为SQL按本链路条目聚合并和详情共用outcome。另把run/retry API接入既有维护admission，维护时409禁止新模型任务。84项管理/生产/维护回归PASS，Ruff/diff-check PASS，source-package74最新。
+已保留formal-activation-first.json等首轮证据，第二次受管刷新2fd30e9f95674e60bef279c6621e81ff/helper27951，仍保留UI与入口flag；currentrender67b在RENDER，等待当前实际工作完成后刷新后端。complete_backend_refresh.py（新exec session见工具）会确认健康/源码/旧IDs并更新formal-activation.runtime，结果写backend-refresh-result.json。新request_json指向本次receipt，local_checkpoint.py可看进展。
+CUA仍未completion_summary！chromeApp原生AX可以操作，CDP仍不要调用。用户/其他操作会切换标签，原AX208链接点击误选旧视频页，未改数据；现在每次拿完整AX动态找“地址和搜索栏”索引，直接导航已知URL最可靠。Chrome当前为/chains/job-050...的运行记录页（旧视频Tab被导航成链路，读页无未保存）。有另一个我们新开/chains页也保留。正式UI创建向导、关联矩阵/报告/发布范围还需查看；可在第二刷新等待期间先检。
+native最后Web21317、dispatcher87789，跨Tab真实HTTP cross-tab-http.json PASS，原production字节与2条SCI历史一致。最新chain_history/routeadmission小修仅SOURCE+unit84测试，native未复制2文件；如需要可同步，但不必重跑已通过的内容生产。旧native2视频+2自然+receipt实际报告证据均保留。
+余：完成第二刷新→正式页面历史HELD/详情一致、创建向导、跨Tab过滤→确认最终read-only invariants/报告补录→只停本轮native服务（busy0+PID归属），正式Web/dispatcher/8011/9253保留→最终截图并CUA completion_summary一次→goal complete→简洁中文交付。
+
+最终收尾：第二次受管刷新2fd30e... PASS，当前正式Web29065，dispatcher23191不变；UI矩阵关联修正已加载，原后台无需再重启。源码包76文件、最终UI74项PASS/build/lint PASS、后端管理84项PASS。正式只读复验config/jobs和64计划不变、3批次spec/16条目保留、原2远端成片完成及下一条队列接续PASS。Chrome验收五步创建必填、Flash管理、HELD列表/详情、报告/成片范围、矩阵精确研究与7输出；截图和AX已存，CUA completion_summary已提交一次。剩余仅核对本轮隔离服务关停receipt与最终diff，随后完成goal。
+
+最终验收完成：隔离服务清理PASS；正式再验76源码/64计划/旧YAML/3批次16条目及队列RENDER PASS，root git diff --check PASS。完整交付见ACCEPTANCE.txt、USER-GUIDE.txt和ROLLBACK.txt。未提交git，未覆盖其他工作树任务。

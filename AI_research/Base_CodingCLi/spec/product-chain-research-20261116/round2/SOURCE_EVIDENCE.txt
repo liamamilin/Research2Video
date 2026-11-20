@@ -1,0 +1,2351 @@
+E01 | core/source_supply.py | SHA256 04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45
+117: def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
+118:     """Scan before slicing, deepen selected links, and return uncommitted delivery."""
+119:     from .sources import fetch_source, resolve
+120:     from .source_pages import canonical_url
+121:     root = Path(getattr(engine, 'state_dir', Path(engine.workspace_dir) / 'state'))
+122:     storage = SupplyStore(root, profile["key"])
+123:     canonical = job["_file"]
+124:     now = time.time()
+125:     from .research_window import select
+126:     window = job.get('_collection_window')
+127:     from .production_policy import load, manages, references
+128:     policy = job.get('_production_policy') or load(engine.config_dir)
+129:     archive = None
+130:     archive_error = ''
+131:     reference_specs = set()
+132:     if job.get('_issue_id') or manages(policy, engine.config_dir, job=canonical):
+133:         from .material_archive import MaterialArchive
+134:         try:
+135:             archive = MaterialArchive(root)
+136:         except (OSError, sqlite3.Error) as exc:
+137:             archive_error = str(exc)[:300]
+138:         reference_specs = references(policy, engine.config_dir)
+139:     baseline = storage.baseline(canonical)
+140:     old = baseline["items"]
+141:     # News dated after the last delivered run's own range is still owed if that run did not hand it over
+142:     # (it overflowed, or a run failed): widen only the date filter, back to where the last run started.
+143:     select_window = window
+144:     if window and old and baseline.get("at"):
+145:         from datetime import datetime
+146:         start = datetime.fromisoformat(window["start"])
+147:         owed = datetime.fromtimestamp(float(baseline["at"]) - window["days"] * 86400, start.tzinfo)
+148:         if owed < start:
+149:             select_window = {**window, "start": owed.isoformat()}
+150:     declared = resolve(list(job.get("sources") or []), engine.config_dir)
+151:     automatic = choose_pool(storage.pool()["sources"], canonical, int(profile.get("pool_per_job", 4)), now)
+152:     coverage = source_coverage.targets(profile, canonical, storage.pool()['sources'])
+153:     metadata = {r['spec']: r for r in automatic}
+154:     metadata.update({r['spec']: r for r in coverage})
+155:     reference_specs.update(r['spec'] for r in coverage if r['role'] in {'state', 'snapshot'})
+156:     specs = list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic]))
+157:     # Snapshot volume is useful context but cannot displace product changes and articles.
+158:     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
+159:     scan = int(profile.get("scan_limit", 80))
+160:     per_source = int(job.get("sources_limit", 10))
+161:     job_profile = profile["jobs"][canonical]
+162:     mode = job_profile.get("mode", "context")
+163:     optional_details = job_profile.get("optional_article_details", False)
+164:     client = engine._source_options(["page:https://example.org"])["search_client"]
+165:     pending = {"profile": profile["key"], "job": canonical, "at": now, "delivered": {}, "sources": {},
+166:                "initial_baseline": {}, "candidates": []}
+167:     items, stats, candidates, discovered_links = [], {}, [], []
+168:     observed, complete_sources = [], set()
+169:     queues, fresh = {}, {}
+
+207:                 if archive:
+208:                     try:
+209:                         archive.record(spec, fetched, error=row['error'])
+210:                     except (OSError, sqlite3.Error) as exc:
+211:                         row['archive_error'] = str(exc)[:300]
+212:                         archive = None
+213:                 row['date_coverage'] = getattr(fetched, 'coverage', {})
+214:             except CancelledError:
+215:                 raise
+216:             except Exception as exc:
+217:                 if not archive:
+218:                     raise
+219:                 try:
+220:                     archive.record(spec, [], error=str(exc))
+221:                 except (OSError, sqlite3.Error) as cache_error:
+222:                     row['archive_error'] = str(cache_error)[:300]
+223:                     archive = None
+224:                 row['error'] = str(exc)[:300]
+225:                 row['live_status'] = 'unavailable'
+226:                 fetched = []
+227:             if archive:
+228:                 from .material_archive import merge
+229:                 from datetime import datetime
+230:                 cutoff = datetime.fromisoformat(window['end']).timestamp() if window else now
+231:                 try:
+232:                     archived, row['archive_coverage'] = archive.read(spec, before=cutoff)
+233:                 except (OSError, sqlite3.Error) as exc:
+234:                     archived = []
+235:                     row['archive_error'] = str(exc)[:300]
+236:                     archive = None
+237:                 row['archived_items'] = len(archived)
+238:                 row['cache_items'] = len([item for item in archived if section_key(item) not in live_keys]) if not fetched or role not in {'state', 'snapshot'} else 0
+239:                 if not fetched or role not in {'state', 'snapshot'}:
+240:                     fetched = merge(archived, fetched)
+241:             if not fetched:
+242:                 raise ValueError("未取得正文条目")
+243:             row["scanned"] = len(fetched)
+244:             if spec not in metadata and all(item.provider in {'aa', 'hf_models', 'wb'} for item in fetched):
+
+E02 | web/services/source_registry.py | SHA256 ad947ae61e51bb438ef217821178a330a8fdc9ee561f8596d3575257c97a132b
+45: def usages(registry: dict, key: str) -> list[dict]:
+46:     paths = get_settings().paths
+47:     entry = registry[key]
+48:     result = []
+49:     for job in list_jobs(paths.jobs_dir):
+50:         data = load_job(paths.jobs_dir, job) or {}
+51:         refs = [s for s in data.get('sources') or [] if s == 'source:' + key or
+52:                 str(s).startswith('tag:') and str(s)[4:] in entry.get('tags', [])]
+53:         if refs:
+54:             result.append({'job': job, 'name': data.get('name') or job, 'references': refs})
+55:     return result
+56: 
+57: 
+58: def change(action: str, key: str, fields: dict, revision: str) -> dict:
+59:     path = Path(get_settings().paths.config_dir) / sources.REGISTRY_FILE
+60:     with file_lock(str(path)):
+61:         current = snapshot()
+62:         if current['revision'] != revision:
+63:             raise HTTPException(409, '信息源已被修改，请重新读取后保存；未覆盖其他修改')
+64:         registry = current['sources']
+65:         if action == 'create' and key in registry:
+66:             raise HTTPException(409, '这个信息源 ID 已存在')
+67:         if action != 'create' and key not in registry:
+68:             raise HTTPException(404, '信息源不存在')
+69:         used_by = usages(registry, key) if key in registry else []
+70:         old = path.read_text(encoding='utf-8') if path.exists() else ''
+71:         raw = yaml_io.parse_yaml(old) if old.strip() else {}
+72:         if action == 'delete':
+73:             candidate = {k: v for k, v in registry.items() if k != key}
+74:             for use in used_by:
+75:                 try:
+76:                     sources.resolve(use['references'], registry=candidate)
+77:                 except sources.RegistryError as exc:
+78:                     raise HTTPException(409, {'message': '删除会使任务来源失效，请先调整引用：' + str(exc), 'used_by': used_by}) from exc
+79:             del raw[key]
+80:         else:
+81:             entry = {**registry.get(key, {'name': key, 'tags': [], 'note': ''}), **fields}
+82:             validate_entry(key, entry)
+83:             candidate = {**registry, key: entry}
+84:             # A tag edit must not silently invalidate an existing job.
+85:             for use in used_by:
+86:                 try:
+87:                     sources.resolve(use['references'], registry=candidate)
+88:                 except sources.RegistryError as exc:
+89:                     raise HTTPException(409, {'message': str(exc), 'used_by': used_by}) from exc
+90:             raw[key] = {**dict(raw.get(key) or {}), **entry}
+91:         backup = None
+92:         if old:
+93:             # Unique names keep several changes within one second recoverable.
+94:             backup = yaml_io.save_backup(str(path.with_name('sources_' + uuid.uuid4().hex[:8] + '.yaml')), old)
+95:         path.parent.mkdir(parents=True, exist_ok=True)
+96:         yaml_io.atomic_write(str(path), yaml_io.dump_yaml(raw))
+97:     return {'id': key, 'revision': snapshot()['revision'], 'used_by': used_by, 'backup': backup,
+98:             'message': {'create': '信息源已登记', 'update': '信息源已更新，后续研究使用新配置', 'delete': '信息源已删除'}[action],
+99:             'href': '/sources'}
+
+E03 | web/services/source_catalog.py | SHA256 8904460fcaeffbf5af6844dfecf2740ae55704dc6a7d093f729cc56f21ad6517
+22: def catalog(config_dir: str, jobs_dir: str, state_dir: str, *, job_names: list[str] | None = None) -> dict:
+23:     """``{sources: [...], problems: [...]}``; ``problems`` are Jobs whose source names the registry does not have."""
+24:     registry = sources.load_registry(config_dir)
+25:     by_spec: dict[str, list[dict]] = {}
+26:     for key, entry in registry.items():
+27:         by_spec.setdefault(entry['spec'], []).append({"id": key, **entry, "used_by": [], "last": None})
+28:     problems: list[dict] = []
+29:     job_labels: dict[str, str] = {}
+30:     for name in list_jobs(jobs_dir) if job_names is None else job_names:
+31:         job = load_job(jobs_dir, name) or {}
+32:         job_labels[name] = job.get("name") or name
+33:         declared = list(job.get("sources") or [])
+34:         if not declared:
+35:             continue
+36:         try:
+37:             specs = sources.resolve(declared, config_dir, registry=registry)
+38:         except sources.RegistryError as exc:
+39:             problems.append({"job": name, "problem": str(exc)})
+40:             continue
+41:         history = _history(state_dir, name) + (_history(state_dir, name.rsplit("/", 1)[-1]) if "/" in name else [])
+42:         history = sorted(history, key=lambda e: e.get("ts") or "")[-RUNS_READ:]
+43:         for spec in specs:
+44:             candidates = by_spec.setdefault(spec, [{"id": "", "name": spec, "spec": spec, "tags": [], "note": "", "used_by": [], "last": None}])
+45:             for row in candidates:
+46:                 references = {str(s).strip() for s in declared}
+47:                 if row['id'] and not (spec in references or 'source:' + row['id'] in references or
+48:                                       any('tag:' + tag in references for tag in row['tags'])):
+49:                     continue
+50:                 row["used_by"].append({"job": name, "name": job.get("name") or name})
+51:                 for entry in reversed(history):
+52:                     state = _fetched(entry).get(spec)
+53:                     if state is None:
+54:                         continue
+55:                     seen = {"at": entry.get("ts"), "job": name, "items": state if isinstance(state, int) else 0,
+56:                             "error": state if isinstance(state, str) else ""}
+57:                     if row["last"] is None or (seen["at"] or "") > (row["last"]["at"] or ""):
+58:                         row["last"] = seen
+59:                     break
+60:     rows = sorted([row for group in by_spec.values() for row in group], key=lambda r: (not r["used_by"], r["id"] == "", r["name"].lower()))
+61:     # The automatic pool is data, not an edit to the user's YAML registry.
+62:     # Empty ids keep these rows on the page's existing read-only/direct-source path.
+63:     from core.source_supply import profiles
+64:     from core.source_supply_store import SupplyStore
+65:     for key, profile in profiles(config_dir).items():
+66:         for source in SupplyStore(state_dir, key).pool()["sources"]:
+67:             last = source.get("last")
+68:             if last:
+69:                 from datetime import datetime, timezone
+70:                 last = {**last, "at": datetime.fromtimestamp(last["at"], timezone.utc).isoformat()}
+71:             stats = source.get("stats", {})
+72:             rows.append({"id": "", "automatic": True, "name": source["name"], "spec": source["spec"],
+73:                          "tags": [key, "自动来源"], "note": source.get("reason", "") +
+74:                          f"；报告引用 {stats.get('used', 0)} 页，变化 {stats.get('changed', 0)} 条（不等于成片数）",
+75:                          "used_by": [{"job": j, "name": job_labels.get(j) or profile["jobs"][j]["direction"]}
+76:                                      for j in source["jobs"] if j in profile["jobs"]], "last": last})
+77:     return {"sources": rows, "problems": problems}
+
+E04 | ui/src/pages/Sources.tsx | SHA256 946da943be99ce923ea8376f30fd2fbb9b576d08a1d86ec098f189b209ea2f88
+44:         <p className="text-xs text-text-muted mt-1">
+45:           查看共享信息源、引用它的研究任务，以及最近一次抓取结果。
+46:         </p></div>{editable && catalog.revision && <button className="btn-primary text-xs" onClick={() => setEditing('')}>新增信息源</button>}
+47:         <button className="btn text-xs" disabled={loading} onClick={load}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
+48:       </div>
+49:       <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在此页或通过助手登记来源，研究任务使用 source:id 引用一个来源，或使用 tag:标签 引用一组。删除前会检查引用任务。</p></details>
+50:       {editing !== null && catalog.revision && <SourceEditor key={editing} id={editing || undefined} revision={catalog.revision} onClose={() => setEditing(null)} onSaved={load} />}
+51: 
+52:       {catalog.coverage?.map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
+53:         <summary className="cursor-pointer font-medium">{profile.name} · 主题覆盖 · {profile.cells.filter(c => c.status !== 'current').length} 项有缺口</summary>
+54:         <p className="text-text-muted mt-2">分别跟踪当前状态页、更新公告、数据快照和文章案例。已交给研究模型的材料与报告已采用的材料分开记录；覆盖状态表示实际读取情况。</p>
+55:         <div className="grid gap-3 mt-3 sm:grid-cols-2">{profile.cells.map(cell => <div key={cell.key} className="border border-border rounded p-3">
+56:           <p className="font-medium">{cell.subject} <span className={cell.status === 'current' ? 'text-success' : 'text-warning'}>{cell.status === 'current' ? '已覆盖' : '待补全'}</span></p>
+57:           <p className="text-text-muted mt-1">{cell.topics.join('、')}</p>
+58:           {!cell.sources.length && <p className="text-warning mt-2">尚无专用来源，来源探索将优先处理</p>}
+59:           <ul className="space-y-2 mt-2">{cell.sources.map((source, i) => <li key={`${source.spec}:${i}`} className="break-all text-text-muted">
+60:             <span>{({ state: '当前状态', release: '更新公告', snapshot: '数据快照', editorial: '文章案例' } as Record<string, string>)[source.role]} · {({ current: '已实时读取', missing: '未采集', stale: '已过期', unavailable: '读取失败', cached: '仅有历史缓存' } as Record<string, string>)[source.status]}</span>
+61:             <div>{source.spec}</div>{source.error && <div className="text-danger">{source.error}</div>}
+62:           </li>)}</ul>
+63:         </div>)}</div>
+64:         <p className="mt-3 text-text-muted">素材记录：已交付待记录采用 {profile.candidates.offered || 0} · 报告采用 {profile.candidates.reported || 0} · 解释背景 {profile.candidates.background || 0} · 延后处理 {profile.candidates.deferred || 0} · 历史采用关系未知 {profile.candidates.unknown || 0}</p>
+65:       </details>)}
+66: 
+67:       {catalog.problems.length ? (
+
+108:       </div>
+109:     </div>
+110:   );
+111: }
+112: 
+113: function Row({ s, onEdit }: { s: SourceRow; onEdit?: () => void }) {
+114:   return (
+115:     <tr className="align-top">
+116:       <td className="px-4 py-2 min-w-[14rem]">
+117:         <div>{s.name}{s.automatic ? <span className="ml-2 text-xs text-accent">自动接入</span> : s.id ? null : <span className="ml-2 text-xs text-warning">没登记</span>}</div>
+118:         <div className="text-xs text-text-muted font-mono break-all">{s.id ? `${s.id} · ` : ""}{s.spec}</div>
+119:         {s.note ? <div className="text-xs text-text-muted mt-1">{s.note}</div> : null}
+120:         {onEdit && <button className="text-xs text-accent mt-1" onClick={onEdit}>修改来源</button>}
+121:       </td>
+122:       <td className="px-4 py-2 text-xs text-text-muted">{s.tags.join("、") || "—"}</td>
+123:       <td className="px-4 py-2 text-xs">
+124:         {s.used_by.length ? s.used_by.map((u) => (
+125:           <div key={u.job}><Link className="hover:underline" to={`/jobs/${encodeURIComponent(u.job)}`}>{u.name}</Link></div>
+126:         )) : <span className="text-text-muted">还没人用</span>}
+127:       </td>
+128:       <td className="px-4 py-2 text-xs">
+129:         {s.last ? (
+130:           s.last.error ? <span className="text-danger">{s.last.error} <TimeStamp value={s.last.at} /></span>
+
+E05 | core/source_supply.py | SHA256 04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45
+22: PAGE_CHARS = 24000  # one article read in full, as the page reader splits it
+23: 
+24: 
+25: def profiles(config_dir: str) -> dict[str, dict]:
+26:     result = {}
+27:     for path in sorted((Path(config_dir) / "source_supply").glob("*.yaml")):
+28:         with path.open() as handle:
+29:             value = load_yaml(handle) or {}
+30:         if value.get("enabled", True):
+31:             result[path.stem] = {**value, "key": path.stem}
+32:     return result
+33: 
+34: 
+35: def for_job(config_dir: str, job: dict) -> dict | None:
+36:     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
+37: 
+38: 
+39: _MONTH = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+40:           r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?![a-z])")
+41: _ANNOUNCED = re.compile(
+42:     rf"\b(?:starting|beginning|effective|as of)\s+(?:(?:in|on|from)\s+)?(?:{_MONTH}|\d{{4}}-\d{{1,2}}-\d{{1,2}})"
+43:     r"|(?:自|从)?\s*(?:\d{4}\s*年\s*)?\d{1,2}\s*月(?:\s*\d{1,2}\s*日)?\s*(?:起|开始)",
+44:     re.I)
+
+E06 | core/video/audience_strategy.py | SHA256 ac2bc0c89fb2b848c061f82d0a6b65f8b468985e0c5d1c3c30bc19935ad3dd84
+125:     second.candidates = second.candidates[:candidate_limit(channel)]
+126:     return second
+127: 
+128: 
+129: def author_material(candidate: Candidate, items: list[dict]) -> str:
+130:     selected = set(candidate.source_ids)
+131:     if not selected <= {p["id"] for p in items}:
+132:         raise ValueError("缺少作者所需的素材")
+133:     return "\n\n---\n\n".join(p["text"] for p in items if p["id"] in selected)
+134: 
+135: 
+136: def job_channel(job: dict) -> str:
+137:     """Only explicitly enabled, newly loaded research jobs use this strategy."""
+138:     return JOBS.get(job.get("_file", ""), "") if job.get("content_strategy") == MARKER else ""
+139: 
+140: 
+141: def topic_channel(topic: dict) -> str:
+142:     """A saved report marker travels with the topic; never upgrade old work implicitly."""
+143:     fields = topic.get("fields") or {}
+144:     if fields.get("选题策略") == MARKER:
+145:         value = fields.get("选题入口")
+146:         return value if isinstance(value, str) and value in CHANNELS else ""
+147:     value = topic.get("audience_strategy")
+148:     return value if isinstance(value, str) and value in CHANNELS else ""
+149: 
+150: 
+
+E07 | core/ai_dossier_sources.py | SHA256 7d52bcf32b4f91e68187eb3a7dcc92d93b234794834e8e5ce98d0759295f3598
+45:                                   + [len(sections) - 1] + list(range(len(sections)))))
+46:     kept, used = [], 0
+47:     for i in priority:
+48:         size = len(sections[i].to_markdown())
+49:         if used + size <= max_chars:
+50:             kept.append(i)
+51:             used += size
+52:     return [sections[i] for i in sorted(kept)]
+53: 
+54: 
+55: def wanted(job: dict) -> bool:
+56:     """Migrated columns, plus any Job that opts in with ``dossier_sources: true``."""
+57:     return job.get("_file") in PRODUCTIONS.values() or job.get("dossier_sources") is True
+58: 
+59: 
+60: def enrich(job: dict, report: str, supplied: str, *, search_client=None, cancel_token=None,
+61:            progress_cb=None, fetch=None) -> tuple[str, dict]:
+62:     """Return additional source text and a small run receipt; keep failed attempts."""
+63:     if not wanted(job):
+64:         return "", {}
+65:     if fetch is None:
+66:         from core.sources import fetch_source
+67:         fetch = fetch_source
+68:     urls = selected_urls(report, supplied)
+69:     page_chars = PAGE_CHARS  # every item read in full; a model that cannot take it fails the run visibly
+70:     if progress_cb and urls:
+
+E08 | core/video/question_material.py | SHA256 a5a6516abbd0cdeed8d1c7f01ef48fe8b290decdfdba3f1d3907a4e2dc1700e3
+55: class Addition(BaseModel):
+56:     addition: str
+57:     used_ids: list[str] = Field(max_length=4)
+58:     replacements: dict[str, str] = Field(default_factory=dict)
+59:     contributions: list[str] = Field(default_factory=list)
+60:     unfilled: list[str] = Field(default_factory=list)
+61: 
+62: 
+63: def enabled(job: dict, system: dict) -> bool:
+64:     """Old Job snapshots and non-content jobs do not acquire new behavior implicitly."""
+65:     return (job.get("question_material") == MARKER and bool(strategy.job_channel(job))
+66:             and (system.get("question_material") or {}).get("enabled", strategy.QUESTION_MATERIAL_DEFAULT) is True)
+67: 
+68: 
+69: def _check_cancel(cancel_token) -> None:
+70:     if cancel_token is not None and cancel_token.is_set():
+71:         raise CancelledError("Cancelled during question-led material collection")
+72: 
+73: 
+74: def _error(exc: Exception) -> dict:
+75:     # Keep error categories, never provider exception strings that could echo credentials.
+76:     return {"type": type(exc).__name__, "http_status": getattr(exc, "code", None)}
+77: 
+78: 
+79: def _editable_paragraphs(blocks: list[str]) -> dict[str, int]:
+80:     """Keep headings, reference lists, tables and fenced code outside replacement."""
+
+E09 | core/video/manuscript_workflow.py | SHA256 b84a91b2ade4a06fe80cd70dfe2cbb7d9c5bdd617ef6e0d0a1b9ded458ad829d
+51: JOB_PROMPTS = {
+52:     "chatgpt_acquisition/t04_testing": JobPrompts(
+53:         version="t04-v1",
+54:         draft=(
+55:             "先从本期已有结果里找到一个观众真要做的决定，用开头的具体任务提出它。每个案例讲一个看得见的结果或错例，"
+56:             "说明它怎样推进同一个决定。保留各案例独立的任务、对象和结果；结果用不到的操作细节留给制作。"
+57:             "尚未实测的情况只说还需要看到什么。收尾把前面的结果合成一句观众下次能用的判断。"
+58:         ),
+59:         episode_lead="整期从一个真实任务的结果起步，用一句口播说明本期要解决的使用问题，接主持人问候后进入第一节。后面的测试随着正文展开。",
+60:         read="""你是听完一期 ChatGPT 实测的观众。说出哪一个实际结果让你改变了用法，引用最能支撑作者判断的原话。找一处值得修的地方：已有结果和作者建议之间哪一步没讲清，或哪段操作说明挡住了这个结果。只指定解决这一问题需要的至多三段；如果听众已经明白，或须换掉主线才能改善，targets 留空，并说明原因。
+61: 输出 JSON：{"takeaway":"听完能带走的用法判断","keep_quote":"有支撑的原话","issue_quote":"最影响理解的原话，可空","revision":"希望听到的具体变化，可空","targets":["段落编号"]}""",
+62:         revise="""根据原材料、整稿与读者意见，仅修改 targets 所列段落。把原有测试观察与作者的使用判断接起来。把观察到的错例、结果或具体差异说到观众能理解为止，留出前后衔接；保留测试对象、结果、核心例子和作者的判断。讲结果需要的动作即可。已有主持人介绍自然接回本期主题。
+63: 输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}""",
+64:     ),
+65:     "chatgpt_acquisition/t09_updates": JobPrompts(
+66:         version="t09-v1",
+
+532: def enabled_jobs(config_dir: str, video_config: dict) -> list[str]:
+533:     """Use the project rollout list unless the installation overrides it."""
+534:     if "manuscript_jobs" in video_config:
+535:         return video_config["manuscript_jobs"] or []
+536:     try:
+537:         with (Path(config_dir) / "manuscript.yaml").open(encoding="utf-8") as config:
+538:             return (load_yaml(config) or {}).get("jobs") or []
+539:     except FileNotFoundError:
+540:         return []
+541: 
+542: 
+543: def bound_job(script: dict, config_dir: str, jobs_dir: str) -> str:
+544:     """Resolve the source Job even for a recipe without a content-column snapshot."""
+545:     from . import production, reports
+546: 
+547:     job = (script.get("content_context") or {}).get("job")
+548:     if job:
+549:         return job
+550:     if production_id := script.get("production"):
+551:         config = production.get(config_dir, jobs_dir, production_id)
+552:         if config and config.usable:
+553:             return config.job
+554:     topic = script.get("topic") or {}
+555:     job = (topic.get("matrix_dedup") or {}).get("job") or topic.get("knowledge_job")
+556:     if job:
+557:         return job
+558:     if report_id := (topic.get("report_id") or script.get("report_id")):
+559:         report = reports.get(report_id)
+560:         if report and report.get("job"):
+561:             return report["job"]
+562:     return script.get("research_job") or ""
+563: 
+564: 
+565: def profile_for(script: dict, config_dir: str, jobs_dir: str, video_config: dict) -> JobPrompts | None:
+566:     """Select the enabled Job's prompts for this production binding."""
+567:     jobs = enabled_jobs(config_dir, video_config)
+568:     if not jobs:
+569:         return None
+570:     job = bound_job(script, config_dir, jobs_dir)
+571:     profile = JOB_PROMPTS.get(job) if job in jobs else None
+572:     if profile and profile.production_id and profile.production_id != script.get("production"):
+573:         from . import production
+574: 
+575:         # An individual report draft can use the same recipe without an
+576:         # explicit binding. Whole-programme and other recipes stay separate.
+577:         topic = script.get("topic") or {}
+578:         if script.get("production") or topic.get("content_mode") == "episode" or not topic.get("from_report"):
+579:             return None
+580:         binding = production.get(config_dir, jobs_dir, profile.production_id)
+
+E10 | web/routes/matrices.py | SHA256 04b6025f3f881185fa464250481e0ef059e84cc07403311a0d2694a3465a1ddf
+275: @router.post("/{key}/copy", status_code=201)
+276: def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
+277:     """A new matrix with new keywords: each picked member is made again from its template, manual, in jobs/<new key>/."""
+278:     from core.video import topic_store
+279: 
+280:     source = _get(key)
+281:     new_key = _new_key(payload.key)
+282:     name, domain, keywords = payload.name.strip(), payload.domain.strip(), _keywords(payload.keywords)
+283:     if not name or not domain or not keywords:
+284:         raise _error(422, "missing_fields", "新矩阵要写名字、领域和至少一个关键词")
+285:     config_dir, jobs_dir = _dirs()
+286:     if os.path.exists(os.path.join(jobs_dir, new_key)):
+287:         raise _error(409, "jobs_dir_exists", f"jobs/{new_key}/ 已经有了：换一个英文名")
+288:     by_job = {m.job: m for m in source.members}
+289:     picked = [by_job.get(j) for j in dict.fromkeys(payload.jobs)]
+290:     if not picked or any(m is None for m in picked):
+291:         raise _error(422, "unknown_member", "只能复制这个矩阵里的 Job")
+292:     stuck = [m.job for m in picked if not m.copy_as]
+293:     if stuck:
+294:         raise _error(422, "not_copyable", f"这些 Job 的提示词写死了原来的领域，暂不能复制：{'、'.join(stuck)}")
+295: 
+296:     tmpl_dir = os.path.join(jobs_dir, "_templates")
+297:     taken = {s.prefix for s in topic_store.sources(jobs_dir).values()} | set(topic_store.DEFAULT_PREFIXES.values())
+298:     files: list[tuple[str, str]] = []
+299:     members: list[matrices.Member] = []
+300:     for member in picked:
+301:         path = os.path.join(tmpl_dir, f"{member.copy_as}.yaml")
+302:         try:
+303:             data = yaml_io.parse_yaml(open(path, encoding="utf-8").read())
+304:         except (OSError, ValueError) as exc:
+305:             raise _error(422, "template_missing", f"{member.job} 要用的模板 {member.copy_as} 读不了：{exc}") from exc
+306:         slug = member.copy_as.lstrip("_")
+307:         label = str(data.pop("label", "") or slug)
+308:         data.pop("category", None)
+309:         data.update({"name": f"{domain} {label}", "enabled": True, "keywords": [],
+310:                      "output": f"output/{new_key}/{{date}}_{slug}.md", "schedule": {"type": "manual"}})
+311:         original = load_job(jobs_dir, member.job) or {}
+312:         topics = original.get("topics") if isinstance(original.get("topics"), dict) else None
+313:         if topics:
+314:             fmt = str(topics.get("format") or "flash")
+315:             base = str(topics.get("prefix") or topic_store.DEFAULT_PREFIXES.get(fmt, "T"))
+316:             prefix = _prefix(base, new_key, taken)
+317:             taken.add(prefix)
+318:             # refresh off: the autopilot never starts a copy on its own, so it spends nothing until someone runs it
+319:             data["topics"] = {"alias": f"{new_key}_{slug}", "format": fmt, "prefix": prefix, "refresh": False}
+320:         errors = yaml_io.validate_output_path(data, output_root=get_settings().paths.output_dir)
+321:         if errors:
+322:             raise _error(422, "invalid_output", "；".join(errors))
+323:         job = f"{new_key}/{slug}"
+324:         files.append((os.path.join(jobs_dir, f"{job}.yaml"), yaml_io.dump_yaml(data)))
+325:         members.append(matrices.Member(job, copy_as=member.copy_as))
+326: 
+327:     os.makedirs(os.path.join(jobs_dir, new_key), exist_ok=True)
+328:     written: list[str] = []
+329:     try:
+330:         for path, content in files:
+331:             yaml_io.atomic_create(path, content)
+332:             written.append(path)
+333:         matrices.save(config_dir, new_key, name=name, domain=domain, keywords=keywords, members=members,
+334:                       render=source.render)
+335:     except Exception:
+336:         for path in written:  # all or nothing: a half-made matrix would leave Jobs nobody groups
+337:             try:
+338:                 os.remove(path)
+339:             except OSError:
+340:                 pass
+341:         raise
+
+537: def _save_paused(matrix: matrices.Matrix, paused: list[str]) -> None:
+538:     matrices.save(_dirs()[0], matrix.key, name=matrix.name, domain=matrix.domain, keywords=matrix.keywords,
+539:                   members=matrix.members, paused=paused)
+540: 
+541: 
+542: class ArchiveIn(BaseModel):
+543:     archived: bool = True
+544: 
+545: 
+546: @router.post("/{key}/archive")
+547: def archive_matrix(key: str, body: Optional[ArchiveIn] = None, user=Depends(require_editor)):
+548:     """Put a matrix away (or bring it back). Nothing is deleted or stopped: its Jobs keep belonging to it, and the
+549:     matrix list just stops showing it."""
+550:     matrix = _get(key)
+551:     flag = body.archived if body else True
+552:     matrices.save(_dirs()[0], key, name=matrix.name, domain=matrix.domain, keywords=matrix.keywords,
+553:                   members=matrix.members, archived=flag)
+554:     audit.log("matrix_archive", user=user["username"], target=key, result="archived" if flag else "restored")
+555:     return get_matrix(key, user)
+556: 
+557: 
+558: @router.post("/{key}/pause")
+559: def pause_matrix(key: str, user=Depends(require_admin)):
+560:     """Stop every member's timed runs. Each Job keeps its own period (resuming turns the same ones back on) and can
+561:     still be run by hand. Runs missed while paused are not made up."""
+562:     from web.routes.scheduler import _mutate
+563:     from web.services import managed_scheduler as managed
+564: 
+565:     matrix = _get(key)
+566:     stopped = list(matrix.paused)
+567:     for member in matrix.members:
+568:         plan = _plan_of(member.job)
+569:         if plan and plan["enabled"]:
+570:             _mutate(managed.store().toggle, plan["id"], False)
+571:             if member.job not in stopped:
+572:                 stopped.append(member.job)
+573:     _save_paused(matrix, stopped)
+574:     audit.log("matrix_pause", user=user["username"], target=key, details={"jobs": stopped})
+575:     return get_matrix(key, user)
+576: 
+577: 
+578: @router.post("/{key}/resume")
+579: def resume_matrix(key: str, body: ResumeIn, user=Depends(require_admin)):
+580:     """Turn back on the timed runs that pausing stopped (the ones switched off by hand meanwhile stay as they are)."""
+581:     from web.routes.scheduler import _mutate
+582:     from web.services import managed_scheduler as managed
+583: 
+584:     matrix = _get(key)
+585:     due = [(j, p) for j in matrix.paused for p in [_plan_of(j)] if p and not p["enabled"]]
+586:     if due and not body.confirm:
+587:         now = datetime.now().astimezone()
+588:         runs = sum(periods.runs_per_month(p["schedule"], now) for _, p in due)
+589:         searches = sum(periods.runs_per_month(p["schedule"], now) * _cost(p["schedule"], j)["searches_per_run"] for j, p in due)
+590:         raise _error(409, "confirm_needed", (
+591:             f"恢复后 {len(due)} 个 Job 会按各自的周期自己运行：每月约 {runs} 次运行"
+592:             + (f"，按上次每次的搜索数约 {searches} 次搜索" if searches else "") + "。暂停期间错过的不补跑。确认后再恢复"))
+593:     if due:
+594:         _mutate(managed.ensure_online)
+595:     for _, plan in due:
+
+E11 | ui/src/pages/Matrices.tsx | SHA256 1b738d3772766f4ec58f2c10b8d2a509a6213d087a0ed5781b05e62016cae103
+98:       <div className="grid gap-2 sm:grid-cols-2">
+99:         <label className="space-y-1 text-xs">矩阵名称<input className="input" placeholder="名字，如 医疗矩阵" value={name} onChange={(e) => setName(e.target.value)} /></label>
+100:         <label className="space-y-1 text-xs">英文标识<input className="input" placeholder="英文名，如 medical" value={key} onChange={(e) => setKey(e.target.value)} /></label>
+101:         <label className="space-y-1 text-xs">研究领域<input className="input" placeholder="领域，如 医疗健康" value={domain} onChange={(e) => setDomain(e.target.value)} /></label>
+102:         <label className="space-y-1 text-xs">共用关键词<input className="input" placeholder="关键词，用逗号分开" value={words} onChange={(e) => setWords(e.target.value)} /></label>
+103:         <label className="space-y-1 text-xs sm:col-span-2">目标观众<input className="input" placeholder="这个领域主要面向谁" value={audience} onChange={(e) => setAudience(e.target.value)} /></label>
+104:       </div>
+105:       <p className="text-xs text-text-muted">建好后添加栏目，并关联已有研究来源。需要新增研究任务时，可以在矩阵设置中管理。</p>
+106:       <div className="flex gap-2">
+107:         <button className="btn btn-primary text-xs" disabled={busy || !name.trim() || !key.trim()} onClick={submit}>
+108:           {busy ? "创建中…" : "创建矩阵"}
+109:         </button>
+
+370:       onSaved(await updateMatrix(matrix.key, { name: matrix.name, domain: matrix.domain, keywords: matrix.keywords, render: { ...matrix.render, video_speed: Number(speed) } }));
+371:       toast.success("默认输出倍速已保存，下次生成视频生效");
+372:     } catch (e) { toast.error(errorMessage(e)); }
+373:     finally { setBusy(false); }
+374:   };
+375:   return <section className="card p-4 space-y-3" aria-label="视频生成默认设置">
+376:     <h2 className="font-medium text-sm">视频生成默认设置</h2>
+377:     <p className="text-xs text-text-muted">本矩阵内所有研究任务的视频统一继承；任务单独设置倍速时优先使用任务设置。新加入的任务也会继承。</p>
+378:     <div className="flex flex-wrap items-center gap-3 text-sm">
+379:       <label htmlFor="matrix-video-speed">默认输出倍速</label>
+380:       <select id="matrix-video-speed" className="input w-auto" value={speed} disabled={!canEdit || busy} onChange={(e) => setSpeed(e.target.value)}>
+381:         {[0.5, 1, 1.25, 1.5, 2].map((value) => <option key={value} value={value}>{value} 倍速</option>)}
+382:       </select>
+383:       {canEdit ? <button className="btn btn-primary text-xs" disabled={busy || Number(speed) === (matrix.render?.video_speed ?? 1)} onClick={save}>{busy ? "保存中…" : "保存倍速"}</button> : null}
+384:     </div>
+385:     <p className="text-xs text-text-muted">保存后，新生成或重新生成的视频生效。已有成片和已提交的出片任务保持原设置。</p>
+386:   </section>;
+387: }
+388: 
+389: /** 换关键词复制：挑出能复制的 Job，用不分领域的模板重新建一份，放进新矩阵；新 Job 都是手动，不会自己跑 */
+390: function CopyForm({ matrix, onDone }: { matrix: Matrix; onDone: (key: string) => void }) {
+391:   const toast = useToast();
+392:   const copyable = matrix.members.filter((m) => m.copyable);
+393:   const stuck = matrix.members.filter((m) => !m.copyable);
+394:   const [key, setKey] = useState("");
+395:   const [name, setName] = useState("");
+396:   const [domain, setDomain] = useState("");
+397:   const [words, setWords] = useState("");
+398:   const [picked, setPicked] = useState<string[]>(copyable.map((m) => m.job));
+399:   const [busy, setBusy] = useState(false);
+400: 
+401:   const submit = async () => {
+402:     setBusy(true);
+403:     try {
+404:       const made = await copyMatrix(matrix.key, { key, name, domain, keywords: splitKeywords(words), jobs: picked });
+405:       toast.success(`已复制成「${made.name}」：新 Job 都是手动，点运行才会跑`);
+406:       onDone(made.key);
+407:     } catch (e) {
+408:       toast.error(errorMessage(e));
+409:     } finally {
+410:       setBusy(false);
+
+537:     finally { setBusy(false); }
+538:   };
+539:   const pause = async () => {
+540:     if (busy || !window.confirm("暂停后这个矩阵所有 Job 的定时都不跑，各自的周期保留，手动运行不受影响。确定？")) return;
+541:     setBusy(true);
+542:     try { setMatrix(await pauseMatrix(matrix.key)); toast.success("已暂停整个矩阵"); }
+543:     catch (e) { toast.error(errorMessage(e)); }
+544:     finally { setBusy(false); }
+545:   };
+546:   const archive = async () => {
+547:     if (busy) return;
+548:     const putAway = !matrix.archived;
+549:     if (putAway && !window.confirm("归档后矩阵列表里不再显示，里面的 Job 和已有的文稿、成片都不动。确定？")) return;
+550:     setBusy(true);
+551:     try { setMatrix(await archiveMatrix(matrix.key, putAway)); toast.success(putAway ? "已归档" : "已取消归档"); }
+552:     catch (e) { toast.error(errorMessage(e)); }
+553:     finally { setBusy(false); }
+
+573:       <div className="space-y-2"><Link className="text-xs text-text-muted hover:text-accent" to="/matrices">← 全部矩阵</Link><h1 className="text-xl font-semibold tracking-tight">{matrix.content?.name || matrix.name}</h1><div className="flex flex-wrap gap-3 items-center"><p className="text-xs text-text-muted">{matrix.content?.audience || matrix.domain || "待设置研究领域"}</p><MatrixHealth matrix={matrix} /></div></div>
+574:       <div className="flex flex-wrap gap-2"><button className="btn text-xs" aria-label="刷新矩阵详情" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>{!matrix.archived ? <Link className="btn btn-primary text-xs" to={`/?matrix=${encodeURIComponent(matrix.key)}&view=all`}>查看视频<ArrowUpRight className="h-3.5 w-3.5" /></Link> : null}</div>
+575:     </header>
+576:     {error ? <div><ErrorState error={error} onRetry={load} compact /><p className="text-xs text-warning mt-2">暂时显示上次读取的数据。</p></div> : null}
+577:     {matrix.archived ? <p className="card p-3 text-xs text-text-muted">这个矩阵已归档，研究任务和历史产出仍保留。可在矩阵设置中取消归档。</p> : null}
+578:     {matrix.paused?.length ? <div role="status" className="card border-warning/50 p-3 text-xs text-warning flex flex-wrap items-center gap-2"><span className="flex-1">矩阵已暂停：{matrix.paused.length} 个 Job 的定时没在跑，各自的周期还留着；「运行一次」仍可手动点。暂停期间错过的不补跑。</span>{isAdmin ? <button className="btn text-xs" disabled={busy} onClick={resume}>恢复定时</button> : null}</div> : null}
+579:     {matrix.errors.length ? <div className="card p-3 text-xs text-warning space-y-1" role="status"><p className="font-medium">矩阵配置需要检查</p>{matrix.errors.map((e) => <p key={e}>{e}</p>)}</div> : null}
+580:     {matrix.monthly_searches ? <MonthlyLimit matrix={matrix} isAdmin={false} onSaved={setMatrix} /> : null}
+581:     <section className="grid grid-cols-3 gap-3" aria-label="当前矩阵概况">{[{ label: "研究任务", value: matrix.members.length }, { label: "需要关注", value: stats.issues }, { label: "已启用定时", value: stats.scheduled }].map((s) => <div key={s.label} className="card p-3"><p className="text-xs text-text-muted">{s.label}</p><p className="text-xl font-semibold tabular-nums mt-1">{s.value}</p></div>)}</section>
+582:     <div role="tablist" aria-label="矩阵工作区" className="flex flex-wrap gap-2 border-b border-border text-sm">
+583:       {([["columns", "栏目"], ["themes", "主题推荐"], ["jobs", business ? "研究来源" : "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
+584:     </div>
+585:     {tab === "columns" ? <ContentColumns key={matrix.key} matrix={matrix} canEdit={canEdit} /> : null}
+586:     {tab === "themes" ? <ThemeWorkbench key={matrix.key} matrix={matrix.key} canEdit={canEdit} /> : null}
+587:     {tab === "runs" ? <MatrixRuns key={matrix.key} matrix={matrix} initialJob={params.get("job") ?? ""} /> : null}
+588:     {tab === "week" ? <MatrixWeek matrix={matrix} onChanged={setMatrix} /> : null}
+589:     {tab === "jobs" ? <section aria-label="矩阵里的 Job" className="space-y-3">
+590:       <p className="text-xs text-text-muted">先运行研究任务，再从报告进入视频制作；任务提示词可在任务详情中编辑。</p>
+591:       {configError ? <div className="card p-3 text-xs text-warning flex flex-wrap gap-2"><span>视频配置数量暂未同步：{configError}</span><button className="text-accent hover:underline" onClick={() => setConfigRetry((n) => n + 1)}>重试视频配置</button></div> : null}
+592:       {matrix.members.map((m) => <MemberCard key={m.job} member={m} matrixKey={matrix.key} canEdit={canEdit} isAdmin={isAdmin} configs={configs ? { count: configs.filter((c) => c.job === m.job).length, auto: configs.filter((c) => c.job === m.job && c.auto > 0).length } : null} onChanged={(next) => { if (next) setMatrix(next); else void load(); }} />)}
+593:       {!matrix.members.length ? <div className="card p-8 text-center space-y-3"><p className="text-sm">还没有研究任务</p><p className="text-xs text-text-muted">把已有任务加入这个矩阵，即可跟进报告和视频。</p>{canEdit ? <button className="btn text-xs" onClick={() => selectTab("settings")}>添加研究任务</button> : null}</div> : null}
+594:     </section> : null}
+595:     {tab === "settings" ? <div className="space-y-4">
+596:       <MatrixContentSettings key={`content-${matrix.key}`} matrix={matrix} canEdit={canEdit} onSaved={setMatrix} />
+597:       <section className="card p-4 space-y-3 text-sm" aria-label="领域和关键词"><h2 className="font-medium">研究范围</h2>{editing ? <>
+598:         <label className="block space-y-1 text-xs">领域<input className="input" aria-label="领域" value={domain} onChange={(e) => setDomain(e.target.value)} /></label><label className="block space-y-1 text-xs">共用关键词<input className="input" aria-label="关键词" value={words} onChange={(e) => setWords(e.target.value)} /></label><p className="text-xs text-text-muted">各任务运行时会先使用这里的关键词，再追加自己的关键词。保存后，下次运行生效。</p>
+599:         <div className="flex gap-2"><button className="btn btn-primary text-xs" disabled={busy} onClick={async () => { if (await save({ domain, keywords: splitKeywords(words) })) setEditing(false); }}>保存</button><button className="btn text-xs" disabled={busy} onClick={() => setEditing(false)}>取消</button></div>
+600:       </> : <><div><span className="text-xs text-text-muted">领域：</span>{matrix.domain || "未设置"}</div><div className="text-xs"><span className="text-text-muted">共用关键词：</span><Keywords words={matrix.keywords} empty="使用各研究任务自己的关键词" /></div>{canEdit ? <button className="btn text-xs" onClick={() => { setDomain(matrix.domain); setWords(matrix.keywords.join("，")); setEditing(true); }}>改领域和关键词</button> : null}</>}<div className="border-t border-border pt-3"><MonthlyLimit matrix={matrix} isAdmin={isAdmin} onSaved={setMatrix} /></div></section>
+601:       <MatrixVideoDefaults key={matrix.key} matrix={matrix} canEdit={canEdit} onSaved={setMatrix} />
+602:       <section className="card p-4 space-y-3" aria-label="管理研究任务"><h2 className="font-medium text-sm">任务归属</h2><p className="text-xs text-text-muted">将已有研究任务加入或移出这个矩阵。</p><ul className="divide-y divide-border">{matrix.members.map((m) => <li key={m.job} className="flex items-center justify-between gap-3 py-3 text-xs"><div className="min-w-0"><p>{m.name}</p><p className="text-text-muted font-mono break-all mt-1">{m.job}</p></div>{canEdit ? <button className="btn text-xs shrink-0" disabled={busy} aria-label={`把 ${m.name} 移出矩阵`} onClick={() => save({ jobs: jobs.filter((j) => j !== m.job) })}>移出</button> : null}</li>)}</ul>
+603:         {memberError ? <ErrorState error={memberError} onRetry={() => setMemberRetry((n) => n + 1)} compact /> : null}
+604:         {canEdit && ungrouped.length ? <div className="flex flex-wrap items-center gap-2 text-xs"><select aria-label="放进来的 Job" className="input w-auto max-w-full" value={adding} onChange={(e) => setAdding(e.target.value)}><option value="">选择未分组的研究任务…</option>{ungrouped.map((j) => <option key={j.job} value={j.job}>{j.name}（{j.job}）</option>)}</select><button className="btn text-xs" disabled={busy || !adding} onClick={async () => { if (await save({ jobs: [...jobs, adding] })) setAdding(""); }}>放进来</button></div> : null}
+605:       </section>
+606:       {canEdit ? <section className="card p-4 space-y-3"><h2 className="font-medium text-sm">矩阵管理</h2><div className="flex flex-wrap gap-2">{isAdmin && matrix.members.some((m) => m.schedule?.enabled) ? <button className="btn text-xs" disabled={busy} onClick={pause}>整个暂停</button> : null}<button className="btn text-xs" disabled={busy} onClick={archive}>{matrix.archived ? "取消归档" : "归档"}</button><button className="btn text-xs" onClick={() => setCopying(!copying)}>换关键词复制</button></div>{copying ? <CopyForm matrix={matrix} onDone={(next) => { setCopying(false); navigate(`/matrices/${next}`); }} /> : null}
+607:         <details className="border-t border-border pt-3 text-xs"><summary className="cursor-pointer text-text-muted">删除分组</summary><div className="space-y-2 mt-3"><p className="text-text-muted">删除后，研究任务仍保留，可重新建立分组。</p><button className="btn text-xs text-danger" disabled={busy} onClick={async () => { if (busy || !window.confirm(`删掉「${matrix.name}」这个分组？里面的 Job 都还在，只是不再归在一起。`)) return; setBusy(true); try { await deleteMatrix(matrix.key); navigate("/matrices"); } catch (e) { toast.error(errorMessage(e)); } finally { setBusy(false); } }}>删除这个矩阵</button></div></details>
+
+632:   if (!matrix || matrix.key !== key) return <div className="space-y-4"><Link className="text-xs text-accent" to={`/matrices/${encodeURIComponent(key)}`}>← 返回矩阵</Link>{error ? <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} /> : <p className="text-sm text-text-muted" role="status">正在读取视频配置…</p>}</div>;
+633:   const member = matrix.members.find((m) => m.job === job);
+634:   return <div className="space-y-5">
+635:     <header className="flex flex-wrap items-start justify-between gap-3"><div className="space-y-2"><div className="flex gap-2 text-xs text-text-muted"><Link className="hover:text-accent" to="/matrices">矩阵</Link><span>/</span><Link className="hover:text-accent" to={`/matrices/${encodeURIComponent(matrix.key)}`}>{matrix.name}</Link></div><h1 className="text-xl font-semibold">{member?.name ?? job} · 视频配置</h1><p className="text-xs text-text-muted">设置这项研究的报告要写成哪些视频。</p></div><button className="btn text-xs" disabled={loading} onClick={() => setRetry((n) => n + 1)}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button></header>
+636:     {error ? <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} compact /> : null}
+637:     {member ? <><div className="flex flex-wrap items-center gap-3 text-xs"><Link className="text-accent hover:underline" to={`/jobs/${encodeURIComponent(member.job)}`}>研究任务详情<ArrowUpRight className="inline h-3.5 w-3.5 ml-1" /></Link><Link className="text-text-muted hover:text-accent" to={`/?matrix=${encodeURIComponent(matrix.key)}&view=all`}>本矩阵的视频<ArrowUpRight className="inline h-3.5 w-3.5 ml-1" /></Link></div><ProductionConfigs key={member.job} members={[member]} canEdit={canEdit} /></>
+638:       : <section className="card p-8 text-center space-y-2"><p className="text-sm">这个研究任务已不在当前矩阵中</p><p className="font-mono text-xs text-text-muted break-all">{job}</p><Link className="btn text-xs" to={`/matrices/${encodeURIComponent(matrix.key)}`}>返回矩阵</Link></section>}
+639:   </div>;
+640: }
+
+E12 | ui/src/components/ProductionConfigs.tsx | SHA256 0fdc36253553fb3883eebf4d8305de57788a58e49f8fca52aa320c6f159eeb14
+146:   const toast = useToast();
+147:   const change = async (enabled: boolean) => {
+148:     try {
+149:       await setAuto(config.key, enabled ? 1 : null);
+150:       onChange();
+151:     } catch (e) {
+152:       toast.error(errorMessage(e));
+153:     }
+154:   };
+155:   return (
+156:     <div className="flex flex-wrap items-center gap-2 text-xs">
+157:       <label className="flex items-center gap-1">
+158:         <input type="checkbox" aria-label="自动写" checked={config.auto > 0}
+159:           onChange={(e) => change(e.target.checked)} />
+160:         报告一出来就自动制作
+161:       </label>
+162:       <span className="text-text-muted">{config.split === "whole" ? config.content_mode === "episode" ? "每份报告制作一期，自动组织多个内容" : "整份报告按配方制作" : "全部不重复选题依次制作"}</span>
+163:       {config.auto > 0 && !scheduled ? <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span> : null}
+164:     </div>
+165:   );
+166: }
+167: 
+168: function ConfigCard({ config, canEdit, scheduled, onChange }: { config: ProductionConfig; canEdit: boolean; scheduled: boolean; onChange: () => void }) {
+169:   const toast = useToast();
+170:   const [open, setOpen] = useState(false);
+171:   return (
+172:     <div className="rounded-md border border-border p-2 space-y-1" aria-label={`配置 ${config.name}`}>
+173:       <div className="flex flex-wrap items-baseline gap-2 text-sm">
+174:         <span className="font-medium">{config.name}</span>
+175:         <span className="text-xs text-text-muted">配方 {config.recipe}</span>
+176:         <span className="text-xs text-text-muted ml-auto">{config.scripts ? `已写 ${config.scripts} 篇` : "还没写过"}</span>
+177:       </div>
+178:       {config.errors.length ? (
+179:         <p className="text-xs text-warning">{config.errors.join("；")}</p>
+180:       ) : (
+181:         <p className="text-xs text-text-muted">
+182:           给{config.audience || "—"}看 · {config.content_mode === "episode" ? "内容决定时长" : `约 ${config.target_minutes} 分钟`} · {config.split_name}
+183:           {config.split === "whole" ? " · 每份报告写一期，直接用报告，不调研"
+184:             : config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
+185:           {config.auto ? (config.split === "whole" ? " · 自动：报告一出来就写" : " · 自动：全部不重复选题") : ""}
+186:         </p>
+187:       )}
+188:       {canEdit && (config.split === "each" || config.split === "whole") && !config.errors.length ? <AutoWrite config={config} scheduled={scheduled} onChange={onChange} /> : null}
+189:       <div className="flex gap-2">
+190:         {!config.errors.length ? (
+191:           <button className="btn text-xs" onClick={() => setOpen(!open)}>
+192:             {open ? "收起" : config.split === "whole" ? "选报告写" : "挑条目写"}
+193:           </button>
+
+244:   const single = members.length === 1;
+245:   // 报告不是条目清单的 Job（只有它自己的页面才挂）：每份新报告写成一期
+246:   const wholes = single ? members.filter((m) => !m.topics && m.exists) : [];
+247:   const pickable = [...sources, ...wholes];
+248:   const isWhole = wholes.some((m) => m.job === job);
+249:   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
+250:   const source = pickable.find((m) => m.job === job)?.topics ?? "";
+251:   const usable = cells.filter((c) => c.usable && c.key && (isWhole
+252:     ? c.column?.topic_kind === "single" && c.whole_report
+253:     : ["single", "roundup"].includes(c.column?.topic_kind ?? "") && (c.topic_sources ?? []).includes(source)));
+254:   // 一份配方文件一项，同一份文件的几个受众收在一起：先选配方（快讯、盘点…），再选给谁看
+255:   const files = new Map<string, VideoCell[]>();
+256:   for (const c of usable) files.set(c.base ?? c.recipe ?? c.id, [...(files.get(c.base ?? c.recipe ?? c.id) ?? []), c]);
+257:   const fileName = (cs: VideoCell[]) => (cs[0].parts ? `${cs[0].parts.type.name} · ${cs[0].parts.format.name}` : cs[0].label);
+258:   const audiences = files.get(recipe) ?? [];
+259:   const attached = (c: VideoCell) => mine.some((m) => m.job === job && m.recipe === c.key);
+260:   // 配方写了 minutes_range 才能改时长；不填就是配方自己的
+261:   const chosen = audiences.find((c) => c.audience === audience) ?? audiences[0];
+262:   const span = chosen?.minutes_range?.length === 2 ? chosen.minutes_range : null;
+263:   const canSkip = !!chosen?.research_optional; // 配方说它的调研可以不做
+264: 
+265:   return (
+266:     <section className="card p-3 space-y-3" aria-label="视频配置">
+267:       <div>
+268:         <h2 className="font-medium text-sm">视频配置</h2>
+269:         <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、要不要重新调研，配方允许的才能在配置里改；拆不拆由配方定。</p>
+270:       </div>
+271:       {pickable.map((m) => {
+272:         const own = mine.filter((c) => c.job === m.job);
+273:         return (
+274:           <div key={m.job} className="space-y-2">
+275:             {single ? null : <h3 className="text-xs text-text-muted">{m.name}</h3>}
+276:             {own.length ? (
+277:               own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!m.schedule} onChange={load} />)
+278:             ) : (
+279:               <p className="text-xs text-text-muted">
+280:                 {m.topics ? "这个 Job 还没配视频，报告只存着，不会写稿。" : "这个 Job 的报告是整份的，还没配视频：配一套，每份新报告就能写成一期。"}
+281:               </p>
+282:             )}
+283:           </div>
+284:         );
+285:       })}
+286:       {!pickable.length ? <p className="text-xs text-text-muted">这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。</p> : null}
+287:       {whole && sources.length && !single ? (
+288:         <p className="text-xs text-text-muted">
+289:           另外 {whole} 个 Job 的报告是整份的，不拆成条目，所以不在这里挂配置。要写成视频，打开那份报告点「写成视频」。
+290:         </p>
+291:       ) : null}
+292:       {mine.filter((c) => !pickable.some((m) => m.job === c.job)).map((c) => (
+293:         <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!members.find((m) => m.job === c.job)?.schedule} onChange={load} />
+294:       ))}
+295:       {canEdit && pickable.length ? (
+
+E13 | ui/src/components/ContentColumns.tsx | SHA256 a1a481bccfd047ba91a6afb045f4545ec9a796013d712e07fd84c8c637393dc8
+100:   };
+101:   const save = async () => {
+102:     if (busy) return;
+103:     setBusy(true); setError("");
+104:     try {
+105:       await saveContentColumn(column?.key || newKey, { ...value,
+106:         presentation: { ...value.presentation, preferred_visuals: visualsInput.split(/[、，,]/).map((v) => v.trim()).filter(Boolean) },
+107:         status: value.production_ids.length ? "configured" : "planned", expected_revision: column?.revision }, !column);
+108:       toast.success("栏目已保存，之后的新文稿使用本次设置"); onSaved();
+109:     } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); }
+110:   };
+111:   return <section className="card p-4 space-y-4" aria-label={column ? "编辑栏目" : "新增栏目"}>
+112:     {prefill && Object.keys(prefill).length ? <p role="note" className="rounded border border-accent bg-accent/10 px-3 py-2 text-xs">
+113:       来自实验{experiment ? ` ${experiment}` : ""}的建议改动已预填：{Object.keys(prefill).join("、")}。检查无误后点保存，不保存就不会生效。</p> : null}
+114:     <h2 className="font-medium text-sm">{column ? "编辑栏目" : "新增栏目"}</h2>
+115:     <div className="grid gap-3 sm:grid-cols-2 text-xs">
+116:       <label>栏目名称<input className="input mt-1" value={value.name} onChange={(e) => setValue({ ...value, name: e.target.value })} /></label>
+117:       <label>栏目类型<select className="input mt-1" value={value.type} onChange={(e) => setValue({ ...value, type: e.target.value })}>
+118:         {types.map((t) => <option key={t.key} value={t.key}>{t.name}</option>)}
+119:       </select></label>
+120:       <label className="sm:col-span-2">持续交付什么价值<textarea className="input mt-1" rows={2} value={value.promise} onChange={(e) => setValue({ ...value, promise: e.target.value })} /></label>
+121:       <label className="sm:col-span-2">面向哪些观众<input className="input mt-1" value={value.audience} onChange={(e) => setValue({ ...value, audience: e.target.value })} /></label>
+122:     </div>
+123:     <fieldset className="space-y-2 text-xs"><legend className="font-medium mb-2">内容组织方式</legend>
+124:       <label className="block"><input type="radio" name="content-mode" checked={value.content_mode === "episode"} onChange={() => setValue({ ...value, content_mode: "episode" })} /> 整期节目（推荐）</label>
+125:       <p className="text-text-muted">一份报告组织成一篇完整讲稿、一条视频；多个内容分段讲述，自动生成内容导航。内容决定时长。</p>
+126:       <label className="block"><input type="radio" name="content-mode" checked={value.content_mode === "individual"} onChange={() => setValue({ ...value, content_mode: "individual" })} /> 独立单条</label>
+127:       <p className="text-text-muted">保留原来的逐条制作方式。切换只用于之后的新任务，已有文稿和成片保留。</p>
+128:     </fieldset>
+129:     <fieldset className="space-y-2 text-xs"><legend className="font-medium mb-2">供稿与生产绑定</legend>
+130:       <p className="text-text-muted">复用已有研究任务和生产配置。关联栏目会保留原来的自动开关与研究周期。</p>
+131:       {configs === null ? <p>读取生产配置…</p> : <div className="max-h-48 overflow-auto border border-border rounded-lg p-2 space-y-2">
+132:         {configs.map((c) => { const taken = !!c.content_column_id && c.content_column_id !== column?.key; return <label key={c.key} className="flex items-start gap-2">
+133:           <input type="checkbox" disabled={taken} checked={value.production_ids.includes(c.key)} onChange={(e) => setValue({ ...value,
+134:             production_ids: e.target.checked ? [...value.production_ids, c.key] : value.production_ids.filter((id) => id !== c.key) })} />
+135:           <span>{c.name || c.key}<span className="text-text-muted ml-2">{taken ? `属于 ${c.content_column_name}` : c.job}</span></span>
+136:         </label>; })}</div>}
+137:     </fieldset>
+138:     <fieldset className="space-y-3 text-xs"><legend className="font-medium mb-2">默认制作方案</legend>
+139:       <div className="grid sm:grid-cols-2 gap-3">
+140:         <label>默认值来源<select className="input mt-1" value={value.render_inheritance} onChange={(e) => setValue({ ...value, render_inheritance: e.target.value as ContentColumn["render_inheritance"] })}>
+141:           <option value="source_compatible">沿用原来源任务</option><option value="content_matrix">继承栏目所属领域</option>
+142:         </select></label>
+143:         <label>制作配方<select className="input mt-1" value={value.render.production_recipe || ""} onChange={(e) => setRender("production_recipe", e.target.value)}>
+144:           <option value="">继承当前制作配方</option>
+145:           {value.render.production_recipe && !recipes.some((r) => r.id === value.render.production_recipe) ? <option value={value.render.production_recipe}>{value.render.production_recipe}</option> : null}
+146:           {recipes.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+147:         </select></label>
+148:         <label>制作档位<select className="input mt-1" value={value.render.production_mode || ""} onChange={(e) => setRender("production_mode", e.target.value)}>
+149:           <option value="">继承任务设置</option><option value="fast">快速混合制作</option><option value="standard">标准制作</option>
+150:         </select></label>
+151:         <label>播放倍速<select className="input mt-1" value={String(value.render.video_speed || "")} onChange={(e) => setRender("video_speed", e.target.value)}>
+152:           <option value="">继承任务设置</option>{[0.5, 1, 1.25, 1.5, 2].map((s) => <option key={s} value={s}>{s} 倍</option>)}
+153:         </select></label>
+154:       </div>
+155:       <p className="text-text-muted">制作配方组织画面与节奏，同一期可以混用截图、图表、流程和价格卡。任务的显式选择仍可覆盖栏目默认值。</p>
+156:       <label className="block">画面偏好<input aria-label="画面偏好" className="input mt-1" value={visualsInput} onChange={(e) => setVisualsInput(e.target.value)} />
+157:         <span className="block text-text-muted mt-1">用顿号分隔，例如：真实截图、性能图、价格卡。实际画面按讲稿和已有素材安排。</span></label>
+158:       <label className="block">画面讲述方式<textarea aria-label="画面讲述方式" className="input mt-1" rows={3}
+159:         value={value.presentation.strategy || ""} onChange={(e) => setValue({ ...value,
+160:           presentation: { ...value.presentation, strategy: e.target.value } })} />
+
+218:       <div className="p-4 space-y-3"><div className="flex justify-between gap-3 items-start"><div><span className="text-xs text-accent">{names.get(c.type) || c.type}</span><h3 className="font-medium mt-1">{c.name}</h3></div>
+219:         <span className="text-xs text-text-muted">{c.status === "planned" || !c.bindings.length ? "待配置" : c.auto_bindings ? "已接自动制作" : "手动制作"}</span></div>
+220:         <p className="text-sm leading-6">{c.promise}</p><p className="text-xs text-text-muted">观众：{c.audience || matrix.content?.audience || "待设置"}</p>
+221:         <p className="text-xs text-accent">{c.content_mode === "individual" ? "独立单条 · 每个内容分别制作" : "整期节目 · 一份报告，一篇总稿，一条视频"}</p>
+222:         {c.presentation.preferred_visuals?.length ? <p className="text-xs text-text-muted">画面偏好：{c.presentation.preferred_visuals.join("、")}</p> : null}
+223:         {c.presentation.strategy ? <p className="text-xs leading-5 text-text-muted">画面讲述：{c.presentation.strategy}</p> : null}
+224:         {c.notes ? <p className="text-xs leading-5 text-text-muted">创作方向：{c.notes}</p> : null}
+225:         {c.errors.length ? <p className="text-xs text-warning">{c.errors.join("；")}</p> : null}
+226:         {c.bindings.length ? <div className="border-t border-border pt-3 space-y-2">{c.bindings.map((b) => <div key={b.key} className="text-xs flex justify-between gap-3">
+227:           <div className="min-w-0"><p>{b.name || b.key}</p><p className="text-text-muted mt-1">当前写法：{b.label || b.recipe} · {b.auto ? "自动制作" : "手动制作"}</p></div>
+228:           {b.source_matrix && b.job ? <Link className="text-accent shrink-0 hover:underline" to={`/matrices/${b.source_matrix}/video/${encodeURIComponent(b.job)}`}>来源与制作<ArrowUpRight className="inline h-3 w-3" /></Link> : null}
+229:         </div>)}</div> : null}
+230:         <div className="flex justify-between items-center text-xs"><span className="text-text-muted">{c.scripts} 篇关联文稿</span>
+231:           {canEdit ? <button className="text-accent hover:underline" onClick={() => setEditing(c.key)}>编辑栏目</button> : null}</div>
+232:         {c.updated_at ? <div className="text-xs text-text-muted"><TimeStamp value={c.updated_at} label="最近内容" staleDays={Infinity} /></div> : null}
+233:       </div>
+
+E14 | core/video/auto.py | SHA256 8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc
+38: def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: float) -> list[dict]:
+39:     """Every report run after opt-in is reconciled separately, including same-day runs.
+40: 
+41:     Legacy capped batches from today get one uncapped pass to recover omitted
+42:     topics. Earlier completed batches remain historical; new-content revisions
+43:     are always detected. Selection and event memory protect existing videos.
+44:     """
+45:     try:
+46:         runs = _runs(state_dir)
+47:         configs = production.load_all(config_dir, jobs_dir)
+48:     except sqlite3.Error:
+49:         return []
+50:     by_job: dict[str, list] = {}
+51:     for config in configs.values():
+52:         if config.auto and config.usable and config.split in ("each", "whole"):
+53:             by_job.setdefault(config.job, []).append(config)
+54:     out = []
+55:     today = time.strftime("%Y-%m-%d", time.localtime(now))
+56:     for job, mine in by_job.items():
+57:         declared_source = topic_store.resolve(jobs_dir, job)
+58:         source = declared_source or topic_store.whole_source(jobs_dir, job)
+59:         if source is None:
+60:             continue
+61:         for day, report in reversed(topic_store.all_report_files(source, root)):
+62:             try:
+63:                 reported = os.path.getmtime(report)
+64:                 revision = report_identity.describe(report, root)["id"]
+65:             except OSError:
+66:                 continue
+67:             if now - reported < SETTLE_SECONDS:
+68:                 continue
+69:             if not topic_store.report_has_content(declared_source, report, root):
+70:                 continue
+71:             previous = [r for r in runs if r["spec"]["job"] == job and
+72:                         os.path.abspath(os.path.join(root, r["spec"]["report"])) == os.path.abspath(report)]
+73:             picks = []
+74:             episode_columns = set()
+75:             for config in sorted(mine, key=lambda c: c.key):
+76:                 try:
+77:                     enabled_at = config.auto_enabled_at or os.path.getmtime(
+78:                         os.path.join(production.directory(config_dir), f"{config.key}.yaml"))
+79:                 except OSError:
+80:                     continue
+81:                 if reported <= enabled_at:
+82:                     continue
+83:                 handled = False
+84:                 for run in previous:
+85:                     spec = run["spec"]
+86:                     selected = spec.get("picks") or []
+87:                     owns = any(p.get("production") == config.key for p in selected)
+88:                     if not owns:
+89:                         continue
+90:                     if spec.get("report_identity") == revision and any(
+91:                             p.get("production") == config.key and p.get("all") for p in selected):
+92:                         handled = True
+93:                     elif not any(p.get("all") for p in selected) and (
+94:                             run["status"] == "RUNNING" or (day < today and reported <= run["started"])):
+95:                         handled = True
+96:                 if handled:
+97:                     continue
+98:                 if config.content_mode == "episode":
+99:                     if config.content_column_id in episode_columns:
+100:                         continue
+101:                     episode_columns.add(config.content_column_id)
+102:                 pick = {"column": config.recipe, "all": True, "production": config.key}
+103:                 if config.content_mode == "episode":
+104:                     pick["content_mode"] = "episode"
+105:                 if config.split == "whole":
+106:                     pick["whole"] = True
+107:                 else:
+108:                     pick["source"] = config.source
+109:                 picks.append(pick)
+110:             if picks:
+
+E15 | web/services/video_autopilot.py | SHA256 f20d37b48fa484e997686c9b6e8ad782bb30f32c4f159eef45ab49d24c4e69f4
+127:     """A production with ``selection.heat_min`` keeps only items hot enough on B站, hottest first (core/video/heat.py).
+128: 
+129:     Only items not taken yet are scored. Any failure keeps every item in its order: heat never stops a video."""
+130:     paths = get_settings().paths
+131:     config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+132:     minimum = (config.selection if config is not None else {}).get("heat_min")
+133:     if minimum is None:
+134:         return candidates, ""
+135:     from core.video import heat
+136: 
+137:     from core.video import audience_strategy
+138:     if candidates and all(audience_strategy.topic_channel(c) for c in candidates):
+139:         return candidates, "按观看动机、受众收获与材料组织的已选顺序制作"
+140:     fresh = [c for c in candidates if c["id"] not in taken]
+141:     try:
+142:         kept, _, note = heat.Heat(paths.state_dir).rank(fresh, int(minimum), video_workflow._llm_configs(None, column)[0])
+143:     except Exception as exc:  # noqa: BLE001
+144:         logger.warning("heat ranking failed (%s)", type(exc).__name__)
+145:         return candidates, f"热度排序出错（{type(exc).__name__}），按原顺序"
+146:     return kept, note
+147: 
+148: 
+149: def _item_text(topic: dict) -> str:
+150:     """The item's own part of its report (what a variant would be written from); its title and fields when unreadable."""
+151:     plain = " ".join([topic.get("title", ""), *map(str, (topic.get("fields") or {}).values())])
+152:     report = topic.get("from_report") or ""
+153:     if not report:
+154:         return plain
+155:     try:
+156:         path = report if os.path.isabs(report) else os.path.join(video_workflow.workspace_dir(), report)
+157:         with open(path, encoding="utf-8") as fh:
+158:             part = excerpt.item_excerpt(fh.read(), topic.get("from_item_title") or topic.get("title", ""))
+159:     except OSError:
+160:         return plain
+161:     return part or plain
+162: 
+163: 
+164: def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Optional[str], list[dict], str]:
+165:     """(base id, its variants, note): the hottest new item at or above ``selection.angle_min``, told again from
+166:     every angle its material supports (core/video/angles.py). Only scored items qualify: no heat, no variants."""
+167:     from core.video import audience_strategy
+168:     if any(audience_strategy.topic_channel(c) for c in candidates):
+169:         return None, [], ""
+170:     paths = get_settings().paths
+171:     config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+172:     minimum = (config.selection if config is not None else {}).get("angle_min")
+173:     if minimum is None:
+174:         return None, [], ""
+175:     from core.video import angles
+
+270:             if fallback["id"] not in taken:
+271:                 taken.add(fallback["id"])
+272:                 items.append({"column_key": pick["column"], "topic": fallback, "production": FLASH_PRODUCTION, "pick": pick})
+273:     from core.video import joint_planning
+274: 
+275:     items = joint_planning.apply(spec, items, config_dir, paths.jobs_dir, video_workflow.workspace_dir(),
+276:                                 lambda key: video_workflow._llm_configs(None, video_columns.get(config_dir, key))[0], notes,
+277:                                 rank_raw=lambda rows: _heat_rank(
+278:                                     {"production": rows[0]["production"]}, video_columns.get(config_dir, rows[0]["column_key"]),
+279:                                     [{k: v for k, v in row["topic"].items() if k != "audience_strategy"} for row in rows], taken))
+280:     for item in items:
+281:         del item["pick"]
+282:     return items
+
+1049: def fire_auto(now: Optional[float] = None) -> int:
+1050:     """A batch for each Job that has a new report its auto configs have not written from (core/video/auto.py).
+1051: 
+1052:     The Job's own schedule produced the report, so the batch does not start the Job (``refresh`` off); its picks are the
+1053:     Job's auto configs, one batch so the limits and the topics already taken hold across them."""
+1054:     paths = get_settings().paths
+1055:     root = os.path.dirname(os.path.abspath(paths.output_dir))
+1056:     fired = 0
+1057:     for found in video_auto.pending(paths.config_dir, paths.jobs_dir, paths.state_dir, root,
+1058:                                     time.time() if now is None else now):
+1059:         try:
+1060:             start_run({"picks": found["picks"], "refresh": False, "job": found["job"],
+1061:                        "report": found["report"], "report_identity": found["report_identity"]},
+1062:                       started_by="autopilot")
+1063:             fired += 1
+1064:         except Exception:
+1065:             # A failed handover must remain pending for the next reconciliation.
+1066:             logger.exception("auto batch for %s not started", found["job"])
+1067:     return fired
+
+E16 | core/video/content_columns.py | SHA256 d78528810610eb95172f96b6716e822d36b9d22a5eda0a810c3696e52da96f36
+161: def snapshot(config_dir: str, production_id: str, job: str) -> dict:
+162:     column = for_production(config_dir, production_id)
+163:     if column is None:
+164:         return {}
+165:     source = matrices.of_job(job, config_dir)
+166:     owner = matrices.load_all(config_dir).get(column.matrix) if column.matrix else None
+167:     premise = str(((owner.content if owner else {}) or {}).get("premise") or "").strip()
+168:     return {**({"premise": premise} if premise else {}), "column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
+169:             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
+170:             "audience": column.audience, "promise": column.promise, "notes": column.notes,
+171:             "content_mode": column.content_mode, "greeting": column.greeting,
+172:             "type_definition": copy.deepcopy(types(config_dir).get(column.type, {})),
+173:             "render_inheritance": column.render_inheritance, "render": copy.deepcopy(column.render),
+174:             "presentation": copy.deepcopy(column.presentation)}
+175: 
+176: 
+177: def apply_script_context(recipe, context: dict):
+
+216: def render_settings(config_dir: str, source_matrix, context: dict, overrides: dict) -> dict:
+217:     result = copy.deepcopy(source_matrix.render if source_matrix else {})
+218:     if context.get("render_inheritance") == "content_matrix":
+219:         content = matrices.load_all(config_dir).get(context.get("matrix", ""))
+220:         if content and (not source_matrix or content.key != source_matrix.key):
+221:             result = inherit(result, content.render)
+222:     return inherit(inherit(result, context.get("render", {})), overrides)
+223: 
+224: 
+225: def save(config_dir: str, key: str, data: dict, *, expected_revision: str | None = None) -> ContentColumn:
+226:     if not KEY.fullmatch(key):
+227:         raise ValueError("栏目标识应为小写字母、数字、下划线或连字符")
+228:     folder = Path(config_dir) / DIR
+229:     folder.mkdir(parents=True, exist_ok=True)
+230:     path = folder / f"{key}.yaml"
+231:     # One catalog lock also prevents two concurrent edits claiming the same production binding.
+232:     with file_lock(str(folder / ".catalog")):
+233:         if expected_revision is not None:
+234:             current = hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else ""
+235:             if current != expected_revision:
+236:                 raise FileExistsError("栏目已变化，请刷新后保存")
+237:         column = _build(key, data, matrices.load_all(config_dir), types(config_dir))
+238:         for other in load_all(config_dir).values():
+239:             if other.key != key and set(other.production_ids) & set(column.production_ids):
+240:                 raise ValueError(f"生产绑定已属于栏目：{other.name}")
+241:         for pid in column.production_ids:
+242:             if not (Path(config_dir) / "production" / f"{pid}.yaml").is_file():
+243:                 raise ValueError(f"生产配置不存在：{pid}")
+244:         atomic_write(str(path), yaml.safe_dump(column.data(), allow_unicode=True, sort_keys=False))
+245:     return load_all(config_dir)[key]
+
+E17 | web/services/video_render.py | SHA256 dd59cf065f4d89032ea8e60f80f2c4da6a7292ff1893d2a739351aa08d1166a9
+222: def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None,
+223:            record: Optional[Callable[..., dict]] = None) -> dict:
+224:     """Record a render of the script's approved version. Does not contact AutoVideo.
+225: 
+226:     ``record`` replaces ``store.create_render`` for a caller that needs the request without a render row: the A/B
+227:     preview (core/experiments/preview.py), whose output must never become a publishable render.
+228:     """
+229:     if (script.get('topic') or {}).get('local_video'):
+230:         raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
+231:     version_no = script.get("approved_version")
+232:     if not version_no:
+233:         raise RenderError("文稿还没有定稿，不能出片")
+234:     version = store.get_version(script["id"], version_no)
+235:     if version is None:
+236:         raise RenderError("找不到定稿版本，请重新选择文稿版本")
+237:     from core.video.article_writer import readiness
+238:     if problem := readiness(version):
+239:         raise RenderError(problem)
+240:     if script.get("topic", {}).get("article"):
+241:         from core.video.articles import ArticleError
+242:         from web.services.video_articles import source_of
+243:         try:
+244:             source_of(script)
+245:         except ArticleError as exc:
+246:             raise RenderError(str(exc)) from exc
+247:     column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
+248:     spoken_sections = authored_sections(version)
+249:     chapter_list = chapters(version)
+250:     text, sha = narration_source(chapter_list)
+251:     title = version["title"][:80]
+252:     version_meta = version.get('meta') or {}
+253:     programme = ((version_meta.get('episode') or {}).get('mode') == 'episode'
+254:                  if version_meta.get('input_kind') == 'user_materials'
+255:                  else script.get('topic', {}).get('content_mode') == 'episode')
+256:     # Narration mode: the approved words are voiced verbatim; AutoVideo only
+257:     # plans the visuals and fails the job rather than change a word.
+258:     form = script["topic"].get("video_form") or column.video_form
+
+307:     from core.video import production
+308:     paths = get_settings().paths
+309:     config = production.get(paths.config_dir, paths.jobs_dir, script["production"]) if script.get("production") else None
+310:     from core import matrices
+311:     job = getattr(config, "job", "") if config else ""
+312:     if script.get("source_matrix_id"):
+313:         matrix = matrices.load_all(paths.config_dir).get(script["source_matrix_id"])
+314:     elif job:
+315:         matrix = matrices.of_job(job, paths.config_dir)
+316:     else:
+317:         # Older scripts have no production key. Resolve their source Job using
+318:         # the same attribution as the board, never the recipe's subject tags.
+319:         from core.video import outputs
+320:         related = [script]
+321:         seen = {script["id"]}
+322:         while len(related) <= 5:
+323:             parent_id = (related[-1].get("topic") or {}).get("parent_script")
+324:             if not parent_id or parent_id in seen:
+325:                 break
+326:             parent = store.get_script(parent_id)
+327:             if not parent:
+328:                 break
+329:             related.append(parent)
+330:             seen.add(parent_id)
+331:         owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, related)
+332:         owner = owners.get(script["id"], {})
+333:         matrix = matrices.load_all(paths.config_dir).get(owner.get("matrix", ""))
+334:     from core.video import content_columns
+335:     matrix_settings = content_columns.render_settings(paths.config_dir, matrix, script.get("content_context") or {},
+336:                                                       config.render if config and config.usable else {})
+337:     recipe_ref = (matrix_settings.get("production_recipe") or column.production_recipe
+338:                   or ("mixed_tutorial" if (script.get("content_context") or {}).get("type") == "tutorial" else ""))
+339:     if column.production_settings or matrix_settings or production_mode is not None or recipe_ref:
+340:         if production_mode not in (None, "standard", "fast"):
+341:             raise RenderError("未知制作档位")
+342:         content_settings = {k: v for k, v in column.production_settings.items() if k != "production_recipe"}
+343:         # Old recipe values are explicit only when no new production reference was selected.
+344:         if not recipe_ref:
+345:             content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id", "brand") if k in request})
+346:         else:
+347:             # A visual recipe replaces the executor, not the narrator selected
+348:             # by the App's writing/output recipe. Matrix and per-render voice
+349:             # choices still override this lower-priority content layer.
+350:             if column.voice_id:
+351:                 content_settings.setdefault("voice_id", column.voice_id)
+352:             for key in ("creative_intent", "packaging"):
+353:                 if key in content_settings and key in request:
+354:                     content_settings[key] = request[key]
+355:         if recipe_ref:
+356:             request["production_recipe"] = recipe_ref
+357:         for key in ("video_form", "creative_intent", "packaging", "voice_id", "brand"):
+358:             request.pop(key, None)
+359:         request["production_context"] = {"content_recipe": {"id": "research:" + column.key, "settings": content_settings}}
+360:         if matrix_settings:
+361:             settings_id = ("research-production:" + config.key if config else
+362:                            "research-matrix:" + matrix.key if matrix else
+363:                            "research-column:" + script.get("content_column_id", "unassigned"))
+364:             request["production_context"]["matrix"] = {"id": settings_id,
+365:                 "settings": {k: v for k, v in matrix_settings.items() if k != "production_recipe"}}
+366:         if script["topic"].get("video_form"):
+367:             request["video_form"] = script["topic"]["video_form"]
+368:         if voice_override:
+369:             request["voice_id"] = voice_override
+370:         if production_mode is not None:
+371:             request["production_mode"] = production_mode
+372:             if production_mode == "fast":
+373:                 request.update(video_form="information_cards", visual_style="editorial_light")
+374:     if script["topic"].get("article"):
+
+418:     from core.video import screenshots
+419:     try:
+420:         materials = screenshots.render_materials(script["id"], version, get_client().base_url)
+421:         if materials:
+422:             from core.video.visual_materials import attach
+423:             attach(request, materials)
+424:         if recover_download:
+425:             previous = store.list_renders(script["id"])
+426:             latest = previous[0] if previous else None
+427:             if (latest and latest["version"] == version_no and latest["status"] == "FAILED"
+428:                     and latest["error_code"] == "DOWNLOAD_FAILED"
+429:                     and {k: v for k, v in latest["request"].items() if k != "idempotency_key"} == request):
+430:                 resumed = store.resume_render_download(latest["id"])
+431:                 if resumed:
+432:                     return resumed
+
+457:                                                for key in user_context['ids'])
+458:         if supplied_images and not materials:
+459:             visuals = {'state': 'pending', 'reason': '准备用户材料画面', 'input_kind': 'user_materials',
+460:                        'material_context': user_context, 'decisions': []}
+461:         return (record or store.create_render)(script["id"], version_no, title=title, source_text=text,
+462:                                                source_sha256=sha, request=request, visuals=visuals)
+463:     except store.ActiveRenderError as exc:
+464:         raise RenderError(str(exc)) from exc
+465:     except screenshots.ScreenshotError as exc:
+
+E18 | core/video/store.py | SHA256 11951bad83e4b6c4e81a8bf514dd06438362e26320791e602c482b03068642f9
+327: def topic_ids_in_use() -> set[str]:
+328:     """Topic ids that already have a script that did not fail (a roundup covers each of its items)."""
+329:     with connect() as conn:
+330:         rows = conn.execute("SELECT topic FROM scripts WHERE status != 'FAILED'").fetchall()
+331:     ids: set = set()
+332:     for row in rows:
+333:         topic = json.loads(row["topic"])
+334:         ids.add(topic.get("id"))
+335:         ids.update(topic.get("items") or [])
+336:     return ids - {None}
+337: 
+338: 
+339: def scripts_by_topic() -> dict[str, list[dict]]:
+340:     """Topic id → the scripts that cover it (not failed, newest first), a roundup covering each of its items."""
+341:     with connect() as conn:
+342:         rows = conn.execute("SELECT id, column_key, topic, status, created_at, archived FROM scripts"
+343:                             " WHERE status != 'FAILED' ORDER BY created_at DESC").fetchall()
+344:     covered: dict[str, list[dict]] = {}
+345:     for row in rows:
+346:         topic = json.loads(row["topic"])
+347:         for topic_id in {topic.get("id"), *(topic.get("items") or [])} - {None}:
+348:             covered.setdefault(topic_id, []).append({"id": row["id"], "column_key": row["column_key"],
+349:                                                       "status": row["status"], "created_at": row["created_at"],
+350:                                                       "archived": row["archived"]})
+351:     return covered
+352: 
+353: 
+354: @contextmanager
+
+632:     story_claim: str = "",
+633: ) -> int:
+634:     """Store a new version and make it current. Returns its number."""
+635:     now = _now()
+636:     with connect(write=True) as conn:
+637:         context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
+638:         frozen = json.loads(context[0]) if context and context[0] else {}
+639:         # An A/B assignment mark alone does not make a context (spec/ab-testing.md §2: arm A stays as today).
+640:         if any(key != "experiments" for key in frozen):
+641:             meta = {**(meta or {}), "content_context": frozen}
+642:         current = conn.execute(
+643:             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
+644:         ).fetchone()[0]
+
+802: def create_render(script_id: str, version: int, *, title: str, source_text: str,
+803:                   source_sha256: str, request: dict, visuals: dict | None = None) -> dict:
+804:     now = _now()
+805:     render_id = uuid.uuid4().hex
+806:     try:
+807:         with connect(write=True) as conn:
+808:             conn.execute(
+809:                 "INSERT INTO renders (id, script_id, version, status, title, source_text,"
+810:                 " source_sha256, request, visuals, created_at, updated_at)"
+811:                 " VALUES (?, ?, ?, 'SUBMITTING', ?, ?, ?, ?, ?, ?, ?)",
+812:                 (render_id, script_id, version, title, source_text, source_sha256,
+813:                  json.dumps({**request, "idempotency_key": f"research:{render_id}"}, ensure_ascii=False),
+814:                  json.dumps(visuals or {}, ensure_ascii=False), now, now),
+815:             )
+816:     except sqlite3.IntegrityError as exc:
+817:         raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+818:     return get_render(render_id)
+819: 
+820: 
+821: def get_render(render_id: str) -> dict | None:
+822:     with connect() as conn:
+823:         row = conn.execute("SELECT * FROM renders WHERE id = ?", (render_id,)).fetchone()
+824:     return _decode(row, _RENDER_JSON)
+825: 
+826: 
+827: def resume_render_download(render_id: str) -> dict | None:
+828:     """Recover a completed remote video's failed copy without submitting another video."""
+829:     try:
+830:         with connect(write=True) as conn:
+831:             changed = conn.execute(
+832:                 "UPDATE renders SET status='DOWNLOADING',error_code=NULL,error_message=NULL,"
+833:                 " completed_at=NULL,updated_at=? WHERE id=? AND status='FAILED'"
+834:                 " AND error_code='DOWNLOAD_FAILED' AND autovideo_job_id IS NOT NULL",
+835:                 (_now(), render_id),
+836:             ).rowcount
+837:     except sqlite3.IntegrityError as exc:
+838:         raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+839:     return get_render(render_id) if changed else None
+840: 
+841: 
+
+881: def update_render(render_id: str, **fields: Any) -> None:
+882:     if not fields:
+883:         return
+884:     fields = _encode({**fields, "updated_at": _now()}, _RENDER_JSON)
+885:     assignments = ", ".join(f"{k} = ?" for k in fields)
+886:     with connect(write=True) as conn:
+887:         conn.execute(f"UPDATE renders SET {assignments} WHERE id = ?", (*fields.values(), render_id))
+888: 
+889: 
+890: def freeze_render_submission(render_id: str, request: dict, visuals: dict) -> dict:
+891:     """Freeze the effective payload once, before any potentially unanswered submit."""
+892:     with connect(write=True) as conn:
+893:         conn.execute("UPDATE renders SET submission_request=?, visuals=?, updated_at=? "
+894:                      "WHERE id=? AND submission_request='{}' AND submit_started_at IS NULL",
+895:                      (json.dumps(request, ensure_ascii=False), json.dumps(visuals, ensure_ascii=False), _now(), render_id))
+896:     return get_render(render_id)
+897: 
+898: 
+899: def latest_render_visuals(script_id: str, version: int) -> dict | None:
+
+E19 | web/routes/production.py | SHA256 72eb1649373cc5f76a519f544de16f413eafda2ebcf5b92a4aa64be041b8b899
+50:             for c in configs.values() if not job or c.job == job]
+51: 
+52: 
+53: @router.get('/{key}/settings')
+54: def config_settings(key: str, user=Depends(require_viewer)) -> dict:
+55:     import hashlib
+56:     from pathlib import Path
+57:     from core import matrices
+58:     from core.video import content_columns
+59:     config = _get(key)
+60:     path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
+61:     matrix = matrices.of_job(config.job, get_settings().paths.config_dir)
+62:     context = content_columns.snapshot(get_settings().paths.config_dir, key, config.job)
+63:     return {**config.as_dict(), 'revision': hashlib.sha256(path.read_bytes()).hexdigest(),
+64:             'content_context': context,
+65:             'effective_render': content_columns.render_settings(get_settings().paths.config_dir, matrix, context, config.render)}
+66: 
+67: 
+68: class RenderSettingsIn(BaseModel):
+69:     model_config = ConfigDict(extra='forbid')
+70:     expected_revision: str = Field(min_length=1)
+71:     render: dict = Field(default_factory=dict)
+72:     inherit: list[str] = Field(default_factory=list)
+73:     auto: int | None = Field(default=None, ge=0)
+74: 
+75: 
+76: @router.patch('/{key}/settings')
+77: def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(require_editor)) -> dict:
+78:     import hashlib
+79:     from pathlib import Path
+80:     from core.fileio import file_lock
+81:     from core.video.production_settings import FIELDS, inherit, validate
+82:     from web.services import yaml_io
+83:     _get(key)
+84:     path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
+85:     if set(body.inherit) - FIELDS or set(body.inherit) & set(body.render):
+86:         raise _error(422, 'invalid_render', '恢复继承使用顶层视频字段，不能同时覆盖同一个字段')
+87:     try:
+88:         patch = validate(body.render)
+89:         with file_lock(str(path)):
+90:             old = path.read_bytes().decode('utf-8')
+91:             if hashlib.sha256(old.encode()).hexdigest() != body.expected_revision:
+92:                 raise _error(409, 'config_changed', '任务视频配置已变化，请重新读取 settings 后再修改')
+93:             data = yaml_io.parse_yaml(old)
+94:             overrides = dict(data.get('render') or {})
+95:             for field in body.inherit:
+96:                 overrides.pop(field, None)
+97:             if body.render or body.inherit:
+98:                 data['render'] = validate(inherit(overrides, patch))
+99:             if body.auto is not None:
+100:                 import time
+101:                 if body.auto:
+102:                     data['auto_enabled_at'] = ((data.get('auto_enabled_at') or path.stat().st_mtime)
+103:                                                if data.get('auto') else time.time())
+104:                 else:
+105:                     data.pop('auto_enabled_at', None)
+106:                 data['auto'] = int(bool(body.auto))
+107:             backup = yaml_io.save_backup(str(path), old)
+108:             yaml_io.atomic_write(str(path), yaml_io.dump_yaml(data))
+109:     except ValueError as exc:
+110:         raise _error(422, 'invalid_render', str(exc)) from exc
+111:     audit.log('production_render', user=user['username'], target=key, details={'backup': backup, 'inherit': body.inherit, 'auto': body.auto})
+
+113: 
+114: 
+115: @router.get("/{key}/pending")
+116: def pending(key: str, user=Depends(require_viewer)) -> dict:
+117:     """The newest report's items, each saying whether this config's recipe already wrote it or it was set aside."""
+118:     from web.routes.video import _topics
+119: 
+120:     config = _get(key)
+121:     if not config.usable:
+122:         raise _error(422, "config_broken", "；".join(config.errors))
+123:     if config.split == "whole":
+124:         return {"report_date": None, "report_path": "", "items": [], "reports": _whole_reports(config)}
+125:     topic_store = _topics()
+126:     report_date, topics = topic_store.load(config.source)
+127:     covered = store.scripts_by_topic()
+128:     dismissed = store.dismissed_topic_ids()
+129:     items = []
+130:     for topic in topics:
+131:         mine = [s for s in covered.get(topic.id, []) if s["column_key"] == config.recipe]
+132:         items.append({**topic.as_dict(), "written": bool(mine), "scripts": mine, "dismissed": topic.id in dismissed})
+133:     return {"report_date": report_date, "report_path": topics[0].report_path if topics else "", "items": items}
+134: 
+
+E20 | web/services/topic_progress.py | SHA256 09960a1fd390fc262c84181093c1b1facf3130dd4538853cd9c5f91dd60abc48
+35: 
+36:     Only read matching script headers and render metadata, never narration or
+37:     frozen requests. A roundup belongs to each of its selected topics.
+38:     """
+39:     if not topic_ids:
+40:         return {}
+41:     ids = set(topic_ids)
+42:     encoded = json.dumps(sorted(ids))
+43:     with store.connect() as conn:
+44:         scripts = [dict(r) for r in conn.execute(
+45:             f"SELECT {_HEADERS} FROM scripts s"
+46:             " WHERE json_extract(topic, '$.id') IN (SELECT value FROM json_each(?))"
+47:             " OR EXISTS (SELECT 1 FROM json_each(topic, '$.items')"
+48:             " WHERE value IN (SELECT value FROM json_each(?))) ORDER BY created_at DESC, id DESC",
+49:             (encoded, encoded),
+50:         )]
+51:     for script in scripts:
+52:         script['topic'] = json.loads(script['topic'])
+53:     progress = _progress_rows(scripts)
+54:     skips = selection_skips(scripts)
+55:     covered: dict[str, list[dict]] = {}
+56:     for script in scripts:
+57:         row = progress[script['id']]
+58:         if script['id'] in skips:
+59:             row['selection_skip'] = skips[script['id']]
+60:         topic = script['topic']
+61:         for topic_id in ({topic.get('id'), *(topic.get('items') or [])} - {None}) & ids:
+62:             covered.setdefault(topic_id, []).append(row)
+63:     return covered
+64: 
+65: 
+66: def _progress_rows(scripts: list[dict]) -> dict[str, dict]:
+67:     """Only expose current-version progress and playable files for these headers."""
+68:     if not scripts:
+69:         return {}
+70:     with store.connect() as conn:
+
+E21 | web/routes/video.py | SHA256 b1ca92fd1bf75ab46328bfef63ce5019e63a59c0d886963c7a5e243a3df9c135
+298:     return _topic_listing(source, round)
+299: 
+300: 
+301: def _topic_listing(source: str, round_date: Optional[str]) -> dict:
+302:     from core.video import topic_store
+303:     from web.services import topic_progress
+304: 
+305:     round_date, topics = topic_store.load(source, round_date)
+306:     used = store.topic_ids_in_use()
+307:     published = store.published_topic_ids()
+308:     covered = topic_progress.scripts_by_topic([t.id for t in topics])
+309:     dismissed = store.dismissed_topic_ids()
+310:     return {
+311:         "round": round_date,
+312:         "rounds": topic_store.report_dates(source),
+313:         "topics": [{**t.as_dict(), "source": t.source, "scripted": t.id in used, "published": t.id in published,
+314:                     "dismissed": t.id in dismissed, "scripts": covered.get(t.id, [])} for t in topics],
+315:     }
+316: 
+317: 
+318: class ManualTopicIn(BaseModel):
+319:     model_config = ConfigDict(extra="forbid")
+320: 
+321:     title: str = Field(min_length=4, max_length=200)
+322:     angle: str = Field(default="", max_length=2000)
+
+E22 | core/video/joint_planning.py | SHA256 bcbec558cf2e1af81a79feec0067eb75894461282ee4a68ebd16ea68b3a2750b
+230: def enabled_for(spec: dict, config_dir: str) -> bool:
+231:     """Whether this report batch can need a slow shared allocation."""
+232:     if not spec.get("report") or spec.get("job") not in audience_strategy.JOBS:
+233:         return False
+234:     try:
+235:         config = load_yaml((Path(config_dir) / "joint_planning.yaml").read_text()) or {}
+236:         productions = {p.get("production") for p in spec.get("picks", [])}
+237:         return config.get("enabled") is True and any(
+238:             p.get("episode_production") in productions and p.get("single_production") in productions
+239:             for p in config.get("pairs", [config]))
+240:     except Exception:
+241:         return False
+242: 
+243: 
+244: def apply(spec: dict, items: list[dict], config_dir: str, jobs_dir: str, workspace: str,
+245:           llm_config, notes: list | None = None, rank_raw=None) -> list[dict]:
+246:     """Only new paired batches opt in. A failed planner returns the original queue."""
+247:     config_path = Path(config_dir) / "joint_planning.yaml"
+248:     if not config_path.is_file():
+249:         return items
+250:     try:
+251:         config = load_yaml(config_path.read_text()) or {}
+252:         if not isinstance(config, dict):
+253:             raise ValueError("联合规划配置必须是映射")
+254:         pairs = config.get("pairs", [config])
+255:         if not isinstance(pairs, list) or any(not isinstance(p, dict) for p in pairs):
+256:             raise ValueError("联合规划的 pairs 必须是配置列表")
+257:     except Exception as exc:
+258:         logger.warning("Joint planning configuration unavailable: %s", exc)
+259:         if notes is not None:
+260:             notes.append("联合规划配置不可读，保留原选题流程")
+261:         return items
+262:     if config.get("enabled") is not True or not spec.get("report"):
+263:         return items
+264:     episodes, singles = [], []
+265:     for pair in pairs:
+266:         episode_id, single_id = pair.get("episode_production"), pair.get("single_production")
+267:         episodes = [i for i in items if i.get("production") == episode_id and i["topic"].get("content_mode") == "episode"]
+268:         singles = [i for i in items if i.get("production") == single_id and i["topic"].get("from_item") and not i["topic"].get("angle")]
+269:         if len(episodes) == 1 and singles:
+270:             config = {"enabled": True, **pair}
+271:             break
+272:     if len(episodes) != 1 or not singles:
+273:         return items
+274:     channel = audience_strategy.JOBS.get(spec.get("job"))
+275:     if channel not in audience_strategy.CHANNELS:
+276:         return items
+277:     try:
+278:         episode = episodes[0]
+279:         report_path = Path(workspace) / spec["report"]
+280:         report = report_path.read_text()
+281:         # Production reconciliation supplies an absolute path; metadata is keyed
+282:         # by workspace-relative output paths, unlike isolated/manual batches.
+283:         metadata = (report_meta.get(spec["report"])
+284:                     or report_meta.get(os.path.relpath(report_path, workspace)) or {})
+285:         material = report_material.read(metadata.get("material") or {}, str(report_path), report) or report
+286:         packets = [{"id": p["id"], "text": p["text"], "links": [p["url"]] if p["url"] else []}
+287:                    for p in audience_strategy.packets(material)]
+288:         # A partial/manual queue must retain episode-only entries, not silently drop them.
+289:         from core.video import excerpt, content_guard, story_pool
+290:         consolidated = {}
+291:         for packet in packets:
+292:             key = story_pool._anchored(packet["links"][0]) if packet["links"] else packet["id"]
+293:             if key not in consolidated or len(packet["text"]) > len(consolidated[key]["text"]):
+294:                 consolidated[key] = packet
+295:         packets = list(consolidated.values())
+296:         available = {i["topic"]["id"] for i in singles}
+297:         candidates = [{"id": c["id"], "title": c["title"],
+298:                        "material": excerpt.item_excerpt(report, c["title"]) or c["title"],
+299:                        "single_allowed": c["id"] in available}
+300:                       for c in episode["topic"]["episode"]["items"]]
+301:         if channel == "flash" and any(i.get("pick", {}).get("all") for i in singles):
+302:             # Bring the existing bounded raw-material recovery forward. This
+303:             # prevents the joint brief from starving singles when no report
+304:             # candidate supports an independent question.
+305:             from core.video import autopilot_store as ap
+306:             taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+307:             cited = set().union(*(story_pool.cited(c["material"]) for c in candidates))
+308:             unused = {}
+309:             for packet in packets:
+310:                 if not packet["links"] or story_pool.cited_packet(packet, cited):
+311:                     continue
+312:                 anchor = story_pool._anchored(packet["links"][0])
+313:                 if anchor not in unused or len(packet["text"]) > len(unused[anchor]["text"]):
+314:                     unused[anchor] = packet
+315:             for packet in list(unused.values())[:40]:
+316:                 raw_id = 'flash-raw:' + hashlib.sha256(json.dumps([packet["links"][0], packet["text"]]).encode()).hexdigest()[:24]
+317:                 if raw_id in taken or any(f'{raw_id}~{angle}' in taken for angle in ('money', 'howto')):
+318:                     continue
+319:                 title = packet["text"].splitlines()[0].lstrip('# ')
+320:                 candidates.append({"id": raw_id, "title": title, "material": packet["text"][:900],
+321:                                    "source_id": packet["id"], "single_allowed": True, "raw_material": True})
+322:                 available.add(raw_id)
+323:                 singles.append({"column_key": singles[0]["column_key"], "production": single_id,
+324:                                 "pick": singles[0]["pick"], "topic": {
+325:                                     "id": raw_id, "title": title, "from_report": spec["report"],
+326:                                     "from_item": raw_id, "from_item_title": title, "fields": {},
+327:                                     "audience_strategy": "flash", "matrix_dedup": singles[0]["topic"].get("matrix_dedup", {})}})
+328:         cited = set().union(*(story_pool.cited(c["material"]) for c in candidates if not c.get("raw_material")))
+329:         raw_sources = {c["source_id"] for c in candidates if c.get("raw_material")}
+330:         selected_packets = [p for p in packets if p["id"] in raw_sources or story_pool.cited_packet(p, cited)]
+331:         if selected_packets:
+332:             packets = selected_packets
+333:         if not candidates or not packets:
+334:             return items
+335:         fingerprint = json.dumps([VERSION, report, material, candidates, config], sort_keys=True, ensure_ascii=False)
+336:         plan_id = hashlib.sha256(fingerprint.encode()).hexdigest()
+337:         path = _path(plan_id)
+338:         path.parent.mkdir(parents=True, exist_ok=True)
+339:         with file_lock(str(path), timeout=60):
+340:             if path.exists():
+341:                 plan = json.loads(path.read_text())
+
+E23 | config/joint_planning.yaml | SHA256 7651cc42ed16be2b9f8d7a3b12eaee045be6be4c243b2628e59ea4faa847bf99
+1: # 仅在同一新批次同时制作合集和单条时共同分配内容；不改已有批次。
+2: enabled: true
+3: pairs:
+4:   - episode_production: flash_daily
+5:     single_production: flash_each
+6:   - episode_production: chatgpt_t09_updates
+7:     single_production: chatgpt_t09_updates_each
+
+E24 | core/production_policy.py | SHA256 363c18e9298d86f2d9db54f9fa5e59a1e50ae72abe9f87a7a0e63cdea2cb19c5
+156:     state_dir: str,
+157:     job: dict,
+158:     now: datetime,
+159:     context: dict | None = None,
+160: ) -> dict:
+161:     """One immutable issue: same cutoff across queue delay, retries and policy edits."""
+162:     if context and context.get("prepared"):
+163:         return context
+164:     policy = load(config_dir)
+165:     name = job.get("_file", "")
+166:     if not manages(policy, config_dir, name):
+167:         return context or {}
+168:     rule = policy.get("jobs", {}).get(name, policy["window"])
+169:     from core.schedule_store import slot
+170:     from core.schedule_store import zone as schedule_zone
+171: 
+172:     due = (context or {}).get("due_at")
+173:     triggered_at = (context or {}).get("flash_triggered_at") if name == FLASH_JOB and due is None else None
+174:     plan = context if context and triggered_at is None else plan_for(state_dir, name)
+175:     timezone = (plan or {}).get("timezone") or rule.get("timezone", "Asia/Shanghai")
+176:     zone = schedule_zone(timezone)
+177:     current = now.replace(tzinfo=zone) if now.tzinfo is None else now.astimezone(zone)
+178:     expression = (plan or {}).get("expression") or (plan or {}).get("schedule")
+179:     if triggered_at is not None:
+180:         current = datetime.fromtimestamp(triggered_at, zone)
+181:     if due is None:
+182:         due = (
+183:             slot(expression, current.timestamp(), timezone, backwards=True)
+184:             if expression and rule["mode"] == "previous_slot"
+185:             else current.timestamp()
+186:         )
+187:     end = datetime.fromtimestamp(due, zone)
+188:     if rule["mode"] == "previous_slot" and expression:
+189:         start = datetime.fromtimestamp(
+190:             slot(expression, due - 60, timezone, backwards=True), zone
+191:         )
+192:     else:
+193:         from datetime import timedelta
+194: 
+195:         start = end - timedelta(days=rule.get("days", job.get("collection_days", 7)))
+196:     mode = rule["mode"]
+197:     if triggered_at is not None:
+198:         end = current
+199:         previous_end = _latest_collection_end(state_dir, name, end)
+200:         if previous_end is not None:
+201:             start = previous_end.astimezone(zone)
+202:         mode = "since_last_collection"
+203:     window = {
+204:         "mode": mode,
+205:         "days": max(1, int((end - start).total_seconds() + 86399) // 86400),
+206:         "start": start.isoformat(),
+207:         "end": end.isoformat(),
+208:         "timezone": timezone,
+209:     }
+210:     identity = {
+211:         "job": name,
+212:         "schedule_id": (plan or {}).get("schedule_id") or (plan or {}).get("id"),
+213:         "schedule_version": (plan or {}).get("version"),
+214:         "start": window["start"],
+215:         "end": window["end"],
+216:     }
+217:     return {
+218:         **(context or {}),
+219:         "prepared": True,
+220:         "policy_revision": policy["revision"],
+221:         "policy": copy.deepcopy(policy),
+222:         "issue_id": hashlib.sha256(
+223:             json.dumps(identity, sort_keys=True).encode()
+224:         ).hexdigest(),
+225:         "research_window": window,
+226:         "job": copy.deepcopy(job),
+227:     }
+228: 
+229: 
+230: def prepare(runtime, job_name: str, context: dict) -> dict:
+231:     from core.config import load_job
+232: 
+233:     job = load_job(runtime.jobs_dir, job_name)
+234:     if not job:
+235:         return context
+236:     if job.get("source_collection"):
+237:         policy = load(runtime.config_dir)
+238:         if policy:
+239:             frozen = {**copy.deepcopy(job), "_production_policy": policy}
+240:             identity = json.dumps([job_name, context.get("due_at"), policy["revision"]])
+241:             return {
+242:                 **context,
+243:                 "prepared": True,
+244:                 "job": frozen,
+245:                 "policy_revision": policy["revision"],
+246:                 "issue_id": hashlib.sha256(identity.encode()).hexdigest(),
+247:             }
+248:     return issue(
+249:         runtime.config_dir,
+250:         runtime.state_dir,
+251:         matrices.for_run(job, runtime.config_dir),
+252:         datetime.now(),
+253:         context,
+254:     )
+255: 
+256: 
+257: def references(policy: dict, config_dir: str) -> set[str]:
+258:     from core.sources import resolve
+259: 
+260:     return set(resolve(policy.get("sources", {}).get("reference", []), config_dir))
+
+E25 | core/material_collection.py | SHA256 3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3
+19: def collect(engine, policy: dict) -> dict:
+20:     settings = policy.get("collection", {})
+21:     root = Path(getattr(engine, "state_dir", Path(engine.workspace_dir) / "state"))
+22:     archive = MaterialArchive(root)
+23:     specs = []
+24:     overdue = []
+25:     owners = matrices.load_all(engine.config_dir)
+26:     active = set()
+27:     for key in policy["matrices"]:
+28:         owner = owners.get(key)
+29:         if not owner or owner.paused or owner.archived:
+30:             continue
+31:         active.add(key)
+32:         for name in owner.jobs:
+33:             job = load_job(engine.jobs_dir, name)
+34:             if job and job.get("enabled", True):
+35:                 specs.extend(
+36:                     sources.resolve(job.get("sources") or [], engine.config_dir)
+37:                 )
+38:     for profile in source_supply.profiles(engine.config_dir).values():
+39:         if profile.get("matrix") in active:
+40:             from core.source_coverage import CoverageStore
+41:             coverage = CoverageStore(root, profile['key']).status(profile)
+42:             specs.extend(r['spec'] for r in coverage)
+43:             overdue.extend(r for r in coverage if r['status'] != 'current')
+44:             specs.extend(
+45:                 r["spec"] for r in SupplyStore(root, profile["key"]).pool()["sources"]
+46:             )
+47:     # Fetch source identities in a stable rotation when the configured bound is smaller than the pool.
+48:     specs = sorted(set(specs))
+49:     bound = settings.get("max_sources", 100)
+50:     offset = (int(time.time() // 86400) * bound) % max(1, len(specs))
+51:     priority = [r['spec'] for r in sorted(overdue, key=lambda r: r.get('attempted_at', 0))]
+52:     selected = list(dict.fromkeys(priority + specs[offset:] + specs[:offset]))[:bound]
+53:     receipt = {
+54:         "policy_revision": policy["revision"],
+55:         "sources_total": len(specs),
+56:         "sources": {},
+
+106:     started = time.time()
+107:     try:
+108:         with LockManager(job["_file"], stale_after=7200):
+109:             policy = job.get("_production_policy") or production_policy.load(
+110:                 engine.config_dir
+111:             )
+112:             if not policy.get("collection", {}).get("enabled"):
+113:                 StateManager.update(job["_file"], "skipped", user=engine.user)
+114:                 return None
+115:             receipt = collect(engine, policy)
+116:             # JSON is not a research report and cannot wake report-to-video reconciliation.
+117:             reference = f"output/source_collections/{time.time_ns()}.json"
+118:             atomic_write(
+119:                 str(Path(engine.workspace_dir) / reference),
+120:                 json.dumps(receipt, ensure_ascii=False, indent=2),
+121:             )
+122:             read = any(r["status"] == "read" for r in receipt["sources"].values())
+123:             StateManager.update(
+
+E26 | config/production_policy.yaml | SHA256 03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f
+1: # 排期在「周期调度」维护；默认研究窗口随相邻计划槽位变化。
+2: schema_version: 1
+3: matrices:
+4:   - ai_media
+5:   - chatgpt_acquisition
+6: window:
+7:   mode: previous_slot
+8:   timezone: Asia/Shanghai
+9: # 可在 jobs 中为任意任务指定 rolling + days，独立调整研究范围而不修改出片周期。
+10: jobs: {}
+11: collection:
+12:   enabled: true
+13:   schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
+14:   timezone: Asia/Shanghai
+15:   retention_days: 60
+16:   limit_per_source: 80
+17:   max_sources: 100
+18:   timeout_seconds: 15
+19: automatic:
+20:   # 每天新接纳的自动节目数；留空（null）表示不限。每期仍只记一次，重试不重复占位。
+21:   daily_limit: null
+22:   timezone: Asia/Shanghai
+23:   recommendations: false
+24: sources:
+25:   reference:
+26:     - source:cg_pro_tiers
+27:     - source:cg_pricing
+28:     - source:cg_help
+29:     - source:cg_capabilities
+30:     - source:cg_errors
+
+E27 | core/engine.py | SHA256 b61e9eb990be2e2209480c65e112187d9a3db03b33a12da63bdf939b9054cfd1
+129:         if job.get('source_collection'):
+130:             from .material_collection import run as collect_materials
+131:             return collect_materials(self, job)
+132: 
+133:         if job.get("source_discovery"):
+134:             from .source_discovery import run as discover_sources
+135:             return discover_sources(self, job)
+136: 
+137:         if job.get("topic_ideas"):
+138:             from .theme_ideas import run as generate_themes
+139:             return generate_themes(self, job)
+140: 
+141:         if job.get("topic_discovery"):
+142:             from .theme_discovery import run as discover_themes
+143:             return discover_themes(self, job)
+144: 
+145:         # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
+146:         # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
+147:         from . import matrices
+148:         if not context.get('job'):
+149:             job = matrices.for_run(job, self.config_dir)
+150:         from .research_window import freeze
+151:         if not context.get('legacy'):
+152:             from .production_policy import issue
+153:             context=issue(self.config_dir,self.state_dir,job,self._now(),context)
+154:         if context.get('research_window'):
+155:             job={**job,'_collection_window':context['research_window'],'_issue_id':context['issue_id'],
+156:                  '_production_policy':context.get('policy', {})}
+157:         else:
+158:             job = freeze(job, self._now())
+159:         self._events_exclude = matrices.jobs_of_other_matrices(job.get("_file", job_name), self.config_dir)
+160: 
+161:         logger.info("Running job: %s", job_name)
+162:         desc = job.get("description", "")
+163:         print(f"  [{job_name}] {desc}")
+164: 
+165:         # --- Lock: prevent concurrent execution ---
+
+195:                 from . import knowledge_job
+196:                 if knowledge_job.enabled(job):
+197:                     # Declared knowledge Job: no sources by design; it sees only what it already covered.
+198:                     if issue := knowledge_job.problem(job):
+199:                         raise ValueError(issue)
+200:                     source_block = knowledge_job.block(knowledge_job.past_titles(job, self.workspace_dir))
+201:                     if job.get("sources"):
+202:                         from .sources import fetch_all, resolve
+203:                         specs = resolve(list(job["sources"]), self.config_dir)
+204:                         ideas = fetch_all(specs, limit_per_source=int(job.get("sources_limit", 8)))
+205:                         logger.info("Knowledge job topic ideas: %d items from %d source(s)", len(ideas), len(specs))
+206:                         source_block += "\n\n" + knowledge_job.topic_block(ideas)
+207:                     fetched = ([], {})
+208:                 elif fetch_only:
+209:                     source_block, fetched = self._fetch_sources_strict(job)
+210:                 else:
+
+237:                 )
+238:                 objective = " - ".join(
+239:                     part for part in (job.get("name", ""), desc) if part
+240:                 )
+241:                 from .research_window import instruction
+242:                 objective += instruction(job.get('_collection_window'))
+243:                 if fetch_only:
+244:                     raw_content = agent.run_fetch_only(
+245:                         base_prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1],
+246:                         sources=source_block or "")
+247:                 else:
+248:                     from .research_batches import MAX_PROMPT_CHARS
+249:                     if source_block and len(prompt) > MAX_PROMPT_CHARS:
+250:                         # The searching agent keeps its first message for the whole run: collected material too large
+251:                         # for the window is first researched in batches, and the agent continues from that draft.
+252:                         agent._remember_urls_in(source_block)
+253:                         digest = agent.write_from(base_prompt, source_block)
+254:                         prompt = (f"{base_prompt}\n\n## 本期采集材料的分批整理稿\n本期采集材料超过单次处理上限，"
+255:                                   f"已分 {agent.batches} 批整理如下，原始链接保留在条目中。\n\n{digest}")
+256:                     raw_content = agent.run(
+257:                         prompt,
+258:                         objective=objective,
+259:                         fallback_queries=job.get("keywords", []),
+260:                     )
+261:                 # Migrated columns deepen the researcher's chosen candidates by
+262:                 # reading existing links, before the ordinary report is saved.
+263:                 from .ai_dossier_sources import enrich, wanted
+264:                 dossier_detail = {}
+265:                 if wanted(job) and raw_content:
+266:                     from .search import SearchClient
+267:                     reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
+268:                                           progress_cb=self._progress)
+269:                     extra, dossier_detail = enrich(
+270:                         job, raw_content, "\n\n".join([source_block, *agent.materials]),
+271:                         search_client=reader, cancel_token=self._cancel, progress_cb=self._progress)
+272:                     if extra:
+273:                         import hashlib
+274:                         import json
+275:                         initial = output_path + ".dossier-initial-" + hashlib.sha256(raw_content.encode()).hexdigest()[:16] + ".json"
+276:                         atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
+277:                         dossier_detail["initial_report"] = initial
+278:                         try:
+279:                             from .research_batches import joined_receipt, strip_receipts
+280:                             initial_report = raw_content
+
+324:                 from .video import audience_strategy, question_material
+325:                 audience_detail = {}
+326:                 supplement_material = ""
+327:                 if audience_strategy.job_channel(job):
+328:                     self._progress({"type": "phase", "phase": "organizing_topics"})
+329:                     initial_report = cleaned
+330:                     import hashlib
+331:                     import json
+332:                     initial_path = output_path + ".audience-initial-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+333:                     atomic_write(initial_path, json.dumps({"report": initial_report}, ensure_ascii=False) + "\n")
+334:                     cleaned, audience_detail = audience_strategy.prepare_report(
+335:                         job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+336:                         LLMConfig.from_system(self.sys, "ai"), cancel_token=self._cancel)
+337:                     cleaned, supplement_material, supplement_detail = question_material.enhance(
+338:                         job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+339:                         {**audience_detail, "initial_report": initial_report}, self.sys,
+340:                         cancel_token=self._cancel, progress_cb=self._progress)
+341:                     if supplement_detail:
+342:                         audience_detail["question_material"] = supplement_detail
+343:                         # These URLs were actually read by the supplemental stage.
+344:                         # Keep the existing citation display consistent with its inputs.
+345:                         self._prompt_urls.update(
+346:                             source["url"] for topic in supplement_detail.get("topics", [])
+347:                             for source in topic.get("retrieved_sources", []) if source.get("text"))
+348:                         for name, value in supplement_detail.get("usage", {}).items():
+349:                             if isinstance(value, (int, float)) and not isinstance(value, bool):
+350:                                 usage[name] = usage.get(name, 0) + value
+351:                     if self._supply_pending:
+352:                         cleaned += "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
+353:                     if self._cancel.is_set():
+354:                         raise CancelledError("Job cancelled after topic organization")
+355:                     audience_detail["initial_report_path"] = initial_path
+356:                     receipt_path = output_path + ".audience-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+357:                     atomic_write(receipt_path, json.dumps({"initial_report": initial_report, **audience_detail}, ensure_ascii=False) + "\n")
+358:                     usage["audience_strategy"] = {
+359:                         **{key: audience_detail[key] for key in
+360:                            ("strategy", "version", "channel", "status", "candidate_count", "selection_mode", "error")
+361:                            if key in audience_detail},
+362:                         "receipt": receipt_path,
+363:                         **({"question_material_status": audience_detail["question_material"].get("status")}
+364:                            if audience_detail.get("question_material") else {}),
+365:                     }
+366:                     for name, value in audience_detail.get("usage", {}).items():
+367:                         if isinstance(value, (int, float)) and not isinstance(value, bool):
+368:                             usage[name] = usage.get(name, 0) + value
+369:                 actual_path = self._save_output(cleaned, output_path)
+370:                 from .report_identity import publish
+
+E28 | ui/src/components/MatrixRuns.tsx | SHA256 82954c428a749a94a79e1f768be421cb857882660ede431c0333cf5c17fdfffb
+38:   const failedMore = useRef(false);
+39:   const toast = useToast();
+40:   const role = useAuthStore((s) => s.user?.role);
+41:   const canEdit = role === "editor" || role === "admin";
+42:   const member = (j: string) => matrix.members.find((m) => m.job === j);
+43: 
+44:   // the engine has no resume point: a run that did not finish is started again from the beginning
+45:   const again = async (r: MatrixRun) => {
+46:     const spend = member(r.job)?.searches_per_run ? `上次完整跑一次用了 ${member(r.job)!.searches_per_run} 次搜索。` : "";
+47:     if (!window.confirm(`重新运行「${r.name}」？会从头再跑一遍，花搜索额度，${spend}`)) return;
+48:     try {
+49:       await runJob(r.job);
+50:       toast.success("开始运行了，刷新后能在最上面看到");
+51:     } catch (e) {
+52:       toast.error(errorMessage(e));
+
+113:           return (
+114:             <li key={`${r.job}-${r.ts}`}>
+115:               {head ? <div className="text-xs text-text-muted pt-2">{head.replace("-", " 年 ")} 月</div> : null}
+116:               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs border-t border-border py-1.5">
+117:                 <TimeStamp value={r.ts} />
+118:                 <Link className="text-sm text-accent hover:underline" to={`/jobs/${encodeURIComponent(r.job)}`}>{r.name}</Link>
+119:                 {r.trigger ? <span className="badge border border-border text-text-muted">{TRIGGER[r.trigger]}</span> : null}
+120:                 <span className={st.cls}>{st.label}</span>
+121:                 {r.searches ? <span className="text-text-muted">{r.searches} 次搜索</span> : null}
+122:                 {r.duration_seconds ? <span className="text-text-muted">{Math.max(1, Math.round(r.duration_seconds / 60))} 分钟</span> : null}
+123:                 {r.report_path && r.status === "success" ? (
+124:                   <Link className="text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(r.report_path.replace(/^output\//, ""))}`}>看报告</Link>
+125:                 ) : null}
+126:                 {r.items ? <span className="text-text-muted">{r.items} 条</span> : null}
+127:                 {canEdit && (r.status === "failed" || r.status === "cancelled") && member(r.job)?.enabled !== false && !member(r.job)?.is_running ? (
+128:                   <button className="text-accent hover:underline" onClick={() => again(r)}>重新运行</button>
+129:                 ) : null}
+130:                 {r.status === "success" && r.report_path ? (
+131:                   r.scripts ? (
+132:                     <span className="text-text-muted">写了 {r.scripts} 篇文稿</span>
+133:                   ) : (
+134:                     <Link className="text-success hover:underline" to={`/matrices/${encodeURIComponent(matrix.key)}/video/${encodeURIComponent(r.job)}`}>还没写视频 →</Link>
+135:                   )
+136:                 ) : null}
+137:                 {r.error ? <details className="basis-full text-text-muted"><summary className="cursor-pointer text-warning">失败详情</summary><p className="mt-2 text-xs leading-5 break-words">{r.error}</p></details> : null}
+138:               </div>
+139:             </li>
+
+E29 | core/video/production.py | SHA256 191b8a6c83a388869e76d0395ab827c18b284a1540c22f437fbacc7d2904f96f
+264:             with open(os.path.join(folder, filename), encoding="utf-8") as fh:
+265:                 data = load_yaml(fh) or {}
+266:         except (OSError, yaml.YAMLError) as exc:
+267:             out[key] = Config(key=key, name=key, job="", recipe="", errors=(f"读不了：{str(exc)[:120]}",))
+268:             continue
+269:         if not isinstance(data, dict):
+270:             out[key] = Config(key=key, name=key, job="", recipe="", errors=("应为映射（name、job、recipe）",))
+271:             continue
+272:         try:
+273:             out[key] = _check(key, data, config_dir, jobs_dir, every_recipe, sources, matrix_jobs)
+274:         except (OSError, ValueError, TypeError, AttributeError, KeyError, yaml.YAMLError) as exc:
+275:             # A referenced job/part may be malformed or replaced during an edit.
+276:             # Keep the broken config visible without breaking every list page.
+277:             out[key] = Config(key=key, name=str(data.get("name") or key), job=str(data.get("job") or ""),
+278:                               recipe=str(data.get("recipe") or ""),
+279:                               errors=(f"配置加载失败：{type(exc).__name__}: {str(exc)[:160]}",))
+280:     from . import content_columns
+281:     for owner in content_columns.load_all(config_dir, configs=out).values():
+282:         if not owner.usable:
+283:             continue
+284:         for pid in owner.production_ids:
+285:             config = out.get(pid)
+286:             if config and config.usable:
+287:                 out[pid] = replace(config, content_mode=owner.content_mode, content_column_id=owner.key,
+288:                     **({"split": "whole", "split_name": "整期节目", "reverify": False}
+289:                        if owner.content_mode == "episode" else {}))
+290:     for key, config in list(out.items()):
+291:         if config.auto and config.split == "some":
+
+303: 
+304: 
+305: def _write(config_dir: str, key: str, data: dict) -> None:
+306:     path = os.path.join(directory(config_dir), f"{key}.yaml")
+307:     if data.get("auto"):
+308:         old = yaml.safe_load(Path(path).read_text()) if os.path.isfile(path) else {}
+309:         old = old if isinstance(old, dict) else {}
+310:         data["auto"] = 1
+311:         data["auto_enabled_at"] = (old.get("auto_enabled_at") or os.path.getmtime(path)) if old.get("auto") else time.time()
+312:     else:
+313:         data.pop("auto_enabled_at", None)
+314:     data = {k: v for k, v in data.items() if v not in ("", None)}
+315:     os.makedirs(directory(config_dir), exist_ok=True)
+316:     atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"),
+
+E30 | config/production/flash_each.yaml | SHA256 7ae50141e6d95edcc0328d444f42a7f1d7e008196d0a329d6cf20f17bb891e5e
+1: # 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，auto 只控制自动制作开关，开启后处理全部不重复选题。
+2: name: 快讯 · 每条一期（不再调研）
+3: job: monitoring/ai_flash_discovery
+4: recipe: flash
+5: auto: 1
+6: reverify: false
+7: # 选题热度（core/video/heat.py，11-10 对标报告）：只做 B站近 7 天同产品视频前 5 条合计播放 ≥ 2 万的条目，按热度从高到低；
+8: # 不到门槛的不做。取不到热度（被拦、次数用完）时照旧全做。
+9: # 热点多角度（core/video/angles.py）：一批里最热、且热度 ≥ 50 万的那一条，按材料能撑起的角度加做「算账值不值」「怎么上手」各一条。
+10: selection:
+11:   heat_min: 20000
+12:   angle_min: 500000
+
+E31 | tests/test_production_policy.py | SHA256 72d13c507c33fa565f6896bfcedcfcdcb41cb16e3a3e0e88a9f02d4212a5b028
+80: def test_retry_retains_job_window_and_policy_revision_after_edits(setup):
+81:     config, path, value, store, job = setup
+82:     base = datetime.fromisoformat("2026-11-02T02:39:00+08:00").timestamp()
+83:     p = store.save(job["_file"], "40 2 * * 1", timezone="Asia/Shanghai", now=base)
+84:     store.enqueue_due(base + 60)
+85:     run = store.runs(p["id"])[0]
+86:     original = store.freeze_context(
+87:         run["id"],
+88:         lambda c: policy.issue(str(config), store.state_dir, job, datetime.now(), c),
+89:     )
+90:     value["window"] = {"mode": "rolling", "days": 14}
+91:     path.write_text(yaml.safe_dump(value))
+92:     job["prompt"] = "Changed"
+93:     retained = store.freeze_context(
+94:         run["id"], lambda c: pytest.fail("Retry reinterpreted its policy")
+95:     )
+96:     assert retained == original and retained["job"]["prompt"] == "Original"
+97:     fresh = policy.issue(str(config), store.state_dir, job, datetime(2026, 11, 9))
+98:     assert (
+99:         fresh["research_window"]["days"] == 14
+100:         and fresh["policy_revision"] != original["policy_revision"]
+101:     )
+102: 
+103: 
+104: def test_manual_run_uses_same_calendar_cutoff(setup):
+105:     config, _, _, store, job = setup
+106:     base = datetime.fromisoformat("2026-11-02T02:39:00+08:00").timestamp()
+107:     store.save(job["_file"], "40 2 * * 1", timezone="Asia/Shanghai", now=base)
+108:     manual = policy.issue(str(config), store.state_dir, job, datetime(2026, 11, 2, 16))
+109:     assert manual["research_window"]["end"] == "2026-11-02T02:40:00+08:00"
+110: 
+111: 
+112: def test_flash_burst_uses_last_successful_cutoff_and_freezes_trigger_time(setup, monkeypatch):
+
+237: def test_enqueue_freezes_job_and_edit_only_changes_future_issues(setup):
+238:     config, path, value, store, job = setup
+239:     jobs = config.parent / "jobs/research"
+240:     jobs.mkdir(parents=True)
+241:     source = jobs / "demo.yaml"
+242:     source.write_text("prompt: Original\nenabled: true\n")
+243:     base = datetime.fromisoformat("2026-11-02T02:39:00+08:00").timestamp()
+244:     plan = store.save(job["_file"], "40 2 * * 1", timezone="Asia/Shanghai", now=base)
+245:     store.enqueue_due(base + 60)
+246:     run = store.runs(plan["id"])[0]
+247:     original = json.loads(run["context"])
+248:     assert original["job"]["prompt"] == "Original"
+249:     source.write_text("prompt: Changed\n")
+250:     value["window"] = {"mode": "rolling", "days": 14}
+251:     path.write_text(yaml.safe_dump(value))
+252:     store.save(
+253:         job["_file"],
+254:         "40 2 * * *",
+255:         schedule_id=plan["id"],
+256:         editing=True,
+257:         timezone="Asia/Shanghai",
+258:         now=base + 120,
+259:     )
+260:     assert store.run(run["id"])["status"] == "queued"
+261:     claimed = store.claim(base + 120)
+262:     assert claimed["id"] == run["id"] and store.start(run["id"], 1, base + 120)
+263:     store.finish(run["id"], "failed", "retry", now=base + 121)
+264:     assert store.run(run["id"])["status"] == "retry"
+265:     assert json.loads(store.run(run["id"])["context"]) == original
+266:     store.toggle(plan["id"], False, base + 122)
+267:     assert (
+268:         store.run(run["id"])["status"] == "skipped"
+269:     )  # Explicit user pause still fences accepted work.
+
+E32 | tests/test_content_columns.py | SHA256 a9cc36bf1d696031dbc9bf2a0e466453f46a8101305c6a6fc8a454b565129dab
+70:     assert all_columns["model_review"].errors and all_columns["duplicate"].errors
+71:     assert content_columns.for_production(config, "flash") is None
+72: 
+73: 
+74: def test_cross_domain_render_defaults_have_explicit_priority_and_legacy_mode(column_env):
+75:     config = str(column_env / "config")
+76:     all_matrices = matrices.load_all(config)
+77:     for key, speed in (("ai", 1.25), ("medical", 1.5)):
+78:         m = all_matrices[key]
+79:         matrices.save(config, key, name=m.name, domain=m.domain, keywords=m.keywords, members=m.members,
+80:                       render={"video_speed": speed})
+81:     source = matrices.load_all(config)["ai"]
+82:     context = content_columns.snapshot(config, "flash", "monitoring/ai_flash_discovery")
+83:     assert context["matrix"] == "medical" and context["source_matrix"] == "ai"
+84:     assert content_columns.render_settings(config, source, context, {}) == {"video_speed": 1.25}
+85:     context["render_inheritance"] = "content_matrix"
+86:     assert content_columns.render_settings(config, source, context, {}) == {"video_speed": 1.5}
+87:     context["render"] = {"video_speed": 2}
+88:     assert content_columns.render_settings(config, source, context, {}) == {"video_speed": 2}
+89:     assert content_columns.render_settings(config, source, context, {"video_speed": 1}) == {"video_speed": 1}
+90:     assert content_columns.render_settings(config, source, {}, {}) == {"video_speed": 1.25}
+91: 
+92: 
+93: @pytest.mark.parametrize('kind,chosen,expected', [
+94:     ('tutorial', None, 'mixed_tutorial'),
+95:     ('tutorial', 'mixed_explainer', 'mixed_explainer'),
+96:     ('explainer', 'mixed_tutorial', 'mixed_tutorial'),
+97:     ('explainer', None, None),
+98: ])
+99: def test_matrix_tutorial_recipe_reaches_render_without_legacy_executor_overrides(column_env, kind, chosen, expected):
+100:     from web.services import video_render
+101:     context = content_columns.snapshot(str(column_env / 'config'), 'flash', 'monitoring/ai_flash_discovery')
+102:     context.update(type=kind, render={'packaging': {'label': '实际操作'}})
+103:     if chosen:
+104:         context['render']['production_recipe'] = chosen
+105:     script = store.create_script('flash', {'title': '转换周报'}, production='flash', content_context=context)
+106:     version = store.add_version(script['id'], title='转换周报', sections=[{
+107:         'title': '执行转换', 'paragraphs': [{'text': '运行转换命令，查看生成的文件。',
+108:                                          'citations': [], 'evidence': 'UNCITED'}]}],
+109:         length_check={}, edit_type='GENERATED')
+110:     store.update_script(script['id'], status='APPROVED', approved_version=version)
+
+146:     assert "对象数量沿用材料" in result.script_style and "讲清对象差异" in result.script_style
+147:     assert content_columns.apply_script_context(recipe, {}) is recipe
+148: 
+149: 
+150: def test_column_brief_reaches_single_call_writer_and_saved_context_stays_frozen(column_env, llm):
+151:     from core.video import columns, writer
+152: 
+153:     config = str(column_env / "config")
+154:     c = content_columns.load_all(config)["model_review"]
+155:     content_columns.save(config, c.key, {**c.data(), "notes": "围绕批量处理解释价格与响应速度的取舍。"})
+156:     context = content_columns.snapshot(config, "flash", "monitoring/ai_flash_discovery")
+157:     recipe = content_columns.apply_script_context(columns.get(config, "flash"), context)
+158:     assert columns.get(config, "flash").script_style not in recipe.script_style
+159:     llm.replies = [script_json()]
+160:     written = writer.write(report=REPORT, citation_check=None, topic={"title": "批量任务怎样选模型"},
+161:                            column_style=recipe.script_style, target_minutes=recipe.target_minutes, llm_config=None)
+162:     assert len(llm.calls) == 1
+163:     assert "围绕批量处理解释价格与响应速度的取舍" in llm.calls[0][1]["content"]
+164:     assert written.meta["creative_direction"] == recipe.script_style
+165:     content_columns.save(config, c.key, {**c.data(), "notes": "改为长文档问题。"})
+166:     frozen = content_columns.apply_script_context(columns.get(config, "flash"), context)
+167:     assert frozen.script_style == recipe.script_style
+
+E33 | tests/test_joint_planning_review.py | SHA256 8bb6a78c4a5e119b6ab99a9045fd5c7145af5a252ce8d38f4c4ae2f4d109327a
+93: def test_frozen_assignment_survives_original_report_moving(batch, video_env, llm, role):
+94:     from web.services import video_workflow as workflow
+95:     from tests.test_video_scripts import script_json
+96:     from tests.test_video_story_pool import event
+97:     spec, plan, urls = batch
+98:     llm.replies = [json.dumps(plan)]
+99:     items = auto.pick_topics(spec)
+100:     item = items[0 if role == 'episode' else 1]
+101:     script = store.create_script('flash-nr', item['topic'], production=item['production'])
+102:     (video_env/spec['report']).rename(video_env/'archived-report.md')
+103:     if role == 'episode':
+104:         reply = json.dumps({'title':'合集', 'sections':[
+105:             {'title':'开场','episode_role':'opening','paragraphs':[{'text':'今天有三个变化。','citations':[]}]},
+106:             *[{'title':f'产品{i}的新发布','episode_role':'item','paragraphs':[{'text':f'产品{i}支持导出文件。','citations':[url]}]} for i,url in enumerate(urls)],
+107:             {'title':'结尾','episode_role':'closing','paragraphs':[{'text':'本期介绍到这里。','citations':[]}]}]})
+108:         llm.replies = [reply]
+109:     else:
+110:         reply = script_json(350, citations={(0,0):[urls[0]]})
+111:         llm.replies = [json.dumps({'events':[event(title='表格导出', subject='产品0', action='release', edition='v2', primary=['S1'])]}), reply]
+112:     assert workflow.run(script['id'],llm_config=object()) == 'DRAFT'
+113:     first = store.get_version(script['id'],1)
+114:     llm.replies = [reply]
+115:     assert workflow.run_rewrite(script['id'],llm_config=object()) == 'DRAFT'
+116:     assert store.get_script(script['id'])['current_version'] == 2
+117:     assert first['meta']['joint_plan'] == store.get_version(script['id'],2)['meta']['joint_plan']
+118: 
+
+137: def test_resume_old_interrupted_transition_uses_existing_items_without_replanning(batch, llm, monkeypatch):
+138:     spec, plan, _ = batch
+139:     llm.replies = [json.dumps(plan)]
+140:     items = auto.pick_topics(spec)
+141:     run = ap.create_run(spec, items)
+142:     ap.update_run(run['id'], stage='TOPICS')
+143:     monkeypatch.setattr(auto, '_background_topics', lambda *_: pytest.fail('existing items must resume directly'))
+144:     monkeypatch.setattr(auto, 'advance', lambda *_ , **kw: {'script':0,'render':0})
+145:     auto._tick_run(ap.get_run(run['id']))
+146:     after = ap.get_run(run['id'])
+147:     assert after['stage'] == 'ITEMS'
+148:     assert [i['id'] for i in after['items']] == [i['id'] for i in run['items']]
+
+E34 | tests/test_matrices.py | SHA256 68216d266dca50bbc840270b7b4a3c7a7b3496c8b68db655c58255080f9a7ac3
+188: def test_api_copying_a_matrix_makes_manual_jobs_with_their_own_topic_source(client, matrix_env):
+189:     from core.video import topic_store
+190: 
+191:     _login(client)
+192:     made = client.post("/api/matrices/ai/copy", json=MEDICAL, headers=_csrf(client))
+193:     assert made.status_code == 201, made.text
+194:     assert made.json()["keywords"] == ["新药审批", "医保政策"] and made.json()["members"][0]["job"] == "medical/flash_discovery"
+195:     job = load_job(str(matrix_env / "jobs"), "medical/flash_discovery")
+196:     assert job["enabled"] and job["schedule"] == {"type": "manual"} and job["keywords"] == []
+197:     assert job["output"] == "output/medical/{date}_flash_discovery.md" and job["name"] == "医疗健康 快讯发现"
+198:     assert job["topics"] == {"alias": "medical_flash_discovery", "format": "flash", "prefix": "MF", "refresh": False}
+199:     sources = topic_store.sources(str(matrix_env / "jobs"))
+200:     assert not sources["medical_flash_discovery"].error and not sources["flash"].error
+201:     config = str(matrix_env / "config")
+202:     prompt = _engine(config)._build_prompt(matrices.for_run(job, config))
+203:     assert "医疗健康" in prompt and "关键词：新药审批, 医保政策" in prompt and "AI" not in prompt
+204:     again = client.post("/api/matrices/medical/copy", json={**MEDICAL, "key": "finance", "domain": "金融",
+205:                                                              "jobs": ["medical/flash_discovery"]}, headers=_csrf(client))
+206:     assert again.status_code == 201  # a copy can be copied: it keeps its template
+207:     assert load_job(str(matrix_env / "jobs"), "finance/flash_discovery")["topics"]["prefix"] == "FF"
+208: 
+209: 
+210: @pytest.mark.parametrize("change, code, kind", [
+211:     ({"jobs": ["research/deep"]}, 422, "not_copyable"),       # its prompt says AI
+212:     ({"key": "ai"}, 409, "matrix_exists"),
+213:     ({"key": "research"}, 409, "jobs_dir_exists"),
+
+244: def test_api_archiving_a_matrix_hides_nothing_but_the_flag_and_survives_a_rename(client, matrix_env):
+245:     _login(client)
+246:     done = client.post("/api/matrices/ai/archive", json={"archived": True}, headers=_csrf(client)).json()
+247:     assert done["archived"] is True and [m["job"] for m in done["members"]] == ["monitoring/ai_flash_discovery", "research/deep"]
+248:     renamed = client.put("/api/matrices/ai", json={"name": "AI 矩阵 2", "domain": "AI 与软件开发", "keywords": []},
+249:                          headers=_csrf(client)).json()
+250:     assert renamed["archived"] is True  # a rename does not bring it back
+251:     assert [m for m in client.get("/api/matrices").json()["matrices"] if m["key"] == "ai"][0]["archived"] is True
+252:     back = client.post("/api/matrices/ai/archive", json={"archived": False}, headers=_csrf(client)).json()
+253:     assert back["archived"] is False
+254: 
+255: 
+
+E35 | web/services/production_policy.py | SHA256 22b01ab2ee6b7f8163dadcc90f63fe5cb2b03dfed3018a3bfc03f310a840ab0f
+15: COLLECTOR = "system/material_collection"
+16: 
+17: 
+18: def describe(paths) -> dict:
+19:     value = policy.load(paths.config_dir)
+20:     storage = ScheduleStore(
+21:         paths.state_dir, config_dir=paths.config_dir, jobs_dir=paths.jobs_dir
+22:     )
+23:     plans = [
+24:         p
+25:         for p in storage.list()
+26:         if policy.manages(value, paths.config_dir, job=p["job_name"])
+27:     ]
+28:     return {
+29:         "policy": value,
+30:         "plans": plans,
+31:         "loaded": {
+32:             "pid": os.getpid(),
+33:             "issue_context_version": 1,
+34:             "automatic_admission_version": 1,
+35:         },
+36:         "collector": next(
+37:             (p for p in storage.list() if p["job_name"] == COLLECTOR), None
+38:         ),
+39:     }
+40: 
+41: 
+42: def save(paths, value: dict, expected_revision: str) -> dict:
+43:     """Changing settings does not rewrite any existing issue, report or video request."""
+44:     policy.validate(value)
+45:     from core.sources import resolve
+46: 
+47:     resolve(value.get("sources", {}).get("reference", []), paths.config_dir)
+48:     from core.matrices import load_all
+49: 
+50:     unknown = set(value.get("matrices", [])) - set(load_all(paths.config_dir))
+51:     if unknown:
+52:         raise ValueError("矩阵不存在：" + ", ".join(sorted(unknown)))
+53:     path = Path(paths.config_dir) / policy.FILE
+54:     with file_lock(str(path)):
+55:         current = policy.load(paths.config_dir)
+56:         if current.get("revision", "") != expected_revision:
+57:             raise ScheduleConflict("生产策略已被修改，请重新读取后保存")
+58:         old = path.read_text() if path.exists() else None
+59:         if old is not None:
+60:             atomic_write(
+61:                 str(
+62:                     Path(paths.state_dir) / "policy-history" / f"{time.time_ns()}.yaml"
+63:                 ),
+64:                 old,
+65:             )
+66:         atomic_write(
+67:             str(path), yaml.safe_dump(value, allow_unicode=True, sort_keys=False)
+68:         )
+69:         try:
+70:             synchronize(paths)
+71:         except Exception:
+72:             if old is not None:
+73:                 atomic_write(str(path), old)
+74:             else:
+
+E36 | ui/src/components/ArticleCreate.tsx | SHA256 cf8eb65cf202f88406653b7e5d659d21c3d8e2a645e27076007bf129b5887a0a
+50:     try {
+51:       const result = await listMatrices();
+52:       setJobNames(Object.fromEntries((result.matrices || []).flatMap(m => (m.members || []).map(j => [j.job, `${m.name} / ${j.name}`]))));
+53:     } catch { matrixNamesLoaded.current = false; }
+54:   }
+55:   return <section className="card p-4 space-y-4" aria-label="文章生成视频">
+56:     <div><h2 className="text-sm font-medium">文章生成视频</h2><p className="text-xs text-text-muted mt-1">粘贴或上传文章，检查原文后生成文稿。定稿、配音与出片沿用现有流程。</p></div>
+57:     <label className="block text-xs space-y-1">文章标题（可选）<input className="input" maxLength={80} value={values.title} onChange={e => setValues({ ...values, title: e.target.value })} /></label>
+58:     <label className="block text-xs space-y-1">上传文章<input type="file" accept=".txt,.md,.docx,.pdf" disabled={!!busy} className="block" onChange={e => { const file = e.target.files?.[0]; if (file) void upload(file); e.target.value = ""; }} /></label>
+59:     {busy === "upload" ? <p role="status" className="text-xs">正在提取文章正文…</p> : null}
+60:     {imported ? <div className="text-xs text-text-muted"><p>已导入 {imported.filename}，原始文件会保留。请检查下面的正文。</p>{imported.warnings.map(w => <p key={w}>{w}</p>)}<button className="text-accent mt-1" disabled={!!busy} onClick={() => { setImported(null); setValues(v => ({ ...v, text: "", import_id: undefined })); }}>改为粘贴另一篇文章</button></div> : null}
+61:     <label className="block text-xs space-y-1">文章正文<textarea className="input min-h-64 font-normal" maxLength={60000} disabled={!!busy} value={values.text} placeholder="把文章粘贴在这里，也可以先上传文件，再检查和整理正文。" onChange={e => setValues({ ...values, text: e.target.value })} /></label>
+62:     <p className="text-xs text-text-muted">{values.text.length} / 60000 字符 · 原文与整理后的正文分别保留</p>
+63:     <div className="flex flex-wrap gap-4">
+64:       <label className="text-xs space-y-1">处理方式<select className="input" value={values.mode} onChange={e => setValues({ ...values, mode: e.target.value as ArticleInput["mode"] })}><option value="read">原文朗读</option><option value="adapt">视频化改编</option></select></label>
+65:       <label className="text-xs space-y-1">文章类型<select className="input" value={values.kind} onChange={e => setValues({ ...values, kind: e.target.value as ArticleInput["kind"] })}><option value="literary">文学／散文／故事</option><option value="information">信息／知识／评论</option></select></label>
+66:     </div>
+67:     <p className="text-xs text-text-muted">{values.mode === "read" ? "保留原句和顺序，仅组织段落；生成文稿时不改写原文。" : "调整口语表达和叙述结构，保留原意、观点归属及事实限定。"}审校核对原文忠实度，不代表完成外部事实核验。</p>
+68:     <details onToggle={e => { if (e.currentTarget.open) void loadMatrixNames(); }}><summary className="text-xs cursor-pointer">来源与制作配置（可选）</summary><div className="grid gap-3 mt-3 sm:grid-cols-2">
+69:       <label className="text-xs">文章来源<select className="input" value={values.origin} onChange={e => setValues({ ...values, origin: e.target.value as ArticleInput["origin"] })}><option value="copied">复制／转载文章</option><option value="original">原创文章</option><option value="ai">大模型生成的文章</option></select></label>
+70:       <label className="text-xs">原文作者<input className="input" maxLength={80} value={values.author} onChange={e => setValues({ ...values, author: e.target.value })} /></label>
+71:       <label className="text-xs">来源链接<input className="input" type="url" maxLength={300} value={values.source_url} onChange={e => setValues({ ...values, source_url: e.target.value })} /></label>
+72:       <label className="text-xs">原文发布日期<input className="input" type="date" value={values.published_on} onChange={e => setValues({ ...values, published_on: e.target.value })} /></label>
+73:       <label className="text-xs">沿用矩阵视频配置<select className="input" value={values.production} onChange={e => setValues({ ...values, production: e.target.value })}><option value="">独立创作</option>{configs.map(c => <option key={c.key} value={c.key}>{jobNames[c.job] || c.job} · {c.name || c.key}</option>)}</select></label>
+74:       {!values.production ? <label className="text-xs">文稿配方<select className="input" value={values.column} onChange={e => setValues({ ...values, column: e.target.value })}>{cells.map(c => <option key={c.id} value={c.key || ""}>{c.label}</option>)}</select></label> : <p className="text-xs text-text-muted">继承所选配置的配方、配音和制作设置；文章处理方式按本次选择执行。</p>}
+75:     </div></details>
+76:     {configError ? <p className="text-xs text-danger" role="alert">{configError} <button className="text-accent" onClick={() => setRetry(retry + 1)}>重试</button></p> : null}
+

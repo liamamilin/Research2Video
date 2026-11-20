@@ -1,0 +1,347 @@
+[
+  {
+    "job": "jobs/economy/economy_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/economy/economy_weekly.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/economy/economy_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/ai_media/weekly_model_arena.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/ai_media/ai_tool_tutorials.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/ai_media/weekly_business_watch.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/ai_media/weekly_deep_research.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/ai_media/daily_opensource_radar.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/science/science_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/science/science_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/science/science_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/software/software_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/software/software_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/software/software_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t08_troubleshooting.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t06_value.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t02_scenarios.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t07_subscription.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t04_testing.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t05_comparison.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t09_updates.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t01_product.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/chatgpt_acquisition/t03_tutorials.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/history/history_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/history/history_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/history/history_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/industry/industry_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/industry/industry_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/industry/industry_daily.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/consumer/consumer_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/consumer/consumer_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/consumer/consumer_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/monitoring/ai_flash_discovery.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/tech/tech_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/tech/tech_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/tech/tech_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/geography/geography_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/geography/geography_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/geography/geography_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/culture/culture_daily.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/culture/culture_weekly.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/culture/culture_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/company/company_daily.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/company/company_weekly.yaml",
+    "changed_keys": [
+      "question_material"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  },
+  {
+    "job": "jobs/company/company_illustrated.yaml",
+    "changed_keys": [
+      "question_material",
+      "description"
+    ],
+    "prompt_schedule_runtime_unchanged": true
+  }
+]

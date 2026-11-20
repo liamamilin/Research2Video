@@ -1,0 +1,157 @@
+{
+  "title": "Claude Opus 5.5 成默认，先删掉那句 think hard",
+  "sections": [
+    {
+      "title": "默认模型换了，提示习惯没换",
+      "paragraphs": [
+        {
+          "text": "先给你一个反直觉的建议：把 Claude 提示词里那句“think hard”删掉，effort 也别一上来就拉满，从 Medium 起步。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "大家好，我是洛洛。今天这件事跟你每次打开 Claude 直接相关：Anthropic 已经把 Opus 5.5 设成所有付费计划的默认模型，同时发布了一份指南，核心意思是，你从上一代模型带过来的那套提示习惯，现在可能反而在拖慢它。我把指南里提到的场景对着日常的活捋了一遍，有两处跟直觉是反着来的。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "周一早上的那份财报",
+      "paragraphs": [
+        {
+          "text": "假设今天是周一，你手上有一份四十页的财报 PDF，里面有七八张很密的图表，你要交的是一张能直接发出去的对账表。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "旧习惯大概是这样：开头先写一句“think hard”，图表里的数字不敢交给模型读，自己一个个手打进去；然后拆成五条消息，先列提纲，再要草稿，再改格式，来回四五轮。这套动作在上一代模型上是对的，因为那时候它确实容易走偏。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "官方现在的建议正好反过来。图表不用手打，PDF 和表格直接当文件传进去。一条消息里把三件事说全：你想要的结果、输出成什么格式、它在什么情况下该停下来问你。要成品表就直接要成品表，别先说“给我个草稿”。他们的说法是，Opus 5.5 更能自己把多步任务走完，有时候它自己跟自己来回，比你切成小块喂进去更顺。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "精度上他们给的对比很具体：Opus 5.5 即使在最低一档 effort，读密集图表里的数值，也比 Opus 5 最高一档更准。这句话反过来听就是，你以前为了让它“认真点”堆的那些话，现在换不来精度，只换来更长的等待。手打七八个图表的数字，加上四五轮改格式，半天就这么过去了；换成拖文件加一条消息，你等一轮就能拿去交。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的建议：先拿一个真实任务去试",
+      "paragraphs": [
+        {
+          "text": "这里说我的判断：上面这些数字全是 Anthropic 自己给的，我没有看到第三方复现。所以我不建议因为一份指南，就把团队攒了几年的提示模板全推翻。更稳的做法是挑一个你每周都要做的真实任务，就用那份对账表，按新写法跑一遍，好用就留下，不好用退回老写法，成本只有这么一次。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "effort 也是同一个道理。我更看重的是先把“越高越保险”这个念头放下来，所以建议从 Medium 起步；真遇上要它自己拆步骤、多轮重构的活，再往上推一档也不迟。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有两个细节，我觉得今天就能改。做设计的时候别写“不要 generic 的设计”，这种笼统的禁令只是把它一个默认风格换成另一个默认风格，直接点名你不想要的：奶油色背景、胶囊按钮。另外，它能通过 connectors 自己去取文件，就别再把内容复制粘贴进对话框，让它自己去读，出来的结果会贴合得多。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=Naming%20specific%20styles%20works%20better%20than%20banning%20generic%20design"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "回到那份财报。指南真正想让你删掉的其实不是某几个词，是“分步骤喂、先要草稿、怕它看错所以自己上手”这一整套动作。我的建议是今天就做一件事：把提示里那句“think hard”删掉，effort 调到 Medium，然后拿一个真实任务跑一遍，看它到底是省了你的时间，还是给你添了乱。你手里有没有一条提示词，是从上一代模型一路抄到现在的？翻出来对一对，可能比看十篇指南都有用。我是洛洛，我们下期见。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 987,
+    "estimated_seconds": 219,
+    "segments": 34,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 2.916,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "默认模型换了，提示习惯没换",
+        "spoken_length": 151,
+        "budget": 109
+      },
+      {
+        "title": "周一早上的那份财报",
+        "spoken_length": 391,
+        "budget": 109
+      },
+      {
+        "title": "我的建议：先拿一个真实任务去试",
+        "spoken_length": 445,
+        "budget": 108
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2319,
+      "completion_tokens": 5841,
+      "total_tokens": 8160,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4393,
+      "cost_usd": 0.00385245,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 52.271,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 1
+  }
+}

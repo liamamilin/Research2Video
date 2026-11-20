@@ -1,0 +1,178 @@
+{
+  "title": "ChatGPT Go 值不值？它补了容量，没补速度和工具",
+  "sections": [
+    {
+      "title": "12 页和 40 页之间",
+      "paragraphs": [
+        {
+          "text": "ChatGPT 的 Go 档，单次能传进去的文件是免费版的三倍多，但速度那一栏，它跟免费版写的是同一句话。大家好，我是洛洛。今天聊 Go 这一档到底值不值——它夹在免费和 Plus 中间，多出来的到底是什么，什么人买了刚好，什么人买了等于白花。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先说一件我没法替你算的事。Go 一个月多少钱，我手上没有一个能念准的官方数字，所以这期不跟你比差价——差价你打开定价页五秒钟就看见了。但“多出来的是容量还是能力”，页面不会告诉你，而这才是买错的根源。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Go",
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "换成这个场景：周五下午，你桌面上有一份 30 页的供应商合同，你想让它把付款条款和违约责任挑出来，逐条列清。免费版接不住。官网模型表上写得很直白：免费档单次输入大约 12 页文本，上下文窗口 27K。你这份 30 页，超了一倍多。拆成三段传也行，但三段之间是断的，前面那段说过什么，后面它不一定还记得。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "Go 这一档，同一张表上，单次输入大约 40 页，上下文 54K。你这份 30 页一次进去，中间不用切。这就是 Go 最实在的一口增量：它能装下的量，正好盖住大多数人的“一份文档”。再往上还有一格：推理模型的上下文，免费档写的是“Varies”，看情况；Go 是 256K。说人话就是，你让它做多步分析、来回追问的时候，它能记住的中间过程比免费版长得多。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "它补了容量，没补速度和模型",
+      "paragraphs": [
+        {
+          "text": "到这儿听着挺值，对吧。但接下来是我更看重的那一半。还是同一张模型表，往上看那几行：GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol，还有 Legacy models。免费档是 No，Go 这一列，还是 No。这些门是 Plus 才开的。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "响应速度那一行更直接：免费档写的是“Limited on bandwidth & availability”，Go 这一列，一字不差，也是这句。Plus 才是 Fast，Pro 才是 Ultrafast。所以你要是嫌免费版慢——等半天才吐字、高峰期老转圈——Go 治不了这个病。这笔钱买到的是更大的桶，不是更快的管子。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "20 美元的 Plus 是另一类东西",
+      "paragraphs": [
+        {
+          "text": "Plus 是另一个物种。官方价 20 美元一个月，页面上写的是“Everything in Go and:”——Go 有的它全有，后面再接一长串：Projects 项目空间、scheduled tasks 定时任务、custom GPTs 自定义助手、扩展的 Deep research 深度检索、桌面和手机端的 ChatGPT Work，还有 GPT-6 的高级推理模型。另外一句要记住：Plus 目前不支持年付，也不能预付几个月，只能按月扣。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=What%20is%20ChatGPT%20Plus%3F",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=Is%20there%20an%20annual%20plan%20available%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的判断是：Go 是容量档，Plus 是能力档，它们解决的不是同一类不痛快。你被卡住的时候其实分三种。第一种叫“传不上去”——文件太大、消息不够、聊久了忘事，这一类 Go 正好。第二种叫“等太久”，Go 一分钱都不解决，要么忍，要么直接上 Plus。第三种叫“它压根不会做这件事”，比如你要一个能反复用的项目空间，要它自己跑一轮深度检索，这一类也只有 Plus。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "装得下，和用得上",
+      "paragraphs": [
+        {
+          "text": "顺带说清一个很多人加钱时的动机。价格页的隐私区，四档写的是同一句话：内容会用于训练模型，可以退出。免费、Go、Plus、Pro，一字不差。付费买到的是能力，不是数据待遇——那个开关在设置里，不在付款页上。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Privacy"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "回到开头那份 30 页的合同。Go 能让它一次读进去，这是真的。但你读完要干什么，决定了这钱花得值不值。如果就这一次，挑出条款复制走，完事——Go 够了。如果你每个月都要审一遍同类合同，还想把五份历史模板攒在一个地方，每次从那儿问——那你要的不是更大的桶，是一个能存东西的房间。那个房间叫 Projects，在 Plus 里。装得下，和用得上，是两件事。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你可以自己回答一个问题：这周你用 ChatGPT，第一次觉得“不够用”的那一刻，是文件传不上去，还是等得太久，还是它根本不会做？答案不一样，档位就不一样。我是洛洛，我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1145,
+    "estimated_seconds": 259,
+    "segments": 50,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.862,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "12 页和 40 页之间",
+        "spoken_length": 445,
+        "budget": 327
+      },
+      {
+        "title": "它补了容量，没补速度和模型",
+        "spoken_length": 161,
+        "budget": 326
+      },
+      {
+        "title": "20 美元的 Plus 是另一类东西",
+        "spoken_length": 252,
+        "budget": 326
+      },
+      {
+        "title": "装得下，和用得上",
+        "spoken_length": 287,
+        "budget": 326
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 28595,
+      "completion_tokens": 7732,
+      "total_tokens": 36327,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 6120,
+      "cost_usd": 0.00892845,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 79.893,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 37
+  }
+}

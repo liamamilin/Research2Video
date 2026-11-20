@@ -1,0 +1,183 @@
+{
+  "status": {
+    "status": "DRAFT",
+    "seconds": 2927.1666982080787,
+    "error": null,
+    "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+  },
+  "configuration": {
+    "job": "monitoring/ai_flash_discovery",
+    "job_sha256": "945a97f1237a2109fd896bc15b13ee4fa817949297f4a2b8fba16ec7f3a84c21",
+    "writer_sha256": "23a66a17c2e8b00b895e9931d87764efe2b7b39893c76a867f6b91c89ea791a1",
+    "isolation": "/tmp/natural-writing-20261116-flash-live",
+    "interventions": [
+      "fresh configured source collection and question material in isolated state",
+      "no prior event, delivery, or publication history in the isolated state",
+      "report-to-script service called synchronously; no publication or rendering"
+    ]
+  },
+  "current_flash_job_sha256": "24f75c7e82787516616de110f23278423fc813f9055797e86c5cdf44b72c50da",
+  "produced_before_latest_optional_fields_prompt": true,
+  "report": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/current/research.txt",
+  "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/current/script.txt",
+  "report_sha256": "1d62a078c8524c1a867967ac95045eedd4cbe019d143c9fda023fad75cfbc123",
+  "script_sha256": "90e9526e2dbad636ee1bb3a6a76834275e9b9430dd625845bc748aa797f162b4",
+  "report_chars": 77970,
+  "script_chars": 7459,
+  "report_topics": 31,
+  "all_report_topic_titles_in_author_request": true,
+  "selection": {
+    "status": "kept_original",
+    "error": {
+      "type": "LLMError"
+    },
+    "question_material_status": "no_candidates"
+  },
+  "calls": [
+    {
+      "stage": "part_1",
+      "request_sha256": "0926dceb79355b01f46789267d9e77414d5be38ea1d0c4c0b12f218508ee8610",
+      "response_sha256": "70483ebb2332da8694ba458939da672b7c9504cd10b0d49560ea4310ba3f6e0d",
+      "user_chars": 1572256
+    },
+    {
+      "stage": "part_2",
+      "request_sha256": "ae911491e14d337482c65b7a7874750c8a45c86cdda13cacddb9259e7f587962",
+      "response_sha256": "de1e66579093952fe687134ea70d723e0cbc16d92c7268e547e611a0f55f1ec4",
+      "user_chars": 1572550
+    },
+    {
+      "stage": "part_3",
+      "request_sha256": "b284133a12647385c619085d0ffffc2a727fc127bf6819718c052e58a51957c9",
+      "response_sha256": "154a734022bb017307c93dbecf6e0104b35b0eab17f70970029321df764bad56",
+      "user_chars": 425447
+    },
+    {
+      "stage": "merge",
+      "request_sha256": "381c233bb22c4be97786cf5e087d25e769cceea6e16d91909d1ed124379ec825",
+      "response_sha256": "323260c1ee7db134671c7a4462672fb8031240d700379ef0795e0d480a9559b0",
+      "user_chars": 74971
+    },
+    {
+      "stage": "dossier_expansion",
+      "request_sha256": "93424560f47ffd1679d14b112ccef50735887dfacdcaafd4e45b5d97fa1cbf01",
+      "response_sha256": "ac872ddb97aefb1ac2535793cea194b0ab162e6e5a08dc98100e8c57130e0a09",
+      "user_chars": 406897
+    },
+    {
+      "stage": "audience_selection",
+      "request_sha256": "f58273068fee68503ef0806a80ef4a8e751b521c2a87440f70abe10e47bb4ffa",
+      "response_sha256": null,
+      "user_chars": 2892420
+    },
+    {
+      "stage": "author",
+      "request_sha256": "d6b9b272d80d388e618a1f9cf2dbd4bd82570b13aa3fb77168d2703fcd1a820f",
+      "response_sha256": "5988c80dfc8c56df88fa142ad60dd1ff8e36a43f6edcf124defc84ea051ac187",
+      "user_chars": 1365239
+    },
+    {
+      "stage": "polish",
+      "request_sha256": "30055c891dc7b450f7392580b0d2c9776167c7534fcda8af826e9cd4737930e0",
+      "response_sha256": "2d59b410b2114d07c7130f2f3ffc17dd686c39841c28014d737498e3a393534f",
+      "user_chars": 7950
+    }
+  ],
+  "material_fit": {
+    "reason": "原始材料超出模型上限，只保留报告引用的材料",
+    "blocks": 2888,
+    "cited": 1035,
+    "kept": 1035,
+    "chars": 3909383,
+    "kept_chars": 1284687
+  },
+  "sections": [
+    {
+      "title": "本期导读",
+      "role": "opening",
+      "paragraphs": 1,
+      "citation_links": 0
+    },
+    {
+      "title": "DeepSeek 免费额度三处收紧",
+      "role": "item",
+      "paragraphs": 7,
+      "citation_links": 11
+    },
+    {
+      "title": "ChatGPT 从帮你找到替你买",
+      "role": "item",
+      "paragraphs": 6,
+      "citation_links": 8
+    },
+    {
+      "title": "苹果 AI 开始收费，中国 12 月见",
+      "role": "item",
+      "paragraphs": 6,
+      "citation_links": 10
+    },
+    {
+      "title": "美联航把 AI 代理挡在门外",
+      "role": "item",
+      "paragraphs": 5,
+      "citation_links": 4
+    },
+    {
+      "title": "Grok 建的应用，94.7% 谁都能开",
+      "role": "item",
+      "paragraphs": 7,
+      "citation_links": 7
+    },
+    {
+      "title": "单价降了，为什么每任务更贵",
+      "role": "item",
+      "paragraphs": 5,
+      "citation_links": 7
+    },
+    {
+      "title": "工具越多越贵：一次 GitHub 查询的账单",
+      "role": "item",
+      "paragraphs": 7,
+      "citation_links": 6
+    },
+    {
+      "title": "Gemini 新模型免费，但眼下不便宜",
+      "role": "item",
+      "paragraphs": 6,
+      "citation_links": 10
+    },
+    {
+      "title": "本期回顾",
+      "role": "closing",
+      "paragraphs": 3,
+      "citation_links": 0
+    }
+  ],
+  "review": {
+    "introduction": "submitted author request had no mandatory sentence pattern and the programme opens with a specific situation",
+    "examples_preserved": "retains application eligibility and limits, expiration, time conditions, comparison setup and mechanism",
+    "remaining": "long recap and overlap across related items. Cost comparison applies the 46-tool-to-CLI ratio after including a 91-tool case.",
+    "limits": "isolated first collection had no normal history. It verifies the fallback branch and predates the final change to research fields. It does not validate selection plus follow-up material or quality stability."
+  },
+  "exact_selection_request_diagnostic": {
+    "request_sha256": "f58273068fee68503ef0806a80ef4a8e751b521c2a87440f70abe10e47bb4ffa",
+    "request_user_chars": 2892420,
+    "status": "returned",
+    "candidate_count": 10,
+    "seconds": 319.1,
+    "valid_source_ids": true,
+    "indexed_sources": 2887,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 965768,
+      "completion_tokens": 17679,
+      "total_tokens": 983447,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 10547,
+      "cost_usd": 0.3109452,
+      "cost_reported_requests": 1
+    },
+    "scope": "first selection call only; no repeat of read-selected-sources, supplements, or the writer"
+  }
+}

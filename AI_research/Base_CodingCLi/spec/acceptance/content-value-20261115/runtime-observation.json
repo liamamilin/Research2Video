@@ -1,0 +1,74 @@
+{
+  "video.db:scripts": [
+    [
+      "APPROVED",
+      496
+    ],
+    [
+      "DRAFT",
+      12
+    ],
+    [
+      "FAILED",
+      204
+    ]
+  ],
+  "video.db:renders": [
+    [
+      "CANCELLED",
+      4
+    ],
+    [
+      "COMPLETED",
+      506
+    ],
+    [
+      "FAILED",
+      113
+    ]
+  ],
+  "video.db:rechecks": [
+    [
+      "DONE",
+      1
+    ]
+  ],
+  "video.db:autopilot_runs": [
+    [
+      "CANCELLED",
+      54
+    ],
+    [
+      "DONE",
+      325
+    ]
+  ],
+  "schedules.db:schedule_runs": [
+    [
+      "failed",
+      18
+    ],
+    [
+      "interrupted",
+      2
+    ],
+    [
+      "success",
+      5667
+    ]
+  ],
+  "schedules.db:schedule_attempts": [
+    [
+      "failed",
+      29
+    ],
+    [
+      "interrupted",
+      2
+    ],
+    [
+      "success",
+      5667
+    ]
+  ]
+}

@@ -1,0 +1,652 @@
+{
+  "variants": {
+    "same-supply-current": {
+      "status": {
+        "status": "DRAFT",
+        "seconds": 1440.1850642079953,
+        "error": null,
+        "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+      },
+      "input": {
+        "job": "monitoring/ai_flash_discovery",
+        "job_sha256": "24f75c7e82787516616de110f23278423fc813f9055797e86c5cdf44b72c50da",
+        "writer_sha256": "23a66a17c2e8b00b895e9931d87764efe2b7b39893c76a867f6b91c89ea791a1",
+        "isolation": "/tmp/natural-writing-20261116-flash-live-same-supply-current",
+        "collection": {
+          "mode": "frozen_actual_initial_supply",
+          "source": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/natural-writing-20261116/flash-research-prompt-pair/flexible_fields/source-block.txt",
+          "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91",
+          "chars": 235658
+        },
+        "interventions": [
+          "frozen initial supply only in same-supply variants; live extra reading and supplement",
+          "no prior event, delivery, or publication history in the isolated state",
+          "report-to-script service called synchronously; no publication or rendering"
+        ]
+      },
+      "receipt_version": 4,
+      "selection_count": 5,
+      "question_material_status": "enriched",
+      "search_calls": 9,
+      "topics": [
+        {
+          "title": "澳洲央行：AI先压到15–24岁初级岗位，软件开发和客服最明显",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        },
+        {
+          "title": "Claude Fable 5.2不生成像素，用几十万笔“画”图；API单价降了，账单却未必降",
+          "supplement_status": "kept_original",
+          "used_source_count": 0,
+          "error": {
+            "type": "ValueError",
+            "http_status": null
+          }
+        },
+        {
+          "title": "Claude Code的Code Mode：AI不再一步步点工具，而是写一段程序调工具",
+          "supplement_status": "enriched",
+          "used_source_count": 2
+        },
+        {
+          "title": "ChatGPT Wallet：AI可以替你结账，但只在美国Pro 18+小范围试",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "OpenAI科学文章：GPT-6 Astra帮物理学家把策略推进成“候选证明”",
+          "supplement_status": "enriched",
+          "used_source_count": 2
+        }
+      ],
+      "report": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-current/research.txt",
+      "report_sha256": "935444d4e809921e0db176cba80f1d4bd2f052383e221d75ddfce78e498de02d",
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-current/script.txt",
+      "script_sha256": "00d67449b351c939333fd818d7396c86b6c916aa1cf81b26c71bc2b505093605",
+      "script_chars": 7176,
+      "author_request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-current/calls/1794817997652789000-request.json",
+      "author_request_sha256": "109fc3d258614f82f77cee3b2f25ad8a2658d89dea7e5fd18ca22ec2e089cad1",
+      "author_input_chars": 199822,
+      "sections": [
+        {
+          "title": "本期导读",
+          "role": "opening",
+          "paragraph_count": 1
+        },
+        {
+          "title": "AI先压到的是初级入口",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "它不生成像素，它画了70万笔",
+          "role": "item",
+          "paragraph_count": 7
+        },
+        {
+          "title": "AI不再点工具，改成写程序",
+          "role": "item",
+          "paragraph_count": 9
+        },
+        {
+          "title": "AI替你结账，但只在小范围",
+          "role": "item",
+          "paragraph_count": 7
+        },
+        {
+          "title": "AI把策略推成了候选证明",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "本期回顾",
+          "role": "closing",
+          "paragraph_count": 3
+        }
+      ],
+      "concrete_material_trace": [
+        {
+          "marker": "31%",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "retryPolicy",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "Payment Account Reference",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "反射正性",
+          "in_pre_supplement_brief": true,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        }
+      ],
+      "review": "Read all sections. Specific research methods, the drawing correction, concrete retry settings and controls, conditions on payment credential reuse, and limits of the mathematical result are preserved. Repeated personal-judgment paragraphs and recap remain, together with a long narration and some abrupt grouping.",
+      "limits": "Frozen previous-day production source supply, normal downstream services and live source reading. This run uses latest R YAML with the pre-S shared selector. Subsequent Flash trials verify S. Fable supplement failed and its original material remained."
+    },
+    "same-supply-soft-selector": {
+      "status": {
+        "status": "DRAFT",
+        "seconds": 1974.6652277500834,
+        "error": null,
+        "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+      },
+      "input": {
+        "job": "monitoring/ai_flash_discovery",
+        "job_sha256": "24f75c7e82787516616de110f23278423fc813f9055797e86c5cdf44b72c50da",
+        "writer_sha256": "23a66a17c2e8b00b895e9931d87764efe2b7b39893c76a867f6b91c89ea791a1",
+        "isolation": "/tmp/natural-writing-20261116-flash-live-same-supply-soft-selector",
+        "collection": {
+          "mode": "frozen_actual_initial_supply",
+          "source": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/natural-writing-20261116/flash-research-prompt-pair/flexible_fields/source-block.txt",
+          "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91",
+          "chars": 235658
+        },
+        "interventions": [
+          "frozen initial supply only in same-supply variants; live extra reading and supplement",
+          "no prior event, delivery, or publication history in the isolated state",
+          "report-to-script service called synchronously; no publication or rendering"
+        ]
+      },
+      "receipt_version": 5,
+      "selection_count": 6,
+      "question_material_status": "enriched",
+      "search_calls": 11,
+      "topics": [
+        {
+          "title": "ChatGPT Pro 多出 500 美元档：Fast/Ultrafast 怎么烧额度，降档为何可能当周清零",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "澳洲央行监测：AI 高暴露岗位上，年轻人先感到招聘变冷",
+          "supplement_status": "enriched",
+          "used_source_count": 1
+        },
+        {
+          "title": "Claude Fable 5.2 用几十万笔触画画：它练的是长任务纠错，不是一键出图",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "Devin 把 Agent 接进终端：/handoff 把本地会话变成云端 PR，Fusion 用便宜模型跑杂活",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        },
+        {
+          "title": "ChatGPT Wallet 让代理代买：卡号对代理和商家隐藏，但只限美国 Pro 用户",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "GPT-6 Astra 参与标准模型格点定义：AI 补的是证明链条里的一段",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        }
+      ],
+      "report": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-soft-selector/research.txt",
+      "report_sha256": "f3cbb5d8ba53e0d720a9b7ca86459a874ce371f9d387fac7d67e9adf1ada60d1",
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-soft-selector/script.txt",
+      "script_sha256": "05f801f84dd22a945779414685eb7100f50037b056d765f1e501fc15150050d9",
+      "script_chars": 7776,
+      "author_request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-soft-selector/calls/1794818761927420000-request.json",
+      "author_request_sha256": "f6dc9bacd5b69740bf0a74ec2e55aa92f1cb770d376b4735bd25cce1d707ddf9",
+      "same_author_system_as_previous_full_sample": true,
+      "author_input_chars": 301928,
+      "sections": [
+        {
+          "title": "本期导读",
+          "role": "opening",
+          "paragraph_count": 1
+        },
+        {
+          "title": "Pro 多出 500 美元档，降档可能当周清零",
+          "role": "item",
+          "paragraph_count": 6
+        },
+        {
+          "title": "ChatGPT Wallet 代买，卡号藏起来",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "Devin 把 Agent 接进终端，一键交给云端",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "Claude 画画，练的是长任务纠错",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "AI 高暴露岗位上，年轻人先感到冷",
+          "role": "item",
+          "paragraph_count": 6
+        },
+        {
+          "title": "Astra 补上标准模型证明的一段",
+          "role": "item",
+          "paragraph_count": 6
+        },
+        {
+          "title": "本期回顾",
+          "role": "closing",
+          "paragraph_count": 4
+        }
+      ],
+      "concrete_material_trace": [
+        {
+          "marker": "重置后第一次",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "苏黎世大学",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "545k",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "重新授权",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        }
+      ],
+      "review": {
+        "material_and_narration": "The manuscript follows specific topics, including follow-up source details on usage reset, authorization/capture, job vs task profile, and division of work in a coding example.",
+        "structure": "One personal-judgment paragraph, no forced stand-alone formula. Opening still lists what will be covered and ending repeats multiple items.",
+        "flaws": "The outline mentions topics in a different order than the body. The explanation overstates latency after saying usage multipliers guarantee no measured outcome. Long stretches list detailed metrics.",
+        "limits": "S selector version 5, still with old source count. Different automatic selections and independently fetched detail, so no whole-manuscript superiority is attributed to wording."
+      }
+    },
+    "same-supply-control": {
+      "status": {
+        "status": "DRAFT",
+        "seconds": 2432.8206724579213,
+        "error": null,
+        "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+      },
+      "input": {
+        "job": "monitoring/ai_flash_discovery",
+        "job_sha256": "945a97f1237a2109fd896bc15b13ee4fa817949297f4a2b8fba16ec7f3a84c21",
+        "writer_sha256": "23a66a17c2e8b00b895e9931d87764efe2b7b39893c76a867f6b91c89ea791a1",
+        "isolation": "/tmp/natural-writing-20261116-flash-live-same-supply-control",
+        "collection": {
+          "mode": "frozen_actual_initial_supply",
+          "source": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/natural-writing-20261116/flash-research-prompt-pair/flexible_fields/source-block.txt",
+          "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91",
+          "chars": 235658
+        },
+        "interventions": [
+          "frozen initial supply only in same-supply variants; live extra reading and supplement",
+          "no prior event, delivery, or publication history in the isolated state",
+          "report-to-script service called synchronously; no publication or rendering"
+        ]
+      },
+      "receipt_version": 4,
+      "selection_count": 7,
+      "question_material_status": "enriched",
+      "search_calls": 14,
+      "topics": [
+        {
+          "title": "Claude Fable 5.2不生成像素而是写代码画70万笔：单价降了，账单未必降",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "ChatGPT Pro出现500美元档：AI订阅开始按价格和额度分层",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "澳大利亚央行：AI先压到15-24岁入门岗，但因果还没锁定",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        },
+        {
+          "title": "ChatGPT Wallet：AI助手开始替你结账，授权不等于下单成功",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        },
+        {
+          "title": "Nvidia前CEO黄仁勋辞任与国会收紧芯片出口：AI算力多一层政策变量",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "让AI改页码，它删了一年讲义：Agent拿到文件权限后要先问什么",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "AI参与基础物理证明：GPT-6 Astra把50多年开放问题推进到候选构造",
+          "supplement_status": "enriched",
+          "used_source_count": 3
+        }
+      ],
+      "report": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-control/research.txt",
+      "report_sha256": "ea50572844eb64a5f8316e4e581f0496c268db50823149a7c429a6924036d5da",
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-control/script.txt",
+      "script_sha256": "439e2ea4f75a30090ee5ae4696a64be6cb4acb8703700618b1931e760e4bcfc4",
+      "script_chars": 10680,
+      "author_request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-control/calls/1794819067874056000-request.json",
+      "author_request_sha256": "0beeb529d521e4d3fdb02a9e6c74511d1a604c64d9061ef7193d263ef9ef7d81",
+      "same_author_system_as_previous_full_sample": true,
+      "author_input_chars": 489735,
+      "sections": [
+        {
+          "title": "本期导读",
+          "role": "opening",
+          "paragraph_count": 1
+        },
+        {
+          "title": "70万笔，不是70万次调用",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "Pro多了一个500美元档",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "AI先压到15到24岁入门岗",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "授权了，不等于下单成功",
+          "role": "item",
+          "paragraph_count": 4
+        },
+        {
+          "title": "芯片出口多了一层政策变量",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "改页码删了一年讲义",
+          "role": "item",
+          "paragraph_count": 4
+        },
+        {
+          "title": "50多年物理问题有了候选构造",
+          "role": "item",
+          "paragraph_count": 5
+        },
+        {
+          "title": "本期回顾",
+          "role": "closing",
+          "paragraph_count": 1
+        }
+      ],
+      "concrete_material_trace": [
+        {
+          "marker": "Playcode",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "模平方",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        {
+          "marker": "授权冻结",
+          "in_pre_supplement_brief": false,
+          "in_used_addition": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        }
+      ],
+      "review": {
+        "material_and_narration": "Retains numerical comparison conditions, individual source provenance, payment stages, and the distinction between a candidate mathematical result and proof of further conditions.",
+        "flaws": "Longer with a company personnel digression, repeated explanations and final recap. It describes age subdivisions of job advertisements even though the selected research scope requires separation of age and occupation exposure.",
+        "limits": "Initial automatic supply frozen across the comparison. Topic selection and live supplemental reading run independently. Manuscript length and topic count are descriptive."
+      }
+    },
+    "same-supply-full-sources": {
+      "status": {
+        "status": "DRAFT",
+        "seconds": 2260.164999624947,
+        "error": null,
+        "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+      },
+      "input": {
+        "job": "monitoring/ai_flash_discovery",
+        "job_sha256": "24f75c7e82787516616de110f23278423fc813f9055797e86c5cdf44b72c50da",
+        "writer_sha256": "23a66a17c2e8b00b895e9931d87764efe2b7b39893c76a867f6b91c89ea791a1",
+        "selector_sha256": "b9044bd50dcccf05c2c0c230dbbff0cfb6ed5accef7ae5e48b1184e1106580b6",
+        "isolation": "/tmp/natural-writing-20261116-flash-live-same-supply-full-sources",
+        "collection": {
+          "mode": "frozen_actual_initial_supply",
+          "source": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/natural-writing-20261116/flash-research-prompt-pair/flexible_fields/source-block.txt",
+          "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91",
+          "chars": 235658
+        },
+        "interventions": [
+          "frozen initial supply only in same-supply variants; live extra reading and supplement",
+          "no prior event, delivery, or publication history in the isolated state",
+          "report-to-script service called synchronously; no publication or rendering"
+        ]
+      },
+      "selector_receipt_version": 6,
+      "runtime_uses_pre_optional_diagnostics_type_fix": true,
+      "all_selector_candidates_have_option_to_omit_fixed_structure": true,
+      "selection_topics": 8,
+      "supplements_status": "enriched",
+      "searches": 15,
+      "author_request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-full-sources/calls/1794819624397277000-request.json",
+      "author_request_sha256": "2e346bfe926d350fe12d0582b610f688fb01564d60266e201b17c573ff20e26b",
+      "author_input_chars": 394623,
+      "same_author_system_as_previous_full_sample": true,
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-full-sources/script.txt",
+      "script_sha256": "cd0239d74b08d562a15c79479c052ff686a6206220f28dd2154eb669ed6b4750",
+      "script_chars": 9354,
+      "report": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-full-sources/research.txt",
+      "report_sha256": "9281316d69b83dbb39833bcc2d9e7291d5d504c7ffc6f61d5039505a9b98e6e5",
+      "topics": [
+        {
+          "title": "Claude Fable 5.2 不生成图片：它写代码一笔一笔画，画错再覆盖修正",
+          "supplement_status": "enriched",
+          "used_source_count": 2
+        },
+        {
+          "title": "ChatGPT Pro 拆成 100/200/500 美元三档：降档后同一周额度不会重置",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "澳洲央行监测：AI 高暴露岗位的年轻人先变弱，但研究作者提醒不能直接归因",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "ChatGPT Wallet 开始替人结账：卡号不暴露给商家，但只限美国 Pro 用户",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "让 Claude 改页码却删掉一年讲义：AI 动文件前，先做一次可撤销的备份",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "Claude Code 的 Code Mode 默认关闭：审批从逐次点击变成看一整段脚本",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        },
+        {
+          "title": "Kimi K2 计划 12 月底下线：还在代码里写旧模型名的，现在该迁移",
+          "supplement_status": "enriched",
+          "used_source_count": 2
+        },
+        {
+          "title": "GPT-6 Astra 帮物理学家推进标准模型格点证明：这是候选方案，不是已完成的终局",
+          "supplement_status": "enriched",
+          "used_source_count": 4
+        }
+      ],
+      "sections": [
+        {
+          "title": "本期导读",
+          "role": "opening",
+          "paragraph_count": 3
+        },
+        {
+          "title": "让 Claude 改页码，一年讲义没了",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "Code Mode：审批变成看一段脚本",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "Fable 5.2 不生成图片，它一笔一笔画",
+          "role": "item",
+          "paragraph_count": 9
+        },
+        {
+          "title": "GPT-6 Astra 推进格点证明，但只是候选",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "ChatGPT Pro 拆三档，降档额度不清零",
+          "role": "item",
+          "paragraph_count": 8
+        },
+        {
+          "title": "ChatGPT Wallet 替你结账，卡号不给商家",
+          "role": "item",
+          "paragraph_count": 7
+        },
+        {
+          "title": "Kimi K2 要下线，旧模型名该换了",
+          "role": "item",
+          "paragraph_count": 7
+        },
+        {
+          "title": "澳洲央行：高暴露岗位的年轻人先变弱",
+          "role": "item",
+          "paragraph_count": 10
+        },
+        {
+          "title": "本期回顾",
+          "role": "closing",
+          "paragraph_count": 4
+        }
+      ],
+      "concrete_material_trace": {
+        "改页码": {
+          "marker": "365 天",
+          "in_selection_brief": false,
+          "in_actual_supplement": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        "Wallet": {
+          "marker": "Ready to check out",
+          "in_selection_brief": false,
+          "in_actual_supplement": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        "Kimi": {
+          "marker": "reasoning_effort",
+          "in_selection_brief": false,
+          "in_actual_supplement": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        "年轻人": {
+          "marker": "SugarAI",
+          "in_selection_brief": false,
+          "in_actual_supplement": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        },
+        "Code Mode": {
+          "marker": "retryPolicy",
+          "in_selection_brief": false,
+          "in_actual_supplement": true,
+          "in_actual_author_request": true,
+          "in_manuscript": true
+        }
+      },
+      "review": {
+        "opening": "Begins with a specific affected document and puts the same authorization story beside a tool-controls explanation.",
+        "retained_detail": "Eight topic sections retain different practical paths, code migration inputs, authorization checks, and the conditional scope of examples.",
+        "remaining": [
+          "Opening still lists the number of items and a final recap restates the main point.",
+          "Research suggests possible causes in the deleted-file example and supplement says the original permission mode is unknown. The author presented three hypotheses as established causal conditions.",
+          "S selector code in this run predates tolerating optional notes recorded as text or arrays. The actual current warm source run uses the deployed type compatibility."
+        ]
+      }
+    }
+  },
+  "live_handles": {
+    "observed_at": "2026-11-16T09:04:49.046376+00:00",
+    "completed_isolated_handles": [
+      95379,
+      62692,
+      69120,
+      84882
+    ],
+    "latest-warm": {
+      "handle": 42364,
+      "observed_at": "2026-11-16T09:22:51.732276+00:00",
+      "handle_checked": "original session responded live",
+      "status": "researching",
+      "last_phase": "question-led supplemental material",
+      "requests": 35,
+      "responses": 34,
+      "selector_version_at_start": 6,
+      "currently_loaded_selector_version": 7
+    }
+  },
+  "observed_comparison_summary": {
+    "same_author_system_for_three_completed": true,
+    "shared_examples": [
+      "drawing methods and revisions",
+      "observational employment research",
+      "payment authorization and responsibility",
+      "the candidate proof and remaining conditions"
+    ],
+    "variation": "The three drafts chose different concrete topics and openings. Each retains an introductions-and-recap pattern. Both changed variants preserve process and additional source details, with tradeoffs in topic coverage and presentation.",
+    "pending": "Latest actual collection with prior delivery history remains active.",
+    "same_author_system_for_four_completed": true
+  }
+}

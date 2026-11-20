@@ -1,0 +1,3125 @@
+{
+  "time": "2026-11-16T22:53:09.789336+08:00",
+  "counts": {
+    "matrices": 16,
+    "unarchived_matrices": 15,
+    "nonarchive_jobs": 174,
+    "production_bindings": 72,
+    "columns": 41,
+    "registered_sources": 228,
+    "auto_bindings": 39,
+    "active_schedules": 19,
+    "legacy_plans": 1,
+    "enabled_legacy_plans": 0
+  },
+  "chains": [
+    {
+      "id": "history_weekly",
+      "job": "history/history_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "history"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "history_weekly"
+      ],
+      "content_mode": {
+        "history_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "bf976e9ccd754a9d81ce1b9c9dd99a33",
+          "job_name": "history/history_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:world_history",
+        "source:smithsonian_history",
+        "source:jstor_daily",
+        "source:loc_blog",
+        "source:medievalists",
+        "source:archaeology_mag",
+        "source:history_blog",
+        "source:public_domain_review",
+        "source:aeon"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_03_agent_workflow_radar",
+      "job": "practical_ai_intelligence/03_agent_workflow_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t06_value",
+      "job": "chatgpt_acquisition/t06_value",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t06_value"
+      ],
+      "content_mode": {
+        "chatgpt_t06_value": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "fa118e34cdaf4eb1bdb3c1fb960f4935",
+          "job_name": "chatgpt_acquisition/t06_value",
+          "schedule": "20 8 * * 5",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_pricing",
+        "source:cg_plus",
+        "source:cg_release_notes",
+        "source:cg_reddit_plus",
+        "source:cg_zhihu"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "economy_illustrated",
+      "job": "economy/economy_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "economy"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": true,
+      "explicit_enabled_at": true,
+      "schedules": [
+        {
+          "id": "illustrated_economy",
+          "job_name": "economy/economy_illustrated",
+          "schedule": "40 8 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:boe_knowledge_bank",
+        "source:economics_se"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "analysis_ai_gap_analysis",
+      "job": "analysis/ai_gap_analysis",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "top_finding",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "deep_dive-2",
+      "job": "research/assistant_iteration_acceptance_20261025",
+      "job_exists_nonarchive": true,
+      "job_enabled": false,
+      "source_matrices": [
+        "assistant_ops_check"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "29b557c9b2a34b3aad0b0cf1d7047589",
+          "job_name": "research/assistant_iteration_acceptance_20261025",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "geography_weekly",
+      "job": "geography/geography_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "geography"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "geography_weekly"
+      ],
+      "content_mode": {
+        "geography_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "d8a3829fdaed47b3b0f5fa715b18db1f",
+          "job_name": "geography/geography_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "tag:geography"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_01_model_and_pricing_radar",
+      "job": "practical_ai_intelligence/01_model_and_pricing_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "culture_daily",
+      "job": "culture/culture_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "culture"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "culture_daily"
+      ],
+      "content_mode": {
+        "culture_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "89a2c5b5b7764da4b8b16452d93441d7",
+          "job_name": "culture/culture_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:hyperallergic",
+        "source:colossal",
+        "source:artnet",
+        "source:pitchfork",
+        "source:dezeen",
+        "source:open_culture",
+        "source:three_quarks",
+        "source:art_newspaper",
+        "source:lithub",
+        "source:indiewire"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "geography_daily",
+      "job": "geography/geography_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "geography"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "geography_daily"
+      ],
+      "content_mode": {
+        "geography_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "c17d4b53da134c44b5c1f7e7e4f505a1",
+          "job_name": "geography/geography_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:atlas_obscura",
+        "source:mongabay",
+        "source:geographical",
+        "source:unesco_wh",
+        "source:usgs_quakes",
+        "source:climate_gov",
+        "source:gdacs",
+        "source:cma_news",
+        "source:nhc_atlantic",
+        "source:carbon_brief"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "economy_weekly",
+      "job": "economy/economy_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "economy"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "economy_weekly"
+      ],
+      "content_mode": {
+        "economy_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "68e08043f1ff4f18bafc3f94facd7e20",
+          "job_name": "economy/economy_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:fed_press",
+        "source:ecb_press",
+        "source:bis",
+        "source:owid",
+        "source:ft_home",
+        "source:wb_gdp_growth",
+        "source:wb_inflation",
+        "source:wb_unemployment",
+        "source:stats_cn_release",
+        "source:pbc_news",
+        "source:bls_latest",
+        "source:ny_fed_liberty",
+        "source:boe_news",
+        "source:boj_news",
+        "source:mof_cn",
+        "source:economist_world",
+        "source:marginal_revolution"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t02_scenarios",
+      "job": "chatgpt_acquisition/t02_scenarios",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t02_scenarios"
+      ],
+      "content_mode": {
+        "chatgpt_t02_scenarios": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "be0fc4f1f4b04b13a27229b4c015c997",
+          "job_name": "chatgpt_acquisition/t02_scenarios",
+          "schedule": "20 8 * * 1",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_learn_videos",
+        "source:cg_stories",
+        "source:cg_how_i_ai",
+        "source:cg_business_stories"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_05_context_rag_memory_radar",
+      "job": "practical_ai_intelligence/05_context_rag_memory_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "ai_media_arena_digest",
+      "job": "ai_media/weekly_model_arena",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_model_review"
+      ],
+      "content_mode": {
+        "ai_model_review": "episode"
+      },
+      "recipe": "report_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "1acefc1b7e9a4e68b07c389d283db035",
+          "job_name": "ai_media/weekly_model_arena",
+          "schedule": "40 2 * * 4",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "aa:models",
+        "hf_models:trending",
+        "rss:https://www.therundown.ai/feed",
+        "tag:ai_radar"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "ai-non_tech-deep_dive-long",
+      "job": "practical_ai_intelligence/07_product_content_opportunities",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "flash_each",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "flash",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "software_weekly",
+      "job": "software/software_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "software"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_software_weekly"
+      ],
+      "content_mode": {
+        "ai_software_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "f42a5e4472f14f8bbdda8365b2c1b938",
+          "job_name": "software/software_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:product_hunt",
+        "source:hn_show",
+        "source:github_blog",
+        "source:changelog",
+        "source:lwn",
+        "source:gh_new_selfhosted",
+        "source:python_insider",
+        "source:rust_blog",
+        "source:kubernetes_blog",
+        "source:apple_developer",
+        "source:android_developers",
+        "source:ms_devblogs",
+        "source:hn_front",
+        "source:lobsters",
+        "source:ruanyifeng_weekly",
+        "source:infoq_en",
+        "source:new_stack",
+        "source:martin_fowler",
+        "source:pragmatic_engineer"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "deep_dive-3",
+      "job": "research/assistant_ops_acceptance_20261025",
+      "job_exists_nonarchive": true,
+      "job_enabled": false,
+      "source_matrices": [
+        "assistant_ops_check"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "4611cfb361814747b8b4396f9032fd20",
+          "job_name": "research/assistant_ops_acceptance_20261025",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": [
+        "video_speed"
+      ]
+    },
+    {
+      "id": "ai-non_tech-deep_dive-long-2",
+      "job": "economy/economy_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "economy"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "34349a1368144fcc99075cc6617c26e3",
+          "job_name": "economy/economy_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:fed_press",
+        "source:ecb_press",
+        "source:bis",
+        "source:owid",
+        "source:ft_home",
+        "source:stats_cn_release",
+        "source:pbc_news",
+        "source:bls_latest",
+        "source:boe_news",
+        "source:boj_news",
+        "source:marginal_revolution"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "research_ai",
+      "job": "research/ai",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "ai_tool_tutorials",
+      "job": "ai_media/ai_tool_tutorials",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_tutorial"
+      ],
+      "content_mode": {
+        "ai_tutorial": "individual"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "359f816b2d0a444f9f57eaafe43637b6",
+          "job_name": "ai_media/ai_tool_tutorials",
+          "schedule": "30 10 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_learn_updates",
+        "page:https://learn.chatgpt.com/docs/projects?surface=app",
+        "source:cg_claude_release_notes",
+        "page:https://academy.claude.com/tutorials/create-and-edit-files-with-claude-to-eliminate-hours-of-busy-work",
+        "page:https://apps.apple.com/cn/app/id6683305962",
+        "page:https://apps.apple.com/cn/app/id6459478672",
+        "page:https://apps.apple.com/cn/app/id6480446430",
+        "page:https://apps.apple.com/cn/app/id6466733523",
+        "page:https://docs.qoder.com/zh/qoder/quickstart.md",
+        "page:https://docs.qoder.com/zh/qoder/execution-environments.md",
+        "page:https://www.codebuddy.cn/docs/workbuddy/Changelog",
+        "page:https://www.codebuddy.cn/docs/workbuddy/Results",
+        "page:https://www.deepseek.com/news/deepseek-app/",
+        "page:https://learn.chatgpt.com/docs/codex/ide.md",
+        "page:https://code.claude.com/docs/en/common-workflows"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "tech_daily",
+      "job": "tech/tech_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "tech"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_tech_daily"
+      ],
+      "content_mode": {
+        "ai_tech_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "3751c3d40bc5457b8e6d47b3d0710246",
+          "job_name": "tech/tech_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:ieee_spectrum",
+        "source:mit_tech_review",
+        "source:nasa",
+        "source:mit_news",
+        "source:ars_technica",
+        "source:darpa_news",
+        "source:esa_tech",
+        "source:techmeme",
+        "source:robot_report",
+        "source:spacenews"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "company_daily",
+      "job": "company/company_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "company"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "company_daily"
+      ],
+      "content_mode": {
+        "company_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "01ccb78d3b30497ba0bbd7ed9eed54a0",
+          "job_name": "company/company_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:crunchbase_news",
+        "source:fast_company",
+        "source:yc_blog",
+        "source:sec_press",
+        "source:apple_newsroom",
+        "source:nvidia_newsroom",
+        "source:tsmc_pr",
+        "source:techmeme",
+        "source:techcrunch"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_02_ai_coding_tools_radar",
+      "job": "practical_ai_intelligence/02_ai_coding_tools_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t05_comparison",
+      "job": "chatgpt_acquisition/t05_comparison",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t05_comparison"
+      ],
+      "content_mode": {
+        "chatgpt_t05_comparison": "individual"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "245dfd72431b467ba09fa7dc40ca10ce",
+          "job_name": "chatgpt_acquisition/t05_comparison",
+          "schedule": "50 7 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_pricing",
+        "source:cg_claude_pricing",
+        "source:cg_gemini_plans",
+        "source:cg_grok",
+        "source:cg_mistral_pricing",
+        "source:cg_claude_release_notes",
+        "source:cg_anthropic_news",
+        "source:cg_gemini_release_notes",
+        "source:cg_gemini_blog",
+        "source:cg_xai_news",
+        "source:cg_zai_release_notes",
+        "source:cg_qbitai",
+        "source:cg_ifanr",
+        "source:sspai",
+        "source:ithome",
+        "source:cg_tomsguide_ai",
+        "source:cg_ai_advantage",
+        "source:cg_zhihu",
+        "source:cg_cn_ai_apps",
+        "source:cg_reddit_compare"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "history_daily",
+      "job": "history/history_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "history"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "history_daily"
+      ],
+      "content_mode": {
+        "history_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "af5531869c214b50978bdf38b64b0bbe",
+          "job_name": "history/history_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:world_history",
+        "source:smithsonian_history",
+        "source:jstor_daily",
+        "source:loc_blog",
+        "source:medievalists",
+        "source:archaeology_mag",
+        "source:history_blog"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "tech_illustrated",
+      "job": "tech/tech_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "tech"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:livescience_tech",
+        "source:interesting_engineering"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "analysis_research_gap_analysis",
+      "job": "analysis/research_gap_analysis",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "top_finding",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "consumer_daily",
+      "job": "consumer/consumer_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "consumer"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "consumer_daily"
+      ],
+      "content_mode": {
+        "consumer_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "64269ad034fc43f294c4a1be0c699825",
+          "job_name": "consumer/consumer_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:notebookcheck_reviews",
+        "source:gsmarena",
+        "source:toms_hardware",
+        "source:ifixit_news",
+        "source:engadget",
+        "source:apple_newsroom",
+        "source:samsung_newsroom",
+        "source:google_products",
+        "source:cpsc_recalls",
+        "source:the_verge",
+        "source:ithome",
+        "source:nine_to_five_mac",
+        "source:android_authority"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "deep_dive-4",
+      "job": "research/assistant_app_acceptance_20261025",
+      "job_exists_nonarchive": true,
+      "job_enabled": false,
+      "source_matrices": [
+        "assistant_app_check"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:assistant_pyodide_check"
+      ],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "economy_daily",
+      "job": "economy/economy_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "economy"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "economy_daily"
+      ],
+      "content_mode": {
+        "economy_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "34349a1368144fcc99075cc6617c26e3",
+          "job_name": "economy/economy_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:fed_press",
+        "source:ecb_press",
+        "source:bis",
+        "source:owid",
+        "source:ft_home",
+        "source:stats_cn_release",
+        "source:pbc_news",
+        "source:bls_latest",
+        "source:boe_news",
+        "source:boj_news",
+        "source:marginal_revolution"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "company_weekly",
+      "job": "company/company_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "company"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "company_weekly"
+      ],
+      "content_mode": {
+        "company_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "c83f8f91930b40a8b97afd74aaf7f204",
+          "job_name": "company/company_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:mckinsey",
+        "source:crunchbase_news",
+        "source:yc_blog",
+        "source:fast_company",
+        "source:sec_press",
+        "source:ft_home",
+        "source:apple_newsroom",
+        "source:samsung_newsroom",
+        "source:amazon_news",
+        "source:nvidia_newsroom",
+        "source:tsmc_pr",
+        "source:techmeme",
+        "source:techcrunch",
+        "source:stratechery",
+        "source:not_boring",
+        "source:economist_world"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t08_troubleshooting",
+      "job": "chatgpt_acquisition/t08_troubleshooting",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t08_troubleshooting"
+      ],
+      "content_mode": {
+        "chatgpt_t08_troubleshooting": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9ea1931c25844588a050925e6bac4f24",
+          "job_name": "chatgpt_acquisition/t08_troubleshooting",
+          "schedule": "20 8 * * 2",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_errors",
+        "source:cg_capabilities",
+        "source:cg_help",
+        "source:cg_status",
+        "source:cg_cancel",
+        "source:cg_billing",
+        "source:cg_regions",
+        "source:cg_bilibili",
+        "source:cg_xiaohongshu",
+        "source:cg_reddit_chatgpt"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "culture_weekly",
+      "job": "culture/culture_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "culture"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "culture_weekly"
+      ],
+      "content_mode": {
+        "culture_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "8e133dff969f4fb286c29dc1e3e9dc5a",
+          "job_name": "culture/culture_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:hyperallergic",
+        "source:colossal",
+        "source:open_culture",
+        "source:artnet",
+        "source:smithsonian_arts",
+        "source:pitchfork",
+        "source:dezeen",
+        "source:jazztimes",
+        "source:three_quarks",
+        "source:art_newspaper",
+        "source:aeon",
+        "source:lithub",
+        "source:indiewire",
+        "source:public_domain_review",
+        "source:marginalian"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "software_daily",
+      "job": "software/software_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "software"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_software_daily"
+      ],
+      "content_mode": {
+        "ai_software_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "862cfe120f2447c3a51d8adb394bf1a5",
+          "job_name": "software/software_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:product_hunt",
+        "source:hn_show",
+        "source:github_blog",
+        "source:changelog",
+        "source:gh_new_selfhosted",
+        "source:python_insider",
+        "source:rust_blog",
+        "source:apple_developer",
+        "source:android_developers",
+        "source:hn_front",
+        "source:lobsters"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "software_illustrated",
+      "job": "software/software_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "software"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:howtogeek",
+        "source:makeuseof"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "ai_media_deep_dive",
+      "job": "ai_media/weekly_deep_research",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_deep_research"
+      ],
+      "content_mode": {
+        "ai_deep_research": "episode"
+      },
+      "recipe": "deep_dive",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "23e9f236d7f74f1e8e0c2ee4363424a5",
+          "job_name": "ai_media/weekly_deep_research",
+          "schedule": "0 8 * * 6",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "rss:https://importai.substack.com/feed",
+        "hf_papers:daily",
+        "tag:ai_radar"
+      ],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "ai_media_opensource_digest",
+      "job": "ai_media/daily_opensource_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_opensource"
+      ],
+      "content_mode": {
+        "ai_opensource": "episode"
+      },
+      "recipe": "report_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "2dbb18d057bd417b82300c631ba68ee9",
+          "job_name": "ai_media/daily_opensource_radar",
+          "schedule": "0 8 * * 3",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "gh_new:llm",
+        "gh_new:agent",
+        "hf_models:trending",
+        "hf_papers:daily",
+        "tldr:ai",
+        "tag:ai_radar",
+        "tag:radar_opensource"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "tech_weekly",
+      "job": "tech/tech_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "tech"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_tech_weekly"
+      ],
+      "content_mode": {
+        "ai_tech_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "848b38ae019846bab978447089caacb7",
+          "job_name": "tech/tech_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "tag:tech"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "industry_illustrated",
+      "job": "industry/industry_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "industry"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:interesting_engineering"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "pai_00_collection_planner",
+      "job": "practical_ai_intelligence/00_collection_planner",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "top_finding",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "flash_daily",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_flash"
+      ],
+      "content_mode": {
+        "ai_flash": "episode"
+      },
+      "recipe": "flash",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_06_infra_and_eval_radar",
+      "job": "practical_ai_intelligence/06_infra_and_eval_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "actionable_ai_agents_actionable",
+      "job": "actionable/ai_agents_actionable",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "action_list",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t07_subscription",
+      "job": "chatgpt_acquisition/t07_subscription",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t07_subscription"
+      ],
+      "content_mode": {
+        "chatgpt_t07_subscription": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "b1c5c454771245ef8c3eb9e509413721",
+          "job_name": "chatgpt_acquisition/t07_subscription",
+          "schedule": "0 8 * * 0",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_pricing",
+        "source:cg_plus",
+        "source:cg_multicurrency",
+        "source:cg_billing",
+        "source:cg_regions",
+        "source:cg_cancel",
+        "source:cg_payment_questions"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "analysis_ai_trends",
+      "job": "analysis/ai_trends",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "flash",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "flash",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "ai-developer-roundup-long",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "ai-developer-roundup-long",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "geography_illustrated",
+      "job": "geography/geography_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "geography"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:geography_realm",
+        "source:livescience_earth"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "company_illustrated",
+      "job": "company/company_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "company"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:npr_planet_money"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "point_short",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "point_short",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "consumer_illustrated",
+      "job": "consumer/consumer_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "consumer"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:howtogeek",
+        "source:makeuseof"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "ai-non_tech-headline-short",
+      "job": "tech/tech_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "tech"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "top_finding",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "3751c3d40bc5457b8e6d47b3d0710246",
+          "job_name": "tech/tech_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:ieee_spectrum",
+        "source:mit_tech_review",
+        "source:nasa",
+        "source:mit_news",
+        "source:ars_technica",
+        "source:darpa_news",
+        "source:esa_tech",
+        "source:techmeme",
+        "source:robot_report",
+        "source:spacenews"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t09_updates_each",
+      "job": "chatgpt_acquisition/t09_updates",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "0116a4d10b18407e930c40fe6eb73c9d",
+          "job_name": "chatgpt_acquisition/t09_updates",
+          "schedule": "40 7 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "tag:ai_daily_shared",
+        "tag:ai_news",
+        "tag:radar_official",
+        "source:cg_learn_videos",
+        "source:cg_youtube_openai",
+        "source:cg_matt_wolfe"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "consumer_weekly",
+      "job": "consumer/consumer_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "consumer"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "consumer_weekly"
+      ],
+      "content_mode": {
+        "consumer_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "8044b9fc153442cf9d09dc79a4c9209a",
+          "job_name": "consumer/consumer_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "tag:consumer"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "pai_04_project_understanding_radar",
+      "job": "practical_ai_intelligence/04_project_understanding_radar",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "report_digest",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "industry_weekly",
+      "job": "industry/industry_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "industry"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "industry_weekly"
+      ],
+      "content_mode": {
+        "industry_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "f3fa8e551643459aafd5dc3853eb0e34",
+          "job_name": "industry/industry_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "tag:industry"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "science_illustrated",
+      "job": "science/science_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "science"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": true,
+      "explicit_enabled_at": true,
+      "schedules": [
+        {
+          "id": "illustrated_science",
+          "job_name": "science/science_illustrated",
+          "schedule": "50 8 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:curious_kids",
+        "source:livescience_mysteries"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "deep_dive",
+      "job": "practical_ai_intelligence/07_product_content_opportunities",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t03_tutorials",
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t03_tutorials"
+      ],
+      "content_mode": {
+        "chatgpt_t03_tutorials": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "5a279c950e7b4b08a25874877ee96727",
+          "job_name": "chatgpt_acquisition/t03_tutorials",
+          "schedule": "0 8 * * 2",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_capabilities",
+        "source:cg_learn_videos",
+        "source:cg_academy",
+        "source:cg_kevin",
+        "source:cg_ai_advantage",
+        "source:cg_prompts"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "science_daily",
+      "job": "science/science_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "science"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "science_daily"
+      ],
+      "content_mode": {
+        "science_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "f99566e2d9d1407fa232c81e57c07b45",
+          "job_name": "science/science_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:science_news",
+        "source:quanta",
+        "source:nature",
+        "source:phys_org",
+        "source:sciencedaily",
+        "source:esa_science",
+        "source:nih_news",
+        "source:science_journal",
+        "source:cell_journal",
+        "source:scientific_american",
+        "source:new_scientist"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "industry_daily",
+      "job": "industry/industry_daily",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "industry"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "industry_daily"
+      ],
+      "content_mode": {
+        "industry_daily": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "773697bf353444bb8d86d380745d7959",
+          "job_name": "industry/industry_daily",
+          "schedule": "0 2 * * *",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:supply_chain_dive",
+        "source:manufacturing_dive",
+        "source:eetimes",
+        "source:semiconductor_digest",
+        "source:nist_manufacturing",
+        "source:tsmc_pr",
+        "source:sia_news",
+        "source:nvidia_newsroom",
+        "source:canary_media",
+        "source:electrek",
+        "source:semiwiki"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "history_illustrated",
+      "job": "history/history_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "history"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:historyextra",
+        "source:livescience_history"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "ai-non_tech-quick_take-short",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "flash",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "culture_illustrated",
+      "job": "culture/culture_illustrated",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "culture"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "illustrated_explainer",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [
+        "source:open_culture",
+        "source:smithsonian_arts"
+      ],
+      "search": false,
+      "knowledge": true,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": [
+        "illustration_style"
+      ]
+    },
+    {
+      "id": "chatgpt_t01_product",
+      "job": "chatgpt_acquisition/t01_product",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t01_product"
+      ],
+      "content_mode": {
+        "chatgpt_t01_product": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "1d67d699dec643079b39f0e3fb819f54",
+          "job_name": "chatgpt_acquisition/t01_product",
+          "schedule": "0 8 * * 1",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_capabilities",
+        "source:cg_learn_videos",
+        "source:cg_help",
+        "source:cg_release_notes"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "ai_media_business_digest",
+      "job": "ai_media/weekly_business_watch",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "ai_business"
+      ],
+      "content_mode": {
+        "ai_business": "episode"
+      },
+      "recipe": "report_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "af9e697989df4460802f3d10c673fec3",
+          "job_name": "ai_media/weekly_business_watch",
+          "schedule": "40 2 * * 5",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "rss:https://www.therundown.ai/feed",
+        "rss:https://importai.substack.com/feed",
+        "tldr:ai",
+        "tag:ai_radar"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "research_ai_automation_systems_research",
+      "job": "research/ai_automation_systems_research",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai"
+      ],
+      "source_matrix_archived": [
+        "ai"
+      ],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "deep_dive",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [],
+      "source_refs": [],
+      "search": null,
+      "knowledge": false,
+      "content_strategy": null,
+      "question_material": null,
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t04_testing",
+      "job": "chatgpt_acquisition/t04_testing",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t04_testing"
+      ],
+      "content_mode": {
+        "chatgpt_t04_testing": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "c9186b3ac0cb49209282bc165ade896b",
+          "job_name": "chatgpt_acquisition/t04_testing",
+          "schedule": "20 8 * * 4",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_learn_videos",
+        "source:cg_ai_explained",
+        "source:cg_kevin",
+        "source:cg_ai_advantage"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "ai-non_tech-one_point-short",
+      "job": "monitoring/ai_flash_discovery",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "ai_media"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [],
+      "content_mode": {},
+      "recipe": "point_short",
+      "auto": false,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+          "job_name": "monitoring/ai_flash_discovery",
+          "schedule": "30 7,18 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:bili_hot_ai",
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "source:cg_pro_tiers",
+        "tag:ai_daily_shared",
+        "github:anthropics/claude-code",
+        "tldr:ai",
+        "rss:https://www.therundown.ai/feed",
+        "hf_models:trending",
+        "tag:ai_radar",
+        "tag:ai_news",
+        "tag:radar_official",
+        "tag:radar_dev"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "science_weekly",
+      "job": "science/science_weekly",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "science"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "science_weekly"
+      ],
+      "content_mode": {
+        "science_weekly": "episode"
+      },
+      "recipe": "topic_digest",
+      "auto": true,
+      "explicit_enabled_at": false,
+      "schedules": [
+        {
+          "id": "4db29c116164438c966bd6d6bf2a46a3",
+          "job_name": "science/science_weekly",
+          "schedule": "0 2 * * 1",
+          "enabled": 0,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:quanta",
+        "source:science_news",
+        "source:nature",
+        "source:phys_org",
+        "source:sciencedaily",
+        "source:mit_news",
+        "source:esa_science",
+        "source:nih_news",
+        "source:nsf_news",
+        "source:science_journal",
+        "source:cell_journal",
+        "source:scientific_american",
+        "source:new_scientist",
+        "source:knowable"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    },
+    {
+      "id": "chatgpt_t09_updates",
+      "job": "chatgpt_acquisition/t09_updates",
+      "job_exists_nonarchive": true,
+      "job_enabled": true,
+      "source_matrices": [
+        "chatgpt_acquisition"
+      ],
+      "source_matrix_archived": [],
+      "source_matrix_paused": {},
+      "columns": [
+        "chatgpt_t09_updates"
+      ],
+      "content_mode": {
+        "chatgpt_t09_updates": "episode"
+      },
+      "recipe": "chatgpt_acquisition",
+      "auto": true,
+      "explicit_enabled_at": true,
+      "schedules": [
+        {
+          "id": "0116a4d10b18407e930c40fe6eb73c9d",
+          "job_name": "chatgpt_acquisition/t09_updates",
+          "schedule": "40 7 * * *",
+          "enabled": 1,
+          "deleted": 0
+        }
+      ],
+      "source_refs": [
+        "source:cg_release_notes",
+        "source:cg_openai_news",
+        "tag:ai_daily_shared",
+        "tag:ai_news",
+        "tag:radar_official",
+        "source:cg_learn_videos",
+        "source:cg_youtube_openai",
+        "source:cg_matt_wolfe"
+      ],
+      "search": false,
+      "knowledge": false,
+      "content_strategy": "audience-v1",
+      "question_material": "question-v1",
+      "render_override_fields": []
+    }
+  ],
+  "coverage_sources": [
+    {
+      "profile": "company",
+      "job": "company/company_daily",
+      "declared_count": 9,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "company",
+      "job": "company/company_weekly",
+      "declared_count": 16,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "economy",
+      "job": "economy/economy_daily",
+      "declared_count": 11,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "economy",
+      "job": "economy/economy_weekly",
+      "declared_count": 17,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "industry",
+      "job": "industry/industry_daily",
+      "declared_count": 11,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "industry",
+      "job": "industry/industry_weekly",
+      "declared_count": 16,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t01_product",
+      "declared_count": 4,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t02_scenarios",
+      "declared_count": 4,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "declared_count": 6,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t04_testing",
+      "declared_count": 4,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t05_comparison",
+      "declared_count": 20,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t06_value",
+      "declared_count": 5,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t07_subscription",
+      "declared_count": 7,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t08_troubleshooting",
+      "declared_count": 10,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t09_updates",
+      "declared_count": 16,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "history",
+      "job": "history/history_daily",
+      "declared_count": 7,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "history",
+      "job": "history/history_weekly",
+      "declared_count": 9,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "consumer",
+      "job": "consumer/consumer_daily",
+      "declared_count": 13,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "consumer",
+      "job": "consumer/consumer_weekly",
+      "declared_count": 18,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "geography",
+      "job": "geography/geography_daily",
+      "declared_count": 10,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "geography",
+      "job": "geography/geography_weekly",
+      "declared_count": 14,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "tech",
+      "job": "tech/tech_daily",
+      "declared_count": 10,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "tech",
+      "job": "tech/tech_weekly",
+      "declared_count": 19,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "culture",
+      "job": "culture/culture_daily",
+      "declared_count": 10,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "culture",
+      "job": "culture/culture_weekly",
+      "declared_count": 15,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "ai_media",
+      "job": "monitoring/ai_flash_discovery",
+      "declared_count": 26,
+      "coverage_count": 43,
+      "coverage_only": [
+        "catalog:https://ai.meta.com/blog/",
+        "catalog:https://bfl.ai/blog",
+        "catalog:https://mistral.ai/news",
+        "catalog:https://www.anthropic.com/news",
+        "catalog:https://www.minimax.io/news",
+        "catalog:https://x.ai/news",
+        "github:QwenLM/qwen-code",
+        "github:cline/cline",
+        "github:openai/codex",
+        "page:https://ai.google.dev/gemini-api/docs/changelog",
+        "page:https://ai.google.dev/gemini-api/docs/pricing",
+        "page:https://api-docs.deepseek.com/quick_start/pricing",
+        "page:https://api-docs.deepseek.com/updates",
+        "page:https://chatgpt.com/pricing",
+        "page:https://claude.com/pricing",
+        "page:https://cursor.com/changelog",
+        "page:https://cursor.com/pricing",
+        "page:https://docs.bigmodel.cn/cn/update/new-releases",
+        "page:https://docs.devin.ai/desktop/changelog",
+        "page:https://docs.mistral.ai/resources/changelogs",
+        "page:https://docs.x.ai/developers/models",
+        "page:https://docs.x.ai/developers/release-notes",
+        "page:https://gemini.google/release-notes/",
+        "page:https://github.com/features/copilot/plans",
+        "page:https://one.google.com/about/google-ai-plans/",
+        "page:https://openai.com/api/pricing/",
+        "page:https://platform.claude.com/docs/en/about-claude/pricing",
+        "page:https://platform.moonshot.cn/docs/pricing/chat",
+        "page:https://support.claude.com/en/articles/12138966-release-notes",
+        "rss:https://code.claude.com/docs/en/changelog/rss.xml",
+        "rss:https://developers.openai.com/rss.xml",
+        "rss:https://github.blog/changelog/label/copilot/feed/",
+        "rss:https://lastweekin.ai/feed",
+        "rss:https://simonwillison.net/atom/everything/",
+        "rss:https://updates.midjourney.com/rss/",
+        "rss:https://www.bensbites.com/feed",
+        "rss:https://www.latent.space/feed",
+        "rss:https://www.qbitai.com/feed"
+      ]
+    },
+    {
+      "profile": "ai_media",
+      "job": "ai_media/daily_opensource_radar",
+      "declared_count": 12,
+      "coverage_count": 5,
+      "coverage_only": [
+        "github:langchain-ai/langgraph",
+        "github:modelcontextprotocol/servers",
+        "github:ollama/ollama",
+        "github:vllm-project/vllm",
+        "rss:https://huggingface.co/blog/feed.xml"
+      ]
+    },
+    {
+      "profile": "ai_media",
+      "job": "ai_media/weekly_model_arena",
+      "declared_count": 9,
+      "coverage_count": 29,
+      "coverage_only": [
+        "catalog:https://ai.meta.com/blog/",
+        "catalog:https://mistral.ai/news",
+        "catalog:https://www.anthropic.com/news",
+        "catalog:https://www.minimax.io/news",
+        "catalog:https://x.ai/news",
+        "github:QwenLM/qwen-code",
+        "github:anthropics/claude-code",
+        "page:https://ai.google.dev/gemini-api/docs/changelog",
+        "page:https://ai.google.dev/gemini-api/docs/pricing",
+        "page:https://api-docs.deepseek.com/quick_start/pricing",
+        "page:https://api-docs.deepseek.com/updates",
+        "page:https://chatgpt.com/pricing",
+        "page:https://claude.com/pricing",
+        "page:https://developers.openai.com/api/docs/changelog.md",
+        "page:https://docs.bigmodel.cn/cn/update/new-releases",
+        "page:https://docs.mistral.ai/resources/changelogs",
+        "page:https://docs.x.ai/developers/models",
+        "page:https://docs.x.ai/developers/release-notes",
+        "page:https://gemini.google/release-notes/",
+        "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+        "page:https://learn.chatgpt.com/docs/whats-new.md",
+        "page:https://one.google.com/about/google-ai-plans/",
+        "page:https://openai.com/api/pricing/",
+        "page:https://platform.claude.com/docs/en/about-claude/pricing",
+        "page:https://platform.moonshot.cn/docs/pricing/chat",
+        "page:https://support.claude.com/en/articles/12138966-release-notes",
+        "rss:https://code.claude.com/docs/en/changelog/rss.xml",
+        "rss:https://developers.openai.com/rss.xml",
+        "rss:https://openai.com/news/rss.xml"
+      ]
+    },
+    {
+      "profile": "ai_media",
+      "job": "ai_media/weekly_business_watch",
+      "declared_count": 9,
+      "coverage_count": 28,
+      "coverage_only": [
+        "catalog:https://www.anthropic.com/news",
+        "github:anthropics/claude-code",
+        "github:cline/cline",
+        "github:openai/codex",
+        "page:https://ai.google.dev/gemini-api/docs/changelog",
+        "page:https://ai.google.dev/gemini-api/docs/pricing",
+        "page:https://chatgpt.com/pricing",
+        "page:https://claude.com/pricing",
+        "page:https://cursor.com/changelog",
+        "page:https://cursor.com/pricing",
+        "page:https://developers.openai.com/api/docs/changelog.md",
+        "page:https://docs.devin.ai/desktop/changelog",
+        "page:https://gemini.google/release-notes/",
+        "page:https://github.com/features/copilot/plans",
+        "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+        "page:https://learn.chatgpt.com/docs/whats-new.md",
+        "page:https://one.google.com/about/google-ai-plans/",
+        "page:https://openai.com/api/pricing/",
+        "page:https://platform.claude.com/docs/en/about-claude/pricing",
+        "page:https://support.claude.com/en/articles/12138966-release-notes",
+        "rss:https://aws.amazon.com/blogs/machine-learning/feed/",
+        "rss:https://blogs.nvidia.com/feed/",
+        "rss:https://code.claude.com/docs/en/changelog/rss.xml",
+        "rss:https://developers.openai.com/rss.xml",
+        "rss:https://github.blog/changelog/label/copilot/feed/",
+        "rss:https://machinelearning.apple.com/rss.xml",
+        "rss:https://news.microsoft.com/source/topics/ai/feed/",
+        "rss:https://openai.com/news/rss.xml"
+      ]
+    },
+    {
+      "profile": "ai_media",
+      "job": "ai_media/weekly_deep_research",
+      "declared_count": 8,
+      "coverage_count": 14,
+      "coverage_only": [
+        "catalog:https://www.anthropic.com/engineering",
+        "github:langchain-ai/langgraph",
+        "github:modelcontextprotocol/servers",
+        "github:ollama/ollama",
+        "github:vllm-project/vllm",
+        "rss:https://huggingface.co/blog/feed.xml",
+        "rss:https://lastweekin.ai/feed",
+        "rss:https://magazine.sebastianraschka.com/feed",
+        "rss:https://research.google/blog/rss/",
+        "rss:https://simonwillison.net/atom/everything/",
+        "rss:https://www.bensbites.com/feed",
+        "rss:https://www.interconnects.ai/feed",
+        "rss:https://www.latent.space/feed",
+        "rss:https://www.qbitai.com/feed"
+      ]
+    },
+    {
+      "profile": "software",
+      "job": "software/software_daily",
+      "declared_count": 11,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "software",
+      "job": "software/software_weekly",
+      "declared_count": 19,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "science",
+      "job": "science/science_daily",
+      "declared_count": 11,
+      "coverage_count": 0,
+      "coverage_only": []
+    },
+    {
+      "profile": "science",
+      "job": "science/science_weekly",
+      "declared_count": 14,
+      "coverage_count": 0,
+      "coverage_only": []
+    }
+  ],
+  "legacy_plans": [
+    {
+      "id": "d2bdadd8ab4d4363b2b504bb30115c6c",
+      "name": "每周二早上一批",
+      "enabled": 0,
+      "expression": "0 5 * * 2",
+      "spec": {
+        "picks": [
+          {
+            "column": "flash",
+            "count": 3,
+            "source": "flash"
+          },
+          {
+            "column": "point_short",
+            "count": 2,
+            "source": "flash"
+          }
+        ],
+        "refresh": true
+      }
+    }
+  ],
+  "duplicate_job_owners": {},
+  "duplicate_production_owners": {}
+}

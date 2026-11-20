@@ -1,0 +1,18 @@
+[
+  {
+    "file": "angles.py",
+    "sha256": "54a132f2b40aecafd8d0d5f4f3f8475230825997250be43c768fbcb4d81f7192"
+  },
+  {
+    "file": "persona.py",
+    "sha256": "3a5b296d411f25775ff6bbd1fc426892b1d57f87fca2cf94f2104f2f7337b2c2"
+  },
+  {
+    "file": "writer.py",
+    "sha256": "453c8bf50404f0e91f374ba016d72177362e0a3d3f82f7f33fe17cbf03ce8786"
+  },
+  {
+    "file": "manuscript_workflow.py",
+    "sha256": "731742954f725356c7cf64ffa7853afcfacbb9ede5f91c0c4eb86f534650e7ff"
+  }
+]

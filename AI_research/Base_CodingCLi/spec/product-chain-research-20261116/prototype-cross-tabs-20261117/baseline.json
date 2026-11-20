@@ -1,0 +1,20 @@
+{
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/jobs/monitoring/ai_flash_discovery.yaml": "7a3f6c7ea0631503e1c56f9161551ff209f1da26a05a0098b415434c62f374b5",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/matrices/ai_media.yaml": "e82f50d91c68b4155fcbd1b0a4df3b700bb5aedcbef89c401fea6a705da05a1c",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/source_supply/ai_media.yaml": "35ae9e5ef4c2c7e3ed11750a985873b7213619574de36fc2bff5bf36a20beca7",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/content_columns/ai_flash.yaml": "fbe20967a81a5d46b93b3546e6ee3196a5d2b08c70a74aa64c60908a7174694a",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/content_strategy.yaml": "e288ef3f229f4cf7bfe477facb5870b98a40d03b9a2f409a8d40c8d76b653d38",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/joint_planning.yaml": "7651cc42ed16be2b9f8d7a3b12eaee045be6be4c243b2628e59ea4faa847bf99",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production_policy.yaml": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production/flash_daily.yaml": "3b93895b90a0af648faa774cac0890d313d4ffef47f42fcff4e9a87fc14503a1",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production/flash_each.yaml": "7ae50141e6d95edcc0328d444f42a7f1d7e008196d0a329d6cf20f17bb891e5e",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/source_supply.py": "04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/material_collection.py": "3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/production_policy.py": "363c18e9298d86f2d9db54f9fa5e59a1e50ae72abe9f87a7a0e63cdea2cb19c5",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/production.py": "191b8a6c83a388869e76d0395ab827c18b284a1540c22f437fbacc7d2904f96f",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/joint_planning.py": "bcbec558cf2e1af81a79feec0067eb75894461282ee4a68ebd16ea68b3a2750b",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/auto.py": "8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/content_columns.py": "d78528810610eb95172f96b6716e822d36b9d22a5eda0a810c3696e52da96f36",
+  "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/services/video_render.py": "dd59cf065f4d89032ea8e60f80f2c4da6a7292ff1893d2a739351aa08d1166a9",
+  "/Users/milin/.codex/visualizations/2026/11/16/01a1e4c4-5a8c-7582-8139-8162b1abb7c6/chain-management-prototype.html": "293db46c1859699256f92e91795c4a2f180daf55bcc5c62fc368546a0ccf0cb7"
+}

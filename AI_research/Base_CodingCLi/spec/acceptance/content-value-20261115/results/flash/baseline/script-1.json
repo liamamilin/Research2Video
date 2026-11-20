@@ -1,0 +1,117 @@
+{
+  "title": "DeepSeek语音五折：一小时录音3毛9，别当长期价",
+  "sections": [
+    {
+      "title": "三套服务，现在一套",
+      "paragraphs": [
+        {
+          "text": "一小时录音转成文字，3毛9——这个价格，以前得接三家服务、写一层胶水代码才凑得出来。大家好，我是洛洛，今天我们聊聊DeepSeek把App里的搜索、文件、语音拆成独立API之后，做语音助手到底能少接几套服务。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "假设你手上有个会议记录助手。以前的流程是：录音送第三方语音识别，转写文本交给模型总结，播报再接一家语音合成。用户中途问一句“最近AI圈有什么新东西”，你还得自己写一层搜索编排：先让模型判断要不要搜，再调Search找网页、用Fetch读内容，最后交回模型总结。三套服务，一层胶水。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "现在录音直接走DeepSeek的语音识别，限时0.39元一小时；总结完走它的语音合成，限时1.5元一万字符；联网搜索在请求里打开，什么时候搜、搜什么、读哪几页，模型自己决定。扫描件也能走图片文字识别。每个能力单独开关、单独计费，不用打包，它连聊天前端Demo都开源了。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "便宜是真的，五折是限时的",
+      "paragraphs": [
+        {
+          "text": "横向看一下：Google Cloud标准语音识别一小时6.43元，DeepSeek这个限时价是它的十六分之一。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但我更看重另一件事：3毛9是限时五折，原价0.78元一小时，语音合成同样五折，原价3元一万字符。所以我的建议是，预算按原价做，把五折当成头几个月的红利。你的单位经济模型如果靠3毛9撑着，恢复原价那天就得重算；可按0.78元算，它还是比OpenAI GPT-Transcribe的1.81元便宜一半多，这门生意照样成立。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "要动手，我建议先只开两个开关：语音识别和联网搜索，跑一周看看账单，再决定要不要把语音合成和图片识别接进来——分开计费的好处就是，哪一项在烧钱你看得见。你们的语音入口，是卡在成本，还是卡在接入太麻烦？我是洛洛，我们下期见。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 559,
+    "estimated_seconds": 124,
+    "segments": 19,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.651,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "三套服务，现在一套",
+        "spoken_length": 304,
+        "budget": 163
+      },
+      {
+        "title": "便宜是真的，五折是限时的",
+        "spoken_length": 255,
+        "budget": 163
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 132352,
+      "completion_tokens": 5591,
+      "total_tokens": 137943,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4915,
+      "cost_usd": 0.0232074,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 52.244,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 576
+  }
+}

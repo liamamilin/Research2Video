@@ -1,0 +1,19 @@
+{
+  "checks": {
+    "all_three_topics_enriched": true,
+    "source_contains_management_entry": true,
+    "saved_material_contains_entry": true,
+    "script_uses_management_entry": true,
+    "script_uses_revocation": true,
+    "original_tutorial_profile": true,
+    "original_audience_scope": true,
+    "joint_input_retained": true
+  },
+  "source_url": "https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Data",
+  "title": "WorkBuddy 产物别急着下载，右上角分享直接发企业微信",
+  "excluded_failures": [
+    "Claude CSV多格式交付：既有事件池步骤返回缺少主事件信息",
+    "ChatGPT多文件夹：相同事件池格式失败"
+  ],
+  "verification_scope": "Real research and question-led acquisition on frozen initial automatic material; third existing topic through normal authoring. No render/publish."
+}

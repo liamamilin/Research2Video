@@ -1,0 +1,603 @@
+--- a/core/video/persona.py
++++ b/core/video/persona.py
+@@ -1,12 +1,10 @@
+-"""The account's narrator: a hook, a natural introduction tied to this topic, then the story.
++"""The account narrator's identity, without a mandatory opening sequence.
+ 
+-Identity is authored with the surrounding narration, never spliced into a sentence
+-by position. Without config/persona.yaml there is no narrator instruction.
++Without config/persona.yaml there is no narrator instruction.
+ """
+ from __future__ import annotations
+ 
+ import os
+-import re
+ from typing import Optional
+ 
+ import yaml
+@@ -41,49 +39,16 @@
+     if not persona:
+         return ""
+     name = persona["name"]
+-    introduction = str(persona.get("introduce") or f"我是{name}。").rstrip("。.!！ ")
+-    greeting = persona.get("opening_greeting", "大家好")
+-    exact_greeting = (f"没有固定栏目问候时，用「{greeting}，{introduction}」接在钩子后。"
+-                      if persona.get("opening_greeting") else "")
+-    ending = "。" if opening_only else f"；最后道别说「{persona['farewell']}」。"
+-    return (f"\n你是这个账号固定的讲述者「{name}」，全程用第一人称“我”对观众讲：我看了、我算了一下、我的判断是、我建议。"
+-            f"开头先讲完整的钩子，再自然问候、自我介绍并接上本期具体要聊的问题，然后承接正文。"
+-            f"例如句式‘{greeting}，{introduction}，今天我们聊聊……’，省略处必须写成这份材料的具体问题，不能照抄省略号。"
+-            f"{exact_greeting}"
+-            "问候、名字和本期话题写成同一段连贯口播，不把名字单独写成一句或一段，不把自我介绍插进尚未讲完的事件。"
+-            "介绍要短，说明为什么接下来要讲这件事，不列节目流程，不重复钩子；语气贴合内容，严肃事件不强行热闹。"
+-            f"若节目已经有固定问候，不重复打招呼，仍自然衔接名字和本期问题{ending}"
+-            "来源只用半句话带过（“官方公告写的是……”“测出来的结果是……”），不用“据某某报道”“某某表示”起句。"
+-            "没有亲手做过的事不说成自己做的：材料里的测试、跑分、实验是别人做的，不说“我实测”“我试了”。")
++    ending = "" if opening_only else f"最后道别说「{persona['farewell']}」。"
++    return (f"\n你是这个账号固定的讲述者「{name}」，用自己的口吻对观众讲述。"
++            f"{ending}"
++            "没有亲手做过的事不说成自己做的：材料里的测试、跑分、实验是别人做的，不说成自己的实测或经历。")
+ 
+ 
+ def opening_needs_introduction(paragraphs: list, persona: dict, *, fixed_greeting: str = "") -> bool:
+-    """Recognize missing or bare identity lines, not judge the quality of an opening.
+-
+-    A complete introduction with a topic is left to the author. This only catches
+-    the mechanical name-only sentence previously inserted by this module.
+-    """
++    """Only repeated identity needs repair; missing or standalone introductions are valid."""
+     if not persona or not paragraphs:
+         return False
+     identity = str(persona.get("introduce") or f"我是{persona['name']}。").rstrip("。.!！ ")
+     opening = "\n".join(p["text"] if isinstance(p, dict) else p.text for p in paragraphs)
+-    if greeting := (persona.get("opening_greeting") if not fixed_greeting else ""):
+-        introductions = list(re.finditer(re.escape(greeting) + r"[，, ]+" + re.escape(identity), opening))
+-        if len(introductions) != 1 or opening.count(identity) != 1:
+-            return True
+-        intro = introductions[0]
+-        hook = opening[:intro.start()].rstrip()
+-        continuation = opening[intro.end():].partition("\n")[0].lstrip("，,。.!！ ")
+-        return not (re.search(r"\w", hook) and hook.endswith(("。", "？", "！", "?", "!", "”", "」"))
+-                    and re.search(r"\w", continuation))
+-    if identity not in opening:
+-        return True
+-    bare = re.compile(r"(?:^|[。！？!?\n])\s*(?:(?P<greeting>大家好|各位好)[，,。！! ]*)?"
+-                      + re.escape(identity) + r"\s*(?:[。！!](?![”’\"'])|$)")
+-    for match in bare.finditer(opening):
+-        # A greeting after the hook can end a sentence. The same paragraph
+-        # still carries the topic, so the spoken introduction is not isolated.
+-        continuation = opening[match.end():].partition("\n")[0].strip()
+-        if not (match["greeting"] and opening[:match.start()].strip() and continuation):
+-            return True
+-    return False
++    return opening.count(identity) > 1
+--- a/core/video/writer.py
++++ b/core/video/writer.py
+@@ -54,7 +54,7 @@
+     entry_start: int = Field(ge=0)
+ 
+ 
+-PROMPT_VERSION = 15
++PROMPT_VERSION = 16
+ #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
+ #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
+ #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
+@@ -64,13 +64,11 @@
+               "或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；"
+               "标题不写日期，不写栏目名，不用“本期”“今日”开头。")
+ #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
+-OPENING_RULE = ("第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；"
+-                "钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；"
+-                "第一句不打招呼，不报栏目名，不用“据某某报道”起头；钩子后的问候和自我介绍按讲述者设定自然衔接。")
++OPENING_RULE = '从本期最值得理解的内容进入，切入点由材料和目标观众决定。'
+ ENDING_RULE = ("结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；"
+                "避免把正文讲清的取舍硬凑成站队。")
+ #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
+-STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
++STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。"
+               "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。"
+               "英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。")
+ #: Narration is what viewers hear; a note to the picture ("画面里可以……") was read out and subtitled (11-10 research,
+@@ -101,14 +99,11 @@
+ AUTHORING_PROMPT = GOAL + """
+ 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
+ 找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
+-沿用上游给出的事实、数据和计算。挑出最值得讲的材料，给出讲述者自己的解释、判断或取舍，让观众听到原材料之外的一层认识。
+-有意思的推论和猜测可以直接讲，交代从哪个细节想到的，用“我猜”或“我更看重”这样的自然口吻表达。
+-有两面时，讲清哪一面在眼下更重要、凭什么，或哪个条件会改变选择。把真正影响判断的条件放在相关处，结尾把自己的观点讲完整。
++沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。
++有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。
+ 研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。
+ """ + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE
+-SYSTEM_PROMPT = AUTHORING_PROMPT + """
+-讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
+-""" + OPENING_RULE + """
++SYSTEM_PROMPT = AUTHORING_PROMPT + "\n" + OPENING_RULE + """
+ 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
+ 接口输出 JSON：
+ {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
+@@ -438,7 +433,7 @@
+ 
+ 
+ def introduce_opening(script: _Script, persona: dict, client: Any, *, greeting: Optional[str] = None) -> tuple[_Script, dict]:
+-    """Author a missing/bare introduction in context once; never insert a stock sentence.
++    """Repair a repeated identity once without imposing an opening structure.
+ 
+     The same author sees the real opening and the next section. Only the opening
+     section can change; the rest of the script and its metadata stay intact.
+@@ -448,7 +443,7 @@
+     if not narrator.opening_needs_introduction(script.sections[0].paragraphs, persona, fixed_greeting=greeting or ""):
+         return script, {"status": "authored", "requests": 0}
+     instruction = (
+-        "修顺这篇口播的开场，保留完整钩子、事实、人物引语和引用链接。将原来孤立的自我介绍改写为问候、名字和具体话题的连贯表达，不是另外新增一段介绍。"
++        "开场重复介绍了讲述者身份，保留其中一次，其余位置自然接回正文。保留已有事实、人物引语和引用链接。"
+         "不要删掉讲述者身份，不添加材料没有的事实或亲身经历。这里只改开场，不添加道别。仅返回首节，格式为"
+         '{"title":"原首节标题","paragraphs":[{"text":"口播","citations":[]}]}。'
+         + narrator.prompt(persona, opening_only=True)
+@@ -462,7 +457,7 @@
+                                 {"role": "user", "content": json.dumps(request, ensure_ascii=False)}], temperature=0.4)
+         candidate = _parse('{"title":"opening","sections":[' + response.content.strip().removeprefix("```json").removesuffix("```").strip() + ']}').sections[0]
+         if narrator.opening_needs_introduction(candidate.paragraphs, persona, fixed_greeting=greeting or ""):
+-            return script, {"status": "unchanged", "requests": 1, "reason": "opening_still_missing_or_bare",
++            return script, {"status": "unchanged", "requests": 1, "reason": "opening_repeats_identity",
+                             "candidate": candidate.model_dump()}
+         opening = script.sections[0].model_copy(update={"paragraphs": candidate.paragraphs})
+         return script.model_copy(update={"sections": [opening, *script.sections[1:]]}), {"status": "rewritten", "requests": 1}
+@@ -507,7 +502,7 @@
+         if lead.entry_start >= len(sentences):
+             return script, {**receipt, "status": "unchanged", "reason": "entry_start_out_of_range"}
+         if narrator.opening_needs_introduction(lead.opening, persona, fixed_greeting=greeting or ""):
+-            return script, {**receipt, "status": "unchanged", "reason": "opening_still_missing_or_bare"}
++            return script, {**receipt, "status": "unchanged", "reason": "opening_repeats_identity"}
+     except (AdaptError, LLMError) as exc:
+         return script, {**receipt, "status": "unchanged", "reason": type(exc).__name__}
+     opening = opening.model_copy(update={"paragraphs": lead.opening})
+--- a/core/video/manuscript_workflow.py
++++ b/core/video/manuscript_workflow.py
+@@ -182,19 +182,14 @@
+ 输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}""",
+     ),
+     "monitoring/ai_flash_discovery": JobPrompts(
+-        version="flash-single-decision-v1",
++        version='flash-explanation-v2',
+         production_id="flash_each",
+         draft=(
+-            '只沿上游已经选定的一条消息讲。开场选一个观众此刻真在犹豫的决定，用新闻中一个具体变化把它摆出来，自然介绍洛洛。'
+-            '先讲最能改变这个决定的一条依据，再解释为什么它够用或还差一步。背景在听众需要它时才出现。'
+-            '从材料提出自己的判断，愿意说现阶段怎么选，也说什么新的具体变化会让你改主意。'
+-            '整条围绕一个决定展开，末尾留一句观众听完就知道该看什么的判断。'
++            '只沿上游选定的一条消息讲，找出这条消息最值得理解的变化，用具体依据解释它为什么重要。背景在听众需要时出现，作者依据材料提出自己的认识或判断。'
+         ),
+         episode_lead='',
+-        read='''你是第一次听这条短快讯、手里正有相近工作的观众。用一句话说你会怎么做，哪条消息让你这样选，什么变化会让你重新考虑。如果有一段让你分不清眼下能做什么、还是要等哪件事，只标记这一段。已经能做决定就留空。
+-输出 JSON：{"takeaway":"现在怎么做及依据","keep_quote":"有用的原话","issue_quote":"卡住的原话，可空","revision":"还没讲清的决定条件，可空","targets":["段落编号"]}''',
+-        revise='''只修标记的一段。沿用作者的选择，用这条新闻已有资料解释一个足以改变决定的条件。保留关键的数字比较和适用范围，能用一句替换笼统建议就不再重复前文。让段落接上原来讲述，保持接近原篇幅。
+-输出 JSON：{"paragraphs":[{"id":"段落编号","text":"修订口播"}]}''',
++        read=FOCUSED_READ,
++        revise=FOCUSED_WRITE,
+     ),
+     "economy/economy_illustrated": JobPrompts(
+         version="economy-illustrated-v1",
+@@ -440,7 +435,7 @@
+     ),
+     "culture/culture_weekly": JobPrompts(
+         version=(
+-            "culture-weekly-v1"
++            'culture-weekly-reader-v4'
+         ),
+         draft=(
+             "开场给出同一作品或表达在两个具体场合里被不同理解的反差。"
+@@ -455,18 +450,10 @@
+             "自然接洛洛的问候，随即追问它怎么走到这里。"
+         ),
+         read=(
+-            "你是第一次听这期文化周报的观众。"
+-            "复述同一件作品或表达在前后两个场合里意思怎样变了，引用让你明白变化来自哪个人或哪个动作的一句。"
+-            "只标一处真的跟丢的地方，说明你听懂了什么，换到哪个场合后不知道谁改变了什么。"
+-            "听得清就留空。"
+-            "输出 JSON：{\"takeaway\":\"我记住的前后变化\",\"keep_quote\":\"听懂来路的原话\",\"issue_quote\":\"卡住的原话，可空\",\"revision\":\"在哪次变化跟丢了，可空\",\"targets\":[\"段落编号\"]}"
+-        ),
+-        revise=(
+-            "只改标出的段落。"
+-            "回到同一个代表作品或场景，用材料里已有的一个创作、展示或使用动作说明它在前后场合的意义怎样变。"
+-            "让观众先辨认是谁做了什么，再接到原作者的理解。"
+-            "材料没有能接上的动作时沿用原段。"
+-            "输出 JSON：{\"paragraphs\":[{\"id\":\"原段落编号\",\"text\":\"修订口播\"}]}"
++            '你是第一次听这期文化周报的观众。说出最值得记住的理解，引用支撑它的具体作品细节或原话。通读后指出一处最影响听懂或继续听的问题，说明它怎样影响理解。若只需改一至三段就能改善，标出对应段落；已经讲顺或需要重构整篇时 targets 留空。\n输出 JSON：{"takeaway":"听完多懂了什么","keep_quote":"值得保留的原话","issue_quote":"卡住或走神的原话，可空","revision":"希望怎样改善，可空","targets":["段落编号"]}'
++        ),
++        revise=(
++            '根据材料与整篇原稿，只修改 targets 所列段落，解决读者提出的具体问题。保留作品细节及有依据的解释，对照上下文决定这里需要补充、缩短还是换个说法，已经讲清的内容留在原处。改后自然接上前后段。\n输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}'
+         ),
+         episode_prompt=writer.CULTURE_CHANGE_EPISODE_PROMPT,
+     ),
+@@ -611,15 +598,11 @@
+     "第一次出现时结合当前示例简短交代。保留资料中的产品端和适用条件。"
+ )
+ JOB_PROMPTS["ai_media/ai_tool_tutorials"] = replace(
+-    _tutorial_profile, version="ai-tool-tutorial-v3",
+-    draft=(_tutorial_profile.draft + "\n" + _tutorial_context
++    _tutorial_profile, version="ai-tool-natural-v4",
++    draft=(_tutorial_profile.draft.replace("开头给观众看输入和成品之间最值得学的变化，再自然介绍主持人。", "")
++           + "\n" + _tutorial_context
+            + "示例明确标作示意。只说完成本期操作用到的入口和菜单项。"
+-           + "示例有改动时，口播说清一个原值和改后要看到的值。\n"
+-           + "把开场和第一步写成连续的现场演示。钩子只留一个具体卡点，紧接一句含主持人问候和任务的自然口播。"
+-           + "下一段直接写给观众照做的第一个有效动作：用示例点出实际入口、命令或输入内容以及当前对象，需要的准备一句带过。"
+-           + "若简单的打开或上传只能就位，把它和真正推进任务的第一次点击、设置或提交合在同一小段。"
+-           + "若条件不满足会走错，先就着这次动作交代该条件。"
+-           + "讲完动作才补会影响下一步的解释，正文沿演示继续，跳过已讲的动作。后文交代适用与例外。"),
++           + "示例有改动时，口播说清一个原值和改后要看到的值。"),
+     read="""你是正在跟着口播操作的观众。先复述这期唯一要做的事，以及你能否做下去。只有原稿会让你点错、用错对象或看不出是否完成，而且原演示内的一句话能解开时，标出这个动作所在的一段。说清你在哪一刻卡住、想知道什么；如果已有答案、只是好奇相邻功能，或需要另做产品试验，targets 留空。
+ 输出 JSON：{"takeaway":"你会做什么","keep_quote":"有用的原话","issue_quote":"卡住的原话，可空","revision":"缺的一个动作或可见结果，可空","targets":["段落编号"]}""",
+     revise="""只在 targets 所列的那一段补清读者卡住的动作或结果。改一句，或紧接原句加一句。沿用原稿的示例、语气和操作范围。只在这里讲一次，让观众接着做。若材料只够解释当前动作，就把它说清，不替产品补具体界面行为。原稿已够用可以原样交回。
+--- a/core/video/angles.py
++++ b/core/video/angles.py
+@@ -19,9 +19,7 @@
+         "label": "算账值不值",
+         "minutes": 5,  # the account's 7-minute hit was a 算账 video; a cost comparison needs room (11-10)
+         "markers": re.compile(r"[¥$￥]|\d\s*(?:元|美元|刀)|额度|套餐|价格|定价|每月|月费|年费|每百万|免费|降价|涨价|订阅"),
+-        "prompt": ("本条讲述角度：算账值不值。同一事件已有一条视频讲发布了什么，这一条只从观众的钱和选择讲："
+-                   "价格、额度、套餐怎么算，和观众手上现有的方案比多花还是省，什么人值得换、什么人不必。"
+-                   "标题和开场都从这个角度出发，和讲发布的那条不要重复；材料没给的价格不要编。"),
++        "prompt": ("本条聚焦材料中的成本问题：价格按什么计、实际任务消耗什么、这些差异意味着什么。已有另一条介绍发布概况，本条展开自己的问题。比较和选择取决于材料是否支持，讲述顺序由内容决定。"),
+     },
+     "howto": {
+         "label": "怎么上手",
+--- a/config/video_recipes/flash.yaml
++++ b/config/video_recipes/flash.yaml
+@@ -30,7 +30,7 @@
+     depth: '{{audience.depth}}'
+     tone: news
+   style: |
+-    从{{audience}}熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。
++    面向本条选题的目标观众，讲清这件新事。
+ output:
+   use: motion
+   packaging:
+--- a/config/content_columns/chatgpt_t05_comparison.yaml
++++ b/config/content_columns/chatgpt_t05_comparison.yaml
+@@ -19,21 +19,5 @@
+   - 产品真实截图
+   - 操作步骤
+ status: configured
+-notes: '题材编号 T05；获客作用：影响选择。节目「同一笔钱，怎么选」（11-10 涨粉研究首选节目，spec/bilibili-growth-research-20261110/PROGRAMMES.md）：每条只回答一个选择问题——一个选题受众共同关心的问题，具体任务作为例子，不把各家功能讲全；开头 15–20 秒提出这个选择问题及相关代价，先给最关键的条件结论；只比较 3 个维度（选题核心角度里点名的比较点必须在其中，比如 ChatGPT 在国内的使用门槛），同一组产品贯穿到底，每个维度先说结果再解释差异；加一个会改变选择的条件（如集中用还是零散用）；结尾给一张“如果你是这种情况，就选……”的决策表。下面的结构按材料选用，都要服从这条主线。每条视频讲一个对比，至少两家不同公司的产品放在同一任务或同一维度上比较，讲清输入、操作、输出差异、费用和适用场景，结尾给出不同需求下的选择。开头 15 秒内亮出反差或结论预告，不先讲品牌背景。结构按材料从下面选一种，不要每条都用同一种：
+-
+-  A 价格反差与分任务对决：先抛一个钱的反差（如都开最高档与都开基础档差几倍），再用 2–3 个日常任务给同样输入看各家输出，最后讲钱和选择顺序。适合多家套餐与能力都有材料时。
+-
+-  B 同题盲测：同一道题去掉名字展示几家答案，请观众先猜，再揭晓并说明差在哪、什么情况选谁。适合有可直接展示的输出时。
+-
+-  C 按人群选购：先给一张结论表，再按学生、职场写作、开发者、预算有限、国内可用等人群各给选择和理由，补一个反例。适合问题是“我该买哪个”时。
+-
+-  D 新功能同台：某家刚上新功能或新模型，先讲变化，再看其他家同一件事做到哪一步，最后说现在值不值得换。适合动态类材料。
+-
+-  E 单项擂台：只比一个维度（长文档、中文写作、免费额度、联网搜索、语音等），说清规则后逐家排序，点出最大意外，收在总表。
+-
+-  F 误区纠正：先摆一个流行说法（越贵越好、排名第一最适合你），用价格或实测把它拆掉，再给正确的判断方法。
+-
+-  G 换用成本：从一家换到另一家能得到什么、会失去什么（记忆、项目、插件、价格、付款方式），适合换的人和怎么迁移。
+-
+-  无论哪种结构，都用对比表或并排画面收尾，标题写出具体对象和反差，不用日期当标题。只比较 ChatGPT 自家档位的题目交给 T06。直接使用上游已有材料，公开说明按公开说明介绍，不声称亲测。'
++notes: "题材编号 T05；围绕本次受众关心的选择问题，比较至少两家不同公司的产品。把产品放到可比的任务或维度下，用材料中的输入、操作、结果及费用解释实际差异。选题核心角度中明确提出的比较点需要讲清；影响适用性的入口、地区、套餐和换用成本在相关处说明。比较范围、展开顺序和结尾由本题的问题与证据决定，让观众理解不同需要下的选择依据。只比较 ChatGPT 自家档位的题目交给 T06。直接使用上游已有材料，公开说明按公开说明介绍，不声称亲测。"
+ content_mode: individual
+--- a/tests/test_manuscript_workflow.py
++++ b/tests/test_manuscript_workflow.py
+@@ -165,7 +165,9 @@
+         assert result is draft and result.meta["manuscript_workflow"]["result"] == "draft"
+ 
+ 
+-def test_revision_keeps_a_connected_introduction_and_applies_the_body_edit(monkeypatch):
++@pytest.mark.parametrize("opening, retained", [("这份报告敢直接交吗？", False),
++    ("这份报告敢直接交吗？我是洛洛。", False), ("我是洛洛。先看结果。我是洛洛。", True)])
++def test_revision_allows_optional_identity_but_keeps_an_opening_when_identity_repeats(monkeypatch, opening, retained):
+     draft = _draft("这份报告敢直接交吗？大家好，我是洛洛，今天就来看看怎么验。")
+     draft.sections.append({"title": "例子", "paragraphs": [{"text": "先核对报告。"}]})
+     monkeypatch.setattr(workflow.persona, "load", lambda: {"name": "洛洛", "introduce": "我是洛洛。"})
+@@ -177,7 +179,7 @@
+                           revision="收紧开头并讲清怎么核对", targets=["S1P1", "S2P1"])
+         assert prompt == workflow.FOCUSED_WRITE
+         return schema(paragraphs=[
+-            {"id": "S1P1", "text": "这份报告敢直接交吗？我是洛洛。"},
++            {"id": "S1P1", "text": opening},
+             {"id": "S2P1", "text": "先点开引用，再看它能不能支持那句话。"},
+         ])
+ 
+@@ -187,8 +189,14 @@
+         column=SimpleNamespace(script_style="风格", target_minutes=3, voice_id=None),
+     )
+ 
+-    assert result.sections[0] == draft.sections[0]
++    if retained:
++        assert result.sections[0] == draft.sections[0]
++    else:
++        assert result.sections[0]["paragraphs"][0]["text"] == opening
+     assert result.sections[1]["paragraphs"][0]["text"] == "先点开引用，再看它能不能支持那句话。"
+     receipt = result.meta["manuscript_workflow"]
+-    assert receipt["retained_opening"] == "revision_broke_introduction"
+-    assert [change["id"] for change in receipt["changes"]] == ["S2P1"]
++    if retained:
++        assert receipt["retained_opening"] == "revision_broke_introduction"
++    else:
++        assert "retained_opening" not in receipt
++    assert [change["id"] for change in receipt["changes"]] == (["S2P1"] if retained else ["S1P1", "S2P1"])
+--- a/tests/test_video_goal_first.py
++++ b/tests/test_video_goal_first.py
+@@ -234,7 +234,7 @@
+     if job == enabled_job and (not profile.production_id or profile.production_id == production_id):
+         if profile.episode_prompt:
+             assert llm.calls[0][0]["content"].startswith(
+-                profile.episode_prompt.replace(writer.EPISODE_LEAD, profile.episode_lead, 1)
++                profile.episode_prompt.replace(writer.EPISODE_LEAD, profile.episode_lead, 1) if profile.episode_lead else profile.episode_prompt
+             )
+         if profile.episode_lead:
+             if not production_id:
+@@ -320,7 +320,6 @@
+     assert [p["text"] for p in said.sections[0]["paragraphs"]][:1] == ["大家好，欢迎收看AI 快讯。今天讲一件事。"]
+     assert "口播开头由节目固定念出问候" not in llm.calls[1][0]["content"]
+     assert plain.sections[0]["paragraphs"][0]["text"] == json.loads(script_json(300))["sections"][0]["paragraphs"][0]["text"]
+-    assert "起承转合" in llm.calls[1][0]["content"]
+ 
+ 
+ def test_a_greeting_the_author_worded_differently_is_replaced_not_heard_twice(llm):
+@@ -359,4 +358,3 @@
+     assert written.sections[0]["paragraphs"][0]["text"] == "先看一个数字：十倍。"
+     system = llm.calls[0][0]["content"]
+     assert writer.OPENING_RULE in system and writer.TITLE_RULE in system and writer.ENDING_RULE in system
+-    assert "站队" in system and "不打招呼" in system and "一个问题" in system
+--- a/tests/test_video_persona.py
++++ b/tests/test_video_persona.py
+@@ -1,4 +1,4 @@
+-"""The account's narrator (core/video/persona.py): first person, introduced right after the hook, never faking tests."""
++"""The account's narrator (core/video/persona.py): identity without a compulsory introduction or fake personal tests."""
+ 
+ from __future__ import annotations
+ 
+@@ -25,15 +25,11 @@
+     assert real.load(str(tmp_path)) == {}
+ 
+ 
+-def test_the_prompt_asks_for_the_first_person_and_forbids_claiming_tests():
++def test_persona_keeps_identity_and_farewell_without_an_opening_template():
+     text = narrator.prompt(LUOLUO)
+-    assert "第一人称" in text and "大家好，我是洛洛，今天我们聊聊" in text and "我是洛洛，我们下期见。" in text
+-    assert "不把名字单独写成一句或一段" in text
+-    assert "不说“我实测”" in text and "据某某报道" in text
++    assert "洛洛" in text and LUOLUO["farewell"] in text
+     assert narrator.prompt({}) == ""
+-    opening = narrator.prompt(LUOLUO, opening_only=True)
+-    assert "大家好，我是洛洛，今天我们聊聊" in opening
+-    assert LUOLUO["farewell"] not in opening
++    assert LUOLUO["farewell"] not in narrator.prompt(LUOLUO, opening_only=True)
+ 
+ 
+ def _paragraphs(*texts):
+@@ -41,39 +37,23 @@
+ 
+ 
+ @pytest.mark.parametrize("texts, expected", [
+-    (("先看一张毕业照。", "我是洛洛。", "女孩接受采访。"), True),
+-    (("降价了。我是洛洛。这笔账怎么算？",), True),
+-    (("先看这个结果。", "大家好，我是洛洛。"), True),
+-    (("大家好，我是洛洛。你是不是也遇到过这种情况？",), True),
+-    (("先看这个结果。", "大家好，我是洛洛。", "今天讲讲原因。"), True),
+-    (("同一段代码，11 月跑和 12 月跑，账单能差一倍。", "大家好，我是洛洛。今天聊聊你的账单和流水线。"), False),
+-    (("一个问题。", "先说背景。", "我是洛洛，今天聊聊这个问题。"), False),
+-    (("先看一个数字。", "大家好，我是洛洛，今天算算每次任务的花费。"), False),
+-    (("一键就能完成吗？", "大家好，我是洛洛，今天用同一份表格走一遍操作。"), False),
+-    (("先看结果。",), True),
++    (("先看一张毕业照。", "我是洛洛。", "女孩接受采访。"), False),
++    (("降价了。我是洛洛。这笔账怎么算？",), False),
++    (("先看结果。",), False),
++    (("大家好，我是洛洛。今天看看原因。",), False),
++    (("先看结果。我是洛洛。", "我是洛洛，今天看看原因。"), True),
+ ])
+-def test_opening_identity_is_kept_with_its_topic(texts, expected):
++def test_identity_is_optional_but_not_repeated(texts, expected):
+     assert narrator.opening_needs_introduction(_paragraphs(*texts), LUOLUO) is expected
+     assert not narrator.opening_needs_introduction(_paragraphs(*texts), {})
+ 
+ 
+-def test_a_configured_identity_is_not_replaced_with_luoluo():
+-    persona = {"name": "阿青", "introduce": "这里是阿青。", "farewell": "下次见。"}
+-    assert "大家好，这里是阿青，今天" in narrator.prompt(persona)
+-    assert narrator.opening_needs_introduction(_paragraphs("结果出乎意料。", "这里是阿青。"), persona)
+-    assert not narrator.opening_needs_introduction(_paragraphs("结果出乎意料。", "这里是阿青，今天看看原因。"), persona)
+-
+-
+-@pytest.mark.parametrize("opening, expected", [
+-    ("大家好，我是洛洛，今天来看看账单。", True),
+-    ("账单翻倍了。大家好，我是洛洛，今天来看看账单。", False),
+-    ("账单翻倍了。我是洛洛，今天来看看账单。", True),
+-    ("账单翻倍了。大家好，我是洛洛。", True),
+-    ("账单翻倍了。大家好，我是洛洛，今天聊账单。我是洛洛。", True),
+-])
+-def test_configured_greeting_follows_the_hook_and_flows_into_topic(opening, expected):
+-    persona = {**LUOLUO, "opening_greeting": "大家好"}
+-    assert narrator.opening_needs_introduction([{"text": opening}], persona) is expected
++def test_configured_identity_and_greeting_do_not_impose_an_opening_order():
++    persona = {"name": "阿青", "introduce": "这里是阿青。", "farewell": "下次见。", "opening_greeting": "各位好"}
++    assert "阿青" in narrator.prompt(persona)
++    for text in ("结果出乎意料。", "这里是阿青。", "各位好，这里是阿青。结果出乎意料。"):
++        assert not narrator.opening_needs_introduction(_paragraphs(text), persona)
++    assert narrator.opening_needs_introduction(_paragraphs("这里是阿青。", "这里是阿青。"), persona)
+ 
+ 
+ @pytest.mark.parametrize("separator", ["，", "。"])
+@@ -91,26 +71,37 @@
+ 
+ 
+ @pytest.mark.parametrize("intro", ["我是洛洛。", "先看背景。"])
+-def test_bare_or_missing_introduction_is_authored_in_context_not_spliced(llm, monkeypatch, intro):
++def test_bare_or_missing_introduction_does_not_rewrite_the_opening(llm, monkeypatch, intro):
+     monkeypatch.setattr(narrator, "load", lambda config_dir=None: LUOLUO)
+     payload = json.loads(script_json(300))
+-    payload["sections"][0]["paragraphs"] = [{"text": "同样的预算，能跑多少次？"}, {"text": intro}]
+-    revised = {"title": "模型试图换标题", "paragraphs": [
+-        {"text": "同样的预算，能跑多少次？"},
+-        {"text": "大家好，我是洛洛，今天算算每次运行的花费，再看哪些任务更划算。"}]}
++    opening = [{"text": "同样的预算，能跑多少次？"}, {"text": intro}]
++    payload["sections"][0]["paragraphs"] = opening
++    llm.replies = [json.dumps(payload, ensure_ascii=False)]
++    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
++                           target_minutes=1, llm_config=None)
++    assert [p["text"] for p in written.sections[0]["paragraphs"]] == [p["text"] for p in opening]
++    assert len(llm.calls) == 1
++    assert written.meta["introduction"] == {"status": "authored", "requests": 0}
++
++
++def test_repeated_identity_is_repaired_once_without_rewriting_other_sections(llm, monkeypatch):
++    monkeypatch.setattr(narrator, "load", lambda config_dir=None: LUOLUO)
++    payload = json.loads(script_json(300))
++    payload["sections"][0]["paragraphs"] = [{"text": "我是洛洛。先看两个数。"}, {"text": "大家好，我是洛洛。现在看结果。"}]
++    revised = {"title": "model changed heading", "paragraphs": [{"text": "我是洛洛。先看两个数。现在看结果。"}]}
+     llm.replies = [json.dumps(payload, ensure_ascii=False), json.dumps(revised, ensure_ascii=False)]
+     written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                            target_minutes=1, llm_config=None)
+-    assert written.sections[0]["paragraphs"][1]["text"] == revised["paragraphs"][1]["text"]
++    assert written.sections[0]["paragraphs"][0]["text"] == revised["paragraphs"][0]["text"]
+     assert written.sections[0]["title"] == payload["sections"][0]["title"]
+     assert written.sections[1]["paragraphs"][0]["text"] == payload["sections"][1]["paragraphs"][0]["text"]
+     assert len(llm.calls) == 2
+-    assert written.meta["introduction"] == {"status": "rewritten", "requests": 1}
+ 
+ 
+ def test_an_unsuccessful_opening_rewrite_preserves_the_draft_without_looping():
+     from core.llm import ChatResponse
+     source = writer._parse(script_json(300))
++    source.sections[0].paragraphs[0].text = "我是洛洛。先看结果。我是洛洛。"
+     client = SimpleNamespace(chat=lambda *args, **kwargs: ChatResponse(content='not JSON'))
+     result, receipt = writer.introduce_opening(source, LUOLUO, client)
+     assert result is source
+@@ -146,7 +137,7 @@
+ 
+ 
+ def test_hooks_stay_with_the_viewer_and_the_named_angle_is_kept():
+-    assert "不用和观众无关的全球或海外统计开场" in writer.OPENING_RULE
++    assert writer.OPENING_RULE in writer.SYSTEM_PROMPT and writer.OPENING_RULE in writer.EPISODE_PROMPT
+     assert writer.ANGLE_RULE in writer.SYSTEM_PROMPT and writer.ANGLE_RULE in writer.EPISODE_PROMPT
+ 
+ 
+--- a/tests/golden/video_cells.json
++++ b/tests/golden/video_cells.json
+@@ -102,7 +102,7 @@
+   },
+   "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+   "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n- 为什么有人在乎：影响 API 成本\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+-  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，给出讲述者自己的解释、判断或取舍，让观众听到原材料之外的一层认识。\n有意思的推论和猜测可以直接讲，交代从哪个细节想到的，用“我猜”或“我更看重”这样的自然口吻表达。\n有两面时，讲清哪一面在眼下更重要、凭什么，或哪个条件会改变选择。把真正影响判断的条件放在相关处，结尾把自己的观点讲完整。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。\n第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；第一句不打招呼，不报栏目名，不用“据某某报道”起头；钩子后的问候和自我介绍按讲述者设定自然衔接。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
++  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+  },
+  "flash": {
+   "budget": 326,
+@@ -154,7 +154,7 @@
+    "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+    "research_timeout_seconds": 1500,
+    "revise_rounds": 2,
+-   "script_style": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
++   "script_style": "面向本条选题的目标观众，讲清这件新事。",
+    "sections": [
+     4,
+     6
+@@ -214,9 +214,9 @@
+     "type": "manual"
+    }
+   },
+-  "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+-  "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+-  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，给出讲述者自己的解释、判断或取舍，让观众听到原材料之外的一层认识。\n有意思的推论和猜测可以直接讲，交代从哪个细节想到的，用“我猜”或“我更看重”这样的自然口吻表达。\n有两面时，讲清哪一面在眼下更重要、凭什么，或哪个条件会改变选择。把真正影响判断的条件放在相关处，结尾把自己的观点讲完整。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。\n第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；第一句不打招呼，不报栏目名，不用“据某某报道”起头；钩子后的问候和自我介绍按讲述者设定自然衔接。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
++  "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n面向本条选题的目标观众，讲清这件新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
++  "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n面向本条选题的目标观众，讲清这件新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
++  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+  },
+  "point_short": {
+   "budget": 391,
+@@ -322,6 +322,6 @@
+   },
+   "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+   "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+-  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，给出讲述者自己的解释、判断或取舍，让观众听到原材料之外的一层认识。\n有意思的推论和猜测可以直接讲，交代从哪个细节想到的，用“我猜”或“我更看重”这样的自然口吻表达。\n有两面时，讲清哪一面在眼下更重要、凭什么，或哪个条件会改变选择。把真正影响判断的条件放在相关处，结尾把自己的观点讲完整。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。\n第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；第一句不打招呼，不报栏目名，不用“据某某报道”起头；钩子后的问候和自我介绍按讲述者设定自然衔接。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
++  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+  }
+ }
+--- a/tests/test_recipe_audiences.py
++++ b/tests/test_recipe_audiences.py
+@@ -81,9 +81,13 @@
+ 
+ def test_shared_flash_brief_addresses_each_selected_audience():
+     every = recipes.expanded(CONFIG)
+-    assert "从开发者熟悉" in every["flash"].column.script_style
++    developer = every["flash"].column
+     public = every["ai-non_tech-quick_take-short"].column
+-    assert "从普通用户熟悉" in public.script_style and "开发者" not in public.script_style
++    assert developer.audience == "开发者"
++    assert public.audience == "普通用户"
++    # Audience binding remains explicit; the shared brief does not prescribe
++    # a particular audience's workplace as every story's opening scene.
++    assert public.script_style == developer.script_style
+ 
+ 
+ def test_each_audience_is_a_column_named_by_the_cell_its_tags_spell(tmp_path):
+--- a/tests/fixtures/recipe_columns.json
++++ b/tests/fixtures/recipe_columns.json
+@@ -396,7 +396,7 @@
+       "target_minutes": 1.25,
+       "video_form": "information_motion",
+       "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+-      "script_style": "从普通用户熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
++      "script_style": "面向本条选题的目标观众，讲清这件新事。",
+       "research_timeout_seconds": 1500,
+       "writer": "legacy",
+       "voice_id": "voxcpm_anchor",
+@@ -584,7 +584,7 @@
+       "target_minutes": 1.25,
+       "video_form": "information_motion",
+       "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+-      "script_style": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
++      "script_style": "面向本条选题的目标观众，讲清这件新事。",
+       "research_timeout_seconds": 1500,
+       "writer": "legacy",
+       "voice_id": "voxcpm_anchor",
+--- a/tests/test_video_angles.py
++++ b/tests/test_video_angles.py
+@@ -47,7 +47,8 @@
+     assert "angle" not in told
+     with pytest.raises(pool.NoCandidate):
+         pool.take(money_again["id"], candidates, [])  # 算账 of this event is already being written
+-    assert "算账值不值" in pool.brief(by_money) and "算账值不值" not in pool.brief(told)
++    assert angles.ANGLES["money"]["prompt"] in pool.brief(by_money)
++    assert angles.ANGLES["money"]["prompt"] not in pool.brief(told)
+     # the gate after writing sees the same thing: siblings are no duplicates of each other
+     for row, story in ((base, told), (money, by_money), (howto, by_howto)):
+         script = {**store.get_script(row["id"]), "topic": {**store.get_script(row["id"])["topic"], "story": story}}
+--- a/tests/test_video_polish.py
++++ b/tests/test_video_polish.py
+@@ -21,16 +21,17 @@
+     return json.dumps({"paragraphs": [{"id": key, "text": text} for key, text in texts.items()]}, ensure_ascii=False)
+ 
+ 
+-def test_final_polish_keeps_connected_opening_and_applies_body_edit(llm, monkeypatch):
++def test_final_polish_accepts_an_opening_without_introduction_and_applies_body_edit(llm, monkeypatch):
+     monkeypatch.setattr(polish.persona, "load", lambda: {"name": "洛洛", "opening_greeting": "大家好"})
+     opening = "这份报告能直接交吗？大家好，我是洛洛，今天就来看看怎么验。材料里写过一种做法。"
+     sections = _sections(["材料里写过一种做法。"])
+     sections[0]["paragraphs"] = [_p(opening)]
+     llm.polish_replies = [_reply(S1P1="这份报告能直接交吗？先看看怎么验。", S2P1="先从报告里的引用查起。")]
+     result, record = polish.polish(llm(None), sections)
+-    assert result[0]["paragraphs"][0]["text"] == opening
++    assert result[0]["paragraphs"][0]["text"] == "这份报告能直接交吗？先看看怎么验。"
+     assert result[1]["paragraphs"][0]["text"] == "先从报告里的引用查起。"
+-    assert [item["id"] for item in record["rejected"]] == ["S1P1"]
++    assert record["rejected"] == []
++    assert [item["id"] for item in record["changes"]] == ["S1P1", "S2P1"]
+ 
+ 
+ def test_the_program_finds_production_notes_and_stock_endings():
+--- a/tests/test_job_rollout_recovery.py
++++ b/tests/test_job_rollout_recovery.py
+@@ -113,7 +113,7 @@
+         def __init__(self, *a, **kw): pass
+         def close(self): pass
+     monkeypatch.setattr('core.llm.LLMClient', Client)
+-    def cancel(*a): raise CancelledError('cancel')
++    def cancel(*a, **kw): raise CancelledError('cancel')
+     monkeypatch.setattr(strategy, 'select', cancel)
+     with pytest.raises(CancelledError):
+         strategy.prepare_report({'_file':'monitoring/ai_flash_discovery', 'content_strategy':strategy.MARKER},

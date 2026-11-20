@@ -1,0 +1,190 @@
+[
+  {
+    "id": "a188b80788864fd7a95b13c334720a34",
+    "column_key": "flash-nr",
+    "production": "flash_daily",
+    "topic": {
+      "id": null,
+      "title": "今日快讯",
+      "fields": {
+        "目标受众": "日常在工作、学习和生活中使用或准备使用 AI 的中文观众；具体题目按实际受益人群说明范围"
+      },
+      "audience_strategy": "flash",
+      "content_mode": "episode",
+      "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+      "report_id": "dd78294e44594c8c8863d14d8c0d54ae",
+      "episode": {
+        "job": "monitoring/ai_flash_discovery",
+        "production": "flash_daily",
+        "items": [
+          {
+            "id": "2026-11-16/F1@r69947213561243af",
+            "title": "腾讯 Hy4 flash 实测：同一个 3D 网页任务约 0.23 元，DeepSeek 约 1.21 元"
+          },
+          {
+            "id": "2026-11-16/F2@r69947213561243af",
+            "title": "同一天两种 AI 钱包：ChatGPT 能替你买单，Gemini 只能读账，边界差在哪"
+          },
+          {
+            "id": "2026-11-16/F3@r69947213561243af",
+            "title": "豆包 App 上线“找店”：地图上直接看团购、下单、导航，对话里把本地生活走完"
+          },
+          {
+            "id": "2026-11-16/F4@r69947213561243af",
+            "title": "Cursor 安全事件：攻击者借 Fireworks 密钥复制编程 Agent 记录，不到 0.05% 用户受影响"
+          },
+          {
+            "id": "2026-11-16/F5@r69947213561243af",
+            "title": "Gemini 独立 App 进 CarPlay：开车时语音查 Gmail 和日历，需要先满足哪些条件"
+          },
+          {
+            "id": "2026-11-16/F6@r69947213561243af",
+            "title": "一个 prompt 做出 Datasette 地图插件：AI 编程在专业工具里到底能走多远"
+          },
+          {
+            "id": "flash-raw:31ee152d6667695f23759229",
+            "title": "[豆包工作上线“工作台”功能，首批覆盖金融、医疗、教育等21个场景_新浪财经_新浪网](https://finance.sina.com.cn/roll/2026-11-16/doc-iniyxcic1237305.shtml) — published 2026-11-16"
+          },
+          {
+            "id": "flash-raw:c283b36a494a2c96590c5b84",
+            "title": "[Apple’s new study looks to improve the effectiveness of AI health tools](https://www.theverge.com/tech/1033355/apples-new-study-looks-to-improve-the-effectiveness-of-ai-health-tools) — published 2026-11-15T20:47:16-05:00"
+          }
+        ],
+        "report_path": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "report_identity": "69947213561243af00dcdd29dc2289c543c41b27a95ec1a671578178c9c3fe3e",
+        "issue": {
+          "issue_id": "bd11592bb1b95e8d8528fdc7ea92de68dfa6ca44911ce09e6aeba6eef80cc990",
+          "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+          "research_window": {
+            "mode": "previous_slot",
+            "days": 1,
+            "start": "2026-11-16T07:30:00+08:00",
+            "end": "2026-11-16T18:30:00+08:00",
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "publication": {
+          "scheme": "lead-subject/v2",
+          "title": "今日快讯",
+          "label": "今日快讯",
+          "issue_date": "2026-11-16"
+        }
+      },
+      "joint_plan": {
+        "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+        "entry": "episode"
+      },
+      "round": "2026-11-16"
+    },
+    "status": "APPROVED"
+  },
+  {
+    "id": "6c7148518ab74c38ae7212ac08538c32",
+    "column_key": "flash-nr",
+    "production": "flash_each",
+    "topic": {
+      "id": "2026-11-16/F4@r69947213561243af~howto",
+      "round": "2026-11-16",
+      "code": "F4",
+      "title": "Cursor 事件后，开发者该查什么：扩展版本、Privacy Mode 和凭证轮换",
+      "fields": {
+        "一句话": "讲清攻击链、暴露了哪些数据、哪些没受影响、Cursor 如何处置，以及“隐私模式”和第三方推理供应商风险该怎么理解。",
+        "目标受众": "使用 Cursor、Claude Code 扩展的开发者和技术负责人。",
+        "选题策略": "audience-v1",
+        "选题入口": "flash",
+        "证据来源": "https://ratelimitnow.com/whats-new#:~:text=Nov%2013%2C%202026%20Nov%2013%2C%202026 https://ratelimitnow.com/whats-new/#w-649 https://ratelimitnow.com/whats-new/#w-650 https://ratelimitnow.com/whats-new/#:~:text=Nov%2013%2C%202026",
+        "核心角度": "比合集多给出具体排查动作、Privacy Mode 保护与例外、Cloud Agents 和第三方模型的边界，以及收到或未收到通知时该怎么处理。",
+        "来源网址": "https://ratelimitnow.com/whats-new#:~:text=Nov%2013%2C%202026%20Nov%2013%2C%202026\nhttps://ratelimitnow.com/whats-new/#w-649\nhttps://ratelimitnow.com/whats-new/#w-650\nhttps://ratelimitnow.com/whats-new/#:~:text=Nov%2013%2C%202026",
+        "来源明细": ""
+      },
+      "score": null,
+      "event_date": null,
+      "stale": false,
+      "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+      "from_item": "2026-11-16/F4@r69947213561243af",
+      "from_item_title": "Cursor 事件后，开发者该查什么：扩展版本、Privacy Mode 和凭证轮换",
+      "matrix_dedup": {
+        "job": "monitoring/ai_flash_discovery",
+        "policy": "matrix-story-v3"
+      },
+      "_story_fallbacks": [],
+      "joint_plan": {
+        "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+        "entry": "2026-11-16/F4@r69947213561243af"
+      },
+      "preserve_audience_scope": true,
+      "base_id": "2026-11-16/F4@r69947213561243af",
+      "angle": "howto",
+      "audience_strategy": "flash",
+      "story": {
+        "title": "Cursor 事件后，开发者该查什么：扩展版本、Privacy Mode 和凭证轮换",
+        "subject": "Cursor 安全事件后的开发者排查",
+        "action": "event",
+        "edition": "Anthropic.claude-code 2.1.312 / 2.1.313",
+        "event_date": "2026-10-29",
+        "summary": "共同问题是：Cursor 市场在 10 月 29 日出现过被篡改的 Anthropic.claude-code 2.1.312/2.1.313，官方称最多 5,000 名请求特定缓存版本的用户可能收到，且仅卸载扩展可能不够；未收到通知说明数据不在泄露 traces 中，但仍应检查扩展来源并轮换可能暴露的凭证。Privacy Mode 下 Customer Data 不被 Cursor 用于训练，Cursor 与供应商维持 ZDR，但模型供应商仍可能运行滥用风险分类器并存储触发调查的数据；非 ZDR 模型会被标注或需管理员 opt-in，Claude Fable 5.2/5.1/5 是保留例外，企业或 Privacy Mode 用户需管理员批准。自带 API key 仍经过 Cursor 后端，文件临时缓存加密且只在请求期间持有密钥；Cloud Agents 是唯一需要 Cursor 存储代码的功能，安全政策禁止代码存储就不要开启。Cursor 侧已迁出 Fireworks 推理、轮换凭证、重建扩展市场并加 secret scanning，开发者应轮换凭证、检查扩展来源并关注官方通告。",
+        "changes": [],
+        "reference_changes": [],
+        "primary": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7",
+          "S8",
+          "S9",
+          "S10",
+          "S11",
+          "S12"
+        ],
+        "background": [],
+        "previous": [
+          "8db460b133ca4014af4462608f5f1990",
+          "6d72c371b4f74ca39348537a73a644fa",
+          "a188b80788864fd7a95b13c334720a34"
+        ],
+        "previous_refs": [
+          {
+            "script_id": "8db460b133ca4014af4462608f5f1990",
+            "version": null,
+            "event_key": "2870b939c151b63ef5318fa9095ed10c8ff4389c8fb1e9f3f4d3f42241227ffe"
+          },
+          {
+            "script_id": "6d72c371b4f74ca39348537a73a644fa",
+            "version": 1,
+            "event_key": "",
+            "chapter": 2
+          },
+          {
+            "script_id": "a188b80788864fd7a95b13c334720a34",
+            "version": 1,
+            "event_key": "",
+            "chapter": 5
+          }
+        ],
+        "family_key": "b03388b4c0e2e7a37fd6e367f0b8d9a0dbab3a172ea753082aaf2b946c48e8a0",
+        "event_key": "2870b939c151b63ef5318fa9095ed10c8ff4389c8fb1e9f3f4d3f42241227ffe#howto",
+        "primary_sources": [
+          "https://ratelimitnow.com/whats-new#:~:text=Nov%2013%2C%202026%20Nov%2013%2C%202026",
+          "https://cursor.com/data-use#:~:text=Data%20Use%20%26%20Privacy%20Overview",
+          "https://cursor.com/docs/enterprise/privacy-and-data-governance#:~:text=Privacy%20and%20Data%20Governance",
+          "https://cursor.com/docs/enterprise/privacy-and-data-governance#1-llm-requests",
+          "https://cursor.com/docs/enterprise/privacy-and-data-governance#2-cloud-agents",
+          "https://cursor.com/docs/enterprise/privacy-and-data-governance#models-with-data-retention",
+          "https://cursor.com/blog/security-incident-update#:~:text=An%20update%20on%20our%20recent%20security%20incident",
+          "https://cursor.com/blog/security-incident-update#what-happened",
+          "https://cursor.com/blog/security-incident-update#what-was-not-affected",
+          "https://cursor.com/blog/security-incident-update#what-weve-done",
+          "https://superprotocol.com/resources/blog/cursor-fireworks-vendor-key#what-happened",
+          "https://superprotocol.com/resources/blog/cursor-fireworks-vendor-key#what-it-would-not-fix"
+        ],
+        "angle": "howto",
+        "pool_id": "cfd1b265c681a72c2f8a48b9e32c8ba524a220b6ca7758c333fb8c68e0bac023",
+        "scope": "matrix:ai_media"
+      }
+    },
+    "status": "APPROVED"
+  }
+]

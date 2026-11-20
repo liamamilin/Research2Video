@@ -1,0 +1,16 @@
+{
+  "checked_files": 832,
+  "changed_since_snapshot": [
+    "core/video/persona.py",
+    "core/video/writer.py",
+    "config/content_strategy.yaml",
+    "config/content_columns/chatgpt_t05_comparison.yaml",
+    "config/content_columns/chatgpt_t09_updates.yaml"
+  ],
+  "note": "与隔离接入开始时的代码配置快照比较；既有工作区改动不回滚。生产数据库使用只读连接备份，未尝试覆盖其后续正常运行数据。",
+  "copied_business_code_matches_snapshot": true,
+  "restored_config_mismatches": [],
+  "checks_passed": 26,
+  "checks_total": 26,
+  "requests": 49
+}

@@ -1,0 +1,232 @@
+{
+  "t05": {
+    "control": {
+      "status": {
+        "status": "selected",
+        "candidates": 4,
+        "calls": 4,
+        "seconds": 442.9
+      },
+      "receipt": {
+        "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/chatgpt_acquisition/2026-11-16_t05_comparison.md",
+        "initial_report_sha256": "d445a32e971f3e59e080d90cbb15d686e63273efea06c3673ed1b23a028d36c6",
+        "selection_supply_sha256": "31c28c15b8e02516dd87909b7951eaaf97431ef44f5f007b048d40529308e74e",
+        "supply_chars": 595438,
+        "strategy_version": 4,
+        "interventions": [
+          "saved automatic initial research and material from actual production run",
+          "remove later supplements using receipt",
+          "real two-stage selection only"
+        ]
+      },
+      "calls": [
+        {
+          "request_sha256": "e90a1830702a335f3cadc6b97a2df8b287818ecc2f092ad94f2be2d9775e50da",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "0ae3900ed07138dddaa8a0388a4881f6ad94acfe76616e180c51ba069b6c074e"
+        },
+        {
+          "request_sha256": "6ffc2156872bf4fb9f36e9119c989ed559913f480db14c044fb869a0f9cdb5d2",
+          "repair": true,
+          "reason": "source count",
+          "response_sha256": "16d59d18e62cf203499befccb7493a3687ae7d1df30ac21e747568a794666e6c"
+        },
+        {
+          "request_sha256": "d0a49bea5337fbebee0d39fa24fece6dfc91d8fc54039def7d3d283804f9c011",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "34de9cdcae705144b5a9155b387e05af749bd8760806fa3cb0a81fce723c008c"
+        },
+        {
+          "request_sha256": "c9b2141a8afb7c9eabde7bab27edd95269bb41734c43bc83eca14c0172eff76e",
+          "repair": true,
+          "reason": "source count",
+          "response_sha256": "726daeb32521996d8a70a514335b50ab2cef70507b60944ad4ab6af3a352f5f0"
+        }
+      ],
+      "rendered_sha256": "af5f8ff26b05339f98340c138cace5ab6414a2daa02d0b3d8e15ddd437a6c85e",
+      "rendered_has_duplicate_angle": true,
+      "topics": [
+        {
+          "title": "第一笔 AI 订阅先别急：ChatGPT 免费版、Gemini 美国区 4.99 美元档和国产免费版，付费墙到底挡了什么",
+          "sources": 8,
+          "suggested_structure": "choice",
+          "material_chars": 923
+        },
+        {
+          "title": "200 页招股书，元宝和 Kimi 差在哪：长文档别只看“上下文窗口”",
+          "sources": 7,
+          "suggested_structure": "work",
+          "material_chars": 582
+        },
+        {
+          "title": "同一句“早晨咖啡”，元宝写得文艺、豆包写得俏皮：中文短文先选谁",
+          "sources": 3,
+          "suggested_structure": "work",
+          "material_chars": 594
+        },
+        {
+          "title": "帮爸妈在微信里用 AI：元宝的“微信好友”入口，和豆包独立 App 差在哪",
+          "sources": 3,
+          "suggested_structure": "choice",
+          "material_chars": 510
+        }
+      ]
+    },
+    "candidate": {
+      "status": {
+        "status": "selected",
+        "candidates": 4,
+        "calls": 4,
+        "seconds": 219.0
+      },
+      "receipt": {
+        "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/chatgpt_acquisition/2026-11-16_t05_comparison.md",
+        "initial_report_sha256": "d445a32e971f3e59e080d90cbb15d686e63273efea06c3673ed1b23a028d36c6",
+        "selection_supply_sha256": "31c28c15b8e02516dd87909b7951eaaf97431ef44f5f007b048d40529308e74e",
+        "supply_chars": 595438,
+        "strategy_version": 5,
+        "interventions": [
+          "saved automatic initial research and material from actual production run",
+          "remove later supplements using receipt",
+          "real two-stage selection only"
+        ]
+      },
+      "calls": [
+        {
+          "request_sha256": "5613535e478244e63320bf57c10064564fc3df8629870dd01dfc4b731ce95559",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "d01bae0a71afe978c38fbe76c49ca78b1b0e54b68803f1eb11e06c7108a7db17"
+        },
+        {
+          "request_sha256": "33d9f2110d1b9602b0f61bd6de740ffc39f8426e5a6246c36a5dde782cc2fc5a",
+          "repair": true,
+          "reason": "source count",
+          "response_sha256": "c917c462fdd1000f30c0e34e42366bcab3ddee45563c54816c6fd2e03596c6c2"
+        },
+        {
+          "request_sha256": "9b179f468bf12271c0266b99e986d34a662fe0e0a291455ea8ddf7a51e58afa2",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "8a04ea0ac00f1ee7ff45c64e9e377c35954ee2d68af2a300d611783d139ad2c1"
+        },
+        {
+          "request_sha256": "63de348b87fd66a77f22ac2a25be54dec5c2ef5390c5cd6ff19ebf35c5e80fd5",
+          "repair": true,
+          "reason": "source count",
+          "response_sha256": "7770753132d5c7e8932bd23d72b78897b1f79c22762fdaf5467fe9e3c576a6f3"
+        }
+      ],
+      "rendered_sha256": "0a9cee30ced545f7ee975f56f2f17476b37e96c33bf6ca96eeaf865dc26a0d0d",
+      "rendered_has_duplicate_angle": false,
+      "topics": [
+        {
+          "title": "先别急着订 ChatGPT Plus：免费版卡在哪，Gemini、Claude 和国产 AI 又贵在什么地方",
+          "sources": 8,
+          "suggested_structure": "",
+          "material_chars": 1463
+        },
+        {
+          "title": "同一段「早晨咖啡」小红书文案，元宝和豆包差在哪：一个散文感，一个网感",
+          "sources": 2,
+          "suggested_structure": "",
+          "material_chars": 548
+        },
+        {
+          "title": "200页招股书，Kimi 和元宝谁总结得更准？长文档选择别只看上下文数字",
+          "sources": 6,
+          "suggested_structure": "",
+          "material_chars": 708
+        },
+        {
+          "title": "AI 语音不是一种功能：元宝实时通话、DeepSeek 语音接口、ChatGPT 有限语音怎么选",
+          "sources": 5,
+          "suggested_structure": "",
+          "material_chars": 734
+        }
+      ]
+    },
+    "no-source-cap": {
+      "status": {
+        "status": "selected",
+        "candidates": 3,
+        "calls": 3,
+        "seconds": 237.1
+      },
+      "receipt": {
+        "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/chatgpt_acquisition/2026-11-16_t05_comparison.md",
+        "initial_report_sha256": "d445a32e971f3e59e080d90cbb15d686e63273efea06c3673ed1b23a028d36c6",
+        "selection_supply_sha256": "31c28c15b8e02516dd87909b7951eaaf97431ef44f5f007b048d40529308e74e",
+        "supply_chars": 595438,
+        "strategy_version": 6,
+        "interventions": [
+          "saved automatic initial research and material from actual production run",
+          "remove later supplements using receipt",
+          "real two-stage selection only"
+        ]
+      },
+      "calls": [
+        {
+          "request_sha256": "5613535e478244e63320bf57c10064564fc3df8629870dd01dfc4b731ce95559",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "09cbcd025f7e806a9a884e615595ccb542d06ba3bfe7c60528d2b8ef131efd00"
+        },
+        {
+          "request_sha256": "e2eaf97dddb1275123534d6c4f59733fde1fac7808c9a85c12cb595f7c7830d5",
+          "repair": true,
+          "reason": "optional missing field type",
+          "response_sha256": "8bc4f6f52344686d0f737734226818c0c1adad3c3b7593ddee3d09fd091bc90a"
+        },
+        {
+          "request_sha256": "2142b85be80c220164e116af1ad036cc5502933c58ac3d917c37cf67dee5c59e",
+          "repair": false,
+          "reason": "",
+          "response_sha256": "779ad6f18bc3325c823cc83b41d2f382044c6ccae23031dcf0e65e5388253481"
+        }
+      ],
+      "rendered_sha256": "8aa0f350e2c3d5d2c61af382470fd397ef522f0efa80b72890a4e0268ee3b60e",
+      "rendered_has_duplicate_angle": false,
+      "topics": [
+        {
+          "title": "同一份200页招股书：元宝给结构、Kimi能指到第几页，长文档该选谁",
+          "sources": 8,
+          "suggested_structure": "先展示同一份PDF和三问任务；再对比元宝/Kimi已有结果；最后解释上传页数、上下文、引用的区别，给“单份超长PDF”和“多文件并行”两条选择路径。",
+          "material_chars": 545
+        },
+        {
+          "title": "免费版到底够不够：写周报、读附件、查资料、做表，ChatGPT、Gemini、Claude、Mistral 的0元档和第一档差在哪",
+          "sources": 12,
+          "suggested_structure": "先给四个日常动作；再逐家讲免费限制和第一档新增权益；最后按“只聊天”“常传附件”“查资料写报告”“要多模态和存储”给选择卡。价格不明处标待核价。",
+          "material_chars": 757
+        },
+        {
+          "title": "同一段“早晨咖啡”小红书文案：元宝偏散文、豆包偏网感，中文文案该按人设还是按平台选",
+          "sources": 3,
+          "suggested_structure": "先遮品牌放两段文案让观众猜；再揭晓元宝/豆包；然后按人设、平台、字数和话题标签给选择卡；最后说明ChatGPT同题待实测，不虚构胜负。",
+          "material_chars": 574
+        }
+      ]
+    }
+  },
+  "same_report_and_index_in_all_first_requests": true,
+  "indexed_source_packets": 429,
+  "latest_schema_accepts_original_unrepaired_latest_response": true,
+  "available_material_preserved": "The broader subscription comparison retains Mistral and its official pricing packet, distinguishes API rates and actual subscription prices, and labels unrun demonstrations as pending.",
+  "limits": "Three isolated dual-stage selection runs, not three new T05 manuscripts. The last service run predated allowing list-shaped optional missing notes; current schema accepts its unchanged raw initial response.",
+  "format_followup": {
+    "initial_flash_output_replay": "Unmodified first selector response from Flash full-sources validates in current schema with known source IDs.",
+    "accepted_formats": {
+      "missing": "text or list of notes",
+      "tradeoffs": "text or list of notes",
+      "source_roles": "ID map or prose notes"
+    },
+    "source_validation": "selected IDs remain known; map keys must belong to selected IDs; prose diagnostics do not select any source",
+    "recorded_initial_result": "8 candidate topics",
+    "activation": "shared-selection-soft-format-activation.json",
+    "evidence": "A real captured request retry identified diagnostics formatting; current schema allows the unchanged captured response.",
+    "test_result": "328 passed"
+  }
+}

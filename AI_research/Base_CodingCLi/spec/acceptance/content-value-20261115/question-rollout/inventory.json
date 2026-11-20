@@ -1,0 +1,1381 @@
+[
+  {
+    "job": "actionable/ai_agents_actionable",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "ai_media/ai_tool_tutorials",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "ai_tutorial",
+    "scope": "daily_content"
+  },
+  {
+    "job": "ai_media/daily_opensource_radar",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "ai_opensource",
+    "scope": "daily_content"
+  },
+  {
+    "job": "ai_media/weekly_business_watch",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "ai_business",
+    "scope": "daily_content"
+  },
+  {
+    "job": "ai_media/weekly_deep_research",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "ai_deep",
+    "scope": "daily_content"
+  },
+  {
+    "job": "ai_media/weekly_model_arena",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "ai_arena",
+    "scope": "daily_content"
+  },
+  {
+    "job": "analysis/ai_gap_analysis",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "analysis/ai_trends",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "analysis/research_gap_analysis",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "archive/video/deep_dive_48fef9b1",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/deep_dive_56435880",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/deep_dive_d8d44faa",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_039af880",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_6acee9c7",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_79c727e2",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_8ec3bb2a",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_9c4aad41",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_a85ffe6d",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_c2ec78a5",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_c5d88429",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_efc85b6e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/flash_f5ebc962",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/point_short_18a54247",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/point_short_4628e576",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/point_short_b61ad2dc",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/point_short_e3731576",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/video/recheck_3cccf3be",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/vod/opp_06f86a78",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/vod/opp_09869a4f",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/vod/opp_4356949f",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/vod/opp_640260af",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "archive/vod/opp_f59571c3",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "archived_one_off_research"
+  },
+  {
+    "job": "chatgpt_acquisition/t01_product",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t01",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t02_scenarios",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t02",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t03_tutorials",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t03",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t04_testing",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t04",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t05_comparison",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t05",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t06_value",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t06",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t07_subscription",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t07",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t08_troubleshooting",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t08",
+    "scope": "daily_content"
+  },
+  {
+    "job": "chatgpt_acquisition/t09_updates",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "t09",
+    "scope": "daily_content"
+  },
+  {
+    "job": "company/company_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "company_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "company/company_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "company_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "company/company_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "company_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "consumer/consumer_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "consumer_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "consumer/consumer_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "consumer_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "consumer/consumer_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "consumer_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "culture/culture_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "culture_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "culture/culture_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "culture_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "culture/culture_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "culture_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "economy/economy_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "economy_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "economy/economy_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "economy_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "economy/economy_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "economy_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "geography/geography_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "geography_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "geography/geography_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "geography_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "geography/geography_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "geography_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "history/history_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "history_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "history/history_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "history_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "history/history_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "history_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "industry/industry_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "industry_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "industry/industry_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "industry_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "industry/industry_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "industry_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "monitoring/ai",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "flash",
+    "scope": "daily_content"
+  },
+  {
+    "job": "monitoring/ai_monitoring",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "monitoring/daily_ai_agents",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "monitoring/人工智能",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/00_collection_planner",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/01_model_and_pricing_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/02_ai_coding_tools_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/03_agent_workflow_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/04_project_understanding_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/05_context_rag_memory_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/06_infra_and_eval_radar",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/07_product_content_opportunities",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/08_risk_and_alternatives",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practical_ai_intelligence/09_executive_synthesis_and_actions",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practice/ai_agents_practice",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "practice/ai_agents_practice_search",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai_agent_coding_tool_research",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai_agents_latest_research",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai_agents_survey_direct",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai_automation_systems_research",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/ai_survey",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/assistant_app_acceptance_20261025",
+    "question_material": null,
+    "enabled": false,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/assistant_iteration_acceptance_20261025",
+    "question_material": null,
+    "enabled": false,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/assistant_ops_acceptance_20261025",
+    "question_material": null,
+    "enabled": false,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/assistant_tracking_acceptance_20261025",
+    "question_material": null,
+    "enabled": false,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "research/独立游戏",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_general_research_or_internal_analysis"
+  },
+  {
+    "job": "science/science_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "science_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "science/science_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "science_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "science/science_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "science_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "software/software_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "software_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "software/software_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "software_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "software/software_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "software_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "source_discovery/ai_media",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/chatgpt_acquisition",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/company",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/consumer",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/culture",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/economy",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/geography",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/history",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/industry",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/science",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/software",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "source_discovery/tech",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "system/material_collection",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "tech/tech_daily",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "tech_daily",
+    "scope": "daily_content"
+  },
+  {
+    "job": "tech/tech_illustrated",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "tech_illustrated",
+    "scope": "daily_content"
+  },
+  {
+    "job": "tech/tech_weekly",
+    "question_material": "question-v1",
+    "enabled": true,
+    "channel": "tech_weekly",
+    "scope": "daily_content"
+  },
+  {
+    "job": "topic_discovery/ai_media",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/chatgpt_acquisition",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/company",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/consumer",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/culture",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/economy",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/education",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/geography",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/history",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/industry",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_discovery/science",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_ideas/chatgpt_acquisition",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "topic_platform/chatgpt_acquisition",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "internal_collection_or_discovery"
+  },
+  {
+    "job": "video/deep_dive_73cc4205",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/deep_dive_b84026da",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/deep_dive_e9dcefd1",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_07c8442c",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_175b2ecd",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_6176b582",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_b52e464e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_bb6a3d49",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_f13f7818",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/flash_f7462d23",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_02448273",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_0ab09d63",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_0e7ef78a",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_106e40a2",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_143b9cd4",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_17bb1d67",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_18c86f62",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_19cae090",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_1db9bad6",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_20c28862",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_23e2d12c",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_2b8260f3",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_2c1dfefb",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_2d5dadab",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_2e657f89",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_2e6607dd",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_3ffed8eb",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_5727e286",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_5aee71ce",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_66cfd9f4",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_72df81d3",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_77463f08",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_7dde431d",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_7ea2a65f",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_7fb8c9bb",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_81108606",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_81bcb0ac",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_83d89edf",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_867e5d5e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_86eaccf9",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_88403137",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_89801d23",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_898b3b51",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_92e2107e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_97c7606d",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_9d6ba001",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_9db03b63",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_9f9e96af",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_a009100d",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_a3fbfcea",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_a51f6487",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_a590bb8e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_a91dacb0",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_ab583da8",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_ae5d6c3c",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_b336eecf",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_b4629b4b",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_bebf7893",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_c349afb2",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_c5049b72",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_c832ac1e",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_caaf742a",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_dda3b4f4",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_e09881d7",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_e3142873",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_e321c9ba",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_e3773196",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_e626996c",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_ec483c34",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_edc92f50",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_ee287f16",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  },
+  {
+    "job": "video/theme_research-m4_fc7e8e13",
+    "question_material": null,
+    "enabled": true,
+    "channel": null,
+    "scope": "existing_one_off_research"
+  }
+]

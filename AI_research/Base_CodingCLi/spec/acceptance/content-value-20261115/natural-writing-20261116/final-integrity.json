@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "file": "core/video/persona.py",
+      "sha256": "d960255ad2aa5161048697888d6fa01aafd0dad05d691ae147bd42e010b0113f"
+    },
+    {
+      "file": "core/video/writer.py",
+      "sha256": "ad7627a917e80d157fd093530837923e83000f09acb16a16257a3aee14a7f97b"
+    },
+    {
+      "file": "core/video/manuscript_workflow.py",
+      "sha256": "6cea2ba320b01abdd5f06cded056826276c306df44676921b41579de10a9d4c5"
+    },
+    {
+      "file": "core/video/angles.py",
+      "sha256": "54a132f2b40aecafd8d0d5f4f3f8475230825997250be43c768fbcb4d81f7192"
+    },
+    {
+      "file": "config/video_recipes/flash.yaml",
+      "sha256": "048693e9429b5e126d507b13ca4d5dff3447ec60531be1eaf0d48a280b5c742a"
+    },
+    {
+      "file": "config/content_columns/chatgpt_t05_comparison.yaml",
+      "sha256": "c5710a98c9995a4489c01e31962d57a596110dbde00581b3ae9a36b8092cac7d"
+    },
+    {
+      "file": "tests/test_manuscript_workflow.py",
+      "sha256": "d11d7b8130251da15bf60b37e6fbfe9edba10f9f67e32ecda7ef7f8883f0ae30"
+    },
+    {
+      "file": "tests/test_video_goal_first.py",
+      "sha256": "47511a01805feb1684a77543e9bf8f6d4c8e6613adfe2585faa6797e2b0be2bf"
+    },
+    {
+      "file": "tests/test_video_persona.py",
+      "sha256": "a1187cb8bc20b41c1d5bc777a23c11e762810fc8f897db97bd3dc76bfdd0ec2e"
+    },
+    {
+      "file": "tests/golden/video_cells.json",
+      "sha256": "3bb28eb0390e5b7c973f085d141e8d451e3879ee104a0b4aa6c8a61ca9d2d9b3"
+    },
+    {
+      "file": "tests/test_recipe_audiences.py",
+      "sha256": "a69b0a20cad562eaef819ec24998f662257a83d6c7a5ab1d903e47face957fbb"
+    },
+    {
+      "file": "tests/fixtures/recipe_columns.json",
+      "sha256": "6b06f1af77019bcee8f03e4659c2bc11be54b74a434466a64ea790b9d0317a37"
+    },
+    {
+      "file": "tests/test_video_angles.py",
+      "sha256": "2c4dbda94bedb3f997306ee6337c322cbd83ef179ad680ef42dc18ff6393fc1d"
+    },
+    {
+      "file": "tests/test_video_polish.py",
+      "sha256": "a9c0e27873144e72707ea9aa81ed4a5ea43ce8cb9bd2b4551c2226c934d36ce3"
+    },
+    {
+      "file": "tests/test_job_rollout_recovery.py",
+      "sha256": "a8f94b0815b591ef71e1905f07fd4219c957b502e25559e757108d052e5a9861"
+    }
+  ],
+  "jobs": 74,
+  "bindings": 57,
+  "scope": "unarchived matrix membership regardless of scheduling; helpers traced; no archived local edits",
+  "python_full_result": "4749 passed, 2 skipped in 488.26s",
+  "full_check_script": "exit 0; ALL CHECKS PASSED",
+  "frontend_result": "96 files, 751 tests passed; type-check, lint and production build passed"
+}

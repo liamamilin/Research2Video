@@ -1,0 +1,128 @@
+{
+  "title": "ChatGPT 免费版卡在哪：27K、12页和Limited",
+  "sections": [
+    {
+      "title": "20页报告贴进去，先撞上12页",
+      "paragraphs": [
+        {
+          "text": "你手头有一份20页的报告，想一次性丢给ChatGPT做摘要；或者你打开Codex，想让它连着改几轮代码，结果页面上写着Limited。先别急着升级，免费版到底卡在哪，有三个信号能帮你判断。大家好，我是洛洛，今天我们聊ChatGPT免费版的27K、12页和Limited，以及什么情况下你才真的需要付费。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先看最硬的一个数：免费版GPT Instant的总上下文是27K，单次输入上限大约12页。这个27K你可以粗略理解成它能同时记住的内容量。注意，这是GPT Instant的口径。你如果切到推理模型，免费版的上下文和输入上限都写着Varies，不能把27K直接套过去。我建议你先量一下自己最常干的那件事：是日常问答、写短邮件，还是每周都要贴十几页以上的材料？如果是后者，12页就是第一道墙。升级到Go或Plus，GPT Instant总上下文变成54K，单次输入约40页；Pro是128K和约250页。所以卡在“一次能喂多少”，Go就能把12页翻到40页，不用直接跳到Pro。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Limited不是一句口号，是一串具体限制",
+      "paragraphs": [
+        {
+          "text": "第二个信号是Limited。免费版不是只在一个地方写Limited，是一串。Codex页面写的是Limited trial access to Codex，意思是试用访问有限。免费版对旗舰模型是受限访问，GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol这些在Free那一栏都是No；免费能用的模型里有GPT-6 Luna和GPT-5 Thinking Mini。消息和上传是Limited，图片生成是Limited and slower，深度研究是Limited，记忆和上下文也是Limited。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "响应速度那一栏更值得看：Free写的是Limited on bandwidth & availability，Go也是Limited，Plus才是Fast，Pro是Ultrafast，括号里注明仅限符合条件的档位。这里有个很容易忽略的取舍：如果你觉得免费版慢，升级到Go不一定解决，因为Go的速度标记还是Limited；但如果你觉得上下文不够，Go和Plus在GPT Instant上都是54K和约40页。所以我更看重你卡的是哪一项：卡页数，Go够；卡等待，至少看Plus。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "卡页数升Go，卡速度别只看Go",
+      "paragraphs": [
+        {
+          "text": "第三个信号，回到你的任务。免费版对所有人开放，升级买的是更多模型和功能访问。我的判断是：日常问答、短文案、偶尔改几行代码，免费版够用，先别升级；你每天都要贴超过12页的材料、做多步骤研究，或者Codex连着用几轮就撞Limited，那就不是“再忍忍”的问题，是口径对不上。",
+          "citations": [
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F",
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一类人，卡的是速度：免费版是Limited on bandwidth & availability，Go也是Limited，想要Fast得看Plus。最后留个问题给你：你最近一次被ChatGPT截断，是贴了多少页，还是用Codex用到第几轮？拿这个数去对12页和40页，比看一堆参数有用。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 796,
+    "estimated_seconds": 178,
+    "segments": 33,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.593,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "20页报告贴进去，先撞上12页",
+        "spoken_length": 332,
+        "budget": 435
+      },
+      {
+        "title": "Limited不是一句口号，是一串具体限制",
+        "spoken_length": 265,
+        "budget": 435
+      },
+      {
+        "title": "卡页数升Go，卡速度别只看Go",
+        "spoken_length": 199,
+        "budget": 435
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3389,
+      "completion_tokens": 6738,
+      "total_tokens": 10127,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 5685,
+      "cost_usd": 0.00455115,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 74.79,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+    "trusted_urls": 3
+  }
+}

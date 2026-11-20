@@ -1,0 +1,15 @@
+{
+  "sandbox_full_backend": "22 failed, 4718 passed, 3 skipped, 55 warnings, 8 errors in 462.25s (0:07:42)",
+  "local_service_retest": "73 passed, 1 skipped in 44.90s",
+  "failing_test_files_retested": [
+    "tests/test_assistant_maintenance.py",
+    "tests/test_capture_process.py",
+    "tests/test_gateway.py",
+    "tests/test_launcher.py",
+    "tests/test_remember_and_gateway_api.py",
+    "tests/test_run_web_duplicate.py"
+  ],
+  "single_run_full_check_passed": false,
+  "frontend_stage_run": false,
+  "production_health": "ok; optional-roles-activation.json"
+}

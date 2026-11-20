@@ -1,0 +1,56 @@
+[
+  {
+    "channel": "flash",
+    "status": "DRAFT",
+    "title": "删掉 think hard，Claude Opus 5.5 提示词该换了",
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "flash",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "664d1ce1900cb5b4ed7a3df44b3777b698b1566cac873138683332ef1af6f42c",
+      "material_sha256": "5dffe3e3c15b4fc6d779d335fe08363947560f5a234bb8d1b47f18938bca23e0",
+      "report_chars": 9139,
+      "material_chars": 73249
+    }
+  },
+  {
+    "channel": "t05",
+    "status": "DRAFT",
+    "title": "豆包通义DeepSeek免费，Kimi Pro 99元该花吗",
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "t05",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "audience_selection",
+      "report_sha256": "6e130000c96ca62676db7e5232eea10ede7f963b904dfc23b714b77f82dc9a19",
+      "material_sha256": "c3e1461ae066c05890825318f35e0ba8d2c6d2ce7e186c8c376eeca5dc85530c",
+      "report_chars": 1368,
+      "material_chars": 11874
+    }
+  },
+  {
+    "channel": "t06",
+    "status": "DRAFT",
+    "title": "ChatGPT升Plus前，先看27K、12页和20美元",
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "t06",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "9ea43bc5fc74a87969a5070ec8c96588c119dbcaed608bb597e968547f261c36",
+      "material_sha256": "c26c20936ca5427a0963a67d413434b4eadfa797816cbc5627b5e4995ba4195e",
+      "report_chars": 8487,
+      "material_chars": 11907
+    }
+  }
+]

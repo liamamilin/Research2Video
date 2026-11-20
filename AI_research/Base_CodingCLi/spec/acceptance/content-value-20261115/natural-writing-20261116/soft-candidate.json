@@ -1,0 +1,514 @@
+[
+  {
+    "file": "config/content_columns/ai_business.yaml",
+    "before_sha256": "d34bf4e1916fa952e17a8cf7f3e924109392e8269a15429906ce84fbde06e47c",
+    "after_sha256": "f8b73e188a876fc60acc8d802dd7df112e878a19e710efae6763971a9e2cc3ec",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/ai_deep_research.yaml",
+    "before_sha256": "3043712747caacc39cccd8af2968bf769ec558233c60f3faf83962be8acfad41",
+    "after_sha256": "7a961f92a23f0c3a1459d84f3adaedc766a71cf92bc1f6d0ee9a8f45e568cdb6",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/ai_model_review.yaml",
+    "before_sha256": "5cf6002e2ce9c4a4b927bff71a11fce132d5f295b8f2312a3c8afea96aee8d55",
+    "after_sha256": "13b48371be70a5cf1f9de0c2f05a64ed3731c5f08ba15833501bdd6358a719e6",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/ai_opensource.yaml",
+    "before_sha256": "e8d570d7128235611f7b71400cfacf062caedab157c59283dab60f9d8fff9a22",
+    "after_sha256": "9a37ea7fd1c147cba97a47d5bdbf508ba1163d67a138b1d1e90ee9ebe9fc179f",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/chatgpt_t01_product.yaml",
+    "before_sha256": "0a749fa6ead7f5e03f59884aee2eb83db450534da781635a3f89b039c4a0bbc5",
+    "after_sha256": "f99ab0f4628ba90302a8200853c21d91c21000275d5036258a68677af0a192fa",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/company_daily.yaml",
+    "before_sha256": "a55f009b4e64571b0206018a0a5b136916af50463deb09df2930eb1ff4abcdd4",
+    "after_sha256": "8a370c922f73f41e0ba3e11fc8ba7986df1c6215c8a285729f9b7689b894160b",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/company_weekly.yaml",
+    "before_sha256": "a426e571f0fcb0a4f173183531df602271aaa8443878314a4c9cbf08bbf16e75",
+    "after_sha256": "a9ab9d830c0a6ac8d7b16532cd5028965a81c187fd4a8530e13dd2b39f01b0c0",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/consumer_daily.yaml",
+    "before_sha256": "53e592d8d8521e796be62e0efa85b0287efeff34e05d26dc6a5dba9e38c69881",
+    "after_sha256": "9567aaba5883e61b5b4ea78943b35b28e11b1317a3bf6a745b4b3e409eb28ef1",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/consumer_weekly.yaml",
+    "before_sha256": "0151f5e3f8d8d49412e08b3e9b01f50103529d15252180215b51b5a67d3c3f4b",
+    "after_sha256": "7e9a6c54a1621bc69e726f7c4b013a45a3489bcd1e00febb15074ea161f6fb95",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/culture_daily.yaml",
+    "before_sha256": "ddae45b0227e8a490a5bf6634a07b245986517248f18f7251a71e71fa5c07b7b",
+    "after_sha256": "d696895a863a18c89515435fc8c9f2afefbb91f8deaa77e973730f553656e830",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/culture_weekly.yaml",
+    "before_sha256": "20a87520cfb4a23d96aa8327254551cc34b62fd66f0f9d6bf734215a2b5217a8",
+    "after_sha256": "3aa04827eb118b733ce8dbb61528597319e81149d8685b885dd8e0d28f385df7",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/economy_daily.yaml",
+    "before_sha256": "1f837e578a91927d3ad4206e4a8b52ee7dfe5ef05f5d2f4a75eb0ffc73ae54b1",
+    "after_sha256": "dd6ad43b01b656c47479dc4d2cff87f0440b536776f03d6a8e7a03e29e08f442",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/economy_weekly.yaml",
+    "before_sha256": "a7fe2d183f2892f60771874a1763d5dda1a7bf0fab60b7d14cbfedaca2ec8065",
+    "after_sha256": "fa225c7dd4dca4c83f113cc05b29b07894918e1071ad60e0c9bd73a9ebe158db",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/geography_daily.yaml",
+    "before_sha256": "663c042a8457b5b69d07202c16ac7dd3dadfd6e73642389e7741001c86d912db",
+    "after_sha256": "f98d8335924f4870fde48e7281b922c621609bc8b9f31f943f69bce78da7a2e4",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/geography_weekly.yaml",
+    "before_sha256": "573a260ba656746d74e88971bdb8c2b0ece7c764c370fc229d9c99c0bf1771cd",
+    "after_sha256": "fdbdeac410e0e56a069027902ee74b87c5f60e93fd06fd109be57171b49c3824",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/history_daily.yaml",
+    "before_sha256": "dd1e34112a2600e83a972080e2caa3649d8e6a08abdea8deab6e6983db9a9f35",
+    "after_sha256": "bb2baf8b543160bc5d30f8f70c2109c1469198c4477bf2616a5bd1da3259c976",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/history_weekly.yaml",
+    "before_sha256": "3d2c99d0490927abd8eb96ca88a04e581ba3d336cd7a5439bc0864789c044cd9",
+    "after_sha256": "2e5d65d7f9827b2ace6c4c3aa845a4877ee997c34bc8ef79af5e2b1e37de9fbd",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/industry_daily.yaml",
+    "before_sha256": "27474a244d785508188eb21bdb46bec92dc827a2890a6d94edbfe8a648f6cbff",
+    "after_sha256": "796b95a445cc6f65cd1446dbf805ce91d8868602bf5b57ba14ec2805c8a309d9",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/industry_weekly.yaml",
+    "before_sha256": "10f13673dd29b280c0f1bf50c36590c951475c53db6b23e34679e1d4600fd564",
+    "after_sha256": "d2354941fc11993521a69213e0c306233fec0cd5e5d641e48e06de659e7ecb76",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/science_daily.yaml",
+    "before_sha256": "599db56c30c87a2bd1eb1e136a4d90464269160442995d1d380ff266b5d2154f",
+    "after_sha256": "9ef7bcec990d1446bd6fee095ee6279b759ae222f3df84a05516781071e387bb",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/content_columns/science_weekly.yaml",
+    "before_sha256": "da16d56891103749993894f5ab2da5f249108271225f1a6492b50c835747782c",
+    "after_sha256": "420d424e8ba8d1988cb980a9e859b6f5b9b423f152d3b2b656c2cdad40c414ca",
+    "reasons": [
+      "栏目写作方向改为本领域的内容建议，取消固定路径与首尾要求"
+    ]
+  },
+  {
+    "file": "config/video_recipes/illustrated_explainer.yaml",
+    "before_sha256": "3efe9b9885becee4f0f57c87135a55e3dd7d13dd66261ee1db84c199cbfc4f9f",
+    "after_sha256": "5843f2918eeec376ab6002e4b6bca9c8ec968d77456bfb0837727ff2a96391bf",
+    "reasons": [
+      "去掉节数、字数、人物和数字配额，视觉具体性改为建议"
+    ]
+  },
+  {
+    "file": "core/video/manuscript_workflow.py",
+    "before_sha256": "6cea2ba320b01abdd5f06cded056826276c306df44676921b41579de10a9d4c5",
+    "after_sha256": "b84a91b2ade4a06fe80cd70dfe2cbb7d9c5bdd617ef6e0d0a1b9ded458ad829d",
+    "reasons": [
+      "实际启用 profile 改为领域建议，去掉固定开场/回环与必须作选择"
+    ]
+  },
+  {
+    "file": "core/video/writer.py",
+    "before_sha256": "ad7627a917e80d157fd093530837923e83000f09acb16a16257a3aee14a7f97b",
+    "after_sha256": "a2043f3cf3aa40e43677e4221eb76eb0e833623eec9f50a421a779f95185a98d",
+    "reasons": [
+      "共用作者取消数量配额、人物必备、目录预告及逐条判断收尾",
+      "专题模板改为解释方向建议，不要求固定主角、步骤顺序和首尾回环",
+      "共用组织指令改为建议，避免覆盖栏目软指导",
+      "标题不再必塞公司和数字，术语与前提解释不再限定句数",
+      "有效请求复核：去掉材料交接中隐藏的强制贯穿与首尾安排"
+    ]
+  },
+  {
+    "file": "jobs/ai_media/daily_opensource_radar.yaml",
+    "before_sha256": "bedf2c54ba4d8cef14db04822845647c917a32cba21a69158469fd3fbf16802a",
+    "after_sha256": "448c9163a994896d08e49bff3ef2eb341e1d4d027f7a1a7870abf841875233d4",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+    ]
+  },
+  {
+    "file": "jobs/ai_media/weekly_deep_research.yaml",
+    "before_sha256": "6c8b07bc0400ad3a1e5f553590bd709b74f6669544d1fcfb0a26ce075b54e70d",
+    "after_sha256": "702ba4e95f8da5d79c2fe5ebef27edaec1c408561fb675eac44bca690bf63e73",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+    ]
+  },
+  {
+    "file": "jobs/company/company_daily.yaml",
+    "before_sha256": "28913e409ec865797e09700dab0d01485024505b3848fe1c59fd357b35599937",
+    "after_sha256": "5239d7bb5d9c070a59f8c752e7350a586f417c8cc8d00abf4717fda9c4d4e1c0",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/company/company_illustrated.yaml",
+    "before_sha256": "c07cc26c27c2a15ca8315ded7ac8b7b6c4684336dc5ed29fdbe26364c502d057",
+    "after_sha256": "618859e5232c610c0c179f949db8225139945fd24304b7289ac115f19810dc65",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/company/company_weekly.yaml",
+    "before_sha256": "e8ecdabf52f72b832e30f92487b7d32ebb4dfc7d4d47985d30b6c2a691074c57",
+    "after_sha256": "c91b57058b4a0efc1fec0ee44bd567a817bfb2a538b0075c6e832990123d7f8a",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/consumer/consumer_daily.yaml",
+    "before_sha256": "e56f3c809fdac9a2f503a70dfc944b0707d7e23f2eb98bf205b00eddb63b3edd",
+    "after_sha256": "09a642b41b4d29daf17f09aef0e92d2716778b7707ce57ff380a132ebf70f038",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/consumer/consumer_illustrated.yaml",
+    "before_sha256": "81f6eec9c0ccb6451af7831c85120d9ef4385d3c691524dfc7b0697d29030be2",
+    "after_sha256": "e21c54dae1461010373b68e6ac0b098d46720cf496c9edccce345fc6a7934e14",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/consumer/consumer_weekly.yaml",
+    "before_sha256": "9aaea09cf331d13712f3e8cca8f3b92339b2601cb6b98709caa29b3faa9802eb",
+    "after_sha256": "dd739a54207394eef5900ce3d93964cea2054fe4ab16042ee4f7c640c9595a20",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/culture/culture_daily.yaml",
+    "before_sha256": "c5327fffe00fe29345c3aa293219f4e6b3c1a1a17876d85c2e78a67df40ef7c3",
+    "after_sha256": "3a56cd062389f3460045e3f1c51449c0e1615556c881e9e5be8753edc6b58442",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+    ]
+  },
+  {
+    "file": "jobs/culture/culture_illustrated.yaml",
+    "before_sha256": "c4471dc6950fbd9e7eaca8689483d81994443a2af09362146c06cd9e67c0a910",
+    "after_sha256": "74e72b8548b65e3324495f70249b9d2ae778cff19a883fe77dac1da8667f63f5",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/culture/culture_weekly.yaml",
+    "before_sha256": "609b4d609d3816462c53970ae8f8733beff83c6b6b1fd5740e0c80beceda0c93",
+    "after_sha256": "601c59664f067d253c488f2ab4dd21a3bb1315cd6c92fae2a15eb45ab2fdbd5b",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/economy/economy_daily.yaml",
+    "before_sha256": "c0a8c3e0f7795b5c7b50c28cd40b77b21644867d3edb03e13082fe1ab2ed7616",
+    "after_sha256": "c8002c45717d79ca2b4b6932e096345a59cdcc1c21d260ba5abe2cd78cd28c1c",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/economy/economy_illustrated.yaml",
+    "before_sha256": "a104e520a4b706d9fffdb939dc84eeb11ec41df96af880ae265bb9782fb2aca1",
+    "after_sha256": "cbce06cb51aa7102c161d9d9a242032dfe29313f9f4d0f8dcb4cbfb770342e0a",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/economy/economy_weekly.yaml",
+    "before_sha256": "3edb600e766eeb17e2fb88f8b555659721b894d4e7004ab0d7c9a3653e034e0a",
+    "after_sha256": "703d37c56308db1135408cbd1353a760327a4cbe0f8eaba37e4f4bbb796da780",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/geography/geography_illustrated.yaml",
+    "before_sha256": "e32d377377d82090af46194d3cf43d35f110067927ef9926d38fc195018ed313",
+    "after_sha256": "369d86f2ff78899da2926c8004e82bf9fb5af85aa403533265e8f7e62cedbe93",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/history/history_illustrated.yaml",
+    "before_sha256": "0cc557035427a5d49c9671cd395202d0c413b82e07ad1a8e71de7849aa329880",
+    "after_sha256": "f8ad8cb48582d338d5a6b8848ed3b72f6516d9729518860d39606ecf0e074b6c",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/industry/industry_illustrated.yaml",
+    "before_sha256": "9f36e2a30be576cae5487fea105fbf10657f3c581969041744201d0a0f4f4f77",
+    "after_sha256": "7ab339c68fd7e414cb962df8a4b8a7edf193fa8b148fc3a99cd29b1b7312e14a",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/industry/industry_weekly.yaml",
+    "before_sha256": "cfa917dc6861aec08edecf340c83de2fabf83442c103db738ed9cdbfde916a35",
+    "after_sha256": "d54775f5d805b1b9892d7ff421608400d26a8cd6c4b36e5e83fb3376fd513a08",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/monitoring/ai_flash_discovery.yaml",
+    "before_sha256": "1dde900dba0077ab51217ad599cfdf7eb722c20118260045bc31270bd1c37ba9",
+    "after_sha256": "de827e2bdcfdf51d3bfcee01f953065ff22b2989192cc9b941c5f690923f6f03",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+    ]
+  },
+  {
+    "file": "jobs/science/science_daily.yaml",
+    "before_sha256": "c3f406c6937561702695c3ac6306f49a725866eb8d41b61a21f26edfaf868579",
+    "after_sha256": "03fb02ce764962036427d34ddf48112869963860671dc9990e2cd77f24227c12",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+    ]
+  },
+  {
+    "file": "jobs/science/science_illustrated.yaml",
+    "before_sha256": "5b15ff19cb3890572cef04dd4ebb9601c95d1d4106f82870dd82a30d4da2fa6c",
+    "after_sha256": "9da054ce30c8f3762e3283ddcd6a8dacc9f0a838283846243e7f4a8c23419a45",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/science/science_weekly.yaml",
+    "before_sha256": "307bb6bfa2e104d2f0f8977d0be285595ff420fe54559258093ada47088acf2a",
+    "after_sha256": "6a4f557f11357464ea0b22c24a06258b9a8d5e0f373e5e9815b01bad8953be7d",
+    "reasons": [
+      "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ]
+  },
+  {
+    "file": "jobs/software/software_illustrated.yaml",
+    "before_sha256": "7c658fae5041c55a12d968b34ad631255dca1de8c99a38730c3d5b700f1b19f5",
+    "after_sha256": "385d230cb42037467990452e489f8373bfa3ba7aa165df91b5ad0f119f2e9045",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "jobs/tech/tech_illustrated.yaml",
+    "before_sha256": "6b53b4fcc94da431132abd532a386f594fd37c4f789c570a8daa2bc41a248c13",
+    "after_sha256": "661687ffe5be790e3969a37a12dc65e9bb5f63f2881b4e1dac18be9ba96ce672",
+    "reasons": [
+      "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+    ]
+  },
+  {
+    "file": "core/video/content_columns.py",
+    "before_sha256": "018adf5a8ecf1ce61f9d55fa41687af37c2417c0509f85397dd60b90ee8737e7",
+    "reasons": [
+      "共用组织指令改为建议，避免覆盖栏目软指导"
+    ],
+    "after_sha256": "d78528810610eb95172f96b6716e822d36b9d22a5eda0a810c3696e52da96f36"
+  },
+  {
+    "file": "core/video/episodes.py",
+    "before_sha256": "e53a99ec40fd2c69613e066e8e259bb714a728af0649866089a8a360f5ee8454",
+    "reasons": [
+      "共用组织指令改为建议，避免覆盖栏目软指导",
+      "有效请求复核：去掉材料交接中隐藏的强制贯穿与首尾安排"
+    ],
+    "after_sha256": "2323799a8866b9dbd91b84f35b109b58c6d60c235b636f7dba05883113d4d22b"
+  },
+  {
+    "file": "tests/test_video_goal_first.py",
+    "before_sha256": "47511a01805feb1684a77543e9bf8f6d4c8e6613adfe2585faa6797e2b0be2bf",
+    "after_sha256": "537fe0e29dc3554abcadc90a6b9b49d9b4e9adc3875b92c665c8d97f7555f8b6",
+    "reasons": [
+      "验证实际模板与栏目上下文的传递，不把具体叙事句式锁进测试",
+      "验证实际风格规则接入，不绑定旧句式",
+      "有效请求复核：去掉材料交接中隐藏的强制贯穿与首尾安排"
+    ]
+  },
+  {
+    "file": "tests/test_content_columns.py",
+    "before_sha256": "9de5d788de0dea46130a1e0277d66fa28d242900f3dce5d3f56518ccfaf088a7",
+    "after_sha256": "a9cc36bf1d696031dbc9bf2a0e466453f46a8101305c6a6fc8a454b565129dab",
+    "reasons": [
+      "验证实际模板与栏目上下文的传递，不把具体叙事句式锁进测试"
+    ]
+  },
+  {
+    "file": "jobs/geography/geography_weekly.yaml",
+    "before_sha256": "796055e77411f6e929dd6b38385e3c24bdebfb110aadf7df69c1a897d82bbbbc",
+    "reasons": [
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ],
+    "after_sha256": "8e42ca90e6f118d1bf8fc02bed4a7a52ab59c8b43cc7fe1b8c79cc0dfecf7a61"
+  },
+  {
+    "file": "jobs/history/history_daily.yaml",
+    "before_sha256": "2f66dae307a1749c6587e5d0ad5455fbd9e0203b0f7965917b66dcff086b745a",
+    "reasons": [
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ],
+    "after_sha256": "986341f6ad9ab990fcbd2d3b2fe9282384ab17f06a1aeac4a5c1bdba2b05450f"
+  },
+  {
+    "file": "jobs/history/history_weekly.yaml",
+    "before_sha256": "78b63f4b779bb7d1fc9dd616459d71622729d4048e08374d0a4adea7c2eedd54",
+    "reasons": [
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ],
+    "after_sha256": "c8b74e65add32126cdf570278029f396ef52d87590b3453f2fc03cef2a11ea3e"
+  },
+  {
+    "file": "jobs/industry/industry_daily.yaml",
+    "before_sha256": "f0637ef7f7ebbcab2f84dafdf38e753deabfd92f3f96f95a4680f35d995dbc71",
+    "reasons": [
+      "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+    ],
+    "after_sha256": "9514a22625d2238a2ae4d938eb8182c91dd5ae7659ec3c37ded659a86ecbdeaf"
+  },
+  {
+    "file": "core/video/question_material.py",
+    "before_sha256": "378cefd988e9df05ef13fe7409f966204eda402a7ea4a9596128580e03b1ac1b",
+    "reasons": [
+      "补材组织优先解释新旧材料的关系与适用条件，不新增作者规则或审核步骤"
+    ],
+    "after_sha256": "4215252f373fd54943942454fcdfe9fe58c84a6bdd01bc13c0f31f2599763730"
+  },
+  {
+    "file": "tests/golden/video_cells.json",
+    "before_sha256": "3bb28eb0390e5b7c973f085d141e8d451e3879ee104a0b4aa6c8a61ca9d2d9b3",
+    "after_sha256": "787996ecb381886c4f11da36b1b273602a154a68211bfedd44267406579cbd04",
+    "reasons": [
+      "有效提示词快照随软建议更新"
+    ]
+  },
+  {
+    "file": "config/video_recipes/chatgpt_acquisition.yaml",
+    "before_sha256": "dd608628cf062630f6f46351bb5fae25ba3f04aca40f58dc81a57d7a9d105c5f",
+    "reasons": [
+      "有效请求复核：去掉材料交接中隐藏的强制贯穿与首尾安排"
+    ],
+    "after_sha256": "c6424f39a4874b4fbdefd5d6534d43708d6fe05e44258b7c64e03dbb7c36e7bb"
+  },
+  {
+    "file": "tests/test_writer_audience_scope.py",
+    "before_sha256": "fc4b0384f8ebb812347e7b8462ef9f552ca877be937f6bc86c41e8bf3d6df45b",
+    "reasons": [
+      "有效请求复核：去掉材料交接中隐藏的强制贯穿与首尾安排"
+    ],
+    "after_sha256": "c3028460aa4fbd449965b7e9ed076547ae2aa1ad4834c4c478e3b03148a49ede"
+  },
+  {
+    "file": "tests/test_audience_expansion.py",
+    "before_sha256": "3fac2329692151c7f5169f2444c0f773487ea72ef78a9a516e024c5725852007",
+    "after_sha256": "87a983561954be90577d3f4e889b71ea006b331f34e73af1d6ca88fea042d882",
+    "reasons": [
+      "移除旧固定小节断言；仅更新本轮有意修改的在用 job 提示词快照，不刷新归档条目"
+    ]
+  },
+  {
+    "file": "tests/fixtures/job_prompt_hashes.json",
+    "before_sha256": "239a19d8a251acf94e2f26f1eb6d395488114f214a5d578698b9babcb88ac9b4",
+    "after_sha256": "604ab9064318d8e8d005d4de84317acc06fe4569711351b4efe2ecca42d0f1d5",
+    "reasons": [
+      "移除旧固定小节断言；仅更新本轮有意修改的在用 job 提示词快照，不刷新归档条目"
+    ]
+  }
+]

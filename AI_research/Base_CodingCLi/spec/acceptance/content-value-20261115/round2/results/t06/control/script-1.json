@@ -1,0 +1,161 @@
+{
+  "title": "免费版 ChatGPT 卡在哪：27K 和 12 页",
+  "sections": [
+    {
+      "title": "一份 30 页的报告，刚好卡在 12 页上",
+      "paragraphs": [
+        {
+          "text": "周五晚上，你把一份 30 页的行业报告拖进免费版 ChatGPT，让它先概括一遍。开头几段它总结得像模像样。你翻到第 20 页，追问里面一张表的具体数字，它就开始绕，说报告里没提。我猜不少人都遇到过这种情况。它其实并没有变笨，只是后面的内容根本没进它脑子。大家好，我是洛洛，今天就聊这件事：免费版到底卡在哪。官方定价页上有三个信号，27K、12 页和一排 Limited，看懂这三个，你自己就能判断要不要掏钱。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先说 27K。在定价页的模型表里，GPT Instant 这一行，免费版写的是总上下文 27K，单次输入上限大约 12 页文本。上下文你可以理解成一次性摊在桌上的材料量，超出的部分它看不见。12 页这个数比 27K 小，我的理解是它得给回答留出空间，不能把额度全填满。同一张表往下看：Go 是 54K、大约 40 页；Plus 也是 54K、大约 40 页；Pro 是 128K、大约 250 页。也就是说，从 12 页到 40 页这一步，Go 和 Plus 给的一模一样，你不用为了页数去买更贵的那档。官方只写了按每用户每月计价、有月付和年付两种买法，具体金额我不在这里替你报。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models",
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但这里有个最容易误读的地方，我得停一下。27K 只属于 GPT Instant，也就是你平时直接对话的那个。同一张表里，GPT Reasoning 那一行，免费版的总上下文和输入上限写的都是 Varies，意思是看情况、不固定。所以你要是用的是会先想一会儿的推理模型，别拿 27K 去算自己的天花板，那两栏根本没给你一个固定数。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "六个 Limited，哪一个先咬到你",
+      "paragraphs": [
+        {
+          "text": "第二个信号是那排 Limited。Codex 那一页，免费版的原文是：有限试用访问 Codex。下面还跟着五条：旗舰模型是有限访问；消息和上传有限；图像生成有限而且更慢；深度研究有限；记忆和上下文有限。注意它说的是有限，不是没有。Codex 你能摸到，只是摸着摸着就没了。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "旗舰模型这条最具体。模型表里，免费版打勾的只有 GPT-6 Luna 和 GPT-5 Thinking Mini。GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol 这些，免费版一栏全是 No。GPT-5.6 Terra 稍微特殊，免费版写的是在 Work 和 Codex 桌面里有限访问。所以你如果听说某个新模型很强、自己却找不到，多半不是设置问题，是这档本来就没给你。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "慢这件事，Go 救不了",
+      "paragraphs": [
+        {
+          "text": "第三个信号是慢。响应速度那一行，免费版写的是受带宽和可用性限制。你猜 Go 写的是什么？一模一样的同一句话。到 Plus 才是 Fast，Pro 是 Ultrafast，还得是在符合条件的档位上。这是我今天最看重的一条：如果你觉得免费版的问题是它回答得慢、高峰期要等，那升 Go 不解决，钱花了，那句话还在。反过来，如果你的问题只是贴 30 页文档被截断，那 Go 这一档就够了，不用往上走。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以三个信号其实对应三种症状。你觉得它读不完、答着答着就丢前文，那是 12 页的问题，往上加页数有用。你觉得它找不到某个模型、深度研究点两下就到头、Codex 试一会儿就停，那是 Limited 的问题，得看哪一项对你最要命，不是每项都能靠一档解决。你觉得它慢，那是带宽的问题，只有 Plus 往上才换了个词。官方那句话说得很平：免费版对所有人开放，升级买的是更多模型和功能的访问。它没说免费版不能用，它说的是免费版的量是有限的。",
+          "citations": [
+            "https://chatgpt.com/pricing/#:~:text=Is%20ChatGPT%20free%20to%20use%3F",
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "回到那份 30 页的报告",
+      "paragraphs": [
+        {
+          "text": "回到开头那份报告。如果你每周都得往里塞一份二三十页的东西，那 12 页就是硬墙，绕不过去，Go 和 Plus 在这件事上给的是同一个 40 页。如果你只是偶尔贴篇长文、平时问答够用，那我建议先别升级，先用一件事测自己：下次它答得含糊，你回头看是第几页开始断的。断在十几页，是上下文；断在“这个功能今天用完了”，是额度；你要是纯粹在等它出字，那才是速度，而速度这条，Go 不在解法里。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你上一次觉得免费版不够用，是它读不完，还是它答得慢？这两个答案指向的档位完全不一样。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/pricing#Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1248,
+    "estimated_seconds": 282,
+    "segments": 56,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.939,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "一份 30 页的报告，刚好卡在 12 页上",
+        "spoken_length": 507,
+        "budget": 327
+      },
+      {
+        "title": "六个 Limited，哪一个先咬到你",
+        "spoken_length": 215,
+        "budget": 326
+      },
+      {
+        "title": "慢这件事，Go 救不了",
+        "spoken_length": 322,
+        "budget": 326
+      },
+      {
+        "title": "回到那份 30 页的报告",
+        "spoken_length": 204,
+        "budget": 326
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3339,
+      "completion_tokens": 3503,
+      "total_tokens": 6842,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2155,
+      "cost_usd": 0.00260265,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 44.49,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 3
+  }
+}

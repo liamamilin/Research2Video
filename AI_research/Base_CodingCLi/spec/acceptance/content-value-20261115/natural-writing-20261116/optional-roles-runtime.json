@@ -1,0 +1,68 @@
+{
+  "science": {
+    "production": "science_weekly",
+    "same_saved_report_sha256": "c003f50ef4a1259918d977580c8d88bd13030250fbc4b588be2b3e7b3637fe86",
+    "same_saved_material_sha256": "08f18398649ab97ea66a657bf5c1047cd86e34fd98222e35a4f7a76f1c859a7b",
+    "only_section_role_wording_varies": true,
+    "outputs": {
+      "control": {
+        "title": "从坏空气到破门而入：把看不见的瞬间变成证据",
+        "roles": [
+          "opening",
+          "item",
+          "item",
+          "item",
+          "item",
+          "item",
+          "closing"
+        ],
+        "script_sha256": "be9dde6b60448e5f0329297441b75203a13bad6cb1079618f6ab04401c73bfd0"
+      },
+      "candidate": {
+        "title": "同一种药，为什么有人有效、有人白吃",
+        "roles": [
+          "opening",
+          "item",
+          "item",
+          "item",
+          "item",
+          "item",
+          "closing"
+        ],
+        "script_sha256": "15cff463d4b20e58cb669815a1baaa5f9bfcd781b41387576e874569f93e94cc"
+      }
+    }
+  },
+  "culture": {
+    "production": "culture_weekly",
+    "same_saved_report_sha256": "bbf01bdd2cf347e6854a304870c72947f007b443867e0caf669095413a09ea9d",
+    "same_saved_material_sha256": "37ca691e410b33abeb5a7d08db9a45043f857f758a3419d576131d4b675c685c",
+    "only_section_role_wording_varies": true,
+    "outputs": {
+      "control": {
+        "title": "玻璃泡泡关了门，黄铜铃还在响",
+        "roles": [
+          "opening",
+          "item",
+          "item",
+          "item",
+          "closing"
+        ],
+        "script_sha256": "e2e2004b1a027d2eca6c0b3829e1f4ad408a0b6cbb682728e30d91fac4cba3bd"
+      },
+      "candidate": {
+        "title": "作者不是一个人：从梵高到一段无词人声",
+        "roles": [
+          "opening",
+          "item",
+          "item",
+          "item",
+          "item",
+          "item",
+          "closing"
+        ],
+        "script_sha256": "3a64b4b5c417898c852994a72f0f57775c1055f5ae8df8912fbab190c79da94b"
+      }
+    }
+  }
+}
