@@ -12,8 +12,9 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from . import persona
+from .narration_stance import defects as stance_defects, launders, note, settle_sections
 
-PROMPT_VERSION = 5
+PROMPT_VERSION = 6
 
 #: A production note to the video maker said as narration ("视频里应该说清楚", "素材只有一句描述").
 _PRODUCTION_NOTE = re.compile(
@@ -40,6 +41,7 @@ RULES = {
     "stock_ending": "用固定句式收尾，各条听起来一个模子",
     "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
     "hedge": "像免责声明一样的套话，观众听着生硬",
+    "audience_stance": "把研究备忘或自我免责说给了观众；留下已经成立的事实，不要补范围套话",
 }
 
 SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
@@ -81,6 +83,7 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
                 hits += [("stock_ending", m.group()) for m in _STOCK_ENDING.finditer(text)]
                 hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
             hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
+            hits += [("audience_stance", item["quote"]) for item in stance_defects(text)]
             found += [{"id": pid(si, pi), "section": si, "paragraph": pi, "rule": rule, "quote": quote,
                        "problem": RULES[rule]} for rule, quote in hits]
     return found
@@ -99,10 +102,36 @@ def _script_text(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _fallback(sections: list[dict], record: dict) -> list[dict]:
+    settled, stance = settle_sections(sections)
+    if stance.get("kept_original"):
+        record["unresolved"] = stance["unresolved"]
+        if stance.get("blocks_auto_approval"):
+            record["blocks_auto_approval"] = True
+        return sections
+    for change in stance["changes"]:
+        section = sections[change["section"]]
+        record["changes"].append({
+            "id": pid(change["section"], change["paragraph"]),
+            "where": f"{section['title']} · 第 {change['paragraph'] + 1} 段",
+            "rules": ["audience_stance"], "before": change["before"], "after": change["after"],
+            "fallback": True,
+        })
+    record["gaps"] = list(record.get("gaps") or []) + stance["gaps"]
+    record["unresolved"] = list(record.get("unresolved") or []) + stance["unresolved"]
+    if stance.get("blocks_auto_approval"):
+        record["blocks_auto_approval"] = True
+    return settled
+
+
 def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[dict], dict]:
-    """(sections, record). With nothing found no model call is made; any failure keeps the draft as it was."""
+    """(sections, record). With nothing found no model call is made.
+
+    A rewrite that still reads a memo, or that leaves 「第二，而……」, is rejected
+    and the paragraph falls back to dropping the memo without inventing a claim.
+    """
     found = findings(sections, greeting=greeting)
-    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": []}
+    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": [], "gaps": []}
     if not found:
         return sections, record
     targets: dict[str, list[dict]] = {}
@@ -116,6 +145,10 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         reply = call_json(client, SYSTEM_PROMPT, request, _Reply, temperature=0.4)
     except Exception as exc:  # noqa: BLE001 - polishing is optional; a failed call never costs the draft
         record["error"] = f"{type(exc).__name__}: {exc}"[:500]
+        if any(item["rule"] == "audience_stance" for item in found):
+            settled = _fallback(sections, record)
+            record["remaining"] = findings(settled, greeting=greeting)
+            return settled, record
         return sections, record
     out = json.loads(json.dumps(sections))
     narrator = persona.load()
@@ -133,8 +166,13 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
             after = after.rstrip() + goodbye
         if after == before:
             continue
-        if _numbers(after) != _numbers(before):
+        stance = any(item["rule"] == "audience_stance" for item in targets[rewrite.id])
+        if _numbers(after) != _numbers(before) and not (stance and _numbers(after) <= _numbers(before)):
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
+            continue
+        reason = launders(before, after) if stance else ""
+        if reason or stance_defects(after):
+            record["rejected"].append({"id": rewrite.id, "reason": reason or "改写仍在念备忘或残句", "text": after})
             continue
         if si == 0 and preserve_intro:
             candidate = [*opening[:pi], {**opening[pi], "text": after}, *opening[pi + 1:]]
@@ -145,6 +183,8 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         record["changes"].append({"id": rewrite.id, "where": f"{out[si]['title']} · 第 {pi + 1} 段",
                                   "rules": sorted({f["rule"] for f in targets[rewrite.id]}),
                                   "before": before, "after": after})
+    if any(item["rule"] == "audience_stance" for item in findings(out, greeting=greeting)):
+        out = _fallback(out, record)
     record["remaining"] = findings(out, greeting=greeting)
     return out, record
 
@@ -166,6 +206,7 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
             span["status"] = "failed"
     record["usage"] = dict(client.usage)
     written.meta["polish"] = record
+    note(written.meta, record)
     if not record["changes"]:
         return
     written.sections = sections

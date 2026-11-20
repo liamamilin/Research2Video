@@ -56,14 +56,16 @@ def test_every_production_recipe_generates_directly_and_can_continue_without_an_
     assert len(llm.calls) == 1
     assert not any((llm.fact_calls, llm.brief_calls, llm.audit_calls, llm.style_calls,
                     llm.reader_calls, llm.revise_calls, llm.editorial_calls, llm.headline_calls))
-    assert version["sections"][0]["paragraphs"][0]["text"] == payload["sections"][0]["paragraphs"][0]["text"]
+    assert version["sections"][0]["paragraphs"][0]["text"] == "这是自动作者的讲法。"
+    assert "材料没有提供" not in version["sections"][0]["paragraphs"][0]["text"]
+    assert version["meta"].get("narration_unresolved")
     assert credibility.label(version)["tier"] == "generated"
     assert version["meta"]["checks"]["model_ran"] is False
     assert version["meta"]["checks"]["summary"]["passed"] is False  # no fabricated review success
     assert video_executor.steps_of(script)[2]["state"] == "SKIPPED"
     decision = video_executor.advance_auto(script, {}, can_start_script=True, can_start_render=False)
-    assert not decision["hold"] and not decision["took"]["script"]
-    assert store.get_script(script["id"])["status"] == "APPROVED"
+    assert decision["hold"] and not decision["took"]["script"]
+    assert store.get_script(script["id"])["status"] == "DRAFT"
 
 
 def test_writer_gets_the_material_and_audience_without_old_production_rules(llm):
