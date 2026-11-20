@@ -73,7 +73,7 @@ def block(titles: list[str]) -> str:
 def topic_block(items: list) -> str:
     """Questions from the declared sources, as topic ideas only (title, a short gist, link)."""
     if not items:
-        return "## 选题参考\n\n（本次信息源没有取到内容，按题目清单选题）"
+        return "## 选题参考\n\n（本次信息源没有取到内容，按风格示例或自拟选题）"
     lines = []
     for item in items[:MAX_IDEAS]:
         gist = re.sub(r"\s+", " ", " ".join(item.excerpts or []))[:140].strip()

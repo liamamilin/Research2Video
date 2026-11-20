@@ -1,0 +1,53 @@
+name: theme_research-m4_17bb1d67
+description: 主题讲解：免费用 ChatGPT 翻译英文邮件，每周十来封，值得升级 Plus 吗？
+enabled: true
+keywords:
+  - 免费用 ChatGPT 翻译英文邮件，每周十来封，值得升级 Plus 吗？
+  - ChatGPT 产品使用、应用价值与订阅决策
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：围绕已经确定的主题研究，准备后续作者可以展开讲述的材料。
+  主题：免费用 ChatGPT 翻译英文邮件，每周十来封，值得升级 Plus 吗？
+  领域：ChatGPT 产品使用、应用价值与订阅决策
+  栏目：T06 · 套餐与付费价值
+  栏目交付目标：我有没有必要付费？
+  目标观众：职场新人、外贸与潜在付费用户
+  创作角度：统计每周邮件量和单封长度，列出免费限制、任务影响与继续免费的条件。
+  用户补充材料：面向中文普通用户和职场新人，优先能展示具体输入、操作和成果的题目。九个栏目保持多样性；套餐和订阅围绕真实决策问题，不要求每类凑满。
+  发现时的线索（用于确定问题，继续阅读相关正文）：
+  - AI News: ChatGPT's cheapest subscription comes to the US: I compared Go to Plus and Pro — Explained: https://www.youtube.com/watch?v=_Y2qlBXJUMQ
+    Struggling with slow chat GPT? Open AAI just launched a new cheaper way to get instant artificial intelligence power. This changes everything. Open AAI now offers three paid tiers beyond free. Go for $8, plus for $20, and pro for $200. The new go tier gives you everything from the free version plus unlimited chats with their superfast GPT 5.2 instant model. Plus offers even more. While Pro targets artificial intelligence power users pushing advanced intelligence limits, this democratizes access to OpenAI's cuttingedge artificial intelligence. More people can now leverage faster, more powerful models for creativity and productivity, driving wider artificial intelligence adoption. Follow us for daily artificial intelligence news updates.
+  研究日期：{date}
+
+  先明确这个题目需要回答的几个子问题。阅读提供的相关来源，定向搜索并阅读能回答这些问题的页面。
+  有用的旧教程、现行规则和案例同样可以使用；页面是否今天新增不决定它是否与本主题有关。
+  围绕信息缺口继续补充；材料充分后形成判断，不预设必须购买、升级或支持某种结论。
+  “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
+  保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
+  优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+
+  输出一份 Markdown 主题研究底稿：
+  # 主题标题
+  ## 要回答的问题与主要判断
+  ## 观众场景与具体材料
+  ## 问题逐项展开（每个问题的具体资料、例子、机制和适用条件）
+  ## 可用于讲述的操作与结果
+  ## 画面材料（页面链接、展示区域、对应讲述内容、输入与输出的演示建议）
+  ## 原始材料中值得保留的细节
+  ## 来源清单
+  这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
+output: output/video/{datetime}_theme_research-m4_17bb1d67.md
+sources:
+  - source:cg_pricing
+  - source:cg_plus
+  - source:cg_release_notes
+  - source:cg_reddit_plus
+  - source:cg_zhihu
+sources_limit: 6
+max_searches: 8

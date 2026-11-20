@@ -1,3 +1,4 @@
+# 特例：冻结期次窗 / 采集策略的矩阵与 Job（见 spec/config-simplification.md）。普通监测可忽略。
 schema_version: 1
 matrices:
 - ai_media

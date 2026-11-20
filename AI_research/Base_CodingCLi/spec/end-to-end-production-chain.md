@@ -63,20 +63,24 @@ flowchart TB
 
 | 对象 | 放哪 | 管什么 |
 |------|------|--------|
-| Job | `jobs/**/*.yaml` | 研究题目、来源、prompt、输出路径、是否搜索 |
-| 信源 | `config/sources.yaml` + Job `sources` | RSS / 页面 / 搜索等采集入口 |
-| 矩阵 | `config/matrices/` | 领域、关键词、矩阵级默认 |
+| Job | `jobs/**/*.yaml` | 研究题目、来源、prompt、输出路径、是否搜索；**报告用的 `domain` / `keywords` / `audience_channel` 写在这里** |
+| 信源 | `config/sources.yaml` + Job `sources` | RSS / 页面 / 搜索等采集入口（共享注册表） |
+| 矩阵 | `config/matrices/` | **薄层**：成员归属、暂停、月搜上限、事件避重、视频默认；不向报告注入关键词 |
 | 栏目 | `config/content_columns/` | 受众、栏目创作方向、制作默认 |
 | 配方 | `config/video_recipes/` | 怎么写、是否调研、画面偏好 |
 | 生产配置 | `config/production/*.yaml` | **哪份 Job → 哪套配方 → 整期还是拆条 → 是否 auto** |
 | 联合规划 | `config/joint_planning.yaml` | 合辑与单条如何同分一批报告 |
 | 链路 | `config/chains/` | 产品化入口：Job + 输出绑定收成一条线 |
 | 自动投稿 | `config/bilibili_auto_upload.yaml` 等 | 窗口、排除 Job、热度等 |
+| 特例 | `source_supply/`、`production_policy` | 多 Job 自动池 / 期次窗；普通监测 Job 可忽略 |
+
+研究侧去留细节见 [config-simplification.md](config-simplification.md)。
 
 日常最常走的绑定示例：
 
-- 快讯合辑 `flash_daily` + 快讯单条 `flash_each` ← Job `monitoring/ai_flash_discovery`
-- ChatGPT 动态整期 / 拆条成对绑定  
+- 快讯合辑 `flash_daily` + 快讯单条 `flash_each` ← Job `monitoring/ai_flash_discovery`  
+  （两条产品线、两个 production 键；由 `joint_planning` 同分一批。整期 vs 热度单条、栏目与读稿 Profile 不同，**不合并成一个 production ID**。取舍见 [config-simplification.md](config-simplification.md)。）
+- ChatGPT 动态整期 / 拆条成对绑定（同构，同样保留双键）  
 - 科学链路 `ai_science_updates_each` ← Job `chains/ai_science_updates`（成片后默认不自动上 B 站）
 
 ---

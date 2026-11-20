@@ -142,8 +142,7 @@ class ResearchEngine:
             from .theme_discovery import run as discover_themes
             return discover_themes(self, job)
 
-        # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
-        # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
+        # Mark matrix membership / event isolation (spec/matrices.md). Domain and keywords stay on the Job file.
         from . import matrices
         if not context.get('job'):
             job = matrices.for_run(job, self.config_dir)
@@ -604,8 +603,8 @@ class ResearchEngine:
         now = self._now()
         variables = {
             "name": job.get("name", job.get("_file", "")),
-            # the matrix's domain; a Job in no matrix has none, so {domain} reads as its name
-            "domain": job.get("_domain") or job.get("name", job.get("_file", "")),
+            # Job domain (or matrix fallback via for_run); otherwise {domain} reads as the Job name
+            "domain": job.get("_domain") or job.get("domain") or job.get("name", job.get("_file", "")),
             "keywords": keyword_str,
             "language": job.get("language", "zh"),
             "date": now.strftime("%Y-%m-%d"),

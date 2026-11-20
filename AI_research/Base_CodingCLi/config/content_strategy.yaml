@@ -20,6 +20,7 @@ channels:
   ai_arena: 模型比较：围绕使用需求理解模型差异，保留比较条件、实际表现与成本，榜单名次和参数不单独构成观看价值。
   ai_business: AI商业：围绕产品、工作与消费选择解释商业变化，保留商业机制和案例，不把融资、估值或品牌热度直接当用户需求。
   ai_deep: AI深度：一个有理解价值的问题及其机制，保留原理、方法、实验和具体例子的解释深度；技术问题按真实理解门槛确定受众。
+  ai_science: AI科研进展：讲清研究问题、AI 介入步骤与证据边界；适合关心科学进展的普通观众与开发者，不把实验室细节伪装成日常操作教程。
   science_daily: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
   science_weekly: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
   science_illustrated: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
@@ -50,6 +51,7 @@ channels:
   tech_daily: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
   tech_weekly: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
   tech_illustrated: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+# Job → channel 映射仅作兼容回退；新配置请在 Job 上写 audience_channel。
 jobs:
   monitoring/ai_flash_discovery: flash
   chatgpt_acquisition/t01_product: t01
@@ -66,6 +68,7 @@ jobs:
   ai_media/weekly_model_arena: ai_arena
   ai_media/weekly_business_watch: ai_business
   ai_media/weekly_deep_research: ai_deep
+  chains/ai_science_updates: ai_science
   science/science_daily: science_daily
   science/science_weekly: science_weekly
   science/science_illustrated: science_illustrated
@@ -144,8 +147,7 @@ productions:
   ai_media_arena_digest: ai_arena
   ai_media_business_digest: ai_business
   ai_media_deep_dive: ai_deep
-  ai-non_tech-deep_dive-long-2: economy_daily
-  ai-non_tech-headline-short: tech_daily
+  ai_science_updates_each: ai_science
 single_question:
 - ai_arena
 - ai_business

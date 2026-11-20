@@ -1,32 +1,33 @@
 name: "AI Flash Discovery"
 description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown、Radar 订阅源与 AI 新闻媒体，初稿沿用固定材料，选题后按问题补材）"
+domain: AI 与软件开发
 enabled: true
 keywords:
-  - 新模型发布
-  - API 价格变化
-  - AI 编程工具更新
-  - agent 框架发布
-  - 开源模型发布
-  - 额度与限流变化
+- 新模型发布
+- API 价格变化
+- AI 编程工具更新
+- agent 框架发布
+- 开源模型发布
+- 额度与限流变化
 language: "zh"
 schedule:
   type: "manual"
-search: false            # 只读下面声明的订阅源，不联网搜索（core/engine.py）
+search: false
 sources_limit: 10
 sources:
-  - "source:bili_hot_ai"   # B站观众本周在看的 AI 热点（core/bili_hot.py，11-10 选题热度）
-  - "source:cg_release_notes"
-  - "source:cg_openai_news"
-  - "source:cg_pro_tiers"
-  - "tag:ai_daily_shared"
-  - "github:anthropics/claude-code"
-  - "tldr:ai"
-  - "rss:https://www.therundown.ai/feed"
-  - "hf_models:trending"
-  - "tag:ai_radar"
-  - "tag:ai_news"
-  - "tag:radar_official"
-  - "tag:radar_dev"
+- "source:bili_hot_ai"     # B站观众本周在看的 AI 热点（core/bili_hot.py，11-10 选题热度）
+- "source:cg_release_notes"
+- "source:cg_openai_news"
+- "source:cg_pro_tiers"
+- "tag:ai_daily_shared"
+- "github:anthropics/claude-code"
+- "tldr:ai"
+- "rss:https://www.therundown.ai/feed"
+- "hf_models:trending"
+- "tag:ai_radar"
+- "tag:ai_news"
+- "tag:radar_official"
+- "tag:radar_dev"
 runtime:
   timeout_seconds: 3600
   skip_if_running: true
@@ -61,7 +62,7 @@ prompt: |
   材料按需求线索、变化材料、具体案例、比较背景搭配；不要求每题凑齐四类。产品热度仅作辅助，不代表某一专业任务有广泛需求。
   按本轮值得制作的顺序排列。可以记录帮助选题的受众需要、特殊限制或待补材料。候选的组织依材料与问题而定。
 output: "output/flash/{date}_ai_flash_discovery.md"
-# 选题来源（spec/video-topics.md）：报告里的 ### 1.1 条目导入选题表，编号 F1、F2…；自动流水线可在当天没有报告时启动它
+audience_channel: flash
 content_strategy: audience-v1
 topics:
   alias: flash

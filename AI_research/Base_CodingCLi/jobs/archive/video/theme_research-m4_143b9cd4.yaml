@@ -1,0 +1,58 @@
+name: theme_research-m4_143b9cd4
+description: 主题讲解：琵琶传入中原后，形制和持琴方式发生了哪些变化？
+enabled: true
+keywords:
+  - 琵琶传入中原后，形制和持琴方式发生了哪些变化？
+  - 文化与艺术
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：围绕已经确定的主题研究，准备后续作者可以展开讲述的材料。
+  主题：琵琶传入中原后，形制和持琴方式发生了哪些变化？
+  领域：文化与艺术
+  栏目：T04 · 文化流动与交融
+  栏目交付目标：一种形式怎样在不同地方被理解和改写？
+  目标观众：愿意走近作品，希望看懂表达、创作与文化来路的普通观众
+  创作角度：沿乐器形制与演奏图像追踪，对照不同地点和时代的细节，解释交流中的新表达。
+  用户补充材料：面向对作品和文化好奇的中文观众，先让观众看见一件作品、一个动作或一处细节，再展开形式、创作与时代关系。中外材料都可借鉴，题目保持对象和表达方式的多样性。
+  发现时的线索（用于确定问题，继续阅读相关正文）：
+  - Central and North Asia, 1000–1400 A.D. | Chronology | Heilbrunn Timeline of Art History | The Metropolitan Museum of Art: https://www.metmuseum.org/it/toah/ht/07/nc
+    结合时代与地区的作品线索观察文化相遇和形式流动。参考其提问和展开方式，具体结论留给选题后的研究。
+  - About the Silk Roads | UNESCO: https://www.unesco.org/en/silk-roads/about-silk-roads
+    沿路线、商品和交流过程理解不同社会如何连接。参考其提问和展开方式，具体结论留给选题后的研究。
+  研究日期：{date}
+
+  先明确这个题目需要回答的几个子问题。阅读提供的相关来源，定向搜索并阅读能回答这些问题的页面。
+  有用的旧教程、现行规则和案例同样可以使用；页面是否今天新增不决定它是否与本主题有关。
+  围绕信息缺口继续补充；材料充分后形成判断，不预设必须购买、升级或支持某种结论。
+  “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
+  保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
+  优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+
+  输出一份 Markdown 主题研究底稿：
+  # 主题标题
+  ## 要回答的问题与主要判断
+  ## 观众场景与具体材料
+  ## 问题逐项展开（每个问题的具体资料、例子、机制和适用条件）
+  ## 可用于讲述的操作与结果
+  ## 画面材料（页面链接、展示区域、对应讲述内容、输入与输出的演示建议）
+  ## 原始材料中值得保留的细节
+  ## 来源清单
+  这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
+output: output/video/{datetime}_theme_research-m4_143b9cd4.md
+sources:
+  - source:hyperallergic
+  - source:colossal
+  - source:open_culture
+  - source:artnet
+  - source:smithsonian_arts
+  - source:pitchfork
+  - source:dezeen
+  - source:jazztimes
+sources_limit: 6
+max_searches: 8

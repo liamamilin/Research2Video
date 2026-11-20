@@ -133,8 +133,13 @@ def author_material(candidate: Candidate, items: list[dict]) -> str:
 
 
 def job_channel(job: dict) -> str:
-    """Only explicitly enabled, newly loaded research jobs use this strategy."""
-    return JOBS.get(job.get("_file", ""), "") if job.get("content_strategy") == MARKER else ""
+    """Audience channel for a research job: Job field first, then legacy content_strategy jobs map."""
+    if job.get("content_strategy") != MARKER:
+        return ""
+    own = job.get("audience_channel")
+    if isinstance(own, str) and own.strip() in CHANNELS:
+        return own.strip()
+    return JOBS.get(job.get("_file", ""), "")
 
 
 def topic_channel(topic: dict) -> str:

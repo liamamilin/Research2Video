@@ -71,6 +71,22 @@ SCHEMA = {
     'defaults': {'output_dir': str},
     'logging': {'level': ('enum', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'NOTSET'), 'file': str},
     'cleanup': {},
+    'network': {
+        'proxy': {
+            'enabled': bool,
+            'host': str,
+            'port': (int, 1, 65535),
+            'sidecar_port': (int, 1, 65535),
+            'auto_start': bool,
+            'core_path': str,
+            'config_path': str,
+            'data_dir': str,
+            'work_dir': str,
+            'startup_timeout_seconds': NONNEGATIVE_NUMBER,
+            'required': bool,
+            'no_proxy': str,
+        },
+    },
 }
 
 

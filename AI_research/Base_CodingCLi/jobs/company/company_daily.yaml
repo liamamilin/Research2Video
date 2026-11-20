@@ -1,6 +1,6 @@
 name: 商业动态日报
-description: 每天值得关注的几条商业动态：公司动作、融资、创业、监管（读 Crunchbase News、Fast Company、Y Combinator、SEC
-  新闻稿抓取的内容），不联网搜索
+description: 每天值得关注的几条商业动态：公司动作、融资、创业、监管（读 Crunchbase News、Fast Company、Y Combinator、SEC 新闻稿抓取的内容），不联网搜索
+domain: 商业与公司
 enabled: true
 keywords:
 - 公司研究
@@ -40,7 +40,6 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/company/{date}_company_daily.md
+audience_channel: company_daily
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

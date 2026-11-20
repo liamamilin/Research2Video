@@ -1,7 +1,10 @@
 name: T05 · AI 产品横向选择
 description: ChatGPT 和其他 AI 哪个好？ — 影响选择；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT Claude Gemini 对比
 - AI 工具选择
 language: zh
@@ -12,7 +15,6 @@ runtime:
   skip_if_running: true
 search: false
 source_history: true
-# 报告写完后为每个条目读一篇原文，交给写稿（core/ai_dossier_sources.py）。
 dossier_sources: true
 sources_limit: 6
 sources:
@@ -77,11 +79,12 @@ prompt: |
   ## 来源清单
   记录实际使用的来源链接。
   若变化监测显示没有新增或修改，只输出本次暂无新题材及简短说明，不生成重复候选。
-
-  选题优先考虑中文观众在消费、工作或生活中遇到的实际问题。普通人共同的处境值得关注，专业题说明适用范围。
-  材料按需求线索、变化材料、具体案例、比较背景搭配；不要求每题凑齐四类。产品热度仅作辅助，不代表某一专业任务有广泛需求。
-  按本轮值得制作的顺序排列。可以记录帮助选题的受众需要、特殊限制或待补材料。候选的组织依材料与问题而定。
+  选题与材料组织：T05横向选择：至少两家不同公司的AI产品；优先覆盖较广的真实选择，也保留能清楚说明受众的专业题。不要为了围绕某品牌硬加无关比较。
+  选题分别考虑与观众切身相关的收益或损失、情绪动机、有趣的新发现和可带走的理解，不要求每题全部具备。优先在栏目范围内覆盖较广的共同问题，具体例子不等于整篇受众；专业问题保留真实适用范围，不伪装成人人适用。商业关联可以较弱，不硬接购买、不预测转化。热度是辅助线索，不等于本题需求；不把多个维度合成总分。材料按需求线索、变化或事实材料、具体案例、比较或解释背景搭配，不必凑齐四类。
+  候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
+  原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/chatgpt_acquisition/{date}_t05_comparison.md
+audience_channel: t05
 content_strategy: audience-v1
 topics:
   alias: chatgpt_t05_comparison

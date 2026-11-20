@@ -1,3 +1,4 @@
+# 特例配置：多 Job 共用自动供给池（见 spec/config-simplification.md）。普通监测 Job 可不关心本文件。
 name: AI 矩阵信息供给
 matrix: ai_media
 enabled: true

@@ -1,0 +1,26 @@
+name: flash_f7462d23
+description: 快讯：Anthropic 给 Claude Code 加了支出报告：能看到钱花在哪、能省哪
+enabled: true
+keywords:
+  - Anthropic 给 Claude Code 加了支出报告
+  - 能看到钱花在哪
+  - 能省哪
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。
+  选题：Anthropic 给 Claude Code 加了支出报告：能看到钱花在哪、能省哪
+  目标观众：开发者
+  选题资料：面向企业客户，提供生产力、成本和建议的详细洞察，回应“AI 花销买到什么”。；（未提供）
+  来源资料：https://techcrunch.com/2026/10/28/anthropic-just-launched-tools-to-show-companies-what-their-ai-spending-is-buying/
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_flash_f7462d23.md

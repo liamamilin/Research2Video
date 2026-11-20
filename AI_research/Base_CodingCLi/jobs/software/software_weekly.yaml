@@ -1,5 +1,6 @@
 name: 软件与工具周观察
 description: 每周挑一类软件或一个工作流讲清楚：解决什么问题、有哪些选择、各自适合谁（读 Product Hunt、Show HN、GitHub、Changelog、LWN 抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 软件与数字工具
 enabled: true
 keywords:
 - 软件发现
@@ -34,7 +35,10 @@ sources:
 - source:martin_fowler
 - source:pragmatic_engineer
 prompt: |
-  从本周的软件材料里解释一个值得理解的变化。写清它解决什么实际问题、用起来是什么样，以及不同选择和使用条件会怎样改变结果。材料有具体操作、结果或例子时，直接写进研究正文。
+  为「一类工具或一个工作流」整理研究底稿。从本周软件材料里只选一个值得讲深的主问题：它解决什么实际问题、用起来是什么样、不同选择和使用条件怎样改变结果。
+
+  材料有具体操作、结果或例子时直接写进正文；相近工具的对照为同一问题服务，不要做成新品目录。开发专用工具保留专业范围。
+
   任务：{name}
   领域：{domain}
   关键词：{keywords}
@@ -45,8 +49,8 @@ prompt: |
   选题与材料组织：软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
   选题分别考虑与观众切身相关的收益或损失、情绪动机、有趣的新发现和可带走的理解，不要求每题全部具备。优先在栏目范围内覆盖较广的共同问题，具体例子不等于整篇受众；专业问题保留真实适用范围，不伪装成人人适用。商业关联可以较弱，不硬接购买、不预测转化。热度是辅助线索，不等于本题需求；不把多个维度合成总分。材料按需求线索、变化或事实材料、具体案例、比较或解释背景搭配，不必凑齐四类。
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
+  原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/software/{date}_software_weekly.md
+audience_channel: software_weekly
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

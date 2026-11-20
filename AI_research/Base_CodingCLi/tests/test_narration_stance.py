@@ -381,11 +381,11 @@ def test_repeated_paraphrases_collapse_without_a_second_model_call(llm):
 def test_flash_each_and_flash_daily_share_the_author_and_only_each_has_the_job_profile():
     each = production.get(str(ROOT / "config"), str(ROOT / "jobs"), "flash_each")
     daily = production.get(str(ROOT / "config"), str(ROOT / "jobs"), "flash_daily")
-    manual = production.get(str(ROOT / "config"), str(ROOT / "jobs"), "deep_dive")
+    manual = production.get(str(ROOT / "config"), str(ROOT / "jobs"), "ai_media_deep_dive")
     assert each.usable and daily.usable and each.reverify is False and daily.reverify is False
     assert each.recipe == daily.recipe == "flash-nr"
     assert each.split == "each" and daily.split == "whole"
-    assert not manual.auto and manual.usable
+    assert manual.auto == 1 and manual.usable
     job = "monitoring/ai_flash_discovery"
     config = {"manuscript_jobs": [job]}
     each_profile = workflow.profile_for(

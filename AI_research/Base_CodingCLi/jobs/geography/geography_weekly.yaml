@@ -1,5 +1,7 @@
 name: 地理专题周读
-description: 每周挑一个地理主题讲清楚：这个地方或现象是什么、数据怎么说、为什么特别（读 Our World in Data、UNESCO、Atlas Obscura、Smithsonian、Mongabay 等抓取的内容），初稿沿用固定材料，选题后按问题补材
+description: 每周挑一个地理主题讲清楚：这个地方或现象是什么、数据怎么说、为什么特别（读 Our World in Data、UNESCO、Atlas Obscura、Smithsonian、Mongabay 
+  等抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 地理与世界
 enabled: true
 keywords:
 - 地理
@@ -32,7 +34,6 @@ prompt: |
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/geography/{date}_geography_weekly.md
+audience_channel: geography_weekly
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

@@ -59,10 +59,11 @@ flowchart LR
 
 ### R3. 矩阵上下文与期次窗
 
-- `matrices.for_run`：注入领域/关键词（不改 YAML）
-- 策略管理 Job：`production_policy.issue` 冻结 `issue_id`、研究窗、策略版本
+- `matrices.for_run`：只标记 `_matrix`；`{domain}` / `{keywords}` 以 **Job 文件**为准（矩阵不再合并关键词）。未写 `domain` 的旧 Job 才回退矩阵 `domain`。
+- 策略管理 Job：`production_policy.issue` 冻结 `issue_id`、研究窗、策略版本（**特例**，见 [config-simplification.md](config-simplification.md)）
 - 其它：有 `collection_days` 则 `research_window.freeze`
 - 事件记忆可按矩阵隔离（`_events_exclude`）
+- 可选 `source_supply`：Job 命中供给档案时叠加自动池（**特例**，非人人必配）
 
 ### R4. Job 锁与超时
 
@@ -129,7 +130,7 @@ flowchart LR
 ### R9. 清洗 + audience-v1
 
 1. `extractor.extract_report`（失败则保留原文）  
-2. 若 Job 映射了 audience channel（`content_strategy: audience-v1`）：  
+2. 若 Job 启用 `content_strategy: audience-v1`：频道取 Job 的 `audience_channel`，缺省再查 `content_strategy.yaml` 的 `jobs:` 映射  
    - 写 `*.audience-initial-<hash>.json`  
    - `audience_strategy.prepare_report`：LLM 选题/结构化（知识频道可保留整稿）  
    - 失败 → `kept_original`，不丢报告  
@@ -204,8 +205,12 @@ flowchart LR
 
 | 路径 | 内容 |
 |------|------|
-| `jobs/**/*.yaml` | Job 定义 |
-| `config/sources.yaml`、`config/source_supply/` | 信源与供给 |
+| `jobs/**/*.yaml` | Job 定义（含 `domain` / `keywords` / `audience_channel`） |
+| `config/sources.yaml` | 共享信源注册表 |
+| `config/source_supply/` | 特例：多 Job 自动供给池 |
+| `config/matrices/` | 薄层：分组 / 避重 / 运维 |
+| `config/content_strategy.yaml` | 受众频道文案库；`jobs:` 映射仅兼容回退 |
+| `config/production_policy.yaml` | 特例：期次窗 |
 | `output/**/*.md` + `*.materials-*.json` + `*.report.json` | 冻结报告与证据 |
 | `state/report_meta.jsonl` | 报告身份与运行元数据 |
 | `state/locks/`、`state/schedules.db`、`state/chains.db` | 锁、排期、链路 |

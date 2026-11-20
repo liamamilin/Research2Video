@@ -1,5 +1,6 @@
 name: 科技前沿日报
 description: 每天值得关注的几项科技进展（读 IEEE Spectrum、MIT Technology Review、NASA、MIT News、Ars Technica 抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 科技与未来产业
 enabled: true
 keywords:
 - 科技前沿
@@ -25,9 +26,12 @@ sources:
 - source:robot_report
 - source:spacenews
 prompt: |
-  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
-  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注新技术怎样工作，以及它可能改变的具体场景，保留能把事情讲生动、讲明白的具体材料。
+  为「一项技术怎样用起来」整理研究底稿。观众希望理解一项新技术在具体场景里改变了什么能力、门槛或操作方式，而不只是发布会参数。
+
+  从近期材料保留有清楚对象与场景的候选；写清它原来怎么做、现在多了哪一步或哪项能力、谁在什么条件下用得上。保留机制说明、适用限制、可展示的页面或过程，以及帮助理解的对照例子。
+
+  热度与品牌名只作背景；主要篇幅留给「怎样工作」和「落到哪一件具体事」。取材备忘与讲述材料分开保留，标题与视频节奏由作者组织。
+
   任务：{name}
   领域：{domain}
   关键词：{keywords}
@@ -40,7 +44,6 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/tech/{date}_tech_daily.md
+audience_channel: tech_daily
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

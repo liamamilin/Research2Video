@@ -16,7 +16,8 @@ from tests.test_theme_workbench import theme_env  # noqa: F401
 from tests.test_video_scripts import video_env  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPANDED = ('ai_media', 'company', 'consumer', 'culture', 'economy', 'education',
+# education matrix is archived (no research jobs); theme_library/education.yaml kept for later.
+EXPANDED = ('ai_media', 'company', 'consumer', 'culture', 'economy',
             'geography', 'history', 'industry', 'science')
 
 

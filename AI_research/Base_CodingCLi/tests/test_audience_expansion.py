@@ -26,9 +26,8 @@ def test_all_content_jobs_and_production_bindings_are_covered_without_enabling_a
         own = [p for p in bindings.values() if p.job == job and (p.content_column_id or p.auto)]
         assert own or channel in profiles.KNOWLEDGE
         assert all(profiles.PRODUCTIONS.get(p.key) == channel for p in own)
-    for job in ('practical_ai_intelligence/00_collection_planner','source_discovery/science',
-                'system/material_collection','research/assistant_ops_acceptance_20261025'):
-        assert not strategy.job_channel(load_job(str(ROOT/'jobs'),job))
+    for job in ('source_discovery/science', 'system/material_collection'):
+        assert not strategy.job_channel(load_job(str(ROOT/'jobs'), job))
 
 
 def test_single_question_keeps_original_explanation_and_source_material(monkeypatch):

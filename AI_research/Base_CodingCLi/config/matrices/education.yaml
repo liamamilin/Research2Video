@@ -2,6 +2,7 @@ name: 教育与方法
 domain: 教育与方法
 keywords: []
 jobs: []
+archived: true  # 无研究 Job；主题目录仍保留 theme_library/education.yaml，日常矩阵列表隐藏
 content:
   name: 教育与方法
   role: domain

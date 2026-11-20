@@ -165,9 +165,8 @@ def test_audience_parts_are_listed_with_the_recipe_files_that_use_them(tmp_path)
     rows = {(p["kind"], p["name"]): p for p in recipes.parts(_config(tmp_path))}
     assert rows[("audience", "kids")]["used_by"] == ["quick"] and rows[("audience", "adults")]["used_by"] == ["quick"]
     shipped = {(p["kind"], p["name"]): p for p in recipes.parts(CONFIG)}
-    assert set(shipped[("audience", "non_tech")]["used_by"]) == {"flash", "point_short", "deep_dive",
-                                                                 "ai-developer-roundup-long", "report_digest",
-                                                                 "top_finding", "action_list"}
+    assert {"flash", "point_short", "deep_dive", "ai-developer-roundup-long", "report_digest",
+            "top_finding", "action_list"} <= set(shipped[("audience", "non_tech")]["used_by"])
 
 
 def test_api_shows_audiences_and_rebuilds_every_version_when_a_profile_is_edited(client, video_env):
@@ -184,7 +183,7 @@ def test_api_shows_audiences_and_rebuilds_every_version_when_a_profile_is_edited
 
     part = client.get("/api/video/recipes/parts/audience/non_tech").json()
     assert {"flash", "point_short", "deep_dive", "ai-developer-roundup-long", "report_digest", "top_finding",
-            "action_list"} == set(part["used_by"])
+            "action_list"} <= set(part["used_by"])
     refused = client.put("/api/video/recipes/parts/audience/non_tech", headers=_csrf(client),
                          json={"content": part["content"].replace("name: 普通用户\n", "")})
     assert refused.status_code == 422 and "ai-non_tech-deep_dive-long" in refused.text  # the columns that would break

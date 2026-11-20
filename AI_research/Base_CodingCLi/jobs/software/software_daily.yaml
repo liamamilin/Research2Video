@@ -1,5 +1,6 @@
 name: 每日软件发现
 description: 每天值得看的新软件和开源项目（读 Product Hunt、Show HN、GitHub Blog、Changelog、GitHub 新项目抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 软件与数字工具
 enabled: true
 keywords:
 - 软件发现
@@ -26,9 +27,10 @@ sources:
 - source:hn_front
 - source:lobsters
 prompt: |
-  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
-  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注软件工具怎样解决一个实际问题，以及它用起来是什么样，保留能把事情讲生动、讲明白的具体材料。
+  为「一个工具怎样解决问题」整理研究底稿。观众希望看到：具体任务从什么输入开始、点了哪些步骤、得到什么结果，以及门槛和适用条件。
+
+  从近期材料保留能展开真实使用过程的软件或开源项目；写清它解决什么问题、和相近选择差在哪、什么人在什么条件下适合用。开发专用工具保留专业范围，不伪装成人人零门槛。
+
   任务：{name}
   领域：{domain}
   关键词：{keywords}
@@ -41,7 +43,6 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/software/{date}_software_daily.md
+audience_channel: software_daily
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

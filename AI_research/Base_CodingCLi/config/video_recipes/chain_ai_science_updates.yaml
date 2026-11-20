@@ -1,5 +1,5 @@
 name: AI 科研进展讲稿
-description: 让{{audience}}抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。
+description: 让{{audience}}听清一项 AI 科研进展：研究问题、AI 帮到哪一步、证据到哪里、还能不能推广。
 status: enabled
 tags:
   domain:
@@ -7,7 +7,7 @@ tags:
     name: AI 科研进展
   type:
     key: quick_take
-    name: 快讯
+    name: 科研短讲
   format:
     key: short
     name: B 站横屏短
@@ -34,22 +34,22 @@ writing:
   default_style:
     depth: '{{audience.depth}}'
     tone: news
-  style: '面向本条选题的目标观众，讲清这件新事。
-
-    '
+  style: |
+    面向本条选题的目标观众，讲清这项科研进展的问题、方法边界与可带走的理解。
 output:
   use: motion
   packaging:
     use: common
-    label: 快讯
+    label: 科研进展
     intro:
       subtitle: '{date}'
       seconds: 1.5
     outro:
       lines:
-      - 面向{{audience}}的 快讯
+      - 面向{{audience}}的 AI 科研进展
       seconds: 3
   recheck: true
 minutes_range:
 - 1
 - 10
+

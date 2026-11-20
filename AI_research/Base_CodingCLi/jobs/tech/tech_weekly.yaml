@@ -1,5 +1,6 @@
 name: 科技周观察
 description: 每周挑一个科技主题讲清楚：技术是什么、进展到哪一步、离落地还有多远（读 IEEE Spectrum 各专题、MIT、NASA、Nature 等抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 科技与未来产业
 enabled: true
 keywords:
 - 科技前沿
@@ -16,9 +17,10 @@ sources_limit: 10
 sources:
 - tag:tech
 prompt: |
-  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
-  这次研究要帮助观众理解：回看这一周的材料，找到值得继续追问的变化和联系。关注新技术怎样工作，以及它可能改变的具体场景，保留能把事情讲生动、讲明白的具体材料。
+  为「一条技术主线」整理研究底稿。回看本周材料，只选一个值得继续追问的技术问题：它进展到哪一步、怎样工作、离日常或产业落地还有多远。
+
+  围绕同一主问题保留机制、场景、采用条件与对照例子；相关新闻为这一问题服务，不要拆成发布会列表。写清对象、过程、限制和可展示细节，给作者完整解释深度。
+
   任务：{name}
   领域：{domain}
   关键词：{keywords}
@@ -31,7 +33,6 @@ prompt: |
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/tech/{date}_tech_weekly.md
+audience_channel: tech_weekly
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

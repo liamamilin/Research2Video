@@ -1,7 +1,10 @@
 name: T08 · 使用问题与避坑
 description: 使用过程中有哪些问题？ — 解决顾虑；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT 无法使用
 - ChatGPT 使用限制
 - ChatGPT 重复扣款
@@ -64,6 +67,7 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/chatgpt_acquisition/{date}_t08_troubleshooting.md
+audience_channel: t08
 content_strategy: audience-v1
 topics:
   alias: chatgpt_t08_troubleshooting

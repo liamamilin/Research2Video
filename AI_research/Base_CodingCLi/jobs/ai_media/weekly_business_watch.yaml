@@ -1,10 +1,11 @@
 name: "AI 商业观察"
 description: "本期 AI 行业的商业动向：产品、定价、公司动作、政策（读 Import AI、The Rundown、TLDR 抓取的内容，初稿沿用固定材料，选题后按问题补材）"
+domain: AI 与软件开发
 enabled: true
 keywords:
-  - AI 商业
-  - 定价
-  - 公司动态
+- AI 商业
+- 定价
+- 公司动态
 language: "zh"
 schedule:
   type: "manual"
@@ -14,10 +15,10 @@ runtime:
 search: false
 sources_limit: 12
 sources:
-  - "rss:https://www.therundown.ai/feed"
-  - "rss:https://importai.substack.com/feed"
-  - "tldr:ai"
-  - "tag:ai_radar"
+- "rss:https://www.therundown.ai/feed"
+- "rss:https://importai.substack.com/feed"
+- "tldr:ai"
+- "tag:ai_radar"
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：研究事情本身，形成供视频作者展开讲述的研究底稿。
@@ -40,7 +41,6 @@ prompt: |
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: "output/business/{date}_ai_business_watch.md"
+audience_channel: ai_business
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

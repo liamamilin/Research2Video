@@ -1,5 +1,6 @@
 name: 科学深度周读
 description: 每周挑一个科学主题讲透：现象是什么、科学家怎么发现的、结论有多可靠（读 Quanta、Science、Nature、MIT News 等抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 科学与知识
 enabled: true
 keywords:
 - 科学新发现
@@ -46,7 +47,6 @@ prompt: |
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/science/{date}_science_weekly.md
+audience_channel: science_weekly
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

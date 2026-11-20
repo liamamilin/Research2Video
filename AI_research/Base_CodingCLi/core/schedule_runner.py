@@ -216,6 +216,7 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
     from core.budget import pipeline_allowed
     from core.config import load_system_config
     from core.engine import ResearchEngine
+    from core.local_proxy import ProxyUnavailableError, ensure_local_proxy
     state.use_state_dir(runtime.state_dir)
     lock._LOCK_DIR = str(Path(runtime.state_dir) / 'locks')
     report_meta.META_FILE = str(Path(runtime.state_dir) / 'report_meta.jsonl')
@@ -229,8 +230,13 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
             return 'blocked', '此期次入队时研究任务已停用', None
     except ValueError as exc:
         return 'blocked', str(exc), None
+    sys_cfg = load_system_config(runtime.config_dir)
+    try:
+        ensure_local_proxy(sys_cfg)
+    except ProxyUnavailableError as exc:
+        return 'failed', f'本地代理不可用：{exc}', None
     if not job.get('source_collection'):
-        allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
+        allowed, reason = pipeline_allowed(sys_cfg)
         if not allowed:
             return 'blocked', reason, None
     from core.matrices import cap_block

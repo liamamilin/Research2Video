@@ -165,7 +165,7 @@ def test_any_job_can_be_a_source_and_a_recipe_can_read_it(video_env):
     write(video_env, "jobs/research/deep_topics.yaml", DEEP_JOB)
     write(video_env, "output/deep_topics/2026-10-20_deep.md", DEEP_REPORT)
     recipe = video_env / "config" / "video_recipes" / "deep_dive.yaml"
-    recipe.write_text(recipe.read_text(encoding="utf-8").replace("sources: [opportunities]", "sources: [deep_topics]"),
+    recipe.write_text(recipe.read_text(encoding="utf-8").replace("sources: []", "sources: [deep_topics]"),
                       encoding="utf-8")
     pilot.sync_topics()
     assert [t.id for t in topic_store.load("deep_topics")[1]] == ["2026-10-20/D1", "2026-10-20/D2"]
@@ -254,6 +254,10 @@ def test_only_sources_that_allow_it_are_started_by_a_batch(video_env, monkeypatc
     started: list[str] = []
     monkeypatch.setattr(pilot, "_start_discovery", lambda job: started.append(job))
     monkeypatch.setattr(pilot, "_discovery_running", lambda job: False)
+    # deep_dive is whole-report in shipped config; restore an item source so the batch can pick it.
+    recipe = video_env / "config" / "video_recipes" / "deep_dive.yaml"
+    recipe.write_text(recipe.read_text(encoding="utf-8").replace("sources: []", "sources: [opportunities]"),
+                      encoding="utf-8")
     spec = {"picks": [{"cell": "flash", "count": 1}, {"cell": "deep_dive", "count": 1}], "refresh": True}
     run = pilot.start_run(spec)
     assert pilot.fresh_topics(run["spec"], run) is False

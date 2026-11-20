@@ -59,6 +59,17 @@ research:                             # Agent loop
   max_rounds: 12
   max_searches: 12
 
+network:                              # local proxy for overseas sources
+  proxy:
+    enabled: true
+    host: "127.0.0.1"
+    port: 7897                        # use Clash Verge when already running
+    sidecar_port: 17897               # else start headless verge-mihomo (no GUI)
+    auto_start: true
+    startup_timeout_seconds: 45
+    required: true                    # CLI/scheduler fail if proxy never comes up
+    no_proxy: "localhost,127.0.0.1,::1"
+
 notifications:                        # optional alerts (any combination)
   enabled: false
   notify_on: ["failed", "cancelled", "round_finished"]   # + success

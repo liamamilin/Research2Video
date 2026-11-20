@@ -1,7 +1,10 @@
 name: T09 · 产品动态与热点
 description: ChatGPT 最近有什么变化？ — 持续引流；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT 新功能
 - ChatGPT 更新
 - ChatGPT Plus 变化
@@ -13,7 +16,6 @@ runtime:
   skip_if_running: true
 search: false
 source_history: true
-# 报告写完后为每个条目读一篇原文，交给写稿（core/ai_dossier_sources.py）。
 dossier_sources: true
 sources_limit: 12
 sources:
@@ -67,6 +69,7 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/chatgpt_acquisition/{date}_t09_updates.md
+audience_channel: t09
 content_strategy: audience-v1
 topics:
   alias: chatgpt_t09_updates

@@ -205,15 +205,20 @@ def llm(monkeypatch):
     return FakeLLM
 
 
-#: the jobs that declare ``topics:`` (core/video/topic_store.py), copied as shipped
-TOPIC_SOURCE_JOBS = ("monitoring/ai_flash_discovery.yaml", "practical_ai_intelligence/07_product_content_opportunities.yaml")
+#: topic-source Jobs copied into isolated test trees (live list skips ``jobs/archive/``)
+TOPIC_SOURCE_JOBS = (
+    ("monitoring/ai_flash_discovery.yaml", "monitoring/ai_flash_discovery.yaml"),
+    # archived PAI opportunities Job: still the deep_dive item-list fixture for video tests
+    ("archive/practical_ai_intelligence/07_product_content_opportunities.yaml",
+     "practical_ai_intelligence/07_product_content_opportunities.yaml"),
+)
 
 
 def install_topic_sources(jobs_dir: Path) -> None:
     shipped = Path(__file__).resolve().parents[1] / "jobs"
-    for rel in TOPIC_SOURCE_JOBS:
-        (jobs_dir / rel).parent.mkdir(parents=True, exist_ok=True)
-        (jobs_dir / rel).write_text((shipped / rel).read_text(encoding="utf-8"), encoding="utf-8")
+    for src_rel, dest_rel in TOPIC_SOURCE_JOBS:
+        (jobs_dir / dest_rel).parent.mkdir(parents=True, exist_ok=True)
+        (jobs_dir / dest_rel).write_text((shipped / src_rel).read_text(encoding="utf-8"), encoding="utf-8")
 
 
 @pytest.fixture
@@ -222,8 +227,10 @@ def video_env(web_env, monkeypatch):
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
     golden.install_recipes(tmp / "config", replace=(("  pipeline: adapt\n", "  pipeline: single\n"),))
-    # This fixture installs the legacy matrix's two source Jobs. The acquisition matrix has its own integration test.
+    # This fixture installs the legacy matrix's two source Jobs. Acquisition / science-chain
+    # recipes need their own Jobs and have dedicated integration coverage.
     (tmp / "config/video_recipes/chatgpt_acquisition.yaml").unlink()
+    (tmp / "config/video_recipes/chain_ai_science_updates.yaml").unlink(missing_ok=True)
     install_topic_sources(tmp / "jobs")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()

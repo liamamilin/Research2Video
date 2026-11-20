@@ -1,5 +1,6 @@
 name: 世界与地球动态
 description: 近期值得讲的地理、生态和世界遗产动态（读 Atlas Obscura、Mongabay、Geographical、UNESCO、USGS 抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 地理与世界
 enabled: true
 keywords:
 - 地理
@@ -41,7 +42,6 @@ prompt: |
   候选按本轮值得制作的顺序排列，先说明共同问题，再保存能展开讲述的具体材料。保留原有字段和本栏目需要的操作、测试、实例或比较条件；不为扩大受众泛化专业内容。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/geography/{date}_geography_daily.md
+audience_channel: geography_daily
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

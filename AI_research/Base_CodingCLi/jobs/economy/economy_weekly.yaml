@@ -1,6 +1,6 @@
 name: 宏观与数据周解读
-description: 每周挑一个经济主题，用世界银行的数据和央行、研究机构的材料讲清楚（读世界银行指标、美联储、欧洲央行、BIS、Our World in Data
-  抓取的内容），不联网搜索
+description: 每周挑一个经济主题，用世界银行的数据和央行、研究机构的材料讲清楚（读世界银行指标、美联储、欧洲央行、BIS、Our World in Data 抓取的内容），不联网搜索
+domain: 财经与经济
 enabled: true
 keywords:
 - 宏观经济
@@ -51,7 +51,6 @@ prompt: |
   本期只选一个主问题，先判断为什么有人值得花时间理解它，再围绕它保留完整解释、原因、过程、案例及条件。不要为了覆盖面拆成新闻列表，也不把商业关联硬写成购买建议。
   原有文稿风格、结构与口播安排交由下游作者；此步骤优化选什么和材料如何组织，不预写新的口播模板。
 output: output/economy/{date}_economy_weekly.md
+audience_channel: economy_weekly
 content_strategy: audience-v1
-
-# After initial research and audience-led selection; preserves the existing writer.
 question_material: question-v1

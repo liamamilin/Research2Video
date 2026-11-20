@@ -1,9 +1,8 @@
-"""Matrices: a set of research Jobs sharing a domain and keywords, listed, edited and copied (spec/matrices.md).
+"""Matrices: research Job groups for ops and copy (spec/matrices.md).
 
-A matrix only groups Jobs. Running a member and changing its period (manual, daily, weekdays, some weekdays,
-monthly) can be done from the matrix page; pausing, cancelling and the schedule's finer settings stay on the Jobs and
-schedule pages. Copying a matrix with new keywords makes new Job files from each member's ``copy_as`` template: they
-start manual, so a copy never runs or spends anything until someone starts it.
+A matrix groups Jobs (membership, pause, search cap, event isolation, render defaults). Report domain/keywords live
+on each Job. Copying a matrix writes the form's domain and keywords into new Job files from each ``copy_as`` template;
+copies start manual so they never run until someone starts them.
 """
 
 from __future__ import annotations
@@ -325,7 +324,7 @@ def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
         slug = member.copy_as.lstrip("_")
         label = str(data.pop("label", "") or slug)
         data.pop("category", None)
-        data.update({"name": f"{domain} {label}", "enabled": True, "keywords": [],
+        data.update({"name": f"{domain} {label}", "enabled": True, "domain": domain, "keywords": keywords,
                      "output": f"output/{new_key}/{{date}}_{slug}.md", "schedule": {"type": "manual"}})
         original = load_job(jobs_dir, member.job) or {}
         topics = original.get("topics") if isinstance(original.get("topics"), dict) else None

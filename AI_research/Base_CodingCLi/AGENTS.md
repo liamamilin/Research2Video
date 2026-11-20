@@ -40,7 +40,7 @@ generation.
 
 | File | Contents |
 |------|----------|
-| `config/system.yaml` | `ai` (LLM endpoint), `search` (provider + limits), `research` (loop limits), optional `extraction` cleanup |
+| `config/system.yaml` | `ai` (LLM endpoint), `search` (provider + limits), `research` (loop limits), optional `extraction` cleanup, `network.proxy` (Clash port or headless mihomo) |
 | `.env` | `LLM_API_KEY`, `PARALLEL_API_KEY` (env vars referenced by system.yaml) |
 | `jobs/*.yaml` | Per-job prompt, keywords, output path, `runtime.timeout_seconds` |
 

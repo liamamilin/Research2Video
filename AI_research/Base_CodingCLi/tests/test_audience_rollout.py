@@ -91,7 +91,19 @@ def test_refinement_reads_originals_without_inheriting_index_stage_claims(llm):
 def test_old_work_and_other_jobs_never_opt_in_by_production_name():
     assert strategy.topic_channel({'title':'旧题'}) == ''
     assert strategy.job_channel({'_file':'monitoring/ai_flash_discovery'}) == ''
-    assert strategy.job_channel({'_file':'practical_ai_intelligence/00_collection_planner', 'content_strategy': strategy.MARKER}) == ''
+    assert strategy.job_channel({'_file':'source_discovery/science', 'content_strategy': strategy.MARKER}) == ''
+
+
+def test_audience_channel_on_job_wins_over_jobs_map():
+    assert strategy.job_channel({
+        '_file': 'monitoring/ai_flash_discovery',
+        'content_strategy': strategy.MARKER,
+        'audience_channel': 't01',
+    }) == 't01'
+    assert strategy.job_channel({
+        '_file': 'monitoring/ai_flash_discovery',
+        'content_strategy': strategy.MARKER,
+    }) == 'flash'
 
 
 def test_detail_subheadings_cannot_create_topics_or_override_scope():
