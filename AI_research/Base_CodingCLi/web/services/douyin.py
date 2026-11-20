@@ -75,14 +75,18 @@ def public_job(row: dict, *, comments: dict | None = None, checks: dict | None =
               "url": f"https://www.douyin.com/video/{row['work_id']}" if WORK_ID.fullmatch(row["work_id"]) else "",
               "can_retry": row["status"] in ("FAILED", "CANCELLED") and bool(row["result"].get("confirmed_not_submitted"))}
     if row['kind'] == 'UPLOAD':
-        comment = (comments if comments is not None else store().comments(row['uid'])).get(row['id'])
+        if comments is not None:
+            comment = comments.get(row['id'])
+        else:
+            found_comments = store().list(uid=row['uid'], kind='FIRST_COMMENT', parent_id=row['id'])
+            comment = found_comments[0] if found_comments else None
         result['first_comment'] = None if not comment else {
             **{k: comment[k] for k in ('id', 'status', 'phase', 'error', 'created_at', 'updated_at')},
             'text': comment['payload']['text'], 'comment_id': comment['result'].get('comment_id', ''),
             'read_back': bool(comment['result'].get('read_back')),
             'can_retry': comment['status'] in ('FAILED', 'CANCELLED') and bool(comment['result'].get('confirmed_not_submitted'))}
         if checks is None:
-            checks = verification_checks(store().list(uid=row['uid'], kind='RECONCILE'))
+            checks = verification_checks(store().list(uid=row['uid'], kind='RECONCILE', parent_id=row['id']))
         check = checks.get(row['id'])
         tracking = row['result'].get('verification', {})
         result['verification'] = {'automatic': row['status'] == 'SUBMITTED' and bool(row['work_id']) and not tracking.get('exhausted'),
@@ -241,14 +245,15 @@ def disconnect() -> dict:
 def candidates() -> list[dict]:
     from core.video import content_guard
 
-    queued = {(r["script_id"], r["version"]) for r in store().list(uid=account().get("uid", ""), kind="UPLOAD")}
+    owner = account().get("uid", "")
+    queued = {(r["script_id"], r["version"]) for r in store().list(uid=owner, kind="UPLOAD")}
     with video_store.connect() as conn:
         rows = conn.execute("SELECT r.id AS render_id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
                             "s.archived,s.status AS script_status,s.current_version,s.approved_version "
                             "FROM renders r JOIN scripts s ON s.id=r.script_id "
                             f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} AND NOT EXISTS "
                             "(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version AND p.platform='douyin' AND (p.account_uid=? OR p.account_uid='')) "
-                            "ORDER BY r.completed_at DESC,r.created_at DESC", (account().get("uid", ""),)).fetchall()
+                            "ORDER BY r.completed_at DESC,r.created_at DESC", (owner,)).fetchall()
     seen, result = set(), []
     for row in rows:
         key = (row["script_id"], row["version"])

@@ -512,18 +512,38 @@ def create_app() -> FastAPI:
         """Cheap gateway liveness; dependency diagnostics remain on /api/health."""
         return {"status": "ok", "instance_id": getattr(app.state, "instance_id", None)}
 
+    app.state.health_cache = {}
+    _health_lock = threading.Lock()
+    _health_ttl = 5.0
+
     @app.get("/api/health")
     def health():
         """Liveness plus real dependency checks; 503 when something is broken."""
         from core.health import run_checks
 
         settings = get_settings()
+        key = (settings.paths.state_dir, settings.paths.output_dir, settings.paths.config_dir)
+        now = time.monotonic()
+        with _health_lock:
+            cached = app.state.health_cache.get(key)
+            if cached is not None and now - cached[0] < _health_ttl:
+                result = dict(cached[1])
+                result['instance_id'] = getattr(app.state, 'instance_id', None)
+                return JSONResponse(
+                    status_code=503 if result["status"] == "error" else 200,
+                    content=result,
+                )
         result = run_checks(
             state_dir=settings.paths.state_dir,
             output_dir=settings.paths.output_dir,
             config_dir=settings.paths.config_dir,
             deep=False,
         )
+        # Cache only healthy answers so a brief outage is rechecked and
+        # unexpected run_checks failures still surface as 500.
+        if result.get("status") != "error":
+            with _health_lock:
+                app.state.health_cache[key] = (time.monotonic(), dict(result))
         result['instance_id'] = getattr(app.state, 'instance_id', None)
         return JSONResponse(
             status_code=503 if result["status"] == "error" else 200,

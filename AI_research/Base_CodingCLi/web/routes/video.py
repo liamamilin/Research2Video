@@ -596,7 +596,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer), compact: bool = False) -> list[dict]:
     published = store.published_versions_by_script()
     renders = store.render_statuses_by_script()
-    scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+    scripts = (store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+               if archived else store.list_scripts(limit=100000))
     paths = get_settings().paths
     owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, scripts)
     scripts = sorted((s for s in scripts if bool(s.get("archived") or owners[s["id"]]["matrix_archived"]) == archived),

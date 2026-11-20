@@ -32,6 +32,7 @@ class DouyinStore:
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_version
                     ON jobs(uid,script_id,version) WHERE kind='UPLOAD';
                 CREATE INDEX IF NOT EXISTS work_queue ON jobs(status,created_at);
+                CREATE INDEX IF NOT EXISTS jobs_parent ON jobs(uid,kind,parent_id);
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_author_comment ON jobs(uid,parent_id) WHERE kind='FIRST_COMMENT';
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_comment_work ON jobs(uid,work_id) WHERE kind='FIRST_COMMENT' AND work_id<>'';
                 CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL);
@@ -84,9 +85,10 @@ class DouyinStore:
                                      " WHERE id=?" + (" AND status=?" if expected else ""),
                                      (*fields.values(), key, *((expected,) if expected else ()))).rowcount)
 
-    def list(self, *, uid: str | None = None, kind: str | None = None, statuses: tuple[str, ...] = ()) -> list[dict]:
+    def list(self, *, uid: str | None = None, kind: str | None = None, parent_id: str | None = None,
+             statuses: tuple[str, ...] = ()) -> list[dict]:
         terms, params = [], []
-        for key, value in (("uid", uid), ("kind", kind)):
+        for key, value in (("uid", uid), ("kind", kind), ("parent_id", parent_id)):
             if value is not None:
                 terms.append(f"{key}=?")
                 params.append(value)
