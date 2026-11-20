@@ -170,6 +170,10 @@ Jobs can be referenced by basename (`daily_ai_agents`) or full path (`monitoring
 | `editor` | Viewer + trigger/cancel runs, edit job YAML |
 | `admin` | Editor + system config, user management, audit log |
 
+## 端到端生产链路
+
+从信源、Job、报告、选题、文稿到 AutoVideo 成片与平台投稿的总览见 [end-to-end-production-chain.md](spec/end-to-end-production-chain.md)。三段细挖：[chain-research.md](spec/chain-research.md)、[chain-video-production.md](spec/chain-video-production.md)、[chain-autovideo.md](spec/chain-autovideo.md)。按 Job / 生产绑定细查见 [job-generation-pipelines.md](spec/job-generation-pipelines.md)。
+
 ## 文稿质量优化偏好
 
 文稿优先讲观众愿意听的发现和作者的判断。来源随内容自然带出，条件在会改变理解或用法时再讲。写稿和核验过程留在制作侧，普通口播可以有不影响理解的小瑕疵。

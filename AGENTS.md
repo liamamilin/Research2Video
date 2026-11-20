@@ -7,6 +7,8 @@ This monorepo contains the research console and the video generation engine. Run
 - `autovideo/`: Chinese narrated video generation. `g1/` provides Video IR validation and trusted Remotion components; `g2/` runs generation; `g3/` contains FastAPI and React (`web/src/`). Contracts and fixtures live in `schemas/` and `examples/`; tests live in `tests/` and module-level `tests/`; `g4/` handles media acceptance.
 - `AI_research/Base_CodingCLi/`: Research reports and video workflows. Python logic lives in `core/`, API code in `web/`, React/TypeScript in `ui/src/`, and backend tests in `tests/`. YAML jobs and settings live in `jobs/` and `config/`.
 
+端到端生产链路（信源 → 报告 → 文稿 → AutoVideo → 发布）见 [`AI_research/Base_CodingCLi/spec/end-to-end-production-chain.md`](AI_research/Base_CodingCLi/spec/end-to-end-production-chain.md)。细挖：[`chain-research.md`](AI_research/Base_CodingCLi/spec/chain-research.md)、[`chain-video-production.md`](AI_research/Base_CodingCLi/spec/chain-video-production.md)、[`chain-autovideo.md`](AI_research/Base_CodingCLi/spec/chain-autovideo.md)。
+
 ## Build, Test, and Development Commands
 
 Install dependencies using project READMEs; run commands in these directories:
