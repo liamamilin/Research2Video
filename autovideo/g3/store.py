@@ -438,6 +438,14 @@ class JobStore:
         return {"attempt_root": attempt_root, "fixture_root": fixture_root, "artifacts": artifact_paths}
 
     def claim_next(self) -> dict | None:
+        # Fast read-only check avoids acquiring a BEGIN IMMEDIATE write lock on every idle poll.
+        probe = self._connect()
+        try:
+            has_queued = probe.execute("SELECT 1 FROM jobs WHERE status='QUEUED' LIMIT 1").fetchone()
+        finally:
+            probe.close()
+        if has_queued is None:
+            return None
         with self._transaction() as conn:
             try:
                 self._require_storage()

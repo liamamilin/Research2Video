@@ -43,13 +43,18 @@ export function ScriptScreenshots({ id, version, canEdit }: { id: string; versio
   useEffect(() => {
     if (!open || !preparing || dirty) return;
     let stopped = false;
-    const timer = setInterval(() => {
-      getScreenshots(id, version).then(value => {
+    let inFlight = false;
+    const refresh = () => {
+      if (stopped || document.hidden || inFlight) return;
+      inFlight = true;
+      void getScreenshots(id, version).then(value => {
         if (stopped) return;
         setData(value); setMaterials(value.selection.materials); setForm(value.selection.form);
-      }).catch(() => undefined);
-    }, 3000);
-    return () => { stopped = true; clearInterval(timer); };
+      }).catch(() => undefined).finally(() => { inFlight = false; });
+    };
+    const timer = window.setInterval(refresh, 3000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { stopped = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [id, version, open, preparing, dirty]);
 
   const changed = () => { setDirty(true); setSaved(false); };

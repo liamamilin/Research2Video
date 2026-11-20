@@ -294,8 +294,10 @@ export function TopicsPage() {
       finally { pending = false; }
     };
     void load();
-    const timer = window.setInterval(load, 15000);
-    return () => { active = false; window.clearInterval(timer); };
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, 15000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [source, sourceInfo?.refresh, tick]);
 
   useEffect(() => {

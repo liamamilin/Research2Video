@@ -18,7 +18,7 @@ def align(ir_path: Path, output: Path) -> None:
     import soundfile as sf
     from scipy.signal import resample_poly
     from mlx_audio.stt.utils import load_model
-    from g2.caption_alignment import align_segment, narration_hash, verify_plan, word_spans
+    from g2.caption_alignment import align_segment, narration_hash, proportional_cues, verify_plan, word_spans
     started = time.monotonic()
     from g2.workspace import project_path
     try:
@@ -47,15 +47,27 @@ def align(ir_path: Path, output: Path) -> None:
         divisor = gcd(rate, 16000)
         speech = resample_poly(samples[a:b], 16000 // divisor, rate // divisor).astype(np.float32)
         items = []
+        align_error = None
         if word_spans(row["text"]):
-            result = model.generate(speech, text=row["text"], language="Chinese")
-            items = [{"text": item.text, "start_ms": round(item.start_time * 1000), "end_ms": round(item.end_time * 1000)}
-                     for item in result.items]
-        segment_cues, segment_evidence = align_segment(row, items)
+            try:
+                result = model.generate(speech, text=row["text"], language="Chinese")
+                items = [{"text": item.text, "start_ms": round(item.start_time * 1000), "end_ms": round(item.end_time * 1000)}
+                         for item in result.items]
+            except Exception as exc:
+                align_error = f"{type(exc).__name__}: {str(exc)[:200]}"
+        if align_error is not None:
+            segment_cues = proportional_cues(row)
+            segment_evidence = {"segment_id": row["id"], "items": [], "method": "proportional_fallback",
+                                "fallback_reason": align_error, "rejected_items": []}
+        else:
+            segment_cues, segment_evidence = align_segment(row, items, allow_proportional_fallback=True)
         cues.extend(segment_cues)
         evidence.append(segment_evidence)
-        if segment_evidence.get("method") == "measured_phrase":
+        method = segment_evidence.get("method")
+        if method == "measured_phrase":
             print(f"ALIGNED {row['id']}: using measured phrase (word timestamps outside audio)", flush=True)
+        elif method == "proportional_fallback":
+            print(f"ALIGNED {row['id']}: using proportional fallback ({segment_evidence.get('fallback_reason', 'aligner mismatch')})", flush=True)
         else:
             print(f"ALIGNED {row['id']}: {len(items)} units", flush=True)
     plan = {"version": 2, "method": "local Qwen3 forced alignment with measured phrase fallback; original transcript and PCM unchanged",

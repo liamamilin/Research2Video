@@ -510,6 +510,7 @@ class SingleWorker:
                 self._lock_file = None
 
     def _loop(self) -> None:
+        idle_polls = 0
         while not self.stop_event.is_set():
             try:
                 job = self.store.claim_next()
@@ -517,16 +518,22 @@ class SingleWorker:
                 # A temporary SQLite lock or filesystem outage must not kill
                 # the sole queue consumer for the rest of the app's lifetime.
                 logger.exception("Could not read video queue; retrying")
+                idle_polls = 0
                 self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds))
                 continue
             if job is None:
                 try:
                     if self.idle_task and self.idle_task(self.stop_event):
+                        idle_polls = 0
                         continue
                 except Exception:
                     logger.exception("Video worker idle task failed; queue remains active")
-                self.stop_event.wait(self.settings.worker_poll_seconds)
+                base = self.settings.worker_poll_seconds
+                delay = base if idle_polls == 0 else min(max(2.0, base), base * (2 ** min(idle_polls, 3)))
+                idle_polls += 1
+                self.stop_event.wait(delay)
                 continue
+            idle_polls = 0
             try:
                 self.processor.execute(job, self.stop_event)
             except Exception as exc:

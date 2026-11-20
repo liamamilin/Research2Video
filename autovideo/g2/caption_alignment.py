@@ -117,19 +117,69 @@ def build_cues(segment: dict, items: list[dict]) -> list[dict]:
     return result
 
 
-def align_segment(segment: dict, items: list[dict]) -> tuple[list[dict], dict]:
-    """Keep a single short caption on its measured phrase when word times overshoot."""
+def proportional_cues(segment: dict) -> list[dict]:
+    """Distribute a segment's measured [start_ms, end_ms] across readable chunks by character weight."""
+    text = segment["text"]
+    start_ms, end_ms = int(segment["start_ms"]), int(segment["end_ms"])
+    duration = end_ms - start_ms
+    if duration <= 0:
+        raise ValueError(f"{segment['id']} 对齐时间无效")
+    spans = chunks(text) if word_spans(text) else [(0, len(text), 0, 0)]
+    max_chunks = max(1, duration // 200)
+    if len(spans) > max_chunks:
+        merged: list[tuple[int, int, int, int]] = []
+        group_size = (len(spans) + max_chunks - 1) // max_chunks
+        for i in range(0, len(spans), group_size):
+            batch = spans[i:i + group_size]
+            merged.append((batch[0][0], batch[-1][1], batch[0][2], batch[-1][3]))
+        spans = merged
+    weights = [max(1, len(re.sub(r"\s+", "", text[a:b]))) for a, b, _, _ in spans]
+    total_weight = sum(weights)
+    cues: list[dict] = []
+    cursor_ms = start_ms
+    acc = 0
+    for idx, ((a, b, _, _), weight) in enumerate(zip(spans, weights)):
+        acc += weight
+        if idx == len(spans) - 1:
+            cue_end = end_ms
+        else:
+            remaining = len(spans) - 1 - idx
+            target = start_ms + round(duration * acc / total_weight)
+            cue_end = max(cursor_ms + 1, min(target, end_ms - remaining))
+        cues.append({"segment_id": segment["id"], "text": text[a:b], "char_start": a, "char_end": b,
+                     "start_ms": cursor_ms, "end_ms": cue_end})
+        cursor_ms = cue_end
+    return cues
+
+
+def align_segment(segment: dict, items: list[dict], *, allow_proportional_fallback: bool = False) -> tuple[list[dict], dict]:
+    """Keep a single short caption on its measured phrase when word times overshoot.
+
+    When ``allow_proportional_fallback`` is True (used by the offline aligner runner),
+    a per-segment aligner failure degrades cleanly to proportional chunk timing within
+    the segment's measured speech interval instead of aborting the whole video job.
+    """
     try:
         return build_cues(segment, items), {"segment_id": segment["id"], "items": items}
-    except CaptionTimingOutsideAudio:
+    except CaptionTimingOutsideAudio as exc:
         text = segment["text"]
-        if segment["end_ms"] - segment["start_ms"] < 200 or len(chunks(text)) != 1:
+        if segment["end_ms"] - segment["start_ms"] >= 200 and len(chunks(text)) == 1:
+            cue = {"segment_id": segment["id"], "text": text, "char_start": 0, "char_end": len(text),
+                   "start_ms": segment["start_ms"], "end_ms": segment["end_ms"]}
+            evidence = {"segment_id": segment["id"], "items": [], "method": "measured_phrase",
+                        "rejected_items": items}
+            return [cue], evidence
+        if not allow_proportional_fallback:
             raise
-        cue = {"segment_id": segment["id"], "text": text, "char_start": 0, "char_end": len(text),
-               "start_ms": segment["start_ms"], "end_ms": segment["end_ms"]}
-        evidence = {"segment_id": segment["id"], "items": [], "method": "measured_phrase",
-                    "rejected_items": items}
-        return [cue], evidence
+        return proportional_cues(segment), {"segment_id": segment["id"], "items": [],
+                                            "method": "proportional_fallback",
+                                            "fallback_reason": str(exc), "rejected_items": items}
+    except ValueError as exc:
+        if not allow_proportional_fallback:
+            raise
+        return proportional_cues(segment), {"segment_id": segment["id"], "items": [],
+                                            "method": "proportional_fallback",
+                                            "fallback_reason": str(exc), "rejected_items": items}
 
 
 def narration_hash(ir: dict) -> str:

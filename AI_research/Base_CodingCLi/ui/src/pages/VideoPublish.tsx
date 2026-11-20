@@ -141,8 +141,10 @@ export function PublishPanel({
   // 复核在后台跑，几分钟；跑着的时候每隔几秒让上层刷新一次
   useEffect(() => {
     if (!running || !onChanged) return;
-    const timer = setInterval(() => { if (!document.hidden) onChanged(); }, 5000);
-    return () => clearInterval(timer);
+    const refresh = () => { if (!document.hidden) onChanged(); };
+    const timer = window.setInterval(refresh, 5000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [running, onChanged]);
 
   useEffect(() => { void reload(); }, [reload, refreshKey, rechecks.length, running, publications.length]);

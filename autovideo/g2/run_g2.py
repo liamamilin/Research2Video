@@ -387,13 +387,12 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
     started = time.monotonic()
 
     def record_failed_request(error_type: str, *, http_status: int | None = None) -> None:
-        # Count every request attempt, including transport and provider failures, against the hard cap.
-        # When token usage is unavailable, reserve the full configured per-call upper bound.
-        maximum_call_cost = (MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
+        # Count every request attempt against MAX_TOTAL_CALLS, without charging phantom worst-case
+        # token cost for failed HTTP/transport attempts that produced no billed completion.
         record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": active_model(),
                   "prompt_version": PROMPT_VERSION, "status": "failed", "error_type": error_type,
                   "http_status": http_status, "elapsed_seconds": round(time.monotonic() - started, 3),
-                  "peak_uncached_cost_upper_bound_usd": round(maximum_call_cost, 8),
+                  "peak_uncached_cost_upper_bound_usd": 0.0,
                   "request_file": str(request_path.relative_to(PROJECT)),
                   "response_file": str(response_path.relative_to(PROJECT)),
                   "reasoning_content_saved": False, "usage_unavailable": True}
@@ -447,7 +446,7 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         write_json(response_path, error)
         record_failed_request(type(exc).__name__)
         reason = getattr(exc, "reason", exc)
-        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.IncompleteRead))
+        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.HTTPException, OSError))
         if transient and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
             delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
             append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage,
@@ -1167,7 +1166,12 @@ def write_call_summary() -> None:
                "pricing_source": PROVIDER.pricing_source or "configured in .env"})
 
 
+_DEFER_MANIFEST = False
+
+
 def write_manifest(*, renderer_root: Path | None = None) -> None:
+    if _DEFER_MANIFEST:
+        return
     files = []
     for base in (FIXTURE_ROOT, ARTIFACTS, LOGS, (renderer_root or ROOT / "renderer") / "src"):
         if not base.exists():
@@ -1582,6 +1586,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in {"all", "scene-edit", "revision", "music-revision"}:
         raise SystemExit("usage: g2/run_g2.py {all|scene-edit}")
     started = time.monotonic()
+    _DEFER_MANIFEST = True
     try:
         if sys.argv[1] == "music-revision":
             from g2.music_mix import reuse_parent
@@ -1610,6 +1615,7 @@ if __name__ == "__main__":
         append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": "all",
                     "exit_code": 0, "elapsed_seconds": round(time.monotonic() - started, 3), "status": qa_result["status"]})
         private_renderer = RUN_ROOT / "renderer"
+        _DEFER_MANIFEST = False
         write_manifest(renderer_root=private_renderer if private_renderer.is_dir() else None)
         print("G2 PASS", flush=True)
     except Exception as exc:
