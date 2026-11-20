@@ -323,6 +323,7 @@ AutoVideo：画面、配音、字幕时间轴、渲染、包装、基础媒体�
 | [chain-research.md](chain-research.md) | 研究段逐步说明 |
 | [chain-video-production.md](chain-video-production.md) | 视频制作段逐步说明 |
 | [chain-autovideo.md](chain-autovideo.md) | AutoVideo 段逐步说明 |
+| [config-simplification.md](config-simplification.md) | 配置减负计划与归档批次 |
 | [job-generation-pipelines.md](job-generation-pipelines.md) | Job 级细表、附录、生产绑定展开 |
 | [video-steps.md](video-steps.md) | 文稿五步与重跑规则 |
 | [video-publish.md](video-publish.md) | 发布与投稿 |

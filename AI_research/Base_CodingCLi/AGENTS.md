@@ -172,7 +172,7 @@ Jobs can be referenced by basename (`daily_ai_agents`) or full path (`monitoring
 
 ## 端到端生产链路
 
-从信源、Job、报告、选题、文稿到 AutoVideo 成片与平台投稿的总览见 [end-to-end-production-chain.md](spec/end-to-end-production-chain.md)。三段细挖：[chain-research.md](spec/chain-research.md)、[chain-video-production.md](spec/chain-video-production.md)、[chain-autovideo.md](spec/chain-autovideo.md)。按 Job / 生产绑定细查见 [job-generation-pipelines.md](spec/job-generation-pipelines.md)。
+从信源、Job、报告、选题、文稿到 AutoVideo 成片与平台投稿的总览见 [end-to-end-production-chain.md](spec/end-to-end-production-chain.md)。三段细挖：[chain-research.md](spec/chain-research.md)、[chain-video-production.md](spec/chain-video-production.md)、[chain-autovideo.md](spec/chain-autovideo.md)。按 Job / 生产绑定细查见 [job-generation-pipelines.md](spec/job-generation-pipelines.md)。配置减负计划见 [config-simplification.md](spec/config-simplification.md)。
 
 ## 文稿质量优化偏好
 
