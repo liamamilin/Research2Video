@@ -87,6 +87,30 @@ SCHEMA = {
             'no_proxy': str,
         },
     },
+    # Declared-source page readers after HTTP/Chrome fail; OpenCode before Exa.
+    'page_readers': {
+        'opencode_cli': {
+            'enabled': bool,
+            'binary': str,
+            'timeout_seconds': POSITIVE_INT,
+            'workdir': str,
+        },
+    },
+    # OpenCode CLI gather-and-organize worker (materials only; report agent still writes).
+    'gather': {
+        'opencode_cli': {
+            'enabled': bool,
+            'binary': str,
+            'workdir': str,
+            'model_provider': str,
+            'free_models': STRINGS,
+            'paid_models': STRINGS,
+            'probe_timeout_seconds': POSITIVE_INT,
+            'gather_timeout_seconds': POSITIVE_INT,
+            'model_cache_seconds': NONNEGATIVE_INT,
+            'apply_to': ('enum', 'fetch_only', 'flagged', 'all'),
+        },
+    },
 }
 
 

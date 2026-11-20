@@ -146,6 +146,8 @@ class SearchClient:
         self.calls = 0
         #: provider -> why it gave nothing, from the last ``search`` (a provider that failed is otherwise only in the log)
         self.errors: dict[str, str] = {}
+        #: Cached Exa Contents quota/rate failure so later page reads skip the paid reader.
+        self.contents_exhausted: str = ""
 
     # ------------------------------------------------------------------
     # Public API
@@ -254,13 +256,21 @@ class SearchClient:
         """Read one exact public URL through Exa Contents when direct fetching is unavailable."""
         if self._cancel.is_set():
             raise CancelledError("Cancelled before reading page")
+        if self.contents_exhausted:
+            raise RuntimeError(self.contents_exhausted)
         key = self.config.api_keys.get("exa")
         if not key:
             raise RuntimeError("网页直接读取失败；可配置 EXA_API_KEY 使用 Exa 网页正文读取")
         self._progress({"type": "tool", "tool": "read_page", "url": url})
-        body = self._post_json("https://api.exa.ai/contents", {
-            "urls": [url], "text": True, "maxAgeHours": 0,
-        }, api_key=key)
+        try:
+            body = self._post_json("https://api.exa.ai/contents", {
+                "urls": [url], "text": True, "maxAgeHours": 0,
+            }, api_key=key)
+        except Exception as exc:
+            from .source_pages import paid_reader_exhausted
+            if paid_reader_exhausted(exc):
+                self.contents_exhausted = str(exc)[:300]
+            raise
         from .source_pages import canonical_url
         for item in body.get("results") or []:
             if canonical_url(item.get("url") or "") == canonical_url(url) and item.get("text"):

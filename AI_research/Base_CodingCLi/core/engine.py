@@ -208,6 +208,19 @@ class ResearchEngine:
                     source_block, fetched = self._fetch_sources_strict(job)
                 else:
                     source_block = self._fetch_sources_block(job)
+                # OpenCode gather worker: organize/supplement materials before the report agent writes.
+                try:
+                    from . import opencode_gather
+                    gather_block, self._opencode_gather_receipt = opencode_gather.gather(
+                        self, job, source_block or "")
+                    if gather_block:
+                        source_block = (source_block or "") + ("\n\n" if source_block else "") + gather_block
+                        logger.info("OpenCode gather attached: %s", self._opencode_gather_receipt)
+                except CancelledError:
+                    raise
+                except Exception as exc:  # noqa: BLE001 - gather is additive; report can still use declared sources
+                    logger.warning("OpenCode gather skipped: %s", exc)
+                    self._opencode_gather_receipt = {"error": str(exc)[:300]}
                 if source_block:
                     prompt = f"{prompt}\n\n{source_block}"
                 logger.debug("Prompt built: %d chars", len(prompt))
@@ -522,12 +535,13 @@ class ResearchEngine:
             options['collection_window'] = job['_collection_window']
         items, stats = fetch_all_strict(specs, limit_per_source=int(job.get("sources_limit", 8)),
                                         **options)
+        items, detail_note = self._follow_teaser_details(job, items, options.get("search_client"))
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
         note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
-        return f"{header}{note}\n\n{self._source_material(job, items)}", (items, stats)
+        return f"{header}{note}{detail_note}\n\n{self._source_material(job, items)}", (items, stats)
 
     def _fetch_supply(self, job: dict):
         from .source_supply import collect, for_job, material_block
@@ -537,14 +551,50 @@ class ResearchEngine:
         items, stats, self._supply_pending, self._supply_receipt = collect(self, job, profile)
         return material_block(items, self._supply_receipt), (items, stats)
 
-    def _source_options(self, specs: list[str]) -> dict:
-        if not any(spec.startswith(("page:", "catalog:", "search:", "bili_hot:")) for spec in specs):
-            return {}
+    def _source_search(self):
         if getattr(self, "_source_search_client", None) is None:
             from .search import SearchClient
             self._source_search_client = SearchClient(SearchConfig.from_system(self.sys),
                                                       cancel_token=self._cancel, progress_cb=self._progress)
-        return {"search_client": self._source_search_client}
+        return self._source_search_client
+
+    def _source_options(self, specs: list[str]) -> dict:
+        if not any(spec.startswith(("page:", "catalog:", "search:", "bili_hot:")) for spec in specs):
+            return {}
+        return {"search_client": self._source_search()}
+
+    def _follow_teaser_details(self, job: dict, items: list, search_client) -> tuple[list, str]:
+        """Fetch-only Jobs without source_supply: turn RSS/catalog teasers into article bodies."""
+        if job.get("search") is not False or not items:
+            return items, ""
+        from .source_pages import DEFAULT_DETAIL_PAGES, follow_teaser_articles
+
+        pages = int(job.get("source_detail_pages", DEFAULT_DETAIL_PAGES) or 0)
+        if pages <= 0:
+            return items, ""
+        client = search_client
+        if client is None and any(getattr(item, "provider", "") in
+                                  {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"}
+                                  for item in items):
+            try:
+                client = self._source_search()
+            except Exception as exc:  # noqa: BLE001 - detail follow can proceed with browser only
+                logger.warning("Source detail paid reader unavailable: %s", str(exc)[:160])
+                client = None
+        extended, receipt = follow_teaser_articles(
+            items, search_client=client, cancel_token=self._cancel, progress_cb=self._progress,
+            detail_pages=pages)
+        if not receipt.get("attempted"):
+            return items, ""
+        lines = [f"- {row['url']}: {row['status']}"
+                 + (f"（{row['error']}）" if row.get("error") else "")
+                 for row in receipt.get("details") or []]
+        note = (f"\n\n正文补读：成功 {receipt.get('successful', 0)} / 尝试 {receipt.get('attempted', 0)}\n"
+                + "\n".join(lines))
+        if receipt.get("paid_error"):
+            note += f"\n付费读页已跳过：{receipt['paid_error']}"
+        logger.info("Source detail follow: %s", receipt)
+        return extended, note
 
     def _source_material(self, job: dict, items: list) -> str:
         from .search import SearchClient

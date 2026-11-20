@@ -78,29 +78,17 @@ def fingerprint(item) -> str:
 
 
 def read_page(url: str, *, limit: int = 80, timeout: int = 15, search_client=None, browser: bool = True,
-              catalog: bool = False):
-    """Reuse public-page readers and anonymous browser; never use a publishing login."""
+              catalog: bool = False, allow_paid: bool = True):
+    """HTTP → anonymous browser → optional paid reader; never a publishing login."""
     from .sources import _get_page
-    from .source_pages import fetch_page
-    try:
-        result = fetch_page(url, limit, timeout, get_page=_get_page, search_client=search_client,
-                            section_chars=24000, catalog=catalog)
-        if not result:
-            raise ValueError("正文读取未取得段落")
-        return result
-    except CancelledError:
-        raise
-    except Exception:
-        if not browser:
-            raise
-        from .video.screenshots import page_for_capture, wait_unless_csp
-        from .source_pages import parse_page, parse_catalog
-        with page_for_capture(url, timeout_seconds=timeout) as page:
-            # Under a CSP that forbids eval, read what has rendered; the parser rejects a page with no text.
-            wait_unless_csp(page, "(document.querySelector('article, main') || document.body).innerText.length > 120",
-                            timeout * 1000)
-            return (parse_catalog(page.content(), page.url, limit) if catalog else
-                    parse_page(page.content(), page.url, limit, section_chars=24000))
+    from .source_pages import PAGE_SECTION_CHARS, fetch_page
+
+    result = fetch_page(url, limit, timeout, get_page=_get_page, search_client=search_client,
+                        section_chars=PAGE_SECTION_CHARS, catalog=catalog, browser=browser,
+                        allow_paid=allow_paid and search_client is not None)
+    if not result:
+        raise ValueError("正文读取未取得段落")
+    return result
 
 
 def choose_pool(pool: list[dict], job: str, count: int, now: float) -> list[dict]:
@@ -349,25 +337,15 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         detail = {"url": url, "status": "unavailable", "sections": 0, "news": news}
         receipt["details"].append(detail)
         try:
-            try:
-                parts = read_page(url, limit=scan, search_client=None)
-            except CancelledError:
-                raise
-            except Exception:
-                if client is None:
-                    raise
-                if exa_detail_error:
-                    detail["fallback_error"] = exa_detail_error
-                    raise
-                detail["reader"] = "exa"  # the paid reader, only after direct and browser reads fail
-                try:
-                    parts = read_page(url, limit=scan, search_client=client, browser=False)
-                except RuntimeError as exc:
-                    if re.search(r"HTTP (401|402|429)\b", str(exc)):
-                        if not optional_details:
-                            raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc
-                        exa_detail_error = str(exc)[:300]
-                    raise
+            from .source_pages import paid_reader_exhausted
+            if exa_detail_error:
+                detail["fallback_error"] = exa_detail_error
+            # One call: HTTP → browser → optional paid reader (skipped after quota failure).
+            allow_paid = client is not None and not exa_detail_error
+            parts = read_page(url, limit=scan, search_client=client if allow_paid else None,
+                              browser=True, allow_paid=allow_paid)
+            if allow_paid and client is not None:
+                detail["reader"] = "unified"  # HTTP → browser → paid inside read_page
             from .ai_dossier_sources import detail_sections
             room = article_chars if news else min(article_chars, budget - used_chars)
             whole = parts
@@ -394,6 +372,12 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
+            from .source_pages import paid_reader_exhausted
+            if paid_reader_exhausted(exc):
+                if not optional_details:
+                    raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc
+                exa_detail_error = str(exc)[:300]
+                detail["fallback_error"] = exa_detail_error
             if optional_details:
                 seed = items[seed_index]
                 items[seed_index] = replace(seed, excerpts=[
