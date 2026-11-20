@@ -25,11 +25,9 @@ coverage:
     queries: [OpenAI ChatGPT official pricing plans usage limits updates]
     sources:
       - {spec: 'page:https://chatgpt.com/pricing', role: state}
-      - {spec: 'page:https://openai.com/api/pricing/', role: state}
-      - {spec: 'page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes', role: release}
+      # 2026-11-20 归档：openai.com/api/pricing、help release-notes、developers RSS 长期 403/不可用
       # 帮助中心与价格页常被拒绝直接读取；新闻与开发者订阅源能直接读到。
       - {spec: 'rss:https://openai.com/news/rss.xml', role: release}
-      - {spec: 'rss:https://developers.openai.com/rss.xml', role: release}
       - {spec: 'page:https://learn.chatgpt.com/docs/whats-new.md', role: release}
       - {spec: 'page:https://developers.openai.com/api/docs/changelog.md', role: release}
   - key: anthropic_product
@@ -122,7 +120,7 @@ coverage:
     jobs: [monitoring/ai_flash_discovery]
     queries: [AI image video generation model official release Midjourney Kling Runway Veo FLUX]
     sources:
-      - {spec: 'rss:https://updates.midjourney.com/rss/', role: release}
+      # 2026-11-20 归档：updates.midjourney.com/rss 长期 XML 解析失败
       - {spec: 'catalog:https://bfl.ai/blog', role: release}
   - key: platform_vendors
     subject: 云与硬件平台（微软 / 英伟达 / AWS / 苹果）

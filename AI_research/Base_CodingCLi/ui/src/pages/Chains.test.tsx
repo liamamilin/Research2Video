@@ -16,7 +16,7 @@ beforeEach(() => {
   apiMock.mockImplementation(async (path: string) => {
     if (path === '/api/chains') return { items: [], archived: [] };
     if (path === '/api/chains/catalog') return { chains: [], revision: '1', sources: { openai: { name: 'OpenAI News', spec: 'rss:https://openai.com/news/rss.xml', enabled: true, tags: [], note: '' } } };
-    if (path === '/api/video/autovideo') return { voices: [{ id: 'zf_xiaoxiao', label: '小晓 · 普通话女声' }] };
+    if (path === '/api/video/autovideo') return { voices: [{ id: 'voxcpm_anchor', label: 'VoxCPM2 · 普通话女声（参考音色）' }] };
     return {};
   });
 });
@@ -37,9 +37,9 @@ it('preserves entered research information and requires an actual source selecti
   expect(screen.getByRole('alert').textContent).toContain('至少选择一个来源');
   fireEvent.click(screen.getByRole('checkbox', { name: /OpenAI News/ }));
   fireEvent.click(screen.getByRole('button', { name: '下一步' }));
-  await waitFor(() => expect((screen.getByLabelText('旁白声音') as HTMLSelectElement).value).toBe('zf_xiaoxiao'));
+  await waitFor(() => expect((screen.getByLabelText('旁白声音') as HTMLSelectElement).value).toBe('voxcpm_anchor'));
   const draft = JSON.parse(localStorage.getItem('chain-wizard-v1')!);
-  expect(draft).toMatchObject({ name: '科研进展', sources: ['source:openai'], voice_id: 'zf_xiaoxiao' });
+  expect(draft).toMatchObject({ name: '科研进展', sources: ['source:openai'], voice_id: 'voxcpm_anchor' });
 });
 it('restores an unfinished creation form after a reload', async () => {
   localStorage.setItem('chain-wizard-v1', JSON.stringify({ name: '未完成链路', key: 'unfinished', prompt: '研究可用工具', sources: ['source:openai'] }));

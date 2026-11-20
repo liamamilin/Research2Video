@@ -128,6 +128,48 @@ def test_follow_teaser_skips_paid_after_quota(monkeypatch):
     assert receipt["paid_error"] and "402" in receipt["paid_error"]
 
 
+def test_follow_teaser_skips_paid_when_client_marks_contents_exhausted(monkeypatch):
+    """fetch_page may re-raise local 403 after Exa 402; contents_exhausted still stops later paid reads."""
+    teasers = [
+        SearchResult("A", "https://news.example/a", excerpts=["a"], provider="rss"),
+        SearchResult("B", "https://news.example/b", excerpts=["b"], provider="rss"),
+    ]
+    client = SimpleNamespace(contents_exhausted="")
+    paid = []
+
+    def fake_fetch(url, limit, timeout, *, get_page, search_client=None, allow_paid=True, **k):
+        if search_client is not None and allow_paid:
+            paid.append(url)
+            client.contents_exhausted = "HTTP 402: credits limit"
+            raise RuntimeError("HTTP 403 Forbidden")  # preferred local error after quota
+        raise RuntimeError("HTTP 403 Forbidden")
+
+    monkeypatch.setattr(source_pages, "fetch_page", fake_fetch)
+    _, receipt = source_pages.follow_teaser_articles(
+        teasers, search_client=client, detail_pages=4)
+    assert paid == ["https://news.example/a"]
+    assert "402" in receipt["paid_error"]
+
+
+def test_fetch_page_skips_paid_when_contents_already_exhausted(monkeypatch):
+    order = []
+
+    def get_page(url, timeout):
+        order.append("http")
+        raise RuntimeError("HTTP 403")
+
+    monkeypatch.setattr(source_pages, "_read_via_browser",
+                        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("browser offline")))
+    monkeypatch.setattr(source_pages, "_read_via_paid",
+                        lambda *a, **k: order.append("paid") or (_ for _ in ()).throw(AssertionError("paid")))
+    client = SimpleNamespace(contents_exhausted="HTTP 402: credits limit")
+    with pytest.raises(RuntimeError, match="browser offline"):
+        source_pages.fetch_page("https://example.com/a", 4, 10, get_page=get_page,
+                                search_client=client, browser=True, allow_paid=True,
+                                allow_opencode=False)
+    assert order == ["http"]
+
+
 def test_engine_follow_only_for_fetch_only_jobs(monkeypatch):
     from core.engine import ResearchEngine
     from core import sources
@@ -160,3 +202,126 @@ def test_engine_follow_only_for_fetch_only_jobs(monkeypatch):
     # searchable path is not used by _fetch_sources_strict normally; follow guard skips when search!=False
     items2, note = engine._follow_teaser_details(searchable, [hit], None)
     assert items2 == [hit] and note == ""
+
+
+def test_page_cache_reuses_positive_and_negative_results_across_stages(monkeypatch):
+    calls = {"http": 0, "browser": 0}
+
+    def get_page(url, timeout):
+        calls["http"] += 1
+        # fetch_page may pass the raw URL (with utm); cache keys strip tracking.
+        from urllib.parse import urlsplit
+        if urlsplit(url).path.rstrip("/").endswith("/ok"):
+            return ARTICLE
+        raise RuntimeError("HTTP 403 Forbidden")
+
+    def browser(*a, **k):
+        calls["browser"] += 1
+        raise RuntimeError("HTTP 403 Forbidden")
+
+    monkeypatch.setattr(source_pages, "_read_via_browser", browser)
+    with source_pages.page_cache_scope() as cache:
+        first = source_pages.fetch_page("https://cache.example/ok?utm_source=x", 4, 10,
+                                        get_page=get_page, allow_opencode=False)
+        first[0].excerpts.append("mutated-by-caller")
+        second = source_pages.fetch_page("https://cache.example/ok", 4, 10,
+                                         get_page=get_page, allow_opencode=False)
+        assert calls["http"] == 1
+        assert "mutated-by-caller" not in second[0].excerpts
+
+        with pytest.raises(RuntimeError, match="403"):
+            source_pages.fetch_page("https://cache.example/bad", 4, 10,
+                                    get_page=get_page, allow_opencode=False)
+        with pytest.raises(RuntimeError, match="403"):
+            source_pages.fetch_page("https://cache.example/bad", 4, 10,
+                                    get_page=get_page, allow_opencode=False)
+        assert calls["http"] == 2 and calls["browser"] == 1
+        stats = cache.stats()
+        assert stats["hits"] == 1 and stats["negative_hits"] == 1
+
+
+def test_page_cache_host_hard_block_skips_slow_fallbacks(monkeypatch):
+    calls = {"http": 0, "browser": 0, "opencode": 0}
+
+    def get_page(url, timeout):
+        calls["http"] += 1
+        raise RuntimeError("HTTP 403 Forbidden")
+
+    def browser(*a, **k):
+        calls["browser"] += 1
+        raise RuntimeError("页面未成功打开（HTTP 403）")
+
+    def opencode(*a, **k):
+        calls["opencode"] += 1
+        raise RuntimeError("HTTP 403")
+
+    monkeypatch.setattr(source_pages, "_read_via_browser", browser)
+    monkeypatch.setattr(source_pages, "_read_via_opencode", opencode)
+    monkeypatch.setattr("core.opencode_cli.available", lambda *a, **k: True)
+
+    with source_pages.page_cache_scope() as cache:
+        for i in range(4):
+            with pytest.raises(RuntimeError, match="403"):
+                source_pages.fetch_page(f"https://blocked.example/post-{i}", 4, 10,
+                                        get_page=get_page, browser=True, allow_opencode=True)
+        # First 2 URLs establish the host hard-block; next 2 fast-fail after HTTP without Chrome/OpenCode.
+        assert calls["http"] == 4
+        assert calls["browser"] == 2
+        assert calls["opencode"] == 2
+        assert cache.stats()["host_fast_fails"] == 2
+
+
+def test_dossier_enrich_and_agent_read_webpage_share_page_cache(monkeypatch):
+    from core import ai_dossier_sources, sources
+    from core.research import ResearchAgent
+    from core.llm import LLMConfig
+    from core.search import SearchConfig
+
+    http_calls = []
+
+    def fake_get_page(url, timeout=15):
+        http_calls.append(url)
+        return ARTICLE
+
+    monkeypatch.setattr(sources, "_get_page", fake_get_page)
+    url = "https://shared.example/story"
+    with source_pages.page_cache_scope() as cache:
+        # Stage R6 reads the page once.
+        got = source_pages.fetch_page(url, 24, 10, get_page=fake_get_page, allow_opencode=False)
+        assert got and len(http_calls) == 1
+
+        # Stage R7 (ResearchAgent.read_webpage) reuses cached content without calling SearchClient.read_page.
+        agent = ResearchAgent(LLMConfig(model="m", base_url="http://localhost"), SearchConfig())
+        monkeypatch.setattr(agent.search, "read_page",
+                            lambda u: (_ for _ in ()).throw(AssertionError("should use cache")))
+        tool_text = agent._execute_tool("read_webpage", {"url": url})
+        assert "正文段落" in tool_text
+
+        # Stage R8 (ai_dossier_sources.enrich inside ThreadPoolExecutor) also hits the same cache.
+        report = f"### 1.1 标题\n- **证据来源**：{url}\n正文"
+        text, receipt = ai_dossier_sources.enrich(
+            {"_file": "ai_media/weekly_deep_research", "dossier_sources": True},
+            report, url,
+        )
+        assert "正文段落" in text and receipt["pages"][0]["status"] == "read"
+        assert len(http_calls) == 1
+        assert cache.stats()["hits"] >= 2
+
+
+def test_follow_teaser_articles_respects_time_budget(monkeypatch):
+    teasers = [
+        SearchResult("A", "https://slow.example/1", excerpts=["teaser 1"], provider="rss"),
+        SearchResult("B", "https://slow.example/2", excerpts=["teaser 2"], provider="rss"),
+    ]
+    now = [100.0]
+    monkeypatch.setattr(source_pages.time, "monotonic", lambda: now[0])
+
+    def fake_fetch(url, *a, **k):
+        now[0] += 5.0
+        return [SearchResult("Body", url, excerpts=["完整正文。" * 30], provider="page")]
+
+    monkeypatch.setattr(source_pages, "fetch_page", fake_fetch)
+    items, receipt = source_pages.follow_teaser_articles(teasers, detail_pages=4, detail_timeout_seconds=3.0)
+    assert receipt["attempted"] == 1 and receipt["successful"] == 1
+    assert receipt["timed_out"] is True and receipt["skipped_by_timeout"] == 1
+    assert "时间预算" in "\n".join(items[1].excerpts)

@@ -96,7 +96,9 @@ SCHEMA = {
             'workdir': str,
         },
     },
-    # OpenCode CLI gather-and-organize worker (materials only; report agent still writes).
+    # OpenCode CLI gather worker (materials only; report agent still writes).
+    # apply_to: all = searching Jobs; fetch_only = search:false Jobs; flagged = explicit only.
+    # search:false Jobs are excluded from "all" unless Job sets opencode_gather: true.
     'gather': {
         'opencode_cli': {
             'enabled': bool,

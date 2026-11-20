@@ -50,14 +50,18 @@ def column_of(script: dict):
     return video_columns.get(get_settings().paths.config_dir, script["column_key"])
 
 
-def steps_of(script: dict) -> list[dict]:
+def steps_of(script: dict, *, version: Optional[dict] = None, renders: Optional[list[dict]] = None,
+             column=None) -> list[dict]:
     """The script's steps as its records show them now."""
-    version = store.get_version(script["id"], script["current_version"]) if script.get("current_version") else None
+    if version is None and script.get("current_version"):
+        version = store.get_version(script["id"], script["current_version"])
+    if renders is None:
+        renders = store.list_renders(script["id"])
     try:
-        mode = column_of(script).research_mode
+        mode = (column or column_of(script)).research_mode
     except Exception:  # noqa: BLE001 - a recipe gone or broken: the steps still read
         mode = "job"
-    return steps.derive(script, version, store.list_renders(script["id"]), research_mode=mode)
+    return steps.derive(script, version, renders, research_mode=mode)
 
 
 def create(column_key: str, topic: dict, started_by: str) -> dict:

@@ -6,7 +6,7 @@
 
 1. 统一页面读取：`HTTP → 匿名 Chrome → OpenCode CLI webfetch → 可选 Exa`（[`core/source_pages.py`](../../core/source_pages.py) `fetch_page`），供给池与 Job 预取共用。
 2. OpenCode CLI：[`core/opencode_cli.py`](../../core/opencode_cli.py)；配置 `page_readers.opencode_cli`。声明源应尽量不靠 Exa；OpenCode 仍无法绕过对全自动客户端 403 的站点（实测 openai.com）。
-3. OpenCode **搜集整理工作员**：[`core/opencode_gather.py`](../../core/opencode_gather.py) + 模型探测 [`core/opencode_models.py`](../../core/opencode_models.py)。成稿 Agent 输入 = 声明源 + OpenCode 材料包 + Exa 末招。Go 免费模型（`*-free`）探测失败则回退 `paid_models`。配置 `gather.opencode_cli`；默认 `apply_to: all`（全 Job 走工作员），单 Job 可用 `opencode_gather: false` 关闭。材料包含整理结论、关键数字与对比、材料条目、成稿可用角度。
+3. OpenCode **调研 harness**：[`core/opencode_gather.py`](../../core/opencode_gather.py) + 模型探测 [`core/opencode_models.py`](../../core/opencode_models.py)。按 Job 的关键词 / 要求（可另写 `opencode_task`）自主 websearch + webfetch，产出材料包；成稿 Agent 仍写终稿。`webfetch_markdown` 仅作读页回退管道。Go 免费模型探测失败回退 `paid_models`。配置 `gather.opencode_cli`；默认 `apply_to: all`，单 Job 可用 `opencode_gather: false`。
 4. fetch-only / 无 `source_supply`：[`follow_teaser_articles`](../../core/source_pages.py) 跟读 RSS/catalog 摘要链接（引擎 [`_follow_teaser_details`](../../core/engine.py)）。
 5. Exa 401/402/429：客户端缓存 `contents_exhausted`，后续付费读跳过；本地 403/缺 Chrome 优先于额度报错露出。
 

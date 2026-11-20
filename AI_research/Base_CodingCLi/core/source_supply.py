@@ -19,7 +19,8 @@ from . import source_coverage
 from .yaml_cache import load_yaml
 
 logger = logging.getLogger(__name__)
-PAGE_CHARS = 24000  # one article read in full, as the page reader splits it
+PAGE_CHARS = 80000  # one article read in full, as the page reader splits it
+DEFAULT_DETAIL_TIMEOUT_SECONDS = 180.0  # wall-clock cap for teaser detail-reading loop; 0 disables
 
 
 def profiles(config_dir: str) -> dict[str, dict]:
@@ -299,7 +300,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         if when and window_start and (when.replace(tzinfo=window_start.tzinfo) if when.tzinfo is None else when) < window_start:
             state += "；发布于本期范围开始之前、此前没有交给研究，本期补交，按原发布日期报道"
         if prior and revised(prior, record):
-            text += "\n上次已交付内容：" + prior["text"][:3000]
+            text += "\n上次已交付内容：" + prior["text"][:20000]
         material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
         rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])
         size = len(rendered.to_markdown())
@@ -327,17 +328,34 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     exa_detail_error = ""
     max_attempts = float(profile.get('detail_attempts') or "inf")
     article_chars = int(profile.get('detail_chars', PAGE_CHARS))
+    raw_timeout = profile.get('detail_timeout_seconds')
+    detail_timeout = DEFAULT_DETAIL_TIMEOUT_SECONDS if raw_timeout is None else float(raw_timeout)
+    detail_started = time.monotonic()
+    detail_timed_out = False
+    skipped_by_timeout = 0
     # News articles are all read in full; page-context articles share what is left of the budget.
     for url, row, material_id, news, seed_index in sorted(candidates, key=lambda c: not c[3]):
         if detail_left <= 0 or attempts >= max_attempts or (not news and used_chars >= budget):
             continue
         if engine._cancel.is_set():
             raise CancelledError("正文补读已取消")
+        if detail_timeout > 0 and (time.monotonic() - detail_started) >= detail_timeout:
+            detail_timed_out = True
+            skipped_by_timeout += 1
+            if optional_details:
+                seed = items[seed_index]
+                items[seed_index] = replace(seed, excerpts=[
+                    *seed.excerpts, "正文补读达到时间预算，以上是该来源已取得的内容。"
+                ])
+            continue
         attempts += 1
         detail = {"url": url, "status": "unavailable", "sections": 0, "news": news}
         receipt["details"].append(detail)
         try:
             from .source_pages import paid_reader_exhausted
+            # fetch_page may re-raise local 403 after Exa 402; trust contents_exhausted too.
+            exhausted = str(getattr(client, "contents_exhausted", "") or "")
+            exa_detail_error = exa_detail_error or exhausted
             if exa_detail_error:
                 detail["fallback_error"] = exa_detail_error
             # One call: HTTP → browser → optional paid reader (skipped after quota failure).
@@ -373,16 +391,18 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         except Exception as exc:
             detail["error"] = str(exc)[:300]
             from .source_pages import paid_reader_exhausted
-            if paid_reader_exhausted(exc):
-                if not optional_details:
+            exhausted = str(getattr(client, "contents_exhausted", "") or "")
+            if paid_reader_exhausted(exc) or exhausted:
+                if not optional_details and paid_reader_exhausted(exc):
                     raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc
-                exa_detail_error = str(exc)[:300]
+                exa_detail_error = (str(exc) if paid_reader_exhausted(exc) else exhausted)[:300]
                 detail["fallback_error"] = exa_detail_error
             if optional_details:
                 seed = items[seed_index]
                 items[seed_index] = replace(seed, excerpts=[
                     *seed.excerpts, "原网页未能补读，以上是该来源已取得的内容。"
                 ])
+    detail_elapsed = round(time.monotonic() - detail_started, 2)
     # A delivered change is not automatically an adopted story. Re-offer a bounded
     # number on a later day; baseline comparison and editorial adoption stay separate.
     from .search import SearchResult
@@ -401,6 +421,8 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     source_coverage.CoverageStore(root, profile['key']).record(pending['sources'], at=now)
     receipt['coverage'] = source_coverage.CoverageStore(root, profile['key']).status(profile, now=now)
     receipt['detail_budget'] = {'success_limit': profile.get('detail_pages'), 'attempt_limit': profile.get('detail_attempts'),
+                                'timeout_seconds': detail_timeout, 'elapsed_seconds': detail_elapsed,
+                                'timed_out': detail_timed_out, 'skipped_by_timeout': skipped_by_timeout,
                                 'article_chars': article_chars, 'news_chars': news_chars,
                                 'attempts': attempts, 'successful': sum(d['status'] == 'read' for d in receipt['details'])}
     storage.remember_links(list(dict.fromkeys(canonical_url(u) for u in discovered_links)))

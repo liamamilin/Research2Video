@@ -848,6 +848,22 @@ def resume_render_download(render_id: str) -> dict | None:
     return get_render(render_id) if changed else None
 
 
+def resume_unconfirmed_render(render_id: str) -> dict | None:
+    """Retry a SUBMIT_UNCONFIRMED render atomically, keeping its frozen payload and idempotency_key."""
+    try:
+        with connect(write=True) as conn:
+            changed = conn.execute(
+                "UPDATE renders SET status='SUBMITTING',error_code=NULL,error_message=NULL,"
+                " completed_at=NULL,submit_started_at=NULL,updated_at=?"
+                " WHERE id=? AND status='FAILED' AND error_code='SUBMIT_UNCONFIRMED'"
+                " AND autovideo_job_id IS NULL",
+                (_now(), render_id),
+            ).rowcount
+    except sqlite3.IntegrityError as exc:
+        raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+    return get_render(render_id) if changed else None
+
+
 def list_renders(script_id: str) -> list[dict]:
     with connect() as conn:
         rows = conn.execute(

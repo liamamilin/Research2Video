@@ -68,8 +68,42 @@ def metadata() -> dict:
     return {f.stem: read(f) for f in (cfg() / "chains").glob("*.yaml")}
 
 
-def all_chains(archived: bool = False) -> list[dict]:
-    configs = production.load_all(paths().config_dir, paths().jobs_dir)
+_YAML_DIGEST_CACHE: dict[tuple[str, str], tuple[tuple, bytes]] = {}
+_YAML_DIGEST_LOCK = threading.Lock()
+
+
+def _yaml_tree_digest(config_dir: str, jobs_dir: str) -> bytes:
+    """Hash every YAML file under config/ and jobs/, cached by (path, mtime_ns, size)."""
+    key = (config_dir, jobs_dir)
+    files = sorted([*Path(config_dir).rglob("*.yaml"), *Path(jobs_dir).rglob("*.yaml")])
+    sig = []
+    for f in files:
+        try:
+            st = f.stat()
+            sig.append((str(f), st.st_mtime_ns, st.st_size))
+        except OSError:
+            continue
+    sig_tuple = tuple(sig)
+    with _YAML_DIGEST_LOCK:
+        cached = _YAML_DIGEST_CACHE.get(key)
+        if cached is not None and cached[0] == sig_tuple:
+            return cached[1]
+    h = hashlib.sha256()
+    for path_str, _, _ in sig_tuple:
+        try:
+            h.update(path_str.encode())
+            h.update(Path(path_str).read_bytes())
+        except OSError:
+            continue
+    value = h.digest()
+    with _YAML_DIGEST_LOCK:
+        _YAML_DIGEST_CACHE[key] = (sig_tuple, value)
+    return value
+
+
+def _all_chains_grouped(configs: dict | None = None) -> tuple[list[dict], list[dict]]:
+    if configs is None:
+        configs = production.load_all(paths().config_dir, paths().jobs_dir)
     meta = metadata()
     for member in meta.values():
         if member.get("archived"):
@@ -107,34 +141,33 @@ def all_chains(archived: bool = False) -> list[dict]:
             "imported": True,
             "schedule_armed": False,
         }
-    return [m for m in meta.values() if bool(m.get("archived")) == archived]
+    active = [m for m in meta.values() if not m.get("archived")]
+    archived_list = [m for m in meta.values() if bool(m.get("archived"))]
+    return active, archived_list
 
 
-def find(key: str, include_archived: bool = False) -> dict:
-    found = next(
-        (
-            m
-            for m in all_chains() + (all_chains(True) if include_archived else [])
-            if m["key"] == key
-        ),
-        None,
-    )
+def all_chains(archived: bool = False, *, configs: dict | None = None) -> list[dict]:
+    active, archived_list = _all_chains_grouped(configs=configs)
+    return archived_list if archived else active
+
+
+def find(key: str, include_archived: bool = False, *, configs: dict | None = None) -> dict:
+    active, archived_list = _all_chains_grouped(configs=configs)
+    pool = active + (archived_list if include_archived else [])
+    found = next((m for m in pool if m["key"] == key), None)
     if found is None:
         error("链路不存在", 404)
     return found
 
 
-def digest(meta: dict) -> str:
+def digest(meta: dict, *, all_plans: list[dict] | None = None) -> str:
     # A legacy-tab edit must invalidate a chain form too.
     h = hashlib.sha256(json.dumps(meta, sort_keys=True, ensure_ascii=False).encode())
-    for f in sorted(
-        [*(cfg()).rglob("*.yaml"), *(Path(paths().jobs_dir)).rglob("*.yaml")]
-    ):
-        h.update(str(f).encode())
-        h.update(f.read_bytes())
+    h.update(_yaml_tree_digest(paths().config_dir, paths().jobs_dir))
+    raw_plans = schedule_store().list() if all_plans is None else all_plans
     plans = [
         {k: v for k, v in p.items() if k not in ("next_run_at", "updated_at")}
-        for p in schedule_store().list()
+        for p in raw_plans
     ]
     h.update(json.dumps(plans, sort_keys=True).encode())
     return h.hexdigest()
@@ -170,7 +203,7 @@ def save_run(row: dict) -> None:
         )
 
 
-def runs(key: str) -> list[dict]:
+def runs(key: str, *, meta: dict | None = None) -> list[dict]:
     with db() as d:
         current = [
             json.loads(r["data"])
@@ -181,8 +214,9 @@ def runs(key: str) -> list[dict]:
     from web.services.chain_history import rows
 
     covered = {r.get("batch_id") for r in current}
+    target = meta if meta is not None else find(key, True)
     historical = [
-        row for row in rows(find(key, True)) if row.get("batch_id") not in covered
+        row for row in rows(target) if row.get("batch_id") not in covered
     ]
     return sorted(current + historical, key=lambda r: r["started_at"], reverse=True)
 
@@ -253,9 +287,12 @@ def transaction():
 
 
 def detail(key: str) -> dict:
-    meta = find(key, True)
-    job = load_job(paths().jobs_dir, meta["job"]) or {}
     configs = production.load_all(paths().config_dir, paths().jobs_dir)
+    active_chains, archived_chains = _all_chains_grouped(configs=configs)
+    meta = next((m for m in active_chains + archived_chains if m["key"] == key), None)
+    if meta is None:
+        error("链路不存在", 404)
+    job = load_job(paths().jobs_dir, meta["job"]) or {}
     owner = matrices.of_job(meta["job"], paths().config_dir)
     registry = sources.load_registry(paths().config_dir)
     from web.services import source_registry
@@ -277,6 +314,12 @@ def detail(key: str) -> dict:
             "pool_per_job": profile.get("pool_per_job", 4),
             "targets": source_coverage.targets(profile, meta["job"]),
         }
+    source_keys = [
+        ref[7:]
+        for ref in job.get("sources", [])
+        if str(ref).startswith("source:") and ref[7:] in registry
+    ]
+    used_by_map = source_registry.usages_map(registry, source_keys) if source_keys else {}
     refs = []
     for ref in job.get("sources", []):
         k = ref[7:] if str(ref).startswith("source:") else None
@@ -298,15 +341,16 @@ def detail(key: str) -> dict:
                     for rk, rv in registry.items()
                     if str(ref).startswith("tag:") and ref[4:] in rv.get("tags", [])
                 ],
-                "used_by": source_registry.usages(registry, k) if k in registry else [],
+                "used_by": used_by_map.get(k, []) if k in registry else [],
             }
         )
+    every_recipe = recipes.expanded(paths().config_dir)
     outputs = []
     for pid in meta.get("outputs", []):
         p = configs.get(pid)
         if p:
             context = content_columns.snapshot(paths().config_dir, pid, meta["job"])
-            recipe = recipes.find(paths().config_dir, p.recipe)
+            recipe = recipes.find(paths().config_dir, p.recipe, every=every_recipe)
             outputs.append(
                 {
                     **p.as_dict(),
@@ -345,11 +389,12 @@ def detail(key: str) -> dict:
         or policy.get("window")
         or {"mode": "rolling", "days": 7}
     )
-    plans = [p for p in schedule_store().list() if p["job_name"] == meta["job"]]
+    all_plans = schedule_store().list()
+    plans = [p for p in all_plans if p["job_name"] == meta["job"]]
     result = {
         **meta,
         "access": chain_access.snapshot(key),
-        "revision": digest(meta),
+        "revision": digest(meta, all_plans=all_plans),
         "research": {
             "name": job.get("name", ""),
             "prompt": job.get("prompt", ""),
@@ -367,17 +412,17 @@ def detail(key: str) -> dict:
         "schedules": plans,
         "shared_chains": [
             {"key": m["key"], "name": m["name"]}
-            for m in all_chains()
+            for m in active_chains
             if m["key"] != key and m["job"] == meta["job"]
         ],
         "policy_managed": production_policy.manages(
-            production_policy.load(paths().config_dir),
+            policy,
             paths().config_dir,
             job=meta["job"],
         ),
         "scripts": scripts[:100],
         "script_count": script_count,
-        "runs": runs(key),
+        "runs": runs(key, meta=meta),
     }
     if meta.get("archived") and meta.get("snapshot"):
         for field in (
@@ -575,7 +620,7 @@ def create(body: dict, user: dict) -> dict:
                 auto=1,
                 render={
                     "video_speed": body.get("video_speed", 1.25),
-                    "voice_id": body.get("voice_id") or "zf_xiaoxiao",
+                    "voice_id": body.get("voice_id") or "voxcpm_anchor",
                 },
             )
             if mode == "episode":
@@ -780,7 +825,7 @@ def update(key: str, body: dict, user: dict) -> dict:
                 reverify=inherited.get("reverify") if mode == "whole" else False,
                 auto=inherited.get("auto", 1),
                 render=copy.deepcopy(
-                    inherited.get("render", {"voice_id": "zf_xiaoxiao"})
+                    inherited.get("render", {"voice_id": "voxcpm_anchor"})
                 ),
             )
             if mode == "episode":

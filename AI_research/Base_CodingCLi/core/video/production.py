@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from core.config_transaction import remove as remove_config_file
 import os
+import threading
 import time
 from dataclasses import dataclass, field, replace
 from typing import Optional
@@ -243,6 +244,38 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
                   selection=selection)
 
 
+_LOAD_ALL_CACHE: dict[tuple[str, str], tuple[tuple, dict[str, Config]]] = {}
+_LOAD_ALL_LOCK = threading.Lock()
+
+
+def _production_cache_sig(config_dir: str, jobs_dir: str) -> tuple:
+    entries: list[tuple[str, int, int]] = []
+    for sub in (DIR, "video_recipes", "matrices", "content_columns"):
+        base = os.path.join(config_dir, sub)
+        if not os.path.isdir(base):
+            continue
+        try:
+            with os.scandir(base) as it:
+                for entry in it:
+                    if entry.name.endswith(".yaml") and not entry.name.startswith((".", "_")):
+                        st = entry.stat()
+                        entries.append((entry.path, st.st_mtime_ns, st.st_size))
+        except OSError:
+            continue
+    for root, dirs, files in os.walk(jobs_dir):
+        dirs[:] = [d for d in dirs if d not in ("archive", "_templates") and not d.startswith(".")]
+        for name in files:
+            if name.endswith(".yaml") and not name.startswith((".", "_")):
+                full = os.path.join(root, name)
+                try:
+                    st = os.stat(full)
+                    entries.append((full, st.st_mtime_ns, st.st_size))
+                except OSError:
+                    continue
+    entries.sort()
+    return tuple(entries)
+
+
 def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
     """Every config by key, in file-name order; a broken one is listed with its errors, never left out."""
     folder = directory(config_dir)
@@ -250,6 +283,12 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
         names = sorted(f for f in os.listdir(folder) if f.endswith(".yaml") and not f.startswith((".", "_")))
     except OSError:
         return {}
+    cache_key = (os.path.abspath(config_dir), os.path.abspath(jobs_dir))
+    sig = _production_cache_sig(config_dir, jobs_dir)
+    with _LOAD_ALL_LOCK:
+        cached = _LOAD_ALL_CACHE.get(cache_key)
+        if cached is not None and cached[0] == sig:
+            return dict(cached[1])
     every_recipe = recipes.expanded(config_dir)
     # These are one request's snapshots, not a persistent cache. Loading them
     # inside _check rescanned every Job and reopened the topics DB per config.
@@ -292,6 +331,8 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
         if config.auto and config.split == "some":
             out[key] = replace(config, auto=0, errors=(*config.errors,
                 "盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方"))
+    with _LOAD_ALL_LOCK:
+        _LOAD_ALL_CACHE[cache_key] = (sig, dict(out))
     return out
 
 

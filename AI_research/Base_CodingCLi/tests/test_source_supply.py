@@ -451,3 +451,28 @@ def test_collect_offers_todays_new_section_before_a_backlog_from_days_ago(setup,
     monkeypatch.setattr(supply, "read_page", lambda *a, **k: page)
     got = supply.collect(engine, job, profile)[0]
     assert "new today" in got[0].excerpts[0]
+
+
+def test_collect_detail_reading_stops_at_time_budget(setup, monkeypatch):
+    engine, job, profile, _ = setup
+    del profile["detail_pages"]
+    profile["detail_timeout_seconds"] = 3.0
+    profile["jobs"][JOB]["optional_article_details"] = True
+    job["sources"] = ["rss:https://news.example/feed"]
+    feed = [replace(item(i, text=f"teaser {i}", provider="rss"),
+                    url=f"https://news.example/a{i}", publish_date="2026-11-02") for i in range(3)]
+    monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: feed)
+
+    now = [100.0]
+    monkeypatch.setattr(supply.time, "monotonic", lambda: now[0])
+
+    def slow_read(url, **k):
+        now[0] += 4.0
+        return [SearchResult("Body", url, excerpts=["完整正文" * 20])]
+
+    monkeypatch.setattr(supply, "read_page", slow_read)
+    got, _, _, receipt = supply.collect(engine, job, profile)
+    budget = receipt["detail_budget"]
+    assert budget["attempts"] == 1 and budget["successful"] == 1
+    assert budget["timed_out"] is True and budget["skipped_by_timeout"] == 2
+    assert sum("时间预算" in "\n".join(r.excerpts) for r in got) == 2

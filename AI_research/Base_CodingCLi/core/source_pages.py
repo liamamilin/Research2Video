@@ -1,10 +1,15 @@
 """Read public pages and tutorial directories as research material."""
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import replace
 import html
 import logging
 import re
 import posixpath
+import threading
+import time
 from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -12,12 +17,177 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from .errors import CancelledError
 from .search import SearchClient, SearchResult
 
-MAX_SECTION_CHARS = 6000
-PAGE_SECTION_CHARS = 24000
+MAX_SECTION_CHARS = 50000
+PAGE_SECTION_CHARS = 80000
 TEASER_PROVIDERS = frozenset({"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"})
 DEFAULT_DETAIL_PAGES = 8
+DEFAULT_DETAIL_TIMEOUT_SECONDS = 120.0
+DEFAULT_HOST_BLOCK_THRESHOLD = 2
 _PAID_QUOTA = re.compile(r"HTTP (401|402|429)\b")
+_HARD_BLOCK = re.compile(r"(?:HTTP\s*403|Forbidden|Access Denied|verify you are human|Just a moment)", re.I)
 logger = logging.getLogger(__name__)
+
+
+class PageCache:
+    """Thread-safe, run-scoped URL page cache shared across R6 → R7 → R8 → R10.
+
+    Caches both parsed sections and terminal read failures so downstream stages
+    do not repeat HTTP/Chrome/OpenCode/Exa fallback chains for the same URL or
+    spend minutes retrying slow fallbacks on a hard-blocked host.
+    """
+
+    def __init__(self, *, host_block_threshold: int = DEFAULT_HOST_BLOCK_THRESHOLD):
+        self._lock = threading.Lock()
+        self._entries: dict[tuple[str, bool], dict] = {}
+        self._host_blocks: dict[str, int] = {}
+        self._host_block_threshold = max(1, int(host_block_threshold))
+        self.hits = 0
+        self.negative_hits = 0
+        self.misses = 0
+        self.host_fast_fails = 0
+
+    @staticmethod
+    def _key(url: str, catalog: bool) -> tuple[str, bool]:
+        return (canonical_url(url), bool(catalog))
+
+    @staticmethod
+    def _host(url: str) -> str:
+        return (urlsplit(url).netloc or "").lower()
+
+    @staticmethod
+    def _clone(results: tuple[SearchResult, ...], limit: int) -> list[SearchResult]:
+        return [replace(item, excerpts=list(item.excerpts)) for item in results[:max(1, limit)]]
+
+    def get(self, url: str, *, catalog: bool = False, limit: int = 80,
+            browser: bool = True, opencode: bool = True, paid: bool = True) -> tuple[str, object]:
+        """Return ``('ok', results)``, ``('error', message)``, or ``('miss', None)``."""
+        key = self._key(url, catalog)
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is None:
+                self.misses += 1
+                return "miss", None
+            if entry["status"] == "ok":
+                results = entry["results"]
+                if entry["limit"] >= limit or len(results) < entry["limit"]:
+                    self.hits += 1
+                    return "ok", self._clone(results, limit)
+                self.misses += 1
+                return "miss", None
+            # Negative hit only when previous attempt already tried at least the same readers.
+            if ((not browser or entry["browser"])
+                    and (not opencode or entry["opencode"])
+                    and (not paid or entry["paid"])):
+                self.negative_hits += 1
+                return "error", entry["message"]
+            self.misses += 1
+            return "miss", None
+
+    def get_ok(self, url: str, *, catalog: bool = False, limit: int = 80) -> list[SearchResult] | None:
+        key = self._key(url, catalog)
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is None or entry["status"] != "ok":
+                return None
+            self.hits += 1
+            return self._clone(entry["results"], limit)
+
+    def put_ok(self, url: str, results: list[SearchResult], *, catalog: bool = False,
+               limit: int = 80, section_chars: int = PAGE_SECTION_CHARS) -> None:
+        if not results:
+            return
+        key = self._key(url, catalog)
+        stored = tuple(replace(item, excerpts=list(item.excerpts)) for item in results)
+        with self._lock:
+            self._entries[key] = {
+                "status": "ok",
+                "results": stored,
+                "limit": max(int(limit), len(stored)),
+                "section_chars": int(section_chars),
+            }
+
+    def put_error(self, url: str, exc: BaseException, *, catalog: bool = False,
+                  browser: bool = True, opencode: bool = True, paid: bool = True) -> None:
+        key = self._key(url, catalog)
+        with self._lock:
+            prev = self._entries.get(key)
+            if prev and prev["status"] == "ok":
+                return
+            self._entries[key] = {
+                "status": "error",
+                "message": str(exc)[:300] or type(exc).__name__,
+                "browser": bool(browser) or bool(prev and prev.get("browser")),
+                "opencode": bool(opencode) or bool(prev and prev.get("opencode")),
+                "paid": bool(paid) or bool(prev and prev.get("paid")),
+            }
+
+    def host_blocked(self, url: str) -> bool:
+        host = self._host(url)
+        if not host:
+            return False
+        with self._lock:
+            return self._host_blocks.get(host, 0) >= self._host_block_threshold
+
+    def record_host_block(self, url: str) -> None:
+        host = self._host(url)
+        if not host:
+            return
+        with self._lock:
+            self._host_blocks[host] = self._host_blocks.get(host, 0) + 1
+
+    def clear_host_block(self, url: str) -> None:
+        host = self._host(url)
+        if not host:
+            return
+        with self._lock:
+            self._host_blocks.pop(host, None)
+
+    def note_host_fast_fail(self) -> None:
+        with self._lock:
+            self.host_fast_fails += 1
+
+    def stats(self) -> dict:
+        with self._lock:
+            return {
+                "hits": self.hits,
+                "negative_hits": self.negative_hits,
+                "misses": self.misses,
+                "host_fast_fails": self.host_fast_fails,
+                "entries": len(self._entries),
+            }
+
+
+_PAGE_CACHE: ContextVar[PageCache | None] = ContextVar("source_pages_cache", default=None)
+
+
+def current_page_cache() -> PageCache | None:
+    """Return the active run-scoped PageCache, or None outside a scope."""
+    return _PAGE_CACHE.get()
+
+
+@contextmanager
+def page_cache_scope(cache: PageCache | None = None):
+    """Bind a shared PageCache for the duration of a research run or worker thread."""
+    active = cache if cache is not None else PageCache()
+    token = _PAGE_CACHE.set(active)
+    try:
+        yield active
+    finally:
+        _PAGE_CACHE.reset(token)
+
+
+def get_cached_page(url: str, *, catalog: bool = False, limit: int = 80) -> list[SearchResult] | None:
+    cache = _PAGE_CACHE.get()
+    if cache is None:
+        return None
+    return cache.get_ok(url, catalog=catalog, limit=limit)
+
+
+def store_cached_page(url: str, results: list[SearchResult], *, catalog: bool = False,
+                      limit: int = 80, section_chars: int = PAGE_SECTION_CHARS) -> None:
+    cache = _PAGE_CACHE.get()
+    if cache is not None:
+        cache.put_ok(url, results, catalog=catalog, limit=limit, section_chars=section_chars)
 
 
 def paid_reader_exhausted(exc: BaseException) -> bool:
@@ -85,7 +255,7 @@ def parse_page(page: str, url: str, limit: int = 8, *, section_chars: int = MAX_
                         "#:~:text=" + quote(heading, safe=""))
         excerpt = body[:section_chars]
         if links:
-            excerpt += "\n相关页面：" + "；".join(dict.fromkeys(links))[:1500]
+            excerpt += "\n相关页面：" + "；".join(dict.fromkeys(links))[:8000]
         key = (target, date)
         if key in sections:
             # Several releases can share a date heading and text-fragment URL.
@@ -198,49 +368,95 @@ def _read_via_opencode(url: str, limit: int, *, catalog: bool, section_chars: in
 def fetch_page(url: str, limit: int, timeout: int, *, get_page, search_client: SearchClient | None = None,
                catalog: bool = False, section_chars: int = MAX_SECTION_CHARS, browser: bool = True,
                allow_paid: bool = True, allow_opencode: bool = True,
-               config_dir: str | None = None) -> list[SearchResult]:
+               config_dir: str | None = None, cache: PageCache | None = None) -> list[SearchResult]:
     """HTTP → anonymous browser → OpenCode CLI webfetch → optional Exa Contents.
 
     Declared sources should succeed without Exa when possible. OpenCode is the
     local-agent fallback; Exa remains last-resort paid reading.
+    When a run-scoped ``PageCache`` is active, positive and negative results are
+    reused across stages and hard-blocked hosts skip slow local fallbacks.
     """
     parsed = urlsplit(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("网页来源需要不带账号密码的 HTTP 或 HTTPS URL")
+
+    active_cache = cache if cache is not None else _PAGE_CACHE.get()
+    paid_already_out = bool(getattr(search_client, "contents_exhausted", ""))
+    req_paid = bool(search_client is not None and allow_paid and not paid_already_out)
+    if active_cache is not None:
+        status, cached = active_cache.get(
+            url, catalog=catalog, limit=limit,
+            browser=browser, opencode=allow_opencode, paid=req_paid,
+        )
+        if status == "ok":
+            return cached  # type: ignore[return-value]
+        if status == "error":
+            raise RuntimeError(str(cached))
+
     parser = parse_catalog if catalog else (
         lambda page, target, lim: parse_page(page, target, lim, section_chars=section_chars))
     errors: list[BaseException] = []
+    browser_tried = False
+    opencode_tried = False
+    paid_tried = False
 
     try:
-        return _parse_with(parser, get_page(url, timeout), url, limit)
+        results = _parse_with(parser, get_page(url, timeout), url, limit)
+        if active_cache is not None:
+            active_cache.put_ok(url, results, catalog=catalog, limit=limit, section_chars=section_chars)
+        return results
     except CancelledError:
         raise
     except Exception as exc:
         errors.append(exc)
 
-    if browser:
-        try:
-            return _read_via_browser(url, limit, timeout, catalog=catalog, section_chars=section_chars)
-        except CancelledError:
-            raise
-        except Exception as exc:
-            errors.append(exc)
+    host_fast_blocked = (
+        active_cache is not None
+        and active_cache.host_blocked(url)
+        and bool(_HARD_BLOCK.search(str(errors[-1])))
+    )
+    if host_fast_blocked:
+        active_cache.note_host_fast_fail()
+        browser_tried = browser
+        opencode_tried = allow_opencode
+    else:
+        if browser:
+            browser_tried = True
+            try:
+                results = _read_via_browser(url, limit, timeout, catalog=catalog, section_chars=section_chars)
+                if active_cache is not None:
+                    active_cache.clear_host_block(url)
+                    active_cache.put_ok(url, results, catalog=catalog, limit=limit, section_chars=section_chars)
+                return results
+            except CancelledError:
+                raise
+            except Exception as exc:
+                errors.append(exc)
 
-    if allow_opencode:
-        try:
-            from .opencode_cli import available, settings as opencode_settings
-            if available(opencode_settings(config_dir)):
-                return _read_via_opencode(url, limit, catalog=catalog, section_chars=section_chars,
-                                         config_dir=config_dir)
-        except CancelledError:
-            raise
-        except Exception as exc:
-            errors.append(exc)
-            logger.info("OpenCode CLI webfetch unavailable for %s: %s", url, str(exc)[:160])
+        if allow_opencode:
+            try:
+                from .opencode_cli import available, settings as opencode_settings
+                if available(opencode_settings(config_dir)):
+                    opencode_tried = True
+                    results = _read_via_opencode(url, limit, catalog=catalog, section_chars=section_chars,
+                                                 config_dir=config_dir)
+                    if active_cache is not None:
+                        active_cache.clear_host_block(url)
+                        active_cache.put_ok(url, results, catalog=catalog, limit=limit, section_chars=section_chars)
+                    return results
+            except CancelledError:
+                raise
+            except Exception as exc:
+                errors.append(exc)
+                logger.info("OpenCode CLI webfetch unavailable for %s: %s", url, str(exc)[:160])
 
-    if search_client is not None and allow_paid:
+    if req_paid:
+        paid_tried = True
         try:
-            return _read_via_paid(search_client, url, limit, catalog=catalog, section_chars=section_chars)
+            results = _read_via_paid(search_client, url, limit, catalog=catalog, section_chars=section_chars)
+            if active_cache is not None:
+                active_cache.put_ok(url, results, catalog=catalog, limit=limit, section_chars=section_chars)
+            return results
         except CancelledError:
             raise
         except Exception as exc:
@@ -248,23 +464,39 @@ def fetch_page(url: str, limit: int, timeout: int, *, get_page, search_client: S
             if paid_reader_exhausted(exc):
                 logger.info("Paid page reader unavailable for %s: %s", url, str(exc)[:160])
                 # Prefer actionable local failures over a paid-quota message.
+                # SearchClient.contents_exhausted stays set so callers skip Exa on later URLs.
+                chosen: BaseException = exc
                 for prev in reversed(errors[:-1]):
                     text = str(prev)
                     if ("截图组件未安装" in text or "Google Chrome" in text
                             or "HTTP 403" in text or "Forbidden" in text
                             or "页面未成功打开" in text
                             or "OpenCode" in text):
-                        raise prev from exc
+                        chosen = prev
+                        break
+                if active_cache is not None:
+                    if not host_fast_blocked and any(_HARD_BLOCK.search(str(e)) for e in errors[:-1]):
+                        active_cache.record_host_block(url)
+                    active_cache.put_error(url, chosen, catalog=catalog,
+                                           browser=browser_tried, opencode=opencode_tried, paid=False)
+                if chosen is not exc:
+                    raise chosen from exc
+                raise
 
-    raise errors[-1]
+    final_exc = errors[-1]
+    if active_cache is not None:
+        if not host_fast_blocked and any(_HARD_BLOCK.search(str(e)) for e in errors):
+            active_cache.record_host_block(url)
+        active_cache.put_error(url, final_exc, catalog=catalog,
+                               browser=browser_tried, opencode=opencode_tried, paid=paid_tried)
+    raise final_exc
 
 
 def follow_teaser_articles(items: list[SearchResult], *, search_client: SearchClient | None = None,
                            cancel_token=None, progress_cb=None, detail_pages: int = DEFAULT_DETAIL_PAGES,
-                           detail_chars: int = PAGE_SECTION_CHARS, timeout: int = 15) -> tuple[list[SearchResult], dict]:
+                           detail_chars: int = PAGE_SECTION_CHARS, timeout: int = 15,
+                           detail_timeout_seconds: float = DEFAULT_DETAIL_TIMEOUT_SECONDS) -> tuple[list[SearchResult], dict]:
     """For fetch-only Jobs without source_supply: follow RSS/catalog teasers into article bodies."""
-    from dataclasses import replace
-
     from .ai_dossier_sources import detail_sections
     from .sources import _get_page
 
@@ -274,8 +506,10 @@ def follow_teaser_articles(items: list[SearchResult], *, search_client: SearchCl
     out = list(items)
     details: list[dict] = []
     seen: set[str] = set()
-    attempted = successful = 0
-    paid_error = ""
+    attempted = successful = skipped_by_timeout = 0
+    timed_out = False
+    started = time.monotonic()
+    paid_error = str(getattr(search_client, "contents_exhausted", "") or "")
     if progress_cb:
         progress_cb({"type": "phase", "phase": "reading_source_details"})
 
@@ -290,10 +524,17 @@ def follow_teaser_articles(items: list[SearchResult], *, search_client: SearchCl
         seen.add(target)
         if cancel_token is not None and cancel_token.is_set():
             raise CancelledError("正文补读已取消")
+        if detail_timeout_seconds > 0 and (time.monotonic() - started) >= detail_timeout_seconds:
+            timed_out = True
+            skipped_by_timeout += 1
+            out[index] = replace(item, excerpts=[*item.excerpts, "正文补读达到时间预算，以上是该来源已取得的内容。"])
+            continue
         attempted += 1
         detail = {"url": target, "status": "unavailable", "sections": 0, "seed": index}
         details.append(detail)
         try:
+            # fetch_page may re-raise HTTP 403 after Exa 402; contents_exhausted still marks quota.
+            paid_error = paid_error or str(getattr(search_client, "contents_exhausted", "") or "")
             parts = fetch_page(target, limit=24, timeout=timeout, get_page=_get_page,
                                search_client=None if paid_error else search_client,
                                section_chars=PAGE_SECTION_CHARS, browser=True,
@@ -312,10 +553,12 @@ def follow_teaser_articles(items: list[SearchResult], *, search_client: SearchCl
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
-            if paid_reader_exhausted(exc):
-                paid_error = str(exc)[:300]
+            exhausted = str(getattr(search_client, "contents_exhausted", "") or "")
+            if paid_reader_exhausted(exc) or exhausted:
+                paid_error = (str(exc) if paid_reader_exhausted(exc) else exhausted)[:300]
                 detail["fallback_error"] = paid_error
             out[index] = replace(item, excerpts=[*item.excerpts, "原网页未能补读，以上是该来源已取得的内容。"])
 
     return out, {"version": 1, "details": details, "successful": successful, "attempted": attempted,
-                 "paid_error": paid_error}
+                 "paid_error": paid_error, "timed_out": timed_out, "skipped_by_timeout": skipped_by_timeout,
+                 "elapsed_seconds": round(time.monotonic() - started, 2)}

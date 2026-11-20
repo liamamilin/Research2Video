@@ -266,11 +266,18 @@ async def lifespan(app: FastAPI):
 
     def assistant_batch_loop() -> None:
         from web.services import assistant_batches
-        while not sweep_stop.wait(3):
+        from web.services.assistant_batch_store import BatchStore
+        wait_seconds = 3
+        while not sweep_stop.wait(wait_seconds):
             try:
-                asyncio.run(assistant_batches.tick(app))
+                if not BatchStore().list(active=True):
+                    wait_seconds = 15
+                    continue
+                dispatched = asyncio.run(assistant_batches.tick(app))
+                wait_seconds = 3 if dispatched or BatchStore().list(active=True) else 15
             except Exception:
                 logger.exception('assistant batch pass failed')
+                wait_seconds = 15
 
     if not os.environ.get('AREC_NO_AUTOPILOT_LOOP'):
         threading.Thread(target=assistant_batch_loop, name='assistant-batches', daemon=True).start()

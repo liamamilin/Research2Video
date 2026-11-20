@@ -4,6 +4,7 @@
 # Usage:
 #   bash scripts/build_launcher.sh                 # build into the repo root
 #   bash scripts/build_launcher.sh ~/Applications  # build and install there
+#   bash scripts/build_launcher.sh <directory> <name.app>  # update an existing name
 #
 # The generated .app bakes in absolute paths (project dir, python, log file),
 # so rebuild it if the repository or virtualenv moves.
@@ -16,6 +17,13 @@ RENDERED="$BASE_DIR/scripts/.launcher.rendered.applescript"
 STARTER_TEMPLATE="$BASE_DIR/scripts/start_server_detached.sh"
 APP_NAME="AREC.app"
 DEST_DIR="${1:-$BASE_DIR}"
+if [[ $# -ge 2 ]]; then
+  APP_NAME="$2"
+fi
+if [[ "$APP_NAME" != *.app || "$APP_NAME" == */* ]]; then
+  echo "error: app name must be a basename ending in .app" >&2
+  exit 1
+fi
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
   echo "error: the launcher is a macOS applet; nothing to do on $(uname -s)." >&2
@@ -27,6 +35,21 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
   PYTHON_BIN="$(command -v python3)"
 fi
 
+# Read the public listener from the same config as the app/gateway. A copied
+# bundle can otherwise keep opening a port now used by an unrelated project.
+BASE_URL="$("$PYTHON_BIN" - "$BASE_DIR/config/web.yaml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+
+config = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
+port = int((config.get("server") or {}).get("port", 8765))
+if not 1 <= port <= 65535:
+    raise ValueError("server.port must be between 1 and 65535")
+print(f"http://127.0.0.1:{port}")
+PY
+)"
+
 mkdir -p "$DEST_DIR" "$BASE_DIR/logs"
 
 # The starter script needs the same interpreter path baked in.
@@ -37,6 +60,7 @@ chmod +x "$STARTER"
 # @...@ placeholders are filled per machine; a stale absolute path is the main
 # reason the launcher would silently fail after a clone or a move.
 /usr/bin/sed \
+  -e "s|@BASE_URL@|$BASE_URL|g" \
   -e "s|@PROJECT_DIR@|$BASE_DIR|g" \
   -e "s|@PYTHON_BIN@|$PYTHON_BIN|g" \
   -e "s|@LOG_FILE@|$BASE_DIR/logs/app_launcher.log|g" \
@@ -86,5 +110,6 @@ fi
 
 echo "built $TARGET"
 echo "paths: project=$BASE_DIR"
+echo "       url=$BASE_URL"
 echo "       python=$PYTHON_BIN"
 echo "       log=$BASE_DIR/logs/app_launcher.log"

@@ -333,7 +333,8 @@ cg_release_notes:
   tags:
     - chatgpt_acquisition
     - chatgpt_s01
-  note: 极高优先；产品动态任务每次比较上次成功报告的页面内容。
+  note: 极高优先；产品动态任务每次比较上次成功报告的页面内容。；2026-11-20 归档：help.openai.com release notes 长期 HTTP 403
+  enabled: false
 cg_openai_news:
   name: OpenAI News
   spec: rss:https://openai.com/news/rss.xml
@@ -363,7 +364,8 @@ cg_pro_tiers:
     - ai_official
     - chatgpt_acquisition
     - chatgpt_s05
-  note: Pro 套餐权益、Work 与 Codex 使用量变化；直接读取官方正文。
+  note: Pro 套餐权益、Work 与 Codex 使用量变化；直接读取官方正文。；2026-11-20 归档：help.openai.com Pro tiers 长期 HTTP 403
+  enabled: false
 cg_pricing:
   name: ChatGPT Pricing
   spec: page:https://chatgpt.com/pricing/
@@ -385,7 +387,8 @@ cg_help:
   tags:
     - chatgpt_acquisition
     - chatgpt_s01
-  note: 极高优先；帮助中心目录摘要，具体操作另读能力总览和错误排查文章。
+  note: 极高优先；帮助中心目录摘要，具体操作另读能力总览和错误排查文章。；2026-11-20 归档：help.openai.com 集合页长期 HTTP 403
+  enabled: false
 cg_learn_videos:
   name: ChatGPT Learn · Videos
   spec: catalog:https://learn.chatgpt.com/videos
@@ -406,7 +409,8 @@ cg_stories:
   tags:
     - chatgpt_acquisition
     - chatgpt_s02
-  note: 高优先；普通用户、小企业与创作案例。
+  note: 高优先；普通用户、小企业与创作案例。；2026-11-20 归档：openai.com/stories 长期 HTTP 403
+  enabled: false
 cg_youtube_openai:
   name: OpenAI 官方 YouTube
   spec: rss:https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A
@@ -498,7 +502,8 @@ cg_plus:
   tags:
     - chatgpt_acquisition
     - chatgpt_s05
-  note: 极高优先；功能、费用、购买与使用限制。
+  note: 极高优先；功能、费用、购买与使用限制。；2026-11-20 归档：help.openai.com Plus 说明长期 HTTP 403
+  enabled: false
 cg_claude_pricing:
   name: Claude 套餐与价格
   spec: page:https://claude.com/pricing
@@ -604,35 +609,40 @@ cg_reddit_compare:
   tags:
     - chatgpt_acquisition
     - chatgpt_t05
-  note: T05 横向比较；用户真实选择理由，作为需求线索。
+  note: T05 横向比较；用户真实选择理由，作为需求线索。；2026-11-20 归档：Reddit 横向搜索连续失败无正文（历史 20 次）
+  enabled: false
 cg_multicurrency:
   name: ChatGPT 多币种与支付方式
   spec: page:https://help.openai.com/en/articles/10421635-multicurrency-billing
   tags:
     - chatgpt_acquisition
     - chatgpt_s05
-  note: 极高优先；按地区、币种和订阅渠道说明支付方式。
+  note: 极高优先；按地区、币种和订阅渠道说明支付方式。；2026-11-20 归档：help.openai.com 多币种页长期 HTTP 403
+  enabled: false
 cg_billing:
   name: ChatGPT 与 API 账单管理
   spec: page:https://help.openai.com/en/articles/9039756-managing-billing-for-chatgpt-and-the-api-platform
   tags:
     - chatgpt_acquisition
     - chatgpt_s05
-  note: 高优先；区分 ChatGPT 订阅与 API 账单。
+  note: 高优先；区分 ChatGPT 订阅与 API 账单。；2026-11-20 归档：help.openai.com 账单页长期 HTTP 403
+  enabled: false
 cg_regions:
   name: ChatGPT 支持的国家和地区
   spec: page:https://help.openai.com/en/articles/7947663-chatgpt-supported-countries
   tags:
     - chatgpt_acquisition
     - chatgpt_s05
-  note: 高优先；付款方式与服务支持地区分别说明。
+  note: 高优先；付款方式与服务支持地区分别说明。；2026-11-20 归档：help.openai.com 地区页长期 HTTP 403
+  enabled: false
 cg_cancel:
   name: ChatGPT 取消订阅
   spec: page:https://help.openai.com/en/articles/7232927-how-do-i-cancel-my-chatgpt-subscription
   tags:
     - chatgpt_acquisition
     - chatgpt_s05
-  note: 高优先；续费、取消和渠道差异。
+  note: 高优先；续费、取消和渠道差异。；2026-11-20 归档：help.openai.com 取消订阅页长期 HTTP 403
+  enabled: false
 cg_payment_questions:
   name: 中文用户 · ChatGPT 支付问题
   spec: search:ChatGPT 支付失败 信用卡 没有国际信用卡 付款方式 扣款没到账 无法升级
@@ -668,8 +678,8 @@ cg_business_stories:
   tags:
     - chatgpt_acquisition
     - chatgpt_s06
-  note: 中高优先；业务场景和成果展示。
-
+  note: 中高优先；业务场景和成果展示。；2026-11-20 归档：customer-stories 长期 HTTP 403
+  enabled: false
 cg_capabilities:
   name: ChatGPT 能力总览
   spec: page:https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview
@@ -736,13 +746,15 @@ r_for_rest_of_us:
   spec: rss:https://rfortherestofus.com/blog/feed/atom
   tags:
     - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。；2026-11-20 归档：Atom 长期断连/超时，无活跃 Job 引用
+  enabled: false
 r_weekly:
   name: rweekly.org Feed
   spec: rss:https://rweekly.org/atom.xml
   tags:
     - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。；2026-11-20 归档：Atom 长期超时，无活跃 Job 引用
+  enabled: false
 zhangwen:
   name: zhangwen.site Feed
   spec: rss:https://zhangwen.site/rss.xml
@@ -1186,5 +1198,6 @@ bili_hot_ai:
 chain_source_mwlrtqz9:
   name: OpenAI 科学博客
   tags: []
-  note: 通过链路创建向导添加
+  note: 通过链路创建向导添加；2026-11-20 归档：openai.com/news/science 长期 HTTP 403；科研链路改用 cg_openai_news
   spec: catalog:https://openai.com/news/science/
+  enabled: false

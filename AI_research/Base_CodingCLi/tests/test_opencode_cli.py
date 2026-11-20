@@ -8,6 +8,7 @@ import pytest
 
 from core import opencode_cli, opencode_gather, source_pages
 from core.search import SearchResult
+from core.video import audience_strategy
 
 
 def test_parse_run_jsonl_prefers_webfetch_tool_output():
@@ -72,30 +73,212 @@ def test_fetch_page_uses_opencode_before_paid(monkeypatch):
     assert got[0].title == "From opencode" and order == ["http", "opencode"]
 
 
-def test_gather_wanted_default_all_and_flags():
+def test_gather_wanted_enables_non_knowledge_jobs_under_apply_all():
     cfg_all = {"enabled": True, "apply_to": "all"}
     assert opencode_gather.wanted({"search": False}, cfg_all)
     assert opencode_gather.wanted({"search": True}, cfg_all)
-    assert not opencode_gather.wanted({"search": True, "opencode_gather": False}, cfg_all)
+    assert not opencode_gather.wanted({"search": False, "knowledge": True}, cfg_all)
+    assert opencode_gather.wanted({"search": False, "knowledge": True, "opencode_gather": True}, cfg_all)
+    assert not opencode_gather.wanted({"search": False, "opencode_gather": False}, cfg_all)
     cfg_fetch = {"enabled": True, "apply_to": "fetch_only"}
     assert opencode_gather.wanted({"search": False}, cfg_fetch)
     assert not opencode_gather.wanted({"search": True}, cfg_fetch)
     assert opencode_gather.wanted({"search": True, "opencode_gather": True}, cfg_fetch)
+    cfg_flag = {"enabled": True, "apply_to": "flagged"}
+    assert not opencode_gather.wanted({"search": True}, cfg_flag)
+    assert opencode_gather.wanted({"search": False, "opencode_gather": True}, cfg_flag)
 
 
-def test_gather_appends_block(monkeypatch, tmp_path):
+def test_gather_objective_includes_keywords():
+    text = opencode_gather._objective({
+        "name": "快讯", "domain": "AI", "keywords": ["模型", "开源"],
+        "audience_channel": "flash", "opencode_task": "盯住本周发布",
+        "prompt": "写一份快讯\n第二行",
+    })
+    assert "关键词：模型、开源" in text and "专项调研要求：" in text and "盯住本周发布" in text
+
+
+def test_normalize_packets_makes_audience_packets():
+    body = (
+        "## 调研结论\n覆盖了发布\n\n"
+        "## 材料条目\n"
+        "### 示例发布\n"
+        "- 链接：https://news.example/a\n"
+        "- 要点：细节甲\n\n"
+        "### [已规范](https://news.example/b)\n"
+        "细节乙\n"
+    )
+    block, urls = opencode_gather.normalize_packets(body)
+    assert block.startswith("### [")
+    assert urls == ["https://news.example/a", "https://news.example/b"]
+    packets = audience_strategy.packets(
+        "### [声明源](https://declared.example/x)\n声明正文\n\n" + block)
+    assert [p["url"] for p in packets] == [
+        "https://declared.example/x", "https://news.example/a", "https://news.example/b"]
+    assert packets[0]["text"].strip() == "### [声明源](https://declared.example/x)\n声明正文"
+    assert packets[1]["title"] == "示例发布"
+    assert "细节甲" in packets[1]["text"]
+    assert "覆盖了发布" in packets[2]["text"]  # overview rides on last OpenCode packet
+
+
+def test_gather_appends_normalized_block(monkeypatch, tmp_path):
     monkeypatch.setattr(opencode_cli, "gather_settings", lambda config_dir=None: {
         "enabled": True, "apply_to": "all", "binary": "opencode",
         "gather_timeout_seconds": 60,
     })
     monkeypatch.setattr(opencode_cli, "available", lambda cfg=None: True)
-    monkeypatch.setattr(opencode_cli, "run", lambda prompt, **k: (
-        "## 整理结论\n够用\n\n## 关键数字与对比\n- 无\n\n"
-        "## 材料条目\n### 1. 示例\n- **要点**：细节\n\n## 成稿可用角度\n- 角度A\n\n## 未覆盖\n- 无",
-        {"model": "opencode-go/beam-free"},
-    ))
+    captured = {}
+
+    def fake_run(prompt, **k):
+        captured["prompt"] = prompt
+        return (
+            "## 调研结论\n够用\n\n## 关键数字与对比\n- 无\n\n"
+            "## 材料条目\n### 示例\n- https://news.example/item\n- **要点**：细节\n\n"
+            "## 成稿可用角度\n- 角度A\n\n## 未覆盖\n- 无",
+            {"model": "opencode-go/beam-free"},
+        )
+
+    monkeypatch.setattr(opencode_cli, "run", fake_run)
     engine = SimpleNamespace(config_dir="config", workspace_dir=str(tmp_path), _cancel=None)
-    block, receipt = opencode_gather.gather(engine, {"search": True, "name": "t", "_file": "x/y"}, "源材料")
-    assert block.startswith("## OpenCode 搜集整理") and "材料条目" in block
-    assert "关键数字与对比" in block and "成稿可用角度" in block
+    job = {"search": True, "name": "t", "_file": "x/y", "keywords": ["release"], "domain": "AI"}
+    block, receipt = opencode_gather.gather(engine, job, "源材料应被忽略")
+    assert block.startswith("### [示例](https://news.example/item)")
+    assert receipt["urls"] == ["https://news.example/item"] and receipt["packet_count"] == 1
+    assert "### [条目标题](https://" in captured["prompt"]
+    assert "源材料应被忽略" not in captured["prompt"]
+    assert "已取得的声明源材料" not in captured["prompt"]
+    assert "并行" in captured["prompt"]
+    assert audience_strategy.packets(block)[0]["url"] == "https://news.example/item"
     assert receipt["model"] == "opencode-go/beam-free" and receipt.get("path")
+    assert receipt.get("keywords") == "release"
+
+
+def test_engine_continues_with_opencode_when_declared_sources_fail(tmp_path, monkeypatch):
+    from core import ai_dossier_sources, report_meta, state
+    from core.engine import ResearchEngine
+    from core.errors import SourcesUnavailableError
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config/system.yaml").write_text("gather:\n  opencode_cli:\n    enabled: true\n    apply_to: all\n")
+    job_path = tmp_path / "jobs/demo.yaml"
+    job_path.parent.mkdir(parents=True)
+    job_path.write_text("name: Demo\nsearch: false\nsources: [page:https://blocked.example/news]\n"
+                        "prompt: 写研究报告\noutput: output/{date}_demo.md\n")
+    monkeypatch.setattr(state, "_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setattr(state, "_HISTORY_DIR", str(tmp_path / "state/history"))
+    monkeypatch.setattr(report_meta, "META_FILE", str(tmp_path / "state/report_meta.jsonl"))
+    monkeypatch.setattr(ai_dossier_sources, "enrich", lambda *a, **k: ("", {}))
+    monkeypatch.setattr(opencode_gather, "gather", lambda eng, job, *a, **k: (
+        "### [OpenCode发现](https://arxiv.org/abs/2611.00001)\n\n论文实验方法与结论细节。\n",
+        {"urls": ["https://arxiv.org/abs/2611.00001"], "packet_count": 1},
+    ))
+
+    seen = {}
+
+    class Agent:
+        def __init__(self, **kw):
+            self.materials, self.retrieved_urls = [], set()
+
+        def run_fetch_only(self, prompt, **kw):
+            seen["sources"] = kw.get("sources", "")
+            seen["urls"] = kw.get("fetched_urls", [])
+            return "# 研究报告\n论文实验方法 https://arxiv.org/abs/2611.00001"
+
+        def get_usage(self):
+            return {"searches": 0, "total_tokens": 1}
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr("core.engine.ResearchAgent", Agent)
+    engine = ResearchEngine(str(tmp_path / "config"), str(tmp_path / "jobs"), workspace_dir=str(tmp_path))
+    monkeypatch.setattr(engine, "_fetch_sources_strict",
+                        lambda job: (_ for _ in ()).throw(SourcesUnavailableError({"page": "HTTP 403"})))
+
+    out = engine.run_job("demo")
+    assert out is not None
+    assert "论文实验方法与结论细节" in seen["sources"]
+    assert "https://arxiv.org/abs/2611.00001" in seen["urls"]
+    meta = state.StateManager.get("demo")
+    assert meta["last_status"] == "success"
+    assert "403" in (meta.get("last_usage") or {}).get("declared_sources_skipped", "")
+
+
+def test_fetch_call_rejects_refusal_and_gateway_errors(monkeypatch):
+    from core.errors import LLMError
+    from core.llm import LLMConfig
+    from core.research import ResearchAgent
+    from core.search import SearchConfig
+
+    agent = ResearchAgent(LLMConfig(model="m", base_url="http://localhost"), SearchConfig())
+    monkeypatch.setattr(agent.llm, "chat", lambda *a, **k: SimpleNamespace(
+        content="抱歉，我无法完成这份报告。", finish_reason="stop"))
+    with pytest.raises(LLMError, match="模型输出不是可用报告"):
+        agent._fetch_call("写报告")
+
+
+def test_audience_direct_skips_redundant_agent_draft_and_dossier(tmp_path, monkeypatch):
+    from core import ai_dossier_sources, report_meta, state
+    from core.engine import ResearchEngine
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config/system.yaml").write_text(
+        "research:\n  audience_direct: true\n"
+        "gather:\n  opencode_cli:\n    enabled: false\n"
+        "question_material:\n  enabled: true\n  scope: focused\n"
+    )
+    job_path = tmp_path / "jobs/chains/ai_science_updates.yaml"
+    job_path.parent.mkdir(parents=True)
+    job_path.write_text(
+        "name: 科学\nsearch: false\nsources: [rss:https://a.test/feed]\n"
+        "prompt: 写报告\noutput: output/{date}_sci.md\n"
+        "audience_channel: ai_science\ncontent_strategy: audience-v1\nquestion_material: question-v1\n"
+    )
+    monkeypatch.setattr(state, "_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.setattr(state, "_HISTORY_DIR", str(tmp_path / "state/history"))
+    monkeypatch.setattr(report_meta, "META_FILE", str(tmp_path / "state/report_meta.jsonl"))
+    monkeypatch.setattr(ai_dossier_sources, "enrich",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("dossier must be skipped")))
+    monkeypatch.setattr("core.engine.ResearchAgent",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("R7 agent must be skipped")))
+
+    def fake_prepare(job, report, mat, cfg, **k):
+        assert report == ""
+        return (
+            "# 直连成稿\n### 1.1 新进展\nhttps://a.test/1",
+            {"strategy": audience_strategy.MARKER, "channel": "ai_science",
+             "candidate_count": 1, "usage": {"total_tokens": 12}},
+        )
+
+    monkeypatch.setattr(audience_strategy, "prepare_report", fake_prepare)
+    engine = ResearchEngine(str(tmp_path / "config"), str(tmp_path / "jobs"), workspace_dir=str(tmp_path))
+    monkeypatch.setattr(engine, "_fetch_sources_strict", lambda j: (
+        "### [标题](https://a.test/1)\n\n正文细节。", ([SearchResult("标题", "https://a.test/1")], {"rss": 1})
+    ))
+    monkeypatch.setattr("core.video.question_material.enhance",
+                        lambda j, r, m, d, s, **k: (r, "", {"status": "skipped_scope"}))
+    out = engine.run_job("chains/ai_science_updates")
+    assert out is not None
+    assert "直连成稿" in (tmp_path / out).read_text()
+    meta = state.StateManager.get("chains/ai_science_updates")
+    assert (meta.get("last_usage") or {}).get("audience_direct") is True
+
+
+def test_question_material_focused_scope_filters_multi_item_with_opencode():
+    from core.video import question_material as qm
+
+    focused = {"question_material": {"enabled": True, "scope": "focused"}}
+    flash_job = {"_file": "monitoring/ai_flash_discovery", "content_strategy": "audience-v1",
+                 "audience_channel": "flash", "question_material": "question-v1"}
+    knowledge_job = {"_file": "science/science_illustrated", "content_strategy": "audience-v1",
+                     "audience_channel": "science_illustrated", "question_material": "question-v1"}
+    single_job = {"_file": "ai_media/weekly_deep_research", "content_strategy": "audience-v1",
+                  "audience_channel": "ai_deep", "question_material": "question-v1"}
+
+    assert not qm.in_scope(flash_job, focused, opencode_gathered=True)
+    assert qm.in_scope(flash_job, focused, opencode_gathered=False)
+    assert qm.in_scope({**flash_job, "question_material_force": True}, focused, opencode_gathered=True)
+    assert qm.in_scope(knowledge_job, focused, opencode_gathered=True)
+    assert qm.in_scope(single_job, focused, opencode_gathered=True)

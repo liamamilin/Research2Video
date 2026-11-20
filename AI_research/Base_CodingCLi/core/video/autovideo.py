@@ -34,7 +34,11 @@ class AutoVideoError(Exception):
 
 
 class AutoVideoUnreachable(Exception):
-    """No usable answer. For a create request the outcome is unknown."""
+    """No usable answer. ``not_sent=True`` means the TCP connection never succeeded."""
+
+    def __init__(self, message: str = "", *, not_sent: bool = False) -> None:
+        super().__init__(message)
+        self.not_sent = not_sent
 
 
 class AutoVideoClient:
@@ -72,7 +76,11 @@ class AutoVideoClient:
             with self._client() as client:
                 response = client.request(method, path, **kwargs)
         except httpx.TransportError as exc:
-            raise AutoVideoUnreachable(f"AutoVideo 无响应（{self.base_url}）：{type(exc).__name__}") from exc
+            not_sent = isinstance(exc, (httpx.ConnectError, httpx.ConnectTimeout))
+            raise AutoVideoUnreachable(
+                f"AutoVideo 无响应（{self.base_url}）：{type(exc).__name__}",
+                not_sent=not_sent,
+            ) from exc
         if response.status_code >= 400:
             raise _error_from(response)
         try:

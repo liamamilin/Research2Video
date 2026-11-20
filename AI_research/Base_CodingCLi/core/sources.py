@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 _UA = "BaseCodingCLi-ResearchAgent/2.0"
 _ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 _CONTENT = "{http://purl.org/rss/1.0/modules/content/}encoded"
-FEED_EXCERPT_CHARS = 3000
+FEED_EXCERPT_CHARS = 50000
 _TAG_RE = re.compile(r"<[^>]+>")
 
 

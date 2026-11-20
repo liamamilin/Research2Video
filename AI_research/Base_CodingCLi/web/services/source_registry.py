@@ -42,23 +42,58 @@ def validate_entry(key: str, fields: dict) -> None:
         raise ValueError('tags 需要非空字符串列表')
 
 
-def usages(registry: dict, key: str) -> list[dict]:
+def usages_map(registry: dict, keys: list[str] | None = None) -> dict[str, list[dict]]:
+    """Compute source usage across all Jobs in a single scan (instead of O(sources * jobs))."""
+    wanted = [k for k in (keys if keys is not None else list(registry)) if k in registry]
+    result: dict[str, list[dict]] = {k: [] for k in wanted}
+    if not wanted:
+        return result
     paths = get_settings().paths
-    entry = registry[key]
-    result = []
+    from core import source_supply, source_coverage
+
+    profiles = source_supply.profiles(paths.config_dir)
+    profile_by_job = {
+        job_name: prof
+        for prof in profiles.values()
+        for job_name in prof.get("jobs", {})
+    }
+    tag_to_keys: dict[str, list[str]] = {}
+    spec_to_keys: dict[str, list[str]] = {}
+    for k in wanted:
+        entry = registry[k]
+        for tag in entry.get("tags", []):
+            tag_to_keys.setdefault(tag, []).append(k)
+        if entry.get("spec"):
+            spec_to_keys.setdefault(entry["spec"], []).append(k)
+
     for job in list_jobs(paths.jobs_dir):
         data = load_job(paths.jobs_dir, job) or {}
-        refs = [s for s in data.get('sources') or [] if s == 'source:' + key or
-                str(s).startswith('tag:') and str(s)[4:] in entry.get('tags', [])]
-        if entry.get('spec') in (data.get('sources') or []):
-            refs.append(entry['spec'])
-        from core import source_supply, source_coverage
-        profile=source_supply.for_job(paths.config_dir,{**data,'_file':job})
-        if profile and any(x['spec']==entry.get('spec') for x in source_coverage.targets(profile,job)):
-            refs.append(entry['spec'])
-        if refs:
-            result.append({'job': job, 'name': data.get('name') or job, 'references': refs})
+        job_sources = data.get("sources") or []
+        per_key: dict[str, list[str]] = {}
+        for s in job_sources:
+            text = str(s)
+            if text.startswith("source:"):
+                k = text[7:]
+                if k in result:
+                    per_key.setdefault(k, []).append(text)
+            elif text.startswith("tag:"):
+                for k in tag_to_keys.get(text[4:], ()):
+                    per_key.setdefault(k, []).append(text)
+            for k in spec_to_keys.get(text, ()):
+                per_key.setdefault(k, []).append(text)
+        profile = profile_by_job.get(job) if data.get("source_supply_enabled", True) else None
+        if profile:
+            for target in source_coverage.targets(profile, job):
+                for k in spec_to_keys.get(target.get("spec", ""), ()):
+                    per_key.setdefault(k, []).append(target["spec"])
+        job_name = data.get("name") or job
+        for k, refs in per_key.items():
+            result[k].append({"job": job, "name": job_name, "references": refs})
     return result
+
+
+def usages(registry: dict, key: str) -> list[dict]:
+    return usages_map(registry, [key]).get(key, [])
 
 
 def change(action: str, key: str, fields: dict, revision: str) -> dict:

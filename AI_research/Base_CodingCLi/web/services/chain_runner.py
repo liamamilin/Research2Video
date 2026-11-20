@@ -240,17 +240,18 @@ def retry(rid: str, user: dict) -> dict:
                     ) in ("DOWNLOAD_FAILED", "SUBMIT_UNCONFIRMED"):
                         from web.services import video_render
 
-                        if latest["error_code"] == "DOWNLOAD_FAILED":
-                            store.resume_render_download(latest["id"])
-                        else:
-                            store.update_render(
-                                latest["id"],
-                                status="SUBMITTING",
-                                error_code=None,
-                                error_message=None,
-                                completed_at=None,
-                            )
-                        video_render.start(latest["id"])
+                        try:
+                            if latest["error_code"] == "DOWNLOAD_FAILED":
+                                resumed = store.resume_render_download(latest["id"])
+                            else:
+                                # SUBMIT_UNCONFIRMED: human confirmed (or library has no match).
+                                # Atomically clear submit_started_at so we create again; same
+                                # idempotency_key keeps AutoVideo from duplicating if the first create landed.
+                                resumed = store.resume_unconfirmed_render(latest["id"])
+                        except store.ActiveRenderError as exc:
+                            chains.error(str(exc), 409)
+                        if resumed:
+                            video_render.start(latest["id"])
                     cutoff = (
                         max(
                             (

@@ -563,7 +563,7 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
     job_id = render["autovideo_job_id"]
     if job_id is None:
         if not render["submit_started_at"]:
-            if (render.get('visuals') or {}).get('input_kind') == 'user_materials':
+            if not render.get("submission_request") and (render.get('visuals') or {}).get('input_kind') == 'user_materials':
                 from web.services.assistant_materials import prepare_render, MaterialPreparationError
                 try:
                     render = prepare_render(render, client)
@@ -613,6 +613,12 @@ def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
             created = client.create_job(payload)
             break
         except AutoVideoUnreachable as exc:
+            if getattr(exc, "not_sent", False):
+                logger.warning("render %s: AutoVideo unreachable before send (%s)", render["id"], exc)
+                store.update_render(render["id"], submit_started_at=None)
+                _fail(render["id"], "AUTOVIDEO_UNREACHABLE",
+                      f"连不上 AutoVideo（{client.base_url}），请先启动它后再重试。")
+                return None
             logger.warning("render %s: create got no answer (%s); reconciling", render["id"], exc)
             return _reconcile({**render, "submit_started_at": started.isoformat()}, client)
         except AutoVideoError as exc:

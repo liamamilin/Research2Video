@@ -363,7 +363,11 @@ class ResearchAgent:
         if complete and getattr(response, "finish_reason", None) == "length":
             from .research_batches import Truncated
             raise Truncated("分批研究稿被模型输出长度截断，结果不完整")
-        return response.content.strip()
+        content = response.content.strip()
+        problem = report_problem(content, self._tools_used)
+        if problem:
+            raise LLMError(f"模型输出不是可用报告：{problem}")
+        return content
 
     def close(self) -> None:
         """Release HTTP resources."""
@@ -481,7 +485,15 @@ class ResearchAgent:
                 parsed = urlsplit(url)
                 if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
                     return "Error: provide a public HTTP or HTTPS URL without credentials"
+                from . import source_pages
+                cached = source_pages.get_cached_page(url)
+                if cached:
+                    self._remember(cached)
+                    rendered = self._truncate(SearchClient.format_results(cached), self.config.max_chars_per_call)
+                    self.materials.append(rendered)
+                    return rendered
                 result = self.search.read_page(url)
+                source_pages.store_cached_page(url, [result])
                 self._remember([result])
                 rendered = self._truncate(SearchClient.format_results([result]), self.config.max_chars_per_call)
                 self.materials.append(rendered)
@@ -640,7 +652,11 @@ class ResearchAgent:
         ]
         response = self.llm.chat(messages, tools=None)
         self._log_usage()
-        return response.content.strip()
+        content = response.content.strip()
+        problem = report_problem(content, self._tools_used)
+        if problem:
+            raise LLMError(f"模型输出不是可用报告：{problem}")
+        return content
 
     def _plan_queries(self, task_prompt: str) -> list[str]:
         try:

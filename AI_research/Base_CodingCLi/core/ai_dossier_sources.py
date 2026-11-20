@@ -70,11 +70,18 @@ def enrich(job: dict, report: str, supplied: str, *, search_client=None, cancel_
     if progress_cb and urls:
         progress_cb({"type": "phase", "phase": "reading_dossier_sources"})
 
+    from core import source_pages
+    active_cache = source_pages.current_page_cache()
+
     def read(url):
         if cancel_token and cancel_token.is_set():
             raise CancelledError("Cancelled before reading dossier source")
         try:
-            sections = fetch("page:" + url, limit=24, timeout=PAGE_SECONDS, search_client=search_client)
+            if active_cache is not None:
+                with source_pages.page_cache_scope(active_cache):
+                    sections = fetch("page:" + url, limit=24, timeout=PAGE_SECONDS, search_client=search_client)
+            else:
+                sections = fetch("page:" + url, limit=24, timeout=PAGE_SECONDS, search_client=search_client)
             kept = detail_sections(sections, max_chars=page_chars)
             text = SearchClient.format_results(kept) if kept else ""
             return text, {"url": url, "status": "read" if text else "empty", "sections": len(kept),

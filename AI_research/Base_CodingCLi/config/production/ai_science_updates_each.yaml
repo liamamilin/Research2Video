@@ -6,5 +6,5 @@ reverify: false
 auto: 1
 render:
   video_speed: 1.25
-  voice_id: zf_xiaoxiao
+  voice_id: voxcpm_anchor
 auto_enabled_at: 1794985272.1795719

@@ -212,9 +212,11 @@ def webfetch_markdown(url: str, *, config: dict | None = None, cancel_token=None
     binary = resolve_binary(gather_cfg)
     model, _ = select_model(gather_cfg, binary=binary, cancel_token=cancel_token, cache=_MODEL_CACHE)
     timeout = max(15, int(cfg.get("timeout_seconds") or DEFAULTS["timeout_seconds"]))
+    # Thin reader for the page-fallback chain only. Job research tasks use
+    # ``opencode_gather`` (keywords + requirements + free tool use).
     prompt = (
-        "只用 webfetch 工具读取下面这个 URL，format 用 markdown。"
-        "不要搜索、不要总结、不要改写标题，只返回页面正文。"
+        "这是读页回退任务：用 webfetch 读取下面 URL，format=markdown，"
+        "返回页面正文即可（可保留原标题）。不要搜索，不要写成研究报告。"
         f"\nURL: {url}"
     )
     command = [

@@ -58,19 +58,67 @@ class Selection(BaseModel):
     tradeoffs: str | list[str] = ""
 
 
+PASS2_ITEM_MAX_CHARS = 30_000
+PASS2_TOTAL_MAX_CHARS = 240_000
+_PASS2_MIN_ITEM_CHARS = 4_000
+
+
 def packets(material: str) -> list[dict]:
-    """Preserve full source text; index excerpts are only used for the first pass."""
+    """Preserve full source text; deduplicate identical URLs keeping the richer packet."""
+    from core.provenance import normalize_url
+
     parts = re.split(r"(?m)(?=^### \[)", material)
-    result = []
+    result: list[dict] = []
+    by_url: dict[str, int] = {}
     for part in parts:
         if not part.startswith("### ["):
             continue
         match = re.match(r"### \[(.*?)\]\((https?://[^\s]+?)\)", part)
-        if match:
-            result.append({"id": f"S{len(result)+1}", "title": match[1], "url": match[2], "text": part.strip()})
+        if not match:
+            continue
+        title, url, text = match[1], match[2], part.strip()
+        key = normalize_url(url)
+        if key and key in by_url:
+            existing = result[by_url[key]]
+            if len(text) > len(existing["text"]):
+                existing["title"] = title
+                existing["url"] = url
+                existing["text"] = text
+            continue
+        if key:
+            by_url[key] = len(result)
+        result.append({"id": f"S{len(result)+1}", "title": title, "url": url, "text": text})
     if not result and material.strip():
         result = [{"id": "S1", "title": "完整自动材料", "url": "", "text": material}]
     return result
+
+
+def _fit_pass2_sources(chosen: list[dict], *, item_limit: int = PASS2_ITEM_MAX_CHARS,
+                       total_limit: int = PASS2_TOTAL_MAX_CHARS) -> list[dict]:
+    """Keep full source text whenever within generous limits; trim only runaway payloads."""
+    if not chosen:
+        return chosen
+    if all(len(p.get("text", "")) <= item_limit for p in chosen) and sum(len(p.get("text", "")) for p in chosen) <= total_limit:
+        return chosen
+    trimmed = []
+    for p in chosen:
+        text = p.get("text", "")
+        if len(text) > item_limit:
+            text = text[:item_limit].rstrip() + "\n…（单篇原文过长，已保留前部分）"
+        trimmed.append({**p, "text": text})
+    total = sum(len(p["text"]) for p in trimmed)
+    if total <= total_limit:
+        return trimmed
+    # Proportionally scale down while keeping a comfortable floor per selected source.
+    scale = total_limit / max(total, 1)
+    fitted = []
+    for p in trimmed:
+        text = p["text"]
+        cap = max(_PASS2_MIN_ITEM_CHARS, int(len(text) * scale))
+        if len(text) > cap:
+            text = text[:cap].rstrip() + "\n…（本轮入选原文总长超限，已按比例保留前部分）"
+        fitted.append({**p, "text": text})
+    return fitted
 
 
 def source_index(items: list[dict], chars: int = 900) -> str:
@@ -93,15 +141,19 @@ def select(client, channel: str, items: list[dict], report: str, *, job: dict | 
     if job is not None:
         # Shared sources contain other products and subjects. The refinement
         # must retain the original Job's scope in both passes, not just a broad
-        # audience/channel description. Forward only editorial fields.
-        scope = {key: job[key] for key in ("name", "description", "keywords", "prompt") if key in job}
-        context += ("\n栏目原始研究任务（题材、产品范围、主问题和适用对象以此为准；"
-                    "其中报告排版要求不改变本步骤的JSON输出格式）：\n"
+        # audience/channel description. Forward only clean editorial fields
+        # (stripping R7 Markdown layout templates and unrendered placeholders).
+        from core.prompt_scope import editorial_brief
+        scope = {key: job[key] for key in ("name", "description", "keywords") if key in job}
+        if "prompt" in job:
+            scope["prompt"] = editorial_brief(str(job["prompt"] or ""))
+        context += ("\n栏目原始研究范围（题材、产品范围、主问题和适用对象以此为准）：\n"
                     + json.dumps(scope, ensure_ascii=False)
                     + "\n只在本栏目范围内比较候选。共用来源中的其他产品或主题只能作为必要背景，"
                     "不能因为更热门或覆盖更广就替换栏目的主问题。原任务要求跨品牌比较时继续跨品牌比较，"
                     "不把所有栏目统一限制到某一品牌。拓宽受众不等于改变栏目范围。")
-    first = call_json(client, SELECT_PROMPT, context + "\n原报告供了解已写角度，可重新选择：\n" + report
+    prior_block = ("\n原报告供了解已写角度，可重新选择：\n" + report) if (report or "").strip() else ""
+    first = call_json(client, SELECT_PROMPT, context + prior_block
                       + "\n来源索引：\n" + source_index(items), Selection, temperature=0.4,
                       validator=lambda value: validate_sources(value, items))
     validate_sources(first, items)
@@ -115,10 +167,11 @@ def select(client, channel: str, items: list[dict], report: str, *, job: dict | 
     topic_fields = {"title", "audience", "source_ids", "series", "topic_kind", "demonstration"}
     shortlist = [candidate.model_dump(include=topic_fields, exclude_defaults=True)
                  for candidate in first.candidates]
+    pass2_sources = _fit_pass2_sources(chosen)
     second = call_json(client, SELECT_PROMPT + "\n现在读取所选原文，修正、合并或放弃材料不足的候选。"
                        "在material中充分写出能交给作者的具体细节、关系与原因。不要新增未提供的来源编号。",
                        context + "\n初选：\n" + json.dumps({"candidates": shortlist}, ensure_ascii=False) + "\n原文：\n"
-                       + json.dumps(chosen, ensure_ascii=False), Selection, temperature=0.4,
+                       + json.dumps(pass2_sources, ensure_ascii=False), Selection, temperature=0.4,
                        validator=lambda value: validate_sources(value, chosen))
     validate_sources(second, chosen)
     second.candidates = second.candidates[:candidate_limit(channel)]
@@ -140,6 +193,24 @@ def job_channel(job: dict) -> str:
     if isinstance(own, str) and own.strip() in CHANNELS:
         return own.strip()
     return JOBS.get(job.get("_file", ""), "")
+
+
+def direct_from_materials(job: dict, system: dict | None = None) -> bool:
+    """Whether a multi-item fetch-only audience-v1 Job can skip redundant R7/R8 drafting.
+
+    ``render_report()`` discards ``original_report`` for non-SINGLE, non-KNOWLEDGE
+    channels, so running a full R7 draft + R8 dossier expansion only wastes 1-2
+    large-context LLM passes. Enabled in production via ``research.audience_direct: true``.
+    """
+    if job.get("audience_direct") is False:
+        return False
+    if job.get("search") is not False:
+        return False
+    if job.get("audience_direct") is not True:
+        if not ((system or {}).get("research") or {}).get("audience_direct"):
+            return False
+    channel = job_channel(job)
+    return bool(channel) and channel not in SINGLE and channel not in KNOWLEDGE
 
 
 def topic_channel(topic: dict) -> str:

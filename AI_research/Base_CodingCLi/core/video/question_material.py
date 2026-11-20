@@ -66,6 +66,25 @@ def enabled(job: dict, system: dict) -> bool:
             and (system.get("question_material") or {}).get("enabled", strategy.QUESTION_MATERIAL_DEFAULT) is True)
 
 
+def in_scope(job: dict, system: dict, *, opencode_gathered: bool = False) -> bool:
+    """Scope filter under ``question_material.scope`` (``all`` | ``focused``).
+
+    In ``focused`` mode, ``question-v1`` runs for KNOWLEDGE and SINGLE-question
+    channels (and any Job with ``question_material_force: true`` or without
+    OpenCode gather packets), avoiding 10-15 redundant LLM calls on multi-item
+    news/flash Jobs that already received OpenCode + fixed-source materials.
+    """
+    if job.get("question_material_force") is True:
+        return True
+    scope = str((system.get("question_material") or {}).get("scope") or "all").lower()
+    if scope != "focused":
+        return True
+    channel = strategy.job_channel(job)
+    if channel in strategy.KNOWLEDGE or channel in strategy.SINGLE:
+        return True
+    return not opencode_gathered
+
+
 def _check_cancel(cancel_token) -> None:
     if cancel_token is not None and cancel_token.is_set():
         raise CancelledError("Cancelled during question-led material collection")
@@ -131,7 +150,7 @@ def _collect(client, search, gaps, brief, cache, cancel_token, progress_cb) -> t
                 if key not in cache:
                     try:
                         pages = fetch_page(result.url, 12, 20, get_page=_get_page,
-                                           search_client=search, section_chars=4000)
+                                           search_client=search, section_chars=50000)
                         text = "\n\n".join(p.to_markdown() for p in pages)
                         cache[key] = {"text": text, "mode": "page_sections"}
                     except CancelledError:
@@ -168,12 +187,15 @@ def _collect(client, search, gaps, brief, cache, cancel_token, progress_cb) -> t
 
 
 def enhance(job: dict, report: str, material: str, audience_detail: dict, system: dict, *,
-            cancel_token=None, progress_cb=None) -> tuple[str, str, dict]:
+            cancel_token=None, progress_cb=None, opencode_gathered: bool = False) -> tuple[str, str, dict]:
     """Return enriched report, actual used source text, and a recoverable audit receipt."""
     if not enabled(job, system):
         return report, "", {}
     channel = strategy.job_channel(job)
     receipt = {"strategy": MARKER, "version": VERSION, "channel": channel, "topics": [], "usage": {}}
+    if not in_scope(job, system, opencode_gathered=opencode_gathered):
+        receipt["status"] = "skipped_scope"
+        return report, "", receipt
     if audience_detail.get("status") == "kept_original" or audience_detail.get("candidate_count") == 0:
         receipt["status"] = "no_candidates"
         return report, "", receipt
