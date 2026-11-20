@@ -60,14 +60,15 @@ def test_every_production_recipe_generates_directly_and_can_continue_without_an_
     assert "材料没有提供" not in version["sections"][0]["paragraphs"][0]["text"]
     assert "官方" not in version["sections"][0]["paragraphs"][0]["text"]
     assert version["meta"].get("narration_gaps")
+    assert version["meta"].get("narration_unresolved")
     assert not version["meta"].get("narration_blocks_auto_approval")
     assert credibility.label(version)["tier"] == "generated"
     assert version["meta"]["checks"]["model_ran"] is False
     assert version["meta"]["checks"]["summary"]["passed"] is False  # no fabricated review success
     assert video_executor.steps_of(script)[2]["state"] == "SKIPPED"
     decision = video_executor.advance_auto(script, {}, can_start_script=True, can_start_render=False)
-    assert not decision["hold"] and not decision["took"]["script"]
-    assert store.get_script(script["id"])["status"] == "APPROVED"
+    assert decision["hold"] and not decision["took"]["script"]
+    assert store.get_script(script["id"])["status"] == "DRAFT"
 
 
 def test_writer_gets_the_material_and_audience_without_old_production_rules(llm):

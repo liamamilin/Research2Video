@@ -21,9 +21,9 @@ from core import report_material, telemetry
 from core.errors import CancelledError
 from core.provenance import extract_urls, normalize_url
 
-from . import length, persona as narrator
+from . import author_input_gates, length, persona as narrator
 from .audience_copy import findings as audience_findings
-from .narration_stance import LISTENING_DIRECTION, settle_sections
+from .narration_stance import LISTENING_DIRECTION, note, settle_sections
 
 MIN_CHINESE_SHARE = 0.5
 
@@ -162,6 +162,20 @@ GREETING_PROMPT = """
 口播开头由节目固定念出问候「{greeting}」，正文从这句问候之后接着讲，不再另外问候或介绍栏目；最后用一句简短的道别结束。"""
 #: Opening and closing sections of a programme carry these titles, so the screen never shows a working label.
 OPENING_TITLE, CLOSING_TITLE = "本期导读", "本期回顾"
+#: Authors sometimes label the first/last beat as "开场：…" / "结尾"; navigation should not show that.
+_WORKING_TITLE = re.compile(r"^(开场|结尾)(?:[：:]\s*(.+))?$")
+
+
+def viewer_section_title(title: str) -> str:
+    """Drop working open/close labels from a section title shown to viewers."""
+    text = (title or "").strip()
+    match = _WORKING_TITLE.match(text)
+    if not match:
+        return text
+    labeled = (match.group(2) or "").strip()
+    if labeled:
+        return labeled
+    return OPENING_TITLE if match.group(1) == "开场" else CLOSING_TITLE
 
 
 @dataclass
@@ -314,7 +328,10 @@ def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: 
             paragraphs.append({"text": text, "citations": kept, "evidence": evidence, "note": note})
             if evidence == "NEEDS_REVIEW":
                 paragraphs[-1]["review_reason"] = para.review_reason.strip() or note or "撰稿时对本段事实把握不足，尚需带出处的明确核验"
-        sections.append({"title": section.title.strip(), "paragraphs": paragraphs,
+        title = section.title.strip()
+        if section.episode_role not in {"opening", "closing"}:
+            title = viewer_section_title(title)
+        sections.append({"title": title, "paragraphs": paragraphs,
                          **({"episode_role": section.episode_role} if section.episode_role else {})})
     check = length.measure(sections, target_minutes, voice=voice)
     check["dropped_citations"] = dropped
@@ -529,6 +546,7 @@ def write(
     report = report_body(report)
     programme = topic.get("content_mode") == "episode"
     persona = narrator.load()
+    column_style, scrubbed_markers = author_input_gates.scrub(column_style)
     system = author_system_prompt(topic, persona, greeting=greeting, tutorial=tutorial,
                                   episode_prompt=episode_prompt, episode_lead=episode_lead)
     request = _request(report, topic, column_style, target_minutes, 0,
@@ -568,20 +586,19 @@ def write(
                  **({"duration_policy": "content"} if programme else {})}
     from core.video import episodes
     title = episodes.publication_title(topic, script.title.strip())
-    return WrittenScript(
-        title=title,
-        sections=sections,
-        length_check=check,
-        meta={"attempts": attempts, "usage": dict(client.usage), "problems": [],
-              **({"authored_title": script.title.strip()} if title != script.title.strip() else {}),
-              "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
-              "model_switches": list(getattr(client, "model_switches", [])),
-              "duration_seconds": round(time.monotonic() - started, 3),
-              "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
-              **({"narration_gaps": stance["gaps"]} if stance.get("gaps") else {}),
-              **({"narration_blocks_auto_approval": True} if stance.get("blocks_auto_approval") else {}),
-              "creative_direction": column_style.strip(),
-              "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
-              "trusted_urls": len(allowed),
-              **({'episode': episodes.manifest(topic, sections)} if programme else {})},
-    )
+    meta = {"attempts": attempts, "usage": dict(client.usage), "problems": [],
+            **({"authored_title": script.title.strip()} if title != script.title.strip() else {}),
+            "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
+            "model_switches": list(getattr(client, "model_switches", [])),
+            "duration_seconds": round(time.monotonic() - started, 3),
+            "generation": "goal_first", "prompt_version": PROMPT_VERSION, "introduction": introduction,
+            "creative_direction": column_style.strip(),
+            "author_system_prompt_sha256": sha256(system.encode()).hexdigest(),
+            "trusted_urls": len(allowed),
+            **({'episode': episodes.manifest(topic, sections)} if programme else {})}
+    if scrubbed_markers:
+        meta["author_input_scrubbed"] = scrubbed_markers
+    # Direction is under our control; article bodies may legitimately use short words like「合集」.
+    author_input_gates.require_clean(column_style, where="creative_direction")
+    note(meta, stance)
+    return WrittenScript(title=title, sections=sections, length_check=check, meta=meta)

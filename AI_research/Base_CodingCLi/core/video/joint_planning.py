@@ -30,7 +30,7 @@ episode.summary 只交代核心变化是什么、对目标观众的直接影响�
 先决定单条独立回答什么，再把回答它所需的操作过程、完整比较和案例从 episode.summary 中拿出去，放进 single.material。共同背景可以简述，两份材料不能各自完整回答同一个问题。
 若单条是 money，合集不提前展开任务分层与购买判断；若单条是 howto，合集不提前讲安装命令和操作步骤。
 howto 必须有材料明确提供的操作入口/命令、关键动作和结果；发布说明只有权限名或功能名时，不能把它改成“怎么配置”的教程。可以留在合集解释变化。
-single.material 是按该问题整理的已有证据与实例，single.incremental_value 具体说明比合集多回答什么。
+single.material 是按该问题整理的已有证据与实例，从观众要解决的问题或关键变化写起，不要用发布日期当第一句；single.incremental_value 写观众听完能带走的收获，不要写合集与单条的制作分工。
 保留选题指定的受众范围；职业案例不自动变成整篇的观看前提。目标受众写在 single.audience 中。
 source_ids 只能选输入的 S 编号；各自选择真正相关的材料。既往内容只作避免重复的参考。
 必须逐一返回所有候选的 candidate_id。每条可有 episode、single、两者都有或两者都为 null；都不选时 reason 说明原因。
@@ -39,13 +39,36 @@ raw_material=true 是报告尚未使用的原始资料，并不代表值得制�
 JSON: {"allocations":[{"candidate_id":"候选ID","reason":"分配原因",
 "episode":{"summary":"合集材料摘要","source_ids":["S1"]},
 "single":{"question":"独立问题标题","audience":"受众","angle":"howto",
-"incremental_value":"比合集多回答什么","material":"展开该问题的材料与实例","source_ids":["S1"]}}]}"""
+"incremental_value":"观众能带走的收获","material":"展开该问题的材料与实例","source_ids":["S1"]}}]}"""
 
 
 def _path(plan_id: str) -> Path:
     if not re.fullmatch(r"[a-f0-9]{64}", plan_id):
         raise ValueError("联合规划编号无效")
     return Path(store.db_path()).parent / "joint-plans" / f"{plan_id}.json"
+
+
+def viewer_takeaway(value: str) -> str:
+    """Keep the audience gain; drop planner wording that compares programme vs single."""
+    text = (value or "").strip()
+    if "合集" in text and "单条" in text:
+        parts = re.split(r"单条(?:进一步)?", text, maxsplit=1)
+        if len(parts) == 2:
+            part = re.sub(r"^(?:给出|讲清|展开|把|说明)", "", parts[1].strip())
+            part = part.strip(" ：:;；。")
+            if part:
+                return part
+    return text
+
+
+def writing_direction(single: dict | None = None, *, role: str = "single") -> str:
+    """Author brief for one frozen assignment. Do not paste programme copy into the single."""
+    if role == "episode":
+        return "按各条摘要讲清变化和对观众的直接影响；完整操作步骤与费用比较不在这里展开。"
+    if not single:
+        raise ValueError("单条写作方向需要独立问题")
+    takeaway = viewer_takeaway(single["incremental_value"])
+    return f"本条只回答：{single['question']}。观众能带走：{takeaway}。"
 
 
 def assignment(topic: dict) -> dict | None:
@@ -55,7 +78,12 @@ def assignment(topic: dict) -> dict | None:
     data = json.loads(_path(ref["id"]).read_text(encoding="utf-8"))
     if data.get("id") != ref["id"] or data.get("status") != "planned":
         raise ValueError("联合规划记录不完整")
-    return data["assignments"][ref["entry"]]
+    entry = dict(data["assignments"][ref["entry"]])
+    if ref["entry"] == "episode":
+        entry["direction"] = writing_direction(role="episode")
+    else:
+        entry["direction"] = writing_direction(entry["single"])
+    return entry
 
 
 def validate(value: dict, candidates: list[dict], packets: list[dict]) -> list[dict]:
@@ -147,14 +175,13 @@ def _compile(rows: list[dict], candidates: list[dict], packets: list[dict]) -> d
             assignments[candidate["id"]] = {
                 "report": f"# {single['question']}\n\n{single['material']}\n\n{links(single['source_ids'])}",
                 "material": "\n\n---\n\n".join(source[i]["text"] for i in dict.fromkeys(single["source_ids"])),
-                "direction": (f"本条只回答：{single['question']}。观众收获：{single['incremental_value']}。"
-                              + (f"同批合集仅介绍：{episode['summary']}。这条展开已分配的独立问题，发布概况只作必要背景。" if episode else "")),
+                "direction": writing_direction(single),
                 "single": single,
             }
     if episode_items:
         assignments["episode"] = {
             "report": "# 本期快讯\n\n" + "\n\n".join(episode_parts), "material": "", "items": episode_items,
-            "direction": "这是与单条共同规划的合集材料。按各条已分配的摘要讲清变化和直接影响，不展开未分配给本合集的完整操作或费用比较。",
+            "direction": writing_direction(role="episode"),
         }
     return assignments
 
@@ -367,7 +394,8 @@ def apply(spec: dict, items: list[dict], config_dir: str, jobs_dir: str, workspa
             topic = item["topic"]
             topic.update(joint_plan={"id": plan_id, "entry": entry}, title=part["question"],
                          from_item_title=part["question"], preserve_audience_scope=True, _story_fallbacks=[])
-            topic["fields"] = {**topic.get("fields", {}), "目标受众": part["audience"], "核心角度": part["incremental_value"]}
+            topic["fields"] = {**topic.get("fields", {}), "目标受众": part["audience"],
+                               "核心角度": viewer_takeaway(part["incremental_value"])}
             if part.get("angle"):
                 topic.update(id=f"{entry}~{part['angle']}", base_id=entry, angle=part["angle"])
             result.append(item)

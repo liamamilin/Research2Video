@@ -12,7 +12,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from . import persona
-from .narration_stance import LISTENING_DIRECTION, defects as stance_defects, launders, settle_sections
+from .narration_stance import LISTENING_DIRECTION, defects as stance_defects, launders, note, settle_sections
 
 PROMPT_VERSION = 7
 
@@ -107,6 +107,8 @@ def _fallback(sections: list[dict], record: dict) -> list[dict]:
     settled, stance = settle_sections(sections)
     if stance.get("kept_original"):
         record["unresolved"] = stance["unresolved"]
+        if stance.get("blocks_auto_approval"):
+            record["blocks_auto_approval"] = True
         return sections
     for change in stance["changes"]:
         section = sections[change["section"]]
@@ -117,7 +119,7 @@ def _fallback(sections: list[dict], record: dict) -> list[dict]:
             "fallback": True,
         })
     record["gaps"] = list(record.get("gaps") or []) + stance["gaps"]
-    record["unresolved"] = stance["unresolved"]
+    record["unresolved"] = list(record.get("unresolved") or []) + stance["unresolved"]
     if stance.get("blocks_auto_approval"):
         record["blocks_auto_approval"] = True
     return settled
@@ -126,8 +128,9 @@ def _fallback(sections: list[dict], record: dict) -> list[dict]:
 def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[dict], dict]:
     """(sections, record). With nothing found no model call is made.
 
-    Section-level number checks from the local polish stay. Stance failures fall
-    back to dropping the aside without inventing a scope sentence.
+    Section-level number checks stay. A rewrite that still reads a memo, or that
+    leaves 「第二，而……」, is rejected and falls back to dropping the memo
+    without inventing a claim.
     """
     found = findings(sections, greeting=greeting)
     record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": [], "gaps": []}
@@ -177,8 +180,8 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
             continue
         reason = launders(before, after) if stance else ""
-        if reason or (stance and stance_defects(after)):
-            record["rejected"].append({"id": rewrite.id, "reason": reason or "改写仍在表演谨慎", "text": after})
+        if reason or stance_defects(after):
+            record["rejected"].append({"id": rewrite.id, "reason": reason or "改写仍在念备忘或残句", "text": after})
             continue
         if si == 0 and preserve_intro:
             candidate = [*opening[:pi], {**opening[pi], "text": after}, *opening[pi + 1:]]
@@ -212,10 +215,7 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
             span["status"] = "failed"
     record["usage"] = dict(client.usage)
     written.meta["polish"] = record
-    if record.get("gaps"):
-        written.meta["narration_gaps"] = list(written.meta.get("narration_gaps") or []) + record["gaps"]
-    if record.get("blocks_auto_approval"):
-        written.meta["narration_blocks_auto_approval"] = True
+    note(written.meta, record)
     if not record["changes"]:
         return
     written.sections = sections

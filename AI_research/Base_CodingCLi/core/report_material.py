@@ -59,6 +59,8 @@ _COLLECTION_STATUS = re.compile(
     r"(本次未取得内容的来源|采集范围说明)(?:\*\*)?"
     r"(?:[ \t]*[：:][ \t]*(?:\*\*)?(.*))?$"
 )
+# Packet bookkeeping for research selection; video narration should not see it.
+_PACKET_META = re.compile(r"^(?:材料编号|采集状态)[：:].*$")
 # Older research reports can append a shot note to an otherwise useful line.
 # Only the explicit report label is special; source articles may use it normally.
 _SHOT_NOTE = re.compile(r"(?:^[ \t]*(?:[-*+] )?|(?<=[。！？])[ \t]*)\*\*画面\*\*[ \t]*[：:]")
@@ -83,6 +85,9 @@ def for_narration(text: str, *, research_report: bool = False) -> str:
             i += 1
             continue
         heading = line.rstrip()
+        if not in_fence and _PACKET_META.fullmatch(heading):
+            i += 1
+            continue
         detail = None if in_fence else _COLLECTION_STATUS.fullmatch(heading)
         if detail is not None or (not in_fence and heading == "## Fetched sources"):
             i += 1

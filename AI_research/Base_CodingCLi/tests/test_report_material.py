@@ -7,6 +7,20 @@ from tests.test_video_scripts import GOOD, REPORT, llm, script_json, video_env  
 from web.services import video_render, video_workflow
 
 
+def test_for_narration_drops_packet_bookkeeping_but_keeps_article_body():
+    raw = (
+        "### [Title](https://example.com/a)\n"
+        "材料编号：Mabc；来源角色：editorial。\n"
+        "采集状态：新增材料；页面变化不等于事件刚刚发生。\n"
+        "具体产品资料，而不是怎么写视频的备忘。\n"
+        "材料编号：Mdef（正文补读）\n"
+        "补充细节还在。\n"
+    )
+    spoken = report_material.for_narration(raw)
+    assert "具体产品资料" in spoken and "补充细节还在" in spoken
+    assert "材料编号" not in spoken and "采集状态" not in spoken and "来源角色" not in spoken
+
+
 def test_material_snapshots_survive_reruns_and_detect_a_changed_report(tmp_path):
     path = tmp_path / "report.md"
     first = report_material.save(str(path), "first report", ["first source"])
@@ -30,14 +44,20 @@ def test_invalid_snapshot_path_is_not_opened(tmp_path):
 def test_original_material_reaches_author_and_its_links_reach_publish_package(video_env, llm, monkeypatch):
     path = video_env / "report.md"
     path.write_text(REPORT)
-    source = "### [Original](https://original.example/news) — published 2026-10-24\n\n具体产品资料，而不是怎么写视频的备忘。"
+    source = (
+        "### [Original](https://original.example/news) — published 2026-10-24\n\n"
+        "材料编号：Moriginal；来源角色：editorial。\n"
+        "采集状态：新增材料；页面变化不等于事件刚刚发生。\n"
+        "具体产品资料，而不是怎么写视频的备忘。"
+    )
     ref = report_material.save(str(path), REPORT, [source])
     monkeypatch.setattr(report_meta, "get", lambda _: {"material": ref})
     llm.replies = [script_json(300, citations={(0, 0): ["https://original.example/news"]})]
     script = store.create_script("report_digest", {"title": "素材试写", "from_report": str(path)})
     assert video_workflow.run(script["id"], llm_config=object()) == "DRAFT"
     request = llm.calls[0][1]["content"]
-    assert source in request and REPORT not in request
+    assert "具体产品资料，而不是怎么写视频的备忘。" in request and REPORT not in request
+    assert "材料编号" not in request and "采集状态" not in request
     version = store.get_version(script["id"], 1)
     assert version["meta"]["material"] == ref
     assert version["meta"]["input_kind"] == "original_material"

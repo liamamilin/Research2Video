@@ -5,7 +5,7 @@ import json
 import pytest
 
 from core import report_material, report_meta
-from core.video import joint_planning as joint, audience_strategy, store, content_guard, story_pool
+from core.video import author_input_gates, joint_planning as joint, audience_strategy, store, content_guard, story_pool
 from core.video import autopilot_store as ap
 from web.services import video_autopilot as auto, video_workflow as workflow
 from tests.test_audience_rollout import chosen
@@ -57,6 +57,14 @@ def test_one_plan_shared_before_writing_and_cached(batch, video_env, llm):
     assert single['topic']['fields']['目标受众'] == plan['allocations'][0]['single']['audience']
     assert '安装命令' not in joint.assignment(episode['topic'])['report']
     assert '安装命令' in joint.assignment(single['topic'])['material']
+    single_direction = joint.assignment(single['topic'])['direction']
+    episode_direction = joint.assignment(episode['topic'])['direction']
+    assert '怎样把表格变成可编辑文件' in single_direction
+    assert '跟着入口、输入和导出步骤完成一个文件' in single_direction
+    assert '产品0支持表格导出' not in single_direction
+    assert '完整操作步骤与费用比较不在这里展开' in episode_direction
+    author_input_gates.require_clean(single_direction)
+    author_input_gates.require_clean(episode_direction)
     again = auto.pick_topics(spec)
     assert len(llm.calls) == 1 and again == items
     assert '合集 3 项，单条 1 条' in notes[-1]
@@ -64,6 +72,48 @@ def test_one_plan_shared_before_writing_and_cached(batch, video_env, llm):
     (video_env/'config/joint_planning.yaml').write_text('enabled: false\n')
     assert joint.assignment(single['topic'])['report'].startswith('# 怎样')
     assert len(auto.pick_topics(spec)) == 4
+
+
+def test_viewer_takeaway_drops_programme_split_and_assignment_rebuilds_old_direction(video_env):
+    assert joint.viewer_takeaway('跟着入口完成导出') == '跟着入口完成导出'
+    assert joint.viewer_takeaway(
+        '合集只报功能上线；单条给出操作路径：点麦克风、点波形，以及隐私开关'
+    ) == '操作路径：点麦克风、点波形，以及隐私开关'
+    assert joint.viewer_takeaway(
+        '合集只说明计费变了；单条进一步区分服务端工具与独立接口'
+    ) == '区分服务端工具与独立接口'
+    single = {
+        'question': 'ChatGPT 实时听写怎么用',
+        'incremental_value': '合集只报功能上线；单条给出点麦克风后边说边出字的操作',
+        'audience': '常用语音输入的人', 'angle': 'howto', 'material': '点麦克风', 'source_ids': ['S1'],
+    }
+    assert joint.writing_direction(single) == (
+        '本条只回答：ChatGPT 实时听写怎么用。观众能带走：点麦克风后边说边出字的操作。')
+    assert '合集' not in joint.writing_direction(single)
+    assert '发布概况' not in joint.writing_direction(role='episode')
+    plan_id = 'a' * 64
+    path = joint._path(plan_id)
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({
+        'id': plan_id, 'status': 'planned',
+        'assignments': {
+            'item-1': {
+                'report': '# q', 'material': 'm', 'single': single,
+                'direction': ('本条只回答：旧。观众收获：旧。同批合集仅介绍：旧摘要。'
+                              '这条展开已分配的独立问题，发布概况只作必要背景。'),
+            },
+            'episode': {
+                'report': '# 本期', 'material': '', 'items': [],
+                'direction': '这是与单条共同规划的合集材料。按摘要讲。',
+            },
+        },
+    }, ensure_ascii=False))
+    rebuilt = joint.assignment({'joint_plan': {'id': plan_id, 'entry': 'item-1'}})
+    assert rebuilt['direction'] == joint.writing_direction(single)
+    assert '同批合集' not in rebuilt['direction']
+    assert '旧摘要' not in rebuilt['direction']
+    assert joint.assignment({'joint_plan': {'id': plan_id, 'entry': 'episode'}})['direction'] == (
+        joint.writing_direction(role='episode'))
 
 
 @pytest.mark.parametrize('legacy_report', [False, True])
@@ -93,6 +143,12 @@ def test_joint_episode_then_independent_single_keeps_external_history(batch, vid
     assert 'install product0' in llm.calls[-1][1]['content']
     assert 'install product1' not in llm.calls[-1][1]['content']
     assert '已选题：' in llm.calls[-2][0]['content']
+    author_request = llm.calls[-1][1]['content']
+    assert '本条只回答：怎样把表格变成可编辑文件' in author_request
+    assert '观众能带走：跟着入口、输入和导出步骤完成一个文件' in author_request
+    author_input_gates.require_clean(version['meta']['creative_direction'])
+    assert '同批合集' not in author_request
+    assert '发布概况只作必要背景' not in author_request
     content_guard.check(store.get_script(single['id']), version['sections'], str(video_env/'config'), str(video_env/'jobs'))
     # Existing how-to coverage is still protected; there is no blanket shared-plan bypass.
     story = version['meta']['story']
