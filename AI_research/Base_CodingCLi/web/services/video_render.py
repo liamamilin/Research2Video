@@ -237,6 +237,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     from core.video.article_writer import readiness
     if problem := readiness(version):
         raise RenderError(problem)
+    from core.video.narration_stance import narration_problem
+    if problem := narration_problem(version, rendering=True):
+        raise RenderError(problem)
     if script.get("topic", {}).get("article"):
         from core.video.articles import ArticleError
         from web.services.video_articles import source_of

@@ -205,6 +205,10 @@ def approve(script_id: str, version: int, by: str) -> None:
     problem = submission_problem(found)
     if problem:
         raise StepError(problem)
+    from core.video.narration_stance import narration_problem
+    problem = narration_problem(found)
+    if problem:
+        raise StepError(problem)
     script = store.get_script(script_id) or {}
     store.update_script(script_id, status="APPROVED", approved_version=version)
     steps.log(script_id, "approve", "approve", f"v{version}", by=by)
@@ -319,6 +323,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
             # by the user can still send it on (reopen_approved).
             out["hold"] = f"文稿没过审（{verdict['text']}），没有出片：" + "；".join(verdict["reasons"][:3]) + "。看过文稿、确认后再出片"
             out["item"] = {"gate": {**verdict, "approved": False}}
+            return out
+        from core.video.narration_stance import auto_approval_hold
+        current = store.get_version(script["id"], script["current_version"])
+        if reason := auto_approval_hold(current):
+            # A new draft still has a memo or a broken join. Already approved scripts do not enter this branch.
+            out["hold"] = reason
+            out["item"] = {"gate": {**verdict, "approved": False,
+                                    "narration_blocks_auto_approval": bool((current.get("meta") or {}).get("narration_blocks_auto_approval"))}}
             return out
         # any other label: the video is made, the label is shown next to it, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])

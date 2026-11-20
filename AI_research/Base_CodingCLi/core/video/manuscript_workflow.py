@@ -744,17 +744,23 @@ def revise_passage(
                     sections[0] = deepcopy(draft.sections[0])
                     receipt["retained_opening"] = "revision_broke_introduction"
             if sections != draft.sections:
+                from .narration_stance import note, settle_sections
+                sections, stance = settle_sections(sections)
                 check = draft.length_check
                 measured = length.measure(sections, check.get("target_minutes"), voice=column.voice_id or None)
                 written = replace(draft, sections=sections, length_check={**check, **measured}, meta=dict(draft.meta))
+                note(written.meta, stance)
                 if on_stage:
                     on_stage("revision", asdict(written))
-                receipt["changes"] = [
-                    {"id": key, "before": draft.sections[si]["paragraphs"][pi]["text"],
-                     "after": sections[si]["paragraphs"][pi]["text"]}
-                    for key, (si, pi) in locations.items()
-                    if sections[si]["paragraphs"][pi]["text"] != draft.sections[si]["paragraphs"][pi]["text"]
-                ]
+                receipt["changes"] = []
+                for key, (si, pi) in locations.items():
+                    before = draft.sections[si]["paragraphs"][pi]["text"]
+                    if si >= len(sections) or pi >= len(sections[si].get("paragraphs") or []):
+                        receipt["changes"].append({"id": key, "before": before, "after": ""})
+                        continue
+                    after = sections[si]["paragraphs"][pi]["text"]
+                    if after != before:
+                        receipt["changes"].append({"id": key, "before": before, "after": after})
                 receipt["result"] = "revised"
     except (AdaptError, LLMError, writer.ScriptError) as exc:
         receipt["error"] = {"stage": stage, "type": type(exc).__name__}

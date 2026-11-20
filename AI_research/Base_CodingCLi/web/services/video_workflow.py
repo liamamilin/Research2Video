@@ -1361,6 +1361,11 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
             for para in section["paragraphs"]:
                 for key in ("facts", "introduces", "recap"):
                     para.pop(key)
+    article = base_meta.get("article") or {}
+    stance = {}
+    if article.get("mode") != "read" and base_meta.get("generation") != "article_verbatim":
+        from core.video.narration_stance import settle_sections
+        clean, stance = settle_sections(clean)
 
     style = _style_of(base_meta, column) if sheet else None
     if base_meta.get("article"):
@@ -1375,6 +1380,8 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                                     plan=plan, sheet=sheet, style=style)
         meta = {"problems": writer.lint(clean),
                 "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
+    from core.video.narration_stance import note as note_stance
+    note_stance(meta, stance)
     from core.video import episodes
     if base_meta.get('user_materials'):
         meta.update(input_kind='user_materials', user_materials=base_meta['user_materials'])
