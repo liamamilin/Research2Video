@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import threading
 import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta
@@ -14,33 +15,55 @@ from zoneinfo import ZoneInfo
 from core import production_policy
 
 WAIT_NOTE = "今日自动生产名额已用完，保留队列，后续日期自动继续"
+_LEDGER_INIT_LOCK = threading.Lock()
+_LEDGER_INITIALIZED: set[tuple[Path, int, int]] = set()
+
+
+def _db_identity(path: Path) -> tuple[Path, int, int] | None:
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    return (path.resolve(), st.st_dev, st.st_ino)
 
 
 class Ledger:
     def __init__(self, state_dir: str, *, now: float | None = None):
         Path(state_dir).mkdir(parents=True, exist_ok=True)
         self.path = Path(state_dir) / "production_admission.db"
-        with self.connect() as db:
-            db.executescript("""
-                CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY,value REAL NOT NULL);
-                CREATE TABLE IF NOT EXISTS admissions (
-                    issue TEXT PRIMARY KEY, day TEXT NOT NULL, accepted_at REAL NOT NULL,
-                    policy_revision TEXT NOT NULL, mode TEXT NOT NULL,
-                    job TEXT NOT NULL DEFAULT ''
-                );
-                CREATE INDEX IF NOT EXISTS admission_day ON admissions(day,mode);
-            """)
-            db.execute("BEGIN IMMEDIATE")
-            if "job" not in {row[1] for row in db.execute("PRAGMA table_info(admissions)")}:
-                db.execute("ALTER TABLE admissions ADD COLUMN job TEXT NOT NULL DEFAULT ''")
-            db.execute(
-                "INSERT OR IGNORE INTO meta VALUES ('enabled_at',?)",
-                (time.time() if now is None else now,),
-            )
+        ident = _db_identity(self.path)
+        if ident is not None and ident in _LEDGER_INITIALIZED:
+            return
+        with _LEDGER_INIT_LOCK:
+            ident = _db_identity(self.path)
+            if ident is not None and ident in _LEDGER_INITIALIZED:
+                return
+            with self.connect() as db:
+                db.execute("PRAGMA journal_mode=WAL")
+                db.executescript("""
+                    CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY,value REAL NOT NULL);
+                    CREATE TABLE IF NOT EXISTS admissions (
+                        issue TEXT PRIMARY KEY, day TEXT NOT NULL, accepted_at REAL NOT NULL,
+                        policy_revision TEXT NOT NULL, mode TEXT NOT NULL,
+                        job TEXT NOT NULL DEFAULT ''
+                    );
+                    CREATE INDEX IF NOT EXISTS admission_day ON admissions(day,mode);
+                """)
+                db.execute("BEGIN IMMEDIATE")
+                if "job" not in {row[1] for row in db.execute("PRAGMA table_info(admissions)")}:
+                    db.execute("ALTER TABLE admissions ADD COLUMN job TEXT NOT NULL DEFAULT ''")
+                db.execute(
+                    "INSERT OR IGNORE INTO meta VALUES ('enabled_at',?)",
+                    (time.time() if now is None else now,),
+                )
+            ident = _db_identity(self.path)
+            if ident is not None:
+                _LEDGER_INITIALIZED.add(ident)
 
     @contextmanager
     def connect(self):
-        db = sqlite3.connect(self.path, timeout=10)
+        db = sqlite3.connect(self.path, timeout=15)
+        db.execute("PRAGMA busy_timeout=15000")
         try:
             with db:
                 yield db

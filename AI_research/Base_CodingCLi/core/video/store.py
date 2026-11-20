@@ -200,6 +200,7 @@ def init_db() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_production ON scripts(production,created_at DESC)")
         for name, definition in (
             ("idx_scripts_chain_summary", "scripts(production,created_at DESC,id,status,current_version,archived)"),
+            ("idx_scripts_archived_created", "scripts(archived,created_at DESC,id DESC)"),
             ("idx_script_versions_summary", "script_versions(script_id,version,title)"),
         ):
             if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='index' AND name=?", (name,)).fetchone():

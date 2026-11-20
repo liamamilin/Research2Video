@@ -5,12 +5,23 @@ from contextlib import contextmanager
 import json
 from pathlib import Path
 import sqlite3
+import threading
 import time
 import uuid
 
 from web.settings import get_settings
 
 OWNER = uuid.uuid4().hex
+_INIT_LOCK = threading.Lock()
+_INITIALIZED: set[tuple[Path, int, int]] = set()
+
+
+def _db_identity(path: Path) -> tuple[Path, int, int] | None:
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    return (path.resolve(), st.st_dev, st.st_ino)
 
 
 def identity(user: dict) -> str:
@@ -22,48 +33,62 @@ class AssistantStore:
         root = Path(get_settings().paths.state_dir)
         root.mkdir(parents=True, exist_ok=True)
         self.path = root / 'assistant.db'
-        with self.db() as db:
-            db.executescript('''
-                CREATE TABLE IF NOT EXISTS conversations (
-                    id TEXT PRIMARY KEY, user_id TEXT NOT NULL, updated REAL NOT NULL,
-                    refs TEXT NOT NULL DEFAULT '[]');
-                CREATE TABLE IF NOT EXISTS requests (
-                    id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL,
-                    message TEXT NOT NULL, status TEXT NOT NULL, owner TEXT NOT NULL,
-                    result TEXT NOT NULL, created REAL NOT NULL, updated REAL NOT NULL);
-                CREATE INDEX IF NOT EXISTS requests_conversation ON requests(conversation_id,created);
-                CREATE TABLE IF NOT EXISTS operations (
-                    id TEXT PRIMARY KEY, request_id TEXT NOT NULL, tool TEXT NOT NULL,
-                    arguments TEXT NOT NULL, status TEXT NOT NULL, result TEXT, created REAL NOT NULL);
-                CREATE TABLE IF NOT EXISTS protected_inputs (
-                    id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL,
-                    parameters TEXT NOT NULL, status TEXT NOT NULL, created REAL NOT NULL,
-                    result TEXT);
-                CREATE INDEX IF NOT EXISTS requests_user_created ON requests(user_id,created);
-                CREATE INDEX IF NOT EXISTS operations_request_created ON operations(request_id,created);
-            ''')
-            if not db.in_transaction:
-                db.execute('BEGIN IMMEDIATE')
-            columns = {row[1] for row in db.execute('PRAGMA table_info(protected_inputs)')}
-            for name, declaration in (('owner', "TEXT NOT NULL DEFAULT ''"), ('updated', 'REAL NOT NULL DEFAULT 0')):
-                if name not in columns:
-                    db.execute(f'ALTER TABLE protected_inputs ADD COLUMN {name} {declaration}')
-            if 'context' not in {row[1] for row in db.execute('PRAGMA table_info(conversations)')}:
-                db.execute("ALTER TABLE conversations ADD COLUMN context TEXT NOT NULL DEFAULT 'null'")
-            if 'materials' not in {row[1] for row in db.execute('PRAGMA table_info(requests)')}:
-                db.execute("ALTER TABLE requests ADD COLUMN materials TEXT NOT NULL DEFAULT '[]'")
+        ident = _db_identity(self.path)
+        if ident is not None and ident in _INITIALIZED:
+            return
+        with _INIT_LOCK:
+            ident = _db_identity(self.path)
+            if ident is not None and ident in _INITIALIZED:
+                return
+            with self.db() as db:
+                db.execute('PRAGMA journal_mode=WAL')
+                db.executescript('''
+                    CREATE TABLE IF NOT EXISTS conversations (
+                        id TEXT PRIMARY KEY, user_id TEXT NOT NULL, updated REAL NOT NULL,
+                        refs TEXT NOT NULL DEFAULT '[]');
+                    CREATE TABLE IF NOT EXISTS requests (
+                        id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL,
+                        message TEXT NOT NULL, status TEXT NOT NULL, owner TEXT NOT NULL,
+                        result TEXT NOT NULL, created REAL NOT NULL, updated REAL NOT NULL);
+                    CREATE INDEX IF NOT EXISTS requests_conversation ON requests(conversation_id,created);
+                    CREATE TABLE IF NOT EXISTS operations (
+                        id TEXT PRIMARY KEY, request_id TEXT NOT NULL, tool TEXT NOT NULL,
+                        arguments TEXT NOT NULL, status TEXT NOT NULL, result TEXT, created REAL NOT NULL);
+                    CREATE TABLE IF NOT EXISTS protected_inputs (
+                        id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL,
+                        parameters TEXT NOT NULL, status TEXT NOT NULL, created REAL NOT NULL,
+                        result TEXT);
+                    CREATE INDEX IF NOT EXISTS requests_user_created ON requests(user_id,created);
+                    CREATE INDEX IF NOT EXISTS operations_request_created ON operations(request_id,created);
+                ''')
+                if not db.in_transaction:
+                    db.execute('BEGIN IMMEDIATE')
+                columns = {row[1] for row in db.execute('PRAGMA table_info(protected_inputs)')}
+                for name, declaration in (('owner', "TEXT NOT NULL DEFAULT ''"), ('updated', 'REAL NOT NULL DEFAULT 0')):
+                    if name not in columns:
+                        db.execute(f'ALTER TABLE protected_inputs ADD COLUMN {name} {declaration}')
+                if 'context' not in {row[1] for row in db.execute('PRAGMA table_info(conversations)')}:
+                    db.execute("ALTER TABLE conversations ADD COLUMN context TEXT NOT NULL DEFAULT 'null'")
+                if 'materials' not in {row[1] for row in db.execute('PRAGMA table_info(requests)')}:
+                    db.execute("ALTER TABLE requests ADD COLUMN materials TEXT NOT NULL DEFAULT '[]'")
+            ident = _db_identity(self.path)
+            if ident is not None:
+                _INITIALIZED.add(ident)
 
     @contextmanager
-    def db(self):
-        db = sqlite3.connect(self.path, timeout=10)
+    def db(self, *, write: bool = True):
+        db = sqlite3.connect(self.path, timeout=15)
         db.row_factory = sqlite3.Row
         try:
-            db.execute('PRAGMA busy_timeout=10000')
-            db.execute('BEGIN IMMEDIATE')
+            db.execute('PRAGMA busy_timeout=15000')
+            if write:
+                db.execute('BEGIN IMMEDIATE')
             yield db
-            db.commit()
+            if write:
+                db.commit()
         except Exception:
-            db.rollback()
+            if write:
+                db.rollback()
             raise
         finally:
             db.close()
@@ -149,7 +174,7 @@ class AssistantStore:
                        (json.dumps(result, ensure_ascii=False, default=str), status, time.time(), request_id))
 
     def request(self, key: str, user: dict) -> dict:
-        with self.db() as db:
+        with self.db(write=False) as db:
             row = db.execute('SELECT * FROM requests WHERE id=? AND user_id=?', (key, identity(user))).fetchone()
             if not row:
                 raise ValueError('请求不存在或无权访问')
@@ -163,7 +188,7 @@ class AssistantStore:
         return key
 
     def conversations(self, user: dict) -> list[dict]:
-        with self.db() as db:
+        with self.db(write=False) as db:
             return [dict(row) for row in db.execute('''
                 SELECT c.id,c.updated,
                 COALESCE((SELECT substr(message,1,60) FROM requests WHERE conversation_id=c.id ORDER BY created LIMIT 1),'新对话') AS title,
@@ -177,7 +202,7 @@ class AssistantStore:
                 raise ValueError('对话不存在或无权访问')
 
     def operations(self, user: dict, conversation_id: str) -> list[dict]:
-        with self.db() as db:
+        with self.db(write=False) as db:
             # Ownership includes empty conversations, without decoding/recovering
             # the entire history a second time when the workspace already read it.
             if not db.execute('SELECT 1 FROM conversations WHERE id=? AND user_id=?',
@@ -200,7 +225,7 @@ class AssistantStore:
             (o.tool IN ({marks}) OR o.tool='query_run' OR (o.tool='query_publishing' AND
              (json_extract(o.result,'$.publication_tasks') IS NOT NULL OR
               json_extract(o.result,'$.publication_preparations') IS NOT NULL))))'''
-        with self.db() as db:
+        with self.db(write=False) as db:
             values = (identity(user), *writes)
             total = db.execute(f'SELECT count(*) FROM requests r WHERE {where}', values).fetchone()[0]
             records = [dict(r) for r in db.execute(f'''SELECT r.id,r.conversation_id,r.message,r.status,r.owner,r.created
@@ -231,7 +256,7 @@ class AssistantStore:
                        ('completed' if ok else 'failed', json.dumps(result, ensure_ascii=False, default=str), key))
 
     def receipt(self, key: str, user: dict) -> dict:
-        with self.db() as db:
+        with self.db(write=False) as db:
             row = db.execute('SELECT o.* FROM operations o JOIN requests r ON o.request_id=r.id WHERE o.id=? AND r.user_id=?',
                              (key, identity(user))).fetchone()
             if not row:

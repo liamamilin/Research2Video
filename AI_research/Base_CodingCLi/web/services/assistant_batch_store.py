@@ -5,29 +5,44 @@ This ledger coordinates existing executors; it never generates or uploads media.
 from __future__ import annotations
 
 import json
+import threading
 import time
 import uuid
 from collections import Counter
+from pathlib import Path
 
-from web.services.assistant_store import AssistantStore, identity
+from web.services.assistant_store import AssistantStore, _db_identity, identity
+
+_BATCH_INIT_LOCK = threading.Lock()
+_BATCH_INITIALIZED: set[tuple[Path, int, int]] = set()
 
 
 class BatchStore(AssistantStore):
     def __init__(self):
         super().__init__()
-        with self.db() as db:
-            db.executescript('''
-                CREATE TABLE IF NOT EXISTS application_batches (
-                    id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL,
-                    spec TEXT NOT NULL, status TEXT NOT NULL, created REAL NOT NULL, updated REAL NOT NULL);
-                CREATE INDEX IF NOT EXISTS application_batches_user ON application_batches(user_id,created);
-                CREATE TABLE IF NOT EXISTS application_batch_items (
-                    id TEXT PRIMARY KEY, batch_id TEXT NOT NULL, slot INTEGER NOT NULL,
-                    target TEXT NOT NULL, title TEXT NOT NULL, payload TEXT NOT NULL,
-                    stage TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT 'pending',
-                    result TEXT NOT NULL DEFAULT '{}', error TEXT NOT NULL DEFAULT '');
-                CREATE INDEX IF NOT EXISTS application_batch_items_batch ON application_batch_items(batch_id,slot);
-            ''')
+        ident = _db_identity(self.path)
+        if ident is not None and ident in _BATCH_INITIALIZED:
+            return
+        with _BATCH_INIT_LOCK:
+            ident = _db_identity(self.path)
+            if ident is not None and ident in _BATCH_INITIALIZED:
+                return
+            with self.db() as db:
+                db.executescript('''
+                    CREATE TABLE IF NOT EXISTS application_batches (
+                        id TEXT PRIMARY KEY, user_id TEXT NOT NULL, title TEXT NOT NULL,
+                        spec TEXT NOT NULL, status TEXT NOT NULL, created REAL NOT NULL, updated REAL NOT NULL);
+                    CREATE INDEX IF NOT EXISTS application_batches_user ON application_batches(user_id,created);
+                    CREATE TABLE IF NOT EXISTS application_batch_items (
+                        id TEXT PRIMARY KEY, batch_id TEXT NOT NULL, slot INTEGER NOT NULL,
+                        target TEXT NOT NULL, title TEXT NOT NULL, payload TEXT NOT NULL,
+                        stage TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT 'pending',
+                        result TEXT NOT NULL DEFAULT '{}', error TEXT NOT NULL DEFAULT '');
+                    CREATE INDEX IF NOT EXISTS application_batch_items_batch ON application_batch_items(batch_id,slot);
+                ''')
+            ident = _db_identity(self.path)
+            if ident is not None:
+                _BATCH_INITIALIZED.add(ident)
 
     def create(self, user: dict, title: str, spec: dict, items: list[dict]) -> dict:
         key, now = uuid.uuid4().hex, time.time()
@@ -39,18 +54,23 @@ class BatchStore(AssistantStore):
                            (uuid.uuid4().hex, key, slot, item['target'], item['title'], json.dumps(item['payload'], ensure_ascii=False)))
         return self.get(key, user)
 
+    @staticmethod
+    def _assemble(row, item_rows) -> dict:
+        batch = {**dict(row), 'spec': json.loads(row['spec'])}
+        batch['items'] = [{**dict(r), 'payload': json.loads(r['payload']), 'result': json.loads(r['result'])}
+                          for r in item_rows]
+        batch['counts'] = dict(Counter(i['state'] for i in batch['items']))
+        batch['active'] = batch['status'] == 'running' or any(i['state'] == 'active' for i in batch['items'])
+        batch['href'] = '/ask?tasks=1&batch=' + row['id']
+        return batch
+
     def get(self, key: str, user: dict | None = None) -> dict:
-        with self.db() as db:
+        with self.db(write=False) as db:
             row = db.execute('SELECT * FROM application_batches WHERE id=?', (key,)).fetchone()
             if not row or user is not None and row['user_id'] != identity(user):
                 raise ValueError('批次不存在或无权访问')
-            batch = {**dict(row), 'spec': json.loads(row['spec'])}
-            batch['items'] = [{**dict(r), 'payload': json.loads(r['payload']), 'result': json.loads(r['result'])}
-                              for r in db.execute('SELECT * FROM application_batch_items WHERE batch_id=? ORDER BY slot', (key,))]
-        batch['counts'] = dict(Counter(i['state'] for i in batch['items']))
-        batch['active'] = batch['status'] == 'running' or any(i['state'] == 'active' for i in batch['items'])
-        batch['href'] = '/ask?tasks=1&batch=' + key
-        return batch
+            item_rows = db.execute('SELECT * FROM application_batch_items WHERE batch_id=? ORDER BY slot', (key,)).fetchall()
+        return self._assemble(row, item_rows)
 
     def list(self, user: dict | None = None, *, active: bool = False, limit: int = 100) -> list[dict]:
         where, values = [], []
@@ -61,14 +81,26 @@ class BatchStore(AssistantStore):
                 OR (status='waiting' AND json_extract(spec,'$.kind')='publish' AND EXISTS (
                     SELECT 1 FROM application_batch_items i WHERE i.batch_id=application_batches.id
                     AND i.state='blocked' AND json_extract(i.result,'$.upload_id') IS NOT NULL)))""")
-        with self.db() as db:
-            query = 'SELECT id FROM application_batches' + (' WHERE ' + ' AND '.join(where) if where else '') + ' ORDER BY created DESC'
+        with self.db(write=False) as db:
+            query = 'SELECT * FROM application_batches' + (' WHERE ' + ' AND '.join(where) if where else '') + ' ORDER BY created DESC'
             # The UI history is bounded; the worker must not starve older active batches.
             if not active or user is not None:
                 query += ' LIMIT ?'
                 values.append(limit)
-            ids = [r[0] for r in db.execute(query, values)]
-        return [self.get(key, user) for key in ids]
+            rows = db.execute(query, values).fetchall()
+            if not rows:
+                return []
+            ids = [row['id'] for row in rows]
+            items_by_batch: dict[str, list] = {bid: [] for bid in ids}
+            for start in range(0, len(ids), 500):
+                chunk = ids[start:start + 500]
+                marks = ','.join('?' for _ in chunk)
+                for item_row in db.execute(
+                    f'SELECT * FROM application_batch_items WHERE batch_id IN ({marks}) ORDER BY batch_id, slot',
+                    chunk,
+                ):
+                    items_by_batch[item_row['batch_id']].append(item_row)
+        return [self._assemble(row, items_by_batch[row['id']]) for row in rows]
 
     def set_status(self, key: str, status: str) -> None:
         with self.db() as db:
