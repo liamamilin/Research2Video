@@ -196,6 +196,25 @@ def paragraph_groups(pipeline, narration: dict, saved: dict) -> list[dict]:
     return result
 
 
+def _plan_chapter(pipeline, narration: dict, saved: dict, chapter: str,
+                  local: list[dict], original: list[dict],
+                  established_entities: list[str], *, has_assembly: bool) -> list[dict]:
+    from g2.production_plan import hybrid_enabled
+    context = {'title': narration['title'], 'groups': local,
+               'creative_intent': saved.get('creative_intent', {}),
+               'fast_cards': hybrid_enabled(saved),
+               'established_entities': established_entities}
+    if has_assembly:
+        context['chapter_context'] = [{'id': g['id'], 'text': g['text']} for g in original if g['chapter_id'] == chapter]
+    def check(value, ctx):
+        try:
+            validate(value, ctx)
+        except (ValueError, TypeError, KeyError, ValidationError) as exc:
+            raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
+    plan = pipeline.generate_validated_plan(f'{chapter}-explanation', messages, SCHEMA, check, context)
+    return plan['pages']
+
+
 def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | None = None) -> dict:
     input_groups = paragraph_groups(pipeline, narration, saved)
     original = input_groups
@@ -208,21 +227,44 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
     # One request per chapter; ordinary paragraphs still share the chapter's data context.
     for chapter in dict.fromkeys(g['chapter_id'] for g in input_groups):
         local = [g for g in input_groups if g['chapter_id'] == chapter]
-        context = {'title': narration['title'], 'groups': local,
-                   'creative_intent': saved.get('creative_intent', {})}
-        from g2.production_plan import hybrid_enabled
-        context['fast_cards'] = hybrid_enabled(saved)
-        context['established_entities'] = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
-        if assembly:
-            context['chapter_context'] = [{'id': g['id'], 'text': g['text']} for g in original if g['chapter_id'] == chapter]
-        def check(value, ctx):
-            try:
-                validate(value, ctx)
-            except (ValueError, TypeError, KeyError, ValidationError) as exc:
-                raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
-        plan = pipeline.generate_validated_plan(f'{chapter}-explanation', messages, SCHEMA, check, context)
-        pages.extend(plan['pages'])
+        established = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
+        pages.extend(_plan_chapter(pipeline, narration, saved, chapter, local, original,
+                                   established, has_assembly=bool(assembly)))
     return {'pages': pages, 'groups': input_groups, 'direction_version': 4,
+            **({'assembly': assembly} if assembly else {})}
+
+
+def plan_storyboard_pipelined(pipeline, narration: dict, saved: dict, chapter_queue) -> dict:
+    """Plan each chapter as soon as its measured voice segments finish, preserving chapter order and entities."""
+    from g2.scene_assembly import arrange
+    original = paragraph_groups(pipeline, narration, saved)
+    chapters = list(dict.fromkeys(g['chapter_id'] for g in original))
+    pages: list[dict] = []
+    assembled_groups: list[dict] = []
+    assembly_units: list[dict] = []
+    assembly_template: dict | None = None
+    for expected in chapters:
+        chapter_id, payload = chapter_queue.get()
+        if chapter_id == '__ERROR__':
+            raise payload
+        if chapter_id == '__DONE__':
+            raise pipeline.G2Fault('STORYBOARD_PIPELINE_INCOMPLETE', f'配音未输出章节 {expected} 的实测时长')
+        if chapter_id != expected:
+            raise pipeline.G2Fault('STORYBOARD_PIPELINE_ORDER', f'章节顺序不一致：期望 {expected}，收到 {chapter_id}')
+        chapter_original = [g for g in original if g['chapter_id'] == expected]
+        local, local_report = arrange(chapter_original, {'rows': payload}, saved)
+        assembled_groups.extend(local)
+        assembly_units.extend(local_report['units'])
+        assembly_template = local_report
+        established = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
+        pages.extend(_plan_chapter(pipeline, narration, saved, expected, local, original,
+                                   established, has_assembly=True))
+    assembly = ({**assembly_template, 'input_paragraphs': len(original),
+                 'visual_units': len(assembled_groups), 'units': assembly_units}
+                if assembly_template is not None else None)
+    if assembly is not None:
+        pipeline.write_json(pipeline.ARTIFACTS / 'scene-assembly.json', assembly)
+    return {'pages': pages, 'groups': assembled_groups, 'direction_version': 4,
             **({'assembly': assembly} if assembly else {})}
 
 

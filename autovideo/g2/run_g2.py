@@ -648,8 +648,9 @@ def write_fact_ledger(plan: dict, source: str | None = None) -> None:
                "faithfulness_method": "not evaluated; source quotes are model-supplied metadata"})
 
 
-def fit_voiceover_to_duration(initial_plan: dict) -> tuple[dict, dict]:
-    alignment = synthesize_and_align(initial_plan)
+def fit_voiceover_to_duration(initial_plan: dict, *, on_chapter_ready=None) -> tuple[dict, dict]:
+    alignment = (synthesize_and_align(initial_plan, on_chapter_ready=on_chapter_ready)
+                 if on_chapter_ready is not None else synthesize_and_align(initial_plan))
     write_fact_ledger(initial_plan)
     write_json(ARTIFACTS / "final-narration-plan.json", initial_plan)
     return initial_plan, alignment
@@ -660,7 +661,103 @@ def spoken_text(text: str) -> str:
     return text.replace("`", "")
 
 
-def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
+_VOICE_READY_LINE = re.compile(r"^VOICE\s+([a-z][a-z0-9_]{0,47})\s+")
+
+
+def _watch_mlx_chapters(plan: dict, cached_ids: set[str], stop_event: threading.Event, on_chapter_ready) -> None:
+    """Emit measured chapter timings as soon as each chapter's MLX WAVs are flushed to disk."""
+    import numpy as np
+    import soundfile as sf
+
+    segments = plan["segments"]
+    chapters: list[tuple[str | None, list[tuple[int, dict]]]] = []
+    for idx, seg in enumerate(segments):
+        cid = seg.get("chapter_id")
+        if not chapters or chapters[-1][0] != cid:
+            chapters.append((cid, []))
+        chapters[-1][1].append((idx, seg))
+    paragraph_file = ARTIFACTS / "paragraph-starts.json"
+    paragraph_starts = (set(json.loads(paragraph_file.read_text(encoding="utf-8"))["segment_ids"])
+                        if paragraph_file.is_file() else set())
+    log_path = LOGS / "local-mlx-voice.log"
+    ready_ids = set(cached_ids)
+    log_offset = 0
+    cursor = round(SAMPLE_RATE * 0.25)
+    guard = round(SAMPLE_RATE * 0.05)
+    chapter_idx = 0
+
+    def refresh_ready() -> None:
+        nonlocal log_offset
+        if not log_path.is_file():
+            return
+        try:
+            with log_path.open("rb") as stream:
+                stream.seek(log_offset)
+                chunk = stream.read()
+                if not chunk:
+                    return
+                nl = chunk.rfind(b"\n")
+                if nl < 0:
+                    return
+                log_offset += nl + 1
+                for raw_line in chunk[:nl].splitlines():
+                    match = _VOICE_READY_LINE.match(raw_line.decode("utf-8", errors="replace").strip())
+                    if match:
+                        ready_ids.add(match.group(1))
+        except OSError:
+            return
+
+    def try_emit() -> bool:
+        nonlocal cursor, chapter_idx
+        while chapter_idx < len(chapters):
+            cid, entries = chapters[chapter_idx]
+            if not all(seg["id"] in ready_ids and (SEGMENTS_DIR / f"{seg['id']}.wav").is_file() for _, seg in entries):
+                return True
+            chapter_rows = []
+            local_cursor = cursor
+            for idx, seg in entries:
+                try:
+                    samples, sample_rate = sf.read(SEGMENTS_DIR / f"{seg['id']}.wav", dtype="float32")
+                    samples = pauses.trim(samples, sample_rate)
+                except (OSError, ValueError):
+                    # Transient read/flush error on external storage: retry on next poll without corrupting cursor.
+                    return True
+                samples = np.asarray(samples, dtype=np.float32)
+                if sample_rate != SAMPLE_RATE or samples.size == 0:
+                    return False
+                active = np.flatnonzero(np.abs(samples) > 0.003)
+                if active.size == 0:
+                    return False
+                start_sample = local_cursor + max(0, int(active[0]) - guard)
+                end_sample = local_cursor + min(len(samples), int(active[-1]) + guard)
+                chapter_rows.append({
+                    "id": seg["id"], "text": seg["text"],
+                    "start_ms": (start_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                    "end_ms": (end_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                })
+                local_cursor += len(samples)
+                if idx < len(segments) - 1:
+                    next_segment = segments[idx + 1]
+                    chapter_boundary = seg.get("chapter_id") != next_segment.get("chapter_id")
+                    boundary = "chapter" if chapter_boundary else "paragraph" if next_segment["id"] in paragraph_starts else "sentence"
+                    gap_ms = pauses.gap_ms(spoken_text(seg["text"]), spoken_text(next_segment["text"]), boundary)
+                    local_cursor += round(SAMPLE_RATE * gap_ms / 1000)
+            cursor = local_cursor
+            on_chapter_ready(cid, chapter_rows)
+            chapter_idx += 1
+        return False
+
+    while True:
+        refresh_ready()
+        if not try_emit():
+            return
+        if stop_event.wait(0.5):
+            refresh_ready()
+            try_emit()
+            return
+
+
+def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict, *, on_chapter_ready=None) -> dict:
     full = {**plan, "voice_settings": settings,
             "segments": [{**s, "text": spoken_text(s["text"])} for s in plan["segments"]]}
     plan_path = ARTIFACTS / "voice-input.json"
@@ -678,12 +775,26 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     fingerprint_seconds = round(time.monotonic() - fingerprint_started, 3)
     missing = [s for s in full["segments"] if s["id"] not in cached]
     fresh = {}
+    watcher_stop = threading.Event()
+    watcher = None
+    if on_chapter_ready is not None:
+        if missing:
+            watcher = threading.Thread(target=_watch_mlx_chapters,
+                                       args=(plan, set(cached), watcher_stop, on_chapter_ready),
+                                       name="voice-chapter-watch", daemon=True)
+            watcher.start()
+        else:
+            watcher_stop.set()
+            _watch_mlx_chapters(plan, set(cached), watcher_stop, on_chapter_ready)
     if missing:
         work_path = ARTIFACTS / "voice-work-input.json"
         write_json(work_path, {**full, "segments": missing})
         try:
             _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
         finally:
+            if watcher is not None:
+                watcher_stop.set()
+                watcher.join(timeout=30)
             # The child checkpoints each finished segment, even if a later one
             # fails or times out. Preserve complete chapters before propagating
             # the original failure; incomplete continuation chains are redone.
@@ -708,7 +819,7 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     return {"enabled": False, "segment_hits": 0, "segment_misses": len(missing), "error": cache_error}
 
 
-def synthesize_and_align(plan: dict) -> dict:
+def synthesize_and_align(plan: dict, *, on_chapter_ready=None) -> dict:
     import numpy as np
     import soundfile as sf
 
@@ -718,6 +829,17 @@ def synthesize_and_align(plan: dict) -> dict:
     ASSETS.mkdir(parents=True, exist_ok=True)
     SEGMENTS_DIR.mkdir(parents=True, exist_ok=True)
     start_time = time.monotonic()
+    emitted_chapters: set[str | None] = set()
+    emit_lock = threading.Lock()
+
+    def _emit_chapter(cid, chapter_rows) -> None:
+        with emit_lock:
+            if cid in emitted_chapters:
+                return
+            emitted_chapters.add(cid)
+        on_chapter_ready(cid, chapter_rows)
+
+    emit_chapter = _emit_chapter if on_chapter_ready is not None else None
     mlx = mlx_engine(VOICE, PROJECT)  # None for Kokoro, which runs in this process
     use_qwen = mlx is not None  # the voice comes as one wav per segment from a fixed local MLX entry point
     cache_metrics = None
@@ -726,7 +848,7 @@ def synthesize_and_align(plan: dict) -> dict:
                           "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", VOXCPM_DEFAULT_CHAIN),
                           "compile": os.environ.get("AUTOVIDEO_G2_VOXCPM_COMPILE", "1") != "0",
                           "reference_cache": os.environ.get("AUTOVIDEO_G2_VOXCPM_REFERENCE_CACHE", "1") != "0"} if VOICE.startswith("voxcpm_") else {}
-        cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings)
+        cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings, on_chapter_ready=emit_chapter)
     else:
         from kokoro_onnx import Kokoro
         from misaki import zh
@@ -740,6 +862,7 @@ def synthesize_and_align(plan: dict) -> dict:
     chunks = [np.zeros(round(SAMPLE_RATE * 0.25), dtype=np.float32)]
     cursor = len(chunks[0])
     rows = []
+    chapter_rows_buf = []
     pause_ms = 360
     paragraph_file = ARTIFACTS / "paragraph-starts.json"
     paragraph_starts = set(json.loads(paragraph_file.read_text(encoding="utf-8"))["segment_ids"]) if paragraph_file.is_file() else set()
@@ -762,14 +885,23 @@ def synthesize_and_align(plan: dict) -> dict:
         segment_path = SEGMENTS_DIR / f"{segment['id']}.wav"
         sf.write(segment_path, samples, SAMPLE_RATE, subtype="PCM_16")
         guard = round(SAMPLE_RATE * 0.05)
+        start_sample = cursor + max(0, int(active[0]) - guard)
+        end_sample = cursor + min(len(samples), int(active[-1]) + guard)
         rows.append({"id": segment["id"], "text": segment["text"],
-                     "start_sample": cursor + max(0, int(active[0]) - guard),
-                     "end_sample": cursor + min(len(samples), int(active[-1]) + guard),
+                     "start_sample": start_sample,
+                     "end_sample": end_sample,
                      "utterance_start_sample": cursor, "utterance_end_sample": cursor + len(samples),
                      "speech_first_sample": int(active[0]), "speech_last_sample": int(active[-1]),
                      "sample_rate": SAMPLE_RATE, "voice": VOICE, "wav": str(segment_path.relative_to(PROJECT))})
+        if not use_qwen and emit_chapter is not None:
+            chapter_rows_buf.append({
+                "id": segment["id"], "text": segment["text"],
+                "start_ms": (start_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                "end_ms": (end_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+            })
         chunks.append(samples)
         cursor += len(samples)
+        chapter_boundary = False
         if index < len(plan["segments"]) - 1:
             next_segment = plan["segments"][index + 1]
             chapter_boundary = segment.get("chapter_id") != next_segment.get("chapter_id")
@@ -782,6 +914,9 @@ def synthesize_and_align(plan: dict) -> dict:
             silence = np.zeros(round(SAMPLE_RATE * gap_ms / 1000), dtype=np.float32)
             chunks.append(silence)
             cursor += len(silence)
+        if not use_qwen and emit_chapter is not None and (chapter_boundary or index == len(plan["segments"]) - 1):
+            emit_chapter(segment.get("chapter_id"), chapter_rows_buf)
+            chapter_rows_buf = []
     audio = np.concatenate(chunks)
     total_frames = math.ceil(len(audio) / (SAMPLE_RATE // FPS))
     audio = np.pad(audio, (0, total_frames * (SAMPLE_RATE // FPS) - len(audio)))
@@ -793,6 +928,21 @@ def synthesize_and_align(plan: dict) -> dict:
     for row in rows:
         row["start_ms"] = (row.pop("start_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
         row["end_ms"] = (row.pop("end_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
+    if emit_chapter is not None:
+        rows_by_id = {row["id"]: row for row in rows}
+        ordered_chapters: list[tuple[str | None, list[dict]]] = []
+        for seg in plan["segments"]:
+            cid = seg.get("chapter_id")
+            if not ordered_chapters or ordered_chapters[-1][0] != cid:
+                ordered_chapters.append((cid, []))
+            row = rows_by_id[seg["id"]]
+            ordered_chapters[-1][1].append({
+                "id": row["id"], "text": row["text"],
+                "start_ms": row["start_ms"], "end_ms": row["end_ms"],
+            })
+        for cid, chapter_rows in ordered_chapters:
+            if cid not in emitted_chapters:
+                emit_chapter(cid, chapter_rows)
     alignment = {"provider": mlx["provider"] if use_qwen else "local_kokoro_onnx", "model": mlx["model"] if use_qwen else "Kokoro-82M-v1.0", "voice": VOICE,
                  "method": "separate real utterances with measured PCM activity bounds", "granularity": "phrase",
                  "sample_rate": SAMPLE_RATE, "duration_seconds": duration_seconds, "duration_ms": duration_ms,
@@ -1215,13 +1365,18 @@ def run_step(label: str, fn, *args):
     return result
 
 
-def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False) -> tuple[dict, dict, dict]:
-    """Overlap ordinary planning, or await measured speech for visual assembly.
+def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False,
+                        pipelined_planner=None) -> tuple[dict, dict, dict]:
+    """Overlap ordinary planning, or pipeline measured speech chapter-by-chapter into visual assembly.
 
     Only one thread calls the LLM. Parallel tasks finish before compilation or error
     propagation, preserving their artifacts without leaving background work running.
     """
-    parallel = CONTENT_MODE and not measured_storyboard and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
+    import queue
+
+    allow_parallel = CONTENT_MODE and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
+    pipelined = allow_parallel and pipelined_planner is not None
+    parallel = allow_parallel and not measured_storyboard and not pipelined
     started = time.monotonic()
     timings = {}
 
@@ -1239,6 +1394,35 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
                               "duration_seconds": round(end - begin, 3), "status": status}
 
     try:
+        if pipelined:
+            chapter_queue: queue.Queue = queue.Queue()
+
+            def run_voice_stream(plan_arg: dict):
+                try:
+                    result = fit_voiceover_to_duration(
+                        plan_arg,
+                        on_chapter_ready=lambda cid, rows: chapter_queue.put((cid, rows)),
+                    )
+                except Exception as exc:
+                    chapter_queue.put(("__ERROR__", exc))
+                    raise
+                chapter_queue.put(("__DONE__", None))
+                return result
+
+            results, error = {}, None
+            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="video-planning") as executor:
+                tasks = {executor.submit(step, "tts-and-align", run_voice_stream, narration): "voice",
+                         executor.submit(step, "storyboard-plan", pipelined_planner, narration, chapter_queue): "storyboard"}
+                for future in as_completed(tasks):
+                    try:
+                        results[tasks[future]] = future.result()
+                    except Exception as exc:
+                        if error is None:
+                            error = exc
+            if error is not None:
+                raise error
+            narration, alignment = results["voice"]
+            return narration, alignment, results["storyboard"]
         if parallel:
             results, error = {}, None
             with ThreadPoolExecutor(max_workers=2, thread_name_prefix="video-planning") as executor:
@@ -1266,7 +1450,8 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
             overlap = max(0, min(voice["end_seconds"], board["end_seconds"])
                           - max(voice["start_seconds"], board["start_seconds"]))
         write_json(ARTIFACTS / "generation-schedule.json", {
-            "mode": "parallel" if parallel else "sequential", "content_mode": CONTENT_MODE,
+            "mode": "pipelined" if pipelined else ("parallel" if parallel else "sequential"),
+            "content_mode": CONTENT_MODE,
             "measured_storyboard": measured_storyboard,
             "wall_seconds": round(wall, 3), "overlap_seconds": round(overlap, 3), "steps": timings})
 
@@ -1369,7 +1554,9 @@ def run_all() -> dict:
     if explanation.enabled(saved_visuals, form):
         narration, alignment, plan = run_planning_stages(narration,
             lambda final, measured: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals, measured),
-            measured_storyboard=True)
+            measured_storyboard=True,
+            pipelined_planner=lambda final, chapter_queue: explanation.plan_storyboard_pipelined(
+                sys.modules[__name__], final, saved_visuals, chapter_queue))
         assets = []
         if saved_visuals.get("image_materials"):
             from g2.creative_forms import prepare_images
