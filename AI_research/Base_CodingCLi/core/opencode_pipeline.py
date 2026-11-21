@@ -580,11 +580,16 @@ def soft_filter(candidates: list[TopicCandidate], *, job: dict, reported_events:
 # Stage 3: Per-Topic Deep Gather (concurrent + cached)
 # ---------------------------------------------------------------------------
 
-def _topic_hash(job_key: str, run_date: str, topic: TopicCandidate) -> str:
-    seed = json.dumps(
-        {"job": job_key, "date": run_date, "title": topic.title, "urls": sorted(topic.seed_urls)},
-        ensure_ascii=False, sort_keys=True,
-    )
+def _topic_hash(job_key: str, run_date: str, topic: TopicCandidate, *, extra: str = "") -> str:
+    payload: dict[str, Any] = {
+        "job": job_key,
+        "date": run_date,
+        "title": topic.title,
+        "urls": sorted(topic.seed_urls),
+    }
+    if extra:
+        payload["extra"] = hashlib.sha256(extra.encode("utf-8")).hexdigest()[:16]
+    seed = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     return hashlib.sha256(seed.encode("utf-8")).hexdigest()[:16]
 
 
@@ -668,7 +673,9 @@ def gather_single_topic(job: dict, topic: TopicCandidate, *, config: dict, cache
                         today: str, workspace_dir: str = "", cancel_token=None) -> dict:
     _check_cancel(cancel_token)
     job_key = str(job.get("_file") or job.get("name") or "job")
-    thash = _topic_hash(job_key, today, topic)
+    theme_meta = job.get("theme_topic") if isinstance(job.get("theme_topic"), dict) else {}
+    extra_seed = "\n".join(str(x) for x in (theme_meta.get("angle") or "", theme_meta.get("notes") or "") if x)
+    thash = _topic_hash(job_key, today, topic, extra=extra_seed)
     cache_path = cache_dir / f"{thash}.json"
     ws_path = Path(workspace_dir) if workspace_dir else cache_dir.parents[2]
     if cache_path.is_file():
@@ -812,7 +819,7 @@ def _demote_dossier_headings(markdown: str) -> tuple[str, list[tuple[str, str]]]
     return safe_body, source_entries
 
 
-def assemble_report(job: dict, dossiers: list[dict], *, channel: str = "") -> tuple[str, str]:
+def assemble_report(job: dict, dossiers: list[dict], *, channel: str = "", strategy: str = MODE_NAME) -> tuple[str, str]:
     """Render downstream-compatible Markdown report and raw material snapshot block."""
     flat = lambda v: " ".join(str(v or "").splitlines()).replace("**", "").strip()
     name = str(job.get("name") or job.get("_file") or "本期研究报告").strip()
@@ -834,7 +841,7 @@ def assemble_report(job: dict, dossiers: list[dict], *, channel: str = "") -> tu
         fields: list[tuple[str, str]] = [("一句话", promise)]
         if audience:
             fields.append(("目标受众", audience))
-        fields.append(("选题策略", MODE_NAME))
+        fields.append(("选题策略", strategy))
         if channel:
             fields.append(("选题入口", channel))
         if urls:
@@ -997,11 +1004,11 @@ def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, st
     notes = str(meta.get("notes") or "").strip()
     domain = str(meta.get("domain") or job.get("domain") or "").strip()
 
-    source_index = build_source_index(source_block, max_items=12)
+    # Only keep URLs explicitly belonging to this theme (discovery signals or user notes).
+    # Broad column subscription feeds must never leak unrelated news into single-topic research.
     seed_urls = _valid_urls(
         list(meta.get("seed_urls") or [])
         + list(extract_urls(notes))
-        + [item["url"] for item in source_index if item.get("url")]
     )[:12]
 
     questions = [str(q).strip() for q in (meta.get("research_questions") or []) if str(q).strip()][:5]
@@ -1030,13 +1037,6 @@ def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, st
         extra_reqs.append(str(job["prompt"]).strip()[:4000])
     if notes:
         extra_reqs.append("用户补充材料与限定背景（务必纳入正文并与查证结果结合）：\n" + notes[:6000])
-    if source_index:
-        preview_lines = [
-            f"- [{item['title']}]({item['url']}): {item['excerpt'][:200]}"
-            for item in source_index[:8] if item.get("url")
-        ]
-        if preview_lines:
-            extra_reqs.append("已预抓取的声明源参考：\n" + "\n".join(preview_lines))
 
     single_job = {
         **job,
@@ -1053,7 +1053,7 @@ def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, st
     )
     if progress:
         progress({"type": "phase", "phase": "assembling_report", "topics": 1})
-    report_md, raw_material = assemble_report(single_job, [dossier], channel=str(job.get("audience_channel") or "").strip())
+    report_md, raw_material = assemble_report(single_job, [dossier], channel=str(job.get("audience_channel") or "").strip(), strategy=SINGLE_MODE_NAME)
     all_urls = _valid_urls(list(seed_urls) + list(dossier.get("urls") or []))
     opencode_usage: dict[str, Any] = {"opencode_calls": 0 if dossier.get("cached") else 1}
     if not dossier.get("cached"):
@@ -1063,7 +1063,7 @@ def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, st
     receipt = {
         "mode": SINGLE_MODE_NAME,
         "version": VERSION,
-        "source_index_count": len(source_index),
+        "source_index_count": 0,
         "topic_count": 1,
         "cached": bool(dossier.get("cached")),
         "seconds": dossier.get("seconds"),

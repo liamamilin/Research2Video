@@ -635,7 +635,7 @@ def test_exhaustion_archives_only_new_draft_and_automatically_reselects(guard_en
     run = ap.create_run({}, [{"column_key": "flash", "topic": topic}])
     item_id = run["items"][0]["id"]
     ap.update_item(item_id, script_id=row["id"], state="WORKING")
-    assert workflow.run(row["id"]) == "FAILED"
+    assert workflow.run(row["id"]) == "SKIPPED"
     assert store.get_script(row["id"])["archived"]
     assert not FakeLLM.calls  # no duplicated body was written
     auto.advance(ap.get_run(run["id"])["items"][0], can_start_script=True, can_start_render=False)
@@ -699,7 +699,7 @@ def test_manual_api_entries_share_matrix_memory_before_writing(client, guard_env
     assert response.status_code == 202, response.text
     row = store.get_script(response.json()["id"])
     assert row["topic"]["matrix_dedup"] == {"job": "science/daily", "policy": pool.POLICY}
-    assert workflow.run(row["id"], started_by="editor") == "FAILED"
+    assert workflow.run(row["id"], started_by="editor") == "SKIPPED"
     row = store.get_script(row["id"])
     assert row["current_version"] == 0 and row["archived"]
     assert old["id"] in row["topic"]["content_archive"]["duplicate_of"]
@@ -770,7 +770,7 @@ def test_generated_research_report_keeps_original_matrix_for_new_manual_drafts(g
     topic = {"title": "再讲一次小蛇", "from_report": old["report_path"], entry: old["id"] if entry == "parent_script" else old["report_id"]}
     row = workflow.start("flash", topic, started_by="editor")
     assert row["topic"]["matrix_dedup"]["job"] == "science/daily"
-    assert workflow.run(row["id"]) == "FAILED"
+    assert workflow.run(row["id"]) == "SKIPPED"
     assert pool.selection(row["id"])["decisions"][0]["peer_id"] == old["id"]
 
 

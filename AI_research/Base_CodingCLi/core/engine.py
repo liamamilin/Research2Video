@@ -232,9 +232,13 @@ class ResearchEngine:
 
                 self._opencode_gather_receipt = {}
                 self._source_fallback_error = ""
-                if use_any_opencode_pipeline:
-                    # OpenCode pipeline (4-stage or single-topic): fetch lightweight source index first,
-                    # skip full-page teaser expansion (per-topic gather reads deep pages directly).
+                if use_single_topic_pipeline:
+                    # Single-topic theme research must stay strictly focused on the chosen theme;
+                    # do not pre-fetch broad column RSS/leaderboard feeds that pollute seed URLs or report_material.
+                    source_block, fetched = "", None
+                elif use_topic_pipeline:
+                    # Four-stage OpenCode pipeline: fetch lightweight source index first,
+                    # skip full-page teaser expansion (Stage 3 reads deep pages per selected topic).
                     try:
                         source_block, fetched = _load_sources(skip_teaser_details=True)
                     except CancelledError:

@@ -149,6 +149,17 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
     return spec
 
 
+def _is_theme_report(topic: dict, report_path: str = "", report_info: dict | None = None) -> bool:
+    """True when this script originates from a single-topic theme research report."""
+    if topic.get("theme_research"):
+        return True
+    path = str(report_path or topic.get("from_report") or "")
+    if "theme_research" in os.path.basename(path):
+        return True
+    info = report_info if report_info is not None else (report_meta.get(path) or {} if path else {})
+    return (info.get("opencode_pipeline") or {}).get("mode") == "opencode_single_topic"
+
+
 def start(column_key: str, topic: dict, started_by: str) -> dict:
     """Create a script for ``topic`` and start researching it in the background."""
     settings = get_settings()
@@ -169,7 +180,7 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     topic = episodes.publication_topic(topic, context)
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
-    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
+    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic) and not _is_theme_report(topic):
         topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
     try:  # the A/B module's one write point (spec/ab-testing.md §5); any failure leaves the script as today (A)
         from core.experiments import hook as experiments_hook
@@ -385,9 +396,12 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     legacy_comparison = (not audience_channel and script.get("production") == "chatgpt_t05_comparison"
                          and bool(topic.get("from_item")))
     scoped_material = audience_material or legacy_comparison
-    joint_input = planned is not None or scoped_material or is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    is_theme_single = _is_theme_report(topic, report_path, report_info)
+    is_opencode_report = bool((report_info.get("opencode_pipeline") or {}).get("mode"))
+    joint_input = (planned is not None or scoped_material or is_episode
+                   or research_dossier.enabled(script) or is_theme_single or is_opencode_report)
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
-    guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
+    guarded = not is_episode and not is_theme_single and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material, comparison_material = {}, "", ""
     if guarded:
@@ -507,9 +521,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             material = comparison_material
         elif guarded:
             material = filtered_material
-        elif topic.get("_material_reselection"):
-            # An existing raw-material story is bound to the packets already
-            # loaded by report_of, including when publication protects it.
+        elif topic.get("_material_reselection") or is_theme_single:
+            # Theme research reports are self-contained single-topic dossiers; skip raw
+            # material snapshots that might still carry legacy column subscription feeds.
             material = ""
         else:
             material = report_material.read(material_ref, full_path, _read_report(report_path)) if material_ref else ""
@@ -537,6 +551,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         material, material_fit = fit_material(active_report, material)
         writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
                          if audience_channel else topic)
+        if is_theme_single:
+            writing_topic = {k: v for k, v in writing_topic.items() if k not in ("story", "matrix_dedup")}
         if legacy_comparison:
             # Old event claims remain available for deduplication. The selected
             # comparison owns the writer's title and evidence, including on redo.
@@ -594,7 +610,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
-        if topic.get("story"):
+        if topic.get("story") and not is_theme_single:
             written.meta["story"] = topic["story"]
     except content_guard.DuplicateContent as exc:
         return _duplicate_script(script_id, exc, failed_status)
@@ -614,7 +630,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         edit_type="GENERATED",
         meta={**meta, "checks": adapt_review.unrequested()},
         created_by=started_by,
-        story_claim=(topic.get("story") or {}).get("event_key", ""),
+        story_claim="" if is_theme_single else (topic.get("story") or {}).get("event_key", ""),
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"

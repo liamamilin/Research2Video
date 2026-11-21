@@ -67,7 +67,9 @@ def policy_topic(topic: dict, job: str) -> dict:
 def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dict:
     """New matrix videos share selection across entry points; rewrites keep their event."""
     if (topic.get("matrix_dedup") or topic.get("knowledge_job") or topic.get("article") or topic.get("local_video")
-            or topic.get("test_sample")):
+            or topic.get("user_materials") or topic.get("theme_research") or topic.get("test_sample")):
+        return topic
+    if "theme_research" in Path(str(topic.get("from_report") or "")).name:
         return topic
     candidates = [context.get("job", "")]
     with store.connect() as conn:

@@ -322,7 +322,7 @@ def test_fully_covered_report_is_archived_before_calling_any_writer(guard_env, m
     script(guard_env, "science/daily")
     current = script(guard_env, "science/weekly", ready=False)
     monkeypatch.setattr(video_workflow.writer, "write", lambda **kw: pytest.fail("duplicate must not spend an LLM call"))
-    assert video_workflow.run(current["id"], started_by="autopilot") == "FAILED"
+    assert video_workflow.run(current["id"], started_by="autopilot") == "SKIPPED"
     assert store.get_script(current["id"])["archived"]
     assert "均已讲过" in store.get_script(current["id"])["error"]
 
