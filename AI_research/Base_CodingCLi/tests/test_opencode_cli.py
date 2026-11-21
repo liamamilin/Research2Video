@@ -282,3 +282,118 @@ def test_question_material_focused_scope_filters_multi_item_with_opencode():
     assert qm.in_scope({**flash_job, "question_material_force": True}, focused, opencode_gathered=True)
     assert qm.in_scope(knowledge_job, focused, opencode_gathered=True)
     assert qm.in_scope(single_job, focused, opencode_gathered=True)
+
+
+def test_parse_usage_aggregates_opencode_jsonl_tokens():
+    stdout = "\n".join([
+        '{"type":"step_finish","part":{"tokens":{"input":100,"output":40,"reasoning":10,"cache":{"read":20}},"cost":0.001}}',
+        '{"type":"step_finish","part":{"tokens":{"input":50,"output":25},"cost":0.0005}}',
+    ])
+    usage = opencode_cli.parse_usage(stdout)
+    assert usage["prompt_tokens"] == 150
+    assert usage["completion_tokens"] == 65
+    assert usage["reasoning_tokens"] == 10
+    assert usage["cache_read_tokens"] == 20
+    assert usage["total_tokens"] == 245
+    assert usage["opencode_steps"] == 2
+    assert usage["cost_usd"] == 0.0015
+
+
+def test_opencode_pipeline_enabled_exemptions_and_soft_filter():
+    from core import opencode_pipeline as pipe
+
+    cfg = {"enabled": True, "pipeline_mode": "opencode_topic_v1"}
+    assert pipe.enabled({"name": "flash"}, cfg)
+    assert not pipe.enabled({"name": "legacy", "research_mode": "legacy"}, cfg)
+    assert not pipe.enabled({"name": "synth", "prompt": "汇总 {upstream_reports}"}, cfg)
+    assert not pipe.enabled({"name": "know", "knowledge": True}, cfg)
+    assert pipe.enabled({"name": "know_opt", "knowledge": True, "research_mode": "opencode_topic_v1"}, cfg)
+
+    candidates = [
+        pipe.TopicCandidate(title=f"独立选题 {i}", seed_urls=[f"https://example.com/{i}"], research_questions=["q"])
+        for i in range(6)
+    ] + [
+        pipe.TopicCandidate(title="小更新 A", seed_urls=["https://example.com/a"], cluster_key="prod"),
+        pipe.TopicCandidate(title="小更新 B", seed_urls=["https://example.com/b"], cluster_key="prod"),
+        pipe.TopicCandidate(title="无链接传闻", seed_urls=[]),
+    ]
+    selected, receipt = pipe.soft_filter(candidates, job={"name": "t"}, use_llm=False)
+    assert len(selected) == 7
+    assert len(receipt["merged"]) == 1
+    assert len(receipt["dropped"]) == 1 and receipt["dropped"][0]["reason"] == "missing_seed_urls"
+
+
+def test_opencode_pipeline_gather_topics_cancels_queued(tmp_path, monkeypatch):
+    import threading
+    from core import opencode_pipeline as pipe
+    from core.errors import CancelledError
+
+    cancel = threading.Event()
+    started = []
+
+    def fake_run(prompt, **kwargs):
+        started.append(prompt[:20])
+        cancel.set()
+        raise CancelledError("cancelled")
+
+    monkeypatch.setattr(opencode_cli, "run", fake_run)
+    topics = [
+        pipe.TopicCandidate(title=f"题 {i}", seed_urls=[f"https://example.com/{i}"])
+        for i in range(5)
+    ]
+    with pytest.raises(CancelledError):
+        pipe.gather_topics(
+            {"_file": "x/y", "name": "t"}, topics,
+            config={"max_concurrency": 1, "per_topic_timeout_seconds": 30},
+            workspace_dir=str(tmp_path), today="2026-11-21", cancel_token=cancel,
+        )
+    assert len(started) == 1
+
+
+def test_opencode_pipeline_end_to_end_usage_and_cache(tmp_path, monkeypatch):
+    import json
+    from core import opencode_pipeline as pipe
+
+    calls = {"n": 0}
+    disc_json = json.dumps({"candidates": [{
+        "title": "新模型发布",
+        "why_now": "今日更新",
+        "audience": "开发者",
+        "promise": "讲清变化",
+        "seed_urls": ["https://example.com/news"],
+        "research_questions": ["价格多少？"],
+    }]}, ensure_ascii=False)
+    dossier_md = (
+        "## 核心结论与背景\n定价 2 美元（https://example.com/news）。\n\n"
+        "## 关键证据与展开\n#### 价格\n输入 2 美元（https://example.com/pricing）。\n\n"
+        "## 材料条目\n### [官方定价](https://example.com/pricing)\n- 官方页。\n\n"
+        "## 口径与信息缺口\n- 一手已确认。\n"
+    )
+
+    def fake_run(_prompt, **_kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return disc_json, {"model": "mock", "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}}
+        return dossier_md, {"model": "mock", "usage": {"prompt_tokens": 200, "completion_tokens": 80, "total_tokens": 280}}
+
+    monkeypatch.setattr(opencode_cli, "gather_settings", lambda _d=None: {
+        "enabled": True, "soft_filter_llm": False, "max_concurrency": 2,
+        "discovery_timeout_seconds": 60, "per_topic_timeout_seconds": 60,
+    })
+    monkeypatch.setattr(opencode_cli, "available", lambda _c=None: True)
+    monkeypatch.setattr(opencode_cli, "run", fake_run)
+
+    engine = SimpleNamespace(
+        config_dir=str(tmp_path), workspace_dir=str(tmp_path), sys={"ai": {}},
+        _cancel=None, _progress=lambda _e: None, _reported_events=lambda: "",
+        _now=lambda: SimpleNamespace(strftime=lambda _f: "2026-11-21"),
+    )
+    job = {"_file": "monitoring/ai_flash_discovery", "name": "AI Flash", "audience_channel": "flash",
+           "research_mode": "opencode_topic_v1"}
+    report_md, raw_mat, receipt = pipe.run(engine, job, "### [News](https://example.com/news)\nBody")
+    assert receipt["topic_count"] == 1
+    assert receipt["usage"]["opencode_calls"] == 2
+    assert receipt["usage"]["total_tokens"] == 430
+    assert "### 1.1 新模型发布" in report_md and "### 来源清单" in report_md
+    assert "https://example.com/pricing" in receipt["urls"]
+    assert raw_mat.strip()

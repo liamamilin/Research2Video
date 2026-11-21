@@ -44,3 +44,25 @@ def test_the_default_limit_is_the_research_window():
     kept, fit = fit_material("", big)
     assert kept == "" and fit["cited"] == 0
     assert video_workflow.fit_material("", "small") == ("small", {})
+
+
+def test_fit_material_deduplicates_blocks_already_in_report():
+    body = "这是一段已经在研究底稿里完整出现过的深挖正文内容，包含具体的日期、人物、版本和出处细节，用来验证同源材料不会被重复喂两遍。" * 3
+    report = f"# 单题报告\n\n{body}\n\n来源：https://example.com/a1"
+    material = f"### [1] https://example.com/a1\n{body}"
+    kept, fit = fit_material(report, material, limit=50_000)
+    assert kept == ""
+    assert fit["dedup_dropped"] == 1
+
+
+def test_fit_report_slices_oversized_report_by_topic_or_section():
+    part1 = "## 选题一：云梦秦简\n" + ("考古细节。" * 300)
+    part2 = "## 选题二：邦联运输船\n" + ("历史细节。" * 300)
+    big_report = part1 + "\n\n" + part2
+    kept, fit = video_workflow.fit_report(big_report, {"title": "选题二：邦联运输船"}, limit=2_000)
+    assert "邦联运输船" in kept and len(kept) <= 2_000
+    assert fit["mode"] == "item_excerpt"
+
+    kept_cap, fit_cap = video_workflow.fit_report(big_report, {}, limit=2_000)
+    assert len(kept_cap) <= 2_050
+    assert fit_cap["mode"] == "section_cap"

@@ -200,3 +200,37 @@ def test_revision_allows_optional_identity_but_keeps_an_opening_when_identity_re
     else:
         assert "retained_opening" not in receipt
     assert [change["id"] for change in receipt["changes"]] == (["S2P1"] if retained else ["S1P1", "S2P1"])
+
+
+def test_revise_passage_rejects_invented_numbers_and_records_usage(monkeypatch):
+    draft = _draft("原稿提到 17 个人。")
+
+    class _FakeClient:
+        usage = {"requests": 2, "prompt_tokens": 300, "completion_tokens": 120, "total_tokens": 420}
+
+    monkeypatch.setattr(workflow, "LLMClient", lambda *args, **kwargs: _FakeClient())
+
+    def chat(client, prompt, request, schema, *, temperature):
+        if prompt == workflow.FOCUSED_READ:
+            return schema(takeaway="主线", keep_quote="原稿提到 17 个人", revision="补充细节", targets=["S1P1"])
+        return schema(paragraphs=[{"id": "S1P1", "text": "原稿提到 99 个人。"}])
+
+    monkeypatch.setattr(workflow, "call_json", chat)
+    result = workflow.revise_passage(
+        draft, report="底稿只写了 17 个人。", topic={}, llm_config=None,
+        column=SimpleNamespace(script_style="风格", target_minutes=3, voice_id=None),
+    )
+    assert result.sections[0]["paragraphs"][0]["text"] == "原稿提到 17 个人。"
+    receipt = result.meta["manuscript_workflow"]
+    assert receipt["result"] == "draft"
+    assert receipt["rejected"][0]["numbers"] == ["99"]
+    assert receipt["usage"]["total_tokens"] == 420
+
+
+def test_manuscript_yaml_enables_all_job_prompts():
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    enabled = set(workflow.enabled_jobs(str(config_dir), {}))
+    assert "history/history_daily" in enabled
+    assert "science/science_illustrated" in enabled
+    assert "economy/economy_illustrated" in enabled
+    assert set(workflow.JOB_PROMPTS).issubset(enabled)

@@ -173,3 +173,16 @@ def test_replacement_does_not_repeat_the_preceding_paragraph(llm):
         prior, "公开信强调了对手的行动。",
     ]
     assert record["changes"][0]["after"] == "公开信强调了对手的行动。"
+
+
+def test_english_long_phrase_is_flagged_for_chinese_tts_polish():
+    sections = _sections(
+        ["作者原话说 Claude far outpaced me near the finish line，引发了很多讨论。"],
+        ["设置里可以看到 Include your audio recordings 这个开关。"],
+        ["这里只提了 Claude Code 和 GitHub Action，正常放行。"],
+    )
+    found = polish.findings(sections, greeting=GREETING)
+    assert [(f["id"], f["rule"]) for f in found] == [
+        ("S2P1", "english_phrase"),
+        ("S3P1", "english_phrase"),
+    ]

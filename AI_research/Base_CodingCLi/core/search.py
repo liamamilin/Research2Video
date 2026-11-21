@@ -148,6 +148,8 @@ class SearchClient:
         self.errors: dict[str, str] = {}
         #: Cached Exa Contents quota/rate failure so later page reads skip the paid reader.
         self.contents_exhausted: str = ""
+        #: In-memory cooldown fallback when shared search_health state_dir is unset (e.g. CLI runs).
+        self._local_cooling: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
     # Public API
@@ -184,8 +186,10 @@ class SearchClient:
         from core import search_health
 
         # Credits, keys and rate limits do not recover within one run: skip a provider that just failed that way
-        # (shared with the other processes) instead of spending another doomed request on it.
-        cooling = search_health.cooling()
+        # (shared with the other processes, plus in-memory fallback for standalone CLI runs).
+        now = time.time()
+        cooling = {k: v for k, v in self._local_cooling.items() if v.get("until", 0) > now}
+        cooling.update(search_health.cooling(now=now))
         answered = False
         for provider in providers:
             if provider in cooling:
@@ -231,11 +235,16 @@ class SearchClient:
             except CancelledError:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
-                self.errors[provider] = str(exc)[:300]
-                telemetry.record_search(provider, self.errors[provider], started)
-                search_health.record_failures({provider: self.errors[provider]})
+                reason = str(exc)[:300]
+                self.errors[provider] = reason
+                telemetry.record_search(provider, reason, started)
+                search_health.record_failures({provider: reason})
+                if kind := search_health.classify(reason):
+                    wait = (search_health.PERMANENT_COOLDOWN if kind == "permanent"
+                            else search_health.RATE_LIMIT_COOLDOWN)
+                    self._local_cooling[provider] = {"until": time.time() + wait, "kind": kind, "reason": reason}
                 logger.warning(
-                    "Search provider '%s' failed: %s", provider, str(exc)[:300]
+                    "Search provider '%s' failed: %s", provider, reason
                 )
 
         if not answered:

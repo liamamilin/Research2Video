@@ -94,8 +94,7 @@ def report_of(script: dict, report_path: str = "", *, version: dict | None = Non
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
                                 summary=(topic.get("fields") or {}).get("一句话") or "",
-                                include_nested=(research_dossier.enabled(script)
-                                                or script.get("production") == "chatgpt_t05_comparison"))
+                                include_nested=True)
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -529,7 +528,13 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             # Both outputs consume their own frozen allocation, including on rewrite.
             # In particular, do not refill a brief episode from the complete dossier.
             dossier_report, material = planned["report"], planned["material"]
-        material, material_fit = fit_material(dossier_report if joint_input else report, material)
+        active_report = dossier_report if joint_input else report
+        active_report, report_fit = fit_report(active_report, topic)
+        if joint_input:
+            dossier_report = active_report
+        else:
+            report = active_report
+        material, material_fit = fit_material(active_report, material)
         writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
                          if audience_channel else topic)
         if legacy_comparison:
@@ -582,6 +587,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
+        if report_fit:
+            written.meta["report_fit"] = report_fit
         if material_fit:
             written.meta["material_fit"] = material_fit
         if guarded:
@@ -616,25 +623,83 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
 MATERIAL_SEPARATOR = "\n\n---\n\n"
 
 
+def _block_duplicated_in_report(block: str, report_norm: str) -> bool:
+    """True when a material block's substantive body is already verbatim/near-verbatim in ``report``."""
+    lines = [line.strip() for line in block.splitlines() if line.strip() and not line.strip().startswith("### [")]
+    if not lines:
+        return False
+    body = re.sub(r"\s+", " ", " ".join(lines))
+    if len(body) >= 120 and body in report_norm:
+        return True
+    substantial = [re.sub(r"\s+", " ", line) for line in lines if len(line) >= 24]
+    if len(substantial) < 3:
+        return False
+    matched = sum(1 for line in substantial if line in report_norm)
+    return matched / len(substantial) >= 0.8
+
+
+def fit_report(report: str, topic: dict | None = None, limit: int | None = None) -> tuple[str, dict]:
+    """Keep an oversized multi-topic report inside the writer's safe window."""
+    from core import research_batches
+    from core.video import excerpt
+
+    limit = limit or research_batches.MAX_PROMPT_CHARS
+    if not report or len(report) <= limit:
+        return report, {}
+    topic = topic or {}
+    title = (topic.get("from_item_title") or topic.get("title") or "").strip()
+    summary = str((topic.get("fields") or {}).get("一句话") or "").strip()
+    if title:
+        part = excerpt.item_excerpt(report, title, summary=summary, include_nested=True)
+        if part and len(part) <= limit:
+            return part, {"reason": "报告超出写稿窗口，已按当前选题自动切片",
+                          "original_chars": len(report), "kept_chars": len(part), "mode": "item_excerpt"}
+    sections = re.split(r"(?m)(?=^#{1,2}\s+)", report)
+    kept, used = [], 0
+    for sec in sections:
+        if not sec:
+            continue
+        if used + len(sec) <= limit:
+            kept.append(sec)
+            used += len(sec)
+        else:
+            remain = limit - used
+            if remain > 600:
+                kept.append(sec[:remain].rstrip() + "\n\n（后续内容因超长已截断）")
+                used = limit
+            break
+    trimmed = "".join(kept) or report[:limit]
+    return trimmed, {"reason": "报告超出写稿窗口，已按章节边界安全裁剪",
+                     "original_chars": len(report), "kept_chars": len(trimmed), "mode": "section_cap"}
+
+
 def fit_material(report: str, material: str, limit: int | None = None) -> tuple[str, dict]:
     """The original material the writer is sent, kept inside the model's window.
 
-    Since every news article is read in full (11-03), a weekly dossier's material can run to millions of characters;
-    research works through it in batches, but the writer gets one call. When report and material do not fit, only the
-    material blocks the report cites are kept (the report is what the script is written from), in their order; if
-    those still do not fit, they are taken in order until the window is full. Returns the material and, when it was
-    reduced, what was kept, so the version records it.
+    Deduplicates blocks already verbatim inside ``report`` (e.g. opencode_topic_v1
+    dossiers stored in both report and material snapshots) and trims oversized
+    material to report-cited blocks inside ``limit``.
     """
     from core import research_batches
     from core.provenance import extract_urls, normalize_url
 
     limit = limit or research_batches.MAX_PROMPT_CHARS
-    room = limit - len(report)
-    if not material or len(material) <= room:
+    if not material:
         return material, {}
     blocks = material.split(MATERIAL_SEPARATOR)
+    report_norm = re.sub(r"\s+", " ", report or "")
+    deduped_blocks = [b for b in blocks if not _block_duplicated_in_report(b, report_norm)] if report_norm else blocks
+    dedup_dropped = len(blocks) - len(deduped_blocks)
+    working = MATERIAL_SEPARATOR.join(deduped_blocks)
+    room = limit - len(report)
+    if len(working) <= room:
+        if dedup_dropped:
+            return working, {"reason": "原始材料与研究底稿内容重复，已自动去重",
+                             "blocks": len(blocks), "dedup_dropped": dedup_dropped,
+                             "kept": len(deduped_blocks), "chars": len(material), "kept_chars": len(working)}
+        return working, {}
     cited_urls = {normalize_url(url) for url in extract_urls(report)}
-    cited = [b for b in blocks if cited_urls & {normalize_url(url) for url in extract_urls(b)}]
+    cited = [b for b in deduped_blocks if cited_urls & {normalize_url(url) for url in extract_urls(b)}]
     kept, used = [], 0
     for block in cited:
         cost = len(block) + len(MATERIAL_SEPARATOR)
@@ -643,7 +708,8 @@ def fit_material(report: str, material: str, limit: int | None = None) -> tuple[
         kept.append(block)
         used += cost
     return MATERIAL_SEPARATOR.join(kept), {"reason": "原始材料超出模型上限，只保留报告引用的材料",
-                                           "blocks": len(blocks), "cited": len(cited), "kept": len(kept),
+                                           "blocks": len(blocks), "dedup_dropped": dedup_dropped,
+                                           "cited": len(cited), "kept": len(kept),
                                            "chars": len(material), "kept_chars": used}
 
 
@@ -664,9 +730,10 @@ def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
 
 def _duplicate_script(script_id: str, exc: content_guard.DuplicateContent, failed_status: str) -> str:
     reason = str(exc)
+    target_status = "SKIPPED" if failed_status == "FAILED" else failed_status
     if content_guard.archive_duplicate(script_id, reason, [p["script_id"] for p in exc.peers]):
-        store.update_script(script_id, status=failed_status, stage=None, error=reason)
-    return failed_status
+        store.update_script(script_id, status=target_status, stage=None, error=reason)
+    return target_status
 
 
 def _attach_report(script: dict, report_path: str, column, started_by: str) -> None:

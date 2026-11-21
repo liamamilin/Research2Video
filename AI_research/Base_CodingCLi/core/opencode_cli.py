@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 from .errors import CancelledError
@@ -37,6 +38,12 @@ _GATHER_DEFAULTS = {
     "model_cache_seconds": 3600,
     # all | fetch_only | flagged — default: every Job gets the gather pack
     "apply_to": "all",
+    # "" (opt-in per Job via research_mode: opencode_topic_v1) | "opencode_topic_v1"
+    "pipeline_mode": "",
+    "discovery_timeout_seconds": 240,
+    "per_topic_timeout_seconds": 300,
+    "max_concurrency": 6,
+    "soft_filter_llm": True,
 }
 
 _FAIL = re.compile(r"(请求失败|HTTP\s*403|HTTP\s*401|HTTP\s*429|未能获取|access denied|verify you are human)", re.I)
@@ -158,6 +165,100 @@ def parse_final_text(stdout: str) -> str:
     return final
 
 
+def parse_usage(stdout: str) -> dict:
+    """Aggregate token/cost usage from ``--format json`` JSONL events when present."""
+    totals = {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "total_tokens": 0,
+        "cost_usd": 0.0,
+        "opencode_steps": 0,
+    }
+    for line in (stdout or "").splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        part = event.get("part") or {}
+        if not isinstance(part, dict):
+            continue
+        tokens = part.get("tokens")
+        if isinstance(tokens, dict):
+            totals["opencode_steps"] += 1
+            inp = int(tokens.get("input") or 0)
+            out = int(tokens.get("output") or 0)
+            reas = int(tokens.get("reasoning") or 0)
+            cache = tokens.get("cache") if isinstance(tokens.get("cache"), dict) else {}
+            cread = int(cache.get("read") or 0)
+            totals["prompt_tokens"] += inp
+            totals["completion_tokens"] += out
+            totals["reasoning_tokens"] += reas
+            totals["cache_read_tokens"] += cread
+            totals["total_tokens"] += int(tokens.get("total") or (inp + out + reas + cread))
+        cost = part.get("cost")
+        if isinstance(cost, (int, float)) and not isinstance(cost, bool):
+            totals["cost_usd"] += float(cost)
+    totals["cost_usd"] = round(totals["cost_usd"], 6)
+    return {k: v for k, v in totals.items() if v}
+
+
+def _run_subprocess(command: list[str], *, limit: int, workdir: str | None, env: dict,
+                    chosen: str, cancel_token=None) -> tuple[int, str, str]:
+    """Run command; poll ``cancel_token`` via Popen so cancellation terminates active child processes."""
+    if cancel_token is None:
+        try:
+            completed = subprocess.run(
+                command, capture_output=True, text=True, timeout=limit,
+                cwd=workdir, env=env, check=False,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）") from exc
+        return completed.returncode, completed.stdout or "", completed.stderr or ""
+
+    proc = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, cwd=workdir, env=env,
+    )
+    deadline = time.monotonic() + limit
+    try:
+        while True:
+            if cancel_token.is_set():
+                proc.terminate()
+                try:
+                    proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=2)
+                raise CancelledError("OpenCode 运行已取消")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                proc.terminate()
+                try:
+                    proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=2)
+                raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）")
+            try:
+                stdout, stderr = proc.communicate(timeout=min(0.5, remaining))
+                return proc.returncode, stdout or "", stderr or ""
+            except subprocess.TimeoutExpired:
+                continue
+    except BaseException:
+        if proc.poll() is None:
+            proc.kill()
+            try:
+                proc.wait(timeout=2)
+            except Exception:
+                pass
+        raise
+
+
 def run(prompt: str, *, config: dict | None = None, model: str | None = None,
         timeout: int | None = None, cancel_token=None) -> tuple[str, dict]:
     """Run ``opencode run`` and return ``(final_text, meta)``."""
@@ -178,25 +279,21 @@ def run(prompt: str, *, config: dict | None = None, model: str | None = None,
     ]
     workdir = str(cfg.get("workdir") or "").strip() or None
     logger.info("OpenCode CLI run model=%s timeout=%s", chosen, limit)
-    try:
-        completed = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=limit,
-            cwd=workdir,
-            env={**os.environ, "NO_COLOR": "1"},
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）") from exc
+    returncode, stdout, stderr = _run_subprocess(
+        command, limit=limit, workdir=workdir, env={**os.environ, "NO_COLOR": "1"},
+        chosen=chosen, cancel_token=cancel_token,
+    )
     if cancel_token is not None and cancel_token.is_set():
         raise CancelledError("OpenCode 运行已取消")
-    if completed.returncode != 0 and not (completed.stdout or "").strip():
-        err = (completed.stderr or completed.stdout or "opencode run failed")[:300]
+    if returncode != 0 and not stdout.strip():
+        err = (stderr or stdout or "opencode run failed")[:300]
         raise RuntimeError(err)
-    text = parse_final_text(completed.stdout or "")
-    return text, {"model": chosen, "model_select": model_receipt, "returncode": completed.returncode}
+    text = parse_final_text(stdout)
+    usage = parse_usage(stdout)
+    meta = {"model": chosen, "model_select": model_receipt, "returncode": returncode}
+    if usage:
+        meta["usage"] = usage
+    return text, meta
 
 
 def webfetch_markdown(url: str, *, config: dict | None = None, cancel_token=None) -> str:

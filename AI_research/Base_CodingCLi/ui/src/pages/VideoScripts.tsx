@@ -35,6 +35,7 @@ export const STATUS_LABEL: Record<ScriptStatus, string> = {
   PLAN_READY: "方案待确认",
   DRAFT: "待审稿",
   APPROVED: "已定稿",
+  SKIPPED: "已跳过",
   FAILED: "失败",
 };
 
@@ -44,6 +45,7 @@ export const STATUS_CLASS: Record<ScriptStatus, string> = {
   PLAN_READY: "bg-warning/15 text-warning border-warning/30",
   DRAFT: "bg-warning/15 text-warning border-warning/30",
   APPROVED: "bg-success/15 text-success border-success/30",
+  SKIPPED: "bg-bg-card text-text-muted border-border",
   FAILED: "bg-danger/15 text-danger border-danger/30",
 };
 
@@ -91,7 +93,7 @@ export const STATUS_NOTE: Partial<Record<VideoCell["status"], string>> = {
 
 const IN_FLIGHT: ScriptStatus[] = ["RESEARCHING", "WRITING"];
 // 状态按钮的顺序：先写稿，再出片，最后发布；失败的放最后
-const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "unpublished", "published", "FAILED"];
+const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "unpublished", "published", "SKIPPED", "FAILED"];
 
 export function minutes(seconds: number | null | undefined): string {
   if (!seconds) return "—";
@@ -158,7 +160,7 @@ export function VideoScriptsPage() {
     finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, [showArchived]);
   useEffect(() => { setError(null); void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
-  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (s.status !== "FAILED" && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
+  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (!["FAILED", "SKIPPED"].includes(s.status) && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void load(); };
     const timer = window.setInterval(refresh, inFlight ? 5000 : 30000);

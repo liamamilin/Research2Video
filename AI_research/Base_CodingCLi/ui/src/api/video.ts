@@ -4,7 +4,7 @@ import type { ExperimentMark } from "@/components/ExperimentBadge";
 import { api } from "./client";
 import type { UploadTask } from "./platforms";
 
-export type ScriptStatus = "RESEARCHING" | "WRITING" | "PLAN_READY" | "DRAFT" | "APPROVED" | "FAILED";
+export type ScriptStatus = "RESEARCHING" | "WRITING" | "PLAN_READY" | "DRAFT" | "APPROVED" | "FAILED" | "SKIPPED";
 export type Evidence = "CITED" | "UNCITED" | "NEEDS_REVIEW";
 export type RenderStatus =
   | "SUBMITTING"

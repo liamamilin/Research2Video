@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from . import persona
 from .narration_stance import LISTENING_DIRECTION, defects as stance_defects, launders, note, settle_sections
 
-PROMPT_VERSION = 7
+PROMPT_VERSION = 8
 
 #: A production note to the video maker said as narration ("视频里应该说清楚", "素材只有一句描述").
 _PRODUCTION_NOTE = re.compile(
@@ -33,6 +33,17 @@ _STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价�
 _STOCK_BRIDGE = re.compile(r"如果说[^。！？]{2,40}?[，,]\s*那么|接下来(?:这|的这)(?:一)?条|下面这(?:一)?条")
 #: A hedge said like a disclaimer ("以你实际界面为准", "不是效果承诺", "我们不做猜测").
 _HEDGE = re.compile(r"以(?:你的?)?实际(?:界面|页面|情况|账单)?(?:显示)?为准|不是效果承诺|(?:我们)?不(?:做|作)(?:任何)?猜测")
+#: A multi-word English phrase/sentence left verbatim in Chinese TTS narration (4+ English words).
+#: Matches natural prose/UI strings like "Claude far outpaced me near the finish line" or "Include your audio recordings",
+#: while skipping URLs, CLI flags/paths, and short proper nouns.
+_ENGLISH_PHRASE = re.compile(r"(?<![A-Za-z0-9_/.:-])(?:[A-Za-z]{2,}(?:'[A-Za-z]+)?(?:\s+[A-Za-z]{2,}(?:'[A-Za-z]+)?){3,})(?![A-Za-z0-9_/.:-])")
+#: Common English function words that indicate a natural sentence/UI clause rather than a pure brand/title stack.
+_ENGLISH_CLAUSE_WORDS = frozenset({
+    "the", "a", "an", "to", "of", "for", "in", "on", "with", "your", "my", "me", "we", "you", "it",
+    "is", "are", "was", "were", "be", "been", "have", "has", "had", "can", "will", "would", "should",
+    "and", "or", "but", "not", "no", "from", "by", "at", "as", "that", "this", "these", "those",
+    "when", "why", "how", "what", "near", "after", "before", "into", "out", "now", "all", "everyone",
+})
 #: The closing's goodbye; a rewrite of that paragraph must still say it.
 _SIGN_OFF = re.compile(r"[^。！？]*(?:下期见|感谢收看|感谢观看|再见)[^。！？]*[。！？]?")
 
@@ -42,6 +53,7 @@ RULES = {
     "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
     "hedge": "像免责声明一样的套话，观众听着生硬",
     "audience_stance": "把研究备忘或自我免责说给了观众；留下已经成立的事实，不要补范围套话",
+    "english_phrase": "中文口播里夹了整段英文短语或原句，中文配音听感割裂",
 }
 
 SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
@@ -50,6 +62,7 @@ SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想�
 只改列出的段落，留住听众用得上的事实、数字、名字和条件。重复或无关的细节可以收掉。
 制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成一句贴合本段内容的短判断；
 硬造的过渡句改成直接进入本条（比如“再说 Gemini。”），或用一句话说出两条真实的关系；免责套话删去，必要的前提用半句话自然带过；
+英文原句或英文界面长短语改写成自然流畅的中文口播（必要的产品名、模型名和极短专有词可以保留）；
 只处理指出的问题，保留作者作比较的对象、取舍和结论范围。保持段落与前后文的衔接，不加新内容；保留原有的开场钩子、问候、自我介绍和话题衔接，也保留原有的道别句。
 输出 JSON：{"paragraphs":[{"id":"S1P2","text":"改好的口播"}]}"""
 
@@ -85,6 +98,10 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
                 hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
             hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
             hits += [("audience_stance", item["quote"]) for item in stance_defects(text)]
+            for m in _ENGLISH_PHRASE.finditer(text):
+                words = m.group().split()
+                if len(words) >= 5 or any(w.lower() in _ENGLISH_CLAUSE_WORDS for w in words):
+                    hits.append(("english_phrase", m.group()))
             found += [{"id": pid(si, pi), "section": si, "paragraph": pi, "rule": rule, "quote": quote,
                        "problem": RULES[rule]} for rule, quote in hits]
     return found

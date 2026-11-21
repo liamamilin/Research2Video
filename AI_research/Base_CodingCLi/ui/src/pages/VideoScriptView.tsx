@@ -157,7 +157,7 @@ export function VideoScriptViewPage() {
   const defaultTab = detail && (current || !detail.version_shown) ? nextStep(detail).tab : "draft";
   const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : defaultTab;
 
-  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || (detail.status !== "FAILED" && Boolean(detail.stage)) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
+  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || (!["FAILED", "SKIPPED"].includes(detail.status) && Boolean(detail.stage)) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
   useEffect(() => {
     if (editing) return;
     const refresh = () => { if (!document.hidden) void load(); };
@@ -544,8 +544,15 @@ export function VideoScriptViewPage() {
         <SelectionSkipLinks skip={detail.selection_skip} back={backToTopics} />
       </section> : null}
 
-      {detail.error && detail.status !== "FAILED" && !detail.selection_skip ? (
+      {detail.error && !["FAILED", "SKIPPED"].includes(detail.status) && !detail.selection_skip ? (
         <section className="card border-warning/40 text-sm text-warning">{detail.error}</section>
+      ) : null}
+
+      {detail.status === "SKIPPED" && !detail.selection_skip ? (
+        <section className="card border-border text-sm space-y-1">
+          <p className="text-text-muted font-medium">已跳过</p>
+          {detail.error ? <p className="text-text-muted">{detail.error}</p> : null}
+        </section>
       ) : null}
 
       {detail.status === "FAILED" && !detail.selection_skip ? (

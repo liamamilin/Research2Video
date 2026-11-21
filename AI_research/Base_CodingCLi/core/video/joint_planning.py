@@ -231,12 +231,12 @@ def available_items(items: list[dict], connection=None) -> list[dict]:
     from contextlib import nullcontext
     with nullcontext(connection) if connection is not None else store.connect() as db:
         taken, episodes = set(), set()
-        for row in db.execute("SELECT topic,production,archived,status FROM scripts s WHERE status!='FAILED'"
+        for row in db.execute("SELECT topic,production,archived,status FROM scripts s WHERE status NOT IN ('FAILED','SKIPPED')"
                               " OR EXISTS(SELECT 1 FROM publications p WHERE p.script_id=s.id)"):
             topic = json.loads(row["topic"])
             taken.add(topic.get("id"))
             taken.update(topic.get("items") or [])
-            if topic.get("content_mode") == "episode" and not row["archived"] and row["status"] != "FAILED":
+            if topic.get("content_mode") == "episode" and not row["archived"] and row["status"] not in ("FAILED", "SKIPPED"):
                 key = _episode_key(row["production"], topic)
                 if key is not None:
                     episodes.add(key)

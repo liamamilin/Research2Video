@@ -69,5 +69,19 @@ topics:
   format: flash
   refresh: true
 
-# After initial research and audience-led selection; preserves the existing writer.
+# 仅在回退 research_mode: legacy 时生效；opencode_topic_v1 模式下由 Stage 3 逐题深挖直接替代。
 question_material: question-v1
+
+# Four-stage OpenCode pipeline (pilot): Discover -> Soft Filter -> Per-Topic Gather -> Assemble
+research_mode: opencode_topic_v1
+topic_criteria: |
+  关注 AI 模型发布、API/订阅定价与额度变化、AI 编程工具与 Agent 框架重要更新、以及会影响普通用户或开发者能力、成本、安全或工作流的变化。
+  标「B站热词」的线索若有实质新进展优先入选；无实质新进展不硬写。
+  同一产品或同一事件的多条零散小更新请使用相同 cluster_key 合并为一个综合选题。
+  不设数量上限；只剔除重复旧闻、无一手来源的传闻和空洞公关稿。
+gather_requirements: |
+  每道题必须拿到一手公告/文档/更新日志原文链接，并尽可能补齐：
+  1. 变化前后的具体对照（价格、额度、速率限制、可用地区或同档竞品对比）；
+  2. 可验证的具体数字、时间节点、适用范围与限制条件；
+  3. 真实使用案例、社区实测反馈或潜在踩坑点；
+  4. 明确区分官方确认事实、第三方实测与尚未核实项。

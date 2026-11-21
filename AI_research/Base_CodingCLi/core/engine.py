@@ -47,6 +47,12 @@ class ResearchEngine:
         self._progress = progress_cb or (lambda _: None)
         self.workspace_dir = os.path.abspath(workspace_dir or os.getcwd())
         self.state_dir = os.path.abspath(state_dir or os.path.join(self.workspace_dir, 'state'))
+        try:
+            from . import search_health
+            if search_health._path() is None:
+                search_health.use_state_dir(self.state_dir)
+        except Exception:
+            pass
         self._date_override = date_override
         # An explicit limit from the caller (run.py --timeout) outranks both
         # the job's runtime.timeout_seconds and system.yaml. Mutating self.sys
@@ -194,9 +200,12 @@ class ResearchEngine:
                 fetch_only = job.get("search") is False  # Initial research reads declared sources; optional enrichment runs later.
                 fetched = None
                 source_block = ""
-                from . import knowledge_job, opencode_gather, opencode_cli
+                from . import knowledge_job, opencode_gather, opencode_cli, opencode_pipeline
 
-                def _load_sources():
+                gather_cfg = opencode_cli.gather_settings(self.config_dir)
+                use_topic_pipeline = opencode_pipeline.enabled(job, gather_cfg)
+
+                def _load_sources(*, skip_teaser_details: bool = False):
                     """Always ``(source_block, fetched_or_None)``."""
                     if knowledge_job.enabled(job):
                         # Declared knowledge Job: no sources by design; it sees only what it already covered.
@@ -210,55 +219,70 @@ class ResearchEngine:
                             logger.info("Knowledge job topic ideas: %d items from %d source(s)", len(ideas), len(specs))
                             block += "\n\n" + knowledge_job.topic_block(ideas)
                         return block, ([], {})
+                    target_job = {**job, "source_detail_pages": 0} if skip_teaser_details else job
                     if fetch_only:
-                        return self._fetch_sources_strict(job)
-                    return self._fetch_sources_block(job), None
+                        return self._fetch_sources_strict(target_job)
+                    return self._fetch_sources_block(target_job), None
 
-                # Declared sources and OpenCode gather run in parallel; both feed the report agent.
-                try:
-                    run_gather = opencode_gather.wanted(job, opencode_cli.gather_settings(self.config_dir))
-                except Exception:
-                    run_gather = False
                 self._opencode_gather_receipt = {}
                 self._source_fallback_error = ""
-                if run_gather:
-                    from concurrent.futures import ThreadPoolExecutor
-                    def _load_sources_scoped():
-                        with source_pages.page_cache_scope(page_cache):
-                            return _load_sources()
-                    with ThreadPoolExecutor(max_workers=2, thread_name_prefix="research-gather") as pool:
-                        src_fut = pool.submit(_load_sources_scoped)
-                        gather_fut = pool.submit(opencode_gather.gather, self, job)
-                        src_error: BaseException | None = None
-                        gather_block = ""
-                        try:
-                            source_block, fetched = src_fut.result()
-                        except BaseException as exc:  # noqa: BLE001 - always wait for gather below
-                            src_error = exc
-                        try:
-                            gather_block, self._opencode_gather_receipt = gather_fut.result()
-                        except CancelledError:
-                            raise
-                        except Exception as exc:  # noqa: BLE001 - gather is additive
-                            logger.warning("OpenCode gather skipped: %s", exc)
-                            self._opencode_gather_receipt = {"error": str(exc)[:300]}
-                        if isinstance(src_error, CancelledError):
-                            raise src_error
-                        if src_error is not None:
-                            if gather_block:
-                                self._source_fallback_error = str(src_error)[:300]
-                                logger.warning("Declared sources unavailable; continuing with OpenCode gather only: %s",
-                                               self._source_fallback_error)
-                                source_block = gather_block
-                                fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
-                            else:
-                                raise src_error
-                        elif gather_block:
-                            source_block = (source_block + "\n\n---\n\n" + gather_block) if source_block else gather_block
-                            logger.info("OpenCode gather attached: %s", self._opencode_gather_receipt)
+                if use_topic_pipeline:
+                    # Four-stage OpenCode pipeline: fetch lightweight source index first,
+                    # skip full-page teaser expansion (Stage 3 reads deep pages per selected topic).
+                    try:
+                        source_block, fetched = _load_sources(skip_teaser_details=True)
+                    except CancelledError:
+                        raise
+                    except Exception as exc:  # noqa: BLE001 - OpenCode Stage 1 can still discover via websearch
+                        self._source_fallback_error = str(exc)[:300]
+                        logger.warning("Declared sources unavailable; continuing with OpenCode topic pipeline: %s",
+                                       self._source_fallback_error)
+                        source_block = ""
+                        fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
                 else:
-                    source_block, fetched = _load_sources()
-                if source_block:
+                    # Declared sources and OpenCode gather run in parallel; both feed the report agent.
+                    try:
+                        run_gather = opencode_gather.wanted(job, gather_cfg)
+                    except Exception:
+                        run_gather = False
+                    if run_gather:
+                        from concurrent.futures import ThreadPoolExecutor
+                        def _load_sources_scoped():
+                            with source_pages.page_cache_scope(page_cache):
+                                return _load_sources()
+                        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="research-gather") as pool:
+                            src_fut = pool.submit(_load_sources_scoped)
+                            gather_fut = pool.submit(opencode_gather.gather, self, job)
+                            src_error: BaseException | None = None
+                            gather_block = ""
+                            try:
+                                source_block, fetched = src_fut.result()
+                            except BaseException as exc:  # noqa: BLE001 - always wait for gather below
+                                src_error = exc
+                            try:
+                                gather_block, self._opencode_gather_receipt = gather_fut.result()
+                            except CancelledError:
+                                raise
+                            except Exception as exc:  # noqa: BLE001 - gather is additive
+                                logger.warning("OpenCode gather skipped: %s", exc)
+                                self._opencode_gather_receipt = {"error": str(exc)[:300]}
+                            if isinstance(src_error, CancelledError):
+                                raise src_error
+                            if src_error is not None:
+                                if gather_block:
+                                    self._source_fallback_error = str(src_error)[:300]
+                                    logger.warning("Declared sources unavailable; continuing with OpenCode gather only: %s",
+                                                   self._source_fallback_error)
+                                    source_block = gather_block
+                                    fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
+                                else:
+                                    raise src_error
+                            elif gather_block:
+                                source_block = (source_block + "\n\n---\n\n" + gather_block) if source_block else gather_block
+                                logger.info("OpenCode gather attached: %s", self._opencode_gather_receipt)
+                    else:
+                        source_block, fetched = _load_sources()
+                if source_block and not use_topic_pipeline:
                     prompt = f"{prompt}\n\n{source_block}"
                 logger.debug("Prompt built: %d chars", len(prompt))
                 if verbose:
@@ -269,7 +293,8 @@ class ResearchEngine:
 
                 from .video import audience_strategy, question_material
                 audience_direct = (
-                    fetch_only
+                    not use_topic_pipeline
+                    and fetch_only
                     and bool(source_block)
                     and audience_strategy.direct_from_materials(job, self.sys)
                 )
@@ -299,7 +324,36 @@ class ResearchEngine:
                     return text, agent.get_usage()
 
                 dossier_detail = {}
-                if audience_direct:
+                pipeline_material = ""
+                pipeline_receipt = {}
+                if use_topic_pipeline:
+                    logger.info("Job '%s' using 4-stage OpenCode topic pipeline (%s)", job_name, opencode_pipeline.MODE_NAME)
+                    print(f"  [{job_name}] Running 4-stage OpenCode topic pipeline...")
+                    raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run(
+                        self, job, source_block, knowledge=knowledge_job.enabled(job)
+                    )
+                    self._prompt_urls.update(_urls_in(source_block))
+                    for item in (fetched[0] if fetched else []):
+                        if getattr(item, "url", None):
+                            self._prompt_urls.add(item.url)
+                    for url in pipeline_receipt.get("urls") or []:
+                        if url:
+                            self._prompt_urls.add(url)
+                    usage = {
+                        "searches": 0,
+                        "opencode_pipeline": {
+                            k: v for k, v in pipeline_receipt.items() if k != "urls"
+                        },
+                    }
+                    for src_usage in (
+                        pipeline_receipt.get("usage") or {},
+                        (pipeline_receipt.get("soft_filter") or {}).get("usage") or {},
+                        (pipeline_receipt.get("discovery") or {}).get("fallback_usage") or {},
+                    ):
+                        for name, value in src_usage.items():
+                            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                                usage[name] = usage.get(name, 0) + value
+                elif audience_direct:
                     logger.info("Job '%s' using audience-direct mode (skipping redundant R7/R8 drafting)", job_name)
                     self._prompt_urls.update(_urls_in(source_block))
                     for item in (fetched[0] if fetched else []):
@@ -411,11 +465,14 @@ class ResearchEngine:
                                  fields={"job": job_name, "status": "failed"})
                     return None
 
-                cleaned = "" if audience_direct else extract_report(raw_content, self.sys,
-                                                                     cancel_token=self._cancel)
+                cleaned = (raw_content if use_topic_pipeline
+                           else "" if audience_direct
+                           else extract_report(raw_content, self.sys, cancel_token=self._cancel))
+                if use_topic_pipeline and self._supply_pending:
+                    cleaned = cleaned.rstrip() + "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
                 audience_detail = {}
                 supplement_material = ""
-                if audience_strategy.job_channel(job):
+                if not use_topic_pipeline and audience_strategy.job_channel(job):
                     self._progress({"type": "phase", "phase": "organizing_topics"})
                     initial_report = cleaned
                     import hashlib
@@ -493,7 +550,7 @@ class ResearchEngine:
                     from .report_material import save as save_material
 
                     material = save_material(actual_path, cleaned,
-                                             [source_block, *getattr(agent, "materials", []), supplement_material])
+                                             [source_block, *getattr(agent, "materials", []), supplement_material, pipeline_material])
                 except OSError as exc:
                     logger.warning("Original material snapshot skipped: %s", exc)
 
@@ -507,6 +564,7 @@ class ResearchEngine:
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation, "material": material,
                                          **({"chain_run_id": context["chain_run_id"]} if context.get("chain_run_id") else {}),
+                                         **({"opencode_pipeline": {"mode": pipeline_receipt.get("mode"), "version": pipeline_receipt.get("version"), "topic_count": pipeline_receipt.get("topic_count"), "artifact_path": pipeline_receipt.get("artifact_path")}} if pipeline_receipt else {}),
                                          **({"audience_strategy": {"strategy": audience_detail["strategy"], "channel": audience_detail["channel"], "candidate_count": audience_detail.get("candidate_count"), "receipt": receipt_path, **({"question_material": question_material.MARKER} if audience_detail.get("question_material", {}).get("status") == "enriched" else {})}} if audience_detail and audience_detail.get("status") != "kept_original" else {}),
                                          **({'production_issue':usage['production_issue']} if (usage or {}).get('production_issue') else {}),
                                          **({"research_dossier": dossier_detail} if dossier_detail else {})})

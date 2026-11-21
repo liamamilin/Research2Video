@@ -243,7 +243,7 @@ def used_candidate_ids(candidates: list[dict], config_dir: str) -> set[str]:
             "fields": {k: v for k,v in (topic.get("fields") or {}).items() if k != "目标受众"}},
             ensure_ascii=False, sort_keys=True)
     with store.connect() as db:
-        rows = db.execute("SELECT topic FROM scripts s WHERE (s.archived=0 AND s.status!='FAILED')"
+        rows = db.execute("SELECT topic FROM scripts s WHERE (s.archived=0 AND s.status NOT IN ('FAILED','SKIPPED'))"
                           " OR EXISTS (SELECT 1 FROM publications p WHERE p.script_id=s.id)").fetchall()
         queued = db.execute("SELECT topic FROM autopilot_items WHERE state NOT IN ('FAILED','CANCELLED')").fetchall()
     covered = {identity(json.loads(r["topic"])) for r in [*rows,*queued]}
@@ -264,7 +264,7 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
 
     with store.connect() as conn:
         skipped = [json.loads(r["topic"]) for r in conn.execute(
-            "SELECT s.topic FROM scripts s WHERE s.archived=1 AND s.status='FAILED' AND s.current_version=0"
+            "SELECT s.topic FROM scripts s WHERE s.archived=1 AND s.status IN ('FAILED','SKIPPED') AND s.current_version=0"
             " AND json_extract(s.topic,'$.content_archive') IS NOT NULL"
             " AND NOT EXISTS (SELECT 1 FROM video_story_decisions d JOIN video_story_pools p ON p.id=d.pool_id"
             " JOIN scripts peer ON peer.id=d.peer_id WHERE d.script_id=s.id AND d.decision='skip' AND ("
@@ -282,7 +282,7 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
             "SELECT s.id FROM scripts s WHERE s.id IN (SELECT value FROM json_each(?)) AND ("
             "EXISTS (SELECT 1 FROM script_versions v JOIN publications p ON p.script_id=v.script_id"
             " AND (p.version=v.version OR p.version IS NULL) WHERE v.script_id=s.id AND v.created_at>=?)"
-            " OR (s.archived=0 AND s.status!='FAILED' AND s.created_by NOT IN"
+            " OR (s.archived=0 AND s.status NOT IN ('FAILED','SKIPPED') AND s.created_by NOT IN"
             " ('chain-validation','prompt-quality-validation','多矩阵质量验收')"
             " AND COALESCE(json_extract(s.topic,'$.test_sample'),0)=0 AND ("
             "EXISTS (SELECT 1 FROM script_versions v WHERE v.script_id=s.id AND v.version=s.current_version"
@@ -327,7 +327,7 @@ def history(config_dir: str, jobs_dir: str, *, include_tutorial_archive: bool = 
     result = []
     for row in rows:
         script = by_id[row["script_id"]]
-        if not row["published"] and (script.get("archived") or is_sample(script) or script["status"] == "FAILED"):
+        if not row["published"] and (script.get("archived") or is_sample(script) or script["status"] in ("FAILED", "SKIPPED")):
             continue
         owner = owners[script["id"]]
         source_matrix = owner.get("source_matrix", owner["matrix"])

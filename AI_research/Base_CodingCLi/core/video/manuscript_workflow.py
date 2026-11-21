@@ -315,6 +315,23 @@ JOB_PROMPTS = {
             '输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}'
         ),
     ),
+    "history/history_daily": JobPrompts(
+        version='history-daily-v1',
+        draft=(
+            '只围绕这一件历史故事展开，先给一个让人想追问下去的具体场景、物件或反差，再沿时间线讲清当事人的处境、关键决定与后续影响。'
+            '人数、年代、地点和史料口径保持前后一致，不确定或学界有争议的地方直说边界。用自然中文口播，不夹杂英文原句。'
+        ),
+        episode_lead="",
+        read=(
+            '你是第一次听这期历史故事的观众。复述最让你记住的转折或细节，引用原稿里最有画面感的一句。'
+            '只找一处会让听众搞混时间先后、人数/口径对不上、动机跳步或夹杂生硬翻译腔的地方，标出同一处需要的一至两段，说清你还想听懂哪一步。已经讲顺就留空。'
+            '输出 JSON：{"takeaway":"记住的故事与转折","keep_quote":"原话","issue_quote":"卡住的原话，可空","revision":"想听清的前因或口径，可空","targets":["段落编号"]}'
+        ),
+        revise=(
+            '只改标记的段落，顺着同一个人物、事件或证物往后讲。用底稿里已有的动作、时间、人数或史料接住读者卡住的那一步，核对好数字与先后关系，保留作者的判断。'
+            '前后已经讲过的背景不重念，按原稿节奏自然接回。输出 JSON：{"paragraphs":[{"id":"段落编号","text":"修订口播"}]}'
+        ),
+    ),
     "history/history_weekly": JobPrompts(
         version='history-weekly-v1-soft-v1',
         draft=(
@@ -740,10 +757,19 @@ def revise_passage(
             replacements = {p.id: writer.spoken_only(p.text).strip() for p in revision.paragraphs}
             if replacements.keys() != targets or len(revision.paragraphs) != len(targets) or not all(replacements.values()):
                 raise AdaptError("改稿未完整返回指定段落")
+            source_numbers = writer._numbers((inputs.get("report") or "") + "\n" + (inputs.get("original_material") or ""))
+            section_numbers = [writer._numbers("\n".join(p["text"] for p in s["paragraphs"])) for s in draft.sections]
             sections = deepcopy(draft.sections)
+            rejected: list[dict] = []
             for key, text in replacements.items():
                 si, pi = locations[key]
+                invented = writer._numbers(text) - (section_numbers[si] | source_numbers)
+                if invented:
+                    rejected.append({"id": key, "reason": "改稿引入了素材里没有的数字", "numbers": sorted(invented), "text": text})
+                    continue
                 sections[si]["paragraphs"][pi]["text"] = text
+            if rejected:
+                receipt["rejected"] = rejected
             if sections[0] != draft.sections[0]:
                 narrator = persona.load()
                 from . import episodes
@@ -776,6 +802,9 @@ def revise_passage(
                 receipt["result"] = "revised"
     except (AdaptError, LLMError, writer.ScriptError) as exc:
         receipt["error"] = {"stage": stage, "type": type(exc).__name__}
+    client_usage = getattr(client, "usage", None)
+    if isinstance(client_usage, dict) and client_usage:
+        receipt["usage"] = dict(client_usage)
     written.meta["manuscript_workflow"] = receipt
     return written
 

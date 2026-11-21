@@ -41,7 +41,7 @@ def heading_text(report: str) -> str:
     return "".join(visible)
 
 
-def item_excerpt(report: str, title: str, *, summary: str = "", include_nested: bool = False) -> Optional[str]:
+def item_excerpt(report: str, title: str, *, summary: str = "", include_nested: bool = True) -> Optional[str]:
     """Read an item's section and cited sources, using its frozen summary if its display title changed.
 
     A summary must match one section exactly; ambiguous or absent matches never return the whole report.

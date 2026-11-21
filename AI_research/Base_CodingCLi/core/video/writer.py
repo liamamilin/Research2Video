@@ -65,11 +65,11 @@ class _EpisodeEntrance(BaseModel):
     entry_start: int = Field(ge=0)
 
 
-PROMPT_VERSION = 27
+PROMPT_VERSION = 28
 # The material decides what is worth naming.
-TITLE_RULE = "标题点出本期最有意思的具体事，数字有助于理解看点时再用。"
+TITLE_RULE = "标题点出本期最有意思的具体事，核心看点前置，尽量控制在 18 到 28 字左右，数字有助于理解看点时再用。"
 #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
-OPENING_RULE = '从本期最值得理解的内容进入，切入点由材料和目标观众决定。'
+OPENING_RULE = '从本期最值得理解的内容进入，第一句短促抛出反差、变化或核心结论（尽量控制在 25 到 35 字以内），细节和背景放到下一句再展开；切入点由材料和目标观众决定。'
 ENDING_RULE = "结尾留一个值得带走的判断、发现或下一步。有值得聊的实际体验，再问观众。"
 #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
 STYLE_RULE = "像对一个懂行的朋友讲，多用短句。说数字时讲出实际含义，陌生术语放在情境里解释。"
@@ -96,7 +96,8 @@ EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期有多个条目，各自讲清看点和必要细节；同一问题可按解释层次展开。条目之间有关系就说出关系，也可以直接切换。
 """ + EPISODE_LEAD + "\n" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文每个条目用一个 item section。独立开场和结尾分别用 opening 和 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
 
 EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解研究底稿中的科学问题。可以从具体现象建立疑问，用实验、观察、模型或不同尺度的例子解释因果。建议保留研究者做了什么、看到了什么，以及这些材料怎样支持解释。相关背景与例子按理解需要展开。
@@ -104,7 +105,8 @@ EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
 解释章节用 section 组织，标题体现具体内容；讲述顺序与收束方式可随本题的推理安排。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
 """
 
 BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
@@ -113,7 +115,8 @@ BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
 业务章节用 section 组织，标题体现具体内容；收束可落在本题有依据的经营认识上。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
 """
 
 ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
@@ -122,7 +125,8 @@ ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
 讲述章节用 section 组织，标题体现具体作品或值得理解的内容；切入和收束可由材料决定。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
 """
 
 CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
@@ -131,7 +135,8 @@ CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
 讲述章节用 section 组织，标题体现具体内容；可以按本题的因果、时间或作品关系展开。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
 """
 
 MANUFACTURING_EPISODE_PROMPT = AUTHORING_PROMPT + """
@@ -140,7 +145,8 @@ MANUFACTURING_EPISODE_PROMPT = AUTHORING_PROMPT + """
 制造章节用 section 组织，标题体现具体内容；可以按理解需要选择切入点和收束。
 """ + ENDING_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
 """
 
 TUTORIAL_PROMPT = AUTHORING_PROMPT + """
@@ -152,7 +158,8 @@ TUTORIAL_PROMPT = AUTHORING_PROMPT + """
 不要把代码围栏、整块 Markdown 原文或表格分隔线写成口播正文，这些内容由实际截图呈现。
 可以用实际输入、操作或可见结果让观众理解教程任务，开场和收束随本次材料安排。
 episode_role 使用 opening、item、closing。保留实际步骤顺序，不把所有步骤塞进同一个项目章节。
-输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
+引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
 
 
 #: A series item that has a next one (selection.next_episode): the last words before the farewell promise it.
@@ -586,7 +593,9 @@ def write(
                  **({"duration_policy": "content"} if programme else {})}
     from core.video import episodes
     title = episodes.publication_title(topic, script.title.strip())
-    meta = {"attempts": attempts, "usage": dict(client.usage), "problems": [],
+    lint_source = report + ("\n" + original_material if original_material else "")
+    lint_problems = lint(sections, lint_source)
+    meta = {"attempts": attempts, "usage": dict(client.usage), "problems": lint_problems,
             **({"authored_title": script.title.strip()} if title != script.title.strip() else {}),
             "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
             "model_switches": list(getattr(client, "model_switches", [])),

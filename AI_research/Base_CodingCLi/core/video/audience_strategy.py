@@ -216,7 +216,7 @@ def direct_from_materials(job: dict, system: dict | None = None) -> bool:
 def topic_channel(topic: dict) -> str:
     """A saved report marker travels with the topic; never upgrade old work implicitly."""
     fields = topic.get("fields") or {}
-    if fields.get("选题策略") == MARKER:
+    if fields.get("选题策略") in {MARKER, "opencode_topic_v1"}:
         value = fields.get("选题入口")
         return value if isinstance(value, str) and value in CHANNELS else ""
     value = topic.get("audience_strategy")

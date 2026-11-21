@@ -111,6 +111,11 @@ SCHEMA = {
             'gather_timeout_seconds': POSITIVE_INT,
             'model_cache_seconds': NONNEGATIVE_INT,
             'apply_to': ('enum', 'fetch_only', 'flagged', 'all'),
+            'pipeline_mode': ('enum', '', 'legacy', 'opencode_topic_v1'),
+            'discovery_timeout_seconds': POSITIVE_INT,
+            'per_topic_timeout_seconds': POSITIVE_INT,
+            'max_concurrency': POSITIVE_INT,
+            'soft_filter_llm': bool,
         },
     },
 }

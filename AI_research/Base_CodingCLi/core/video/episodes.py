@@ -173,7 +173,7 @@ def scripts_for(report_path: str, recipe: str, production_id: str, column_id: st
     version_clause = " AND json_extract(topic,'$.episode.report_identity') = ?" if revision else ""
     with store.connect() as db:
         rows = db.execute(f"""SELECT id,column_key,status,topic,created_at FROM scripts
-            WHERE archived=0 AND status!='FAILED' AND {owner}
+            WHERE archived=0 AND status NOT IN ('FAILED','SKIPPED') AND {owner}
             AND json_extract(topic,'$.content_mode')='episode'
             AND (report_path=? OR json_extract(topic,'$.from_report')=?)
              {version_clause} ORDER BY created_at""", (column_id or production_id, report_path, report_path, *((revision,) if revision else ()))).fetchall()
