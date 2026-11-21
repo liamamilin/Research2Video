@@ -1,0 +1,24 @@
+{
+  "python_syntax": {
+    "files": 991,
+    "errors": []
+  },
+  "ui-types": {
+    "exit_code": 0
+  },
+  "ui-lint": {
+    "exit_code": 0
+  },
+  "ui-build": {
+    "exit_code": 0
+  },
+  "renderer-types": {
+    "exit_code": 0
+  },
+  "research-config": {
+    "exit_code": 0
+  },
+  "workshop-js": {
+    "exit_code": 0
+  }
+}

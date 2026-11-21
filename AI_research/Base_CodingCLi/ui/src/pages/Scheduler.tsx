@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageResource } from "@/lib/use-page-resource";
 import { api } from "@/api/client";
@@ -98,6 +99,7 @@ const SYSTEM_HINT: Record<string, string> = {
 const displayTime = (iso?: string) => iso ? iso.slice(0, 16).replace("T", " ") : "—";
 
 export function SchedulerPage() {
+  const chainScope=useChainScope();
   const focusedPlan = new URLSearchParams(window.location.search).get('plan');
   const toast = useToast();
   const [historyId, setHistoryId] = useState("");
@@ -123,9 +125,9 @@ export function SchedulerPage() {
   const states = useMemo(() => Object.fromEntries([...(system.data?.health?.jobs || []), ...(managed.data?.health?.jobs || [])].map(s => [s.id, s])), [system.data, managed.data]);
   const dispatcher = managed.data?.dispatcher || null;
   const timezone = managed.data?.timezone || system.data?.timezone || "服务器本地时区";
-  const warnings = [...new Set([...(managed.data?.warnings || []), ...(system.data?.warnings || [])])];
-  const removed = system.data?.removed_system_jobs || [];
-  const others = system.data?.others || [];
+  const warnings = [...new Set([...(managed.data?.warnings || []), ...(!chainScope.key?system.data?.warnings || []:[])])];
+  const removed = chainScope.key?[]:system.data?.removed_system_jobs || [];
+  const others = chainScope.key?[]:system.data?.others || [];
   const loaded = !!managed.data || !!system.data;
   const awaitingFirstJobs = !jobs.length && ((!managed.data && managed.loading) || (!system.data && system.loading));
   const loading = managed.loading;
@@ -243,11 +245,12 @@ export function SchedulerPage() {
   // Only a legacy cron entry owns its own command line; managed plans and
   // system agents get their trigger from somewhere else.
   const legacyEdit = !!editing && !isSystemEdit && editingJob?.backend !== "managed";
-  const filteredJobs = schedulable.filter(job => `${job.name} ${job.label} ${job.description}`.toLowerCase().includes(jobQuery.trim().toLowerCase()));
-  const visibleSchedules = jobs.filter((j) => (!scheduleQuery || `${j.title} ${j.id} ${j.job_name} ${j.job_label || ""}`.toLowerCase().includes(scheduleQuery.trim().toLowerCase())) &&
+  const filteredJobs = schedulable.filter(job => chainScope.job(job.name) && `${job.name} ${job.label} ${job.description}`.toLowerCase().includes(jobQuery.trim().toLowerCase()));
+  const visibleSchedules = jobs.filter((j) => chainScope.job(j.job_name||"" ) && (!scheduleQuery || `${j.title} ${j.id} ${j.job_name} ${j.job_label || ""}`.toLowerCase().includes(scheduleQuery.trim().toLowerCase())) &&
     (!statusScope || (statusScope === "enabled" ? j.enabled : statusScope === "paused" ? !j.enabled : ["overdue", "unverified", "no_schedule"].includes(states[j.id]?.status))));
-  const hasLaunchd = jobs.some(job => job.backend === "launchd");
-  const needsAttention = Object.values(states).filter(s => ["overdue", "unverified", "no_schedule"].includes(s.status)).length;
+  const scopedJobs=jobs.filter(j=>chainScope.job(j.job_name||""));
+  const hasLaunchd = !chainScope.key && jobs.some(job => job.backend === "launchd");
+  const needsAttention = scopedJobs.filter(j=>["overdue", "unverified", "no_schedule"].includes(states[j.id]?.status)).length;
   const previewValid = preview?.schedule === form.schedule.trim().split(/\s+/).join(" ") && preview.requestedTimezone === form.timezone && !!preview?.next_runs?.length;
   // A system agent carries no job and no command -- only the trigger -- so
   // requiring either of those would leave its save button permanently disabled.
@@ -262,15 +265,15 @@ export function SchedulerPage() {
     </div>
 
     <div className="card p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-      <span><strong className="text-lg mr-1.5">{loaded ? jobs.filter(j => j.enabled).length : "—"}</strong>已启用</span>
-      <span className="text-text-muted">{loaded ? jobs.filter(j => !j.enabled).length : "—"} 个已暂停</span>
+      <span><strong className="text-lg mr-1.5">{loaded ? scopedJobs.filter(j => j.enabled).length : "—"}</strong>已启用</span>
+      <span className="text-text-muted">{loaded ? scopedJobs.filter(j => !j.enabled).length : "—"} 个已暂停</span>
       <span className={needsAttention ? "text-warning" : "text-text-muted"}>{loaded ? needsAttention : "—"} 个待检查 / 验证</span>
       <span className="ml-auto text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{timezone}</span>
     </div>
 
     {dispatcher && <div className={cn("card p-4 flex flex-wrap items-center gap-3", dispatcher.online ? "border-success/30" : "border-danger/50")}>
       <ShieldCheck className={cn("w-5 h-5", dispatcher.online ? "text-success" : "text-danger")} />
-      <div className="flex-1"><p className="text-sm font-medium">{dispatcher.online ? "周期执行器在线" : "周期执行器离线"}</p><p className="text-xs text-text-muted mt-1">{dispatcher.detail}。新 job 使用托管计划，关闭页面或重启 Web 不影响执行。</p></div>
+      <div className="flex-1"><p className="text-sm font-medium">{dispatcher.online ? "周期执行器在线" : "周期执行器离线"}</p><p className="text-xs text-text-muted mt-1">{dispatcher.detail}。{dispatcher.detail?.includes("隔离")?"关闭浏览器后继续执行；重新启动隔离应用后恢复已保存计划。":"新 job 使用托管计划，关闭页面或重启 Web 不影响执行。"}</p></div>
       {!dispatcher.online && <button className="btn text-xs" disabled={!!busy} onClick={startDispatcher}>{busy === "host" ? "正在验证心跳…" : "启动 / 恢复执行器"}</button>}
     </div>}
     {hasLaunchd && <div className="card border-accent/30 p-4 flex gap-3">
@@ -333,7 +336,7 @@ export function SchedulerPage() {
     </div>}
 
     {error && jobs.length > 0 ? <ErrorState error={error} onRetry={() => fetchJobs()} compact /> : null}
-    {jobs.length ? <div className="flex flex-wrap items-center gap-3"><input className="input max-w-sm text-xs" aria-label="搜索调度计划" placeholder="搜索计划名称或研究任务" value={scheduleQuery} onChange={(e) => setScheduleQuery(e.target.value)} /><select aria-label="调度状态" className="input w-auto text-xs" value={statusScope} onChange={(e) => setStatusScope(e.target.value)}><option value="">全部状态</option><option value="enabled">已启用</option><option value="paused">已暂停</option><option value="attention">待检查 / 验证</option></select><span className="text-xs text-text-muted ml-auto">显示 {visibleSchedules.length} / {jobs.length}</span></div> : null}
+    {jobs.length ? <div className="flex flex-wrap items-center gap-3"><input className="input max-w-sm text-xs" aria-label="搜索调度计划" placeholder="搜索计划名称或研究任务" value={scheduleQuery} onChange={(e) => setScheduleQuery(e.target.value)} /><select aria-label="调度状态" className="input w-auto text-xs" value={statusScope} onChange={(e) => setStatusScope(e.target.value)}><option value="">全部状态</option><option value="enabled">已启用</option><option value="paused">已暂停</option><option value="attention">待检查 / 验证</option></select><span className="text-xs text-text-muted ml-auto">显示 {visibleSchedules.length} / {scopedJobs.length}</span></div> : null}
     {loaded && jobs.length > 0 && !visibleSchedules.length ? <p className="text-sm text-text-muted">没有符合筛选的计划</p> : null}
     {awaitingFirstJobs ? <p className="text-sm text-text-muted">加载中…</p> : error && !jobs.length ? <ErrorState error={error} onRetry={() => fetchJobs()} /> : jobs.length === 0 ? <div className="card p-10 text-center space-y-2">
       <Clock className="w-8 h-8 mx-auto text-text-muted" />

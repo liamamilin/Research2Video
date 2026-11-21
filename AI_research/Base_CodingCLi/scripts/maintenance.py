@@ -40,6 +40,9 @@ DEFAULT_LOG_DAYS = 14
 DEFAULT_BACKUPS = 14
 # A lock sidecar older than this belongs to a process that is long gone.
 DEFAULT_LOCK_DAYS = 7
+# Validation and acceptance runs untouched this long are deleted outright.
+DEFAULT_SCRATCH_DAYS = 7
+DEFAULT_AUTOVIDEO_DATA = ROOT.parents[1] / "autovideo" / "g3" / "data"
 
 
 def _size(path: Path) -> int:
@@ -293,6 +296,75 @@ def prune_backups(state_dir: Path, keep: int, dry_run: bool) -> str:
     return report
 
 
+#: Research-side folders that only ever hold validation and acceptance runs; each child is one run.
+SCRATCH_CONTAINERS = ("validation", "automatic_visual_acceptance", "screenshot_acceptance")
+#: AutoVideo top-level entries named like ``acceptance-x`` or ``x-20261028`` are one-off validation runs.
+DATED_ENTRY = re.compile(r"^acceptance-|(?:^|[-_])20\d{6}(?:[-_.]|$)")
+#: Never removed by name matching, whatever they are called.
+PROTECTED_SUFFIXES = (".db", ".sqlite3", ".db-wal", ".db-shm", ".sqlite3-wal", ".sqlite3-shm")
+
+
+def _newest_mtime(path: Path) -> float:
+    """Last write anywhere inside, without following symlinks; a run still writing stays young."""
+    newest = path.lstat().st_mtime
+    if path.is_dir() and not path.is_symlink():
+        for child in path.rglob("*"):
+            try:
+                newest = max(newest, child.lstat().st_mtime)
+            except OSError:
+                continue
+    return newest
+
+
+def _scratch_candidates(state_dir: Path, autovideo_data: Path) -> list[Path]:
+    found: list[Path] = []
+    containers = [state_dir / name for name in SCRATCH_CONTAINERS] + [autovideo_data / "validation"]
+    for root in containers:
+        if root.is_dir() and not root.is_symlink():
+            found += sorted(root.iterdir())
+    if autovideo_data.is_dir():
+        found += sorted(p for p in autovideo_data.iterdir()
+                        if p.name != "validation" and DATED_ENTRY.search(p.name))
+    return [p for p in found
+            if not p.is_symlink() and not p.name.endswith(PROTECTED_SUFFIXES) and not p.name.startswith(".")]
+
+
+def prune_scratch(state_dir: Path, autovideo_data: Path, days: int, dry_run: bool) -> str:
+    """Delete validation and acceptance runs nobody has written to for ``days``.
+
+    These held 19 GB by 11-08: screenshots, sample renders and audio from one-off
+    checks, while the finished videos already live on the external disk. Nothing
+    in code or any database reads them back. Symlinks (earlier runs moved to the
+    external disk) are left alone, as are databases whatever their name.
+    """
+    cutoff = time.time() - days * 86400
+    removed = freed = stuck = 0
+    for path in _scratch_candidates(state_dir, autovideo_data):
+        try:
+            if _newest_mtime(path) >= cutoff:
+                continue
+            size = _size(path)
+            if not dry_run:
+                if path.is_dir():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+                if path.exists():
+                    stuck += 1
+                    continue
+        except OSError:
+            stuck += 1
+            continue
+        removed += 1
+        freed += size
+    if not removed and not stuck:
+        return "验证中间产出: 无可清理"
+    report = f"验证中间产出: {removed} 项（{freed / 1073741824:.2f} GB）"
+    if stuck:
+        report += f"，{stuck} 项删除失败"
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="每日维护：回收数据库、清理会话/日志/锁/备份")
     parser.add_argument("--state-dir", default=str(ROOT / "state"))
@@ -301,10 +373,13 @@ def main() -> int:
     parser.add_argument("--log-days", type=int, default=DEFAULT_LOG_DAYS)
     parser.add_argument("--backups", type=int, default=DEFAULT_BACKUPS)
     parser.add_argument("--lock-days", type=int, default=DEFAULT_LOCK_DAYS)
+    parser.add_argument("--autovideo-data-dir", default=str(DEFAULT_AUTOVIDEO_DATA))
+    parser.add_argument("--scratch-days", type=int, default=DEFAULT_SCRATCH_DAYS)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     state_dir = Path(args.state_dir)
+    autovideo_data = Path(args.autovideo_data_dir)
     logs_dir = Path(args.logs_dir)
     output_dir = Path(args.output_dir)
     os.environ.setdefault("AREC_STATE_DIR", str(state_dir))
@@ -317,6 +392,7 @@ def main() -> int:
         ("logs", lambda: prune_logs(logs_dir, args.log_days, args.dry_run)),
         ("backups", lambda: prune_backups(state_dir, args.backups, args.dry_run)),
         ("empty-rounds", lambda: prune_empty_round_dirs(output_dir, args.lock_days, args.dry_run)),
+        ("scratch", lambda: prune_scratch(state_dir, autovideo_data, args.scratch_days, args.dry_run)),
     )
     failed: list[str] = []
     for name, step in steps:

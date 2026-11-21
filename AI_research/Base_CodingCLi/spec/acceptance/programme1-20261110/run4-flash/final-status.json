@@ -1,0 +1,374 @@
+{
+ "job_id": "2f554c9a-1f07-4e8e-866c-2c0a7adbbd13",
+ "title": "Claude 降价 20%，Copilot 用户却还用不上",
+ "status": "COMPLETED",
+ "active_stage": "COMPLETE",
+ "attempt_count": 1,
+ "cancel_requested": false,
+ "error_code": null,
+ "error_message": null,
+ "retryable": false,
+ "source_sha256": "a3b37612b9f75320a2e9e0979a676893164e2495434fe23bd7c576a516d5815e",
+ "source_char_count": 1440,
+ "target_duration_sec": 60,
+ "theme": "minimal_dark",
+ "voice_id": "voxcpm_anchor",
+ "created_at": "2026-11-10T15:29:40.225+00:00",
+ "updated_at": "2026-11-10T15:45:15.530+00:00",
+ "version": 13,
+ "operation_type": "generate",
+ "parent_job_id": null,
+ "parent_attempt_no": null,
+ "scene_id": null,
+ "creative_intent": {
+  "audience": "",
+  "purpose": "知识讲解",
+  "tone": "",
+  "focus": "Fable 5.2 把单价从 $10/$50 降到 $8/$40、上下文拉到 1M、输出快 30%；Claude Code 默认切到它，GitHub Copilot 却要管理员手动开 policy 并接受数据保留。"
+ },
+ "revision_mode": null,
+ "input_mode": "narration",
+ "idempotency_key": null,
+ "background_music_resolved": null,
+ "background_music": {
+  "enabled": false
+ },
+ "production_recipe_resolved": null,
+ "production_plan": {
+  "schema_version": 1,
+  "settings": {
+   "brand": {
+    "enabled": true,
+    "profile": "linthesis"
+   },
+   "content_notices": [],
+   "creative_intent": {
+    "audience": "",
+    "purpose": "知识讲解",
+    "tone": "",
+    "focus": "Fable 5.2 把单价从 $10/$50 降到 $8/$40、上下文拉到 1M、输出快 30%；Claude Code 默认切到它，GitHub Copilot 却要管理员手动开 policy 并接受数据保留。"
+   },
+   "duration_mode": "content",
+   "music": null,
+   "packaging": {
+    "preset": "common",
+    "label": "快讯",
+    "accent": "#1f7a4d",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "recipe": "flash-nr",
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "production_context": {
+    "content_recipe": {
+     "id": "research:flash-nr",
+     "settings": {
+      "video_form": "information_motion",
+      "creative_intent": {
+       "purpose": "知识讲解",
+       "focus": "Fable 5.2 把单价从 $10/$50 降到 $8/$40、上下文拉到 1M、输出快 30%；Claude Code 默认切到它，GitHub Copilot 却要管理员手动开 policy 并接受数据保留。"
+      },
+      "packaging": {
+       "preset": "common",
+       "label": "快讯",
+       "accent": "#1f7a4d",
+       "intro": {
+        "subtitle": "11月9日",
+        "seconds": 1.5
+       },
+       "outro": {
+        "lines": [
+         "面向开发者的 快讯"
+        ],
+        "seconds": 3
+       },
+       "recipe": "flash-nr"
+      },
+      "voice_id": "voxcpm_anchor"
+     }
+    },
+    "matrix": {
+     "id": "research-production:flash_each",
+     "settings": {
+      "video_speed": 1.25
+     }
+    }
+   },
+   "production_mode": "standard",
+   "production_recipe": null,
+   "target_duration_sec": 60,
+   "video_form": "information_motion",
+   "video_speed": 1.25,
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+   "packaging.label": "content_recipe",
+   "packaging.accent": "content_recipe",
+   "packaging.enabled": "common",
+   "packaging.intro.component": "common",
+   "packaging.intro.enabled": "common",
+   "packaging.intro.seconds": "content_recipe",
+   "packaging.outro.component": "common",
+   "packaging.outro.enabled": "common",
+   "packaging.outro.seconds": "content_recipe",
+   "packaging.badge.component": "common",
+   "packaging.badge.enabled": "common",
+   "packaging.source_card.component": "common",
+   "packaging.source_card.enabled": "common",
+   "packaging.source_card.seconds": "common",
+   "packaging.sound.component": "common",
+   "packaging.sound.enabled": "common",
+   "video_form": "content_recipe",
+   "production_mode": "common",
+   "visual_style": "common",
+   "duration_mode": "request",
+   "target_duration_sec": "common",
+   "voice_id": "content_recipe",
+   "video_speed": "matrix",
+   "creative_intent": "common",
+   "creative_intent.purpose": "content_recipe",
+   "creative_intent.focus": "content_recipe",
+   "packaging.preset": "content_recipe",
+   "packaging.intro.subtitle": "content_recipe",
+   "packaging.outro.lines": "content_recipe",
+   "packaging.recipe": "content_recipe",
+   "enabled": "brand_default",
+   "profile": "brand_default"
+  },
+  "style": {
+   "id": "legacy",
+   "version": 1,
+   "description": "保留各既有形式的原始视觉定义"
+  },
+  "executor": {
+   "id": "remotion",
+   "version": 1
+  },
+  "output": {
+   "width": 1920,
+   "height": 1080,
+   "fps": 30
+  },
+  "packaging_sha256": "c8642bda5e007a9f0df812154eeffb27ed74cd2b77b734e7a797fa52623730c2",
+  "packaging": {
+   "library": "autovideo-packaging",
+   "version": 2,
+   "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+   "selection": {
+    "preset": "common",
+    "label": "快讯",
+    "accent": "#1f7a4d",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "recipe": "flash-nr",
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "components": {
+    "label": "快讯",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+     "component": "stinger",
+     "enabled": false,
+     "seconds": 1.5
+    },
+    "outro": {
+     "component": "end_card",
+     "enabled": false,
+     "seconds": 2.5
+    },
+    "badge": {
+     "component": "corner_badge",
+     "enabled": false
+    },
+    "source_card": {
+     "component": "source_card",
+     "enabled": true,
+     "seconds": 4.5
+    },
+    "sound": {
+     "component": "synth_sting",
+     "enabled": false
+    }
+   },
+   "package": {
+    "accent": "#1f7a4d"
+   },
+   "badge": {
+    "text": "",
+    "color": "#1f7a4d"
+   },
+   "source_card": null,
+   "source_card_state": "no_sources",
+   "component_versions": {
+    "intro": {
+     "id": "stinger",
+     "version": 1
+    },
+    "outro": {
+     "id": "end_card",
+     "version": 2
+    },
+    "badge": {
+     "id": "corner_badge",
+     "version": 1
+    },
+    "source_card": {
+     "id": "source_card",
+     "version": 2
+    },
+    "sound": {
+     "id": "synth_sting",
+     "version": 1
+    }
+   },
+   "sha256": "c8642bda5e007a9f0df812154eeffb27ed74cd2b77b734e7a797fa52623730c2"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "a3b37612b9f75320a2e9e0979a676893164e2495434fe23bd7c576a516d5815e",
+  "music": {
+   "selection": null,
+   "background_music_generated": false
+  },
+  "brand_record_sha256": "8e8e766277b1d8553a00a1b068971ad023a039e10575198167446fd6b97c9465",
+  "brand_layout": {
+   "version": 1,
+   "left": 140,
+   "right": 140,
+   "top": 54,
+   "width": 520,
+   "height": 76,
+   "gap": 40
+  },
+  "sha256": "808a3155db8b3779a167cc322542581633f36b3e414a4cb8de169d203c28cfb2"
+ },
+ "production_mode": "standard",
+ "visual_style": "legacy",
+ "video_speed": 1.25,
+ "video_form": "information_motion",
+ "duration_mode": "content",
+ "input_analysis": {
+  "requested_form": "information_motion",
+  "selected_form": "information_motion",
+  "recommended_form": "information_motion",
+  "selection_mode": "manual",
+  "status": "ready",
+  "reason": "按指定形式制作，定稿讲稿逐字配音。",
+  "issues": [],
+  "retained_units": 35,
+  "excluded_units": 0
+ },
+ "resolved_video_form": "information_motion",
+ "attempts": [
+  {
+   "attempt_no": 1,
+   "status": "COMPLETED",
+   "started_at": "2026-11-10T15:29:40.241+00:00",
+   "completed_at": "2026-11-10T15:45:15.530+00:00",
+   "error_code": null,
+   "error_message": null,
+   "stages": [
+    {
+     "stage": "PLAN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:29:40.241+00:00",
+     "completed_at": "2026-11-10T15:29:40.637+00:00",
+     "duration_seconds": 0.06,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "VOICE_ALIGN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:29:40.639+00:00",
+     "completed_at": "2026-11-10T15:36:22.586+00:00",
+     "duration_seconds": 401.94,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "STORYBOARD",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:36:22.593+00:00",
+     "completed_at": "2026-11-10T15:37:51.499+00:00",
+     "duration_seconds": 88.99,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "SCENE_IMAGES",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T15:37:51.503+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "BUILD_IR",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:37:51.862+00:00",
+     "completed_at": "2026-11-10T15:38:59.881+00:00",
+     "duration_seconds": 68.03,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "RENDER",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:38:59.887+00:00",
+     "completed_at": "2026-11-10T15:44:25.730+00:00",
+     "duration_seconds": 325.94,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "QUALITY_CHECK",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:44:25.743+00:00",
+     "completed_at": "2026-11-10T15:45:15.530+00:00",
+     "duration_seconds": 11.09,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "PACKAGE",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:44:37.468+00:00",
+     "completed_at": "2026-11-10T15:45:15.462+00:00",
+     "duration_seconds": 13.57,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "AUDIO_MIX",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T15:45:01.950+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    }
+   ]
+  }
+ ]
+}

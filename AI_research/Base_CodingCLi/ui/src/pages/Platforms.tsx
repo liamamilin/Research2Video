@@ -3,7 +3,7 @@ import { VISIBLE_PLATFORM_NAMES, SOCIAL_PLATFORM_KEYS } from "@/lib/distribution
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ExternalLink, MessageSquareText, RefreshCw, Settings, UploadCloud } from "lucide-react";
-import { DEFAULT_PUBLISH_WINDOW, EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type PlatformOverview, type PlatformComment, type PlatformSettings, type PublishWindow, type UploadCandidate } from "@/api/platforms";
+import { DEFAULT_PUBLISH_WINDOW, EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type CommentRestriction, type FirstComment, type PlatformOverview, type PlatformComment, type PlatformSettings, type PublishWindow, type UploadCandidate } from "@/api/platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
 import { errorMessage } from "@/lib/toast";
@@ -99,7 +99,9 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
   const firstComment = config.first_comment || EMPTY_FIRST_COMMENT;
   const hours = config.publish_window || DEFAULT_PUBLISH_WINDOW;
   const setWindow = (patch: Partial<PublishWindow>) => setConfig({ ...config, publish_window: { ...hours, ...patch } });
-  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); void run(() => platformAction("/settings", { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment, publish_window: hours }, "PUT")); }}>
+  const guide = config.restricted_comment || { enabled: false, text: "", pin: true };
+  const setGuide = (patch: Partial<FirstComment>) => setConfig({ ...config, restricted_comment: { ...guide, ...patch } });
+  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); void run(() => platformAction("/settings", { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment, publish_window: hours, restricted_comment: guide }, "PUT")); }}>
     <h2 className="text-sm font-medium">自动化策略</h2>
     <BilibiliCategorySelect label="默认投稿分区" required={config.auto_upload} value={config.tid} onChange={tid => setConfig({ ...config, tid })} resource={categoryResource} />
     <label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={config.auto_upload} disabled={!ready && !config.auto_upload} onChange={e => setConfig({ ...config, auto_upload: e.target.checked })} />出片后自动投稿</label>
@@ -110,8 +112,26 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
     <label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={config.sync_comments} onChange={e => setConfig({ ...config, sync_comments: e.target.checked })} />每 5 分钟同步已管理视频的最新评论</label>
     <p className="text-xs text-text-muted">每轮读取每个视频的最新一页和楼中楼预览；更早评论和完整楼中楼可继续读取。回复由你编辑并点击发送。</p>
     <FirstCommentOptions template value={firstComment} onChange={value => setConfig({ ...config, first_comment: value })} />
-    <button disabled={busy || (config.auto_upload && !validCategory) || (firstComment.enabled && !firstComment.text.trim()) || (hours.enabled && hours.start >= hours.end)} className="btn btn-primary text-xs">保存策略</button>
+    <div className="space-y-2"><label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={guide.enabled} onChange={e => setGuide({ enabled: e.target.checked })} />评论区推广被限流时，自动换成引导评论</label>
+      <p className="text-xs text-text-muted">每半小时查一次创作中心。稿件因评论区商业推广被限流时，删掉本账号带站外链接的评论；勾选后再发这条引导评论并置顶。引导评论不能带站外链接。申诉仍需在创作中心手动提交。</p>
+      {guide.enabled ? <textarea aria-label="限流引导评论" className="input text-xs w-full min-h-[64px]" value={guide.text} maxLength={1000} onChange={e => setGuide({ text: e.target.value })} placeholder="例如：想订阅 GPT 的私信我发「GPT」，自动回复开通方式" /> : null}</div>
+    <button disabled={busy || (guide.enabled && !guide.text.trim()) || (config.auto_upload && !validCategory) || (firstComment.enabled && !firstComment.text.trim()) || (hours.enabled && hours.start >= hours.end)} className="btn btn-primary text-xs">保存策略</button>
   </form>;
+}
+
+const RESTRICTION_STATES: Record<string, string> = { DETECTED: "待处理", CLEANING: "正在删除推广评论", CLEANED: "推广评论已删", POSTING: "正在发引导评论", SWAPPED: "已换成引导评论", CLOSED: "评论区已关闭", FAILED: "处理失败", UNKNOWN: "结果待核对" };
+
+function Restrictions({ rows }: { rows: CommentRestriction[] }) {
+  const active = rows.filter(row => row.active);
+  if (!active.length) return null;
+  return <section className="card p-4 space-y-3 border-warning/40">
+    <h2 className="text-sm font-medium text-warning">流量受影响 · 评论区商业推广（{active.length}）</h2>
+    <p className="text-xs text-text-muted">换评不会自动解除限流：请在 72 小时内到创作中心对这些稿件点【稿件申诉】，说明推广评论已删除。</p>
+    <ul className="space-y-2 text-xs">{active.map(row => <li key={row.bvid} className="space-y-1">
+      <div className="flex flex-wrap gap-2 items-center"><PlatformLink bvid={row.bvid}>{row.title || row.bvid}</PlatformLink><span>{RESTRICTION_STATES[row.status] || row.status}</span>{row.deleted.length ? <span className="text-text-muted">已删 {row.deleted.length} 条推广评论</span> : null}{row.guide_rpid ? <PlatformLink bvid={row.bvid} rpid={row.guide_rpid}>查看引导评论</PlatformLink> : null}<a className="text-accent hover:underline" href="https://member.bilibili.com/platform/upload-manager/article" target="_blank" rel="noreferrer">去申诉</a></div>
+      {row.error ? <p className="text-warning">{row.error}</p> : null}
+    </li>)}</ul>
+  </section>;
 }
 
 export function PlatformsPage() {
@@ -165,6 +185,7 @@ function BilibiliPlatformsPage() {
       <div role="tablist" className="flex gap-1 border-b border-border">{[{ id: "uploads", label: "视频投稿", icon: UploadCloud }, { id: "comments", label: `评论收件箱${pending ? ` · ${pending}` : ""}`, icon: MessageSquareText }, { id: "settings", label: "账号与策略", icon: Settings }].map(item => <button key={item.id} role="tab" aria-selected={tab === item.id} className={cn("px-3 py-2 text-sm flex gap-2 items-center border-b-2", tab === item.id ? "text-accent border-accent" : "text-text-muted border-transparent")} onClick={() => changeTab(item.id)}><item.icon className="w-4 h-4" />{item.label}</button>)}</div>
       {!data.account.connected && tab !== "settings" ? <section className="card p-8 text-center space-y-3"><p className="text-sm text-text-muted">先连接哔哩哔哩账号，再开始投稿和管理评论。</p><button className="btn btn-primary text-xs" onClick={() => changeTab("settings")}>前往账号连接</button></section> : null}
       {tab === "uploads" ? <div className="space-y-4">
+        <Restrictions rows={data.restrictions || []} />
         {canEdit && data.account.connected ? <CandidatePicker data={data} selected={selected} onSelect={value => { setSelected(value); setParams(previous => { const next = new URLSearchParams(previous); next.delete("task"); if (value) next.set("render", value); else next.delete("render"); return next; }); }} /> : null}
         {taskId && data.account.connected ? <FocusedUpload key={taskId} taskId={taskId} canEdit={canEdit} run={run} busy={busy} /> : null}
         {selected && !taskId && canEdit && data.account.connected ? <UploadForm key={selected} renderId={selected} run={run} busy={busy || !data.biliup_ready} onDone={task => { setSelected(""); setParams(previous => { const next = new URLSearchParams(previous); next.delete("render"); if (task.id && data.publication_flow) next.set("task", task.id); return next; }); }} /> : null}

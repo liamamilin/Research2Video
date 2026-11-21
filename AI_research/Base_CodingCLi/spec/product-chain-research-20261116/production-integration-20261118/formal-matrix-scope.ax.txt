@@ -1,0 +1,212 @@
+Window: "研映 · Research2Video", App: Google Chrome.
+0 标准窗口 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c, Secondary Actions: Raise
+	1 container 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 container
+					8 弹出式按钮 查看网站信息
+					9 文本栏 (settable) 地址和搜索栏, Value: http://127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c, Placeholder: 问问 Google 或输入网址
+					10 按钮 为此标签页添加书签
+				11 container
+					12 弹出式按钮 Ghelper
+					13 弹出式按钮 MetaMask
+可以访问此网站
+					14 弹出式按钮 ChatGPT
+可以访问此网站
+					15 弹出式按钮 扩展程序
+				16 按钮 Liam
+				17 弹出式按钮 完成更新
+			18 工具栏 书签
+				19 工具栏 已保存的标签页分组
+					20 “已保存的标签页分组”按钮 “⚡ 页面性能”分组 - 已打开
+					21 按钮 标签页分组
+				22 分离器 分隔符
+				23 书签文件夹按钮 不常用
+				24 书签文件夹按钮 常用
+				25 书签文件夹按钮 大模型
+				26 书签文件夹按钮 项目
+				27 书签文件夹按钮 数据发现
+				28 书签文件夹按钮 阅读
+				29 书签文件夹按钮 工具
+				30 书签文件夹按钮 所有书签
+				31 分离器 分隔符
+			32 container
+				33 滚动区
+					34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c
+						35 container
+							36 标题 研映 · Research2Video, Value: 2
+								37 文本 研映 · Research2Video
+							38 按钮 admin · admin （账号设置）
+							39 container
+								40 link 链路管理, Value: 127.0.0.1:8775/chains
+								41 link 矩阵, Value: 127.0.0.1:8775/matrices?chain=job-050ab505483c
+								42 link 产出, Value: 127.0.0.1:8775/outputs?chain=job-050ab505483c
+								43 link 视频看板, Value: 127.0.0.1:8775/?chain=job-050ab505483c
+								44 link 文稿, Value: 127.0.0.1:8775/video?chain=job-050ab505483c
+								45 link 成片与发布, Value: 127.0.0.1:8775/publish?chain=job-050ab505483c
+								46 link 平台管理, Value: 127.0.0.1:8775/platforms?chain=job-050ab505483c
+								47 link 助手, Value: 127.0.0.1:8775/ask?chain=job-050ab505483c
+								48 文本 研究引擎
+								49 link 研究总览, Value: 127.0.0.1:8775/engine?chain=job-050ab505483c
+								50 link Jobs, Value: 127.0.0.1:8775/jobs?chain=job-050ab505483c
+								51 link 情报轮次, Value: 127.0.0.1:8775/rounds?chain=job-050ab505483c
+								52 link 报告, Value: 127.0.0.1:8775/reports?chain=job-050ab505483c
+								53 link 周期调度, Value: 127.0.0.1:8775/scheduler?chain=job-050ab505483c
+								54 文本 高级
+								55 link 选题, Value: 127.0.0.1:8775/topics?chain=job-050ab505483c
+								56 link 信息源, Value: 127.0.0.1:8775/sources?chain=job-050ab505483c
+								57 link 文稿配方, Value: 127.0.0.1:8775/video-recipes?chain=job-050ab505483c
+								58 link 数据分析, Value: 127.0.0.1:8775/analytics?chain=job-050ab505483c
+								59 link 设置, Value: 127.0.0.1:8775/settings?chain=job-050ab505483c
+							60 按钮 退出
+							61 文本 关联链路
+							62 link ← AI Flash Discovery, Value: 127.0.0.1:8775/chains/job-050ab505483c
+							63 文本 在此保存的修改会在链路管理中生效。矩阵、报告、产出、文稿、看板、任务、来源、配方及周期列表已按此链路筛选。
+							64 link 退出关联，查看全部, Value: 127.0.0.1:8775/matrices/ai_media
+							65 container
+								66 标题 AI 与科技 · AI Flash Discovery, Value: 1
+									67 text AI 与科技  ·  AI Flash Discovery
+								68 文本 只显示当前链路的研究和视频输出。矩阵的共用栏目、关键词、预算和主题设置会影响其他链路，请在整个矩阵中管理。
+								69 link 返回链路与运行记录, Value: 127.0.0.1:8775/chains/job-050ab505483c
+								70 link 本链路周期, Value: 127.0.0.1:8775/scheduler?chain=job-050ab505483c
+								71 link 查看整个矩阵与共用设置, Value: 127.0.0.1:8775/matrices/ai_media
+							72 container 当前链路研究
+								73 container 研究任务 AI Flash Discovery
+									74 link AI Flash Discovery, Value: 127.0.0.1:8775/jobs/monitoring%2Fai_flash_discovery
+									75 文本 上次运行完成
+									76 container 2026-11-18T13:15:30+0800
+										77 text 11-18 13:15  ·  2 小时前
+									78 按钮 运行 AI Flash Discovery 一次
+									79 文本 运行周期
+									80 文本 定时 30 7,18 * * *
+									81 container 2026-11-18T18:30:00+08:00
+										82 text 下次  11-18 18:30  ·  4 小时后
+									83 按钮 改 AI Flash Discovery 的周期
+									84 文本 研究报告
+									85 link 查看报告, Value: 127.0.0.1:8775/reports/view?path=flash%2F2026-11-18_ai_flash_discovery_1.md
+									86 container 2026-11-18T13:15:30+0800
+										87 text 11-18 13:15  ·  2 小时前
+									88 文本 视频制作
+									89 link 视频配置, Value: 127.0.0.1:8775/matrices/ai_media/video/monitoring%2Fai_flash_discovery
+									90 文本 7 套，2 套自动写
+									91 文本 最新报告已写 1 篇
+									92 开合三角标记 任务详情
+										93 文本 任务详情
+							94 container 视频配置
+								95 标题 视频配置, Value: 2
+									96 文本 视频配置
+								97 文本 每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、要不要重新调研，配方允许的才能在配置里改；拆不拆由配方定。
+								98 container 配置 快讯 · 开发者 · B 站横屏短
+									99 text 快讯 · 开发者 · B 站横屏短 配方  flash 已写 12 篇
+									100 container
+										101 text 给 开发者 看 ·  约 1.25 分钟  ·  每条一期  · 挑中的条目会重新调研一遍
+									102 container
+										103 复选框 自动写, Value: 0
+										104 文本 报告一出来就自动制作
+									105 文本 全部不重复选题依次制作
+									106 按钮 挑条目写
+									107 按钮 删除这套
+								108 container 配置 快讯 · 每天（不再调研）
+									109 text 快讯 · 每天（不再调研） 配方  flash-nr 已写 69 篇
+									110 container
+										111 text 给 开发者 看 ·  内容决定时长  ·  整期节目  · 每份报告写一期，直接用报告，不调研  · 自动：报告一出来就写
+									112 container
+										113 复选框 自动写, Value: 1
+										114 文本 报告一出来就自动制作
+									115 文本 每份报告制作一期，自动组织多个内容
+									116 按钮 选报告写
+									117 按钮 删除这套
+								118 container 配置 快讯 · 每条一期（不再调研）
+									119 text 快讯 · 每条一期（不再调研） 配方  flash-nr 已写 87 篇
+									120 container
+										121 text 给 开发者 看 ·  约 1.25 分钟  ·  每条一期  · 不再调研  · 自动：全部不重复选题
+									122 container
+										123 复选框 自动写, Value: 1
+										124 文本 报告一出来就自动制作
+									125 文本 全部不重复选题依次制作
+									126 按钮 挑条目写
+									127 按钮 删除这套
+								128 container 配置 快讯 · 普通用户 · B 站横屏短
+									129 text 快讯 · 普通用户 · B 站横屏短 配方  ai-non_tech-quick_take-short 还没写过
+									130 container
+										131 text 给 普通用户 看 ·  约 1.25 分钟  ·  每条一期  · 挑中的条目会重新调研一遍
+									132 container
+										133 复选框 自动写, Value: 0
+										134 文本 报告一出来就自动制作
+									135 文本 全部不重复选题依次制作
+									136 按钮 挑条目写
+									137 按钮 删除这套
+								138 container 配置 盘点 · 开发者 · B 站横屏长
+									139 text 盘点 · 开发者 · B 站横屏长 配方  ai-developer-roundup-long 已写 5 篇
+									140 container
+										141 text 给 开发者 看 ·  约 4 分钟  ·  挑几条合一期  · 用报告里的条目，不调研
+									142 按钮 挑条目写
+									143 按钮 删除这套
+								144 container 配置 一个知识点 · 开发者 · B 站横屏短
+									145 text 一个知识点 · 开发者 · B 站横屏短 配方  point_short 已写 3 篇
+									146 container
+										147 text 给 开发者 看 ·  约 1.5 分钟  ·  每条一期  · 挑中的条目会重新调研一遍
+									148 container
+										149 复选框 自动写, Value: 0
+										150 文本 报告一出来就自动制作
+									151 文本 全部不重复选题依次制作
+									152 按钮 挑条目写
+									153 按钮 删除这套
+								154 container 配置 一个知识点 · 普通用户 · B 站横屏短
+									155 text 一个知识点 · 普通用户 · B 站横屏短 配方  ai-non_tech-one_point-short 还没写过
+									156 container
+										157 text 给 普通用户 看 ·  约 1.5 分钟  ·  每条一期  · 挑中的条目会重新调研一遍
+									158 container
+										159 复选框 自动写, Value: 0
+										160 文本 报告一出来就自动制作
+									161 文本 全部不重复选题依次制作
+									162 按钮 挑条目写
+									163 按钮 删除这套
+								164 弹出式按钮 加配置用的配方, Value: 用哪个配方…
+									165 (selected) 用哪个配方…
+								166 弹出式按钮 (disabled) 加配置给谁看, Value: 先选配方
+								167 按钮 (disabled) 加一套配置
+							168 按钮 让助手处理当前页面
+			169 弹出式按钮 标签页搜索
+			170 container
+				171 标签组
+					172 标签 (settable, boolean) Master of Science in Blockchain | NTU Singapore - 已固定, Value: off
+					173 标签 (settable, boolean) ChatGPT - 已固定, Value: off
+					174 标签 (settable, boolean) ChatGPT - 内存用量高 - 1.0 GB, Value: off
+					175 标签 (settable, boolean) 鹈鹕骑自行车 | AI 考题博物馆 - 闲置标签页 - 已释放 143 MB, Value: off
+					176 标签 (settable, boolean) Cursor Vibe Jam 2026 - 闲置标签页 - 已释放 170 MB, Value: off
+					177 标签 (settable, boolean) OpenCode Console - 闲置标签页 - 已释放 51.1 MB, Value: off
+					178 标签 (settable, boolean) Go | OpenCode - 闲置标签页 - 已释放 73.4 MB, Value: off
+					179 标签 (settable, boolean) 登录 | AutoDL算力云 - 闲置标签页 - 已释放 108 MB, Value: off
+					180 标签 (settable, boolean) 社会机制库 - 闲置标签页 - 已释放 132 MB, Value: off
+					181 标签 (settable, boolean) LLM&Agent 课程 - 闲置标签页 - 已释放 137 MB, Value: off
+					182 标签 (settable, boolean) Open Design Cloud - 闲置标签页, Value: off
+					183 标签 (settable, boolean) Some-Project/个人重要/****** 我的书.md at master · liamamilin/Some-Project - 闲置标签页 - 已释放 74.1 MB, Value: off
+					184 标签 (settable, boolean) liamamilin/ATLAS-METHODS - 闲置标签页 - 已释放 81.1 MB, Value: off
+					185 标签 (settable, boolean) 第 03 章 Python 组织程序的基本工具 · Python 设计模式：从问题到方案 - 闲置标签页 - 已释放 121 MB, Value: off
+					186 标签组 分组“⚡ 页面性能”- 2 个标签页•  研映 · Research2Video•  研映 · Research2Video - 已展开
+					187 标签 (selected, settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: on
+						188 按钮 关闭
+					189 标签 (settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: off
+					190 标签 (settable, boolean) Mureka：AI音乐生成器，轻松创作旋律、歌曲与歌词 | 最佳AI作曲平台与音乐创作工具, Value: off
+			191 按钮 新标签页
+			192 按钮 打开 Chrome 中的 Gemini
+	193 关闭按钮
+	194 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	195 最小化按钮
+196 menu bar
+	197 Chrome
+	198 文件
+	199 编辑
+	200 显示
+	201 历史记录
+	202 书签
+	203 个人资料
+	204 标签页
+	205 窗口
+	206 帮助
+
+The focused UI element is 34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c

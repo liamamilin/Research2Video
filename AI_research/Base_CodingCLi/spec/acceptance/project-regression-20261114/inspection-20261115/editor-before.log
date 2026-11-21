@@ -1,0 +1,70 @@
+
+> ai-research-ui@0.1.0 test
+> vitest run --run src/lib/use-script-editor.test.tsx
+
+
+ RUN  v3.2.7 /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/ui
+
+ ❯ src/lib/use-script-editor.test.tsx (2 tests | 2 failed) 12ms
+   × keeps recovered drafts separate when switching versions during editing 10ms
+     → expected { title: '第一版草稿', sections: [], …(2) } to deeply equal { title: '第二版草稿', sections: [], …(2) }
+   × does not copy unsaved text to a different script or user 2ms
+     → expected { title: '仅属于 Alice 的第一份文稿', …(3) } to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/use-script-editor.test.tsx > keeps recovered drafts separate when switching versions during editing
+AssertionError: expected { title: '第一版草稿', sections: [], …(2) } to deeply equal { title: '第二版草稿', sections: [], …(2) }
+
+- Expected
++ Received
+
+  {
+-   "baseVersion": 2,
+-   "original": "original",
++   "baseVersion": 1,
++   "original": "{\"title\":\"版本 1\",\"sections\":[]}",
+    "sections": [],
+-   "title": "第二版草稿",
++   "title": "第一版草稿",
+  }
+
+ ❯ src/lib/use-script-editor.test.tsx:21:40
+     19|   hook.rerender({ shown: version(2) });
+     20|   expect(hook.result.current.editing).toBe(false);
+     21|   expect(hook.result.current.recovery).toEqual(next);
+       |                                        ^
+     22|   expect(JSON.parse(localStorage.getItem(nextKey)!)).toEqual(next);
+     23|   expect(JSON.parse(localStorage.getItem("script-editor:alice:script:v…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/lib/use-script-editor.test.tsx > does not copy unsaved text to a different script or user
+AssertionError: expected { title: '仅属于 Alice 的第一份文稿', …(3) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "baseVersion": 1,
+  "original": "{\"title\":\"版本 1\",\"sections\":[]}",
+  "sections": [],
+  "title": "仅属于 Alice 的第一份文稿",
+}
+
+ ❯ src/lib/use-script-editor.test.tsx:35:40
+     33|   act(() => hook.result.current.setTitle("仅属于 Alice 的第一份文稿"));
+     34|   hook.rerender({ id: "second", user: "bob" });
+     35|   expect(hook.result.current.recovery).toBeNull();
+       |                                        ^
+     36|   expect(localStorage.getItem("script-editor:bob:second:v1")).toBeNull…
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  10:28:50
+   Duration  1.15s (transform 25ms, setup 0ms, collect 120ms, tests 12ms, environment 600ms, prepare 43ms)

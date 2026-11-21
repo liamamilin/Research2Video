@@ -36,6 +36,13 @@ logger = logging.getLogger("ai_research.web.video_executor")
 MAX_RETRIES = 2
 #: A render AutoVideo failed is submitted again this many times (a render is 15-30 minutes of its time).
 RENDER_RETRIES = 1
+#: Deterministic render errors that will fail identically on retry — hold immediately instead of burning 20+ minutes.
+NON_RETRYABLE_RENDER_CODES = frozenset({
+    "MODEL_COST_BUDGET_EXCEEDED", "MODEL_SCHEMA_REJECTED", "NARRATION_TEXT_MISMATCH",
+    "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "RENDER_CONFIG_INVALID",
+    "DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING",
+    "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "DISK_OFFLINE", "STORAGE_UNAVAILABLE",
+})
 #: A script that failed only because no search provider could answer is retried once search recovers, this many times
 #: (core.search_health spaces the tries by its 10-30 minute cooldowns), without using up MAX_RETRIES.
 SEARCH_RETRIES = 24
@@ -50,14 +57,18 @@ def column_of(script: dict):
     return video_columns.get(get_settings().paths.config_dir, script["column_key"])
 
 
-def steps_of(script: dict) -> list[dict]:
+def steps_of(script: dict, *, version: Optional[dict] = None, renders: Optional[list[dict]] = None,
+             column=None) -> list[dict]:
     """The script's steps as its records show them now."""
-    version = store.get_version(script["id"], script["current_version"]) if script.get("current_version") else None
+    if version is None and script.get("current_version"):
+        version = store.get_version(script["id"], script["current_version"])
+    if renders is None:
+        renders = store.list_renders(script["id"])
     try:
-        mode = column_of(script).research_mode
+        mode = (column or column_of(script)).research_mode
     except Exception:  # noqa: BLE001 - a recipe gone or broken: the steps still read
         mode = "job"
-    return steps.derive(script, version, store.list_renders(script["id"]), research_mode=mode)
+    return steps.derive(script, version, renders, research_mode=mode)
 
 
 def create(column_key: str, topic: dict, started_by: str) -> dict:
@@ -205,6 +216,10 @@ def approve(script_id: str, version: int, by: str) -> None:
     problem = submission_problem(found)
     if problem:
         raise StepError(problem)
+    from core.video.narration_stance import narration_problem
+    problem = narration_problem(found)
+    if problem:
+        raise StepError(problem)
     script = store.get_script(script_id) or {}
     store.update_script(script_id, status="APPROVED", approved_version=version)
     steps.log(script_id, "approve", "approve", f"v{version}", by=by)
@@ -256,6 +271,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
     tries = lambda key: int((retries or {}).get(key, 0))  # noqa: E731
     if status in ("RESEARCHING", "WRITING"):
         return out
+    if status == "APPROVED":
+        # Following an existing render (or waiting for capacity) spends no new
+        # attempt. Keep the history check at the point a new render can start,
+        # instead of rereading the entire archive on every progress poll.
+        renders = store.list_renders(script["id"])
+        current = [row for row in renders if row["version"] == script["approved_version"]]
+        if not can_start_render or any(row["status"] in (*store.ACTIVE_RENDER_STATUSES, "COMPLETED") for row in current):
+            return _render_auto(script, can_start_render, out, retries)
     if status in ("DRAFT", "APPROVED") and script.get("current_version"):
         from core.video import content_guard
 
@@ -287,8 +310,10 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
         if tries(key) >= limit:
             out["hold"] = f"写稿失败 {limit + 1} 次：{script.get('error')}"
             return out
-        if not can_start_script:
-            if key == "search" and search_health.outage():
+        needs_search = key == "search" or not (script.get("report_path") or script["topic"].get("from_report"))
+        search_down = needs_search and search_health.outage()
+        if not can_start_script or search_down:
+            if search_down:
                 out["item"] = {"note": SEARCH_WAIT_NOTE}
             return out
         failed_step = "research" if not script.get("report_path") else "write"
@@ -317,6 +342,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
             # by the user can still send it on (reopen_approved).
             out["hold"] = f"文稿没过审（{verdict['text']}），没有出片：" + "；".join(verdict["reasons"][:3]) + "。看过文稿、确认后再出片"
             out["item"] = {"gate": {**verdict, "approved": False}}
+            return out
+        from core.video.narration_stance import auto_approval_hold
+        current = store.get_version(script["id"], script["current_version"])
+        if reason := auto_approval_hold(current):
+            # A new draft still has a memo or a broken join. Already approved scripts do not enter this branch.
+            out["hold"] = reason
+            out["item"] = {"gate": {**verdict, "approved": False,
+                                    "narration_blocks_auto_approval": bool((current.get("meta") or {}).get("narration_blocks_auto_approval"))}}
             return out
         # any other label: the video is made, the label is shown next to it, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
@@ -349,10 +382,14 @@ def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optio
         out["hold"] = ("提交结果尚未确认，请先在 AutoVideo 作品库核对任务" if latest["error_code"] == "SUBMIT_UNCONFIRMED"
                        else "成片已生成但复制失败，点击重跑可继续复制，无需重新生成")
         return out
+    if latest and latest["status"] == "FAILED" and latest.get("error_code") in NON_RETRYABLE_RENDER_CODES:
+        out["hold"] = f"出片失败（{latest['error_code']}，确定性错误不自动重试）：{latest.get('error_message') or '请检查配置或日志'}"
+        return out
     if len(failed) > RENDER_RETRIES:
         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"
         return out
     if not can_start_render:
+        out['item']={'note':'上次出片失败；等待渲染名额后自动重试' if latest and latest['status']=='FAILED' else '等待渲染名额，已有讲稿保留'}
         return out
     from core.video import production_admission
     from core.research_window import date_of

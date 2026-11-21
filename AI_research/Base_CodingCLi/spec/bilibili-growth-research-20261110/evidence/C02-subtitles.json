@@ -1,0 +1,1615 @@
+{
+  "bvid": "BV1REgz6fEtP",
+  "observed_at": "2026-11-10T09:03:24.485374+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 0.76,
+      "to": 3.92,
+      "sid": 1,
+      "location": 2,
+      "content": "通过GENTTIC工具和最新模型的朋友应该知道",
+      "music": 0.0
+    },
+    {
+      "from": 3.92,
+      "to": 5.86,
+      "sid": 2,
+      "location": 2,
+      "content": "现在的AI能力已经很强了",
+      "music": 0.0
+    },
+    {
+      "from": 5.86,
+      "to": 8.5,
+      "sid": 3,
+      "location": 2,
+      "content": "强到甚至完全不需不用选逆向",
+      "music": 0.0
+    },
+    {
+      "from": 8.5,
+      "to": 10.94,
+      "sid": 4,
+      "location": 2,
+      "content": "都可以自自己制作汉化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 11.17,
+      "to": 12.35,
+      "sid": 5,
+      "location": 2,
+      "content": "在上一个阶段",
+      "music": 0.0
+    },
+    {
+      "from": 12.35,
+      "to": 14.35,
+      "sid": 6,
+      "location": 2,
+      "content": "出于成本和各方面的考量",
+      "music": 0.0
+    },
+    {
+      "from": 14.35,
+      "to": 16.19,
+      "sid": 7,
+      "location": 2,
+      "content": "AI主要还是用于辅助逆向",
+      "music": 0.0
+    },
+    {
+      "from": 16.19,
+      "to": 19.43,
+      "sid": 8,
+      "location": 2,
+      "content": "或者干脆制作文本的错翻译和初步润色",
+      "music": 0.0
+    },
+    {
+      "from": 19.43,
+      "to": 22.61,
+      "sid": 9,
+      "location": 2,
+      "content": "主要的逆向测试工作还是由汉化组完成",
+      "music": 0.0
+    },
+    {
+      "from": 22.61,
+      "to": 25.43,
+      "sid": 10,
+      "location": 2,
+      "content": "但是现在即便你对代码一窍不通",
+      "music": 0.0
+    },
+    {
+      "from": 25.43,
+      "to": 26.73,
+      "sid": 11,
+      "location": 2,
+      "content": "可以说只要有手",
+      "music": 0.0
+    },
+    {
+      "from": 26.73,
+      "to": 30.55,
+      "sid": 12,
+      "location": 2,
+      "content": "就能为自己喜欢的作品制作高质量的I5补丁",
+      "music": 0.0
+    },
+    {
+      "from": 30.55,
+      "to": 33.23,
+      "sid": 13,
+      "location": 2,
+      "content": "那么跟luna translator这样的工具比",
+      "music": 0.0
+    },
+    {
+      "from": 34.31,
+      "to": 35.87,
+      "sid": 14,
+      "location": 2,
+      "content": "制自己制作汉化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 35.87,
+      "to": 38.73,
+      "sid": 15,
+      "location": 2,
+      "content": "最明显的优势就是可以提高沉浸感",
+      "music": 0.0
+    },
+    {
+      "from": 38.73,
+      "to": 41.53,
+      "sid": 16,
+      "location": 2,
+      "content": "要用大模型进行整体性的润色",
+      "music": 0.0
+    },
+    {
+      "from": 41.53,
+      "to": 42.41,
+      "sid": 17,
+      "location": 2,
+      "content": "会有更显",
+      "music": 0.0
+    },
+    {
+      "from": 42.41,
+      "to": 44.31,
+      "sid": 18,
+      "location": 2,
+      "content": "会有显著更高的翻译质量",
+      "music": 0.0
+    },
+    {
+      "from": 44.31,
+      "to": 47.879,
+      "sid": 19,
+      "location": 2,
+      "content": "而且不用忍受本地翻译带来的高延迟",
+      "music": 0.0
+    },
+    {
+      "from": 48.119,
+      "to": 50.439,
+      "sid": 20,
+      "location": 2,
+      "content": "我用codex其实也有一段时间了",
+      "music": 0.0
+    },
+    {
+      "from": 50.439,
+      "to": 52.879,
+      "sid": 21,
+      "location": 2,
+      "content": "但直到最近GPT5.6系列发布",
+      "music": 0.0
+    },
+    {
+      "from": 52.879,
+      "to": 54.63,
+      "sid": 22,
+      "location": 2,
+      "content": "我才后知后觉啊",
+      "music": 0.0
+    },
+    {
+      "from": 54.63,
+      "to": 57.78,
+      "sid": 23,
+      "location": 2,
+      "content": "可以用这么这样的工具去制作汉化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 57.78,
+      "to": 59.48,
+      "sid": 24,
+      "location": 2,
+      "content": "虽然不需要严格的教程",
+      "music": 0.0
+    },
+    {
+      "from": 59.48,
+      "to": 61.34,
+      "sid": 25,
+      "location": 2,
+      "content": "但我还是象征性的做个视频",
+      "music": 0.0
+    },
+    {
+      "from": 61.34,
+      "to": 62.3,
+      "sid": 26,
+      "location": 2,
+      "content": "广而告之",
+      "music": 0.0
+    },
+    {
+      "from": 62.3,
+      "to": 65.21,
+      "sid": 27,
+      "location": 2,
+      "content": "顺便带各位梳理一下整体流程",
+      "music": 0.0
+    },
+    {
+      "from": 65.21,
+      "to": 66.91,
+      "sid": 28,
+      "location": 2,
+      "content": "然后看了前提一嘴",
+      "music": 0.0
+    },
+    {
+      "from": 66.91,
+      "to": 71.02,
+      "sid": 29,
+      "location": 2,
+      "content": "因为我做的测试对象是全年龄作品",
+      "music": 0.0
+    },
+    {
+      "from": 71.02,
+      "to": 74.46,
+      "sid": 30,
+      "location": 2,
+      "content": "我不太清楚18加作品会不会受到安全限制",
+      "music": 0.0
+    },
+    {
+      "from": 74.46,
+      "to": 76.7,
+      "sid": 31,
+      "location": 2,
+      "content": "如果在执行过程中撞到围栏",
+      "music": 0.0
+    },
+    {
+      "from": 76.7,
+      "to": 77.9,
+      "sid": 32,
+      "location": 2,
+      "content": "你可以在提示词",
+      "music": 0.0
+    },
+    {
+      "from": 77.9,
+      "to": 79.53,
+      "sid": 33,
+      "location": 2,
+      "content": "词词提示词中",
+      "music": 0.0
+    },
+    {
+      "from": 79.53,
+      "to": 82.82,
+      "sid": 34,
+      "location": 2,
+      "content": "暗示或者明示这部作品对你有多重要",
+      "music": 0.0
+    },
+    {
+      "from": 82.82,
+      "to": 86.08,
+      "sid": 35,
+      "location": 2,
+      "content": "然后让他把HHCG的部分隔离出来",
+      "music": 0.0
+    },
+    {
+      "from": 86.08,
+      "to": 87.36,
+      "sid": 36,
+      "location": 2,
+      "content": "只翻译其他部分",
+      "music": 0.0
+    },
+    {
+      "from": 87.36,
+      "to": 88.96,
+      "sid": 37,
+      "location": 2,
+      "content": "就像音之诗一样",
+      "music": 0.0
+    },
+    {
+      "from": 88.96,
+      "to": 90.9,
+      "sid": 38,
+      "location": 2,
+      "content": "如果用破线分组",
+      "music": 0.0
+    },
+    {
+      "from": 90.9,
+      "to": 92.38,
+      "sid": 39,
+      "location": 2,
+      "content": "可能不会有这个问题",
+      "music": 0.0
+    },
+    {
+      "from": 92.38,
+      "to": 94.7,
+      "sid": 40,
+      "location": 2,
+      "content": "但这不在我们的考虑范围之内",
+      "music": 0.0
+    },
+    {
+      "from": 94.7,
+      "to": 96.979,
+      "sid": 41,
+      "location": 2,
+      "content": "那教程部分非常简单",
+      "music": 0.0
+    },
+    {
+      "from": 96.979,
+      "to": 99.699,
+      "sid": 42,
+      "location": 2,
+      "content": "你只要像这样子",
+      "music": 0.0
+    },
+    {
+      "from": 110.38,
+      "to": 114.28,
+      "sid": 43,
+      "location": 2,
+      "content": "你只要像这样子把游戏文件拖进文本框",
+      "music": 0.0
+    },
+    {
+      "from": 114.28,
+      "to": 115.7,
+      "sid": 44,
+      "location": 2,
+      "content": "然后告诉他这款",
+      "music": 0.0
+    },
+    {
+      "from": 115.7,
+      "to": 119.33,
+      "sid": 45,
+      "location": 2,
+      "content": "我需要这款GALGAME的汉化补丁那几",
+      "music": 0.0
+    },
+    {
+      "from": 119.33,
+      "to": 120.51,
+      "sid": 46,
+      "location": 2,
+      "content": "然后一步步确认",
+      "music": 0.0
+    },
+    {
+      "from": 120.51,
+      "to": 123.69,
+      "sid": 47,
+      "location": 2,
+      "content": "基本上就可以得到可用的核弹补丁了",
+      "music": 0.0
+    },
+    {
+      "from": 123.69,
+      "to": 126.47,
+      "sid": 48,
+      "location": 2,
+      "content": "整体流程大概是确认文本位置",
+      "music": 0.0
+    },
+    {
+      "from": 126.47,
+      "to": 127.57,
+      "sid": 49,
+      "location": 2,
+      "content": "确认实现方案",
+      "music": 0.0
+    },
+    {
+      "from": 127.57,
+      "to": 129.149,
+      "sid": 50,
+      "location": 2,
+      "content": "翻译回填测试",
+      "music": 0.0
+    },
+    {
+      "from": 129.149,
+      "to": 133.489,
+      "sid": 51,
+      "location": 2,
+      "content": "对于显示错误debug完成粗翻译意义补丁",
+      "music": 0.0
+    },
+    {
+      "from": 133.489,
+      "to": 135.6,
+      "sid": 52,
+      "location": 2,
+      "content": "只要按照这个顺序对话",
+      "music": 0.0
+    },
+    {
+      "from": 135.6,
+      "to": 137.34,
+      "sid": 53,
+      "location": 2,
+      "content": "基本就能做出补丁",
+      "music": 0.0
+    },
+    {
+      "from": 137.34,
+      "to": 139.32,
+      "sid": 54,
+      "location": 2,
+      "content": "如果你不知道下一步是什么",
+      "music": 0.0
+    },
+    {
+      "from": 139.32,
+      "to": 140.76,
+      "sid": 55,
+      "location": 2,
+      "content": "也可以直接问AI",
+      "music": 0.0
+    },
+    {
+      "from": 140.76,
+      "to": 144.33,
+      "sid": 56,
+      "location": 2,
+      "content": "反正只要有open对话就能进行下去",
+      "music": 0.0
+    },
+    {
+      "from": 144.33,
+      "to": 147.76,
+      "sid": 57,
+      "location": 2,
+      "content": "如果你想进一步提高翻译质量",
+      "music": 0.0
+    },
+    {
+      "from": 148.12,
+      "to": 151.95,
+      "sid": 58,
+      "location": 2,
+      "content": "你可以再确认实现方案后",
+      "music": 0.0
+    },
+    {
+      "from": 151.95,
+      "to": 154.35,
+      "sid": 59,
+      "location": 2,
+      "content": "让他先用廉价模型进行粗翻",
+      "music": 0.0
+    },
+    {
+      "from": 154.35,
+      "to": 157.35,
+      "sid": 60,
+      "location": 2,
+      "content": "然后确认其剧情有具体有多少章节",
+      "music": 0.0
+    },
+    {
+      "from": 157.35,
+      "to": 159.41,
+      "sid": 61,
+      "location": 2,
+      "content": "然后分批",
+      "music": 0.0
+    },
+    {
+      "from": 161.26,
+      "to": 163.9,
+      "sid": 62,
+      "location": 2,
+      "content": "按文本量分批实现润色",
+      "music": 0.0
+    },
+    {
+      "from": 166.1,
+      "to": 167.98,
+      "sid": 63,
+      "location": 2,
+      "content": "比如说一次润色五张",
+      "music": 0.0
+    },
+    {
+      "from": 167.98,
+      "to": 170.08,
+      "sid": 64,
+      "location": 2,
+      "content": "这里我不太建议润色",
+      "music": 0.0
+    },
+    {
+      "from": 170.08,
+      "to": 171.459,
+      "sid": 65,
+      "location": 2,
+      "content": "一次润色太多",
+      "music": 0.0
+    },
+    {
+      "from": 171.459,
+      "to": 175.419,
+      "sid": 66,
+      "location": 2,
+      "content": "比如说之前有一次我尝试让他一次润色十张",
+      "music": 0.0
+    },
+    {
+      "from": 175.419,
+      "to": 180.6,
+      "sid": 67,
+      "location": 2,
+      "content": "他就突然选择去下载一个本地的小模型",
+      "music": 0.0
+    },
+    {
+      "from": 180.6,
+      "to": 181.52,
+      "sid": 68,
+      "location": 2,
+      "content": "进行润色",
+      "music": 0.0
+    },
+    {
+      "from": 181.52,
+      "to": 186.42,
+      "sid": 69,
+      "location": 2,
+      "content": "那前面我们也提到了",
+      "music": 0.0
+    },
+    {
+      "from": 187.54,
+      "to": 189.04,
+      "sid": 70,
+      "location": 2,
+      "content": "也是粗翻译",
+      "music": 0.0
+    },
+    {
+      "from": 189.04,
+      "to": 191.3,
+      "sid": 71,
+      "location": 2,
+      "content": "用小小参量的模型来做",
+      "music": 0.0
+    },
+    {
+      "from": 191.3,
+      "to": 193.6,
+      "sid": 72,
+      "location": 2,
+      "content": "这个很显然不合适",
+      "music": 0.0
+    },
+    {
+      "from": 194.16,
+      "to": 195.0,
+      "sid": 73,
+      "location": 2,
+      "content": "那么薄",
+      "music": 0.0
+    },
+    {
+      "from": 195.0,
+      "to": 197.08,
+      "sid": 74,
+      "location": 2,
+      "content": "像这样子分段进行润色",
+      "music": 0.0
+    },
+    {
+      "from": 197.08,
+      "to": 199.47,
+      "sid": 75,
+      "location": 2,
+      "content": "完成后再让它对肾",
+      "music": 0.0
+    },
+    {
+      "from": 199.47,
+      "to": 201.51,
+      "sid": 76,
+      "location": 2,
+      "content": "让它进行一个整体性的润色",
+      "music": 0.0
+    },
+    {
+      "from": 201.51,
+      "to": 204.77,
+      "sid": 77,
+      "location": 2,
+      "content": "这样就可以能得到一个质量非常高的汉化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 205.31,
+      "to": 206.43,
+      "sid": 78,
+      "location": 2,
+      "content": "如果你不嫌麻烦",
+      "music": 0.0
+    },
+    {
+      "from": 206.43,
+      "to": 210.53,
+      "sid": 79,
+      "location": 2,
+      "content": "也可以再接入其他模型",
+      "music": 0.0
+    },
+    {
+      "from": 210.53,
+      "to": 213.55,
+      "sid": 80,
+      "location": 2,
+      "content": "让他们去点评一下这个补丁",
+      "music": 0.0
+    },
+    {
+      "from": 213.55,
+      "to": 217.09,
+      "sid": 81,
+      "location": 2,
+      "content": "比如说这里我选的是一个开源harmony",
+      "music": 0.0
+    },
+    {
+      "from": 217.09,
+      "to": 218.11,
+      "sid": 82,
+      "location": 2,
+      "content": "教deep chat",
+      "music": 0.0
+    },
+    {
+      "from": 218.11,
+      "to": 219.43,
+      "sid": 83,
+      "location": 2,
+      "content": "然后我接入deep sick",
+      "music": 0.0
+    },
+    {
+      "from": 219.43,
+      "to": 223.14,
+      "sid": 84,
+      "location": 2,
+      "content": "让D老师去点评一下这个汉化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 223.14,
+      "to": 228.29,
+      "sid": 85,
+      "location": 2,
+      "content": "然后让他点评完之后再把这个意见反馈给codex",
+      "music": 0.0
+    },
+    {
+      "from": 228.29,
+      "to": 229.67,
+      "sid": 86,
+      "location": 2,
+      "content": "让它进行修改",
+      "music": 0.0
+    },
+    {
+      "from": 229.67,
+      "to": 233.87,
+      "sid": 87,
+      "location": 2,
+      "content": "这样你就能得到一个质量非常接近人工精翻",
+      "music": 0.0
+    },
+    {
+      "from": 233.87,
+      "to": 234.81,
+      "sid": 88,
+      "location": 2,
+      "content": "汉化补丁啊",
+      "music": 0.0
+    },
+    {
+      "from": 234.81,
+      "to": 235.73,
+      "sid": 89,
+      "location": 2,
+      "content": "话又说回来",
+      "music": 0.0
+    },
+    {
+      "from": 235.73,
+      "to": 236.69,
+      "sid": 90,
+      "location": 2,
+      "content": "如果你是懒狗",
+      "music": 0.0
+    },
+    {
+      "from": 236.69,
+      "to": 242.159,
+      "sid": 91,
+      "location": 2,
+      "content": "我这里也顺手写了一个SKU叫罗克莱cheme text",
+      "music": 0.0
+    },
+    {
+      "from": 242.159,
+      "to": 244.779,
+      "sid": 92,
+      "location": 2,
+      "content": "在输入框打斜杠",
+      "music": 0.0
+    },
+    {
+      "from": 244.779,
+      "to": 248.459,
+      "sid": 93,
+      "location": 2,
+      "content": "然后LO基本上就能看到这个SKU",
+      "music": 0.0
+    },
+    {
+      "from": 248.459,
+      "to": 250.779,
+      "sid": 94,
+      "location": 2,
+      "content": "这个skill的流程涵盖了",
+      "music": 0.0
+    },
+    {
+      "from": 250.779,
+      "to": 254.479,
+      "sid": 95,
+      "location": 2,
+      "content": "从开始到初步认识并打包生成可用的强化补丁",
+      "music": 0.0
+    },
+    {
+      "from": 254.479,
+      "to": 256.779,
+      "sid": 96,
+      "location": 2,
+      "content": "还附带图形化界面",
+      "music": 0.0
+    },
+    {
+      "from": 257.28,
+      "to": 260.4,
+      "sid": 97,
+      "location": 2,
+      "content": "但是经翻部分和后续外部审查",
+      "music": 0.0
+    },
+    {
+      "from": 260.4,
+      "to": 263.159,
+      "sid": 98,
+      "location": 2,
+      "content": "我依旧建议你人工进行确认",
+      "music": 0.0
+    },
+    {
+      "from": 263.599,
+      "to": 265.199,
+      "sid": 99,
+      "location": 2,
+      "content": "要是这点苦都吃不了",
+      "music": 0.0
+    },
+    {
+      "from": 265.199,
+      "to": 268.099,
+      "sid": 100,
+      "location": 2,
+      "content": "那我就不建议你自己做哈哈布丁了",
+      "music": 0.0
+    },
+    {
+      "from": 268.099,
+      "to": 270.89,
+      "sid": 101,
+      "location": 2,
+      "content": "要么就接着用用那translator",
+      "music": 0.0
+    },
+    {
+      "from": 270.89,
+      "to": 272.85,
+      "sid": 102,
+      "location": 2,
+      "content": "要么就等着别人喂饭吧",
+      "music": 0.0
+    },
+    {
+      "from": 274.41,
+      "to": 277.42,
+      "sid": 103,
+      "location": 2,
+      "content": "然后是一些注意事项嗯",
+      "music": 0.0
+    },
+    {
+      "from": 277.64,
+      "to": 282.39,
+      "sid": 104,
+      "location": 2,
+      "content": "一开销我在skill中已经要求code code",
+      "music": 0.0
+    },
+    {
+      "from": 282.39,
+      "to": 284.35,
+      "sid": 105,
+      "location": 2,
+      "content": "codex先用LUNA做速翻",
+      "music": 0.0
+    },
+    {
+      "from": 284.35,
+      "to": 285.71,
+      "sid": 106,
+      "location": 2,
+      "content": "并KARA初步润色",
+      "music": 0.0
+    },
+    {
+      "from": 285.71,
+      "to": 287.21,
+      "sid": 107,
+      "location": 2,
+      "content": "最后由soul校对",
+      "music": 0.0
+    },
+    {
+      "from": 287.21,
+      "to": 289.93,
+      "sid": 108,
+      "location": 2,
+      "content": "理论上在开销方面是相对可控的",
+      "music": 0.0
+    },
+    {
+      "from": 289.93,
+      "to": 291.97,
+      "sid": 109,
+      "location": 2,
+      "content": "但我在用so hi实测的时候",
+      "music": 0.0
+    },
+    {
+      "from": 291.97,
+      "to": 292.62,
+      "sid": 110,
+      "location": 2,
+      "content": "发现",
+      "music": 0.0
+    },
+    {
+      "from": 292.62,
+      "to": 296.84,
+      "sid": 111,
+      "location": 2,
+      "content": "很多时候TARA的翻译质量都是不及so的日期的",
+      "music": 0.0
+    },
+    {
+      "from": 296.84,
+      "to": 300.45,
+      "sid": 112,
+      "location": 2,
+      "content": "此时so会直接接管翻译嗯",
+      "music": 0.0
+    },
+    {
+      "from": 300.45,
+      "to": 303.11,
+      "sid": 113,
+      "location": 2,
+      "content": "并重新翻译前面用tr翻译的部分",
+      "music": 0.0
+    },
+    {
+      "from": 303.11,
+      "to": 306.45,
+      "sid": 114,
+      "location": 2,
+      "content": "导致一定程度上这个额度浪费",
+      "music": 0.0
+    },
+    {
+      "from": 308.18,
+      "to": 310.44,
+      "sid": 115,
+      "location": 2,
+      "content": "如果包含分段经翻的话",
+      "music": 0.0
+    },
+    {
+      "from": 310.44,
+      "to": 313.22,
+      "sid": 116,
+      "location": 2,
+      "content": "完整流程的开销大概如下",
+      "music": 0.0
+    },
+    {
+      "from": 313.97,
+      "to": 316.33,
+      "sid": 117,
+      "location": 2,
+      "content": "按照这是我用的中转站的面板",
+      "music": 0.0
+    },
+    {
+      "from": 316.33,
+      "to": 317.85,
+      "sid": 118,
+      "location": 2,
+      "content": "按照中转站的面板显示",
+      "music": 0.0
+    },
+    {
+      "from": 317.85,
+      "to": 319.8,
+      "sid": 119,
+      "location": 2,
+      "content": "大概是1亿多token的消耗",
+      "music": 0.0
+    },
+    {
+      "from": 319.8,
+      "to": 321.76,
+      "sid": 120,
+      "location": 2,
+      "content": "一半会花在skill的流程中",
+      "music": 0.0
+    },
+    {
+      "from": 321.76,
+      "to": 324.69,
+      "sid": 121,
+      "location": 2,
+      "content": "另一半会花花在正在润色中",
+      "music": 0.0
+    },
+    {
+      "from": 324.69,
+      "to": 329.11,
+      "sid": 122,
+      "location": 2,
+      "content": "整体消耗是略大于plus刀套餐的周限额的",
+      "music": 0.0
+    },
+    {
+      "from": 329.11,
+      "to": 330.51,
+      "sid": 123,
+      "location": 2,
+      "content": "除非你的额度用不完",
+      "music": 0.0
+    },
+    {
+      "from": 330.51,
+      "to": 332.735,
+      "sid": 124,
+      "location": 2,
+      "content": "不然我不建议你使用",
+      "music": 0.0
+    },
+    {
+      "from": 334.32,
+      "to": 336.06,
+      "sid": 125,
+      "location": 2,
+      "content": "正价进行翻译",
+      "music": 0.0
+    },
+    {
+      "from": 336.06,
+      "to": 338.15,
+      "sid": 126,
+      "location": 2,
+      "content": "而是使用一些廉价的中转",
+      "music": 0.0
+    },
+    {
+      "from": 338.15,
+      "to": 340.21,
+      "sid": 127,
+      "location": 2,
+      "content": "那以我拥有中段为参考",
+      "music": 0.0
+    },
+    {
+      "from": 340.21,
+      "to": 345.35,
+      "sid": 128,
+      "location": 2,
+      "content": "在plus号池下好玩的整体开销大概是十块钱",
+      "music": 0.0
+    },
+    {
+      "from": 345.939,
+      "to": 348.539,
+      "sid": 129,
+      "location": 2,
+      "content": "如果用相对不稳定的特殊分组",
+      "music": 0.0
+    },
+    {
+      "from": 348.539,
+      "to": 350.919,
+      "sid": 130,
+      "location": 2,
+      "content": "比如说最近比较火的K12TM",
+      "music": 0.0
+    },
+    {
+      "from": 350.919,
+      "to": 353.81,
+      "sid": 131,
+      "location": 2,
+      "content": "还有bug tm之类的分组",
+      "music": 0.0
+    },
+    {
+      "from": 353.81,
+      "to": 355.73,
+      "sid": 132,
+      "location": 2,
+      "content": "这样的开销还能再少一半",
+      "music": 0.0
+    },
+    {
+      "from": 355.73,
+      "to": 357.05,
+      "sid": 133,
+      "location": 2,
+      "content": "降到五块钱左右",
+      "music": 0.0
+    },
+    {
+      "from": 357.05,
+      "to": 360.84,
+      "sid": 134,
+      "location": 2,
+      "content": "这对于玩gala来说算是一个很实惠的价格了",
+      "music": 0.0
+    },
+    {
+      "from": 360.84,
+      "to": 362.96,
+      "sid": 135,
+      "location": 2,
+      "content": "然后由于我既不是好商",
+      "music": 0.0
+    },
+    {
+      "from": 362.96,
+      "to": 364.26,
+      "sid": 136,
+      "location": 2,
+      "content": "影子才中转的",
+      "music": 0.0
+    },
+    {
+      "from": 364.26,
+      "to": 367.14,
+      "sid": 137,
+      "location": 2,
+      "content": "这里我就不打这个中转站的广告了",
+      "music": 0.0
+    },
+    {
+      "from": 367.14,
+      "to": 369.58,
+      "sid": 138,
+      "location": 2,
+      "content": "如果你实在找不到可以用的中转",
+      "music": 0.0
+    },
+    {
+      "from": 369.58,
+      "to": 371.44,
+      "sid": 139,
+      "location": 2,
+      "content": "或者是不知道怎么配置",
+      "music": 0.0
+    },
+    {
+      "from": 371.44,
+      "to": 375.08,
+      "sid": 140,
+      "location": 2,
+      "content": "然后我决取决于这个视频的呼声",
+      "music": 0.0
+    },
+    {
+      "from": 375.08,
+      "to": 377.97,
+      "sid": 141,
+      "location": 2,
+      "content": "我考虑会再做一期视频",
+      "music": 0.0
+    },
+    {
+      "from": 377.97,
+      "to": 379.05,
+      "sid": 142,
+      "location": 2,
+      "content": "讲讲这个事情",
+      "music": 0.0
+    },
+    {
+      "from": 379.05,
+      "to": 381.93,
+      "sid": 143,
+      "location": 2,
+      "content": "然后中转的话是你实在找不到",
+      "music": 0.0
+    },
+    {
+      "from": 381.93,
+      "to": 384.14,
+      "sid": 144,
+      "location": 2,
+      "content": "可以私信我",
+      "music": 0.0
+    },
+    {
+      "from": 386.04,
+      "to": 387.5,
+      "sid": 145,
+      "location": 2,
+      "content": "然后第二个是绘制",
+      "music": 0.0
+    },
+    {
+      "from": 387.5,
+      "to": 389.72,
+      "sid": 146,
+      "location": 2,
+      "content": "我听说code写的skill",
+      "music": 0.0
+    },
+    {
+      "from": 389.72,
+      "to": 391.3,
+      "sid": 147,
+      "location": 2,
+      "content": "别的模型可能看不懂",
+      "music": 0.0
+    },
+    {
+      "from": 391.3,
+      "to": 394.73,
+      "sid": 148,
+      "location": 2,
+      "content": "加上我试过让NPC按着急",
+      "music": 0.0
+    },
+    {
+      "from": 394.73,
+      "to": 396.09,
+      "sid": 149,
+      "location": 2,
+      "content": "在审查完之后",
+      "music": 0.0
+    },
+    {
+      "from": 396.09,
+      "to": 398.35,
+      "sid": 150,
+      "location": 2,
+      "content": "按照他的意见直接修改汉化文件",
+      "music": 0.0
+    },
+    {
+      "from": 398.35,
+      "to": 400.89,
+      "sid": 151,
+      "location": 2,
+      "content": "而且不出意外的出现了语法错误",
+      "music": 0.0
+    },
+    {
+      "from": 400.89,
+      "to": 403.69,
+      "sid": 152,
+      "location": 2,
+      "content": "所以我不建议你把这个SKU",
+      "music": 0.0
+    },
+    {
+      "from": 403.69,
+      "to": 405.33,
+      "sid": 153,
+      "location": 2,
+      "content": "装到其他的families下",
+      "music": 0.0
+    },
+    {
+      "from": 405.33,
+      "to": 408.87,
+      "sid": 154,
+      "location": 2,
+      "content": "或者至少要装到一个性能比较高的HARDX下",
+      "music": 0.0
+    },
+    {
+      "from": 408.87,
+      "to": 410.07,
+      "sid": 155,
+      "location": 2,
+      "content": "并且黑",
+      "music": 0.0
+    },
+    {
+      "from": 410.07,
+      "to": 412.91,
+      "sid": 156,
+      "location": 2,
+      "content": "并且在模型方面至少要使用GBT",
+      "music": 0.0
+    },
+    {
+      "from": 412.91,
+      "to": 414.33,
+      "sid": 157,
+      "location": 2,
+      "content": "5.64w medium",
+      "music": 0.0
+    },
+    {
+      "from": 414.33,
+      "to": 416.85,
+      "sid": 158,
+      "location": 2,
+      "content": "或者是同等智力水平的模型",
+      "music": 0.0
+    },
+    {
+      "from": 416.85,
+      "to": 418.62,
+      "sid": 159,
+      "location": 2,
+      "content": "以减少反攻次数",
+      "music": 0.0
+    },
+    {
+      "from": 418.62,
+      "to": 421.48,
+      "sid": 160,
+      "location": 2,
+      "content": "另外推理强度也不需要高于害",
+      "music": 0.0
+    },
+    {
+      "from": 421.48,
+      "to": 423.98,
+      "sid": 161,
+      "location": 2,
+      "content": "它的效果并不会好",
+      "music": 0.0
+    },
+    {
+      "from": 424.33,
+      "to": 426.53,
+      "sid": 162,
+      "location": 2,
+      "content": "如即便你把这个推理",
+      "music": 0.0
+    },
+    {
+      "from": 426.53,
+      "to": 429.65,
+      "sid": 163,
+      "location": 2,
+      "content": "努力程度调高到x type或者是max",
+      "music": 0.0
+    },
+    {
+      "from": 429.65,
+      "to": 431.9,
+      "sid": 164,
+      "location": 2,
+      "content": "它的效果也不会好多少",
+      "music": 0.0
+    },
+    {
+      "from": 431.9,
+      "to": 433.32,
+      "sid": 165,
+      "location": 2,
+      "content": "第三个是时间",
+      "music": 0.0
+    },
+    {
+      "from": 433.32,
+      "to": 436.26,
+      "sid": 166,
+      "location": 2,
+      "content": "因为最近codex频繁更新to call的逻辑",
+      "music": 0.0
+    },
+    {
+      "from": 436.26,
+      "to": 438.62,
+      "sid": 167,
+      "location": 2,
+      "content": "computer use的使用会很频繁",
+      "music": 0.0
+    },
+    {
+      "from": 438.62,
+      "to": 444.17,
+      "sid": 168,
+      "location": 2,
+      "content": "他们的use的优点就是你对他会主动帮你验证啊",
+      "music": 0.0
+    },
+    {
+      "from": 444.17,
+      "to": 447.17,
+      "sid": 169,
+      "location": 2,
+      "content": "你在开完之后可以做甩手掌柜",
+      "music": 0.0
+    },
+    {
+      "from": 447.17,
+      "to": 448.86,
+      "sid": 170,
+      "location": 2,
+      "content": "把电脑放在一边",
+      "music": 0.0
+    },
+    {
+      "from": 448.86,
+      "to": 451.78,
+      "sid": 171,
+      "location": 2,
+      "content": "但缺点他是会占用一定的电脑资源",
+      "music": 0.0
+    },
+    {
+      "from": 451.78,
+      "to": 456.61,
+      "sid": 172,
+      "location": 2,
+      "content": "而且他有时候推出这个状态的会有很高的延迟",
+      "music": 0.0
+    },
+    {
+      "from": 456.61,
+      "to": 458.51,
+      "sid": 173,
+      "location": 2,
+      "content": "如果你的电脑性能稍差",
+      "music": 0.0
+    },
+    {
+      "from": 458.51,
+      "to": 461.79,
+      "sid": 174,
+      "location": 2,
+      "content": "比如说你是使用的是热门的清华本",
+      "music": 0.0
+    },
+    {
+      "from": 461.79,
+      "to": 466.22,
+      "sid": 175,
+      "location": 2,
+      "content": "在computer use死的状态下很容易出现卡顿",
+      "music": 0.0
+    },
+    {
+      "from": 466.22,
+      "to": 467.28,
+      "sid": 176,
+      "location": 2,
+      "content": "就算性能够",
+      "music": 0.0
+    },
+    {
+      "from": 467.28,
+      "to": 469.95,
+      "sid": 177,
+      "location": 2,
+      "content": "这个框看着也会稍微有点烦心",
+      "music": 0.0
+    },
+    {
+      "from": 469.95,
+      "to": 472.95,
+      "sid": 178,
+      "location": 2,
+      "content": "所以最省心的方案是像我途中一样",
+      "music": 0.0
+    },
+    {
+      "from": 472.95,
+      "to": 474.93,
+      "sid": 179,
+      "location": 2,
+      "content": "单独放一台设备让它跑",
+      "music": 0.0
+    },
+    {
+      "from": 474.93,
+      "to": 478.65,
+      "sid": 180,
+      "location": 2,
+      "content": "或者干脆你在你玩手机或者干别的事情的时候",
+      "music": 0.0
+    },
+    {
+      "from": 478.65,
+      "to": 479.99,
+      "sid": 181,
+      "location": 2,
+      "content": "接着接着跑",
+      "music": 0.0
+    },
+    {
+      "from": 479.99,
+      "to": 483.56,
+      "sid": 182,
+      "location": 2,
+      "content": "当然如果你想在",
+      "music": 0.0
+    },
+    {
+      "from": 484.52,
+      "to": 488.16,
+      "sid": 183,
+      "location": 2,
+      "content": "用电脑的时候是在后台挂这个东西也行",
+      "music": 0.0
+    },
+    {
+      "from": 488.16,
+      "to": 490.62,
+      "sid": 184,
+      "location": 2,
+      "content": "但是你要注意这个流程",
+      "music": 0.0
+    },
+    {
+      "from": 490.62,
+      "to": 494.8,
+      "sid": 185,
+      "location": 2,
+      "content": "这个SCSQ的流程会在开始的时候",
+      "music": 0.0
+    },
+    {
+      "from": 494.8,
+      "to": 497.799,
+      "sid": 186,
+      "location": 2,
+      "content": "进入游戏的开头页面",
+      "music": 0.0
+    },
+    {
+      "from": 497.799,
+      "to": 501.379,
+      "sid": 187,
+      "location": 2,
+      "content": "如果你翻译的是一些八座之类的作品",
+      "music": 0.0
+    },
+    {
+      "from": 501.379,
+      "to": 507.32,
+      "sid": 188,
+      "location": 2,
+      "content": "还有如他你一点点进去excel就是HCG去起点",
+      "music": 0.0
+    },
+    {
+      "from": 507.32,
+      "to": 510.88,
+      "sid": 189,
+      "location": 2,
+      "content": "那我建议你注意一下使用的场合",
+      "music": 0.0
+    },
+    {
+      "from": 510.88,
+      "to": 513.51,
+      "sid": 190,
+      "location": 2,
+      "content": "以免出现社会性死亡呃",
+      "music": 0.0
+    },
+    {
+      "from": 513.51,
+      "to": 517.11,
+      "sid": 191,
+      "location": 2,
+      "content": "其他状态呢挂在后台是没什么性能开销",
+      "music": 0.0
+    },
+    {
+      "from": 517.11,
+      "to": 518.51,
+      "sid": 192,
+      "location": 2,
+      "content": "基本没有问题的",
+      "music": 0.0
+    },
+    {
+      "from": 518.51,
+      "to": 522.73,
+      "sid": 193,
+      "location": 2,
+      "content": "另外根据文本量skill跑完消耗一两个小时",
+      "music": 0.0
+    },
+    {
+      "from": 522.73,
+      "to": 523.61,
+      "sid": 194,
+      "location": 2,
+      "content": "非常正常",
+      "music": 0.0
+    },
+    {
+      "from": 523.61,
+      "to": 526.21,
+      "sid": 195,
+      "location": 2,
+      "content": "加上后续的分段润色和修正",
+      "music": 0.0
+    },
+    {
+      "from": 526.21,
+      "to": 528.13,
+      "sid": 196,
+      "location": 2,
+      "content": "再花一两个小时也很正常",
+      "music": 0.0
+    },
+    {
+      "from": 528.13,
+      "to": 533.25,
+      "sid": 197,
+      "location": 2,
+      "content": "整体下来一天可能也就一一台设备",
+      "music": 0.0
+    },
+    {
+      "from": 533.25,
+      "to": 539.14,
+      "sid": 198,
+      "location": 2,
+      "content": "一天也就制作一到两个汉化补丁呃",
+      "music": 0.0
+    },
+    {
+      "from": 539.14,
+      "to": 542.94,
+      "sid": 199,
+      "location": 2,
+      "content": "请你在请你注意安排好时间",
+      "music": 0.0
+    },
+    {
+      "from": 542.94,
+      "to": 546.64,
+      "sid": 200,
+      "location": 2,
+      "content": "然后看看在什么场合下使适合使用",
+      "music": 0.0
+    },
+    {
+      "from": 546.64,
+      "to": 549.32,
+      "sid": 201,
+      "location": 2,
+      "content": "那么大致内容就是这些",
+      "music": 0.0
+    }
+  ]
+}

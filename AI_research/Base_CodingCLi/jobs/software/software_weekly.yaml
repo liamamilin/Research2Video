@@ -1,5 +1,6 @@
 name: 软件与工具周观察
-description: 每周挑一类软件或一个工作流讲清楚：解决什么问题、有哪些选择、各自适合谁（读 Product Hunt、Show HN、GitHub、Changelog、LWN 抓取的内容），不联网搜索
+description: 每周挑一类软件或一个工作流讲清楚：解决什么问题、有哪些选择、各自适合谁（读 Product Hunt、Show HN、GitHub、Changelog、LWN 抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 软件与数字工具
 enabled: true
 keywords:
 - 软件发现
@@ -34,9 +35,10 @@ sources:
 - source:martin_fowler
 - source:pragmatic_engineer
 prompt: |
-  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
-  这次研究要帮助观众理解：回看这一周的材料，找到值得继续追问的变化和联系。关注软件工具怎样解决一个实际问题，以及它用起来是什么样，保留能把事情讲生动、讲明白的具体材料。
+  为「一类工具或一个工作流」整理研究底稿。从本周软件材料里只选一个值得讲深的主问题：它解决什么实际问题、用起来是什么样、不同选择和使用条件怎样改变结果。
+
+  材料有具体操作、结果或例子时直接写进正文；相近工具的对照为同一问题服务，不要做成新品目录。开发专用工具保留专业范围。
+
   任务：{name}
   领域：{domain}
   关键词：{keywords}
@@ -45,3 +47,6 @@ prompt: |
 
   数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
 output: output/software/{date}_software_weekly.md
+audience_channel: software_weekly
+content_strategy: audience-v1
+question_material: question-v1

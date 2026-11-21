@@ -1,0 +1,31 @@
+{
+  "before": {
+    "pid": 15638,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794372619.9858491,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "77b04e02f77047eabeb3a9cfcf9ab6c0"
+  },
+  "started_at": 1794408679.046655,
+  "after": {
+    "pid": 32488,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794408679.623321,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "bcafe439b4b74b8a9da595c68e41cec7"
+  },
+  "health": "ok",
+  "routes": [
+    "/api/platforms/bilibili/covers/{render_id}",
+    "/api/platforms/bilibili/covers/{render_id}/paths",
+    "/api/platforms/bilibili/covers/{render_id}/{ratio}",
+    "/api/platforms/bilibili/uploads/{task_id}/covers"
+  ],
+  "completed_at": 1794408681.732516
+}

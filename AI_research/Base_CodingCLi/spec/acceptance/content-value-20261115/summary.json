@@ -1,0 +1,826 @@
+[
+  {
+    "channel": "flash",
+    "index": 1,
+    "baseline": {
+      "title": "DeepSeek语音五折：一小时录音3毛9，别当长期价",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 132352,
+          "completion_tokens": 5591,
+          "total_tokens": 137943,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 4915,
+          "cost_usd": 0.0232074,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 52.244,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 576
+      },
+      "length_check": {
+        "spoken_length": 559,
+        "estimated_seconds": 124,
+        "segments": 19,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 1.651,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "三套服务，现在一套",
+            "spoken_length": 304,
+            "budget": 163
+          },
+          {
+            "title": "便宜是真的，五折是限时的",
+            "spoken_length": 255,
+            "budget": 163
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "删掉“think hard”后，Claude Opus 5.5 的提示该怎么改",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 1861,
+          "completion_tokens": 3581,
+          "total_tokens": 5442,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2870,
+          "cost_usd": 0.00242775,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 37.866,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 1
+      },
+      "length_check": {
+        "spoken_length": 458,
+        "estimated_seconds": 103,
+        "segments": 20,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 1.376,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先删掉旧咒语",
+            "spoken_length": 103,
+            "budget": 109
+          },
+          {
+            "title": "一条消息把任务说全",
+            "spoken_length": 251,
+            "budget": 109
+          },
+          {
+            "title": "我的判断",
+            "spoken_length": 104,
+            "budget": 108
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "flash",
+    "index": 2,
+    "baseline": {
+      "title": "Claude Code 一天能派 500 个活，但额度会先见底",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 132357,
+          "completion_tokens": 6415,
+          "total_tokens": 138772,
+          "cache_read_tokens": 1152,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 5028,
+          "cost_usd": 0.02353321,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 77.671,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 576
+      },
+      "length_check": {
+        "spoken_length": 1198,
+        "estimated_seconds": 270,
+        "segments": 49,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 3.597,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "三个会话合成一个",
+            "spoken_length": 382,
+            "budget": 82
+          },
+          {
+            "title": "每个线程都是一次完整会话",
+            "spoken_length": 174,
+            "budget": 82
+          },
+          {
+            "title": "能用的人比想用的少",
+            "spoken_length": 342,
+            "budget": 81
+          },
+          {
+            "title": "我的建议：先拆两条线试试",
+            "spoken_length": 300,
+            "budget": 81
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "DeepSeek把语音、OCR、搜索拆开计价：小团队先算哪一笔",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2557,
+          "completion_tokens": 6322,
+          "total_tokens": 8879,
+          "cache_read_tokens": 512,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 5407,
+          "cost_usd": 0.00410149,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 64.444,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 19
+      },
+      "length_check": {
+        "spoken_length": 594,
+        "estimated_seconds": 131,
+        "segments": 22,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 1.753,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先看三张价签",
+            "spoken_length": 252,
+            "budget": 109
+          },
+          {
+            "title": "五折别写进报价",
+            "spoken_length": 114,
+            "budget": 109
+          },
+          {
+            "title": "会议记录先接哪一段",
+            "spoken_length": 228,
+            "budget": 108
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t05",
+    "index": 1,
+    "baseline": {
+      "title": "读200页招股书，Kimi和元宝差在一个页码上",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 309754,
+          "completion_tokens": 3931,
+          "total_tokens": 313685,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2072,
+          "cost_usd": 0.0488217,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 91.579,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 1068
+      },
+      "length_check": {
+        "spoken_length": 1226,
+        "estimated_seconds": 276,
+        "segments": 51,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.919,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "开场：同一份200页PDF，分水岭在哪",
+            "spoken_length": 206,
+            "budget": 261
+          },
+          {
+            "title": "页码这件事，为什么值钱",
+            "spoken_length": 275,
+            "budget": 261
+          },
+          {
+            "title": "容量不是胜负手，任务形状才是",
+            "spoken_length": 308,
+            "budget": 261
+          },
+          {
+            "title": "钱不是这道题的门槛，ChatGPT也别急着指望",
+            "spoken_length": 215,
+            "budget": 261
+          },
+          {
+            "title": "回到周一早上那份文件",
+            "spoken_length": 222,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "国内四款AI怎么搭：免费版够不够，Kimi Pro的99元该不该花？",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 4364,
+          "completion_tokens": 4514,
+          "total_tokens": 8878,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3220,
+          "cost_usd": 0.003363,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 45.679,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 2
+      },
+      "length_check": {
+        "spoken_length": 1051,
+        "estimated_seconds": 234,
+        "segments": 43,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.781,
+        "status": "UNDER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先别急着选“最强”，先看免费版能顶到哪",
+            "spoken_length": 161,
+            "budget": 218
+          },
+          {
+            "title": "免费版先解决大多数日常任务",
+            "spoken_length": 178,
+            "budget": 218
+          },
+          {
+            "title": "长文档：Kimi Pro的99元，值不值先看使用频率",
+            "spoken_length": 152,
+            "budget": 218
+          },
+          {
+            "title": "API是另一本账：对话免费不等于调用免费",
+            "spoken_length": 225,
+            "budget": 217
+          },
+          {
+            "title": "我的搭配顺序：先零成本跑一个月，再决定开哪一个",
+            "spoken_length": 198,
+            "budget": 217
+          },
+          {
+            "title": "回到那99元：长文档月卡，不是人人都该买",
+            "spoken_length": 137,
+            "budget": 217
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t05",
+    "index": 2,
+    "baseline": {
+      "title": "同一句“早晨咖啡”，元宝写成了散文，豆包写成了段子",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 309708,
+          "completion_tokens": 4485,
+          "total_tokens": 314193,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2234,
+          "cost_usd": 0.0491472,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 56.13,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 1068
+      },
+      "length_check": {
+        "spoken_length": 1167,
+        "estimated_seconds": 264,
+        "segments": 46,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.878,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "同一句提示词，交上来两种东西",
+            "spoken_length": 304,
+            "budget": 327
+          },
+          {
+            "title": "散文还是段子，差在句式上",
+            "spoken_length": 336,
+            "budget": 326
+          },
+          {
+            "title": "选工具，其实是选默认值",
+            "spoken_length": 345,
+            "budget": 326
+          },
+          {
+            "title": "回到那句“早晨咖啡”",
+            "spoken_length": 182,
+            "budget": 326
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "研究生写综述：Gemini选题、Qwen筛文献、ChatGPT出机理图，只订一个够不够？",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 3984,
+          "completion_tokens": 4650,
+          "total_tokens": 8634,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2852,
+          "cost_usd": 0.0033876,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 49.502,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 7
+      },
+      "length_check": {
+        "spoken_length": 1868,
+        "estimated_seconds": 416,
+        "segments": 70,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 1.386,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "只订一个，缺口在流程不在模型",
+            "spoken_length": 361,
+            "budget": 261
+          },
+          {
+            "title": "选题先收窄，文献别按年份排队",
+            "spoken_length": 330,
+            "budget": 261
+          },
+          {
+            "title": "Qwen筛摘要：先做表，不写正文",
+            "spoken_length": 372,
+            "budget": 261
+          },
+          {
+            "title": "ChatGPT出机理图草图，正式图还得自己做",
+            "spoken_length": 434,
+            "budget": 261
+          },
+          {
+            "title": "我的低成本搭法：一个主订，关键节点人工补位",
+            "spoken_length": 371,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t06",
+    "index": 1,
+    "baseline": {
+      "title": "贴一份长PDF就断？三个数字判断要不要买ChatGPT Plus",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 28597,
+          "completion_tokens": 2129,
+          "total_tokens": 30726,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 0,
+          "cost_usd": 0.00556695,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 31.855,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 37
+      },
+      "length_check": {
+        "spoken_length": 1791,
+        "estimated_seconds": 402,
+        "segments": 69,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 1.341,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先看你撞的是不是免费版那面墙",
+            "spoken_length": 591,
+            "budget": 261
+          },
+          {
+            "title": "同一个任务，免费版输在哪一步",
+            "spoken_length": 379,
+            "budget": 261
+          },
+          {
+            "title": "但别急着买：三个反过来的条件",
+            "spoken_length": 324,
+            "budget": 261
+          },
+          {
+            "title": "真要买，先看清钱怎么扣",
+            "spoken_length": 278,
+            "budget": 261
+          },
+          {
+            "title": "回到那份四十页的报告",
+            "spoken_length": 219,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "免费版到底卡在哪：27K、12 页、Limited 三个信号，先判断要不要付费",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2845,
+          "completion_tokens": 5942,
+          "total_tokens": 8787,
+          "cache_read_tokens": 512,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 4509,
+          "cost_usd": 0.00391669,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 61.066,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 3
+      },
+      "length_check": {
+        "spoken_length": 1193,
+        "estimated_seconds": 265,
+        "segments": 47,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.883,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先给判断：免费版还能用，卡的是访问权和额度",
+            "spoken_length": 281,
+            "budget": 261
+          },
+          {
+            "title": "信号一：约 12 页，卡的是单次输入",
+            "spoken_length": 158,
+            "budget": 261
+          },
+          {
+            "title": "信号二：27K，卡的是长对话和长材料",
+            "spoken_length": 167,
+            "budget": 261
+          },
+          {
+            "title": "信号三：Limited，卡的是稳定性和功能入口",
+            "spoken_length": 174,
+            "budget": 261
+          },
+          {
+            "title": "怎么选：先改用法，再决定 Go、Plus 还是先不付费",
+            "spoken_length": 413,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t06",
+    "index": 2,
+    "baseline": {
+      "title": "ChatGPT Go 值不值？它补了容量，没补速度和工具",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 28595,
+          "completion_tokens": 7732,
+          "total_tokens": 36327,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 6120,
+          "cost_usd": 0.00892845,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 79.893,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 37
+      },
+      "length_check": {
+        "spoken_length": 1145,
+        "estimated_seconds": 259,
+        "segments": 50,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.862,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "12 页和 40 页之间",
+            "spoken_length": 445,
+            "budget": 327
+          },
+          {
+            "title": "它补了容量，没补速度和模型",
+            "spoken_length": 161,
+            "budget": 326
+          },
+          {
+            "title": "20 美元的 Plus 是另一类东西",
+            "spoken_length": 252,
+            "budget": 326
+          },
+          {
+            "title": "装得下，和用得上",
+            "spoken_length": 287,
+            "budget": 326
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "candidate": {
+      "title": "每月20美元的Plus，哪些任务能做了，哪些只是额度变大",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2286,
+          "completion_tokens": 5406,
+          "total_tokens": 7692,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3918,
+          "cost_usd": 0.0035865,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 53.418,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+        "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+        "trusted_urls": 6
+      },
+      "length_check": {
+        "spoken_length": 982,
+        "estimated_seconds": 220,
+        "segments": 44,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.735,
+        "status": "UNDER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先分清：入口、额度、早期功能",
+            "spoken_length": 251,
+            "budget": 218
+          },
+          {
+            "title": "三个入口，直接改每周流程",
+            "spoken_length": 188,
+            "budget": 218
+          },
+          {
+            "title": "四项expanded，改的是做多少",
+            "spoken_length": 191,
+            "budget": 218
+          },
+          {
+            "title": "图像是质量，早期功能别押注",
+            "spoken_length": 106,
+            "budget": 217
+          },
+          {
+            "title": "20美元是网页订阅，没有年付",
+            "spoken_length": 105,
+            "budget": 217
+          },
+          {
+            "title": "我的判断：先看任务，不看消息数",
+            "spoken_length": 141,
+            "budget": 217
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  }
+]

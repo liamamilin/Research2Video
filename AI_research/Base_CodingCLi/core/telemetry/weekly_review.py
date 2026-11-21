@@ -28,7 +28,8 @@ MONEY = re.compile(r"\$|美元|块钱|\d+\s*元|价格|涨价|降价|半价|免�
 DURATIONS = ((120, "2 分钟内"), (240, "2–4 分钟"), (480, "4–8 分钟"), (None, "8 分钟以上"))
 SLOTS = ((6, "凌晨 0–6 点"), (12, "上午 6–12 点"), (18, "下午 12–18 点"), (24, "晚上 18–24 点"))
 DIMENSIONS = (("form", "形式"), ("matrix", "矩阵"), ("column", "栏目"), ("structure", "对比结构（T05）"),
-              ("product", "标题写了产品名"), ("money", "标题写了钱"), ("duration", "时长"), ("slot", "发布时段"))
+              ("product", "标题写了产品名"), ("money", "标题写了钱"), ("cover", "封面样式"), ("duration", "时长"),
+              ("slot", "发布时段"), ('programme', '节目写法版本'), ('material_usage', '成片素材使用'))
 
 
 def structure(text: str) -> str:
@@ -93,6 +94,12 @@ def _measure(video: dict, now: float) -> dict:
             **{key: value for key, (_, value) in windows.items()}, "state": windows["h24"][0],
             "form": video.get("form") or "未标注", "matrix": video.get("matrix") or "未标注",
             "column": video.get("column") or "未标注", "structure": video.get("structure") or "",
+            "cover": video.get("cover") or "未标注",
+            'programme': video.get('programme') or '', 'material_usage': video.get('material_usage') or '',
+            'presentation': video.get('presentation') or {},
+            # A/B marks frozen on the script (spec/ab-testing.md §9): so a change in the review is not misread
+            "experiments": [{"id": m.get("id"), "arm": m.get("arm")} for m in video.get("experiments") or []
+                            if isinstance(m, dict)],
             "product": "是" if PRODUCTS.search(title) else "否", "money": "是" if MONEY.search(title) else "否",
             "duration_band": _band(video.get("duration") or 0), "slot": _slot(video["pubdate"]), **_watch(video)}
 
@@ -187,7 +194,7 @@ def review(videos: list[dict], start: float, now: float) -> dict:
     """The review of the week starting ``start`` (local Monday 00:00), compared with the week before.
 
     ``videos`` are published workflow videos: bvid, title, pubdate, duration, view (current plays), metrics (current
-    counters), snapshots [(observed_at, plays)], form, matrix, column, structure."""
+    counters), snapshots [(observed_at, plays)], form, matrix, column, structure, cover (the cover style)."""
     end = start + 7 * 86400
     measured = [_measure(v, now) for v in videos if start - 7 * 86400 <= v["pubdate"] < end]
     items = [i for i in measured if i["pubdate"] >= start]
@@ -200,7 +207,7 @@ def review(videos: list[dict], start: float, now: float) -> dict:
     dimensions = []
     for key, label in DIMENSIONS:
         groups = _groups(items, previous, key, overall)
-        if key == "structure" and not groups:
+        if key in ('structure', 'programme', 'material_usage') and not groups:
             continue  # no T05 item with a structure published this week
         dimensions.append({"key": key, "label": label, "groups": groups})
     findings, suggestions = _findings(dimensions, overall, counts)

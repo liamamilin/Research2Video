@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRounds, getReportRaw, runRound, cancelRound, retryRound, type Round } from "@/api";
@@ -32,7 +33,7 @@ export function RoundsPage() {
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
 
-  const [rounds, setRounds] = useState<Round[]>([]);
+  const [rounds, setRounds] = useState<Round[]>(() => readPageSnapshot<{ rounds: Round[] }>("rounds")?.rounds ?? []);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,24 +49,26 @@ export function RoundsPage() {
 
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller;
     try {
       const data = await getRounds(30, controller.signal);
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted || revision !== snapshotRevision()) return;
+      savePageSnapshot("rounds", data, revision);
       setRounds(data.rounds);
       setRunning(data.running);
       setError("");
     } catch (err: unknown) {
-      if (!controller.signal.aborted) setError(err instanceof Error ? err.message : "加载失败");
+      if (!controller.signal.aborted && revision === snapshotRevision()) setError(err instanceof Error ? err.message : "加载失败");
     } finally {
-      if (flight.current === controller) { flight.current = null; setLoading(false); }
+      if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); }
     }
   }, []);
 
   useEffect(() => { void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, running ? 5000 : 30000);
+    const timer = window.setInterval(refresh, running ? 15000 : 45000);
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [running, load]);

@@ -1,0 +1,29 @@
+{
+  "profile_changes": [
+    {
+      "job": "monitoring/ai_flash_discovery",
+      "field": "version",
+      "before": "flash-natural-minimal-r3",
+      "after": "flash-explanation-v2"
+    },
+    {
+      "job": "ai_media/ai_tool_tutorials",
+      "field": "version",
+      "before": "ai-tool-opening-flexible-r8",
+      "after": "ai-tool-natural-v4"
+    },
+    {
+      "job": "culture/culture_weekly",
+      "field": "version",
+      "before": "culture-weekly-natural-v2",
+      "after": "culture-weekly-natural-v3"
+    }
+  ],
+  "other_changes": [
+    "persona punctuation cleanup and unused variables",
+    "repeated-identity repair instruction now matches its trigger",
+    "writer prompt version 16"
+  ],
+  "culture_episode_lead_actual": "",
+  "superseded_by": "round11-source.json and applied-files.json; culture structure relaxation reverted"
+}

@@ -1,0 +1,15 @@
+{
+  "job_id": "e04186e9-7875-4460-b628-98ed7f6bc040",
+  "entry": "POST /api/jobs → SingleWorker → G2ProcessRunner (isolated data)",
+  "status": "COMPLETED",
+  "budget_usd": 20.0,
+  "cost_upper_bound_usd": 0.123,
+  "llm_call_count": 3,
+  "qa_status": "PASS",
+  "full_decode_passed": true,
+  "video_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/regression-fixes-20261114-final/jobs/e04186e9-7875-4460-b628-98ed7f6bc040/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+  "sha256": "5eb8efc6c48dd1852aca3b3b2b69dfcb2ac5272064672f53aa94e2508e3c60ac",
+  "renderer_javascript_unchanged": true,
+  "manual_input": "Short engineering smoke script; not a production topic or visual quality acceptance",
+  "tts": "Reused 4 voice segments freshly synthesized by initial smoke run"
+}

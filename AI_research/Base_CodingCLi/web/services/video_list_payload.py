@@ -2,6 +2,19 @@
 from __future__ import annotations
 
 
+def job_state(state: dict | None) -> dict | None:
+    """List views need usage totals, not per-source/per-call research records."""
+    if state is None:
+        return None
+    result = dict(state)
+    if isinstance(state.get("last_usage"), dict):
+        result["last_usage"] = {k: v for k, v in state["last_usage"].items() if k in {
+            "model", "prompt_tokens", "completion_tokens", "total_tokens", "searches",
+            "cost", "cost_usd", "llm_calls", "cached_tokens",
+        }}
+    return result
+
+
 def publication(row: dict) -> dict:
     # In particular, exclude publish_pack/description snapshots and attempt logs.
     return {key: value for key, value in row.items() if key in {
@@ -24,7 +37,8 @@ def compact(row: dict) -> dict:
                                               if k in {"file_name", "duration", "width", "height", "size"}}
     if row.get("content_context"):
         result["content_context"] = {k: v for k, v in row["content_context"].items()
-                                     if k in {"column", "column_name", "matrix", "source_matrix", "type", "content_mode"}}
+                                     if k in {"column", "column_name", "matrix", "source_matrix", "type", "content_mode",
+                                              "experiments"}}
     if row.get("length_check"):
         result["length_check"] = {**{k: v for k, v in row["length_check"].items() if k in {
             "spoken_length", "estimated_seconds", "target_minutes", "budget", "ratio", "status", "dropped_citations",

@@ -25,7 +25,7 @@ def visual_theme(ir: dict | None = None, production_style: dict | None = None) -
                 "muted": "#69756e", "dot_grid": True}
     if preset == "information_cards":
         return {"id": "information_cards", "background": "#f3f5f1", "text": "#213d39", "muted": "#73847b"}
-    if preset in {"kinetic_typography", "image_slideshow", "chat_dialogue", "object_showcase", "dynamic_collage"}:
+    if preset in {"kinetic_typography", "image_slideshow", "chat_dialogue", "object_showcase", "dynamic_collage", "illustrated_explainer"}:
         return {"id": "creative_light", "background": "#f5f2e9", "text": "#213d39", "muted": "#73847b"}
     if ir is not None:
         return {"id": "legacy_dark", "background": "#0b1020", "text": "#f3f6fc", "muted": "#a9b7cd"}

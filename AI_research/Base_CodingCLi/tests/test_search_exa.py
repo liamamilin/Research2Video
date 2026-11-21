@@ -215,3 +215,47 @@ def test_youcom_daily_limit_is_a_failure_not_an_empty_result(monkeypatch):
     with pytest.raises(SearchUnavailableError):
         client.search(["q"])
     assert "daily limit" in client.errors["youcom"]
+
+
+def test_exa_contents_402_is_remembered_and_not_retried(monkeypatch, tmp_path):
+    from core import search_health
+
+    search_health.use_state_dir(str(tmp_path))
+    try:
+        hits = {"n": 0}
+
+        def urlopen(request, timeout=None):
+            hits["n"] += 1
+            raise RuntimeError(
+                'HTTP 402: {"error":"You have exceeded your credits limit","tag":"NO_MORE_CREDITS"}')
+
+        monkeypatch.setattr("core.search.urllib.request.urlopen", urlopen)
+        client = SearchClient(_config())
+        with pytest.raises(RuntimeError, match="402"):
+            client.read_page("https://a.test/1")
+        with pytest.raises(RuntimeError, match="402"):
+            client.read_page("https://a.test/2")
+        assert hits["n"] == 1
+        assert "exa" in search_health.cooling()
+        assert search_health.blocked()["exa"]["cause"] == "credits"
+
+        # A fresh client still skips Exa while the shared cooldown is active.
+        other = SearchClient(_config())
+        with pytest.raises(RuntimeError, match="402|credits|exa"):
+            other.read_page("https://a.test/3")
+        assert hits["n"] == 1
+
+        # After cooldown, one probe is allowed (same as search()), then stop again.
+        def expire(data):
+            data["providers"]["exa"]["until"] = 1
+        search_health._update(expire)
+        assert "exa" not in search_health.cooling()
+        probe = SearchClient(_config())
+        with pytest.raises(RuntimeError, match="402"):
+            probe.read_page("https://a.test/4")
+        assert hits["n"] == 2
+        with pytest.raises(RuntimeError, match="402"):
+            probe.read_page("https://a.test/5")
+        assert hits["n"] == 2
+    finally:
+        search_health.use_state_dir(None)

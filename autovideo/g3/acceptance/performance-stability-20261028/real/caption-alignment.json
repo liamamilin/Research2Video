@@ -1,0 +1,510 @@
+{
+  "version": 2,
+  "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+  "narration_sha256": "2494c0f87d60a90ed4cda78fdcaadf1fcd7db62e22d41c98ac67bb982dbfc687",
+  "audio_sha256": "ef54e7a0f03e6f9a6a9f1e502b3788cbabcc0be73bc30fb396730efcc0dc6657",
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "model_sha256": "be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91",
+  "generation_seconds": 75.825,
+  "cues": [
+    {
+      "segment_id": "c1_n1",
+      "text": "视频从写稿进入制作时，页面需要继续更新。",
+      "char_start": 0,
+      "char_end": 20,
+      "start_ms": 360,
+      "end_ms": 3957
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "正在工作的任务显示进度，",
+      "char_start": 0,
+      "char_end": 12,
+      "start_ms": 4437,
+      "end_ms": 6487
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "完成之后显示可以播放的成片。",
+      "char_start": 12,
+      "char_end": 26,
+      "start_ms": 6597,
+      "end_ms": 8807
+    },
+    {
+      "segment_id": "c2_n1",
+      "text": "长文稿可以分成独立章节。",
+      "char_start": 0,
+      "char_end": 12,
+      "start_ms": 9781,
+      "end_ms": 12071
+    },
+    {
+      "segment_id": "c2_n2",
+      "text": "如果后面的配音失败，已经完成的章节应当保留，",
+      "char_start": 0,
+      "char_end": 22,
+      "start_ms": 12480,
+      "end_ms": 15810
+    },
+    {
+      "segment_id": "c2_n2",
+      "text": "重试时继续生成剩下的内容。",
+      "char_start": 22,
+      "char_end": 35,
+      "start_ms": 15810,
+      "end_ms": 18050
+    }
+  ],
+  "word_evidence": [
+    {
+      "segment_id": "c1_n1",
+      "items": [
+        {
+          "text": "视",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "频",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "从",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "写",
+          "start_ms": 800,
+          "end_ms": 1040
+        },
+        {
+          "text": "稿",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "进",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "入",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "制",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "作",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "时",
+          "start_ms": 1840,
+          "end_ms": 2240
+        },
+        {
+          "text": "页",
+          "start_ms": 2320,
+          "end_ms": 2400
+        },
+        {
+          "text": "面",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "需",
+          "start_ms": 2560,
+          "end_ms": 2800
+        },
+        {
+          "text": "要",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "继",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "续",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "更",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "新",
+          "start_ms": 3360,
+          "end_ms": 3680
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n2",
+      "items": [
+        {
+          "text": "正",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "在",
+          "start_ms": 320,
+          "end_ms": 560
+        },
+        {
+          "text": "工",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "作",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "的",
+          "start_ms": 880,
+          "end_ms": 960
+        },
+        {
+          "text": "任",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "务",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "显",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "示",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "进",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "度",
+          "start_ms": 1760,
+          "end_ms": 2080
+        },
+        {
+          "text": "完",
+          "start_ms": 2320,
+          "end_ms": 2400
+        },
+        {
+          "text": "成",
+          "start_ms": 2400,
+          "end_ms": 2640
+        },
+        {
+          "text": "之",
+          "start_ms": 2640,
+          "end_ms": 2720
+        },
+        {
+          "text": "后",
+          "start_ms": 2720,
+          "end_ms": 3040
+        },
+        {
+          "text": "显",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "示",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "可",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "以",
+          "start_ms": 3520,
+          "end_ms": 3600
+        },
+        {
+          "text": "播",
+          "start_ms": 3600,
+          "end_ms": 3680
+        },
+        {
+          "text": "放",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "的",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "成",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "片",
+          "start_ms": 4160,
+          "end_ms": 4400
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n1",
+      "items": [
+        {
+          "text": "长",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "文",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "稿",
+          "start_ms": 560,
+          "end_ms": 800
+        },
+        {
+          "text": "可",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "以",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "分",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "成",
+          "start_ms": 1280,
+          "end_ms": 1600
+        },
+        {
+          "text": "独",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "立",
+          "start_ms": 1760,
+          "end_ms": 1840
+        },
+        {
+          "text": "章",
+          "start_ms": 1840,
+          "end_ms": 2080
+        },
+        {
+          "text": "节",
+          "start_ms": 2080,
+          "end_ms": 2320
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n2",
+      "items": [
+        {
+          "text": "如",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "果",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "后",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "面",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "的",
+          "start_ms": 800,
+          "end_ms": 880
+        },
+        {
+          "text": "配",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "音",
+          "start_ms": 1040,
+          "end_ms": 1120
+        },
+        {
+          "text": "失",
+          "start_ms": 1120,
+          "end_ms": 1360
+        },
+        {
+          "text": "败",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "已",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "经",
+          "start_ms": 1760,
+          "end_ms": 1840
+        },
+        {
+          "text": "完",
+          "start_ms": 1840,
+          "end_ms": 2080
+        },
+        {
+          "text": "成",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "的",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "章",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "节",
+          "start_ms": 2480,
+          "end_ms": 2720
+        },
+        {
+          "text": "应",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "当",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "保",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "留",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "重",
+          "start_ms": 3440,
+          "end_ms": 3600
+        },
+        {
+          "text": "试",
+          "start_ms": 3600,
+          "end_ms": 3840
+        },
+        {
+          "text": "时",
+          "start_ms": 3840,
+          "end_ms": 4080
+        },
+        {
+          "text": "继",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "续",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "生",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "成",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "剩",
+          "start_ms": 4800,
+          "end_ms": 5040
+        },
+        {
+          "text": "下",
+          "start_ms": 5040,
+          "end_ms": 5200
+        },
+        {
+          "text": "的",
+          "start_ms": 5200,
+          "end_ms": 5280
+        },
+        {
+          "text": "内",
+          "start_ms": 5280,
+          "end_ms": 5360
+        },
+        {
+          "text": "容",
+          "start_ms": 5360,
+          "end_ms": 5600
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+# 内容选题与材料组织；不改变调度、自动制作开关或原写稿风格。
+version: 1
+# 可随代码交付；system.yaml 仍可显式关闭，旧 Job 快照不自动启用。
+question_material:
+  enabled: true
+editorial_guidance: 优先选栏目内有具体材料可说明、观众真正会遇到或想理解的问题。真实的使用处境和独到发现都值得关注，专业问题保留适用范围。热度可帮助发现需求，实际材料决定这个问题是否值得讲。按解释需要选用观察、案例、对照或背景。
+channels:
+  flash: AI快讯：近期变化如何影响普通人的钱、工作、能力、生活或安全；专业探索可以入选，但不能仅凭产品热门优先。
+  t01: T01产品认知：普通用户想理解哪些能力、边界与用途；用熟悉的问题说明产品，不把功能表当选题。
+  t02: T02应用场景：从工作、学习与生活中的共同问题选择案例，保留任务起点、输入、操作和产物，案例职业不限定整篇受众。
+  t03: T03教程：选择有可跟随操作和可见结果的共同需求，保留同一份示例输入、步骤、入口和适用条件，不为扩大受众删掉步骤。
+  t04: T04能力验证：围绕观众真正想知道的能力，用已有测试的输入、过程和结果讲清用法。
+  t05: T05横向选择：至少两家不同公司的AI产品；优先覆盖较广的真实选择，也保留能清楚说明受众的专业题。不要为了围绕某品牌硬加无关比较。
+  t06: T06付费价值：同一产品免费与付费、不同档位的价值；以使用频率、权益和选择为中心，不默认付费更好，不写成硬广。
+  t07: T07订阅支付：从订阅、扣费、续费、取消和退款等共同疑问切入，保留渠道与适用地区差异，不把促成支付作为唯一收获。
+  t08: T08排障：围绕用户能辨认的症状组织原因和下一步，保留区分条件与操作顺序，不将个案写成普遍故障。
+  t09: T09动态：选择改变普通用户可用能力、成本或操作的更新，说明受益人和使用情形，品牌热度仅作辅助。
+  ai_tutorial: AI工具教程：每轮最多三条不同问题；保留官方资料中的产品端、具体入口、步骤、示例输入和可见结果，以及系列和题材分类。专业教程保留前置知识，不把例子职业写成观看门槛。
+  ai_opensource: 开源工具：先选观众有什么问题值得解决，再说明项目如何做到；保留部署条件、操作与结果，专业工具不伪装成零门槛大众工具。
+  ai_arena: 模型比较：围绕使用需求理解模型差异，保留比较条件、实际表现与成本，榜单名次和参数不单独构成观看价值。
+  ai_business: AI商业：围绕产品、工作与消费选择解释商业变化，保留商业机制和案例，不把融资、估值或品牌热度直接当用户需求。
+  ai_deep: AI深度：一个有理解价值的问题及其机制，保留原理、方法、实验和具体例子的解释深度；技术问题按真实理解门槛确定受众。
+  ai_science: AI科研进展：讲清研究问题、AI 介入步骤与证据边界；适合关心科学进展的普通观众与开发者，不把实验室细节伪装成日常操作教程。
+  science_daily: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
+  science_weekly: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
+  science_illustrated: 科学：从生活现象、好奇心或反直觉发现进入，保留实验对象、操作、观测与解释链，不硬写消费建议。
+  company_daily: 商业：公司做法如何影响产品、服务、工作与消费者，保留商业机制和具体案例，不以融资金额代替内容价值。
+  company_weekly: 商业：公司做法如何影响产品、服务、工作与消费者，保留商业机制和具体案例，不以融资金额代替内容价值。
+  company_illustrated: 商业：公司做法如何影响产品、服务、工作与消费者，保留商业机制和具体案例，不以融资金额代替内容价值。
+  economy_daily: 经济：价格、收入、就业与生活选择背后的机制，保留数据条件和传导过程，不把宏观变化写成个人投资建议。
+  economy_weekly: 经济：价格、收入、就业与生活选择背后的机制，保留数据条件和传导过程，不把宏观变化写成个人投资建议。
+  economy_illustrated: 经济：价格、收入、就业与生活选择背后的机制，保留数据条件和传导过程，不把宏观变化写成个人投资建议。
+  industry_daily: 产业：日常产品背后的制造、供应与成本变化，保留工序和产业链关系，专业环节解释其作用。
+  industry_weekly: 产业：日常产品背后的制造、供应与成本变化，保留工序和产业链关系，专业环节解释其作用。
+  industry_illustrated: 产业：日常产品背后的制造、供应与成本变化，保留工序和产业链关系，专业环节解释其作用。
+  consumer_daily: 消费科技：购买、使用、维修与升级中的共同疑问，保留真实使用差异和适用条件，不默认买贵或买新。
+  consumer_weekly: 消费科技：购买、使用、维修与升级中的共同疑问，保留真实使用差异和适用条件，不默认买贵或买新。
+  consumer_illustrated: 消费科技：购买、使用、维修与升级中的共同疑问，保留真实使用差异和适用条件，不默认买贵或买新。
+  history_daily: 历史：人物处境、制度选择与文明变化中的有趣问题，保留时代环境与事件过程，不强套现代职场或消费结论。
+  history_weekly: 历史：人物处境、制度选择与文明变化中的有趣问题，保留时代环境与事件过程，不强套现代职场或消费结论。
+  history_illustrated: 历史：人物处境、制度选择与文明变化中的有趣问题，保留时代环境与事件过程，不强套现代职场或消费结论。
+  geography_daily: 地理：地方差异、自然现象和人与环境的关系，保留空间、尺度和变化过程，不强写旅行消费。
+  geography_weekly: 地理：地方差异、自然现象和人与环境的关系，保留空间、尺度和变化过程，不强写旅行消费。
+  geography_illustrated: 地理：地方差异、自然现象和人与环境的关系，保留空间、尺度和变化过程，不强写旅行消费。
+  culture_daily: 文化：作品、审美与文化现象为何触动人，保留作品细节、创作处境与理解背景，不只列名人和展讯。
+  culture_weekly: 文化：作品、审美与文化现象为何触动人，保留作品细节、创作处境与理解背景，不只列名人和展讯。
+  culture_illustrated: 文化：作品、审美与文化现象为何触动人，保留作品细节、创作处境与理解背景，不只列名人和展讯。
+  software_daily: 软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
+  software_weekly: 软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
+  software_illustrated: 软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
+  tech_daily: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+  tech_weekly: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+  tech_illustrated: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+  hot_trends: 每日重要热点：近48小时跨领域重要事件（宏观经济、财经商业、科技产业与民生消费），排除敏感时政军事与娱乐八卦；重磅1–3条拆独立单条，其余有价值变化进合集。
+# Job → channel 映射仅作兼容回退；新配置请在 Job 上写 audience_channel。
+jobs:
+  monitoring/ai_flash_discovery: flash
+  chatgpt_acquisition/t01_product: t01
+  chatgpt_acquisition/t02_scenarios: t02
+  chatgpt_acquisition/t03_tutorials: t03
+  chatgpt_acquisition/t04_testing: t04
+  chatgpt_acquisition/t05_comparison: t05
+  chatgpt_acquisition/t06_value: t06
+  chatgpt_acquisition/t07_subscription: t07
+  chatgpt_acquisition/t08_troubleshooting: t08
+  chatgpt_acquisition/t09_updates: t09
+  ai_media/ai_tool_tutorials: ai_tutorial
+  ai_media/daily_opensource_radar: ai_opensource
+  ai_media/weekly_model_arena: ai_arena
+  ai_media/weekly_business_watch: ai_business
+  ai_media/weekly_deep_research: ai_deep
+  chains/ai_science_updates: ai_science
+  chains/hot_trends: hot_trends
+  science/science_daily: science_daily
+  science/science_weekly: science_weekly
+  science/science_illustrated: science_illustrated
+  company/company_daily: company_daily
+  company/company_weekly: company_weekly
+  company/company_illustrated: company_illustrated
+  economy/economy_daily: economy_daily
+  economy/economy_weekly: economy_weekly
+  economy/economy_illustrated: economy_illustrated
+  industry/industry_daily: industry_daily
+  industry/industry_weekly: industry_weekly
+  industry/industry_illustrated: industry_illustrated
+  consumer/consumer_daily: consumer_daily
+  consumer/consumer_weekly: consumer_weekly
+  consumer/consumer_illustrated: consumer_illustrated
+  history/history_daily: history_daily
+  history/history_weekly: history_weekly
+  history/history_illustrated: history_illustrated
+  geography/geography_daily: geography_daily
+  geography/geography_weekly: geography_weekly
+  geography/geography_illustrated: geography_illustrated
+  culture/culture_daily: culture_daily
+  culture/culture_weekly: culture_weekly
+  culture/culture_illustrated: culture_illustrated
+  software/software_daily: software_daily
+  software/software_weekly: software_weekly
+  software/software_illustrated: software_illustrated
+  tech/tech_daily: tech_daily
+  tech/tech_weekly: tech_weekly
+  tech/tech_illustrated: tech_illustrated
+productions:
+  chatgpt_t01_product: t01
+  chatgpt_t02_scenarios: t02
+  chatgpt_t03_tutorials: t03
+  chatgpt_t04_testing: t04
+  chatgpt_t05_comparison: t05
+  chatgpt_t06_value: t06
+  chatgpt_t07_subscription: t07
+  chatgpt_t08_troubleshooting: t08
+  chatgpt_t09_updates: t09
+  science_daily: science_daily
+  science_weekly: science_weekly
+  science_illustrated: science_illustrated
+  company_daily: company_daily
+  company_weekly: company_weekly
+  company_illustrated: company_illustrated
+  economy_daily: economy_daily
+  economy_weekly: economy_weekly
+  economy_illustrated: economy_illustrated
+  industry_daily: industry_daily
+  industry_weekly: industry_weekly
+  industry_illustrated: industry_illustrated
+  consumer_daily: consumer_daily
+  consumer_weekly: consumer_weekly
+  consumer_illustrated: consumer_illustrated
+  history_daily: history_daily
+  history_weekly: history_weekly
+  history_illustrated: history_illustrated
+  geography_daily: geography_daily
+  geography_weekly: geography_weekly
+  geography_illustrated: geography_illustrated
+  culture_daily: culture_daily
+  culture_weekly: culture_weekly
+  culture_illustrated: culture_illustrated
+  software_daily: software_daily
+  software_weekly: software_weekly
+  software_illustrated: software_illustrated
+  tech_daily: tech_daily
+  tech_weekly: tech_weekly
+  tech_illustrated: tech_illustrated
+  flash_each: flash
+  flash_daily: flash
+  chatgpt_t09_updates_each: t09
+  ai_tool_tutorials: ai_tutorial
+  ai_media_opensource_digest: ai_opensource
+  ai_media_arena_digest: ai_arena
+  ai_media_business_digest: ai_business
+  ai_media_deep_dive: ai_deep
+  ai_science_updates_each: ai_science
+  hot_trends_each: hot_trends
+  hot_trends_daily: hot_trends
+single_question:
+- ai_arena
+- ai_business
+- ai_deep
+- company_weekly
+- consumer_weekly
+- culture_weekly
+- economy_weekly
+- geography_weekly
+- history_weekly
+- industry_weekly
+- science_weekly
+- software_weekly
+- tech_weekly
+knowledge:
+- company_illustrated
+- consumer_illustrated
+- culture_illustrated
+- economy_illustrated
+- geography_illustrated
+- history_illustrated
+- industry_illustrated
+- science_illustrated
+- software_illustrated
+- tech_illustrated
+candidate_limits:
+  # 快讯与每日重要热点的候选数量由本期材料决定，供合集和单条共同使用。
+  flash: null
+  hot_trends: null
+  default: 4
+  ai_tutorial: 3

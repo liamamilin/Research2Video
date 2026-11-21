@@ -1,0 +1,185 @@
+{
+  "completed_at": "2026-11-14T17:41:28.079118+08:00",
+  "base_commit": "596d10da",
+  "conclusion": "已修复两类逻辑缺陷及3处渲染器类型错误。最终预算按用户后续要求设为固定20美元/视频，可配置；引擎回归与隔离真实短片通过。研究常驻服务未重载，采集修复待其重载后生效。",
+  "unchanged_existing_modified_files": 9,
+  "source_code_modified_by_this_run": true,
+  "unique_tests_passed": 6333,
+  "unique_tests_skipped": 2,
+  "counts": {
+    "research_backend_passed": 4462,
+    "research_backend_skipped": 2,
+    "research_frontend_passed": 749,
+    "autovideo_passed_after_environment_rechecks": 1117,
+    "music_workshop_passed": 5,
+    "design_snapshot_passed_duplicate_subset": 23,
+    "tracked_python_files_compiled": 987
+  },
+  "raw_runs": [
+    {
+      "evidence": "research-backend.xml",
+      "tests": 4464,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    },
+    {
+      "evidence": "research-ui.xml",
+      "tests": 749,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "evidence": "autovideo.xml",
+      "tests": 1103,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 1
+    },
+    {
+      "evidence": "autovideo-loopback.xml",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "evidence": "pronunciation.xml",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "evidence": "music.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "builds": {
+    "research_frontend_types": "pass",
+    "research_frontend_lint": "pass",
+    "research_frontend_production_build": "pass_with_chunk_size_warning",
+    "autovideo_frontend_build": "pass",
+    "autovideo_bundle_matches_source": "pass",
+    "renderer_strict_types": "pass_after_fix",
+    "music_javascript_syntax": "pass",
+    "research_config_validation": "pass",
+    "git_diff_check": "pass"
+  },
+  "findings": [
+    {
+      "severity": "P2",
+      "file": "autovideo/g1/renderer/src/RelationLayout.ts",
+      "lines": [
+        30,
+        31
+      ],
+      "issue": "TS7006: row 由 any 传播，两个 map 回调的 e 隐式 any，严格类型检查失败。",
+      "resolution": "fixed_in_source_and_verified"
+    },
+    {
+      "severity": "P2",
+      "file": "autovideo/g1/renderer/src/Root.tsx",
+      "lines": [
+        23,
+        502
+      ],
+      "issue": "TS2367: Timeline.presentation.preset 类型未包含 illustrated_explainer，但渲染分派判断该值。",
+      "resolution": "fixed_in_source_and_verified"
+    },
+    {
+      "severity": "warning",
+      "issue": "研究 UI 的 YamlEditor 构建块约 3.72 MB（gzip 963.58 kB），触发 Vite 500 kB 体积警告。"
+    },
+    {
+      "severity": "P1",
+      "jobs": [
+        "1ed19eea-ec89-423a-a5eb-2477006b0abf",
+        "b8616d64-8291-410c-a125-b0f002cda11e"
+      ],
+      "issue": "已定位真实失败根因：备用模型切到配置零单价的opencode后，章节规划按当前单价把整片预算重算为0，却保留先前失败请求0.123美元费用预留，下一次模型成功返回仍判超限。content_video.py:118有同类重算。",
+      "file": "autovideo/g2/authored_script.py",
+      "lines": [
+        145,
+        146,
+        147
+      ],
+      "resolution": "fixed_in_source_and_verified"
+    },
+    {
+      "severity": "P2",
+      "file": "AI_research/Base_CodingCLi/core/production_policy.py",
+      "lines": [
+        140,
+        198,
+        199,
+        200
+      ],
+      "issue": "_latest_collection_end调用get_history默认仅最近50条；最近50条失败会漏掉更早的成功窗口，since_last_collection退回最近排期起点而漏采。",
+      "evidence": "evidence/logic-window-repro.json",
+      "production_observed": false,
+      "resolution": "fixed_in_source_and_verified",
+      "activation": "resident research server reload pending; new processes use fixed code"
+    }
+  ],
+  "skips": [
+    {
+      "test": "test_built_app_carries_the_custom_catalog_and_icon_name",
+      "reason": "当前检出未构建 AREC.app"
+    },
+    {
+      "test": "test_the_budget_is_never_silently_spent_on_a_prefix",
+      "reason": "当前轮次没有 P1"
+    }
+  ],
+  "limits": [
+    "外部研究/模型/TTS到全新MP4的正常生产入口，本轮未重新端到端执行。",
+    "两份既有成片仅验证完整音视频解码；不代表主观画面、同步或整片听审验收。",
+    "研究端浏览器验证到登录页；登录后的交互由API/组件测试覆盖，未实际浏览器登录逐页操作。",
+    "未执行真实投稿或修改调度。"
+  ],
+  "environment_rechecks": [
+    "首轮研究 check.sh 受本机端口沙箱限制，中止并在允许端口的环境完整重跑后端；其余检查阶段单独全部执行。",
+    "AutoVideo 原始1100通过/2端口失败/1缺依赖跳过；2个端口测试重跑通过，语音依赖在g0环境补跑15通过。",
+    "设计快照23通过已包含在AutoVideo套件中，不重复计入总数。"
+  ],
+  "logic_review_evidence": [
+    "evidence/logic-budget-repro.json",
+    "evidence/logic-window-repro.json"
+  ],
+  "fixes": {
+    "verified_at": "2026-11-14T18:33:03.131312+08:00",
+    "budget_default_usd": 20.0,
+    "budget_configuration": "AUTOVIDEO_G2_MAX_COST_USD",
+    "budget_frozen_at_process_start": true,
+    "engine_passed": 1113,
+    "pronunciation_passed": 15,
+    "research_focused_passed": 60,
+    "renderer_strict_types": "pass",
+    "renderer_emitted_js_identical": true,
+    "live_smoke": {
+      "job_id": "e04186e9-7875-4460-b628-98ed7f6bc040",
+      "entry": "POST /api/jobs → SingleWorker → G2ProcessRunner (isolated data)",
+      "status": "COMPLETED",
+      "budget_usd": 20.0,
+      "cost_upper_bound_usd": 0.123,
+      "llm_call_count": 3,
+      "qa_status": "PASS",
+      "full_decode_passed": true,
+      "video_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/regression-fixes-20261114-final/jobs/e04186e9-7875-4460-b628-98ed7f6bc040/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+      "sha256": "5eb8efc6c48dd1852aca3b3b2b69dfcb2ac5272064672f53aa94e2508e3c60ac",
+      "renderer_javascript_unchanged": true,
+      "manual_input": "Short engineering smoke script; not a production topic or visual quality acceptance",
+      "tts": "Reused 4 voice segments freshly synthesized by initial smoke run"
+    },
+    "deployment": {
+      "new_video_processes": "load fixed budget and renderer automatically",
+      "research_resident_service": "not restarted in this run; existing process predates collection-history fix"
+    },
+    "unrelated_worktree_changes": "preserved"
+  }
+}

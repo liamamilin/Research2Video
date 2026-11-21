@@ -1,0 +1,372 @@
+{
+ "job_id": "184ada6a-1abc-4b05-8e2c-1bcaf49729ec",
+ "title": "手机只装一个 AI：五家全免费，ChatGPT 先别急着付费",
+ "status": "COMPLETED",
+ "active_stage": "COMPLETE",
+ "attempt_count": 1,
+ "cancel_requested": false,
+ "error_code": null,
+ "error_message": null,
+ "retryable": false,
+ "source_sha256": "867818e7fd32419c417fa5d6c138e30ad553760a1c424f29739cc42f3a1c64b3",
+ "source_char_count": 1395,
+ "target_duration_sec": 60,
+ "theme": "minimal_dark",
+ "voice_id": "voxcpm_anchor",
+ "created_at": "2026-11-10T13:36:53.719+00:00",
+ "updated_at": "2026-11-10T13:53:37.347+00:00",
+ "version": 13,
+ "operation_type": "generate",
+ "parent_job_id": null,
+ "parent_attempt_no": null,
+ "scene_id": null,
+ "creative_intent": {
+  "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+  "purpose": "栏目：T05 · AI 产品横向选择。讲解目标：ChatGPT 和其他 AI 哪个好？。\n优先按段落组合并排输出对比、价格卡、对比表、产品真实截图、操作步骤，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+  "tone": "",
+  "focus": "同一任务“在手机里完成一次问答并把结果发给别人”，比较国内多家产品的入口、免费额度、生态联动，以及 ChatGPT 作为海外选项的使用门槛。"
+ },
+ "revision_mode": null,
+ "input_mode": "narration",
+ "idempotency_key": null,
+ "background_music_resolved": null,
+ "background_music": {
+  "enabled": false
+ },
+ "production_recipe_resolved": null,
+ "production_plan": {
+  "schema_version": 1,
+  "settings": {
+   "brand": {
+    "enabled": true,
+    "profile": "linthesis"
+   },
+   "content_notices": [],
+   "creative_intent": {
+    "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+    "purpose": "栏目：T05 · AI 产品横向选择。讲解目标：ChatGPT 和其他 AI 哪个好？。\n优先按段落组合并排输出对比、价格卡、对比表、产品真实截图、操作步骤，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+    "tone": "",
+    "focus": "同一任务“在手机里完成一次问答并把结果发给别人”，比较国内多家产品的入口、免费额度、生态联动，以及 ChatGPT 作为海外选项的使用门槛。"
+   },
+   "duration_mode": "content",
+   "music": null,
+   "packaging": {
+    "preset": "common",
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "recipe": "chatgpt_acquisition-m5",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "production_context": {
+    "content_recipe": {
+     "id": "research:chatgpt_acquisition-m5",
+     "settings": {
+      "video_form": "information_motion",
+      "creative_intent": {
+       "purpose": "知识讲解",
+       "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+       "focus": "同一任务“在手机里完成一次问答并把结果发给别人”，比较国内多家产品的入口、免费额度、生态联动，以及 ChatGPT 作为海外选项的使用门槛。"
+      },
+      "packaging": {
+       "preset": "common",
+       "label": "ChatGPT 实用讲解",
+       "accent": "#1f7a4d",
+       "recipe": "chatgpt_acquisition-m5",
+       "intro": {
+        "title": "手机只装一个 AI"
+       }
+      },
+      "voice_id": "voxcpm_anchor"
+     }
+    },
+    "matrix": {
+     "id": "research-production:chatgpt_t05_comparison",
+     "settings": {
+      "video_speed": 1.25,
+      "packaging": {
+       "label": "AI 产品横向选择",
+       "preset": "common"
+      }
+     }
+    }
+   },
+   "production_mode": "standard",
+   "production_recipe": null,
+   "target_duration_sec": 60,
+   "video_form": "information_motion",
+   "video_speed": 1.25,
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+   "packaging.label": "matrix",
+   "packaging.accent": "content_recipe",
+   "packaging.enabled": "common",
+   "packaging.intro.component": "common",
+   "packaging.intro.enabled": "common",
+   "packaging.intro.seconds": "common",
+   "packaging.outro.component": "common",
+   "packaging.outro.enabled": "common",
+   "packaging.outro.seconds": "common",
+   "packaging.badge.component": "common",
+   "packaging.badge.enabled": "common",
+   "packaging.source_card.component": "common",
+   "packaging.source_card.enabled": "common",
+   "packaging.source_card.seconds": "common",
+   "packaging.sound.component": "common",
+   "packaging.sound.enabled": "common",
+   "video_form": "content_recipe",
+   "production_mode": "common",
+   "visual_style": "common",
+   "duration_mode": "request",
+   "target_duration_sec": "common",
+   "voice_id": "content_recipe",
+   "video_speed": "matrix",
+   "creative_intent": "common",
+   "creative_intent.purpose": "request",
+   "creative_intent.audience": "request",
+   "creative_intent.focus": "content_recipe",
+   "packaging.preset": "matrix",
+   "packaging.recipe": "content_recipe",
+   "packaging.intro.title": "content_recipe",
+   "enabled": "brand_default",
+   "profile": "brand_default"
+  },
+  "style": {
+   "id": "legacy",
+   "version": 1,
+   "description": "保留各既有形式的原始视觉定义"
+  },
+  "executor": {
+   "id": "remotion",
+   "version": 1
+  },
+  "output": {
+   "width": 1920,
+   "height": 1080,
+   "fps": 30
+  },
+  "packaging_sha256": "af29c36e062550702faa490eebf53058621d758be7f04246b9f26e3122f55e5d",
+  "packaging": {
+   "library": "autovideo-packaging",
+   "version": 2,
+   "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+   "selection": {
+    "preset": "common",
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "recipe": "chatgpt_acquisition-m5",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "components": {
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+     "component": "stinger",
+     "enabled": false,
+     "seconds": 1.5
+    },
+    "outro": {
+     "component": "end_card",
+     "enabled": false,
+     "seconds": 2.5
+    },
+    "badge": {
+     "component": "corner_badge",
+     "enabled": false
+    },
+    "source_card": {
+     "component": "source_card",
+     "enabled": true,
+     "seconds": 4.5
+    },
+    "sound": {
+     "component": "synth_sting",
+     "enabled": false
+    }
+   },
+   "package": {
+    "accent": "#1f7a4d"
+   },
+   "badge": {
+    "text": "",
+    "color": "#1f7a4d"
+   },
+   "source_card": null,
+   "source_card_state": "no_sources",
+   "component_versions": {
+    "intro": {
+     "id": "stinger",
+     "version": 1
+    },
+    "outro": {
+     "id": "end_card",
+     "version": 2
+    },
+    "badge": {
+     "id": "corner_badge",
+     "version": 1
+    },
+    "source_card": {
+     "id": "source_card",
+     "version": 2
+    },
+    "sound": {
+     "id": "synth_sting",
+     "version": 1
+    }
+   },
+   "sha256": "af29c36e062550702faa490eebf53058621d758be7f04246b9f26e3122f55e5d"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "867818e7fd32419c417fa5d6c138e30ad553760a1c424f29739cc42f3a1c64b3",
+  "music": {
+   "selection": null,
+   "background_music_generated": false
+  },
+  "brand_record_sha256": "8e8e766277b1d8553a00a1b068971ad023a039e10575198167446fd6b97c9465",
+  "brand_layout": {
+   "version": 1,
+   "left": 140,
+   "right": 140,
+   "top": 54,
+   "width": 520,
+   "height": 76,
+   "gap": 40
+  },
+  "sha256": "da9fef6c79c52e57b72d22a3b878fc178689b34b75bd15115f32687cfcbec8b3"
+ },
+ "production_mode": "standard",
+ "visual_style": "legacy",
+ "video_speed": 1.25,
+ "video_form": "information_motion",
+ "duration_mode": "content",
+ "input_analysis": {
+  "requested_form": "information_motion",
+  "selected_form": "information_motion",
+  "recommended_form": "information_motion",
+  "selection_mode": "manual",
+  "status": "ready",
+  "reason": "按指定形式制作，定稿讲稿逐字配音。",
+  "issues": [],
+  "retained_units": 45,
+  "excluded_units": 0
+ },
+ "resolved_video_form": "information_motion",
+ "attempts": [
+  {
+   "attempt_no": 1,
+   "status": "COMPLETED",
+   "started_at": "2026-11-10T13:36:53.807+00:00",
+   "completed_at": "2026-11-10T13:53:37.347+00:00",
+   "error_code": null,
+   "error_message": null,
+   "stages": [
+    {
+     "stage": "PLAN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:36:53.807+00:00",
+     "completed_at": "2026-11-10T13:36:54.187+00:00",
+     "duration_seconds": 0.17,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "VOICE_ALIGN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:36:54.190+00:00",
+     "completed_at": "2026-11-10T13:43:20.735+00:00",
+     "duration_seconds": 386.54,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "STORYBOARD",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:43:20.738+00:00",
+     "completed_at": "2026-11-10T13:45:25.747+00:00",
+     "duration_seconds": 124.97,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "SCENE_IMAGES",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T13:45:25.757+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "BUILD_IR",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:45:26.115+00:00",
+     "completed_at": "2026-11-10T13:46:30.974+00:00",
+     "duration_seconds": 64.93,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "RENDER",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:46:30.978+00:00",
+     "completed_at": "2026-11-10T13:52:44.002+00:00",
+     "duration_seconds": 372.84,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "QUALITY_CHECK",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:52:44.020+00:00",
+     "completed_at": "2026-11-10T13:53:37.347+00:00",
+     "duration_seconds": 11.48,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "PACKAGE",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T13:52:55.372+00:00",
+     "completed_at": "2026-11-10T13:53:36.935+00:00",
+     "duration_seconds": 14.13,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "AUDIO_MIX",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T13:53:22.716+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    }
+   ]
+  }
+ ]
+}

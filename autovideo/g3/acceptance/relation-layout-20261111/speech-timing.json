@@ -1,0 +1,90 @@
+{
+  "method": "Original audio preserved; compare each first-character forced-alignment word against actual compiled beat frame. Highlight anticipates by existing shot transition; anchor is not measured human perception.",
+  "anchors": [
+    {
+      "run": "spoken",
+      "target": "node:n0",
+      "anchor_frame": 12,
+      "expected_voice_ms": 410,
+      "frame_rounding_error_ms": -10.0
+    },
+    {
+      "run": "spoken",
+      "target": "node:n1",
+      "anchor_frame": 161,
+      "expected_voice_ms": 5365,
+      "frame_rounding_error_ms": 1.667
+    },
+    {
+      "run": "spoken",
+      "target": "node:n2",
+      "anchor_frame": 288,
+      "expected_voice_ms": 9611,
+      "frame_rounding_error_ms": -11.0
+    },
+    {
+      "run": "spoken",
+      "target": "node:n3",
+      "anchor_frame": 430,
+      "expected_voice_ms": 14349,
+      "frame_rounding_error_ms": -15.667
+    },
+    {
+      "run": "spoken",
+      "target": "node:n4",
+      "anchor_frame": 552,
+      "expected_voice_ms": 18389,
+      "frame_rounding_error_ms": 11.0
+    },
+    {
+      "run": "spoken",
+      "target": "node:n5",
+      "anchor_frame": 686,
+      "expected_voice_ms": 22851,
+      "frame_rounding_error_ms": 15.667
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n0",
+      "anchor_frame": 7,
+      "expected_voice_ms": 247,
+      "frame_rounding_error_ms": -13.667
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n1",
+      "anchor_frame": 107,
+      "expected_voice_ms": 3583,
+      "frame_rounding_error_ms": -16.333
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n2",
+      "anchor_frame": 192,
+      "expected_voice_ms": 6392,
+      "frame_rounding_error_ms": 8.0
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n3",
+      "anchor_frame": 287,
+      "expected_voice_ms": 9557,
+      "frame_rounding_error_ms": 9.667
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n4",
+      "anchor_frame": 366,
+      "expected_voice_ms": 12202,
+      "frame_rounding_error_ms": -2.0
+    },
+    {
+      "run": "spoken-1.5",
+      "target": "node:n5",
+      "anchor_frame": 457,
+      "expected_voice_ms": 15235,
+      "frame_rounding_error_ms": -1.667
+    }
+  ],
+  "max_absolute_rounding_error_ms": 16.333
+}

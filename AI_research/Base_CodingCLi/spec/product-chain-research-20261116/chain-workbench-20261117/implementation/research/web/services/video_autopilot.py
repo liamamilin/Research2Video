@@ -1,0 +1,1070 @@
+"""The unattended pipeline: topics → script → audit → approve → render, resuming where it stopped.
+
+``tick()`` is idempotent. Each call reads the real state of every item's script and render and does
+the next thing that is missing, so a restart or a crash never repeats finished work:
+
+* no script yet → create it (its id is recorded before the work starts);
+* script FAILED or its audits cut off → resume it (research is reused, a saved draft is not rewritten);
+* draft with audits done → approve automatically, with a credibility label (core/video/credibility.py);
+* approved → one render (a render row with an AutoVideo job id is only polled, never resubmitted);
+* render completed → done. Nothing here publishes.
+
+Nothing here waits for the user, except a draft the audits still call seriously wrong (有严重问题) or that would be
+spoken wrongly (口播有问题): it is held, with the reason, until the user approves it. The label (有出处可信 … 有严重问题)
+says how far the words can be trusted and is shown wherever a video is listed; otherwise an item is held only for a
+technical failure (the script failed after its retries, the render failed after its retry).
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import threading
+import time
+import uuid
+from concurrent.futures import Future
+from typing import Optional
+
+from core.fileio import file_lock
+from core.production_policy import FLASH_JOB
+from core.video import auto as video_auto
+from core.video import autopilot_store as ap
+from core.video import columns as video_columns
+from core.video import content_columns, research_dossier
+from core.video import excerpt, production
+from core.video import store, story_pool
+from core.video import topic_store
+from web.services import video_executor, video_render, video_workflow  # noqa: F401 - tests patch the last two here
+from web.settings import get_settings
+
+logger = logging.getLogger("ai_research.web.video_autopilot")
+
+#: Retries of a failed stage and of a failed render: the executor's (web/services/video_executor.py).
+MAX_RETRIES = video_executor.MAX_RETRIES
+RENDER_RETRIES = video_executor.RENDER_RETRIES
+#: Scripts researching at once (each research uses search quota); renders go one at a time.
+MAX_SCRIPTS = 2
+MAX_RENDERS = 1
+#: How long past a discovery job's own time limit (``runtime.timeout_seconds``) to keep waiting for it to end.
+#: The job's engine cancels it at that limit, so the batch waits for the job, not for a clock of its own.
+DISCOVERY_SLACK_SECONDS = 5 * 60
+DISCOVERY_DEFAULT_TIMEOUT = 3600
+
+DEFAULT_SPEC = {"picks": [{"column": "flash", "all": True, "source": "flash"},
+                          {"column": "point_short", "all": True, "source": "flash"}],
+                "refresh": True}
+FLASH_PRODUCTION = "flash_each"
+RAW_PACKET_LIMIT = 40
+
+
+# --- picking ---------------------------------------------------------------
+
+def sync_topics() -> list[dict]:
+    """Read new or changed reports of every topic source into the topics table (core/video/topic_store.py)."""
+    settings = get_settings()
+    return topic_store.sync(settings.paths.jobs_dir, settings.paths.output_dir)
+
+
+def resolve_pick(pick: dict) -> dict:
+    """A pick by ``cell`` (the recipe's key) becomes ``column`` + ``source`` (the recipe's first topic source)."""
+    if not pick.get("cell"):
+        return pick
+    from core.video import recipes as matrix
+
+    config_dir = get_settings().paths.config_dir
+    sources = matrix.topic_sources(config_dir, pick["cell"])
+    if not sources:
+        raise ValueError(f"格子 {pick['cell']} 没有选题来源，不能自动挑选题")
+    if video_columns.for_new_script(config_dir, pick["cell"]).topic_kind != "single":
+        raise ValueError(f"格子 {pick['cell']} 一期用几条选题合成，不能按条数自动挑")
+    return {"column": pick["cell"], "count": pick.get("count", 1), "source": sources[0], **({"all": True} if pick.get("all") else {})}
+
+
+def known_source(name: str) -> bool:
+    return name == topic_store.MANUAL or topic_store.resolve(get_settings().paths.jobs_dir, name) is not None
+
+
+def coverage(*, cells: Optional[list[dict]] = None, source_rows: Optional[list[dict]] = None) -> list[dict]:
+    """Per cell: its topic sources, how many topics wait to be written and how many are taken, newest report date."""
+    from core.video import recipes as matrix
+
+    settings = get_settings()
+    if source_rows is None:
+        source_rows = sync_topics()
+    known = {topic_store.MANUAL} | {value for row in source_rows for value in (row["name"], row["job"])}
+    covered = store.scripts_by_topic()
+    dismissed = store.dismissed_topic_ids()
+    cache: dict[str, tuple] = {}
+    rows = []
+    for cell in cells if cells is not None else matrix.catalog(settings.paths.config_dir):
+        sources = cell.get("topic_sources") or []
+        if not cell["usable"] or cell["key"] is None:
+            continue
+        if cell.get("whole_report") and not sources:  # written from a whole report (Job page), no items to pick here
+            continue
+        row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
+               "open": 0, "written": 0, "dismissed": 0, "report_date": None,
+               "unknown_sources": [s for s in sources if s not in known],
+               "multi": bool(cell["column"] and cell["column"].get("topic_kind") == "roundup"),
+               "autopilot": bool(cell["column"] and cell["column"].get("topic_kind", "single") == "single")}
+        for source in sources:
+            if source not in cache:
+                cache[source] = topic_store.load(source)
+            date, topics = cache[source]
+            row["report_date"] = max(filter(None, [row["report_date"], date]), default=None)
+            # written is per cell: a topic written as a quick take is still open for a knowledge point
+            done = {t.id for t in topics if any(x["column_key"] == cell["key"] for x in covered.get(t.id, []))}
+            skipped = {t.id for t in topics if t.id in dismissed} - done
+            row["open"] += len(topics) - len(done) - len(skipped)
+            row["written"] += len(done)
+            row["dismissed"] += len(skipped)
+        rows.append(row)
+    return rows
+
+
+def _heat_rank(pick: dict, column, candidates: list[dict], taken: set) -> tuple[list[dict], str]:
+    """A production with ``selection.heat_min`` keeps only items hot enough on B站, hottest first (core/video/heat.py).
+
+    Only items not taken yet are scored. Any failure keeps every item in its order: heat never stops a video."""
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    minimum = (config.selection if config is not None else {}).get("heat_min")
+    if minimum is None:
+        return candidates, ""
+    from core.video import heat
+
+    from core.video import audience_strategy
+    if candidates and all(audience_strategy.topic_channel(c) for c in candidates):
+        return candidates, "按观看动机、受众收获与材料组织的已选顺序制作"
+    fresh = [c for c in candidates if c["id"] not in taken]
+    try:
+        kept, _, note = heat.Heat(paths.state_dir).rank(fresh, int(minimum), video_workflow._llm_configs(None, column)[0])
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("heat ranking failed (%s)", type(exc).__name__)
+        return candidates, f"热度排序出错（{type(exc).__name__}），按原顺序"
+    return kept, note
+
+
+def _item_text(topic: dict) -> str:
+    """The item's own part of its report (what a variant would be written from); its title and fields when unreadable."""
+    plain = " ".join([topic.get("title", ""), *map(str, (topic.get("fields") or {}).values())])
+    report = topic.get("from_report") or ""
+    if not report:
+        return plain
+    try:
+        path = report if os.path.isabs(report) else os.path.join(video_workflow.workspace_dir(), report)
+        with open(path, encoding="utf-8") as fh:
+            part = excerpt.item_excerpt(fh.read(), topic.get("from_item_title") or topic.get("title", ""))
+    except OSError:
+        return plain
+    return part or plain
+
+
+def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Optional[str], list[dict], str]:
+    """(base id, its variants, note): the hottest new item at or above ``selection.angle_min``, told again from
+    every angle its material supports (core/video/angles.py). Only scored items qualify: no heat, no variants."""
+    from core.video import audience_strategy
+    if any(audience_strategy.topic_channel(c) for c in candidates):
+        return None, [], ""
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    minimum = (config.selection if config is not None else {}).get("angle_min")
+    if minimum is None:
+        return None, [], ""
+    from core.video import angles
+
+    hottest = next((c for c in candidates if c["id"] in fresh and (c.get("heat") or {}).get("score", -1) >= minimum), None)
+    if hottest is None:
+        return None, [], ""
+    made = angles.variants(hottest, _item_text(hottest))
+    if not made:
+        return hottest["id"], [], f"「{hottest.get('title', '')[:16]}」够热但材料撑不起算账或上手，只做一条"
+    return hottest["id"], made, (f"「{hottest.get('title', '')[:16]}」热度 {hottest['heat']['score']}，加做 "
+                                 + "、".join(angles.ANGLES[v["angle"]]["label"] for v in made))
+
+
+def _chain_episodes(pick: dict, picked: list[dict]) -> None:
+    """Keep stable series slots across candidate changes; _prepare names only a completed sequel.
+
+    A slot its predecessor previewed by name publishes after it (platform_manager.base_pending);
+    an unannounced slot keeps the normal spacing. Extra angles stay outside the chain.
+    """
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    if not (config is not None and config.selection.get("next_episode")):
+        return
+    chain = [i for i in picked if not i["topic"].get("angle")]
+    for item in chain:
+        item['topic'] = {**item['topic'], 'episode_id': item['topic']['id']}
+    for before, after in zip(chain, chain[1:]):
+        before["topic"] = {**before["topic"], "next_episode_id": after['topic']['episode_id']}
+        after["topic"] = {**after["topic"], "after_id": before["topic"]["id"]}
+
+
+def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
+    """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet.
+
+    ``notes`` collects what the batch should say about its choice (items dropped as not hot enough)."""
+    sync_topics()
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+    items: list[dict] = []
+    from core.video import content_guard
+
+    paths = get_settings().paths
+    config_dir = paths.config_dir
+    for pick in (resolve_pick(p) for p in spec.get("picks", [])):
+        column = video_columns.get(config_dir, pick["column"])
+        if pick.get("whole"):  # the Job's report as it is, one video: never a topic source
+            item = _whole_item(spec, pick)
+            if item is not None:
+                items.append({**item, "pick": pick})
+            continue
+        source = topic_store.resolve(paths.jobs_dir, pick.get("source", "flash"))
+        if spec.get("report"):
+            if source is None:
+                raise ValueError("批次指定的选题来源不存在")
+            _, topics = topic_store.read_report(source, spec["report"], video_workflow.workspace_dir())
+        else:
+            _, topics = topic_store.load(pick.get("source", "flash"))
+        job = source.job if source else ""
+        candidates = [content_guard.policy_topic(excerpt.topic_for(column, topic), job)
+                      for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0)))]
+        for candidate in candidates:
+            if candidate.get("matrix_dedup"):
+                candidate["matrix_dedup"]["policy"] = story_pool.POLICY
+        skipped = (content_guard.known_duplicate_ids(candidates, config_dir) |
+                   content_guard.used_candidate_ids(candidates, config_dir))
+        candidates = [candidate for candidate in candidates if candidate["id"] not in skipped]
+        # before the fallbacks are taken from them: an item too cold to make is no fallback either
+        candidates, heat_note = _heat_rank(pick, column, candidates, taken)
+        if heat_note and notes is not None:
+            notes.append(heat_note)
+        base_id, extra, angle_note = _angle_variants(pick, candidates, {c["id"] for c in candidates if c["id"] not in taken})
+        if angle_note and notes is not None:
+            notes.append(angle_note)
+        # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
+        for candidate in candidates:
+            if not pick.get("all") and len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
+                break
+            if candidate["id"] in taken:
+                continue
+            taken.add(candidate["id"])
+            items.append({"column_key": pick["column"], "topic": candidate,
+                          "production": pick.get("production", ""), "pick": pick})
+            if candidate["id"] == base_id:  # its angles right after it, each a video of its own
+                for variant in extra:
+                    if variant["id"] not in taken:
+                        taken.add(variant["id"])
+                        items.append({"column_key": pick["column"], "topic": variant,
+                                      "production": pick.get("production", ""), "pick": pick})
+        _chain_episodes(pick, [i for i in items if i["pick"] is pick])
+        # A finite queue of alternatives lets semantic cross-day duplicates be
+        # replaced before writing; candidates do not reserve videos on their own.
+        for item in items:
+            if item["pick"] is pick and story_pool.enabled(item["topic"]):
+                item["topic"] = {**item["topic"], "_story_fallbacks": [dict(c) for c in candidates if c["id"] not in taken]}
+        if (spec.get("report") and pick.get("production") == FLASH_PRODUCTION
+                and not any(i["pick"] is pick for i in items)):
+            fallback = _material_topic(spec["report"], spec.get("report_identity"))
+            if fallback["id"] not in taken:
+                taken.add(fallback["id"])
+                items.append({"column_key": pick["column"], "topic": fallback, "production": FLASH_PRODUCTION, "pick": pick})
+    from core.video import joint_planning
+
+    items = joint_planning.apply(spec, items, config_dir, paths.jobs_dir, video_workflow.workspace_dir(),
+                                lambda key: video_workflow._llm_configs(None, video_columns.get(config_dir, key))[0], notes,
+                                rank_raw=lambda rows: _heat_rank(
+                                    {"production": rows[0]["production"]}, video_columns.get(config_dir, rows[0]["column_key"]),
+                                    [{k: v for k, v in row["topic"].items() if k != "audience_strategy"} for row in rows], taken))
+    for item in items:
+        del item["pick"]
+    return items
+
+
+def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
+    """The item for a whole-report pick: the report the batch was started for, unless it was written already."""
+    from core.video import reports
+
+    report = spec.get("report")
+    if not report:
+        return None
+    workspace = video_workflow.workspace_dir()
+    relative = reports.relative(os.path.join(workspace, report), workspace)
+    source = topic_store.resolve(get_settings().paths.jobs_dir, spec.get("job", ""))
+    if not topic_store.report_has_content(source, relative, workspace):
+        return None
+    if pick.get("content_mode") == "episode":
+        from core.video import episodes
+        owner = content_columns.for_production(get_settings().paths.config_dir, pick.get("production", ""))
+        from core import report_identity
+        revision = spec.get("report_identity") or report_identity.describe(os.path.join(workspace, relative), workspace)["id"]
+        existing = episodes.scripts_for(relative, pick["column"], pick.get("production", ""), owner.key if owner else "", revision)
+    else:
+        existing = [s for s in reports.scripts_of(relative, pick["column"]) if not s.get("archived")]
+    if existing:
+        return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
+    record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
+    if pick.get("content_mode") == "episode":
+        from core.video import episodes
+        topic = episodes.topic(record, workspace, job=spec.get("job", ""), source=source, production=pick.get("production", ""))
+        return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
+    from core.video import content_guard
+
+    topic = content_guard.matrix_topic({**reports.topic_for(record, workspace), "from_report": relative,
+                                        "report_id": record["id"]},
+                                       spec.get("job") or record.get("job", ""), get_settings().paths.jobs_dir)
+    return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
+
+
+#: A source job cut off (the app restarted) is started once more, no more: each start spends its searches again.
+DISCOVERY_STARTS = 2
+
+
+def refresh_sources(spec: dict) -> list[topic_store.Source]:
+    """The sources a batch's picks read that let the pipeline start their job (``topics.refresh: true``)."""
+    jobs_dir = get_settings().paths.jobs_dir
+    out: dict[str, topic_store.Source] = {}
+    for pick in spec.get("picks", []):
+        source = topic_store.resolve(jobs_dir, resolve_pick(pick).get("source", ""))
+        if source is not None and source.refresh and not source.error:
+            out[source.name] = source
+    return list(out.values())
+
+
+def _has_today(source: topic_store.Source) -> bool:
+    files = topic_store.report_files(source, os.path.dirname(os.path.abspath(get_settings().paths.output_dir)))
+    return bool(files) and files[0][0] == time.strftime("%Y-%m-%d")
+
+
+def fresh_topics(spec: dict, run: dict) -> bool:
+    """True when the batch can start picking.
+
+    A source whose newest report is not today's has its job started — once per batch. Starting a job cancels the one
+    already running under the same name, so a start on every tick would restart it forever."""
+    if not spec.get("refresh"):
+        return True
+    stale = [s for s in refresh_sources(spec) if not _has_today(s)]
+    if not stale:
+        return True
+    labels = "、".join(f"「{s.label}」" for s in stale)
+    started_at = run.get("discovery_at")
+    if any(_discovery_running(s.job) for s in stale):
+        if started_at is None:  # someone else started it (by hand): wait for that one
+            ap.update_run(run["id"], discovery_at=time.time())
+            return False
+        if time.time() - started_at <= discovery_wait_seconds(stale):
+            return False  # the job is still going and within its own time limit: wait for it to end
+        ap.update_run(run["id"], note=f"今天的{labels}超过了它自己的时限还没结束，用最新的一期")
+        return True
+    if int(run.get("discovery_tries") or 0) < DISCOVERY_STARTS:
+        ap.update_run(run["id"], discovery_at=time.time(), discovery_tries=int(run.get("discovery_tries") or 0) + 1)
+        for source in stale:
+            _start_discovery(source.job)
+        return False
+    ap.update_run(run["id"], note=f"今天的{labels}没有跑出报告，用最新的一期")
+    return True
+
+
+def discovery_wait_seconds(sources: list[topic_store.Source]) -> int:
+    """How long a batch waits for these sources' jobs: the longest job time limit, plus a little."""
+    from core.config import load_job
+
+    jobs_dir = get_settings().paths.jobs_dir
+    limits = []
+    for source in sources:
+        runtime = (load_job(jobs_dir, source.job) or {}).get("runtime") or {}
+        try:
+            limits.append(int(runtime.get("timeout_seconds") or DISCOVERY_DEFAULT_TIMEOUT))
+        except (TypeError, ValueError):
+            limits.append(DISCOVERY_DEFAULT_TIMEOUT)
+    return max(limits or [DISCOVERY_DEFAULT_TIMEOUT]) + DISCOVERY_SLACK_SECONDS
+
+
+_discovery_lock = threading.RLock()
+
+
+def discovery_status(name: str = "flash") -> dict:
+    """A refreshable source's job: running now, when its newest report came out, how many searches it last took."""
+    from core.state import StateManager
+
+    settings = get_settings()
+    source = topic_store.resolve(settings.paths.jobs_dir, name)
+    if source is None or not source.refresh:
+        raise ValueError(f"选题来源 {name} 不能从这里生成（它的 Job 没写 topics.refresh: true）")
+    files = topic_store.report_files(source, os.path.dirname(os.path.abspath(settings.paths.output_dir)))
+    last = StateManager.get(source.job) or {}
+    return {"source": source.name, "job": source.job, "label": source.label,
+            "running": _discovery_running(source.job),
+            "report_date": files[0][0] if files else None,
+            "report_at": os.path.getmtime(files[0][1]) if files else None,
+            "searches": (last.get("last_usage") or {}).get("searches")}
+
+
+def start_discovery_if_idle(name: str = "flash") -> bool:
+    """Start a refreshable source's job unless it is running — starting a job cancels the one running under its name."""
+    status = discovery_status(name)
+    with _discovery_lock:  # the check and the start are one step, so a double click starts it once
+        if _discovery_running(status["job"]):
+            return False
+        _start_discovery(status["job"])
+        return True
+
+
+def _job_names(job: str) -> set[str]:
+    """Every name a job may be running under: its path (the Jobs page), its file name (older batches)."""
+    return {job, job.rsplit("/", 1)[-1]}
+
+
+def _discovery_running(job: str) -> bool:
+    """Running here under either name, or in another process (the scheduler, the command line) holding its lock."""
+    from core.lock import LockManager
+    from web.runner.registry import TaskRegistry
+
+    registry = TaskRegistry()
+    return any(registry.is_running(name) or LockManager.is_locked(name) for name in _job_names(job))
+
+
+def _start_discovery(job: str) -> None:
+    from web.runner.executor import start_job
+
+    settings = get_settings()
+    with _discovery_lock:
+        try:
+            start_job(job, "autopilot", config_dir=settings.paths.config_dir, jobs_dir=settings.paths.jobs_dir)
+        except Exception as exc:  # noqa: BLE001 - the job cannot start; the next tick sees it is not running
+            logger.info("topic source %s not started: %s", job, exc)
+
+
+# --- advancing one item ----------------------------------------------------
+# What a script does next is decided by the executor (web/services/video_executor.py), the same place the user's
+# buttons go through; here is only the batch's bookkeeping: its items, their retries and notes.
+
+judge = video_executor.judge
+
+
+def _retries(item: dict, key: str) -> int:
+    return int((item.get("retries") or {}).get(key, 0))
+
+
+def _bump(item: dict, key: str) -> dict:
+    retries = {**(item.get("retries") or {}), key: _retries(item, key) + 1}
+    ap.update_item(item["id"], retries=retries)
+    return {**item, "retries": retries}
+
+
+def _hold(item: dict, note: str) -> None:
+    ap.update_item(item["id"], state="HELD", note=note)
+
+
+def advance(item: dict, *, can_start_script: bool, can_start_render: bool, search_down: bool = False) -> dict:
+    """Do the next missing thing for one item. Returns which kinds of work it newly started."""
+    took = {"script": False, "render": False}
+    if item["state"] in ("DONE", "FAILED", "HELD", "CANCELLED"):
+        return took
+    if not item["script_id"]:
+        if item["topic"].get("_material_reselection"):
+            batch = ap.get_run(item["run_id"]) or {}
+            # Let the report's original slots select first. The raw-material
+            # pass fills one vacancy and must not compete with those slots.
+            if any(row["id"] != item["id"] and row.get("production") == FLASH_PRODUCTION
+                   and (row["state"] == "PENDING" or row["state"] == "WORKING" and not (row.get("gate") or {}).get("story_selection"))
+                   for row in batch.get("items", [])):
+                return took
+        needs_search = search_down and not item["topic"].get("from_report")
+        if not can_start_script or needs_search:
+            if needs_search and item["note"] != video_executor.SEARCH_WAIT_NOTE:
+                ap.update_item(item["id"], note=video_executor.SEARCH_WAIT_NOTE)
+            return took
+        from core.video import content_guard
+
+        paths = get_settings().paths
+        topic = content_guard.with_policy({"created_by": "autopilot", "topic": item["topic"]}, paths.jobs_dir)["topic"]
+        if topic.get("theme_task_id"):
+            from core.theme_store import ThemeStore
+            theme = ThemeStore(paths.state_dir).get(topic["theme_task_id"])
+            if theme and not theme["script_id"] and (theme["used_at"] or theme["status"] in ("dismissed", "used")):
+                ap.update_item(item["id"], state="CANCELLED", note="主题已由用户忽略或标记已用")
+                return took
+            with store.connect() as db:
+                old = db.execute("SELECT id FROM scripts WHERE json_extract(topic,'$.theme_task_id')=?",
+                                 (topic["theme_task_id"],)).fetchone()
+            if old:
+                script, _ = create_queued_script(item, topic)
+                ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="接续已有文稿")
+                return took
+        if topic.get("id") in content_guard.known_duplicate_ids([topic], paths.config_dir):
+            gate = dict(item.get("gate") or {})
+            gate["known_duplicate_skips"] = list(dict.fromkeys([*gate.get("known_duplicate_skips", []), topic["id"]]))
+            _replace_candidate(item, gate, "此候选已确认重复")
+            return took
+        if content_guard.writing_peer(topic, paths.config_dir, paths.jobs_dir):
+            ap.update_item(item["id"], note="等待同矩阵前一项确定主事件，再从剩余候选选题")
+            return took
+        try:
+            content_guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+        except content_guard.DuplicateContent as exc:
+            ap.update_item(item["id"], state="CANCELLED", note=str(exc))
+            if topic.get("theme_task_id"):
+                from core.theme_store import ThemeStore
+                ThemeStore(paths.state_dir).mark(topic["theme_task_id"], "skipped")
+            return took
+        topic = _prepare({**item, "topic": topic})
+        if item.get("production"):
+            topic = {**topic, "_production": item["production"]}
+        from core.video import production_admission
+        parent = ap.run_origin(item['run_id'])
+        if not production_admission.enter(paths, topic, key=item['id'],
+                accepted_before=parent['started_at'] if parent else None,
+                manual=bool(parent and parent['started_by'] != 'autopilot')):
+            if item.get('note') != production_admission.WAIT_NOTE:
+                ap.update_item(item['id'], note=production_admission.WAIT_NOTE)
+            return took
+        script, created = create_queued_script(item, topic)
+        ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿" if created else "接续已有文稿")
+        took["script"] = created
+        return took
+    script = store.get_script(item["script_id"])
+    if script is None:
+        _fail(item, "文稿记录丢失")
+        return took
+    # Once approved, the chosen story is frozen in this item's writing result.
+    # Video progress polling must not reread every selection decision or rewrite it.
+    previous_gate = item.get("gate") or {}
+    selection = (previous_gate.get("story_selection") or {}) if script["status"] == "APPROVED" and not script.get("archived") else story_pool.selection(script["id"])
+    gate = {**previous_gate, **({"story_selection": selection} if selection else {})}
+    if selection and gate != previous_gate:
+        ap.update_item(item["id"], gate=gate)
+    if script.get("archived"):
+        # Only our explicit exhausted selection can replace an item. A manual
+        # archival is final for this pipeline and never revives that script.
+        if selection and not selection["selected"] and script["topic"].get("content_archive"):
+            _reselect(item, script, gate)
+        else:
+            ap.update_item(item["id"], state="CANCELLED", note="文稿已归档，不再继续")
+        return took
+    out = video_executor.advance_auto(script, item.get("retries") or {}, can_start_script=can_start_script,
+                                      can_start_render=can_start_render)
+    if out["item"] and "gate" in out["item"]:
+        out["item"]["gate"] = {**gate, **out["item"]["gate"]}
+    if out["bump"]:
+        _bump(item, out["bump"])
+    if out["hold"]:
+        if out["item"]:
+            ap.update_item(item["id"], **out["item"])
+        _hold(item, out["hold"])
+    elif out["item"]:
+        ap.update_item(item["id"], **out["item"])
+    if script["topic"].get("theme_task_id"):
+        from core.theme_store import ThemeStore
+        themes = ThemeStore(get_settings().paths.state_dir)
+        state = (out.get("item") or {}).get("state")
+        status = "attention" if out["hold"] else {"DONE": "completed", "WORKING": "started"}.get(state)
+        current = themes.get(script["topic"]["theme_task_id"])
+        if status and current and current["status"] != status:
+            themes.mark(current["id"], status)
+    if selection and script["status"] in ("WRITING", "RESEARCHING"):
+        ap.update_item(item["id"], note=f"已选主事件：{selection['selected']}；跳过 {selection['skipped']} 个重复候选")
+    return out["took"]
+
+
+def create_queued_script(item: dict, topic: dict) -> tuple[dict, bool]:
+    """Share the theme handover lock with manual starts, including crash recovery."""
+    from contextlib import nullcontext
+    theme = topic.get("theme_task_id")
+    paths = get_settings().paths
+    lock = file_lock(os.path.join(paths.state_dir, "theme-start", theme)) if theme else nullcontext()
+    with lock:
+        existing = None
+        if theme:
+            with store.connect() as db:
+                row = db.execute("SELECT id FROM scripts WHERE json_extract(topic,'$.theme_task_id')=?",
+                                 (theme,)).fetchone()
+            existing = store.get_script(row["id"]) if row else None
+        script = existing or video_executor.create(item["column_key"], topic, "autopilot")
+        if not existing and item.get("production"):
+            store.update_script(script["id"], production=item["production"])
+        if theme:
+            from core.theme_store import ThemeStore
+            ThemeStore(paths.state_dir).attach(theme, script["id"], True)
+        return script, existing is None
+
+
+def _reselect(item: dict, script: dict, gate: dict) -> None:
+    attempts = list((item.get("gate") or {}).get("story_attempts") or [])
+    attempts.append({"script_id": script["id"], "title": script["topic"].get("title", ""),
+                     "reason": script.get("error") or "主事件均已覆盖", "selection": gate["story_selection"]})
+    _replace_candidate(item, {**gate, "story_attempts": attempts}, script.get('error') or '主事件均已覆盖')
+
+
+def _material_topic(report: str, revision: str | None = None) -> dict:
+    """One bounded second pass per report and production batch."""
+    return {"id": f"flash-material:{revision or os.path.basename(report)}", "title": "从快讯原始资料重新选题",
+            "from_report": report, "fields": {}, "_material_reselection": True,
+            "preserve_audience_scope": True,
+            **({"report_identity": revision} if revision else {}),
+            "matrix_dedup": {"job": FLASH_JOB, "policy": story_pool.POLICY}}
+
+
+def material_story_pool(script: dict, report: str, original: str, peers: list[dict], config, column) -> dict:
+    from core.video import content_guard
+
+    paths = get_settings().paths
+    scope = content_guard.scope(FLASH_JOB, paths.config_dir)
+    if not original:
+        pool = story_pool.load_or_create(scope, "", "", peers, config, material_packets=[])
+        return {**pool, "selection_note": "本期没有可读取的原始资料快照"}
+    source = topic_store.resolve(paths.jobs_dir, FLASH_JOB)
+    candidates = topic_store.parse(source, report, "2000-01-01") if source else []
+    cited = set()
+    for candidate in candidates:
+        item = excerpt.item_excerpt(report, candidate.title, include_nested=True)
+        if item:
+            cited.update(story_pool.cited(item))
+    covered = set().union(*(p["sources"] for p in peers))
+    packets = {}
+    for packet in story_pool.packets("", original):
+        if not packet["links"] or story_pool.cited_packet(packet, cited):
+            continue
+        url = packet["links"][0]
+        key = content_guard.source_key(url)
+        if not key or key in covered or key.startswith("search.bilibili.com/"):
+            continue
+        # The collector puts dated news first. Consolidate article/excerpt copies
+        # and prefer the packet most likely to contain the full reportable story.
+        identity = story_pool._anchored(url)
+        previous = packets.get(identity)
+        if previous is None or len(packet["text"]) > len(previous["text"]):
+            packets[identity] = packet
+    pool = story_pool.load_or_create(scope, "", "", peers, config,
+                                     material_packets=list(packets.values())[:RAW_PACKET_LIMIT])
+    entries = [{"id": f"material-event:{e['event_key']}", "title": e["title"], "fields": {"一句话": e["summary"]}, "event": e}
+               for e in pool["events"]]
+    kept, note = _heat_rank({"production": script["production"]}, column, entries, set())
+    if not entries:
+        note = "本期原始资料中没有可补充的候选"
+    return {**pool, "events": [e["event"] for e in kept], "selection_note": note}
+
+
+def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
+    from core.video import content_guard
+
+    if item["topic"].get("joint_plan"):
+        ap.update_item(item["id"], state="CANCELLED", gate=gate,
+                       note=f"共同规划的独立问题已覆盖，本条结束：{reason}")
+        return
+    alternatives = list(item["topic"].get("_story_fallbacks") or [])
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+    taken |= content_guard.known_duplicate_ids(alternatives, get_settings().paths.config_dir)
+    for index, topic in enumerate(alternatives):
+        if topic["id"] in taken:
+            continue
+        # Episode identity belongs to the slot, not the candidate. Retrying B as D
+        # must leave C waiting for that same slot, rather than a discarded topic.
+        links = {key: item['topic'][key] for key in ('episode_id', 'after_id', 'next_episode_id')
+                 if item['topic'].get(key)}
+        if item['topic'].get('after_id') or item['topic'].get('next_episode'):
+            links.setdefault('episode_id', item['topic']['id'])  # older batches
+        replacement = {**topic, **links, "_story_fallbacks": alternatives[index+1:]}
+        ap.update_item(item["id"], topic=replacement, script_id=None, state="PENDING", retries={},
+                       gate={**gate, "story_selection": {}, "replacements": gate.get("replacements", 0) + 1},
+                       note=f"旧事件已覆盖，自动改选：{topic['title']}")
+        return
+    if item.get("production") == FLASH_PRODUCTION and not item["topic"].get("_material_reselection"):
+        run = ap.get_run(item["run_id"])
+        report = (run or {}).get("spec", {}).get("report") or item["topic"].get("from_report")
+        already = any(row.get("production") == FLASH_PRODUCTION and row["topic"].get("_material_reselection")
+                      for row in (run or {}).get("items", []))
+        if report and not already:
+            topic = _material_topic(report, (run or {}).get("spec", {}).get("report_identity"))
+            ap.update_item(item["id"], topic=topic, script_id=None, state="PENDING", retries={},
+                           gate={**gate, "story_selection": {}}, note="报告候选已耗尽，回原始资料重新选题")
+            return
+    ap.update_item(item["id"], state="CANCELLED", gate=gate,
+                   note=f"候选不足，排重后少做一条：{reason}")
+
+
+def _prepare(item: dict) -> dict:
+    topic = dict(item["topic"])
+    # A selected candidate can still change or fail. Promise a named sequel only
+    # when its video exists; ordinary farewells still work for an unfinished batch.
+    topic.pop('next_episode', None)
+    if topic.get('next_episode_id'):
+        run = ap.get_run(item['run_id']) or {}
+        following = next((row for row in run.get('items', [])
+                          if row['topic'].get('episode_id') == topic['next_episode_id']), None)
+        if following and following['state'] == 'DONE' and following.get('render_id'):
+            render = store.get_render(following['render_id'])
+            if render and render['status'] == 'COMPLETED':
+                topic['next_episode'] = following['topic'].get('title', '')
+    config_dir = get_settings().paths.config_dir
+    column = video_columns.get(config_dir, item["column_key"])
+    job = research_dossier.PRODUCTIONS.get(item.get("production"), "")
+    domain = job and not job.startswith(("ai_media/", "monitoring/"))
+    from core.video import audience_strategy
+    marked = audience_strategy.topic_channel(topic)
+    scoped = marked and audience_strategy.PRODUCTIONS.get(item.get("production")) == marked
+    business = content_columns.for_production(config_dir, item["production"]) if domain or scoped else None
+    audience = (business.audience if business else "") or column.audience
+    fields = topic.setdefault("fields", {})
+    if audience and not (fields.get("目标受众") or "").strip():
+        fields["目标受众"] = audience
+    return topic
+
+
+def _fail(item: dict, note: str) -> dict:
+    ap.update_item(item["id"], state="FAILED", note=note)
+    return item
+
+
+# --- the tick --------------------------------------------------------------
+
+def tick() -> int:
+    """Fire due plans, then advance every running batch one step. Safe to call from any process, any time."""
+    try:
+        with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
+            story_pool.reconcile()
+            fire_due_plans()
+            fire_auto()
+            from web.services import theme_workbench
+            theme_workbench.enqueue_recommendations()
+            reopen_approved()
+            runs = sorted(ap.list_runs(limit=None, status="RUNNING"), key=lambda r: r["started_at"])  # oldest first: see below
+            if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
+                from core import activity
+
+                activity.use_state_dir(get_settings().paths.state_dir)
+                activity.mark_activity()
+            # The limits hold across batches (each Job's report is a batch of its own), so who asks first gets the free
+            # slot. Oldest first: a script that failed or waits for its audit is retried before any newer batch starts,
+            # instead of starving behind them for as long as new batches keep coming.
+            counts = _in_flight(runs)
+            advanced = 0
+            for run in runs:
+                try:
+                    advanced += _tick_run(run, counts)
+                    if run.get('dispatch_failures'):
+                        ap.update_run(run['id'], dispatch_failures=0)
+                except Exception as exc:
+                    failures = run.get('dispatch_failures', 0) + 1
+                    note = f'批次调度失败 {failures} 次（{type(exc).__name__}）'
+                    ap.update_run(run['id'], dispatch_failures=failures, note=note)
+                    if failures >= 3:
+                        for item in run['items']:
+                            if item['state'] not in {'DONE', 'FAILED', 'HELD', 'CANCELLED'}:
+                                _fail(item, note)
+                        ap.update_run(run['id'], status='DONE')
+                    counts.update(_in_flight(ap.list_runs(limit=None, status='RUNNING')))
+                    logger.warning('video batch %s dispatch failed (%s)', run['id'], type(exc).__name__)
+            return advanced
+    except TimeoutError:
+        return 0
+
+
+#: Holds that video_executor._render_auto sets on an approved script: they wait for the render, not the user.
+RENDER_HOLDS = ("出片失败", "提交结果尚未确认", "成片已生成但复制失败", "不能出片")
+
+
+def reopen_approved() -> int:
+    """A held item whose script the user has since approved goes on to its render, in its batch.
+
+    Items an earlier version of the pipeline held at its quality gate (there is none now) are let through too."""
+    reopened = 0
+    for item in ap.held_items(limit=None):
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not script or script.get("archived"):
+            continue
+        old_gate = script and script["status"] == "DRAFT" and not script.get("stage") and item["note"].startswith("闸门没通过")
+        if old_gate:
+            ap.update_item(item["id"], state="WORKING", note="不再设闸门，继续")
+            ap.update_run(item["run_id"], status="RUNNING")
+            reopened += 1
+            continue
+        if script["status"] == "APPROVED":
+            if item["note"].startswith(RENDER_HOLDS) and not any(
+                    r["version"] == script["approved_version"]
+                    and r["status"] in ("COMPLETED", *store.ACTIVE_RENDER_STATUSES)
+                    for r in store.list_renders(script["id"])):
+                # A render hold is not waiting for approval: reopening it only re-holds it on the
+                # next step, every tick (11-15). retry_held_renders resumes it once its cause is fixed.
+                continue
+            # Reconcile this approval even when a manual render already exists.
+            # advance_auto selects only approved_version and adopts its active
+            # or completed render before considering a new submission.
+            ap.update_item(item["id"], state="WORKING", note="你已定稿，继续出片")
+            ap.update_run(item["run_id"], status="RUNNING")
+            reopened += 1
+    return reopened
+
+
+def retry_held_renders() -> int:
+    """Items held for failed renders go on, their earlier failures no longer counted: for when what broke them is fixed
+    (an account's balance, a key, the model the renders use). Only items whose script is approved and not archived (an
+    archived one was put away on purpose: it would be rendered again behind the user's back). Returns how many."""
+    reopened = 0
+    for item in ap.held_items(limit=None):
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not (script and script["status"] == "APPROVED" and not script.get("archived")
+                and item["note"].startswith("出片失败")):
+            continue
+        cutoff = max((r["created_at"] for r in store.list_renders(script["id"]) if r["status"] in ("FAILED", "CANCELLED")),
+                     default="")  # the failures there are now; a render made after this one counts again
+        ap.update_item(item["id"], state="WORKING", note="重新出片",
+                       retries={**(item.get("retries") or {}), "renders_forgiven_before": cutoff})
+        ap.update_run(item["run_id"], status="RUNNING")
+        reopened += 1
+    return reopened
+
+
+def retry_search_holds() -> int:
+    """Items held because research could not search (credits ran out, every provider rate-limited) go on, their earlier
+    tries no longer counted, and their themes leave 「需处理」. Only failed, unarchived scripts whose error was that
+    outage; while search is still down they wait for it rather than fail again. Returns how many."""
+    from core import search_health
+    from core.theme_store import ThemeStore
+
+    themes = ThemeStore(get_settings().paths.state_dir)
+    reopened = 0
+    for item in ap.held_items(limit=None):
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not (script and script["status"] == "FAILED" and not script.get("archived")
+                and search_health.is_outage_error(script.get("error"))):
+            continue
+        retries = {k: v for k, v in (item.get("retries") or {}).items() if k not in ("script", "search")}
+        ap.update_item(item["id"], state="WORKING", note="等待重新调研", retries=retries)
+        ap.update_run(item["run_id"], status="RUNNING")
+        theme_id = script["topic"].get("theme_task_id")
+        theme = themes.get(theme_id) if theme_id else None
+        if theme and theme["status"] == "attention":
+            themes.mark(theme_id, "started")
+        reopened += 1
+    return reopened
+
+
+def _in_flight(runs: list[dict]) -> dict:
+    """Scripts being written and renders being made right now, over every one of these batches' items."""
+    counts = {"scripts": 0, "renders": 0}
+    for run in runs:
+        for item in run.get("items") or []:
+            if item["script_id"]:
+                s = store.get_script(item["script_id"])
+                counts["scripts"] += bool(s and (s["status"] in ("RESEARCHING", "WRITING")
+                                                 or (s["status"] == "DRAFT" and s.get("stage"))))
+                counts["renders"] += any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in store.list_renders(item["script_id"]))
+    return counts
+
+
+_topic_picks: dict[tuple[str, str], Future] = {}
+_topic_picks_lock = threading.Lock()
+
+
+def _background_topics(run: dict) -> tuple[list[dict], list[str]] | None:
+    """Wait across ticks, never inside the dispatch lock. Only one picker at a time."""
+    key = (store.db_path(), run["id"])
+    with _topic_picks_lock:
+        # A cancelled batch never receives its late result.
+        for old_key, future in list(_topic_picks.items()):
+            if old_key[0] == key[0] and future.done():
+                owner = ap.get_run(old_key[1])
+                if not owner or owner["status"] != "RUNNING" or owner["stage"] != "TOPICS":
+                    del _topic_picks[old_key]
+        future = _topic_picks.get(key)
+        if future is not None:
+            if not future.done():
+                return None
+            del _topic_picks[key]
+            return future.result()
+        if any(not f.done() for f in _topic_picks.values()):
+            return None
+        future = Future()
+        _topic_picks[key] = future
+
+        def work():
+            try:
+                # Multiple app/CLI processes must not concurrently plan one run.
+                lock = os.path.join(get_settings().paths.state_dir, f"joint-picking-{run['id']}")
+                with file_lock(lock, timeout=0):
+                    notes = []
+                    result = (pick_topics(run["spec"], notes), notes)
+            except TimeoutError:
+                future.set_result(None)
+            except BaseException as exc:
+                future.set_exception(exc)
+            else:
+                future.set_result(result)
+
+        threading.Thread(target=work, name="joint-topic-picker", daemon=True).start()
+        return None
+
+
+def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
+    run = ap.get_run(run["id"])
+    if not run or run["status"] != "RUNNING":
+        return 0
+    if run["stage"] == "TOPICS" and run["items"]:
+        if not _add_items(run["id"], []):
+            return 0
+        run = ap.get_run(run["id"])
+    spec = run["spec"]
+    if run["stage"] == "TOPICS":
+        if spec.get("report_identity"):
+            from core.report_identity import describe
+            if describe(spec["report"], video_workflow.workspace_dir())["id"] != spec["report_identity"]:
+                ap.update_run(run["id"], status="CANCELLED", note="报告内容已变化，新的报告版本由对账流程接续")
+                return 0
+        if not fresh_topics(spec, run):
+            return 0
+        notes: list[str] = []
+        from core.video import joint_planning
+        background = joint_planning.enabled_for(spec, get_settings().paths.config_dir)
+        if background:
+            picked = _background_topics(run)
+            if picked is None:
+                return 0
+            items, notes = picked
+        else:
+            items = pick_topics(spec, notes)
+        if not _add_items(run["id"], items, notes, recheck=background):
+            return 0
+        run = ap.get_run(run["id"])
+    if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
+        counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))
+    from core import search_health
+    # While search is down, wait only for work that depends on it.
+    search_down = search_health.outage() is not None
+    for item in run["items"]:
+        try:
+            took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS,
+                           can_start_render=counts["renders"] < MAX_RENDERS, search_down=search_down)
+            if (item.get('retries') or {}).get('dispatch'):
+                current = (ap.get_run(run['id']) or {}).get('items', [])
+                latest = next((row for row in current if row['id'] == item['id']), item)
+                ap.update_item(item['id'], retries={**(latest.get('retries') or {}), 'dispatch': 0})
+        except Exception as exc:
+            failures = int((item.get('retries') or {}).get('dispatch', 0)) + 1
+            note = f'任务调度失败 {failures} 次（{type(exc).__name__}）'
+            ap.update_item(item['id'], retries={**(item.get('retries') or {}), 'dispatch': failures}, note=note)
+            if failures >= 3:
+                _fail(item, note)
+            counts.update(_in_flight(ap.list_runs(limit=None, status='RUNNING')))
+            logger.warning('video item %s dispatch failed (%s)', item['id'], type(exc).__name__)
+            continue
+        counts["scripts"] += took["script"]
+        counts["renders"] += took["render"]
+    run = ap.get_run(run["id"])
+    if run["items"] and all(i["state"] in ("DONE", "FAILED", "HELD", "CANCELLED") for i in run["items"]):
+        ap.update_run(run["id"], status="DONE", note=_summary(run))
+    return 1
+
+
+def _add_items(run_id: str, items: list[dict], notes: list[str] | None = None, *, recheck: bool = False) -> bool:
+    """Admit a completed pick and change stage in one transaction, only if still wanted."""
+    now = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    notes = list(notes or [])
+    with store.connect(write=True) as conn:
+        run = conn.execute("SELECT status,stage,note FROM autopilot_runs WHERE id=?", (run_id,)).fetchone()
+        if not run or run["status"] != "RUNNING" or run["stage"] != "TOPICS":
+            return False
+        if conn.execute("SELECT 1 FROM autopilot_items WHERE run_id=? LIMIT 1", (run_id,)).fetchone():
+            # Resume a batch cut off between the old two separate commits.
+            conn.execute("UPDATE autopilot_runs SET stage='ITEMS',updated_at=? WHERE id=?", (now, run_id))
+            return True
+        if recheck:
+            from core.video import joint_planning
+            available = joint_planning.available_items(items, conn)
+            if len(available) < len(items):
+                notes.append(f"等待规划期间已有其他任务占用，跳过 {len(items) - len(available)} 项")
+            items = available
+        if not items:
+            note = "；".join(filter(None, [run["note"], *notes, "没有可写的新选题"]))
+            conn.execute("UPDATE autopilot_runs SET status='DONE',note=?,updated_at=? WHERE id=?", (note, now, run_id))
+            return False
+        for i, item in enumerate(items):
+            conn.execute("INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"
+                         " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                         (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False),
+                          item.get("production", ""), now))
+        conn.execute("UPDATE autopilot_runs SET stage='ITEMS',note=?,updated_at=? WHERE id=?",
+                     ("；".join(notes) if notes else run["note"], now, run_id))
+        return True
+
+
+def _summary(run: dict) -> str:
+    counts: dict[str, int] = {}
+    for i in run["items"]:
+        counts[i["state"]] = counts.get(i["state"], 0) + 1
+    current = [(i.get("gate") or {}).get("story_selection") for i in run["items"]]
+    current = [s for s in current if s]
+    selections = current + [a["selection"] for i in run["items"] for a in (i.get("gate") or {}).get("story_attempts", [])]
+    raw = [i for i in run["items"] if i["topic"].get("_material_reselection")]
+    replaced = sum((i.get("gate") or {}).get("replacements", 0) for i in run["items"])
+    if not selections and not raw and not replaced:
+        return "，".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    pools = {s["pool_id"]: s["candidates"] for s in selections}
+    skipped = {(s["pool_id"], d["title"]) for s in selections for d in s["decisions"] if d["decision"] == "skip"}
+    raw_selected = sum(bool(((i.get("gate") or {}).get("story_selection") or {}).get("selected")) for i in raw)
+    shortages = sum(not s["selected"] for s in current)
+    return (f"候选 {sum(pools.values())}，采用 {sum(bool(s['selected']) for s in current)}，"
+            f"重复跳过 {len(skipped)}，改选 {replaced + raw_selected}，候选耗尽 {shortages}；"
+            + (f"回原始资料 {len(raw)} 次，选中 {raw_selected} 条；" if raw else "") +
+            "，".join(f"{k} {v}" for k, v in sorted(counts.items())))
+
+
+# --- plans -----------------------------------------------------------------
+
+def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
+    """A batch from ``spec`` (the default one when none is given). Items are picked on the first tick."""
+    spec = spec or DEFAULT_SPEC
+    for pick in spec.get("picks", []):
+        pick = resolve_pick(pick)
+        video_columns.for_new_script(get_settings().paths.config_dir, pick["column"])  # unknown or blocked raises
+    return ap.create_run(spec, [], plan_id=plan_id, started_by=started_by)
+
+
+def save_plan(name: str, expression: str, spec: Optional[dict] = None, *, created_by: str = "") -> dict:
+    from core.schedule_store import slot
+    next_fire = slot(expression, time.time(), "local")
+    return ap.save_plan(name, expression, spec or DEFAULT_SPEC, next_fire=next_fire, created_by=created_by)
+
+
+def fire_due_plans(now: Optional[float] = None) -> int:
+    from core.schedule_store import slot
+    now = time.time() if now is None else now
+    fired = 0
+    for plan in ap.list_plans():
+        if not plan["enabled"] or plan["next_fire"] is None or plan["next_fire"] > now:
+            continue
+        # a missed slot (the host was off) fires once, late — but not if it is more than a day old
+        nxt = slot(plan["expression"], now, "local")
+        if ap.claim_plan(plan["id"], plan["next_fire"], nxt):
+            late = now - plan["next_fire"]
+            if late < 24 * 3600:
+                spec = {**plan["spec"], "picks": [{**p, "all": True} for p in plan["spec"].get("picks", [])]}
+                start_run(spec, plan_id=plan["id"], started_by="autopilot")
+                fired += 1
+            else:  # recorded, so a skipped week shows on the board instead of passing unseen
+                ap.finished_run(plan["spec"], f"错过了 {time.strftime('%m-%d %H:%M', time.localtime(plan['next_fire']))}"
+                                f" 这一批（晚了 {late / 3600:.0f} 小时，超过一天不补跑）",
+                                plan_id=plan["id"], started_by="autopilot")
+    return fired
+
+
+def fire_auto(now: Optional[float] = None) -> int:
+    """A batch for each Job that has a new report its auto configs have not written from (core/video/auto.py).
+
+    The Job's own schedule produced the report, so the batch does not start the Job (``refresh`` off); its picks are the
+    Job's auto configs, one batch so the limits and the topics already taken hold across them."""
+    paths = get_settings().paths
+    root = os.path.dirname(os.path.abspath(paths.output_dir))
+    fired = 0
+    for found in video_auto.pending(paths.config_dir, paths.jobs_dir, paths.state_dir, root,
+                                    time.time() if now is None else now):
+        try:
+            start_run({"picks": found["picks"], "refresh": False, "job": found["job"],
+                       "report": found["report"], "report_identity": found["report_identity"]},
+                      started_by="autopilot")
+            fired += 1
+        except Exception:
+            # A failed handover must remain pending for the next reconciliation.
+            logger.exception("auto batch for %s not started", found["job"])
+    return fired

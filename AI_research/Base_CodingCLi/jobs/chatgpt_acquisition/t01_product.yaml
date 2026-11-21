@@ -1,7 +1,10 @@
 name: T01 · 产品与能力认知
 description: ChatGPT 到底能做什么？ — 吸引新用户；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT 能做什么
 - ChatGPT 入门
 language: zh
@@ -53,8 +56,13 @@ prompt: |
   记录实际使用的来源链接。
   若变化监测显示没有新增或修改，只输出本次暂无新题材及简短说明，不生成重复候选。
 output: output/chatgpt_acquisition/{date}_t01_product.md
+audience_channel: t01
+content_strategy: audience-v1
 topics:
   alias: chatgpt_t01_product
   format: items
   prefix: CGA
   refresh: true
+
+# After initial research and audience-led selection; preserves the existing writer.
+question_material: question-v1

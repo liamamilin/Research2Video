@@ -1,0 +1,421 @@
+本轮逐项处置：74 个在用 job；归档排除。未开周期任务的矩阵包含在内。
+实际提示词组合 57 条，全部无解析错误。运行效果不外推到全部 job。
+
+1. ai_media/ai_tool_tutorials
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：ai_tool_tutorials
+
+2. ai_media/daily_opensource_radar
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段
+生产绑定：ai_media_opensource_digest
+
+3. ai_media/weekly_business_watch
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：ai_media_business_digest
+
+4. ai_media/weekly_deep_research
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段
+生产绑定：ai_media_deep_dive
+
+5. ai_media/weekly_model_arena
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：ai_media_arena_digest
+
+6. chatgpt_acquisition/t01_product
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t01_product
+
+7. chatgpt_acquisition/t02_scenarios
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t02_scenarios
+
+8. chatgpt_acquisition/t03_tutorials
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t03_tutorials
+
+9. chatgpt_acquisition/t04_testing
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t04_testing
+
+10. chatgpt_acquisition/t05_comparison
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t05_comparison
+
+11. chatgpt_acquisition/t06_value
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t06_value
+
+12. chatgpt_acquisition/t07_subscription
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t07_subscription
+
+13. chatgpt_acquisition/t08_troubleshooting
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t08_troubleshooting
+
+14. chatgpt_acquisition/t09_updates
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：chatgpt_t09_updates, chatgpt_t09_updates_each
+
+15. company/company_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：company_daily
+
+16. company/company_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：company_illustrated
+
+17. company/company_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：company_weekly
+
+18. consumer/consumer_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：consumer_daily
+
+19. consumer/consumer_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：consumer_illustrated
+
+20. consumer/consumer_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：consumer_weekly
+
+21. culture/culture_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段
+生产绑定：culture_daily
+
+22. culture/culture_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：culture_illustrated
+
+23. culture/culture_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：culture_weekly
+
+24. economy/economy_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：ai-non_tech-deep_dive-long-2, economy_daily
+
+25. economy/economy_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：economy_illustrated
+
+26. economy/economy_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：economy_weekly
+
+27. geography/geography_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：geography_daily
+
+28. geography/geography_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：geography_illustrated
+
+29. geography/geography_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：geography_weekly
+
+30. history/history_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：history_daily
+
+31. history/history_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：history_illustrated
+
+32. history/history_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：history_weekly
+
+33. industry/industry_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：industry_daily
+
+34. industry/industry_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：industry_illustrated
+
+35. industry/industry_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：industry_weekly
+
+36. monitoring/ai_flash_discovery
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段
+生产绑定：ai-developer-roundup-long, ai-non_tech-one_point-short, ai-non_tech-quick_take-short, flash, flash_daily, flash_each, point_short
+
+37. research/assistant_app_acceptance_20261025
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：deep_dive-4
+
+38. research/assistant_iteration_acceptance_20261025
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：deep_dive-2
+
+39. research/assistant_ops_acceptance_20261025
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：deep_dive-3
+
+40. science/science_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段
+生产绑定：science_daily
+
+41. science/science_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：science_illustrated
+
+42. science/science_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：上游取材建议取消固定叙事回环，保留内容信息与解析字段；研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环
+生产绑定：science_weekly
+
+43. software/software_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：software_daily
+
+44. software/software_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：software_illustrated
+
+45. software/software_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：software_weekly
+
+46. source_discovery/ai_media
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+47. source_discovery/chatgpt_acquisition
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+48. source_discovery/company
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+49. source_discovery/consumer
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+50. source_discovery/culture
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+51. source_discovery/economy
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+52. source_discovery/geography
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+53. source_discovery/history
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+54. source_discovery/industry
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+55. source_discovery/science
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+56. source_discovery/software
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+57. source_discovery/tech
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+58. system/material_collection
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+59. tech/tech_daily
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：ai-non_tech-headline-short, tech_daily
+
+60. tech/tech_illustrated
+研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。
+本地改动：去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度
+生产绑定：tech_illustrated
+
+61. tech/tech_weekly
+共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。
+本地改动：保留原任务输入要求
+生产绑定：tech_weekly
+
+62. topic_discovery/ai_media
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+63. topic_discovery/chatgpt_acquisition
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+64. topic_discovery/company
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+65. topic_discovery/consumer
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+66. topic_discovery/culture
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+67. topic_discovery/economy
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+68. topic_discovery/education
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+69. topic_discovery/geography
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+70. topic_discovery/history
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+71. topic_discovery/industry
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+72. topic_discovery/science
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+73. topic_ideas/chatgpt_acquisition
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+74. topic_platform/chatgpt_acquisition
+沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。
+本地改动：保留原任务输入要求
+生产绑定：辅助入口，无直接写稿绑定
+
+补材风格继承复查：以下45项调用同一补材能力，已去掉要求保持原文风格的句子；选题身份、受众、接口及输入事实仍保留。该修改不是每项都实跑或质量稳定的声明，见 INPUT-FOCUS-REVIEW.txt。
+- ai_media/ai_tool_tutorials
+- ai_media/daily_opensource_radar
+- ai_media/weekly_business_watch
+- ai_media/weekly_deep_research
+- ai_media/weekly_model_arena
+- chatgpt_acquisition/t01_product
+- chatgpt_acquisition/t02_scenarios
+- chatgpt_acquisition/t03_tutorials
+- chatgpt_acquisition/t04_testing
+- chatgpt_acquisition/t05_comparison
+- chatgpt_acquisition/t06_value
+- chatgpt_acquisition/t07_subscription
+- chatgpt_acquisition/t08_troubleshooting
+- chatgpt_acquisition/t09_updates
+- company/company_daily
+- company/company_illustrated
+- company/company_weekly
+- consumer/consumer_daily
+- consumer/consumer_illustrated
+- consumer/consumer_weekly
+- culture/culture_daily
+- culture/culture_illustrated
+- culture/culture_weekly
+- economy/economy_daily
+- economy/economy_illustrated
+- economy/economy_weekly
+- geography/geography_daily
+- geography/geography_illustrated
+- geography/geography_weekly
+- history/history_daily
+- history/history_illustrated
+- history/history_weekly
+- industry/industry_daily
+- industry/industry_illustrated
+- industry/industry_weekly
+- monitoring/ai_flash_discovery
+- science/science_daily
+- science/science_illustrated
+- science/science_weekly
+- software/software_daily
+- software/software_illustrated
+- software/software_weekly
+- tech/tech_daily
+- tech/tech_illustrated
+- tech/tech_weekly
+
+研究初稿跟进：42 个 job 的单句修改、各自的渲染哈希与可用绑定见 research-brief-scope.json。整期章节跟进：30 个 job 的提示配置差异见 optional-role-config-diff.json。74 项逐项记录同步到 job-reviews.json 和 soft-job-reviews.json。

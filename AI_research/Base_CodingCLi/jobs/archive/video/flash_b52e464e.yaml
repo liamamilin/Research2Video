@@ -1,0 +1,26 @@
+name: flash_b52e464e
+description: 快讯：Claude Code 的 MCP Tasks 公测：长任务丢给服务器，CLI 继续干活
+enabled: true
+keywords:
+  - Claude Code 的 MCP Tasks 公测
+  - 长任务丢给服务器
+  - CLI 继续干活
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。
+  选题：Claude Code 的 MCP Tasks 公测：长任务丢给服务器，CLI 继续干活
+  目标观众：开发者
+  选题资料：兼容 MCP 服务器可以跑长任务，CLI 不再阻塞；需要 v2.1.304+、task-capable server 和符合条件的会话，桌面端和 VS Code 扩展暂不支持。；（未提供）
+  来源资料：https://aicatchup.com/news/claude-code-mcp-tasks-public-beta
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_flash_b52e464e.md

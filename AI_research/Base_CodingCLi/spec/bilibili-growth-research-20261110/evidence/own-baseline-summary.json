@@ -1,0 +1,850 @@
+{
+  "extracted_at": "2026-11-10T16:45:59.715129+08:00",
+  "cutoff": "2026-10-15T00:00:00+08:00",
+  "source": "state/platform_analytics.db read-only transaction",
+  "count_in_period": 270,
+  "eligible": {
+    "n": 263,
+    "total_views": 40073,
+    "median_views": 19,
+    "top1_share": 0.4975419858757767,
+    "top5_share": 0.6473935068499987,
+    "h24": {
+      "status_counts": {
+        "ok": 195,
+        "gap": 49,
+        "pending": 19
+      },
+      "median": 15
+    },
+    "h72": {
+      "status_counts": {
+        "ok": 200,
+        "gap": 22,
+        "pending": 41
+      },
+      "median": 15.0
+    },
+    "h168": {
+      "status_counts": {
+        "gap": 31,
+        "ok": 137,
+        "pending": 95
+      },
+      "median": 15
+    },
+    "watch": {
+      "completion": {
+        "n": 249,
+        "median": 22.26
+      },
+      "avg_seconds": {
+        "n": 242,
+        "median": 42.0
+      },
+      "exit3s": {
+        "n": 34,
+        "median": 43.644999999999996
+      },
+      "cover_pass": {
+        "n": 40,
+        "median": 58.14
+      }
+    }
+  },
+  "by_matrix": {
+    "unlabeled": {
+      "n": 169,
+      "total_views": 8644,
+      "median_views": 14,
+      "top1_share": 0.08884775566867191,
+      "top5_share": 0.2719805645534475,
+      "h24": {
+        "status_counts": {
+          "ok": 130,
+          "gap": 27,
+          "pending": 12
+        },
+        "median": 10.5
+      },
+      "h72": {
+        "status_counts": {
+          "ok": 141,
+          "gap": 6,
+          "pending": 22
+        },
+        "median": 12
+      },
+      "h168": {
+        "status_counts": {
+          "gap": 29,
+          "ok": 91,
+          "pending": 49
+        },
+        "median": 10
+      },
+      "watch": {
+        "completion": {
+          "n": 162,
+          "median": 21.795
+        },
+        "avg_seconds": {
+          "n": 155,
+          "median": 35
+        },
+        "exit3s": {
+          "n": 15,
+          "median": 49.85
+        },
+        "cover_pass": {
+          "n": 20,
+          "median": 19.87
+        }
+      }
+    },
+    "ai_media": {
+      "n": 29,
+      "total_views": 6443,
+      "median_views": 43,
+      "top1_share": 0.3113456464379947,
+      "top5_share": 0.756479900667391,
+      "h24": {
+        "status_counts": {
+          "ok": 17,
+          "gap": 11,
+          "pending": 1
+        },
+        "median": 73
+      },
+      "h72": {
+        "status_counts": {
+          "ok": 19,
+          "gap": 7,
+          "pending": 3
+        },
+        "median": 33
+      },
+      "h168": {
+        "status_counts": {
+          "ok": 22,
+          "pending": 7
+        },
+        "median": 33.5
+      },
+      "watch": {
+        "completion": {
+          "n": 28,
+          "median": 11.59
+        },
+        "avg_seconds": {
+          "n": 28,
+          "median": 37.0
+        },
+        "exit3s": {
+          "n": 4,
+          "median": 28.66
+        },
+        "cover_pass": {
+          "n": 5,
+          "median": 93.06
+        }
+      }
+    },
+    "company": {
+      "n": 3,
+      "total_views": 53,
+      "median_views": 13,
+      "top1_share": 0.5094339622641509,
+      "top5_share": 1.0,
+      "h24": {
+        "status_counts": {
+          "ok": 2,
+          "gap": 1
+        },
+        "median": 18.0
+      },
+      "h72": {
+        "status_counts": {
+          "ok": 2,
+          "gap": 1
+        },
+        "median": 15.5
+      },
+      "h168": {
+        "status_counts": {
+          "ok": 3
+        },
+        "median": 13
+      },
+      "watch": {
+        "completion": {
+          "n": 3,
+          "median": 20.58
+        },
+        "avg_seconds": {
+          "n": 3,
+          "median": 31
+        },
+        "exit3s": {
+          "n": 0,
+          "median": null
+        },
+        "cover_pass": {
+          "n": 0,
+          "median": null
+        }
+      }
+    },
+    "chatgpt_acquisition": {
+      "n": 60,
+      "total_views": 24929,
+      "median_views": 34.0,
+      "top1_share": 0.7997914075975772,
+      "top5_share": 0.9145172289301616,
+      "h24": {
+        "status_counts": {
+          "ok": 45,
+          "gap": 9,
+          "pending": 6
+        },
+        "median": 19
+      },
+      "h72": {
+        "status_counts": {
+          "gap": 7,
+          "ok": 37,
+          "pending": 16
+        },
+        "median": 34
+      },
+      "h168": {
+        "status_counts": {
+          "ok": 19,
+          "gap": 2,
+          "pending": 39
+        },
+        "median": 39
+      },
+      "watch": {
+        "completion": {
+          "n": 54,
+          "median": 30.240000000000002
+        },
+        "avg_seconds": {
+          "n": 54,
+          "median": 75.5
+        },
+        "exit3s": {
+          "n": 15,
+          "median": 42.85
+        },
+        "cover_pass": {
+          "n": 15,
+          "median": 67.83
+        }
+      }
+    },
+    "economy": {
+      "n": 2,
+      "total_views": 4,
+      "median_views": 2.0,
+      "top1_share": 0.75,
+      "top5_share": 1.0,
+      "h24": {
+        "status_counts": {
+          "ok": 1,
+          "gap": 1
+        },
+        "median": 0
+      },
+      "h72": {
+        "status_counts": {
+          "gap": 1,
+          "ok": 1
+        },
+        "median": 2
+      },
+      "h168": {
+        "status_counts": {
+          "ok": 2
+        },
+        "median": 2.0
+      },
+      "watch": {
+        "completion": {
+          "n": 2,
+          "median": 6.52
+        },
+        "avg_seconds": {
+          "n": 2,
+          "median": 15.0
+        },
+        "exit3s": {
+          "n": 0,
+          "median": null
+        },
+        "cover_pass": {
+          "n": 0,
+          "median": null
+        }
+      }
+    }
+  },
+  "overviews": [
+    {
+      "period": 7,
+      "summary": "{\"view\": 19501, \"like\": 0, \"favorite\": 0, \"fan\": 5}",
+      "platform_date": "2026-11-08",
+      "synced_at": 1794282908.436939
+    },
+    {
+      "period": 30,
+      "summary": "{\"view\": 36100, \"like\": 0, \"favorite\": 0, \"fan\": -29}",
+      "platform_date": "2026-11-08",
+      "synced_at": 1794282908.436939
+    }
+  ],
+  "top15": [
+    {
+      "bvid": "BV1b9xj6hENy",
+      "title": "同样20美元，ChatGPT、Claude、Gemini卖的根本不是同一样东西",
+      "duration": 421,
+      "views": 19938,
+      "h24": {
+        "status": "ok",
+        "views": 3187,
+        "method": "linear_interpolation",
+        "after_hours": 0.495,
+        "before_hours": 0.088
+      },
+      "h72": {
+        "status": "gap",
+        "views": null
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794291304.6772668,
+        "avg_seconds": 96,
+        "completion": 23.02,
+        "views": 18065
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1b9xj6hENy",
+        "script_id": "2d5dadab5c184f0e8228ca8e5e0beeb0",
+        "render_id": "b5545de40ab8438da20600e6b30e714f",
+        "column_key": "theme_research-m4",
+        "content_matrix_id": "chatgpt_acquisition",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "c0e2f1fa-88ce-4a0f-ae5f-697b2d3a68f7",
+        "column_name": "T05 · AI 产品横向选择"
+      }
+    },
+    {
+      "bvid": "BV1Fo4x65Ejj",
+      "title": "Codex 遭 AGENTS.md 投毒成功率超 90%",
+      "duration": 699,
+      "views": 2006,
+      "h24": {
+        "status": "ok",
+        "views": 1552,
+        "method": "linear_interpolation",
+        "after_hours": 0.418,
+        "before_hours": 0.247
+      },
+      "h72": {
+        "status": "pending",
+        "views": null
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794286506.319974,
+        "completion": 7.15,
+        "exit3s": 28.69,
+        "cover_pass": 95.96,
+        "interact": 1.71,
+        "guest_share": 99.61,
+        "views": 1703,
+        "avg_seconds": 49
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1Fo4x65Ejj",
+        "script_id": "74a228a50e70481e83ca16cc95811a35",
+        "render_id": "419e830943ae4f729c37031a3a737fbe",
+        "column_key": "flash-nr",
+        "content_matrix_id": "ai_media",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "c33dc285-5ab9-4708-b673-27b3867ff6c4",
+        "column_name": "AI 快讯"
+      }
+    },
+    {
+      "bvid": "BV1SuxD6bEdY",
+      "title": "Grok Bot 每月 200 美元那档也不是无限用：马斯克承认成本撑不住，所有档位都锁每周额度",
+      "duration": 174,
+      "views": 1713,
+      "h24": {
+        "status": "ok",
+        "views": 680,
+        "method": "linear_interpolation",
+        "after_hours": 0.548,
+        "before_hours": 0.117
+      },
+      "h72": {
+        "status": "ok",
+        "views": 1073,
+        "method": "linear_interpolation",
+        "after_hours": 1.3,
+        "before_hours": 0.868
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794288312.920396,
+        "avg_seconds": 37,
+        "completion": 21.31,
+        "views": 1541
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1SuxD6bEdY",
+        "script_id": "74c65ba7252a4c5184f2d4b9a025fa3b",
+        "render_id": "d9a52492366f4b51b8ec8bf9f1ac701a",
+        "column_key": "chatgpt_acquisition",
+        "content_matrix_id": "chatgpt_acquisition",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "1e6e7394-8456-4380-94df-6ce5ab48b4bc",
+        "column_name": "T05 · AI 产品横向选择"
+      }
+    },
+    {
+      "bvid": "BV1ZYWs6FEae",
+      "title": "GPT-6 Astra 真实任务只做对 26.4%，ChatGPT Pro 称取消 5 小时限制",
+      "duration": 732,
+      "views": 1518,
+      "h24": {
+        "status": "ok",
+        "views": 1439,
+        "method": "linear_interpolation",
+        "after_hours": 0.139,
+        "before_hours": 0.443
+      },
+      "h72": {
+        "status": "pending",
+        "views": null
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794285913.641176,
+        "completion": 5.83,
+        "exit3s": 28.63,
+        "cover_pass": 96.46,
+        "interact": 0.42,
+        "guest_share": 99.42,
+        "views": 1305,
+        "avg_seconds": 42
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1ZYWs6FEae",
+        "script_id": "cf27d03e3e8c46a394485fee30ad9f03",
+        "render_id": "d0ae5f3e75094e859386c8e0d0cfc6b2",
+        "column_key": "flash-nr",
+        "content_matrix_id": "ai_media",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "2cf61a9c-1800-41e0-979c-d7f4e98672cf",
+        "column_name": "AI 快讯"
+      }
+    },
+    {
+      "bvid": "BV1ts4K6vEPG",
+      "title": "GPT-6.2 Astra 与 Claude Mythos 5.5 同日曝光：只有 HuggingFace 上一份被下了 5000 次的疑似权重",
+      "duration": 92,
+      "views": 768,
+      "h24": {
+        "status": "ok",
+        "views": 668,
+        "method": "linear_interpolation",
+        "after_hours": 0.587,
+        "before_hours": 0.163
+      },
+      "h72": {
+        "status": "ok",
+        "views": 749,
+        "method": "linear_interpolation",
+        "after_hours": 0.586,
+        "before_hours": 1.582
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794289207.60964,
+        "avg_seconds": 16,
+        "completion": 17.81,
+        "views": 723
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1ts4K6vEPG",
+        "script_id": "e098ce01e3ed4e45b59a2718e78117a9",
+        "render_id": "e7574a340897420888fb317d718f0ce5",
+        "column_key": "flash-nr",
+        "content_matrix_id": "",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "466df921-7714-4d60-89fb-b5af3d99fbd2",
+        "column_name": ""
+      }
+    },
+    {
+      "bvid": "BV1fUxm6NEvP",
+      "title": "Claude 订阅送 $100，ChatGPT 与 Codex 共用额度",
+      "duration": 491,
+      "views": 601,
+      "h24": {
+        "status": "ok",
+        "views": 488,
+        "method": "linear_interpolation",
+        "after_hours": 0.316,
+        "before_hours": 0.268
+      },
+      "h72": {
+        "status": "ok",
+        "views": 573,
+        "method": "linear_interpolation",
+        "after_hours": 0.899,
+        "before_hours": 1.183
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794288614.335735,
+        "avg_seconds": 65,
+        "completion": 13.26,
+        "views": 578
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1fUxm6NEvP",
+        "script_id": "7e42272e36f64415a5169efed5373119",
+        "render_id": "303c080748d0493083045b492e13e408",
+        "column_key": "flash-nr",
+        "content_matrix_id": "ai_media",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "04f00dda-81ea-438c-bc5e-e4c6c26d1e73",
+        "column_name": "AI 快讯"
+      }
+    },
+    {
+      "bvid": "BV1FB476sE9T",
+      "title": "Google AI Ultra 月费 99.99 美元：5 倍 Pro 用量、20TB 存储和 YouTube Premium，值得升吗？",
+      "duration": 218,
+      "views": 567,
+      "h24": {
+        "status": "ok",
+        "views": 166,
+        "method": "linear_interpolation",
+        "after_hours": 0.345,
+        "before_hours": 0.155
+      },
+      "h72": {
+        "status": "ok",
+        "views": 546,
+        "method": "linear_interpolation",
+        "after_hours": 1.261,
+        "before_hours": 0.823
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794286506.319974,
+        "completion": 21.19,
+        "exit3s": 25.39,
+        "cover_pass": 95.66,
+        "interact": 0.55,
+        "guest_share": 98.64,
+        "views": 475,
+        "avg_seconds": 46
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1FB476sE9T",
+        "script_id": "27654815742d46fcbc296159d6d8fe1b",
+        "render_id": "96eeaeb2249643e2bb2b3b738821a5b1",
+        "column_key": "chatgpt_acquisition",
+        "content_matrix_id": "chatgpt_acquisition",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "d2ae006f-1dbf-43fe-b5d4-414a58cea869",
+        "column_name": "T05 · AI 产品横向选择"
+      }
+    },
+    {
+      "bvid": "BV14WsZ6uEF1",
+      "title": "Qwen3.8 在沙箱里说“不调工具”，转头想把文件传往北京",
+      "duration": 80,
+      "views": 481,
+      "h24": {
+        "status": "ok",
+        "views": 241,
+        "method": "linear_interpolation",
+        "after_hours": 0.198,
+        "before_hours": 0.386
+      },
+      "h72": {
+        "status": "gap",
+        "views": null
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794291304.6772668,
+        "avg_seconds": 28,
+        "completion": 35.9,
+        "views": 443
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV14WsZ6uEF1",
+        "script_id": "b414cd14aa0941b7b7ae592f9b870ee9",
+        "render_id": "5ebd0998ca94457e98c9a17b2bf0e442",
+        "column_key": "flash-nr",
+        "content_matrix_id": "ai_media",
+        "resolved_video_form": "object_showcase",
+        "autovideo_job_id": "a45ca92b-a471-4854-8b9a-3dfd9cb8b563",
+        "column_name": "AI 快讯"
+      }
+    },
+    {
+      "bvid": "BV1iBxD6zEzA",
+      "title": "Claude Ultra 每月 200 美元：验证过的账户不再有 5 小时限额",
+      "duration": 128,
+      "views": 455,
+      "h24": {
+        "status": "ok",
+        "views": 254,
+        "method": "linear_interpolation",
+        "after_hours": 0.167,
+        "before_hours": 0.498
+      },
+      "h72": {
+        "status": "ok",
+        "views": 305,
+        "method": "linear_interpolation",
+        "after_hours": 1.503,
+        "before_hours": 0.747
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794288312.920396,
+        "avg_seconds": 26,
+        "completion": 20.68,
+        "views": 405
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1iBxD6zEzA",
+        "script_id": "f13a922507854d958836b4f638394c87",
+        "render_id": "80784e389adf40f385efee0f860d1822",
+        "column_key": "chatgpt_acquisition",
+        "content_matrix_id": "",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "e4dc648b-cb2b-4386-98cd-920261c96d24",
+        "column_name": ""
+      }
+    },
+    {
+      "bvid": "BV1XrnB6nEzQ",
+      "title": "Copilot 11 月 16 日下架三个模型，Pro 用户只剩一个替代能选",
+      "duration": 108,
+      "views": 440,
+      "h24": {
+        "status": "gap",
+        "views": null
+      },
+      "h72": {
+        "status": "ok",
+        "views": 126,
+        "method": "linear_interpolation",
+        "after_hours": 1.5,
+        "before_hours": 0.618
+      },
+      "watch": {
+        "day": "2026-11-04",
+        "collected_at": 1793773810.679213,
+        "avg_seconds": 41,
+        "completion": 38.75,
+        "views": 372
+      },
+      "production": {}
+    },
+    {
+      "bvid": "BV1CsxD6EEv9",
+      "title": "5人团队买AI：Claude月费100美元起，Gemini 105，Mistral 125，ChatGPT要先问用量",
+      "duration": 201,
+      "views": 401,
+      "h24": {
+        "status": "ok",
+        "views": 282,
+        "method": "linear_interpolation",
+        "after_hours": 0.35,
+        "before_hours": 0.315
+      },
+      "h72": {
+        "status": "ok",
+        "views": 339,
+        "method": "linear_interpolation",
+        "after_hours": 1.017,
+        "before_hours": 1.233
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794288312.920396,
+        "avg_seconds": 31,
+        "completion": 15.67,
+        "views": 380
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1CsxD6EEv9",
+        "script_id": "ef64f137a7ae4a1d941b08c68df7b42e",
+        "render_id": "406b5ab66d18484a8beac724ac8124de",
+        "column_key": "chatgpt_acquisition",
+        "content_matrix_id": "chatgpt_acquisition",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "cacaced9-0ea8-480d-bec8-56c9cbbacf4d",
+        "column_name": "T05 · AI 产品横向选择"
+      }
+    },
+    {
+      "bvid": "BV1emn96aEqK",
+      "title": "Python 跑进浏览器，难的不是编译它，是给它伪造一个操作系统",
+      "duration": 457,
+      "views": 345,
+      "h24": {
+        "status": "ok",
+        "views": 72,
+        "method": "linear_interpolation",
+        "after_hours": 0.304,
+        "before_hours": 0.527
+      },
+      "h72": {
+        "status": "ok",
+        "views": 163,
+        "method": "linear_interpolation",
+        "after_hours": 0.721,
+        "before_hours": 1.36
+      },
+      "watch": {
+        "day": "2026-11-08",
+        "collected_at": 1794118211.910861,
+        "avg_seconds": 90,
+        "completion": 19.87,
+        "views": 319
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1emn96aEqK",
+        "script_id": "9cffe666a5434c0f8b55662f37d4c573",
+        "render_id": "ef5e8c7528514390810633e43bbe09e7",
+        "column_key": "deep_dive",
+        "content_matrix_id": "",
+        "resolved_video_form": "information_cards",
+        "autovideo_job_id": "2b9104ff-17d9-4ea3-a90f-1d612d4cf9aa",
+        "column_name": ""
+      }
+    },
+    {
+      "bvid": "BV1jR4g68Evm",
+      "title": "Google 让 robots.txt 一行拒绝所有 AI 训练，代价是 Gemini 里没有你",
+      "duration": 181,
+      "views": 343,
+      "h24": {
+        "status": "ok",
+        "views": 231,
+        "method": "linear_interpolation",
+        "after_hours": 0.261,
+        "before_hours": 0.321
+      },
+      "h72": {
+        "status": "ok",
+        "views": 264,
+        "method": "linear_interpolation",
+        "after_hours": 1.131,
+        "before_hours": 0.987
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794288614.335735,
+        "avg_seconds": 33,
+        "completion": 18.74,
+        "views": 322
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1jR4g68Evm",
+        "script_id": "be2b7c2b5c0e492495f4da07856fb08e",
+        "render_id": "b5b0d60ad59a454598c6e952691a7ed6",
+        "column_key": "flash-nr",
+        "content_matrix_id": "",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "d2b49269-5c4b-4132-806b-2cd1d416b909",
+        "column_name": ""
+      }
+    },
+    {
+      "bvid": "BV1wQ4x6mENm",
+      "title": "Claude Code 云会话能自己配环境了：密钥不进入虚拟机，5 分钟内的 setup 会被快照复用",
+      "duration": 132,
+      "views": 331,
+      "h24": {
+        "status": "ok",
+        "views": 320,
+        "method": "linear_interpolation",
+        "after_hours": 0.182,
+        "before_hours": 0.483
+      },
+      "h72": {
+        "status": "pending",
+        "views": null
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794286204.5942478,
+        "completion": 10.86,
+        "exit3s": 49.85,
+        "cover_pass": 78.04,
+        "interact": 1.51,
+        "guest_share": 97.27,
+        "views": 327,
+        "avg_seconds": 14
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1wQ4x6mENm",
+        "script_id": "21bc05c125cf48f89db84ee47c068552",
+        "render_id": "84d8dba827504a04b4a6a35b890aec18",
+        "column_key": "flash-nr",
+        "content_matrix_id": "",
+        "resolved_video_form": "information_motion",
+        "autovideo_job_id": "8ff56d6e-455b-4d42-9368-94673de2f4fe",
+        "column_name": ""
+      }
+    },
+    {
+      "bvid": "BV1xVxq6JEDv",
+      "title": "GPT-6.1 Terra 的 Azure 欧洲区端点统一涨价 20%：从和官方同价，变成比官方贵",
+      "duration": 141,
+      "views": 307,
+      "h24": {
+        "status": "gap",
+        "views": null
+      },
+      "h72": {
+        "status": "ok",
+        "views": 267,
+        "method": "linear_interpolation",
+        "after_hours": 1.261,
+        "before_hours": 0.905
+      },
+      "watch": {
+        "day": "2026-11-10",
+        "collected_at": 1794290109.976186,
+        "avg_seconds": 18,
+        "completion": 13.06,
+        "views": 301
+      },
+      "production": {
+        "url": "https://www.bilibili.com/video/BV1xVxq6JEDv",
+        "script_id": "175b2ecd9a1f4256be77a3e13531269a",
+        "render_id": "fccffc6db7034dab9e11ac229574b9e2",
+        "column_key": "flash",
+        "content_matrix_id": "",
+        "resolved_video_form": "object_showcase",
+        "autovideo_job_id": "ed0a9b08-385c-444b-bf7b-19a62d808abf",
+        "column_name": ""
+      }
+    }
+  ]
+}

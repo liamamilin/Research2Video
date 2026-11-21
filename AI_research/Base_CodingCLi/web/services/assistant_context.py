@@ -95,6 +95,34 @@ def _materials(result: dict, operation_id: str) -> dict:
     return view
 
 
+def _read_application_list(result: dict, operation_id: str) -> dict:
+    """Trim giant list payloads inside read_application (e.g. GET /api/platforms/bilibili uploads)."""
+    payload = result.get('result')
+    if not isinstance(payload, dict):
+        return result
+    list_key = next(
+        (key for key in ('uploads', 'items', 'jobs', 'scripts')
+         if isinstance(payload.get(key), list) and len(payload[key]) > 15),
+        None,
+    )
+    if not list_key:
+        return result
+    rows = payload[list_key]
+    view = deepcopy(result)
+    view['result'][list_key] = rows[:15]
+    view['_model_view'] = {
+        'operation_id': operation_id,
+        'result_path': f'/result/{list_key}',
+        'fields': f'result.{list_key} truncated to first 15 items; original receipt retains all items',
+        'fields_complete': False,
+        'total_items': len(rows),
+        'shown_items': 15,
+        'complete': False,
+        'next_read': {'operation_id': operation_id, 'result_path': f'/result/{list_key}', 'offset': 15, 'limit': 20},
+    }
+    return view
+
+
 def model_result(tool: str, arguments: dict, result: dict, operation_id: str | None,
                  *, index_offset: int = 0) -> dict:
     """Project only known list tools. Detail reads, writes and small results are untouched."""
@@ -104,6 +132,8 @@ def model_result(tool: str, arguments: dict, result: dict, operation_id: str | N
         return _matrix_detail(result, operation_id)
     if tool == 'read_materials':
         return _materials(result, operation_id)
+    if tool == 'read_application':
+        return _read_application_list(result, operation_id)
     field, limit = None, 20
     if tool == 'list_jobs':
         field, limit = 'items', 40

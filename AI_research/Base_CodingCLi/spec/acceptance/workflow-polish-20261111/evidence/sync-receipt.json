@@ -1,0 +1,25 @@
+{
+  "case": "separate-introduction-emphasis",
+  "source_attempt": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/f8fa6d9a-4254-4929-9ecc-c3101aededad/attempts/1/g2-run",
+  "scene_ids": [
+    "card_3_p2"
+  ],
+  "original_start_frame": 1466,
+  "original_end_frame": 1875,
+  "video_speed": 1.25,
+  "narration_unchanged": true,
+  "audio_sha256": "a2ecb0e57d022f6d9ff2cd34ca1eca87fff30b11e6116253a2b9ba09082ad0b4",
+  "decode": {
+    "before.mp4": {
+      "decode_exit_code": 0,
+      "stderr": ""
+    },
+    "after.mp4": {
+      "decode_exit_code": 0,
+      "stderr": ""
+    }
+  },
+  "new_model_calls": 0,
+  "manual_scene_or_beat_edits": 2,
+  "edit": "two reveal_phrase values; no narration, text, layout or beat edits"
+}

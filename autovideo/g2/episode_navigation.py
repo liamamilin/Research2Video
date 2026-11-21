@@ -11,7 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from g2.fast_cards import _ass_text, _stamp
+from g2.fast_cards import _ass_text, _stamp, font, lines
 
 
 def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
@@ -32,6 +32,7 @@ def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
 STAGE = (0, 140, 1920, 870)
 CARD_FRAMES = 54           # an item card shows for 1.8 s, never longer than a third of its item
 FADE_MS = 220
+MAX_AGENDA_ITEMS = 12  # Six legible rows per column in the available picture area.
 PAPER = {'background': '#F7F8F5', 'text': '#202D28', 'muted': '#69756E', 'accent': '#17784B',
          'line': '#E1E8E1', 'surface': '#FFFFFF'}
 
@@ -45,7 +46,7 @@ def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph
     the one being said is worse than none.
     """
     first = items[0]['start_frame'] if items else 0
-    if first <= 0:
+    if first <= 0 or len(items) > MAX_AGENDA_ITEMS:
         return None
     chapters = ir['content_structure']['chapters']
     covered = {ci for item in program['items'] for ci in item['chapter_indexes']}
@@ -122,7 +123,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         rect(4, start, end, x0, y0, x1 - x0, y1 - y0, _bgr(paper['background']), f'\\fad({FADE_MS},{FADE_MS})')
     def text(start, end, x, y, size, fill, value, align=4, bold=True):
         event(8, start, end, '{' + f'\\an{align}\\pos({x},{y})\\fs{size}\\c{fill}\\b{int(bold)}\\fad({FADE_MS},{FADE_MS})' + '}' + _ass_text(value))
-    if opening:
+    if opening and 0 < len(items) <= MAX_AGENDA_ITEMS:
         start, end = opening['start_frame'], opening['end_frame']
         cover(start, end)
         text(start, end, 140, 205, 44, _bgr(paper['text']), '操作步骤' if tutorial else '本期导读')
@@ -130,13 +131,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         columns = 1 if len(items) <= 5 else 2
         rows = -(-len(items) // columns)
         width = (x1 - 280 - 40 * (columns - 1)) // columns
-        height = min(96, (y1 - 290 - 20 * (rows - 1)) // rows)
+        gap = 10
+        height = min(100, (y1 - 280 - gap * (rows - 1)) // rows)
         lights = opening.get('highlights')
-        top = 280 + max(0, (y1 - 300 - (rows * height + 20 * (rows - 1))) // 2)
+        top = 280 + (y1 - 280 - (rows * height + gap * (rows - 1))) // 2
+        size = 36 if rows == 6 else 40
+        face = font(size)
         for i, item in enumerate(items):
             column, row = divmod(i, rows)
-            x, y = 140 + column * (width + 40), top + row * (height + 20)
-            size = _fit(item['title'], width - 150, 38 if columns == 1 else 32)
+            x, y = 140 + column * (width + 40), top + row * (height + gap)
+            title = r'\N'.join(_ass_text(line) for line in lines(item['title'], face, width - 136))
             windows = [(start, end, 'idle')] if lights is None else [
                 (start, lights[i], 'next'), (lights[i], lights[i + 1] if i + 1 < len(items) else end, 'now'),
                 (lights[i + 1] if i + 1 < len(items) else end, end, 'done')]
@@ -153,7 +157,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 ink = _bgr(accent) if state == 'now' else _bgr(paper['muted']) if state == 'done' else _bgr(paper['text'])
                 number = _bgr(accent) if state != 'done' else _bgr(paper['muted'])
                 event(8, begin, until, '{' + f'\\an4\\pos({x + 36},{y + height // 2})\\fs30\\c{number}\\b1' + fade + '}' + f"{item['index']:02d}")
-                event(8, begin, until, '{' + f'\\an4\\pos({x + 110},{y + height // 2})\\fs{size}\\c{ink}\\b{int(state == "now")}' + fade + '}' + _ass_text(item['title']))
+                event(8, begin, until, '{' + f'\\an4\\pos({x + 110},{y + height // 2})\\fs{size}\\c{ink}\\b{int(state == "now")}' + fade + '}' + title)
     for card in item_cards or []:
         start, end = card['start_frame'], card['end_frame']
         item = items[card['index'] - 1]

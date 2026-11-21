@@ -1,0 +1,22 @@
+{
+  "case": "consumer_illustrated",
+  "checks": {
+    "original_question_preserved": true,
+    "source_has_answer_passage": true,
+    "actual_saved_material_has_answer_passage": true,
+    "original_dossier_lacks_specific_wind_example": true,
+    "fixed_script_uses_wind_example": true,
+    "fixed_script_keeps_main_question": true,
+    "writer_prompt_unchanged": true,
+    "original_audience_scope_retained": true,
+    "writer_receives_complete_report": true,
+    "fallback_text_used": true
+  },
+  "source_url": "https://doi.org/10.1541/ieejjia.23006921",
+  "source_marker": "may introduce additional noise",
+  "source_excerpt": "The feedforward type ANC may introduce additional noise into the user's eardrum",
+  "draft_marker": "呼呼声有时反而更明显",
+  "failed_attempt_title": "AirPods Pro通透模式：误差不到3dB，为什么还假？",
+  "fixed_title": "降噪耳机不是挡住噪音，是在你耳边放个反声音",
+  "verification_scope": "Saved research replay through actual production writing/import entry; initial source acquisition frozen; no rendering or publishing."
+}

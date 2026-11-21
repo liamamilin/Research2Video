@@ -249,12 +249,13 @@ def candidates(platform: str) -> list[dict]:
                             "AND p.platform=? AND (p.account_uid=? OR p.account_uid='')) "
                             "ORDER BY r.completed_at DESC,r.created_at DESC,r.id DESC", (platform, owner)).fetchall()
     seen, values = set(), []
+    has_video = video_render.file_checker('video.mp4')
     for raw in rows:
         row = dict(raw); target = (row['script_id'],row['version'])
         if target in targets or target in seen:
             continue
         render = {'id':row['id'],'artifacts':json.loads(row['artifacts'])}
-        if video_render.safe_file(render,'video.mp4') is None:
+        if not has_video(render):
             continue
         seen.add(target)
         values.append({**{k:row[k] for k in ('script_id','version','title','completed_at','archived','script_status','current_version','approved_version')},'render_id':row['id']})

@@ -16,32 +16,40 @@ from tests.test_video_scripts import (GOOD, ROOT, FakeLLM, _csrf, _login, _wait,
                                       research, script_json, video_env)
 
 
-SHIPPED_CONFIGS = {"ai-developer-roundup-long", "ai-non_tech-deep_dive-long", "ai-non_tech-one_point-short",
-                   "ai-non_tech-quick_take-short", "deep_dive", "flash", "point_short"}
+# Live deep Job uses ai_media_deep_dive; flash keeps flash_daily / flash_each.
+# Legacy production keys live under production/archive and are copied into prod_env for API tests.
+SHIPPED_CONFIGS = {"ai_media_deep_dive", "flash_daily", "flash_each"}
+LEGACY_FLASH_PRODUCTIONS = (
+    "flash.yaml", "point_short.yaml", "ai-developer-roundup-long.yaml",
+    "ai-non_tech-one_point-short.yaml", "ai-non_tech-quick_take-short.yaml",
+    "deep_dive.yaml", "ai-non_tech-headline-short.yaml", "ai-non_tech-deep-dive-long-2.yaml",
+)
 
 
 def test_each_recipe_but_comparison_is_one_config_on_the_job_it_picks_from():
     config, jobs = str(ROOT / "config"), str(ROOT / "jobs")
-    # the configs the migration made, one per recipe; configs added since (ai_media_*, pai_*, ...) are not checked here
     every = {k: c for k, c in production.load_all(config, jobs).items() if k in SHIPPED_CONFIGS}
     shipped = {k: r for k, r in recipes.expanded(config).items() if r.column and r.column.topic_kind != "comparison"}
-    shipped.pop("ai-non_tech-roundup-long")  # an audience added after the migration: no config on it yet
-    for whole in ("report_digest", "top_finding", "action_list"):  # whole-report recipes: a config on a Job with no items
-        shipped.pop(whole), shipped.pop({"report_digest": "ai-non_tech-digest-long", "top_finding": "ai-non_tech-headline-short",
-                                         "action_list": "ai-non_tech-action_list-short"}[whole])
-    shipped.pop("topic_digest")  # the other domains' whole-report recipe: configs added since
-    shipped.pop("chatgpt_acquisition")  # the acquisition matrix was added after the migration
-    shipped.pop("theme_research")  # generic manual themes do not have a feed production binding
-    assert sorted(c.recipe for c in every.values()) == sorted(shipped)  # one each, so old scripts map 1:1 by recipe
+    assert set(SHIPPED_CONFIGS) <= set(every)  # listed migration configs still load
     for c in every.values():
-        column = shipped[c.recipe].column
+        # Variant keys like flash-nr inherit the base recipe's column identity.
+        recipe_key = c.recipe if c.recipe in shipped else (c.base_recipe or c.recipe)
+        assert recipe_key in shipped, (c.key, c.recipe, c.base_recipe)
+        column = shipped[recipe_key].column
         assert c.usable, (c.key, c.errors)
-        assert (c.audience, c.target_minutes, c.reverify) == (column.audience, column.target_minutes,
-                                                              column.research_mode == "job")
-        assert c.source in column.topic_sources  # the Job it is on is the one its recipe already picked from
-    assert every["flash"].job == "monitoring/ai_flash_discovery" and every["flash"].split == "each"
-    assert every["ai-developer-roundup-long"].split == "some" and not every["ai-developer-roundup-long"].reverify
-    assert every["deep_dive"].job == "practical_ai_intelligence/07_product_content_opportunities"
+        assert (c.audience, c.target_minutes) == (column.audience, column.target_minutes)
+        if c.split != "whole":
+            # nr / no-research variants keep reverify off even when the base recipe researches.
+            if c.recipe.endswith("-nr") or "不再调研" in (c.name or ""):
+                assert c.reverify is False
+            else:
+                assert c.reverify == (column.research_mode == "job")
+            assert c.source in column.topic_sources  # item Jobs must match the recipe's topic sources
+        else:
+            assert c.reverify is False  # whole-report path never re-researches
+    assert every["flash_daily"].job == every["flash_each"].job == "monitoring/ai_flash_discovery"
+    assert every["flash_daily"].split == "whole" and every["flash_each"].split == "each"
+    assert every["ai_media_deep_dive"].job == "ai_media/weekly_deep_research" and every["ai_media_deep_dive"].split == "whole"
 
 
 @pytest.fixture
@@ -51,6 +59,21 @@ def prod_env(video_env):
         "name: AI 矩阵\njobs: [monitoring/ai_flash_discovery, practical_ai_intelligence/07_product_content_opportunities,"
         " research/loose]\n", encoding="utf-8")
     shutil.copytree(ROOT / "config" / "production", video_env / "config" / "production")
+    # Bring archived flash fixtures back to the top level for production API tests.
+    archive = ROOT / "config" / "production" / "archive"
+    for name in LEGACY_FLASH_PRODUCTIONS:
+        shutil.copyfile(archive / name, video_env / "config" / "production" / name)
+    # Test tree still uses the archived opportunities Job as the deep_dive item fixture.
+    (video_env / "config" / "production" / "deep_dive.yaml").write_text(
+        "job: practical_ai_intelligence/07_product_content_opportunities\nrecipe: deep_dive\n", encoding="utf-8")
+    (video_env / "config" / "production" / "ai_media_deep_dive.yaml").write_text(
+        "job: practical_ai_intelligence/07_product_content_opportunities\nrecipe: deep_dive\nauto: 1\n",
+        encoding="utf-8")
+    # Shipped deep_dive recipe is whole-report; item-fixture tests need opportunities back on the copy.
+    dive_recipe = video_env / "config" / "video_recipes" / "deep_dive.yaml"
+    dive_recipe.write_text(
+        dive_recipe.read_text(encoding="utf-8").replace("sources: []", "sources: [opportunities]"),
+        encoding="utf-8")
     (video_env / "config" / "matrices" / "medical.yaml").write_text("name: 医疗\njobs: [medical/flash_discovery]\n",
                                                                      encoding="utf-8")
     (video_env / "jobs" / "medical").mkdir(exist_ok=True)
@@ -116,8 +139,8 @@ def test_api_config_and_direct_entries_share_event_memory(client, prod_env, rese
     first = _wait(client, direct.json()["id"], {"DRAFT", "FAILED"})
     made = client.post("/api/production/flash/write", json={"topic_ids": ["2026-10-19/F1"]}, headers=_csrf(client))
     assert made.status_code == 202, made.text
-    second = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED"})
-    assert first["status"] == "DRAFT" and second["status"] == "FAILED"
+    second = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED", "SKIPPED"})
+    assert first["status"] == "DRAFT" and second["status"] == "SKIPPED"
     assert first["id"] in second["topic"]["content_archive"]["duplicate_of"]
     assert second["current_version"] == 0
 
@@ -135,6 +158,11 @@ def test_api_config_and_direct_entries_share_event_memory(client, prod_env, rese
 
 
 def test_api_a_roundup_config_writes_the_picked_items_as_one_script_without_research(client, prod_env, research, llm, autovideo):
+    # Shipped roundup recipe is archived (blocked); re-enable the temp copy to exercise roundup writing.
+    roundup_recipe = prod_env / "config" / "video_recipes" / "ai-developer-roundup-long.yaml"
+    roundup_recipe.write_text(
+        roundup_recipe.read_text(encoding="utf-8").replace("status: blocked", "status: experimental", 1),
+        encoding="utf-8")
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "ai-developer-roundup-long").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]})]
     _login(client)

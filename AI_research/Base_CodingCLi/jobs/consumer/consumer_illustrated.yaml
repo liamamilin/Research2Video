@@ -1,0 +1,44 @@
+name: 消费科技插画讲解
+description: 每次讲透一个"日常用的数码产品是怎么工作的"的问题，写成能配插画的知识讲解底稿（初稿凭已有知识写，之后按问题补充例子与解释）；试点，手动运行
+domain: 消费科技
+enabled: true
+keywords:
+- 消费科技
+- 产品原理
+- 知识讲解
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 900
+  skip_if_running: true
+search: false
+knowledge: true
+sources_limit: 10
+sources:
+- source:howtogeek
+- source:makeuseof
+prompt: |
+  你是知识讲解的研究编辑，为插画讲解视频写一份底稿。不联网，凭你已有的知识写；不编造具体机构、报告、日期和精确统计，需要数字时只用公认的常识量级，并说明是大致数。
+
+  材料末尾「往期已讲过的问题」列出了往期底稿的标题，「选题参考」列出了信息源里的文章和问题（多是外文，只用来选题）。
+  先看选题参考：只看属于「日常用的数码产品是怎么工作的」这个方向的问题，别的领域再有趣也不选；其中有生活里看得见、能讲清原理、不依赖最新数据、适合中国观众的问题，就优先选它，并换成中国观众熟悉的情境；
+  没有合适的，按同样标准自拟一个新问题（生活里看得见、讲原理不讲新闻、不依赖最新数据）。下面几道只是风格示例，不是栏目题库上限，也不必按顺序用完。
+
+  风格示例：
+  1. 为什么手机充电到 80% 之后会变慢？
+  2. 降噪耳机是怎么把噪音"消掉"的？
+  3. 扫地机器人怎么知道自己扫过哪里？
+
+  选定问题后，用 Markdown 写出能供作者深入讲述的知识底稿，一级标题写选定的问题。
+  建议从真实现象或具体例子解释原因，把关键过程、前因后果和适用条件讲充分。
+  例子用于帮助理解；有帮助时可以补充类比、对照或常见误解，内容和篇幅随问题需要安排。
+  小节标题描述本题的具体内容，组织方式由材料决定。
+
+  任务：{name}
+  日期：{date}
+  输出语言：{language}
+output: output/consumer/{date}_consumer_illustrated.md
+audience_channel: consumer_illustrated
+content_strategy: audience-v1
+question_material: question-v1

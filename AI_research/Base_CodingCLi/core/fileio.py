@@ -88,6 +88,9 @@ def file_lock(key: str, timeout: float = 10.0) -> Iterator[None]:
 
 def atomic_write(path: str, content: str, encoding: str = "utf-8") -> None:
     """Write text via temp file + rename so readers never see a partial file."""
+    from core.config_transaction import before_write
+    before_write(path, content, encoding)
+
     parent = os.path.dirname(path)
     if parent:
         os.makedirs(parent, exist_ok=True)

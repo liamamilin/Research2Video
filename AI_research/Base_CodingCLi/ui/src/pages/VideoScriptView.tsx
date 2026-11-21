@@ -45,6 +45,7 @@ import { ScriptPolish } from "@/components/ScriptPolish";
 import { workflowReturn } from "@/lib/platform-links";
 import { SelectionSkipLinks, skipLabel } from "@/components/SelectionSkip";
 import { useScriptEditor } from "@/lib/use-script-editor";
+import { ExperimentBadge } from "@/components/ExperimentBadge";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
   CITED: { label: "有出处", cls: "bg-success/15 text-success border-success/30" },
@@ -116,6 +117,9 @@ export function VideoScriptViewPage() {
   const [catalog, setCatalog] = useState<StyleCatalog | null>(null);
   const [facts, setFacts] = useState<Record<string, Fact>>({});
   const [publishVersion, setPublishVersion] = useState<number | null>(null);
+  const [screenshotsMountedFor, setScreenshotsMountedFor] = useState("");
+  const factsCacheKey = useRef("");
+  const autovideoCache = useRef<{ id: string; tick: number; at: number } | null>(null);
 
   const flight = useRef<AbortController | null>(null);
   const activePage = useRef(id);
@@ -132,7 +136,9 @@ export function VideoScriptViewPage() {
 
   useEffect(() => {
     activePage.current = id;
-    setDetail(null); setError(null); setPublishVersion(null); setVoice(""); setProductionMode(""); setOperationError(""); void load();
+    factsCacheKey.current = "";
+    autovideoCache.current = null;
+    setDetail(null); setError(null); setFacts({}); setAutovideo(null); setRenderStatusError(false); setScreenshotsMountedFor(""); setPublishVersion(null); setVoice(""); setProductionMode(""); setOperationError(""); void load();
     return () => { activePage.current = ""; flight.current?.abort(); flight.current = null; };
   }, [load, id]);
 
@@ -151,7 +157,7 @@ export function VideoScriptViewPage() {
   const defaultTab = detail && (current || !detail.version_shown) ? nextStep(detail).tab : "draft";
   const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : defaultTab;
 
-  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || (detail.status !== "FAILED" && Boolean(detail.stage)) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
+  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || (!["FAILED", "SKIPPED"].includes(detail.status) && Boolean(detail.stage)) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
   useEffect(() => {
     if (editing) return;
     const refresh = () => { if (!document.hidden) void load(); };
@@ -172,14 +178,29 @@ export function VideoScriptViewPage() {
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
   const shownVersion = detail?.version_shown?.version;
+  const screenshotsKey = detail && shownVersion ? `${detail.id}-${shownVersion}` : "";
   useEffect(() => {
-    if (tab !== "draft" || !sheetId) {
+    if (!localVideo && screenshotsKey && !editing && (tab === "draft" || tab === "video")) {
+      setScreenshotsMountedFor(screenshotsKey);
+    }
+  }, [localVideo, screenshotsKey, editing, tab]);
+  useEffect(() => {
+    if (!sheetId) {
+      factsCacheKey.current = "";
       setFacts({});
       return;
     }
-    const controller = new AbortController(); setFacts({});
+    if (tab !== "draft") return;
+    const nextKey = `${id}:${shownVersion ?? ""}:${sheetId}`;
+    if (factsCacheKey.current === nextKey) return;
+    const controller = new AbortController();
     getVideoFacts(id, shownVersion, controller.signal)
-      .then((sheet) => { if (!controller.signal.aborted) setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f]))); })
+      .then((sheet) => {
+        if (!controller.signal.aborted) {
+          factsCacheKey.current = nextKey;
+          setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f])));
+        }
+      })
       .catch(() => { if (!controller.signal.aborted) setFacts({}); });
     return () => controller.abort();
   }, [tab, id, sheetId, shownVersion]);
@@ -187,9 +208,17 @@ export function VideoScriptViewPage() {
   const needsRenderStatus = detail?.status === "APPROVED" && tab === "video" && !localVideo;
   useEffect(() => {
     if (!canEdit || !needsRenderStatus) return;
+    const cached = autovideoCache.current;
+    if (cached && cached.id === id && cached.tick === statusTick && Date.now() - cached.at < 15000) return;
     const controller = new AbortController();
-    setAutovideo(null); setRenderStatusError(false);
-    getAutoVideoStatus(controller.signal).then((value) => { if (!controller.signal.aborted) setAutovideo(value); })
+    if (!cached || cached.tick !== statusTick) setAutovideo(null);
+    setRenderStatusError(false);
+    getAutoVideoStatus(controller.signal).then((value) => {
+      if (!controller.signal.aborted) {
+        autovideoCache.current = { id, tick: statusTick, at: Date.now() };
+        setAutovideo(value);
+      }
+    })
       .catch(() => { if (!controller.signal.aborted) setRenderStatusError(true); });
     return () => controller.abort();
   }, [canEdit, needsRenderStatus, id, statusTick]);
@@ -383,6 +412,7 @@ export function VideoScriptViewPage() {
             {!localVideo && <CredibilityBadge value={detail.credibility} />}
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.topic.content_mode === "episode" ? <span className="badge border border-accent text-accent">整期节目</span> : null}
+            <ExperimentBadge marks={detail.content_context?.experiments} />
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.content_context?.column_name ? <Link className="text-xs text-accent hover:underline"
               to={`/matrices/${detail.content_context.matrix}?tab=columns`}>栏目：{detail.content_context.column_name}</Link> : null}
@@ -514,8 +544,15 @@ export function VideoScriptViewPage() {
         <SelectionSkipLinks skip={detail.selection_skip} back={backToTopics} />
       </section> : null}
 
-      {detail.error && detail.status !== "FAILED" && !detail.selection_skip ? (
+      {detail.error && !["FAILED", "SKIPPED"].includes(detail.status) && !detail.selection_skip ? (
         <section className="card border-warning/40 text-sm text-warning">{detail.error}</section>
+      ) : null}
+
+      {detail.status === "SKIPPED" && !detail.selection_skip ? (
+        <section className="card border-border text-sm space-y-1">
+          <p className="text-text-muted font-medium">已跳过</p>
+          {detail.error ? <p className="text-text-muted">{detail.error}</p> : null}
+        </section>
       ) : null}
 
       {detail.status === "FAILED" && !detail.selection_skip ? (
@@ -558,7 +595,7 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {shown && !editing && tab === "draft" ? <ScriptPolish polish={shown.meta?.polish} /> : null}
-      {!localVideo && shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
+      {!localVideo && shown && screenshotsMountedFor === screenshotsKey ? <div hidden={editing || (tab !== "draft" && tab !== "video")}><ScriptScreenshots key={`${detail.id}-${shown.version}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} visible={!editing && (tab === "draft" || tab === "video")} refreshKey={renderForVersion(detail, shown.version)?.id ?? ""} /></div> : null}
       {detail.topic.article && tab === "draft" ? <ArticleSource key={detail.id} id={detail.id} mode={detail.topic.article.mode} /> : null}
       {detail.report_id && tab === "draft" ? (
         <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>
@@ -799,11 +836,48 @@ function RenderPanel({
         </div>
       ) : null}
 
-      {!detail.topic.local_video && latest?.status === "COMPLETED" && latest.timings?.elapsed_seconds != null ? (
-        <p className="text-xs text-text-muted">
-          总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
-          {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
-        </p>
+      {!detail.topic.local_video && (latest?.status === "COMPLETED" || latest?.status === "FAILED") && (latest.timings?.elapsed_seconds != null || latest.timings?.diagnostics?.steps?.length) ? (
+        <div className="text-xs text-text-muted space-y-1.5">
+          {latest.timings?.elapsed_seconds != null ? (
+            <p>
+              总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
+              {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
+              {latest.timings.diagnostics?.executor ? ` · 引擎 ${latest.timings.diagnostics.executor}` : ""}
+              {latest.timings.diagnostics?.llm?.calls != null
+                ? ` · 分镜 LLM ${latest.timings.diagnostics.llm.calls} 次${latest.timings.diagnostics.llm.cost_usd ? `（估算上界 $${latest.timings.diagnostics.llm.cost_usd.toFixed(3)}）` : ""}`
+                : ""}
+            </p>
+          ) : null}
+          {latest.timings?.diagnostics?.steps?.length ? (
+            <p className="flex flex-wrap gap-x-2.5 gap-y-1">
+              {latest.timings.diagnostics.steps.map((s) => (
+                <span key={s.name} className={s.status === "failed" ? "text-danger" : undefined}>
+                  {s.label} {s.seconds == null ? "失败" : s.seconds >= 60 ? `${(s.seconds / 60).toFixed(1)}m` : `${Math.round(s.seconds)}s`}
+                </span>
+              ))}
+            </p>
+          ) : null}
+          {latest.timings.diagnostics?.components ? (
+            <p className="flex flex-wrap gap-1.5 items-center">
+              <span>画面组件：</span>
+              {Object.entries(latest.timings.diagnostics.components).map(([comp, count]) => (
+                <span key={comp} className="badge border border-border font-mono">{comp}×{count}</span>
+              ))}
+              {latest.timings.diagnostics.text_card_ratio != null ? (
+                <span className={cn("badge border", latest.timings.diagnostics.text_card_ratio > 0.7 ? "border-warning/40 text-warning" : "border-border")}>
+                  纯文字卡 {Math.round(latest.timings.diagnostics.text_card_ratio * 100)}%
+                </span>
+              ) : null}
+              {latest.timings.diagnostics.captions?.fallback_segments ? (
+                <span className="badge border border-warning/40 text-warning">
+                  字幕比例回退 {latest.timings.diagnostics.captions.fallback_segments} 段
+                </span>
+              ) : latest.timings.diagnostics.captions?.cue_count ? (
+                <span className="badge border border-border">字幕 {latest.timings.diagnostics.captions.cue_count} 条</span>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {latest && active ? (

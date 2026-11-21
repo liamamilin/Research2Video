@@ -1,0 +1,47 @@
+[
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/backup_state.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/build.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/build_icons.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/build_launcher.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/check.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/deploy.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/install_launchd.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/run_practical_intelligence.sh",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/scripts/start_server_detached.sh",
+    "returncode": 0,
+    "error": ""
+  }
+]

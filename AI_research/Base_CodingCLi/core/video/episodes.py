@@ -34,7 +34,11 @@ def topic(report: dict, workspace: str, *, job: str, source=None, production: st
     if source is not None:
         _, candidates = topic_store.read_report(source, report["report_path"], workspace)
         items = [{"id": t.id, "title": t.title} for t in candidates]
-    return {**value, "content_mode": MODE, "from_report": report["report_path"],
+    from . import audience_strategy
+    strategy = (report_meta.get(report['report_path']) or {}).get('audience_strategy') or {}
+    selected_strategy = strategy.get('channel') if strategy.get('strategy') == audience_strategy.MARKER else ''
+    return {**value, **({'audience_strategy': selected_strategy} if isinstance(selected_strategy, str) and selected_strategy in audience_strategy.CHANNELS else {}),
+            "content_mode": MODE, "from_report": report["report_path"],
             "report_id": report["id"], "episode": {"job": job, "production": production,
             "items": items, "report_path": report["report_path"], "report_identity": identity,
             **({'issue':copy.deepcopy(issue)} if issue else {})}}
@@ -60,16 +64,14 @@ def programme_label(context: dict) -> str:
 
 
 def greeting(topic: dict, context: dict) -> str:
-    """The fixed line the narrator opens with: the column's own ``greeting``, else one built from its name.
+    """The fixed line the narrator opens with: only a column's own ``greeting``.
 
-    It is the same for every issue of a column and says no date. A script without a column has none.
+    Since 11-10 a column no longer gets "大家好，欢迎收看<栏目>。" by default: the benchmark of small accounts' AI hits
+    (spec/benchmark-20261110/ai-report.md) open on the hook itself. A column that wants a line sets ``greeting``.
     """
     if not context.get("column"):
         return ""
-    if (context.get("greeting") or "").strip():
-        return context["greeting"].strip()
-    label = ((topic.get("episode") or {}).get("publication") or {}).get("label") or programme_label(context)
-    return f"大家好，欢迎收看{label}。" if label else ""
+    return (context.get("greeting") or "").strip()
 
 
 def publication_topic(topic: dict, context: dict) -> dict:
@@ -125,7 +127,7 @@ def brief(topic: dict, *, tutorial: bool = False) -> str:
     chosen = "\n".join(f"{i+1}. {t['title']}" for i, t in enumerate(items))
     publication = (topic.get("episode") or {}).get("publication") or {}
     if publication.get("scheme") == SCHEME:
-        naming = ("\n整期总标题由你来写：从本期最值得看的一两条内容里取具体产品和数字，"
+        naming = ("\n整期总标题由你来写：从本期值得看的内容里选有吸引力的具体看点，"
                   f"不写日期，也不写栏目名「{publication['label']}」。日期不写进口播。")
     elif publication:
         naming = (f"\n整期总标题使用「{publication['title']}」，不要把第一条或最显眼的事件当作整期总标题。"
@@ -137,14 +139,14 @@ def brief(topic: dict, *, tutorial: bool = False) -> str:
         return ("\n\n## 内容组织方式：完整教程\n"
                 "本份报告制作一条视频，按实际任务的准备、操作、结果等阶段分章，每个阶段一个 section。"
                 "章节就是步骤导航，title 为不带编号的短标题；各步骤承接同一份输入与输出。"
-                "开场与收尾各一个 section，episode_role 使用 opening、item、closing。"
+                "如有独立开场或收尾，可分别用 section 表达；episode_role 使用 opening、item、closing。"
                 "按实际内容展开，沿用上游给出的命令和结果。" + naming)
     return ("\n\n## 内容组织方式：整期节目\n"
             "本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。"
-            "整期共享开场和收尾，各条之间按需要衔接。每条内容用一个 section，title 为适合导航的短标题，"
+            "各条之间按需要衔接。每条内容用一个 section，title 为适合导航的短标题，"
             "该 section 的 paragraphs 按需要展开背景、具体例子、操作过程、机制、结果与影响。"
             "同一内容可以有很多段旁白；不要把每个解释步骤拆成新的内容条目。"
-            "开场和收尾各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。"
+            "如有独立开场或收尾，可分别用 section 表达。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。"
             "内容标题最多 24 字，不使用编号，视频自动显示序号。"
             "时长由内容决定，配方中单条视频的秒数、分钟数或字数只作历史参考，不作为整期篇幅上限。"
             "保留原始材料的具体细节和研究底稿的解释深度。上游结论直接用于讲述。"
@@ -171,7 +173,7 @@ def scripts_for(report_path: str, recipe: str, production_id: str, column_id: st
     version_clause = " AND json_extract(topic,'$.episode.report_identity') = ?" if revision else ""
     with store.connect() as db:
         rows = db.execute(f"""SELECT id,column_key,status,topic,created_at FROM scripts
-            WHERE archived=0 AND status!='FAILED' AND {owner}
+            WHERE archived=0 AND status NOT IN ('FAILED','SKIPPED') AND {owner}
             AND json_extract(topic,'$.content_mode')='episode'
             AND (report_path=? OR json_extract(topic,'$.from_report')=?)
              {version_clause} ORDER BY created_at""", (column_id or production_id, report_path, report_path, *((revision,) if revision else ()))).fetchall()

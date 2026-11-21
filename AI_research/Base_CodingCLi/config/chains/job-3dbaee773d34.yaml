@@ -1,0 +1,7 @@
+key: job-3dbaee773d34
+name: AI 商业观察
+job: ai_media/weekly_business_watch
+outputs:
+- ai_media_business_digest
+imported: true
+schedule_armed: true

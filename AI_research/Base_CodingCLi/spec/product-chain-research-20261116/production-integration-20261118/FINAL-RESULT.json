@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "at": 1794984844.466198,
+  "formal_url": "http://127.0.0.1:8775/chains",
+  "runtime": {
+    "pid": 29065,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794983858.616315,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "e12b3a923cf74b3ab424f1048b9cc47b"
+  },
+  "ui_sha256": "42602ceea7cadced0b64c300ce861fa254920ee0091c4e7a322b53dd44f9ea13",
+  "source_files": 76,
+  "frontend_tests": 74,
+  "backend_management_tests": 84,
+  "rehearsal_cleanup": "PASS",
+  "formal_invariants": "PASS",
+  "browser_evidence": [
+    "formal-chain-management.png",
+    "formal-publish-scope.png",
+    "formal-matrix-scope.ax.txt"
+  ]
+}

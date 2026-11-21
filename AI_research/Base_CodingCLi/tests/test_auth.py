@@ -330,3 +330,30 @@ def test_decode_token_rejects_garbage():
 
     assert jwt_helper.decode_token("not-a-jwt") is None
     assert jwt_helper.decode_token("") is None
+
+
+def test_token_routes_refuse_a_refresh_token_in_the_access_cookie(client):
+    # 11-15: these routes checked only the signature, so a 30-day refresh token could mint a permanent API token.
+    _login(client)
+    refresh = client.cookies.get("ai_research_refresh")
+    csrf = _csrf(client)
+    client.cookies.clear()
+    client.cookies.set("ai_research_access", refresh, path="/")
+    client.cookies.set("ai_research_csrf", csrf, path="/")
+    headers = {"X-CSRF-Token": csrf}
+    assert client.post("/api/auth/tokens", json={"name": "x"}, headers=headers).status_code == 401
+    assert client.get("/api/auth/sessions").status_code == 401
+    assert client.post("/api/auth/change-password", json={"current_password": "admin-pass-123",
+                       "new_password": "another-pass-456"}, headers=headers).status_code == 401
+
+
+def test_a_revoked_session_cannot_mint_tokens_or_change_the_password(client):
+    from web.auth import db as user_db
+    from web.auth import jwt as jwt_helper
+
+    _login(client)
+    assert client.post("/api/auth/tokens", json={"name": "ok"}, headers=_csrf_header(client)).status_code == 200
+    user_db.revoke_session(jwt_helper.decode_token(client.cookies.get("ai_research_access"))["jti"])
+    assert client.post("/api/auth/tokens", json={"name": "x"}, headers=_csrf_header(client)).status_code == 401
+    assert client.post("/api/auth/change-password", json={"current_password": "admin-pass-123",
+                       "new_password": "another-pass-456"}, headers=_csrf_header(client)).status_code == 401

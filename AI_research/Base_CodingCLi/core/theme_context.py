@@ -7,6 +7,7 @@ from . import matrices
 from .config import load_job
 from .video import content_columns
 from .yaml_cache import load_yaml
+from .video.audience_profiles import EDITORIAL_GUIDANCE
 
 
 def categories(config_dir: str, matrix_key: str, *, include_legacy: bool = False) -> list[dict]:
@@ -48,27 +49,45 @@ def research_spec(theme: dict, category: dict, matrix, *, sources: list[str]) ->
 {signals or '用户自主命题。'}
 研究日期：{{date}}
 
-先明确这个题目需要回答的几个子问题。阅读提供的相关来源，定向搜索并阅读能回答这些问题的页面。
+从这个题目真正需要回答的问题出发。阅读提供的相关来源，定向搜索并阅读能展开解释的页面。
 有用的旧教程、现行规则和案例同样可以使用；页面是否今天新增不决定它是否与本主题有关。
 围绕信息缺口继续补充；材料充分后形成判断，不预设必须购买、升级或支持某种结论。
 “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
 保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
 优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+{EDITORIAL_GUIDANCE}
+题目已经确定，以上原则用于组织材料和保持受众范围，不重新换题。需求线索说明为什么有人在意，具体材料和案例展开怎么发生，比较背景解释差异；不把这些内部角色写成口播章节要求。
 
-输出一份 Markdown 主题研究底稿：
-# 主题标题
-## 要回答的问题与主要判断
-## 观众场景与具体材料
-## 问题逐项展开（每个问题的具体资料、例子、机制和适用条件）
-## 可用于讲述的操作与结果
-## 画面材料（页面链接、展示区域、对应讲述内容、输入与输出的演示建议）
-## 原始材料中值得保留的细节
-## 来源清单
+输出一份 Markdown 主题研究底稿，以主题标题开头。按题目和材料组织正文，保留具体案例、机制、操作或适用条件中有助于理解的部分。
+有适合展示的页面或演示时，把链接和相关输入、过程、结果与对应解释放在一起。末尾保留来源清单。
 这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
 """
-    return {"prompt": prompt, "keywords": [theme["title"], matrix.domain or matrix.name], "language": "zh",
-            "sources": list(dict.fromkeys(sources)), "sources_limit": 6, "max_searches": 8,
-            "runtime": {"timeout_seconds": 2400, "skip_if_running": True}}
+    seed_urls = list(dict.fromkeys(
+        str(s["url"]).strip() for s in theme.get("signals", [])
+        if isinstance(s, dict) and str(s.get("url") or "").strip().startswith(("http://", "https://"))
+    ))
+    audience = theme["audience"] or category["audience"] or matrix.content.get("audience", "")
+    return {
+        "prompt": prompt,
+        "keywords": [theme["title"], matrix.domain or matrix.name],
+        "language": "zh",
+        "sources": list(dict.fromkeys(sources)),
+        "sources_limit": 6,
+        "max_searches": 8,
+        "research_mode": "opencode_single_topic",
+        "theme_topic": {
+            "title": theme["title"],
+            "angle": theme.get("angle", ""),
+            "audience": audience,
+            "promise": category.get("promise", ""),
+            "category_name": category.get("name", ""),
+            "domain": matrix.domain or matrix.name,
+            "reason": theme.get("reason", ""),
+            "notes": theme.get("notes", ""),
+            "seed_urls": seed_urls,
+        },
+        "runtime": {"timeout_seconds": 2400, "skip_if_running": True},
+    }
 
 
 def source_specs(category: dict, config_dir: str, jobs_dir: str, matrix) -> list[str]:

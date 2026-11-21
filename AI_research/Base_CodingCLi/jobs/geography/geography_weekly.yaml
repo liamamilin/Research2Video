@@ -1,5 +1,7 @@
 name: 地理专题周读
-description: 每周挑一个地理主题讲清楚：这个地方或现象是什么、数据怎么说、为什么特别（读 Our World in Data、UNESCO、Atlas Obscura、Smithsonian、Mongabay 等抓取的内容），不联网搜索
+description: 每周挑一个地理主题讲清楚：这个地方或现象是什么、数据怎么说、为什么特别（读 Our World in Data、UNESCO、Atlas Obscura、Smithsonian、Mongabay 
+  等抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 地理与世界
 enabled: true
 keywords:
 - 地理
@@ -15,24 +17,19 @@ search: false
 sources_limit: 10
 sources:
 - tag:geography
-prompt: '为「地理如何塑造生活」整理研究底稿。围绕同一个具体空间问题，以同一地点或一组可比较地点的持续例子解释空间差异如何通过地形、距离、气候、水流、道路或设施转成生活后果。先把人和事物放回位置与连接，保留材料中的路线、尺度、推理、过程和具体生活实例；比较对齐同一问题。机构、资本和争论贴着它们实际改变的空间路径或当地活动解释。
-
+prompt: |
+  为「地理如何塑造生活」整理研究底稿。围绕同一个具体空间问题，可以结合具体地点或可比较地点解释空间差异如何通过地形、距离、气候、水流、道路或设施转成生活后果。位置与连接有助于理解人和事物的关系，保留材料中的路线、尺度、推理、过程和具体生活实例；比较对齐同一问题。机构、资本和争论贴着它们实际改变的空间路径或当地活动解释。
 
   初次整理后，补充正文继续深化已经选定的地点与主问题，把新取得的关系、阶段、细节与相邻例子接回原解释。底稿完整保留主过程与生活例子，研究备忘供作者构思；旁白直接讲当地的人、移动和结果，作者按本期材料组织标题与节奏。材料已有的地图、剖面、地点或设施图像页面链接与可观察要点放在对应空间说明小节，供后续画面使用。
 
-
   任务：{name}
-
   领域：{domain}
-
   关键词：{keywords}
-
   日期：{date}
-
   输出语言：{language}
 
-
   数据格式：Markdown；用「## 本期主问题：具体空间问题」标明本期要展开的同一解释，下面「### 2.1 名称」等小节组织相关关系、阶段与例子，内部用「####」保留完整过程。素材链接放在对应段落，末尾「### 来源清单」继续记录链接。
-
-  '
 output: output/geography/{date}_geography_weekly.md
+audience_channel: geography_weekly
+content_strategy: audience-v1
+question_material: question-v1

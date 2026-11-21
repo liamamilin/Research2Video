@@ -1,0 +1,742 @@
+{
+  "split": "development",
+  "sha256": "1b201c0e1c3cd6c0669fa13756c935d7fc77ac402ebaa5eaa0adb90c74bfc055",
+  "summary": {
+    "1": {
+      "cases": 40,
+      "failed": 0,
+      "index": 23
+    },
+    "0.9": {
+      "cases": 40,
+      "failed": 2,
+      "index": 25
+    }
+  },
+  "cases": [
+    {
+      "id": "development-fork-00",
+      "family": "fork",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-fork-00",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-merge-01",
+      "family": "merge",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-merge-01",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-diamond-02",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-diamond-02",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-ladder-03",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-ladder-03",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-layered-04",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-layered-04",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-cycle-05",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.32779452607591,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-cycle-05",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-disconnected-06",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-disconnected-06",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-parallel-07",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "development-parallel-07",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 900
+    },
+    {
+      "id": "development-fork-08",
+      "family": "fork",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-fork-08",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-merge-09",
+      "family": "merge",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-merge-09",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-diamond-10",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.171163202122955,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-diamond-10",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-ladder-11",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-ladder-11",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-layered-12",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-layered-12",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [
+        "small_text"
+      ],
+      "minimum_node_px": 16.36461446503288,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-cycle-13",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-cycle-13",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-disconnected-14",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-disconnected-14",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-parallel-15",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.796407185628745,
+      "duration_frames": 900
+    },
+    {
+      "id": "development-parallel-15",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 900
+    },
+    {
+      "id": "development-fork-16",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-fork-16",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-merge-17",
+      "family": "merge",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.6398295581969,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-merge-17",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-diamond-18",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 34,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-diamond-18",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 30.000000000000004,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-ladder-19",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-ladder-19",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32.0,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-layered-20",
+      "family": "layered",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-layered-20",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-cycle-21",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-cycle-21",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-disconnected-22",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-disconnected-22",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-parallel-23",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-parallel-23",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-fork-24",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-fork-24",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "development-merge-25",
+      "family": "merge",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-merge-25",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-diamond-26",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-diamond-26",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-ladder-27",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-ladder-27",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "development-layered-28",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-layered-28",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [
+        "small_text"
+      ],
+      "minimum_node_px": 9.599579242636748,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-cycle-29",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-cycle-29",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-disconnected-30",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-disconnected-30",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 720
+    },
+    {
+      "id": "development-parallel-31",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-parallel-31",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-fork-32",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-fork-32",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-merge-33",
+      "family": "merge",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-merge-33",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 120
+    },
+    {
+      "id": "development-diamond-34",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-diamond-34",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "development-ladder-35",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-ladder-35",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "development-layered-36",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-layered-36",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-cycle-37",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-cycle-37",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-disconnected-38",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-disconnected-38",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 450
+    },
+    {
+      "id": "development-parallel-39",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "development-parallel-39",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    }
+  ]
+}

@@ -1,0 +1,542 @@
+{
+  "declared": [
+    "source:bili_hot_ai",
+    "source:cg_release_notes",
+    "source:cg_openai_news",
+    "source:cg_pro_tiers",
+    "tag:ai_daily_shared",
+    "github:anthropics/claude-code",
+    "tldr:ai",
+    "rss:https://www.therundown.ai/feed",
+    "hf_models:trending",
+    "tag:ai_radar",
+    "tag:ai_news",
+    "tag:radar_official",
+    "tag:radar_dev"
+  ],
+  "expanded": [
+    "bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI",
+    "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+    "rss:https://openai.com/news/rss.xml",
+    "page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+    "page:https://learn.chatgpt.com/docs/whats-new.md",
+    "page:https://developers.openai.com/api/docs/changelog.md",
+    "rss:https://ratelimitnow.com/whats-new.xml",
+    "rss:https://aicatchup.com/rss.xml",
+    "github:anthropics/claude-code",
+    "tldr:ai",
+    "rss:https://www.therundown.ai/feed",
+    "hf_models:trending",
+    "rss:https://aftergradient.com/rss.xml?kind=news",
+    "rss:https://devbrief.dev/rss.xml",
+    "rss:https://onevium.com/zh/rss.xml",
+    "rss:https://zhangwen.site/rss.xml",
+    "rss:https://www.ifanr.com/feed",
+    "rss:https://techcrunch.com/category/artificial-intelligence/feed/",
+    "rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "rss:https://the-decoder.com/feed/",
+    "rss:https://www.testingcatalog.com/rss/",
+    "rss:https://9to5mac.com/guides/apple-intelligence/feed/",
+    "radar:chatgpt / claude / codex 动态",
+    "radar:Ollama / Claude Code / Codex 重要更新",
+    "radar:AI 编程工具产品动态（每周对比）",
+    "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具"
+  ],
+  "receipt": [
+    {
+      "spec": "page:https://chatgpt.com/pricing",
+      "coverage": "openai_product",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "page:https://openai.com/api/pricing/",
+      "coverage": "openai_product",
+      "error": "页面未成功打开（HTTP 403），请检查来源网址",
+      "delivered": 8
+    },
+    {
+      "spec": "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+      "coverage": "openai_product",
+      "error": "页面未成功打开（HTTP 403），请检查来源网址",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://openai.com/news/rss.xml",
+      "coverage": "openai_product",
+      "error": "",
+      "delivered": 6
+    },
+    {
+      "spec": "rss:https://developers.openai.com/rss.xml",
+      "coverage": "openai_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://learn.chatgpt.com/docs/whats-new.md",
+      "coverage": "openai_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://developers.openai.com/api/docs/changelog.md",
+      "coverage": "openai_product",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "rss:https://ratelimitnow.com/whats-new.xml",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://claude.com/pricing",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "page:https://platform.claude.com/docs/en/about-claude/pricing",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "rss:https://code.claude.com/docs/en/changelog/rss.xml",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "github:anthropics/claude-code",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "catalog:https://www.anthropic.com/news",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://support.claude.com/en/articles/12138966-release-notes",
+      "coverage": "anthropic_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://one.google.com/about/google-ai-plans/",
+      "coverage": "google_product",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "page:https://ai.google.dev/gemini-api/docs/pricing",
+      "coverage": "google_product",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "page:https://gemini.google/release-notes/",
+      "coverage": "google_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://ai.google.dev/gemini-api/docs/changelog",
+      "coverage": "google_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://cursor.com/pricing",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "page:https://cursor.com/changelog",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://github.com/features/copilot/plans",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 8
+    },
+    {
+      "spec": "rss:https://github.blog/changelog/label/copilot/feed/",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "github:openai/codex",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "github:cline/cline",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://docs.devin.ai/desktop/changelog",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 7
+    },
+    {
+      "spec": "catalog:https://cursor.com/blog",
+      "coverage": "coding_products",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://docs.x.ai/developers/models",
+      "coverage": "xai_product",
+      "error": "",
+      "delivered": 7
+    },
+    {
+      "spec": "page:https://docs.x.ai/developers/release-notes",
+      "coverage": "xai_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "catalog:https://x.ai/news",
+      "coverage": "xai_product",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "catalog:https://ai.meta.com/blog/",
+      "coverage": "open_weight_labs",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "catalog:https://mistral.ai/news",
+      "coverage": "open_weight_labs",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://docs.mistral.ai/resources/changelogs",
+      "coverage": "open_weight_labs",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "page:https://api-docs.deepseek.com/updates",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "page:https://api-docs.deepseek.com/quick_start/pricing",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 6
+    },
+    {
+      "spec": "page:https://platform.moonshot.cn/docs/pricing/chat",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 7
+    },
+    {
+      "spec": "page:https://docs.bigmodel.cn/cn/update/new-releases",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "catalog:https://www.minimax.io/news",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "github:QwenLM/qwen-code",
+      "coverage": "china_models",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "rss:https://updates.midjourney.com/rss/",
+      "coverage": "creative_generation",
+      "error": "mismatched tag: line 35, column 6",
+      "delivered": 0
+    },
+    {
+      "spec": "catalog:https://bfl.ai/blog",
+      "coverage": "creative_generation",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://simonwillison.net/atom/everything/",
+      "coverage": "practitioner_commentary",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://www.latent.space/feed",
+      "coverage": "practitioner_commentary",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "rss:https://lastweekin.ai/feed",
+      "coverage": "practitioner_commentary",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://www.bensbites.com/feed",
+      "coverage": "practitioner_commentary",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://www.qbitai.com/feed",
+      "coverage": "practitioner_commentary",
+      "error": "",
+      "delivered": 10
+    },
+    {
+      "spec": "bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI",
+      "coverage": "",
+      "error": "",
+      "delivered": 7
+    },
+    {
+      "spec": "page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+      "coverage": "",
+      "error": "页面未成功打开（HTTP 403），请检查来源网址",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://aicatchup.com/rss.xml",
+      "coverage": "",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "tldr:ai",
+      "coverage": "",
+      "error": "",
+      "delivered": 11
+    },
+    {
+      "spec": "rss:https://www.therundown.ai/feed",
+      "coverage": "",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "hf_models:trending",
+      "coverage": "",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "rss:https://aftergradient.com/rss.xml?kind=news",
+      "coverage": "",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://devbrief.dev/rss.xml",
+      "coverage": "",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://onevium.com/zh/rss.xml",
+      "coverage": "",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://zhangwen.site/rss.xml",
+      "coverage": "",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://www.ifanr.com/feed",
+      "coverage": "",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "rss:https://techcrunch.com/category/artificial-intelligence/feed/",
+      "coverage": "",
+      "error": "",
+      "delivered": 15
+    },
+    {
+      "spec": "rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "coverage": "",
+      "error": "",
+      "delivered": 10
+    },
+    {
+      "spec": "rss:https://the-decoder.com/feed/",
+      "coverage": "",
+      "error": "",
+      "delivered": 6
+    },
+    {
+      "spec": "rss:https://www.testingcatalog.com/rss/",
+      "coverage": "",
+      "error": "",
+      "delivered": 0
+    },
+    {
+      "spec": "rss:https://9to5mac.com/guides/apple-intelligence/feed/",
+      "coverage": "",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "radar:chatgpt / claude / codex 动态",
+      "coverage": "",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "radar:Ollama / Claude Code / Codex 重要更新",
+      "coverage": "",
+      "error": "",
+      "delivered": 1
+    },
+    {
+      "spec": "radar:AI 编程工具产品动态（每周对比）",
+      "coverage": "",
+      "error": "",
+      "delivered": 2
+    },
+    {
+      "spec": "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具",
+      "coverage": "",
+      "error": "",
+      "delivered": 2
+    }
+  ],
+  "items": [
+    {
+      "id": "2026-11-17/F1@rfe1be2f4a73a1e02",
+      "title": "豆包工作台上线：金融投研等21个专业场景预置技能，个人工作台可保存分享"
+    },
+    {
+      "id": "2026-11-17/F2@rfe1be2f4a73a1e02",
+      "title": "加州起诉 OpenAI：AI agent 越出测试环境，另一边出现全自动漏洞利用工具"
+    },
+    {
+      "id": "2026-11-17/F3@rfe1be2f4a73a1e02",
+      "title": "Qwen4-Max 发布：专业任务成本约为前代三分之一，API 价格和 Live Delivery 怎么用"
+    },
+    {
+      "id": "2026-11-17/F4@rfe1be2f4a73a1e02",
+      "title": "Apple 测试 Siri 高级功能日限额：基础免费，图像和自动化重度使用看 iCloud+ 档位"
+    },
+    {
+      "id": "2026-11-17/F5@rfe1be2f4a73a1e02",
+      "title": "Poppy 1.0 发布：AI 助手替你逛店、查余额、订票，先解决它能做什么的授权"
+    },
+    {
+      "id": "2026-11-17/F6@rfe1be2f4a73a1e02",
+      "title": "GitHub Copilot 11月16日弃用三款模型：写死模型名的脚本和管理员策略要查什么"
+    },
+    {
+      "id": "2026-11-17/F7@rfe1be2f4a73a1e02",
+      "title": "中国区 Apple Intelligence 扩到 iPad 和 Mac 测试：写作工具、Genmoji 可用，但没有 Siri AI"
+    },
+    {
+      "id": "2026-11-17/F8@rfe1be2f4a73a1e02",
+      "title": "OpenAI 开放 5 万份科研资助：每份覆盖最多 3 人，11月23日先到先得"
+    },
+    {
+      "id": "2026-11-17/F9@rfe1be2f4a73a1e02",
+      "title": "Anthropic 的 agent 记忆研究：存 413 个文件只拿 1 个徽章，少记策略反而走得更远"
+    },
+    {
+      "id": "2026-11-17/F10@rfe1be2f4a73a1e02",
+      "title": "Embla 1 想在手机上离线跑推理模型：1.77 秒、每次请求免费，但数学是短板"
+    },
+    {
+      "id": "flash-raw:3becc690a6c46079f79891ac",
+      "title": "[Changelog · Nov 16](https://developers.openai.com/api/docs/changelog.md#:~:text=Nov%2016) — published 2026-11-16"
+    },
+    {
+      "id": "flash-raw:e61986747fba32e958b52116",
+      "title": "[2.1.326](https://code.claude.com/docs/en/changelog#2-1-326) — published Mon, 16 Nov 2026 22:18:49 GMT"
+    },
+    {
+      "id": "flash-raw:a9c8700b711920e84d04d45d",
+      "title": "[Devin Apps (3 minute read)](https://devin.ai/blog/devin-apps) — published 2026-11-16"
+    },
+    {
+      "id": "flash-raw:5c760c64238db4f569258c03",
+      "title": "[Apple launches new app to study how people use AI for health](https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/) — published Mon, 16 Nov 2026 01:30:00 +0000"
+    },
+    {
+      "id": "flash-raw:33bc06b8baad44653f1e5812",
+      "title": "[Bulk start AI Scan for repositories](https://github.blog/changelog/2026-11-16-bulk-start-ai-scan-for-repositories) — published 2026-11-17T04:33:33+08:00"
+    },
+    {
+      "id": "flash-raw:8f53da5c9dc8466dd4ce0720",
+      "title": "[Claude now builds interactive websites inside canvas graphics, reviving the Flash era with real HTML](https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html/) — published Mon, 16 Nov 2026 16:10:22 +0000"
+    }
+  ],
+  "outputs": [
+    {
+      "title": "豆包21个工作台，苹果给Siri上日限额",
+      "from": null,
+      "render": "ec87040f39264626899723fd969b73d7"
+    },
+    {
+      "title": "豆包工作台月费68元起，金融投研为什么可能还要再买一份数据",
+      "from": "2026-11-17/F1@rfe1be2f4a73a1e02",
+      "render": "32e2aa9467a847379e4ae0c59aa05a8e"
+    },
+    {
+      "title": "FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP",
+      "from": "2026-11-17/F2@rfe1be2f4a73a1e02",
+      "render": "b12ae81883bf4a90b302c8b7e930dfbd"
+    },
+    {
+      "title": "Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？",
+      "from": "2026-11-17/F3@rfe1be2f4a73a1e02",
+      "render": "fdfaafa43eab42b88e9ddbd33ebabc78"
+    },
+    {
+      "title": "Poppy 支持名单很长，但真能读到文件的只有 16 家",
+      "from": "2026-11-17/F5@rfe1be2f4a73a1e02",
+      "render": "4c338a7420574a268c228878706d2d24"
+    },
+    {
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "from": "2026-11-17/F9@rfe1be2f4a73a1e02",
+      "render": "d657281aef1f46a8a4bc93b5db145b0b"
+    }
+  ],
+  "others": [
+    "ai-developer-roundup-long",
+    "ai-non_tech-one_point-short",
+    "ai-non_tech-quick_take-short",
+    "flash",
+    "point_short"
+  ]
+}

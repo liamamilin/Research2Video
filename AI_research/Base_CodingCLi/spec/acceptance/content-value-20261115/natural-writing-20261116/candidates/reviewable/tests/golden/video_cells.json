@@ -1,0 +1,327 @@
+{
+ "deep_dive": {
+  "budget": 1566,
+  "column": {
+   "allowed_forms": [
+    "auto",
+    "information_motion",
+    "process_diagram"
+   ],
+   "allowed_tones": [],
+   "audience": "开发者",
+   "audit_model": "review",
+   "audit_style_severity": "warn",
+   "audit_timeout_seconds": 0,
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
+   "default_depth": "intermediate",
+   "default_tone": "explainer",
+   "description": "陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+   "key": "deep_dive",
+   "name": "深度解读",
+   "package": {},
+   "packaging": {
+    "accent": "#1f7a4d",
+    "label": "深度解读",
+    "outro": {
+     "lines": [
+      "面向开发者的 深度解读"
+     ],
+     "seconds": 2.5
+    },
+    "preset": "common"
+   },
+   "paragraph_units": [
+    60,
+    140
+   ],
+   "pause_after_plan": false,
+   "production_mode": "standard",
+   "production_recipe": "",
+   "production_settings": {},
+   "recheck": false,
+   "required_roles": [],
+   "research_language": "zh",
+   "research_mode": "job",
+   "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "research_timeout_seconds": 3600,
+   "revise_rounds": 2,
+   "script_style": "陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+   "sections": [
+    4,
+    6
+   ],
+   "source_card": true,
+   "target_minutes": 6,
+   "topic_fields": [
+    "核心角度",
+    "目标受众",
+    "为什么有人在乎"
+   ],
+   "topic_kind": "single",
+   "topic_sources": [
+    "opportunities"
+   ],
+   "video_form": "auto",
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor",
+   "writer": "legacy"
+  },
+  "package_request": {},
+  "packaging_request": {
+   "accent": "#1f7a4d",
+   "label": "深度解读",
+   "outro": {
+    "lines": [
+     "面向开发者的 深度解读"
+    ],
+    "seconds": 2.5
+   },
+   "preset": "common",
+   "recipe": "deep_dive"
+  },
+  "research_job": {
+   "description": "深度解读：示例选题：某模型的限时价格",
+   "enabled": true,
+   "keywords": [
+    "示例选题",
+    "某模型的限时价格"
+   ],
+   "language": "zh",
+   "name": "deep_dive_00000000",
+   "output": "output/video/{datetime}_deep_dive_00000000.md",
+   "prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。\n选题：示例选题：某模型的限时价格\n目标观众：开发者\n选题资料：（未提供）\n来源资料：https://example.com/pricing\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "runtime": {
+    "skip_if_running": true,
+    "timeout_seconds": 3600
+   },
+   "schedule": {
+    "type": "manual"
+   }
+  },
+  "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n- 为什么有人在乎：影响 API 成本\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+ },
+ "flash": {
+  "budget": 326,
+  "column": {
+   "allowed_forms": [
+    "information_motion"
+   ],
+   "allowed_tones": [],
+   "audience": "开发者",
+   "audit_model": "review",
+   "audit_style_severity": "warn",
+   "audit_timeout_seconds": 0,
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
+   "default_depth": "intermediate",
+   "default_tone": "news",
+   "description": "让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+   "key": "flash",
+   "name": "快讯",
+   "package": {},
+   "packaging": {
+    "accent": "#1f7a4d",
+    "intro": {
+     "seconds": 1.5,
+     "subtitle": "{date}"
+    },
+    "label": "快讯",
+    "outro": {
+     "lines": [
+      "面向开发者的 快讯"
+     ],
+     "seconds": 3
+    },
+    "preset": "common"
+   },
+   "paragraph_units": [
+    60,
+    140
+   ],
+   "pause_after_plan": false,
+   "production_mode": "standard",
+   "production_recipe": "",
+   "production_settings": {},
+   "recheck": true,
+   "required_roles": [],
+   "research_language": "zh",
+   "research_mode": "job",
+   "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "research_timeout_seconds": 1500,
+   "revise_rounds": 2,
+   "script_style": "面向本条选题的目标观众，讲清这件新事。",
+   "sections": [
+    4,
+    6
+   ],
+   "source_card": true,
+   "target_minutes": 1.25,
+   "topic_fields": [
+    "核心角度",
+    "目标受众",
+    "条目数",
+    "条目",
+    "对比对象",
+    "对比维度"
+   ],
+   "topic_kind": "single",
+   "topic_sources": [
+    "flash"
+   ],
+   "video_form": "information_motion",
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor",
+   "writer": "legacy"
+  },
+  "package_request": {},
+  "packaging_request": {
+   "accent": "#1f7a4d",
+   "intro": {
+    "seconds": 1.5,
+    "subtitle": "10月13日"
+   },
+   "label": "快讯",
+   "outro": {
+    "lines": [
+     "面向开发者的 快讯"
+    ],
+    "seconds": 3
+   },
+   "preset": "common",
+   "recipe": "flash"
+  },
+  "research_job": {
+   "description": "快讯：示例选题：某模型的限时价格",
+   "enabled": true,
+   "keywords": [
+    "示例选题",
+    "某模型的限时价格"
+   ],
+   "language": "zh",
+   "name": "flash_00000000",
+   "output": "output/video/{datetime}_flash_00000000.md",
+   "prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：示例选题：某模型的限时价格\n目标观众：开发者\n选题资料：（未提供）；输入 2 美元 -> 4 美元\n来源资料：https://example.com/pricing\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "runtime": {
+    "skip_if_running": true,
+    "timeout_seconds": 1500
+   },
+   "schedule": {
+    "type": "manual"
+   }
+  },
+  "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n面向本条选题的目标观众，讲清这件新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n面向本条选题的目标观众，讲清这件新事。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+ },
+ "point_short": {
+  "budget": 391,
+  "column": {
+   "allowed_forms": [
+    "information_motion"
+   ],
+   "allowed_tones": [],
+   "audience": "开发者",
+   "audit_model": "review",
+   "audit_style_severity": "warn",
+   "audit_timeout_seconds": 0,
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
+   "default_depth": "intermediate",
+   "default_tone": "explainer",
+   "description": "带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+   "key": "point_short",
+   "name": "一个知识点",
+   "package": {},
+   "packaging": {
+    "accent": "#1f7a4d",
+    "label": "一个知识点",
+    "outro": {
+     "lines": [
+      "面向开发者的 知识点"
+     ],
+     "seconds": 2.5
+    },
+    "preset": "common"
+   },
+   "paragraph_units": [
+    60,
+    140
+   ],
+   "pause_after_plan": false,
+   "production_mode": "standard",
+   "production_recipe": "",
+   "production_settings": {},
+   "recheck": false,
+   "required_roles": [],
+   "research_language": "zh",
+   "research_mode": "job",
+   "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：围绕观众对这个知识点的疑问寻找解释、例子和有意思的发现。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "research_timeout_seconds": 1800,
+   "revise_rounds": 2,
+   "script_style": "带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+   "sections": [
+    4,
+    6
+   ],
+   "source_card": true,
+   "target_minutes": 1.5,
+   "topic_fields": [
+    "核心角度",
+    "目标受众",
+    "条目数",
+    "条目",
+    "对比对象",
+    "对比维度"
+   ],
+   "topic_kind": "single",
+   "topic_sources": [
+    "flash"
+   ],
+   "video_form": "information_motion",
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor",
+   "writer": "legacy"
+  },
+  "package_request": {},
+  "packaging_request": {
+   "accent": "#1f7a4d",
+   "label": "一个知识点",
+   "outro": {
+    "lines": [
+     "面向开发者的 知识点"
+    ],
+    "seconds": 2.5
+   },
+   "preset": "common",
+   "recipe": "point_short"
+  },
+  "research_job": {
+   "description": "一个知识点：示例选题：某模型的限时价格",
+   "enabled": true,
+   "keywords": [
+    "示例选题",
+    "某模型的限时价格"
+   ],
+   "language": "zh",
+   "name": "point_short_00000000",
+   "output": "output/video/{datetime}_point_short_00000000.md",
+   "prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：围绕观众对这个知识点的疑问寻找解释、例子和有意思的发现。\n选题：示例选题：某模型的限时价格\n目标观众：开发者\n选题资料：（未提供）\n来源资料：https://example.com/pricing\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+   "runtime": {
+    "skip_if_running": true,
+    "timeout_seconds": 1800
+   },
+   "schedule": {
+    "type": "manual"
+   }
+  },
+  "writer_request": "## 目标观众\n开发者\n\n## 这次想做的视频\n带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_request_used": "## 目标观众\n开发者\n\n## 这次想做的视频\n带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。\n\n## 选题\n示例选题：某模型的限时价格\n\n## 选题资料\n\n\n## 素材\n### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n",
+  "writer_system": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。\n找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。\n沿用上游给出的事实、数据和计算。挑出最值得讲的材料，把具体细节和它们之间的关系讲透。\n有自己的解释、判断或推论时，讲清它来自哪些细节及关系。影响理解的前提和条件在相关处交代。\n研究备忘仅作内部取材背景。素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧。\n像对一个懂行的朋友讲：多用短句，可以直接说出有依据的判断。一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；正文不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”），换话题就直接说下一件事；开场自我介绍可以简短说明本期具体问题；上游未提供的事实、数字和亲历不要编造；把“待实测”这类制作备注留在稿外。\n从本期最值得理解的内容进入，切入点由材料和目标观众决定。\n让标题说出本期最有意思的具体事情。标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；标题不写日期，不写栏目名，不用“本期”“今日”开头。结尾落在本期最值得带走的判断、解释或下一步。有一个确实值得观众用自己的经历回答的问题，再邀请他们聊；避免把正文讲清的取舍硬凑成站队。\n接口输出 JSON：\n{\"title\":\"视频标题\",\"sections\":[{\"title\":\"小节标题\",\"paragraphs\":[{\"text\":\"口播正文\",\"citations\":[\"素材链接\"]}]}]}"
+ }
+}

@@ -3,3 +3,8 @@ name: T09 · 产品动态与热点 · 每条一期
 job: chatgpt_acquisition/t09_updates
 recipe: chatgpt_acquisition
 auto: 1
+# 选题热度（core/video/heat.py，11-10）：和 AI 快讯一样，B站近 7 天同产品热度不到 2 万的产品动态不做；
+# 最热且 ≥ 50 万的一条加做算账/上手。
+selection:
+  heat_min: 20000
+  angle_min: 500000

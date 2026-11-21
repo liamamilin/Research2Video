@@ -26,6 +26,7 @@ class MusicJobs:
     def connect(self):
         conn = sqlite3.connect(self.db, timeout=15, isolation_level=None)
         conn.row_factory = sqlite3.Row
+        conn.execute('PRAGMA busy_timeout=15000')
         try:
             yield conn
         finally:
@@ -36,6 +37,7 @@ class MusicJobs:
             raise GenerationError('MUSIC_WORKSPACE_INVALID', '音乐任务目录不安全')
         self.root.mkdir(parents=True, exist_ok=True)
         with self.connect() as conn:
+            conn.execute('PRAGMA journal_mode=WAL')
             conn.execute('''CREATE TABLE IF NOT EXISTS music_jobs (
                 id TEXT PRIMARY KEY, status TEXT NOT NULL, stage TEXT NOT NULL,
                 request_json TEXT NOT NULL, resolved_json TEXT NOT NULL,
@@ -88,6 +90,8 @@ class MusicJobs:
 
     def claim(self) -> dict | None:
         with self.connect() as conn:
+            if conn.execute("SELECT 1 FROM music_jobs WHERE status='QUEUED' LIMIT 1").fetchone() is None:
+                return None
             conn.execute('BEGIN IMMEDIATE')
             row = conn.execute("SELECT * FROM music_jobs WHERE status='QUEUED' ORDER BY created_at LIMIT 1").fetchone()
             if not row:
@@ -118,6 +122,21 @@ class MusicJobs:
                          ('CANCELLED' if status=='QUEUED' else 'RUNNING','CANCELLED' if status=='QUEUED' else 'CANCELLING',now(),identity))
             conn.commit()
         return self.get(identity)
+
+    def fail(self, identity: str, code: str, message: str) -> None:
+        """Finish atomically; an already accepted cancellation takes precedence."""
+        with self.connect() as conn:
+            conn.execute('BEGIN IMMEDIATE')
+            row = conn.execute("SELECT cancel_requested FROM music_jobs WHERE id=? AND status='RUNNING'",
+                               (identity,)).fetchone()
+            if row is None:
+                return
+            cancelled = bool(row['cancel_requested'])
+            conn.execute("""UPDATE music_jobs SET status=?,stage=CASE WHEN ? THEN 'CANCELLED' ELSE stage END,
+                runner_pid=NULL,error_code=?,error_message=?,updated_at=? WHERE id=?""",
+                ('CANCELLED' if cancelled else 'FAILED', cancelled, None if cancelled else code,
+                 None if cancelled else message, now(), identity))
+            conn.commit()
 
     def start_publish(self, identity: str) -> bool:
         """Serialize the cancellation decision with the final asset commit boundary."""

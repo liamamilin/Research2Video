@@ -19,23 +19,25 @@ def overview(scripts: list[dict]) -> dict[str, list[dict]]:
     ids = {s["id"] for s in scripts}
     if not ids:
         return {}
+    placeholders = ",".join("?" for _ in ids)
+    parameters = tuple(ids)
     profiles = accounts()
     with store.connect() as conn:
-        publications = [dict(r) for r in conn.execute("SELECT * FROM publications ORDER BY created_at DESC") if r["script_id"] in ids]
-        drafts = [dict(r) for r in conn.execute("SELECT script_id,version,platform,account_uid,render_id,updated_at FROM distribution_drafts") if r["script_id"] in ids]
+        publications = [dict(r) for r in conn.execute(f"SELECT * FROM publications WHERE script_id IN ({placeholders}) ORDER BY created_at DESC", parameters)]
+        drafts = [dict(r) for r in conn.execute(f"SELECT script_id,version,platform,account_uid,render_id,updated_at FROM distribution_drafts WHERE script_id IN ({placeholders})", parameters)]
     tasks = []
     with platform_manager.store().connect() as conn:
-        for r in conn.execute("SELECT id,uid,script_id,version,render_id,status,error,bvid,updated_at FROM uploads ORDER BY created_at DESC"):
+        for r in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,bvid,updated_at FROM uploads WHERE script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
             if r["script_id"] in ids:
                 tasks.append({**dict(r), "platform": "bilibili", "work_id": r["bvid"]})
     with douyin.store().connect() as conn:
-        for r in conn.execute("SELECT id,uid,script_id,version,render_id,status,error,work_id,phase,updated_at FROM jobs WHERE kind='UPLOAD' ORDER BY created_at DESC"):
+        for r in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,work_id,phase,updated_at FROM jobs WHERE kind='UPLOAD' AND script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
             if r["script_id"] in ids:
                 tasks.append({**dict(r), "platform": "douyin"})
     for platform in SOCIAL_PLATFORMS:
-        for task in social_publishing.store(platform).list(kind="UPLOAD"):
-            if task['script_id'] in ids:
-                tasks.append({**task,"platform":platform})
+        with social_publishing.store(platform).connect() as conn:
+            for task in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,work_id,updated_at FROM jobs WHERE kind='UPLOAD' AND script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
+                tasks.append({**dict(task), "platform": platform})
     targets = {}
 
     def target(script_id, version, platform, owner):
@@ -50,7 +52,7 @@ def overview(scripts: list[dict]) -> dict[str, list[dict]]:
         return targets[key]
 
     with store.connect() as conn:
-        versions = {(r["script_id"], r["version"]) for r in conn.execute("SELECT DISTINCT script_id,version FROM renders") if r["script_id"] in ids}
+        versions = {(r["script_id"], r["version"]) for r in conn.execute(f"SELECT DISTINCT script_id,version FROM renders WHERE script_id IN ({placeholders})", parameters)}
     versions.update((s["id"], s["current_version"]) for s in scripts)
     for script_id, version in versions:
         for platform, profile in profiles.items():

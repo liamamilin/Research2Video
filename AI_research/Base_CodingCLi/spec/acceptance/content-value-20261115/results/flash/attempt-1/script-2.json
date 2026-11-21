@@ -1,0 +1,214 @@
+{
+  "title": "DeepSeek把语音、搜索、文件拆成API：小团队先算哪几项",
+  "sections": [
+    {
+      "title": "先别急着换服务，先看它拆开了什么",
+      "paragraphs": [
+        {
+          "text": "DeepSeek 这波最值得小团队注意的，不是又多了一个模型，而是语音、搜索/抓取、文件解析/OCR 被拆成可以按项调用的 API。大家好，我是洛洛，今天我们聊聊：如果你在做语音助手、会议记录、文档处理或 RAG，这几项到底怎么计价，先试哪一段，哪些价格又不能当成长期价。普通用户可能只感知到功能变多，真正要算账的是接 API 的小团队和独立开发者。公开信息里有一句很关键：官方 App 的功能可以自由组合调用；但官方公告和接口文档的细节还要再确认，尤其是限时价截止时间、稳定性和并发限制。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "过去小团队常见的做法是语音、OCR、搜索分别找不同供应商，或者买一个打包服务；现在至少从价格页看，ASR、TTS、Search/Fetch、文件解析/OCR 是分项列价的。原来的感觉是这些能力只能整包买，现在可以拆开买；但拆开不等于便宜，每一项都要单独算量、单独做限流和失败处理，成本不再是一口价。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "三项价格，先按单位拆开",
+      "paragraphs": [
+        {
+          "text": "语音先看两个单位：TTS 按每万字符，列表价 0.45 美元，限时五折 0.225 美元；ASR 按每小时音频，列表价 0.116 美元，限时五折 0.058 美元。这里最容易误判的是，ASR 的“每小时”是音频时长，不是你会议开了多久就花多少文本 token；TTS 的“每万字符”是你要播出来的字数，不是输入给模型的字数。做会议记录，先把这两笔分开。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "搜索和抓取都是每 1000 次 0.75 美元，直接调 Search/Fetch API 算，模型通过 web tools 用也算；文件解析/OCR 是每 1000 页 0.225 美元。也就是说，RAG 里“找资料”和“读文件”是两种账：搜索按次数，文件按页数。你做文档问答，别只盯模型 token，前面 OCR 和后面抓取都可能单独冒出来。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "模型侧还有一层峰谷价：Flash 和 Pro 都支持工具调用、Responses API、Anthropic API，上下文 1M；Flash 支持视觉，Pro 不支持视觉。高峰是 UTC 周一至周五 01:00–04:00、06:00–10:00，非高峰价是高峰价一半。这个结构对小团队的意义是：能挪到非高峰的批处理，和必须实时响应的语音入口，要分开算。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "会议记录先试 ASR，不要一上来全接",
+      "paragraphs": [
+        {
+          "text": "如果我现在带一个小团队做会议记录，我会先把链路拆成四段：录音转写走 ASR；转写文本做总结；需要播报再走 TTS；只有涉及实时信息才接搜索/抓取。第一段先试 ASR，因为它是会议记录最刚性的成本，也是最容易用量估算的一段：一小时音频的列表价 0.116 美元，限时价 0.058 美元；你先拿真实会议时长乘一下，就知道试点预算大概在哪。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "总结这一段用 token 计价，Flash 和 Pro 的输入输出价不同，而且高峰和非高峰差一倍；所以会议记录不要只报“语音转写多少钱”，要把总结模型、输出长度、是否峰值调用一起算。TTS 我建议放最后，除非你的产品真的要语音播报；它按每万字符 0.45 美元列表价、限时 0.225 美元，播报稿越长越要单独控制。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "搜索/抓取和 OCR 不是会议记录的默认项。会议里如果要查实时资料，才接搜索；如果有大量文档要读，才接文件解析/OCR。搜索和抓取每 1000 次 0.75 美元，OCR 每 1000 页 0.225 美元，量小的时候不吓人，量一上来就是独立成本项。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "哪些价格不能当长期价",
+      "paragraphs": [
+        {
+          "text": "最不能直接写进长期报价的，是语音的 50% 限时价。TTS 0.225 美元、ASR 0.058 美元是限时五折，列表价是 0.45 和 0.116；现在还没看到明确的截止时间，所以做预算时我建议至少按列表价做底线，限时价只用于试点期或者促销测算。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "搜索/抓取和 OCR 现在页面上没有标限时折扣，但也不等于长期合同价；模型 token 的峰谷价是结构性价格，适合做调度策略，不适合假设永远不变。还有一点，模型侧能看到并发限制：Flash 2500、Pro 500；语音和 OCR 的限流细节还没看到，这会影响你能不能扛住高峰，而不是只看单价。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的选型顺序",
+      "paragraphs": [
+        {
+          "text": "所以小团队先算三项：第一，ASR 的真实音频小时数，这是会议记录和语音入口的底座；第二，总结模型的 token 量和峰值/非高峰调度；第三，OCR 的页数和搜索/抓取次数。TTS 先作为可选项，等产品确认需要播报再加。这样拆的好处是，你能只替换最贵或最不稳的那一段，而不是整包换供应商。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但我不建议现在就把“限时价”当成替换第三方服务的理由。更稳的做法是：先用 ASR 做一个小流量试点，按列表价算长期成本，按限时价算试点预算；同时确认官方接口文档、截止时间、稳定性和并发限制。等这些清楚，再决定是自建语音入口，还是继续用第三方打包服务。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我是洛洛，我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1455,
+    "estimated_seconds": 322,
+    "segments": 53,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 4.297,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先别急着换服务，先看它拆开了什么",
+        "spoken_length": 311,
+        "budget": 66
+      },
+      {
+        "title": "三项价格，先按单位拆开",
+        "spoken_length": 350,
+        "budget": 65
+      },
+      {
+        "title": "会议记录先试 ASR，不要一上来全接",
+        "spoken_length": 354,
+        "budget": 65
+      },
+      {
+        "title": "哪些价格不能当长期价",
+        "spoken_length": 210,
+        "budget": 65
+      },
+      {
+        "title": "我的选型顺序",
+        "spoken_length": 230,
+        "budget": 65
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3002,
+      "completion_tokens": 6767,
+      "total_tokens": 9769,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4606,
+      "cost_usd": 0.0045105,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 54.302,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+    "author_system_prompt_sha256": "fa950d5021002ca429726396d47adbff0adcc3840053250f17bf7f3609d51679",
+    "trusted_urls": 19
+  }
+}

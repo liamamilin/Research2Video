@@ -1,0 +1,22 @@
+[
+  {
+    "file": "core/video/persona.py",
+    "sha256": "a80ea835315aef6fd797e6ff4cc83238c33f0dd89d3de9d53f2df02365204f8e"
+  },
+  {
+    "file": "core/video/writer.py",
+    "sha256": "73b722819f8e5192cc0fd75b53a862f954e45ae13704fa98f6581001c2ff8693"
+  },
+  {
+    "file": "core/video/manuscript_workflow.py",
+    "sha256": "956400e2e8d5fa79afd478501c1312fcc147507af7b55efcaaf63b7af77b5b36"
+  },
+  {
+    "file": "core/video/angles.py",
+    "sha256": "8d137a0c2029bcfa7faf6361f02720e058157c1305ca7e88056f7a31b0f0dfd9"
+  },
+  {
+    "file": "config/content_columns/chatgpt_t05_comparison.yaml",
+    "sha256": "c5710a98c9995a4489c01e31962d57a596110dbde00581b3ae9a36b8092cac7d"
+  }
+]

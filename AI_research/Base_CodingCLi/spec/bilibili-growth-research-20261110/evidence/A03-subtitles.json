@@ -1,0 +1,719 @@
+{
+  "bvid": "BV1si89zpE2Z",
+  "observed_at": "2026-11-10T08:58:57.558137+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 5.24,
+      "to": 7.28,
+      "sid": 1,
+      "location": 2,
+      "content": "根据多项统计资料显示",
+      "music": 0.0
+    },
+    {
+      "from": 7.28,
+      "to": 10.27,
+      "sid": 2,
+      "location": 2,
+      "content": "手机的更换周期大约是40个月左右",
+      "music": 0.0
+    },
+    {
+      "from": 10.27,
+      "to": 12.63,
+      "sid": 3,
+      "location": 2,
+      "content": "最近这一周期有了明显延长",
+      "music": 0.0
+    },
+    {
+      "from": 12.63,
+      "to": 13.87,
+      "sid": 4,
+      "location": 2,
+      "content": "在2020年",
+      "music": 0.0
+    },
+    {
+      "from": 13.87,
+      "to": 16.98,
+      "sid": 5,
+      "location": 2,
+      "content": "大部分人是每30个月就更换一次手机",
+      "music": 0.0
+    },
+    {
+      "from": 16.98,
+      "to": 18.74,
+      "sid": 6,
+      "location": 2,
+      "content": "如果你经常更换手机",
+      "music": 0.0
+    },
+    {
+      "from": 18.74,
+      "to": 21.57,
+      "sid": 7,
+      "location": 2,
+      "content": "可能今天的主题并不会对你产生兴趣",
+      "music": 0.0
+    },
+    {
+      "from": 21.57,
+      "to": 24.19,
+      "sid": 8,
+      "location": 2,
+      "content": "但如果你长时间使用同一部手机",
+      "music": 0.0
+    },
+    {
+      "from": 24.19,
+      "to": 27.21,
+      "sid": 9,
+      "location": 2,
+      "content": "你肯定会发现和刚买来使用的时候相比",
+      "music": 0.0
+    },
+    {
+      "from": 27.21,
+      "to": 29.6,
+      "sid": 10,
+      "location": 2,
+      "content": "电池明显比以前更费电了",
+      "music": 0.0
+    },
+    {
+      "from": 29.6,
+      "to": 31.14,
+      "sid": 11,
+      "location": 2,
+      "content": "手机内置的电池",
+      "music": 0.0
+    },
+    {
+      "from": 31.14,
+      "to": 34.72,
+      "sid": 12,
+      "location": 2,
+      "content": "大多数是锂离子电池或者锂离子聚合物电池",
+      "music": 0.0
+    },
+    {
+      "from": 34.72,
+      "to": 37.95,
+      "sid": 13,
+      "location": 2,
+      "content": "这些电池通常充电约500~1000次后",
+      "music": 0.0
+    },
+    {
+      "from": 37.95,
+      "to": 41.15,
+      "sid": 14,
+      "location": 2,
+      "content": "电池容量会减少到原来的70%左右",
+      "music": 0.0
+    },
+    {
+      "from": 41.15,
+      "to": 42.77,
+      "sid": 15,
+      "location": 2,
+      "content": "所以使用约两年后",
+      "music": 0.0
+    },
+    {
+      "from": 42.77,
+      "to": 45.62,
+      "sid": 16,
+      "location": 2,
+      "content": "满电状态下的使用时间会逐渐变短",
+      "music": 0.0
+    },
+    {
+      "from": 45.62,
+      "to": 48.08,
+      "sid": 17,
+      "location": 2,
+      "content": "可是为什么会出现这种现象呢",
+      "music": 0.0
+    },
+    {
+      "from": 48.08,
+      "to": 49.48,
+      "sid": 18,
+      "location": 2,
+      "content": "要解决这个问题",
+      "music": 0.0
+    },
+    {
+      "from": 49.48,
+      "to": 51.44,
+      "sid": 19,
+      "location": 2,
+      "content": "需要了解电池的工作原理",
+      "music": 0.0
+    },
+    {
+      "from": 51.44,
+      "to": 55.629,
+      "sid": 20,
+      "location": 2,
+      "content": "我们平时常见的圆柱形电池由正极和负极组成",
+      "music": 0.0
+    },
+    {
+      "from": 55.629,
+      "to": 58.469,
+      "sid": 21,
+      "location": 2,
+      "content": "正极的电位也就是电气位置能较高",
+      "music": 0.0
+    },
+    {
+      "from": 58.469,
+      "to": 59.829,
+      "sid": 22,
+      "location": 2,
+      "content": "负极的电位较低",
+      "music": 0.0
+    },
+    {
+      "from": 59.829,
+      "to": 62.1,
+      "sid": 23,
+      "location": 2,
+      "content": "因此两极之间会产生电位差",
+      "music": 0.0
+    },
+    {
+      "from": 62.1,
+      "to": 63.9,
+      "sid": 24,
+      "location": 2,
+      "content": "这个差就是我们说的电压",
+      "music": 0.0
+    },
+    {
+      "from": 63.9,
+      "to": 65.7,
+      "sid": 25,
+      "location": 2,
+      "content": "为了帮助理解这个概念",
+      "music": 0.0
+    },
+    {
+      "from": 65.7,
+      "to": 66.96,
+      "sid": 26,
+      "location": 2,
+      "content": "我们以水车为例",
+      "music": 0.0
+    },
+    {
+      "from": 66.96,
+      "to": 68.68,
+      "sid": 27,
+      "location": 2,
+      "content": "用水泵把水抽上去",
+      "music": 0.0
+    },
+    {
+      "from": 68.68,
+      "to": 70.64,
+      "sid": 28,
+      "location": 2,
+      "content": "利用重力产生的重力势能",
+      "music": 0.0
+    },
+    {
+      "from": 70.64,
+      "to": 73.27,
+      "sid": 29,
+      "location": 2,
+      "content": "通过水下落的力量带动水车转动",
+      "music": 0.0
+    },
+    {
+      "from": 73.27,
+      "to": 75.19,
+      "sid": 30,
+      "location": 2,
+      "content": "同样的要让电流流动",
+      "music": 0.0
+    },
+    {
+      "from": 75.19,
+      "to": 77.84,
+      "sid": 31,
+      "location": 2,
+      "content": "正极和负极之间必须存在电位差",
+      "music": 0.0
+    },
+    {
+      "from": 77.84,
+      "to": 80.92,
+      "sid": 32,
+      "location": 2,
+      "content": "也就是正极和负极的电器位置能存在差异",
+      "music": 0.0
+    },
+    {
+      "from": 80.92,
+      "to": 83.65,
+      "sid": 33,
+      "location": 2,
+      "content": "而使电流流动的这个差异就是电压",
+      "music": 0.0
+    },
+    {
+      "from": 83.65,
+      "to": 85.01,
+      "sid": 34,
+      "location": 2,
+      "content": "手机内置的电池",
+      "music": 0.0
+    },
+    {
+      "from": 85.01,
+      "to": 88.44,
+      "sid": 35,
+      "location": 2,
+      "content": "也是通过复杂的化学反应在内部产生电位差",
+      "music": 0.0
+    },
+    {
+      "from": 88.44,
+      "to": 90.14,
+      "sid": 36,
+      "location": 2,
+      "content": "这个电位差形成电压",
+      "music": 0.0
+    },
+    {
+      "from": 90.14,
+      "to": 93.63,
+      "sid": 37,
+      "location": 2,
+      "content": "通过锂离子在正极和负极之间移动来工作",
+      "music": 0.0
+    },
+    {
+      "from": 93.63,
+      "to": 97.03,
+      "sid": 38,
+      "location": 2,
+      "content": "这里的锂离子电池和锂离子聚合物电池的区别",
+      "music": 0.0
+    },
+    {
+      "from": 97.03,
+      "to": 98.94,
+      "sid": 39,
+      "location": 2,
+      "content": "在于锂离子移动的通道",
+      "music": 0.0
+    },
+    {
+      "from": 98.94,
+      "to": 100.32,
+      "sid": 40,
+      "location": 2,
+      "content": "电解质的种类不同",
+      "music": 0.0
+    },
+    {
+      "from": 100.32,
+      "to": 102.54,
+      "sid": 41,
+      "location": 2,
+      "content": "锂离子电池使用液态电解质",
+      "music": 0.0
+    },
+    {
+      "from": 102.54,
+      "to": 104.16,
+      "sid": 42,
+      "location": 2,
+      "content": "而锂离子聚合物电池",
+      "music": 0.0
+    },
+    {
+      "from": 104.16,
+      "to": 106.75,
+      "sid": 43,
+      "location": 2,
+      "content": "则使用凝胶状的聚合物电解质",
+      "music": 0.0
+    },
+    {
+      "from": 106.75,
+      "to": 109.57,
+      "sid": 44,
+      "location": 2,
+      "content": "这种原理和世界上最早的电池一样",
+      "music": 0.0
+    },
+    {
+      "from": 109.57,
+      "to": 112.45,
+      "sid": 45,
+      "location": 2,
+      "content": "在稀硫酸电解液中插入铜板和锌板",
+      "music": 0.0
+    },
+    {
+      "from": 112.45,
+      "to": 114.35,
+      "sid": 46,
+      "location": 2,
+      "content": "电位较高的铜板为正极",
+      "music": 0.0
+    },
+    {
+      "from": 114.35,
+      "to": 116.36,
+      "sid": 47,
+      "location": 2,
+      "content": "电位较低的锌板为负极",
+      "music": 0.0
+    },
+    {
+      "from": 116.36,
+      "to": 118.38,
+      "sid": 48,
+      "location": 2,
+      "content": "然后将两者用导线连接",
+      "music": 0.0
+    },
+    {
+      "from": 118.38,
+      "to": 120.42,
+      "sid": 49,
+      "location": 2,
+      "content": "负电荷从新板流向铜板",
+      "music": 0.0
+    },
+    {
+      "from": 120.42,
+      "to": 123.84,
+      "sid": 50,
+      "location": 2,
+      "content": "电流则从铜板流向新版电灯因此亮起",
+      "music": 0.0
+    },
+    {
+      "from": 123.84,
+      "to": 125.12,
+      "sid": 51,
+      "location": 2,
+      "content": "随着时间推移",
+      "music": 0.0
+    },
+    {
+      "from": 125.12,
+      "to": 127.12,
+      "sid": 52,
+      "location": 2,
+      "content": "电化学反应会产生氢离子",
+      "music": 0.0
+    },
+    {
+      "from": 127.12,
+      "to": 128.68,
+      "sid": 53,
+      "location": 2,
+      "content": "与铜板接触的电解液",
+      "music": 0.0
+    },
+    {
+      "from": 128.68,
+      "to": 131.49,
+      "sid": 54,
+      "location": 2,
+      "content": "中的氢离子与抵达铜板的负电荷相遇",
+      "music": 0.0
+    },
+    {
+      "from": 131.49,
+      "to": 133.15,
+      "sid": 55,
+      "location": 2,
+      "content": "在表面生成氢气",
+      "music": 0.0
+    },
+    {
+      "from": 133.15,
+      "to": 134.93,
+      "sid": 56,
+      "location": 2,
+      "content": "在这个过程中会产生",
+      "music": 0.0
+    },
+    {
+      "from": 134.93,
+      "to": 137.7,
+      "sid": 57,
+      "location": 2,
+      "content": "以小气泡形式吸附在正极表面的现象",
+      "music": 0.0
+    },
+    {
+      "from": 137.7,
+      "to": 140.62,
+      "sid": 58,
+      "location": 2,
+      "content": "这会阻碍电极与电解液之间的化学反应",
+      "music": 0.0
+    },
+    {
+      "from": 140.62,
+      "to": 142.26,
+      "sid": 59,
+      "location": 2,
+      "content": "从而妨碍电流的流动",
+      "music": 0.0
+    },
+    {
+      "from": 142.26,
+      "to": 144.36,
+      "sid": 60,
+      "location": 2,
+      "content": "这种现象称为极化现象",
+      "music": 0.0
+    },
+    {
+      "from": 144.36,
+      "to": 145.48,
+      "sid": 61,
+      "location": 2,
+      "content": "同样的原理",
+      "music": 0.0
+    },
+    {
+      "from": 145.48,
+      "to": 146.58,
+      "sid": 62,
+      "location": 2,
+      "content": "使用手机时",
+      "music": 0.0
+    },
+    {
+      "from": 146.58,
+      "to": 149.16,
+      "sid": 63,
+      "location": 2,
+      "content": "负极的锂离子向正极移动时放电",
+      "music": 0.0
+    },
+    {
+      "from": 149.16,
+      "to": 152.209,
+      "sid": 64,
+      "location": 2,
+      "content": "充电时锂离子则从正极移动回负极",
+      "music": 0.0
+    },
+    {
+      "from": 152.209,
+      "to": 153.009,
+      "sid": 65,
+      "location": 2,
+      "content": "反复充",
+      "music": 0.0
+    },
+    {
+      "from": 153.009,
+      "to": 153.609,
+      "sid": 66,
+      "location": 2,
+      "content": "放电后",
+      "music": 0.0
+    },
+    {
+      "from": 153.609,
+      "to": 154.809,
+      "sid": 67,
+      "location": 2,
+      "content": "由于极化现象",
+      "music": 0.0
+    },
+    {
+      "from": 154.809,
+      "to": 158.149,
+      "sid": 68,
+      "location": 2,
+      "content": "锂离子从正极回到负极的能力逐渐下降",
+      "music": 0.0
+    },
+    {
+      "from": 158.149,
+      "to": 159.369,
+      "sid": 69,
+      "location": 2,
+      "content": "即使充满电",
+      "music": 0.0
+    },
+    {
+      "from": 159.369,
+      "to": 161.469,
+      "sid": 70,
+      "location": 2,
+      "content": "可用的电能量也会逐渐减少",
+      "music": 0.0
+    },
+    {
+      "from": 161.469,
+      "to": 163.329,
+      "sid": 71,
+      "location": 2,
+      "content": "导致电池耗电更快",
+      "music": 0.0
+    },
+    {
+      "from": 163.329,
+      "to": 165.949,
+      "sid": 72,
+      "location": 2,
+      "content": "当然极化现象并不是唯一原因",
+      "music": 0.0
+    },
+    {
+      "from": 165.949,
+      "to": 169.029,
+      "sid": 73,
+      "location": 2,
+      "content": "电池内部参与电极反应的活性物质会分解",
+      "music": 0.0
+    },
+    {
+      "from": 169.029,
+      "to": 170.489,
+      "sid": 74,
+      "location": 2,
+      "content": "还有在首次充电时",
+      "music": 0.0
+    },
+    {
+      "from": 170.489,
+      "to": 172.069,
+      "sid": 75,
+      "location": 2,
+      "content": "负极表面形成的薄膜",
+      "music": 0.0
+    },
+    {
+      "from": 172.069,
+      "to": 175.22,
+      "sid": 76,
+      "location": 2,
+      "content": "SEI层不均匀形成等多种化学变化",
+      "music": 0.0
+    },
+    {
+      "from": 175.22,
+      "to": 178.709,
+      "sid": 77,
+      "location": 2,
+      "content": "都会导致电池性能随着使用时间的增长而下降",
+      "music": 0.0
+    },
+    {
+      "from": 178.709,
+      "to": 182.349,
+      "sid": 78,
+      "location": 2,
+      "content": "还有我们了解一下手机持续使用时发热的原因",
+      "music": 0.0
+    },
+    {
+      "from": 182.349,
+      "to": 183.869,
+      "sid": 79,
+      "location": 2,
+      "content": "电流是带有负电荷的",
+      "music": 0.0
+    },
+    {
+      "from": 183.869,
+      "to": 186.65,
+      "sid": 80,
+      "location": 2,
+      "content": "自由电子沿一个方向流动形成的现象",
+      "music": 0.0
+    },
+    {
+      "from": 186.65,
+      "to": 189.53,
+      "sid": 81,
+      "location": 2,
+      "content": "这些电子在导体内部的原子之间移动",
+      "music": 0.0
+    },
+    {
+      "from": 189.53,
+      "to": 190.63,
+      "sid": 82,
+      "location": 2,
+      "content": "在这个过程中",
+      "music": 0.0
+    },
+    {
+      "from": 190.63,
+      "to": 193.41,
+      "sid": 83,
+      "location": 2,
+      "content": "电子与原子或离子碰撞产生电阻",
+      "music": 0.0
+    },
+    {
+      "from": 193.41,
+      "to": 195.57,
+      "sid": 84,
+      "location": 2,
+      "content": "以摩擦起热的形式表现出来",
+      "music": 0.0
+    },
+    {
+      "from": 195.57,
+      "to": 197.33,
+      "sid": 85,
+      "location": 2,
+      "content": "电子设备持续使用时",
+      "music": 0.0
+    },
+    {
+      "from": 197.33,
+      "to": 198.55,
+      "sid": 86,
+      "location": 2,
+      "content": "碰撞不断积累",
+      "music": 0.0
+    },
+    {
+      "from": 198.55,
+      "to": 200.03,
+      "sid": 87,
+      "location": 2,
+      "content": "温度就会逐渐升高",
+      "music": 0.0
+    },
+    {
+      "from": 200.03,
+      "to": 202.66,
+      "sid": 88,
+      "location": 2,
+      "content": "这是大多数电子产品共有的现象",
+      "music": 0.0
+    },
+    {
+      "from": 202.66,
+      "to": 205.46,
+      "sid": 89,
+      "location": 2,
+      "content": "那么今天的科普对你有帮助吗",
+      "music": 0.0
+    }
+  ]
+}

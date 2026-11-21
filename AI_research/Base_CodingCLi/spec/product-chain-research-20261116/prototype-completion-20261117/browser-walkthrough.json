@@ -1,0 +1,911 @@
+[
+  {
+    "label": "A01 真实 Flash 总览",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 13 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 另有 5 个手动生产配置引用本研究。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A02 双时间与独立计划",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每天 07:30、18:30 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/17 18:30\n      - term: 采集范围\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A03 来源加入路径",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\" [pressed]\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"来源与共享研究\" [level=2]\n      - button \"修改来源与研究\"\n      - generic: 修改研究目标或来源会影响下一批研究，包括另外 5 个手动生产配置以后使用的报告。 已有报告与作品保持原快照。\n      - term: 内容目标\n      - definition: AI 产品变化、使用方法与对用户的实际影响\n      - term: 目标观众\n      - definition: 开发者\n      - term: 来源组合\n      - definition: 13 条声明 ＋ 主题覆盖 ＋ 自动发现 ＋ 历史积累\n      - term: 本链排除\n      - definition: 无\n      - term: 选题与补材\n      - definition: Flash 受众与选题策略 · 按问题补材启用\n      - generic \"查看来源声明与加入路径\" [active]\n      - generic: source:bili_hot_ai\n      - generic: 已声明\n      - generic: source:cg_release_notes\n      - generic: 已声明\n      - generic: source:cg_openai_news\n      - generic: 已声明\n      - generic: source:cg_pro_tiers\n      - generic: 已声明\n      - generic: tag:ai_daily_shared\n      - generic: 已声明\n      - generic: github:anthropics/claude-code\n      - generic: 已声明\n      - generic: tldr:ai\n      - generic: 已声明\n      - generic: rss:https://www.therundown.ai/feed\n      - generic: 已声明\n      - generic: hf_models:trending\n      - generic: 已声明\n      - generic: tag:ai_radar\n      - generic: 已声明\n      - generic: tag:ai_news\n      - generic: 已声明\n      - generic: tag:radar_official\n      - generic: 已声明\n      - generic: tag:radar_dev\n      - generic: 已声明\n      - generic: OpenAI RSS：手动声明 ＋ OpenAI 产品主题覆盖。移除单条声明后，仍可能由主题覆盖带入。\n      - generic \"展开实际 26 个声明来源规格\"\n      - generic \"共享服务与其他使用者\"\n      - generic \"已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "BUG01 编辑面板被状态同步关闭",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\" [pressed]\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"来源与共享研究\" [level=2]\n      - button \"修改来源与研究\"\n      - generic: 修改研究目标或来源会影响下一批研究，包括另外 5 个手动生产配置以后使用的报告。 已有报告与作品保持原快照。\n      - term: 内容目标\n      - definition: AI 产品变化、使用方法与对用户的实际影响\n      - term: 目标观众\n      - definition: 开发者\n      - term: 来源组合\n      - definition: 13 条声明 ＋ 主题覆盖 ＋ 自动发现 ＋ 历史积累\n      - term: 本链排除\n      - definition: 无\n      - term: 选题与补材\n      - definition: Flash 受众与选题策略 · 按问题补材启用\n      - generic \"查看来源声明与加入路径\"\n      - generic \"展开实际 26 个声明来源规格\"\n      - generic \"共享服务与其他使用者\"\n      - generic \"已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "FIX01 刷新恢复原型",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"修改来源与研究\":\n        - heading \"修改来源与研究\" [level=2]\n        - button \"关闭\"\n        - text: 内容目标\n        - textbox \"内容目标\": AI 产品变化、使用方法与对用户的实际影响\n        - text: 目标观众\n        - textbox \"目标观众\": 开发者\n        - text: 选题策略\n        - textbox \"选题策略\": Flash 受众与选题策略\n        - checkbox \"根据选题问题自动补充材料\" [checked]\n        - text: 根据选题问题自动补充材料\n        - strong: bili_hot_ai\n        - generic: source:bili_hot_ai\n        - button \"移除声明\"\n        - strong: cg_release_notes\n        - generic: source:cg_release_notes\n        - button \"移除声明\"\n        - strong: OpenAI 新闻 RSS\n        - generic: source:cg_openai_news\n        - button \"移除声明\"\n        - strong: cg_pro_tiers\n        - generic: source:cg_pro_tiers\n        - button \"移除声明\"\n        - strong: ai_daily_shared\n        - generic: tag:ai_daily_shared\n        - button \"移除声明\"\n        - strong: anthropics/claude-code\n        - generic: github:anthropics/claude-code\n        - button \"移除声明\"\n        - strong: ai\n        - generic: tldr:ai\n        - button \"移除声明\"\n        - strong: https://www.therundown.ai/feed\n        - generic: rss:https://www.therundown.ai/feed\n        - button \"移除声明\"\n        - strong: trending\n        - generic: hf_models:trending\n        - button \"移除声明\"\n        - strong: ai_radar\n        - generic: tag:ai_radar\n        - button \"移除声明\"\n        - strong: ai_news\n        - generic: tag:ai_news\n        - button \"移除声明\"\n        - strong: radar_official\n        - generic: tag:radar_official\n        - button \"移除声明\"\n        - strong: radar_dev\n        - generic: tag:radar_dev\n        - button \"移除声明\"\n        - text: 来源类型\n        - combobox \"来源类型\":\n          - option \"网页 / 更新页\" [selected]\n          - option \"RSS 订阅\"\n          - option \"GitHub 仓库\"\n          - option \"来源组\"\n          - option \"来源库引用\"\n          - option \"TLDR\"\n          - option \"模型榜单\"\n          - option \"Radar\"\n          - option \"热门视频\"\n        - text: 地址或来源标识\n        - textbox \"地址或来源标识\"\n        - button \"添加来源\"\n        - checkbox \"加入主题覆盖来源\" [checked]\n        - text: 加入主题覆盖来源\n        - checkbox \"使用自动发现的来源\" [checked]\n        - text: 使用自动发现的来源\n        - checkbox \"读取已积累的历史材料\" [checked]\n        - text: 读取已积累的历史材料\n        - generic \"本链排除（优先于所有加入方式）\"\n        - button \"保存研究设置\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A04 移除声明仍由覆盖加入",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 研究设置已保存；下一批采用，历史保持原快照。\n      - paragraph: 单条链路 · v2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\" [pressed]\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"来源与共享研究\" [level=2]\n      - button \"修改来源与研究\"\n      - generic: 修改研究目标或来源会影响下一批研究，包括另外 5 个手动生产配置以后使用的报告。 已有报告与作品保持原快照。\n      - term: 内容目标\n      - definition: AI 产品变化、使用方法与对用户的实际影响\n      - term: 目标观众\n      - definition: 开发者\n      - term: 来源组合\n      - definition: 12 条声明 ＋ 主题覆盖 ＋ 自动发现 ＋ 历史积累\n      - term: 本链排除\n      - definition: 无\n      - term: 选题与补材\n      - definition: Flash 受众与选题策略 · 按问题补材启用\n      - generic \"查看来源声明与加入路径\" [active]\n      - generic: source:bili_hot_ai\n      - generic: 已声明\n      - generic: source:cg_release_notes\n      - generic: 已声明\n      - generic: source:cg_pro_tiers\n      - generic: 已声明\n      - generic: tag:ai_daily_shared\n      - generic: 已声明\n      - generic: github:anthropics/claude-code\n      - generic: 已声明\n      - generic: tldr:ai\n      - generic: 已声明\n      - generic: rss:https://www.therundown.ai/feed\n      - generic: 已声明\n      - generic: hf_models:trending\n      - generic: 已声明\n      - generic: tag:ai_radar\n      - generic: 已声明\n      - generic: tag:ai_news\n      - generic: 已声明\n      - generic: tag:radar_official\n      - generic: 已声明\n      - generic: tag:radar_dev\n      - generic: 已声明\n      - generic: OpenAI RSS：OpenAI 产品主题覆盖。移除单条声明后，仍可能由主题覆盖带入。\n      - generic \"展开实际 26 个声明来源规格\"\n      - generic \"共享服务与其他使用者\"\n      - generic \"已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A05 排除优先于来源加入路径",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 研究设置已保存；下一批采用，历史保持原快照。\n      - paragraph: 单条链路 · v3\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\" [pressed]\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"来源与共享研究\" [level=2]\n      - button \"修改来源与研究\"\n      - generic: 修改研究目标或来源会影响下一批研究，包括另外 5 个手动生产配置以后使用的报告。 已有报告与作品保持原快照。\n      - term: 内容目标\n      - definition: AI 产品变化、使用方法与对用户的实际影响\n      - term: 目标观众\n      - definition: 开发者\n      - term: 来源组合\n      - definition: 12 条声明 ＋ 主题覆盖 ＋ 自动发现 ＋ 历史积累\n      - term: 本链排除\n      - definition: OpenAI 新闻 RSS\n      - term: 选题与补材\n      - definition: Flash 受众与选题策略 · 按问题补材启用\n      - generic \"查看来源声明与加入路径\" [active]\n      - generic: source:bili_hot_ai\n      - generic: 已声明\n      - generic: source:cg_release_notes\n      - generic: 已声明\n      - generic: source:cg_pro_tiers\n      - generic: 已声明\n      - generic: tag:ai_daily_shared\n      - generic: 已声明\n      - generic: github:anthropics/claude-code\n      - generic: 已声明\n      - generic: tldr:ai\n      - generic: 已声明\n      - generic: rss:https://www.therundown.ai/feed\n      - generic: 已声明\n      - generic: hf_models:trending\n      - generic: 已声明\n      - generic: tag:ai_radar\n      - generic: 已声明\n      - generic: tag:ai_news\n      - generic: 已声明\n      - generic: tag:radar_official\n      - generic: 已声明\n      - generic: tag:radar_dev\n      - generic: 已声明\n      - generic: OpenAI RSS：OpenAI 产品主题覆盖。本链排除优先，后续各入口不再送入；其他链照常。\n      - generic \"展开实际 26 个声明来源规格\"\n      - generic \"共享服务与其他使用者\"\n      - generic \"已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A06 单输出编辑",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"修改重点单条\":\n        - heading \"修改重点单条\" [level=2]\n        - button \"关闭\"\n        - text: 输出名称\n        - textbox \"输出名称\": 重点单条\n        - text: 视频速度\n        - combobox \"视频速度\":\n          - option \"继承矩阵：1.25 倍\" [selected]\n          - option \"1.0 倍\"\n          - option \"1.25 倍\"\n          - option \"1.5 倍\"\n        - text: 声音\n        - combobox \"声音\":\n          - option \"继承配方：voxcpm_anchor\" [selected]\n          - option \"voxcpm_anchor（本输出固定）\"\n        - text: 画面形式\n        - combobox \"画面形式\":\n          - option \"继承配方：information_motion\" [selected]\n          - option \"information_motion（本输出固定）\"\n        - text: 时长\n        - combobox \"时长\":\n          - option \"按内容决定\" [selected]\n          - option \"约 1 分钟\"\n          - option \"约 2 分钟\"\n          - option \"约 3 分钟\"\n        - text: 每期最多单条数\n        - spinbutton \"每期最多单条数\": \"5\"\n        - generic \"选题阈值\"\n        - generic: 只影响此输出的新批次。另一输出和旧批次保持原设置；历史作品需单独选择生成新版本。\n        - button \"保存此输出\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A07 仅单条 1.5 合集仍 1.25",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v4\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 12 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 另有 5 个手动生产配置引用本研究。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.5 倍 · 时长随内容 · 输出规则 v2\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A08 历史批次保持六条与旧设置",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 真实记录快照 · 11 月 17 日早间\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已完成 · 6/6 条视频完成\n      - button \"返回链路\"\n      - generic: 以下是实际批次的记录快照；重试或新版本仅在原型中演练。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A09 十候选到十六合集与五单条",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 真实记录快照 · 11 月 17 日早间\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已完成 · 6/6 条视频完成\n      - button \"返回链路\"\n      - generic: 以下是实际批次的记录快照；重试或新版本仅在原型中演练。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\" [active]\n      - generic: 报告 10 个候选 → 合集 16 项（含 6 项报告外原材料）＋5 条重点单条。候选可同时进入合集和独立单条。\n      - strong: 豆包工作台上线：金融投研等21个专业场景预置技能，个人工作台可保存分享\n      - paragraph: 报告候选 · 进入合集＋独立单条\n      - strong: 加州起诉 OpenAI：AI agent 越出测试环境，另一边出现全自动漏洞利用工具\n      - paragraph: 报告候选 · 进入合集＋独立单条\n      - strong: Qwen4-Max 发布：专业任务成本约为前代三分之一，API 价格和 Live Delivery 怎么用\n      - paragraph: 报告候选 · 进入合集＋独立单条\n      - strong: Apple 测试 Siri 高级功能日限额：基础免费，图像和自动化重度使用看 iCloud+ 档位\n      - paragraph: 报告候选 · 进入合集\n      - strong: Poppy 1.0 发布：AI 助手替你逛店、查余额、订票，先解决它能做什么的授权\n      - paragraph: 报告候选 · 进入合集＋独立单条\n      - strong: GitHub Copilot 11月16日弃用三款模型：写死模型名的脚本和管理员策略要查什么\n      - paragraph: 报告候选 · 进入合集\n      - strong: 中国区 Apple Intelligence 扩到 iPad 和 Mac 测试：写作工具、Genmoji 可用，但没有 Siri AI\n      - paragraph: 报告候选 · 进入合集\n      - strong: OpenAI 开放 5 万份科研资助：每份覆盖最多 3 人，11月23日先到先得\n      - paragraph: 报告候选 · 进入合集\n      - strong: Anthropic 的 agent 记忆研究：存 413 个文件只拿 1 个徽章，少记策略反而走得更远\n      - paragraph: 报告候选 · 进入合集＋独立单条\n      - strong: Embla 1 想在手机上离线跑推理模型：1.77 秒、每次请求免费，但数学是短板\n      - paragraph: 报告候选 · 进入合集\n      - strong: \"[Changelog · Nov 16](https://developers.openai.com/api/docs/changelog.md#:~:text=Nov%2016) — published 2026-11-16\"\n      - paragraph: 报告外原材料 · 进入合集\n      - strong: \"[2.1.326](https://code.claude.com/docs/en/changelog#2-1-326) — published Mon, 16 Nov 2026 22:18:49 GMT\"\n      - paragraph: 报告外原材料 · 进入合集\n      - strong: \"[Devin Apps (3 minute read)](https://devin.ai/blog/devin-apps) — published 2026-11-16\"\n      - paragraph: 报告外原材料 · 进入合集\n      - strong: \"[Apple launches new app to study how people use AI for health](https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/) — published Mon, 16 Nov 2026 01:30:00 +0000\"\n      - paragraph: 报告外原材料 · 进入合集\n      - strong: \"[Bulk start AI Scan for repositories](https://github.blog/changelog/2026-11-16-bulk-start-ai-scan-for-repositories) — published 2026-11-17T04:33:33+08:00\"\n      - paragraph: 报告外原材料 · 进入合集\n      - strong: \"[Claude now builds interactive websites inside canvas graphics, reviving the Flash era with real HTML](https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html/) — published Mon, 16 Nov 2026 16:10:22 +0000\"\n      - paragraph: 报告外原材料 · 进入合集\n      - generic \"本批 65 个来源回执（历史快照，不随设置修改）\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A10 单条新版本影响预览",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"只为此视频生成新版本\":\n        - heading \"只为此视频生成新版本\" [level=2]\n        - button \"关闭\"\n        - paragraph: 豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\n        - term: 原设置\n        - definition: v1 · 1.25 倍\n        - term: 当前输出设置\n        - definition: v2 · 1.5 倍\n        - term: 使用内容\n        - definition: 复用这条视频的原讲稿；不重跑研究或其他视频\n        - term: 旧版本\n        - definition: 保留\n        - button \"生成模拟新版本\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A11 原研究不重跑 单条新增版本",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 此视频新增版本，旧版本保留。\n      - paragraph: 真实记录快照 · 11 月 17 日早间\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已完成 · 6/6 条视频完成\n      - button \"返回链路\"\n      - generic: 以下是实际批次的记录快照；重试或新版本仅在原型中演练。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 2\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "label": "A12 混合批次排队",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 排队中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 0 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 等待调度接收\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "排队中",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A13 研究阶段",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 研究中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 读取材料并研究\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "研究中",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A14 输出安排",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 安排输出 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 报告就绪，准备接续启用输出\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "安排输出",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A15 六个独立制作记录",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 制作中 · 0/6 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 每条视频独立制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 制作中\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "0/6 条视频完成",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A16 五成一败",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 部分失败 · 5/6 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 失败\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - generic: 视频制作失败（模拟服务异常），讲稿已保留。只重试此视频，不重跑研究。\n        - button \"按原请求重试此视频\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "部分失败 · 5/6",
+        "pass": true
+      },
+      {
+        "text": "按原请求重试此视频",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A17 仅失败项重试",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 仅失败视频已按原请求重试；研究和其他作品未重跑。\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已完成 · 6/6 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-101\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 2\n        - paragraph: 输出设置 v2 · 1.5 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 6/6",
+        "pass": true
+      },
+      {
+        "text": "1 次研究 / 1 次尝试",
+        "pass": true
+      },
+      {
+        "text": "尝试 2",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A18 只暂停单条",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 此输出已暂停；研究及其他输出继续，已提交视频继续。\n      - paragraph: 单条链路 · v5\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"重点单条\" [level=2]\n      - paragraph: flash_each · 规则 v3 · 暂停接续\n      - button \"修改此输出\"\n      - button \"恢复此输出\"\n      - term: 使用的研究\n      - definition: monitoring/ai_flash_discovery\n      - term: 内容分配\n      - definition: 候选中按选题策略选取，最多 5 条独立视频\n      - term: 视频速度\n      - definition: 1.5 倍 · 本输出覆盖\n      - term: 声音\n      - definition: voxcpm_anchor · 继承配方\n      - term: 画面形式\n      - definition: information_motion · 继承配方\n      - term: 时长\n      - definition: 由内容决定\n      - term: 生效范围\n      - definition: 新批次采用当前值；既有批次保持启动快照\n      - generic \"配置来源与分配规则\"\n      - button \"删除此输出\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "此输出已暂停；研究及其他输出继续",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A19 复用报告跳过研究",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 3\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 安排输出 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v5 · 启动时冻结；当前链路 v5\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 复用已有报告；本批未重新研究\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 报告就绪，准备接续启用输出\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "复用已有报告；本批未重新研究",
+        "pass": true
+      },
+      {
+        "text": "安排输出",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A20 仅合集产出",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 3\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已完成 · 1/1 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v5 · 启动时冻结；当前链路 v5\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 复用已有报告；本批未重新研究\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 1/1",
+        "pass": true
+      },
+      {
+        "text": "复用已有报告；本批未重新研究",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A21 单条恢复继承",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 仅此输出已更新；另一输出与旧批次不变。\n      - paragraph: 单条链路 · v7\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"重点单条\" [level=2]\n      - paragraph: flash_each · 规则 v5 · 自动接续\n      - button \"修改此输出\"\n      - button \"暂停此输出\"\n      - term: 使用的研究\n      - definition: monitoring/ai_flash_discovery\n      - term: 内容分配\n      - definition: 候选中按选题策略选取，最多 5 条独立视频\n      - term: 视频速度\n      - definition: 1.25 倍 · 继承矩阵默认\n      - term: 声音\n      - definition: voxcpm_anchor · 继承配方\n      - term: 画面形式\n      - definition: information_motion · 继承配方\n      - term: 时长\n      - definition: 由内容决定\n      - term: 生效范围\n      - definition: 新批次采用当前值；既有批次保持启动快照\n      - generic \"配置来源与分配规则\"\n      - button \"删除此输出\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "1.25 倍 · 继承矩阵默认",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A22 刷新后保留修改及历史",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v7\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"重点单条\" [level=2]\n      - paragraph: flash_each · 规则 v5 · 自动接续\n      - button \"修改此输出\"\n      - button \"暂停此输出\"\n      - term: 使用的研究\n      - definition: monitoring/ai_flash_discovery\n      - term: 内容分配\n      - definition: 候选中按选题策略选取，最多 5 条独立视频\n      - term: 视频速度\n      - definition: 1.25 倍 · 继承矩阵默认\n      - term: 声音\n      - definition: voxcpm_anchor · 继承配方\n      - term: 画面形式\n      - definition: information_motion · 继承配方\n      - term: 时长\n      - definition: 由内容决定\n      - term: 生效范围\n      - definition: 新批次采用当前值；既有批次保持启动快照\n      - generic \"配置来源与分配规则\"\n      - button \"删除此输出\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "1.25 倍 · 继承矩阵默认",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A23 删除单输出影响范围",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"删除重点单条\":\n        - heading \"删除重点单条\" [level=2]\n        - button \"关闭\"\n        - generic: 仅删除原型配置；已有运行记录、讲稿版本和视频记录保留。\n        - heading \"停止与解除\" [level=3]\n        - list:\n          - listitem: 重点单条的自动接续与生产配置\n          - listitem: 此输出的栏目引用与联合规划关联\n          - listitem: 其他输出和仍被使用的研究继续\n        - heading \"继续保留\" [level=3]\n        - list:\n          - listitem: 历史批次、作品和原请求\n          - listitem: 来源库与共享发现 / 积累服务\n          - listitem: 已提交的任务继续；可在运行记录单独取消。\n        - button \"确认删除此输出\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "其他输出和仍被使用的研究继续",
+        "pass": true
+      },
+      {
+        "text": "栏目引用与联合规划关联",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A24 合集和共享研究继续",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 配置已移除，历史与共享资源保留。\n      - paragraph: 单条链路 · v8\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 1 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 12 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 另有 5 个手动生产配置引用本研究。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - button \"添加视频输出\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "1 个视频输出",
+        "pass": true
+      },
+      {
+        "text": "管理每日合集",
+        "pass": true
+      },
+      {
+        "text": "另有 5 个手动生产配置",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A25 为共享研究重新添加单条",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v9\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 12 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 另有 5 个手动生产配置引用本研究。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "2 个视频输出",
+        "pass": true
+      },
+      {
+        "text": "管理重点单条",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A26 暂停共享研究边界",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"暂停整链自动运行\":\n        - heading \"暂停整链自动运行\" [level=2]\n        - button \"关闭\"\n        - generic: 停止本链自动触发与未提交输出接续。共享研究仍服务另外 5 个生产配置，研究计划保持运行。共享来源发现与素材积累继续，已提交视频继续。\n        - button \"确认暂停\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "共享研究仍服务另外 5 个生产配置",
+        "pass": true
+      },
+      {
+        "text": "已提交视频继续",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A27 取消请求与结果分开",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 4\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 取消请求已发送 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v10 · 启动时冻结；当前链路 v10\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 等待执行器返回取消结果\n      - button \"接收取消结果\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "取消请求已发送",
+        "pass": true
+      },
+      {
+        "text": "接收取消结果",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A28 本次取消完成",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 4\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 已取消 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v10 · 启动时冻结；当前链路 v10\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已取消",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "A29 恢复且不补跑",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 已恢复；按计划的错过时段策略执行。\n      - paragraph: 单条链路 · v11\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每天 07:30、18:30 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/17 18:30\n      - term: 采集范围\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "11/17 18:30",
+        "pass": true
+      },
+      {
+        "text": "跳过，不补跑",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B01 空白创建提示",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - alert: 请填写名称、内容目标和观众。\n      - paragraph: 创建一条完整链路\n      - heading \"内容目标\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 链路名称\n      - textbox \"链路名称\"\n      - text: 希望持续产出什么内容\n      - textbox \"希望持续产出什么内容\"\n      - text: 目标观众\n      - textbox \"目标观众\": 对科技与科学感兴趣的普通观众\n      - generic \"创建后会得到什么\"\n      - button \"上一步\" [disabled]\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "请填写名称、内容目标和观众",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B02 从零添加科学来源",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"添加来源\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 来源类型\n      - combobox \"来源类型\":\n        - option \"网页 / 更新页\" [selected]\n        - option \"RSS 订阅\"\n        - option \"GitHub 仓库\"\n        - option \"来源组\"\n        - option \"来源库引用\"\n        - option \"TLDR\"\n        - option \"模型榜单\"\n        - option \"Radar\"\n        - option \"热门视频\"\n      - text: 地址或来源标识\n      - textbox \"地址或来源标识\"\n      - button \"添加来源\"\n      - generic: 网页来源只监测该页面；要持续获取新文章，请添加栏目列表或 RSS。原型不联网检测地址。\n      - checkbox \"加入主题覆盖来源\"\n      - text: 加入主题覆盖来源\n      - checkbox \"使用自动发现的来源\"\n      - text: 使用自动发现的来源\n      - checkbox \"读取已积累的历史材料\" [checked]\n      - text: 读取已积累的历史材料\n      - generic \"本链排除（优先于所有加入方式）\"\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "添加来源",
+        "pass": true
+      },
+      {
+        "text": "网页来源只监测该页面",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B03 研究方式显式关联",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"研究方式\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 选题策略\n      - textbox \"选题策略\": 围绕观众问题选题\n      - checkbox \"根据选题问题自动补充材料\" [checked]\n      - text: 根据选题问题自动补充材料\n      - generic: 报告和原材料共同交给输出安排；补材服务失败会在运行中显示，不增加人工审批。\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "选题策略",
+        "pass": true
+      },
+      {
+        "text": "根据选题问题自动补充材料",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B04 新链两种输出",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"视频输出\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 输出组合\n      - combobox \"输出组合\":\n        - option \"重点单条\"\n        - option \"一期合集\"\n        - option \"合集＋重点单条\" [selected]\n      - heading \"每日合集\" [level=3]\n      - paragraph: 每期 1 条；可使用报告外原材料\n      - paragraph: 1.25 倍 · 信息动态图文 · 按内容决定时长\n      - heading \"重点单条\" [level=3]\n      - paragraph: 每个选题独立成片；最多 5 条\n      - paragraph: 1.25 倍 · 信息动态图文 · 按内容决定时长\n      - generic: 创建后可以分别修改每个输出的选题、时长、声音和速度。\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "每日合集",
+        "pass": true
+      },
+      {
+        "text": "重点单条",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B05 创建策略与时间清单",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"运行计划\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 运行方式\n      - combobox \"运行方式\":\n        - option \"仅手动\"\n        - option \"每天\" [selected]\n        - option \"每周\"\n      - text: 时间 1\n      - textbox \"时间 1\": 07:30\n      - button \"移除时间\"\n      - text: 时间 2\n      - textbox \"时间 2\": 18:30\n      - button \"移除时间\"\n      - button \"添加运行时间\"\n      - paragraph: Asia/Shanghai · 无需填写 cron\n      - text: 采集窗口\n      - combobox \"采集窗口\":\n        - option \"相邻计划时段（首次手动默认最近 24 小时）\" [selected]\n        - option \"最近 24 小时\"\n        - option \"最近 7 天\"\n      - generic \"错过时段与失败处理\"\n      - option \"跳过，等下一时段\" [selected]\n      - option \"仅补最近一时段\"\n      - option \"不自动重试\"\n      - option \"1 次\"\n      - option \"2 次\" [selected]\n      - generic \"创建清单\" [active]\n      - term: 研究身份\n      - definition: 创建时自动分配\n      - term: 来源供给\n      - definition: 本链来源配置\n      - term: 受众与选题\n      - definition: 优先讲清一个科学问题，以及 AI 在研究过程中的具体作用 · 希望了解 AI 如何用于科学研究的普通观众\n      - term: 材料补充\n      - definition: 按问题补材已启用\n      - term: 默认视频配方\n      - definition: 信息动态图文 · voxcpm_anchor\n      - term: 输出安排\n      - definition: 合集与单条共同安排；按各自规则制作\n      - term: 实现状态\n      - definition: 以上为原型关系；正式创建/迁移尚未接通\n      - button \"上一步\"\n      - button \"创建链路\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "本链来源配置",
+        "pass": true
+      },
+      {
+        "text": "按问题补材已启用",
+        "pass": true
+      },
+      {
+        "text": "合集与单条共同安排",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B06 新链完整创建",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 链路已创建；能力关联已保存在原型中。\n      - paragraph: 单条链路 · v1\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: 研究者使用 AI 推进科学发现的一手记录、实用方法与新发现\n      - generic: 1 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 新链的供给、选题与补材策略随创建保存；下方可查看关联。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "科学发现视频",
+        "pass": true
+      },
+      {
+        "text": "每天 07:30、18:30",
+        "pass": true
+      },
+      {
+        "text": "本研究由这条链独立使用",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B07 新身份仍具备策略",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 链路已创建；能力关联已保存在原型中。\n      - paragraph: 单条链路 · v1\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: 研究者使用 AI 推进科学发现的一手记录、实用方法与新发现\n      - generic: 1 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 新链的供给、选题与补材策略随创建保存；下方可查看关联。\n      - generic \"查看已关联能力\" [active]\n      - term: 研究身份\n      - definition: research/chain-105\n      - term: 来源供给\n      - definition: 本链来源配置\n      - term: 受众与选题\n      - definition: 优先讲清一个科学问题，以及 AI 在研究过程中的具体作用 · 希望了解 AI 如何用于科学研究的普通观众\n      - term: 材料补充\n      - definition: 按问题补材已启用\n      - term: 默认视频配方\n      - definition: 信息动态图文 · voxcpm_anchor\n      - term: 输出安排\n      - definition: 合集与单条共同安排；按各自规则制作\n      - term: 实现状态\n      - definition: 以上为原型关系；正式创建/迁移尚未接通\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "research/chain-105",
+        "pass": true
+      },
+      {
+        "text": "优先讲清一个科学问题",
+        "pass": true
+      },
+      {
+        "text": "本链来源配置",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B08 新链修改单条",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 仅此输出已更新；另一输出与旧批次不变。\n      - paragraph: 单条链路 · v2\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"科学问题解说\" [level=2]\n      - paragraph: chain-105-each-1 · 规则 v2 · 自动接续\n      - button \"修改此输出\"\n      - button \"暂停此输出\"\n      - term: 使用的研究\n      - definition: research/chain-105\n      - term: 内容分配\n      - definition: 候选中按选题策略选取，最多 2 条独立视频\n      - term: 视频速度\n      - definition: 1 倍 · 本输出覆盖\n      - term: 声音\n      - definition: voxcpm_anchor · 继承配方\n      - term: 画面形式\n      - definition: information_motion · 继承配方\n      - term: 时长\n      - definition: 约 2 分钟\n      - term: 生效范围\n      - definition: 新批次采用当前值；既有批次保持启动快照\n      - generic \"配置来源与分配规则\"\n      - button \"删除此输出\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "科学问题解说",
+        "pass": true
+      },
+      {
+        "text": "约 2 分钟",
+        "pass": true
+      },
+      {
+        "text": "1 倍 · 本输出覆盖",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B09 新链修改时间",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 运行计划已更新。\n      - paragraph: 单条链路 · v3\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 启用 · 每天 07:30、20:00 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每天 07:30、20:00 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/17 20:00\n      - term: 采集范围\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "每天 07:30、20:00",
+        "pass": true
+      },
+      {
+        "text": "11/17 20:00",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B10 研究失败没有创建视频",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 研究失败 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v3 · 启动时冻结；当前链路 v3\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - text: 研究中止：补材搜索服务额度不足（HTTP 402）。没有创建视频。\n      - paragraph: 先在服务设置中处理额度；原型可模拟恢复后继续。\n      - button \"模拟服务恢复并重试研究\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "研究失败",
+        "pass": true
+      },
+      {
+        "text": "HTTP 402",
+        "pass": true
+      },
+      {
+        "text": "尚无报告",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B11 恢复研究并完成三个产物",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 已完成 · 3/3 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v3 · 启动时冻结；当前链路 v3\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-106\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现视频 · 本期合集\":\n        - paragraph: 每日合集 · 完成\n        - heading \"科学发现视频 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 3/3",
+        "pass": true
+      },
+      {
+        "text": "1 次研究 / 2 次尝试",
+        "pass": true
+      },
+      {
+        "text": "1 倍",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B12 新链已产生的报告可复用",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 演练批次 1 的报告\"\n        - term: 采集窗口\n        - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n        - term: 将接续\n        - definition: 每日合集、科学问题解说\n        - term: 自动计划\n        - definition: 每天 07:30、20:00\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "复用 演练批次 1 的报告",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B13 新链部分失败",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 部分失败 · 2/3 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v3 · 启动时冻结；当前链路 v3\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 复用已有报告；本批未重新研究\n      - term: 报告身份\n      - definition: demo-report-run-106\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现视频 · 本期合集\":\n        - paragraph: 每日合集 · 完成\n        - heading \"科学发现视频 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 失败\n        - heading \"科学发现视频 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - generic: 视频制作失败（模拟服务异常），讲稿已保留。只重试此视频，不重跑研究。\n        - button \"按原请求重试此视频\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "部分失败 · 2/3",
+        "pass": true
+      },
+      {
+        "text": "复用已有报告；本批未重新研究",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B14 新链单项恢复",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 仅失败视频已按原请求重试；研究和其他作品未重跑。\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 已完成 · 3/3 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v3 · 启动时冻结；当前链路 v3\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 复用已有报告；本批未重新研究\n      - term: 报告身份\n      - definition: demo-report-run-106\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现视频 · 本期合集\":\n        - paragraph: 每日合集 · 完成\n        - heading \"科学发现视频 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 3\" [level=3]\n        - generic: 尝试 2\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 3/3",
+        "pass": true
+      },
+      {
+        "text": "尝试 2",
+        "pass": true
+      },
+      {
+        "text": "复用已有报告；本批未重新研究",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B15 暂停时手动仍完成",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 3\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 已完成 · 3/3 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v4 · 启动时冻结；当前链路 v4\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-108\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现视频 · 本期合集\":\n        - paragraph: 每日合集 · 完成\n        - heading \"科学发现视频 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现视频 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现视频 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 输出设置 v2 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 3/3",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B16 手动未恢复周期",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v4\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 暂停自动运行 · 每天 07:30、20:00 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: 研究者使用 AI 推进科学发现的一手记录、实用方法与新发现\n      - generic: 1 条来源声明\n      - generic: 每天 07:30、20:00\n      - paragraph: 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 已暂停接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"科学问题解说\":\n        - heading \"科学问题解说\" [level=3]\n        - generic: 已暂停接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1 倍 · 约 2 分钟 · 输出规则 v2\n        - button \"管理科学问题解说\"\n      - generic: 新链的供给、选题与补材策略随创建保存；下方可查看关联。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "暂停自动运行",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B17 无新内容有明确终态",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 4\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 无新内容 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v5 · 启动时冻结；当前链路 v5\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 本时段没有可用的新内容。研究已结束，没有创建空白视频，等待下一时段。\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "无新内容",
+        "pass": true
+      },
+      {
+        "text": "没有创建空白视频",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B18 去重不重复提交",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 5\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 已跳过 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v5 · 启动时冻结；当前链路 v5\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 去重跳过；本批未研究或制作\n      - term: 报告身份\n      - definition: demo-report-run-110\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 同一报告与输出已处理，本次去重跳过；不重复研究或制作。\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已跳过",
+        "pass": true
+      },
+      {
+        "text": "去重跳过；本批未研究或制作",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B19 刷新后保留两链演练",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 5\n      - heading \"科学发现视频\" [level=1]\n      - paragraph: 已跳过 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v5 · 启动时冻结；当前链路 v5\n      - term: 材料窗口\n      - definition: 11/16 20:00 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 去重跳过；本批未研究或制作\n      - term: 报告身份\n      - definition: demo-report-run-110\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 同一报告与输出已处理，本次去重跳过；不重复研究或制作。\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已跳过",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B20 复制保留来源",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 复制链路 · 新身份与独立研究\n      - heading \"添加来源\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - strong: OpenAI 科学博客介绍页\n      - generic: page:https://openai.com/index/our-new-blog-for-science\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - text: 来源类型\n      - combobox \"来源类型\":\n        - option \"网页 / 更新页\" [selected]\n        - option \"RSS 订阅\"\n        - option \"GitHub 仓库\"\n        - option \"来源组\"\n        - option \"来源库引用\"\n        - option \"TLDR\"\n        - option \"模型榜单\"\n        - option \"Radar\"\n        - option \"热门视频\"\n      - text: 地址或来源标识\n      - textbox \"地址或来源标识\"\n      - button \"添加来源\"\n      - generic: 网页来源只监测该页面；要持续获取新文章，请添加栏目列表或 RSS。原型不联网检测地址。\n      - checkbox \"加入主题覆盖来源\"\n      - text: 加入主题覆盖来源\n      - checkbox \"使用自动发现的来源\"\n      - text: 使用自动发现的来源\n      - checkbox \"读取已积累的历史材料\" [checked]\n      - text: 读取已积累的历史材料\n      - generic \"本链排除（优先于所有加入方式）\"\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "OpenAI 科学博客介绍页",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B21 复制保留选题策略",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 复制链路 · 新身份与独立研究\n      - heading \"研究方式\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 选题策略\n      - textbox \"选题策略\": 优先讲清一个科学问题，以及 AI 在研究过程中的具体作用\n      - checkbox \"根据选题问题自动补充材料\" [checked]\n      - text: 根据选题问题自动补充材料\n      - generic: 报告和原材料共同交给输出安排；补材服务失败会在运行中显示，不增加人工审批。\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "优先讲清一个科学问题",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B22 副本默认手动",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 复制链路 · 新身份与独立研究\n      - heading \"运行计划\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 运行方式\n      - combobox \"运行方式\":\n        - option \"仅手动\" [selected]\n        - option \"每天\"\n        - option \"每周\"\n      - text: 采集窗口\n      - combobox \"采集窗口\":\n        - option \"相邻计划时段（首次手动默认最近 24 小时）\" [selected]\n        - option \"最近 24 小时\"\n        - option \"最近 7 天\"\n      - generic \"错过时段与失败处理\"\n      - option \"跳过，等下一时段\" [selected]\n      - option \"仅补最近一时段\"\n      - option \"不自动重试\"\n      - option \"1 次\"\n      - option \"2 次\" [selected]\n      - generic \"创建清单\"\n      - button \"上一步\"\n      - button \"创建链路\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "option \"仅手动\" [selected]",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B23 副本不复制历史",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"科学发现 · 独立副本\" [level=1]\n      - paragraph: 启用 · 仅手动 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\" [pressed]\n      - heading \"本链运行记录\" [level=2]\n      - button \"运行一次\"\n      - generic: 尚无运行记录\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "尚无运行记录",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B24 新版明确写稿阶段",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学发现 · 独立副本\" [level=1]\n      - paragraph: 写稿中 · 0/3 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（首次手动：最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-112\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 为每条产物分别写稿；完成后自动进入视频制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现 · 独立副本 · 本期合集\":\n        - paragraph: 每日合集 · 写稿中\n        - heading \"科学发现 · 独立副本 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 写稿中\n        - heading \"科学发现 · 独立副本 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 写稿中\n        - heading \"科学发现 · 独立副本 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "写稿中",
+        "pass": true
+      },
+      {
+        "text": "讲稿编写中",
+        "pass": true
+      },
+      {
+        "text": "目标约 2 分钟",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B25 写稿完成接续视频",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学发现 · 独立副本\" [level=1]\n      - paragraph: 制作中 · 0/3 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（首次手动：最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-112\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 每条视频独立制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现 · 独立副本 · 本期合集\":\n        - paragraph: 每日合集 · 制作中\n        - heading \"科学发现 · 独立副本 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 制作中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 制作中\n        - heading \"科学发现 · 独立副本 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 制作中 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 制作中\n        - heading \"科学发现 · 独立副本 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 制作中 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "制作中",
+        "pass": true
+      },
+      {
+        "text": "讲稿已就绪",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B26 副本完整成片记录",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学发现 · 独立副本\" [level=1]\n      - paragraph: 已完成 · 3/3 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（首次手动：最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-112\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"科学发现 · 独立副本 · 本期合集\":\n        - paragraph: 每日合集 · 完成\n        - heading \"科学发现 · 独立副本 · 本期合集\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 2\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现 · 独立副本 · 示例选题 2\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"科学发现 · 独立副本 · 示例选题 3\":\n        - paragraph: 科学问题解说 · 完成\n        - heading \"科学发现 · 独立副本 · 示例选题 3\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 目标约 2 分钟\n        - paragraph: 输出设置 v1 · 1 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 3/3",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B27 独享研究删除范围",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"删除整条链路\":\n        - heading \"删除整条链路\" [level=2]\n        - button \"关闭\"\n        - generic: 仅删除原型配置；已有运行记录、讲稿版本和视频记录保留。\n        - heading \"停止与解除\" [level=3]\n        - list:\n          - listitem: 本链所有视频输出及自动接续\n          - listitem: 本链的栏目引用与联合规划关联\n          - listitem: 本链独享研究任务与周期停止\n        - heading \"继续保留\" [level=3]\n        - list:\n          - listitem: 历史批次、作品和原请求\n          - listitem: 来源库与共享发现 / 积累服务\n          - listitem: 已提交的任务继续；可在运行记录单独取消。\n        - button \"确认删除整链\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "本链独享研究任务与周期停止",
+        "pass": true
+      },
+      {
+        "text": "历史批次、作品和原请求",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B28 删除新链副本仍在",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 配置已移除，历史与共享资源保留。\n      - heading \"我的生产链路\" [level=1]\n      - paragraph: 从信息源到视频，在一条链路里管理。\n      - button \"新建链路\"\n      - region \"AI Flash\":\n        - heading \"AI Flash\" [level=2]\n        - paragraph: AI 产品变化、使用方法与对用户的实际影响\n        - generic: 每天 07:30、18:30\n        - generic: 每日合集＋重点单条\n        - generic: 实际配置映射\n        - paragraph: 12 条来源声明 → 共享研究 → 2 个输出 · 下次 11/17 18:30\n        - button \"管理链路\"\n      - region \"科学发现 · 独立副本\":\n        - heading \"科学发现 · 独立副本\" [level=2]\n        - paragraph: 研究者使用 AI 推进科学发现的一手记录、实用方法与新发现\n        - generic: 仅手动\n        - generic: 每日合集＋科学问题解说\n        - generic: 新建演练\n        - paragraph: 1 条来源声明 → 共享研究 → 2 个输出 · 下次 无自动触发\n        - button \"管理链路\"\n      - generic: 交互演练 · 不连接生产服务。AI Flash 初始记录取自 11/17 快照；新增运行使用示例材料。\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "科学发现 · 独立副本",
+        "pass": true
+      },
+      {
+        "text": "AI Flash",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "B29 新链历史保留",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - heading \"作品与运行记录\" [level=2]\n      - strong: 科学发现 · 独立副本 · 演练批次 1\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 3/3 条完成\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 5\n      - paragraph: 原型模拟 · 已跳过 · 研究 0 次 / 尝试 0 次 · 0/0 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 4\n      - paragraph: 原型模拟 · 无新内容 · 研究 1 次 / 尝试 1 次 · 0/0 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 3\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 2\n      - paragraph: 原型模拟 · 已完成 · 研究 0 次 / 尝试 0 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 1\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 2 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 4\n      - paragraph: 原型模拟 · 已取消 · 研究 1 次 / 尝试 1 次 · 0/0 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 3\n      - paragraph: 原型模拟 · 已完成 · 研究 0 次 / 尝试 0 次 · 1/1 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 2\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 6/6 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 11 月 17 日早间\n      - paragraph: 真实记录快照 · 已完成 · 研究 1 次 / 尝试 1 次 · 6/6 条完成\n      - button \"查看批次\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "科学发现视频 · 演练批次 1",
+        "pass": true
+      },
+      {
+        "text": "链路已删除",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C01 最终修订重载",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - heading \"作品与运行记录\" [level=2]\n      - strong: 科学发现 · 独立副本 · 演练批次 1\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 3/3 条完成\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 5\n      - paragraph: 原型模拟 · 已跳过 · 研究 0 次 / 尝试 0 次 · 0/0 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 4\n      - paragraph: 原型模拟 · 无新内容 · 研究 1 次 / 尝试 1 次 · 0/0 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 3\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 2\n      - paragraph: 原型模拟 · 已完成 · 研究 0 次 / 尝试 0 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: 科学发现视频 · 演练批次 1\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 2 次 · 3/3 条完成 · 链路已删除\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 4\n      - paragraph: 原型模拟 · 已取消 · 研究 1 次 / 尝试 1 次 · 0/0 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 3\n      - paragraph: 原型模拟 · 已完成 · 研究 0 次 / 尝试 0 次 · 1/1 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 演练批次 2\n      - paragraph: 原型模拟 · 已完成 · 研究 1 次 / 尝试 1 次 · 6/6 条完成\n      - button \"查看批次\"\n      - strong: AI Flash · 11 月 17 日早间\n      - paragraph: 真实记录快照 · 已完成 · 研究 1 次 / 尝试 1 次 · 6/6 条完成\n      - button \"查看批次\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": []
+  },
+  {
+    "label": "C02 复建保留完整来源",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 复制链路 · 新身份与独立研究\n      - heading \"添加来源\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - strong: bili_hot_ai\n      - generic: source:bili_hot_ai\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: cg_release_notes\n      - generic: source:cg_release_notes\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: cg_pro_tiers\n      - generic: source:cg_pro_tiers\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: ai_daily_shared\n      - generic: tag:ai_daily_shared\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: anthropics/claude-code\n      - generic: github:anthropics/claude-code\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: ai\n      - generic: tldr:ai\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: https://www.therundown.ai/feed\n      - generic: rss:https://www.therundown.ai/feed\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: trending\n      - generic: hf_models:trending\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: ai_radar\n      - generic: tag:ai_radar\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: ai_news\n      - generic: tag:ai_news\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: radar_official\n      - generic: tag:radar_official\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: radar_dev\n      - generic: tag:radar_dev\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - strong: OpenAI 新闻 RSS\n      - generic: source:cg_openai_news\n      - button \"移除声明\"\n      - button \"仅本链排除\"\n      - text: 来源类型\n      - combobox \"来源类型\":\n        - option \"网页 / 更新页\" [selected]\n        - option \"RSS 订阅\"\n        - option \"GitHub 仓库\"\n        - option \"来源组\"\n        - option \"来源库引用\"\n        - option \"TLDR\"\n        - option \"模型榜单\"\n        - option \"Radar\"\n        - option \"热门视频\"\n      - text: 地址或来源标识\n      - textbox \"地址或来源标识\"\n      - button \"添加来源\"\n      - generic: 网页来源只监测该页面；要持续获取新文章，请添加栏目列表或 RSS。原型不联网检测地址。\n      - checkbox \"加入主题覆盖来源\" [checked]\n      - text: 加入主题覆盖来源\n      - checkbox \"使用自动发现的来源\" [checked]\n      - text: 使用自动发现的来源\n      - checkbox \"读取已积累的历史材料\" [checked]\n      - text: 读取已积累的历史材料\n      - generic \"本链排除（优先于所有加入方式）\"\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "source:cg_openai_news",
+        "pass": true
+      },
+      {
+        "text": "tag:radar_dev",
+        "pass": true
+      },
+      {
+        "text": "使用自动发现的来源\" [checked]",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C03 新身份携带 Flash 能力",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 复制链路 · 新身份与独立研究\n      - heading \"运行计划\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - text: 运行方式\n      - combobox \"运行方式\":\n        - option \"仅手动\"\n        - option \"每天\" [selected]\n        - option \"每周\"\n      - text: 时间 1\n      - textbox \"时间 1\": 07:30\n      - button \"移除时间\"\n      - text: 时间 2\n      - textbox \"时间 2\": 18:30\n      - button \"移除时间\"\n      - button \"添加运行时间\"\n      - paragraph: Asia/Shanghai · 无需填写 cron\n      - text: 采集窗口\n      - combobox \"采集窗口\":\n        - option \"相邻计划时段（首次手动默认最近 24 小时）\" [selected]\n        - option \"最近 24 小时\"\n        - option \"最近 7 天\"\n      - generic \"错过时段与失败处理\"\n      - option \"跳过，等下一时段\" [selected]\n      - option \"仅补最近一时段\"\n      - option \"不自动重试\"\n      - option \"1 次\"\n      - option \"2 次\" [selected]\n      - generic \"创建清单\" [active]\n      - term: 研究身份\n      - definition: 创建时自动分配\n      - term: 来源供给\n      - definition: AI 视频栏目（ai_media）\n      - term: 受众与选题\n      - definition: Flash 受众与选题策略 · 开发者\n      - term: 材料补充\n      - definition: 按问题补材已启用\n      - term: 默认视频配方\n      - definition: 信息动态图文 · voxcpm_anchor\n      - term: 输出安排\n      - definition: 合集与单条共同安排；按各自规则制作\n      - term: 实现状态\n      - definition: 以上为原型关系；正式创建/迁移尚未接通\n      - button \"上一步\"\n      - button \"创建链路\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "创建时自动分配",
+        "pass": true
+      },
+      {
+        "text": "AI 视频栏目（ai_media）",
+        "pass": true
+      },
+      {
+        "text": "Flash 受众与选题策略",
+        "pass": true
+      },
+      {
+        "text": "合集与单条共同安排",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C04 Flash 双时间双输出复建",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 链路已创建；能力关联已保存在原型中。\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 13 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "13 条来源声明",
+        "pass": true
+      },
+      {
+        "text": "每天 07:30、18:30",
+        "pass": true
+      },
+      {
+        "text": "2 个视频输出",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C05 Flash 复建逐条写稿",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 写稿中 · 0/6 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-114\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 为每条产物分别写稿；完成后自动进入视频制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 写稿中\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "写稿中 · 0/6",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C06 Flash 新流程五成一败",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 部分失败 · 5/6 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-114\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 失败\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 失败 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic: 视频制作失败（模拟服务异常），讲稿已保留。只重试此视频，不重跑研究。\n        - button \"按原请求重试此视频\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "部分失败 · 5/6",
+        "pass": true
+      },
+      {
+        "text": "讲稿已就绪",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C07 新流程重试恢复",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 仅失败视频已按原请求重试；研究和其他作品未重跑。\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 已完成 · 6/6 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-114\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"豆包21个工作台，苹果给Siri上日限额\":\n        - paragraph: 每日合集 · 完成\n        - heading \"豆包21个工作台，苹果给Siri上日限额\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\":\n        - paragraph: 重点单条 · 完成\n        - heading \"豆包工作台月费68元起，金融投研为什么可能还要再买一份数据\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\":\n        - paragraph: 重点单条 · 完成\n        - heading \"FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Poppy 支持名单很长，但真能读到文件的只有 16 家\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Poppy 支持名单很长，但真能读到文件的只有 16 家\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\":\n        - paragraph: 重点单条 · 完成\n        - heading \"Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了\" [level=3]\n        - generic: 尝试 2\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "已完成 · 6/6",
+        "pass": true
+      },
+      {
+        "text": "尝试 2",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C08 删除真实映射保留五个共享引用",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"删除整条链路\":\n        - heading \"删除整条链路\" [level=2]\n        - button \"关闭\"\n        - generic: 仅删除原型配置；已有运行记录、讲稿版本和视频记录保留。\n        - heading \"停止与解除\" [level=3]\n        - list:\n          - listitem: 本链所有视频输出及自动接续\n          - listitem: 本链的栏目引用与联合规划关联\n          - listitem: 其他输出和仍被使用的研究继续\n        - heading \"继续保留\" [level=3]\n        - list:\n          - listitem: 历史批次、作品和原请求\n          - listitem: 来源库与共享发现 / 积累服务\n          - listitem: 共享研究及其计划：另有 5 个生产配置引用，可在“共享来源与研究”找到。\n          - listitem: 已提交的任务继续；可在运行记录单独取消。\n        - button \"确认删除整链\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "另有 5 个生产配置引用",
+        "pass": true
+      },
+      {
+        "text": "共享研究及其计划",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C09 删除后共享研究可找到",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - heading \"共享来源与研究\" [level=1]\n      - generic: 删除链路会保留历史与来源库；仍被其他对象使用的研究继续存在。这里管理引用关系的可见性。\n      - heading \"AI Flash · 保留的共享研究\" [level=2]\n      - paragraph: monitoring/ai_flash_discovery\n      - paragraph: 仍被 5 个手动生产配置引用，研究计划保留。\n      - paragraph: ai-developer-roundup-long、ai-non_tech-one_point-short、ai-non_tech-quick_take-short、flash、point_short\n      - heading \"DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\" [level=3]\n      - paragraph: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://help.openai.com/en/articles/6825453-chatgpt-release-notes\" [level=3]\n      - paragraph: page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"OpenAI 新闻 RSS\" [level=3]\n      - paragraph: rss:https://openai.com/news/rss.xml\n      - paragraph: AI Flash · 配置复建 · 其他使用者：模型竞技场、商业观察\n      - heading \"https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\" [level=3]\n      - paragraph: page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://learn.chatgpt.com/docs/whats-new.md\" [level=3]\n      - paragraph: page:https://learn.chatgpt.com/docs/whats-new.md\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://developers.openai.com/api/docs/changelog.md\" [level=3]\n      - paragraph: page:https://developers.openai.com/api/docs/changelog.md\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://ratelimitnow.com/whats-new.xml\" [level=3]\n      - paragraph: rss:https://ratelimitnow.com/whats-new.xml\n      - paragraph: AI Flash · 配置复建\n      - heading \"https://aicatchup.com/rss.xml\" [level=3]\n      - paragraph: rss:https://aicatchup.com/rss.xml\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"anthropics/claude-code\" [level=3]\n      - paragraph: github:anthropics/claude-code\n      - paragraph: AI Flash · 配置复建\n      - heading \"ai\" [level=3]\n      - paragraph: tldr:ai\n      - paragraph: AI Flash · 配置复建\n      - heading \"https://www.therundown.ai/feed\" [level=3]\n      - paragraph: rss:https://www.therundown.ai/feed\n      - paragraph: AI Flash · 配置复建\n      - heading \"trending\" [level=3]\n      - paragraph: hf_models:trending\n      - paragraph: AI Flash · 配置复建\n      - heading \"https://aftergradient.com/rss.xml?kind=news\" [level=3]\n      - paragraph: rss:https://aftergradient.com/rss.xml?kind=news\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://devbrief.dev/rss.xml\" [level=3]\n      - paragraph: rss:https://devbrief.dev/rss.xml\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://onevium.com/zh/rss.xml\" [level=3]\n      - paragraph: rss:https://onevium.com/zh/rss.xml\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://zhangwen.site/rss.xml\" [level=3]\n      - paragraph: rss:https://zhangwen.site/rss.xml\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://www.ifanr.com/feed\" [level=3]\n      - paragraph: rss:https://www.ifanr.com/feed\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://techcrunch.com/category/artificial-intelligence/feed/\" [level=3]\n      - paragraph: rss:https://techcrunch.com/category/artificial-intelligence/feed/\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\" [level=3]\n      - paragraph: rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://the-decoder.com/feed/\" [level=3]\n      - paragraph: rss:https://the-decoder.com/feed/\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://www.testingcatalog.com/rss/\" [level=3]\n      - paragraph: rss:https://www.testingcatalog.com/rss/\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"https://9to5mac.com/guides/apple-intelligence/feed/\" [level=3]\n      - paragraph: rss:https://9to5mac.com/guides/apple-intelligence/feed/\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"chatgpt / claude / codex 动态\" [level=3]\n      - paragraph: radar:chatgpt / claude / codex 动态\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"Ollama / Claude Code / Codex 重要更新\" [level=3]\n      - paragraph: radar:Ollama / Claude Code / Codex 重要更新\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"AI 编程工具产品动态（每周对比）\" [level=3]\n      - paragraph: radar:AI 编程工具产品动态（每周对比）\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"开发者社区：AI Agent / 本地 LLM / 开发效率新工具\" [level=3]\n      - paragraph: radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具\n      - paragraph: 暂无本原型链路引用；来源仍保留\n      - heading \"bili_hot_ai\" [level=3]\n      - paragraph: source:bili_hot_ai\n      - paragraph: AI Flash · 配置复建\n      - heading \"cg_release_notes\" [level=3]\n      - paragraph: source:cg_release_notes\n      - paragraph: AI Flash · 配置复建\n      - heading \"cg_pro_tiers\" [level=3]\n      - paragraph: source:cg_pro_tiers\n      - paragraph: AI Flash · 配置复建\n      - heading \"ai_daily_shared\" [level=3]\n      - paragraph: tag:ai_daily_shared\n      - paragraph: AI Flash · 配置复建\n      - heading \"ai_radar\" [level=3]\n      - paragraph: tag:ai_radar\n      - paragraph: AI Flash · 配置复建\n      - heading \"ai_news\" [level=3]\n      - paragraph: tag:ai_news\n      - paragraph: AI Flash · 配置复建\n      - heading \"radar_official\" [level=3]\n      - paragraph: tag:radar_official\n      - paragraph: AI Flash · 配置复建\n      - heading \"radar_dev\" [level=3]\n      - paragraph: tag:radar_dev\n      - paragraph: AI Flash · 配置复建\n      - heading \"OpenAI 科学博客介绍页\" [level=3]\n      - paragraph: page:https://openai.com/index/our-new-blog-for-science\n      - paragraph: 科学发现 · 独立副本\n      - heading \"OpenAI 新闻 RSS\" [level=3]\n      - paragraph: source:cg_openai_news\n      - paragraph: AI Flash · 配置复建\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "AI Flash · 保留的共享研究",
+        "pass": true
+      },
+      {
+        "text": "仍被 5 个手动生产配置引用",
+        "pass": true
+      },
+      {
+        "text": "科学发现 · 独立副本",
+        "pass": true
+      },
+      {
+        "text": "AI Flash · 配置复建",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C10 来源组引用与保留研究都可见",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - heading \"共享来源与研究\" [level=1]\n      - generic: 删除链路会保留历史与来源库；仍被其他对象使用的研究继续存在。这里管理引用关系的可见性。\n      - heading \"AI Flash · 保留的共享研究\" [level=2]\n      - paragraph: monitoring/ai_flash_discovery\n      - paragraph: 仍被 5 个手动生产配置引用，研究计划保留。\n      - paragraph: ai-developer-roundup-long、ai-non_tech-one_point-short、ai-non_tech-quick_take-short、flash、point_short\n      - heading \"DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\" [level=3]\n      - paragraph: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://help.openai.com/en/articles/6825453-chatgpt-release-notes\" [level=3]\n      - paragraph: page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"OpenAI 新闻 RSS\" [level=3]\n      - paragraph: rss:https://openai.com/news/rss.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash · 其他使用者：模型竞技场、商业观察\n      - heading \"https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\" [level=3]\n      - paragraph: page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://learn.chatgpt.com/docs/whats-new.md\" [level=3]\n      - paragraph: page:https://learn.chatgpt.com/docs/whats-new.md\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://developers.openai.com/api/docs/changelog.md\" [level=3]\n      - paragraph: page:https://developers.openai.com/api/docs/changelog.md\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://ratelimitnow.com/whats-new.xml\" [level=3]\n      - paragraph: rss:https://ratelimitnow.com/whats-new.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://aicatchup.com/rss.xml\" [level=3]\n      - paragraph: rss:https://aicatchup.com/rss.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"anthropics/claude-code\" [level=3]\n      - paragraph: github:anthropics/claude-code\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"ai\" [level=3]\n      - paragraph: tldr:ai\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://www.therundown.ai/feed\" [level=3]\n      - paragraph: rss:https://www.therundown.ai/feed\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"trending\" [level=3]\n      - paragraph: hf_models:trending\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://aftergradient.com/rss.xml?kind=news\" [level=3]\n      - paragraph: rss:https://aftergradient.com/rss.xml?kind=news\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://devbrief.dev/rss.xml\" [level=3]\n      - paragraph: rss:https://devbrief.dev/rss.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://onevium.com/zh/rss.xml\" [level=3]\n      - paragraph: rss:https://onevium.com/zh/rss.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://zhangwen.site/rss.xml\" [level=3]\n      - paragraph: rss:https://zhangwen.site/rss.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://www.ifanr.com/feed\" [level=3]\n      - paragraph: rss:https://www.ifanr.com/feed\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://techcrunch.com/category/artificial-intelligence/feed/\" [level=3]\n      - paragraph: rss:https://techcrunch.com/category/artificial-intelligence/feed/\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\" [level=3]\n      - paragraph: rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://the-decoder.com/feed/\" [level=3]\n      - paragraph: rss:https://the-decoder.com/feed/\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://www.testingcatalog.com/rss/\" [level=3]\n      - paragraph: rss:https://www.testingcatalog.com/rss/\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"https://9to5mac.com/guides/apple-intelligence/feed/\" [level=3]\n      - paragraph: rss:https://9to5mac.com/guides/apple-intelligence/feed/\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"chatgpt / claude / codex 动态\" [level=3]\n      - paragraph: radar:chatgpt / claude / codex 动态\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"Ollama / Claude Code / Codex 重要更新\" [level=3]\n      - paragraph: radar:Ollama / Claude Code / Codex 重要更新\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"AI 编程工具产品动态（每周对比）\" [level=3]\n      - paragraph: radar:AI 编程工具产品动态（每周对比）\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"开发者社区：AI Agent / 本地 LLM / 开发效率新工具\" [level=3]\n      - paragraph: radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"bili_hot_ai\" [level=3]\n      - paragraph: source:bili_hot_ai\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"cg_release_notes\" [level=3]\n      - paragraph: source:cg_release_notes\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"cg_pro_tiers\" [level=3]\n      - paragraph: source:cg_pro_tiers\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"ai_daily_shared\" [level=3]\n      - paragraph: tag:ai_daily_shared\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"ai_radar\" [level=3]\n      - paragraph: tag:ai_radar\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"ai_news\" [level=3]\n      - paragraph: tag:ai_news\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"radar_official\" [level=3]\n      - paragraph: tag:radar_official\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"radar_dev\" [level=3]\n      - paragraph: tag:radar_dev\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n      - heading \"OpenAI 科学博客介绍页\" [level=3]\n      - paragraph: page:https://openai.com/index/our-new-blog-for-science\n      - paragraph: 科学发现 · 独立副本\n      - heading \"OpenAI 新闻 RSS\" [level=3]\n      - paragraph: source:cg_openai_news\n      - paragraph: AI Flash · 配置复建 · 保留研究：AI Flash\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "AI Flash · 配置复建 · 保留研究：AI Flash",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "C11 有效来源可展开",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\" [pressed]\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - heading \"来源与共享研究\" [level=2]\n      - button \"修改来源与研究\"\n      - generic: 修改研究目标或来源会影响下一批研究。 已有报告与作品保持原快照。\n      - term: 内容目标\n      - definition: AI 产品变化、使用方法与对用户的实际影响\n      - term: 目标观众\n      - definition: 开发者\n      - term: 来源组合\n      - definition: 13 条声明 ＋ 主题覆盖 ＋ 自动发现 ＋ 历史积累\n      - term: 本链排除\n      - definition: 无\n      - term: 选题与补材\n      - definition: Flash 受众与选题策略 · 按问题补材启用\n      - generic \"查看来源声明与加入路径\"\n      - generic \"查看初始快照的 26 个声明来源规格\"\n      - generic \"下一批实际使用哪些来源\" [active]\n      - paragraph: 按已知来源组与快照规则推导；下次实际回执以执行结果为准。历史回执始终保留。\n      - strong: DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\n      - paragraph: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI\n      - paragraph: 来源库引用 bili_hot_ai\n      - generic: 下批可用\n      - strong: https://help.openai.com/en/articles/6825453-chatgpt-release-notes\n      - paragraph: page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes\n      - paragraph: 来源库引用 cg_release_notes ＋ 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\n      - paragraph: page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers\n      - paragraph: 来源库引用 cg_pro_tiers\n      - generic: 下批可用\n      - strong: https://learn.chatgpt.com/docs/whats-new.md\n      - paragraph: page:https://learn.chatgpt.com/docs/whats-new.md\n      - paragraph: 来源组 ai_daily_shared ＋ 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://developers.openai.com/api/docs/changelog.md\n      - paragraph: page:https://developers.openai.com/api/docs/changelog.md\n      - paragraph: 来源组 ai_daily_shared ＋ 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://ratelimitnow.com/whats-new.xml\n      - paragraph: rss:https://ratelimitnow.com/whats-new.xml\n      - paragraph: 来源组 ai_daily_shared ＋ 来源组 ai_radar ＋ 主题覆盖 coding_products ＋ 自动发现\n      - generic: 下批可用\n      - strong: https://aicatchup.com/rss.xml\n      - paragraph: rss:https://aicatchup.com/rss.xml\n      - paragraph: 来源组 ai_daily_shared ＋ 来源组 ai_radar\n      - generic: 下批可用\n      - strong: anthropics/claude-code\n      - paragraph: github:anthropics/claude-code\n      - paragraph: 手动声明 ＋ 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: ai\n      - paragraph: tldr:ai\n      - paragraph: 手动声明\n      - generic: 下批可用\n      - strong: https://www.therundown.ai/feed\n      - paragraph: rss:https://www.therundown.ai/feed\n      - paragraph: 手动声明\n      - generic: 下批可用\n      - strong: trending\n      - paragraph: hf_models:trending\n      - paragraph: 手动声明\n      - generic: 下批可用\n      - strong: https://aftergradient.com/rss.xml?kind=news\n      - paragraph: rss:https://aftergradient.com/rss.xml?kind=news\n      - paragraph: 来源组 ai_radar\n      - generic: 下批可用\n      - strong: https://devbrief.dev/rss.xml\n      - paragraph: rss:https://devbrief.dev/rss.xml\n      - paragraph: 来源组 ai_radar\n      - generic: 下批可用\n      - strong: https://onevium.com/zh/rss.xml\n      - paragraph: rss:https://onevium.com/zh/rss.xml\n      - paragraph: 来源组 ai_radar\n      - generic: 下批可用\n      - strong: https://zhangwen.site/rss.xml\n      - paragraph: rss:https://zhangwen.site/rss.xml\n      - paragraph: 来源组 ai_radar\n      - generic: 下批可用\n      - strong: https://www.ifanr.com/feed\n      - paragraph: rss:https://www.ifanr.com/feed\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: https://techcrunch.com/category/artificial-intelligence/feed/\n      - paragraph: rss:https://techcrunch.com/category/artificial-intelligence/feed/\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\n      - paragraph: rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: https://the-decoder.com/feed/\n      - paragraph: rss:https://the-decoder.com/feed/\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: https://www.testingcatalog.com/rss/\n      - paragraph: rss:https://www.testingcatalog.com/rss/\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: https://9to5mac.com/guides/apple-intelligence/feed/\n      - paragraph: rss:https://9to5mac.com/guides/apple-intelligence/feed/\n      - paragraph: 来源组 ai_news\n      - generic: 下批可用\n      - strong: chatgpt / claude / codex 动态\n      - paragraph: radar:chatgpt / claude / codex 动态\n      - paragraph: 来源组 radar_official\n      - generic: 下批可用\n      - strong: Ollama / Claude Code / Codex 重要更新\n      - paragraph: radar:Ollama / Claude Code / Codex 重要更新\n      - paragraph: 来源组 radar_dev\n      - generic: 下批可用\n      - strong: AI 编程工具产品动态（每周对比）\n      - paragraph: radar:AI 编程工具产品动态（每周对比）\n      - paragraph: 来源组 radar_dev\n      - generic: 下批可用\n      - strong: 开发者社区：AI Agent / 本地 LLM / 开发效率新工具\n      - paragraph: radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具\n      - paragraph: 来源组 radar_dev\n      - generic: 下批可用\n      - strong: OpenAI 新闻 RSS\n      - paragraph: rss:https://openai.com/news/rss.xml\n      - paragraph: 来源库引用 cg_openai_news ＋ 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://chatgpt.com/pricing\n      - paragraph: page:https://chatgpt.com/pricing\n      - paragraph: 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://openai.com/api/pricing/\n      - paragraph: page:https://openai.com/api/pricing/\n      - paragraph: 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://developers.openai.com/rss.xml\n      - paragraph: rss:https://developers.openai.com/rss.xml\n      - paragraph: 主题覆盖 openai_product\n      - generic: 下批可用\n      - strong: https://claude.com/pricing\n      - paragraph: page:https://claude.com/pricing\n      - paragraph: 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: https://platform.claude.com/docs/en/about-claude/pricing\n      - paragraph: page:https://platform.claude.com/docs/en/about-claude/pricing\n      - paragraph: 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: https://code.claude.com/docs/en/changelog/rss.xml\n      - paragraph: rss:https://code.claude.com/docs/en/changelog/rss.xml\n      - paragraph: 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: catalog:https://www.anthropic.com/news\n      - paragraph: catalog:https://www.anthropic.com/news\n      - paragraph: 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: https://support.claude.com/en/articles/12138966-release-notes\n      - paragraph: page:https://support.claude.com/en/articles/12138966-release-notes\n      - paragraph: 主题覆盖 anthropic_product\n      - generic: 下批可用\n      - strong: https://one.google.com/about/google-ai-plans/\n      - paragraph: page:https://one.google.com/about/google-ai-plans/\n      - paragraph: 主题覆盖 google_product\n      - generic: 下批可用\n      - strong: https://ai.google.dev/gemini-api/docs/pricing\n      - paragraph: page:https://ai.google.dev/gemini-api/docs/pricing\n      - paragraph: 主题覆盖 google_product\n      - generic: 下批可用\n      - strong: https://gemini.google/release-notes/\n      - paragraph: page:https://gemini.google/release-notes/\n      - paragraph: 主题覆盖 google_product\n      - generic: 下批可用\n      - strong: https://ai.google.dev/gemini-api/docs/changelog\n      - paragraph: page:https://ai.google.dev/gemini-api/docs/changelog\n      - paragraph: 主题覆盖 google_product\n      - generic: 下批可用\n      - strong: https://cursor.com/pricing\n      - paragraph: page:https://cursor.com/pricing\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: https://cursor.com/changelog\n      - paragraph: page:https://cursor.com/changelog\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: https://github.com/features/copilot/plans\n      - paragraph: page:https://github.com/features/copilot/plans\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: https://github.blog/changelog/label/copilot/feed/\n      - paragraph: rss:https://github.blog/changelog/label/copilot/feed/\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: openai/codex\n      - paragraph: github:openai/codex\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: cline/cline\n      - paragraph: github:cline/cline\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: https://docs.devin.ai/desktop/changelog\n      - paragraph: page:https://docs.devin.ai/desktop/changelog\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: catalog:https://cursor.com/blog\n      - paragraph: catalog:https://cursor.com/blog\n      - paragraph: 主题覆盖 coding_products\n      - generic: 下批可用\n      - strong: https://docs.x.ai/developers/models\n      - paragraph: page:https://docs.x.ai/developers/models\n      - paragraph: 主题覆盖 xai_product\n      - generic: 下批可用\n      - strong: https://docs.x.ai/developers/release-notes\n      - paragraph: page:https://docs.x.ai/developers/release-notes\n      - paragraph: 主题覆盖 xai_product\n      - generic: 下批可用\n      - strong: catalog:https://x.ai/news\n      - paragraph: catalog:https://x.ai/news\n      - paragraph: 主题覆盖 xai_product\n      - generic: 下批可用\n      - strong: catalog:https://ai.meta.com/blog/\n      - paragraph: catalog:https://ai.meta.com/blog/\n      - paragraph: 主题覆盖 open_weight_labs\n      - generic: 下批可用\n      - strong: catalog:https://mistral.ai/news\n      - paragraph: catalog:https://mistral.ai/news\n      - paragraph: 主题覆盖 open_weight_labs\n      - generic: 下批可用\n      - strong: https://docs.mistral.ai/resources/changelogs\n      - paragraph: page:https://docs.mistral.ai/resources/changelogs\n      - paragraph: 主题覆盖 open_weight_labs\n      - generic: 下批可用\n      - strong: https://api-docs.deepseek.com/updates\n      - paragraph: page:https://api-docs.deepseek.com/updates\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: https://api-docs.deepseek.com/quick_start/pricing\n      - paragraph: page:https://api-docs.deepseek.com/quick_start/pricing\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: https://platform.moonshot.cn/docs/pricing/chat\n      - paragraph: page:https://platform.moonshot.cn/docs/pricing/chat\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: https://docs.bigmodel.cn/cn/update/new-releases\n      - paragraph: page:https://docs.bigmodel.cn/cn/update/new-releases\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: catalog:https://www.minimax.io/news\n      - paragraph: catalog:https://www.minimax.io/news\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: QwenLM/qwen-code\n      - paragraph: github:QwenLM/qwen-code\n      - paragraph: 主题覆盖 china_models\n      - generic: 下批可用\n      - strong: https://updates.midjourney.com/rss/\n      - paragraph: rss:https://updates.midjourney.com/rss/\n      - paragraph: 主题覆盖 creative_generation\n      - generic: 下批可用\n      - strong: catalog:https://bfl.ai/blog\n      - paragraph: catalog:https://bfl.ai/blog\n      - paragraph: 主题覆盖 creative_generation\n      - generic: 下批可用\n      - strong: https://simonwillison.net/atom/everything/\n      - paragraph: rss:https://simonwillison.net/atom/everything/\n      - paragraph: 主题覆盖 practitioner_commentary\n      - generic: 下批可用\n      - strong: https://www.latent.space/feed\n      - paragraph: rss:https://www.latent.space/feed\n      - paragraph: 主题覆盖 practitioner_commentary\n      - generic: 下批可用\n      - strong: https://lastweekin.ai/feed\n      - paragraph: rss:https://lastweekin.ai/feed\n      - paragraph: 主题覆盖 practitioner_commentary\n      - generic: 下批可用\n      - strong: https://www.bensbites.com/feed\n      - paragraph: rss:https://www.bensbites.com/feed\n      - paragraph: 主题覆盖 practitioner_commentary\n      - generic: 下批可用\n      - strong: https://www.qbitai.com/feed\n      - paragraph: rss:https://www.qbitai.com/feed\n      - paragraph: 主题覆盖 practitioner_commentary\n      - generic: 下批可用\n      - generic \"共享服务与其他使用者\"\n      - generic \"已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "来源库引用 cg_release_notes",
+        "pass": true
+      },
+      {
+        "text": "来源组 ai_daily_shared",
+        "pass": true
+      },
+      {
+        "text": "主题覆盖 openai_product",
+        "pass": true
+      },
+      {
+        "text": "下批可用",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "D01 宽屏布局",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 13 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": []
+  },
+  {
+    "label": "D02 320 像素窄屏",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 13 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": []
+  },
+  {
+    "label": "D03 窄屏刷新恢复",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每天 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\" [pressed]\n      - button \"来源与研究\"\n      - button \"运行计划\"\n      - button \"运行记录\"\n      - generic: 共享上游\n      - heading \"信息源 → 研究报告\" [level=2]\n      - paragraph: AI 产品变化、使用方法与对用户的实际影响\n      - generic: 13 条来源声明\n      - generic: 每天 07:30、18:30\n      - paragraph: 主题覆盖 · 自动发现 · 使用积累材料 · 按问题补材\n      - paragraph: 报告就绪后，分别接续右侧输出。\n      - button \"管理来源与研究\"\n      - paragraph: 本研究由这条链独立使用。\n      - generic: →\n      - region \"每日合集\":\n        - heading \"每日合集\" [level=3]\n        - generic: 自动接续\n        - paragraph: 汇总本期报告与材料，生成 1 条合集\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理每日合集\"\n      - region \"重点单条\":\n        - heading \"重点单条\" [level=3]\n        - generic: 自动接续\n        - paragraph: 从本期候选中选取重点，每个选题独立成片\n        - paragraph: 1.25 倍 · 时长随内容 · 输出规则 v1\n        - button \"管理重点单条\"\n      - generic: 来源与批次来自 11/17 实际配置快照；本页后续改动均为原型演练。\n      - generic \"查看已关联能力\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": []
+  },
+  {
+    "label": "D04 窄屏来源编辑",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"修改来源与研究\":\n        - heading \"修改来源与研究\" [level=2]\n        - button \"关闭\"\n        - text: 内容目标\n        - textbox \"内容目标\": AI 产品变化、使用方法与对用户的实际影响\n        - text: 目标观众\n        - textbox \"目标观众\": 开发者\n        - text: 选题策略\n        - textbox \"选题策略\": Flash 受众与选题策略\n        - checkbox \"根据选题问题自动补充材料\" [checked]\n        - text: 根据选题问题自动补充材料\n        - strong: bili_hot_ai\n        - generic: source:bili_hot_ai\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: cg_release_notes\n        - generic: source:cg_release_notes\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: cg_pro_tiers\n        - generic: source:cg_pro_tiers\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: ai_daily_shared\n        - generic: tag:ai_daily_shared\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: anthropics/claude-code\n        - generic: github:anthropics/claude-code\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: ai\n        - generic: tldr:ai\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: https://www.therundown.ai/feed\n        - generic: rss:https://www.therundown.ai/feed\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: trending\n        - generic: hf_models:trending\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: ai_radar\n        - generic: tag:ai_radar\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: ai_news\n        - generic: tag:ai_news\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: radar_official\n        - generic: tag:radar_official\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: radar_dev\n        - generic: tag:radar_dev\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - strong: OpenAI 新闻 RSS\n        - generic: source:cg_openai_news\n        - button \"移除声明\"\n        - button \"仅本链排除\"\n        - text: 来源类型\n        - combobox \"来源类型\":\n          - option \"网页 / 更新页\" [selected]\n          - option \"RSS 订阅\"\n          - option \"GitHub 仓库\"\n          - option \"来源组\"\n          - option \"来源库引用\"\n          - option \"TLDR\"\n          - option \"模型榜单\"\n          - option \"Radar\"\n          - option \"热门视频\"\n        - text: 地址或来源标识\n        - textbox \"地址或来源标识\"\n        - button \"添加来源\"\n        - generic: 网页来源只监测该页面；要持续获取新文章，请添加栏目列表或 RSS。原型不联网检测地址。\n        - checkbox \"加入主题覆盖来源\" [checked]\n        - text: 加入主题覆盖来源\n        - checkbox \"使用自动发现的来源\" [checked]\n        - text: 使用自动发现的来源\n        - checkbox \"读取已积累的历史材料\" [checked]\n        - text: 读取已积累的历史材料\n        - generic \"本链排除（优先于所有加入方式）\"\n        - button \"保存研究设置\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": []
+  },
+  {
+    "label": "D05 每周相邻时段",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status: 运行计划已更新。\n      - paragraph: 单条链路 · v2\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每周日 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每周日 07:30、18:30 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/22 07:30\n      - term: 采集范围\n      - definition: 11/15 07:30 → 11/15 18:30（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "每周日",
+        "pass": true
+      },
+      {
+        "text": "11/22",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "D06 压缩状态刷新恢复",
+    "dom": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v2\n      - heading \"AI Flash · 配置复建\" [level=1]\n      - paragraph: 启用 · 每周日 07:30、18:30 · 2 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每周日 07:30、18:30 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/22 07:30\n      - term: 采集范围\n      - definition: 11/15 07:30 → 11/15 18:30（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "每周日",
+        "pass": true
+      },
+      {
+        "text": "11/22",
+        "pass": true
+      }
+    ]
+  },
+  {
+    "label": "D07 最终两条可继续管理的链路",
+    "dom": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - heading \"我的生产链路\" [level=1]\n      - paragraph: 从信息源到视频，在一条链路里管理。\n      - button \"新建链路\"\n      - region \"科学发现 · 独立副本\":\n        - heading \"科学发现 · 独立副本\" [level=2]\n        - paragraph: 研究者使用 AI 推进科学发现的一手记录、实用方法与新发现\n        - generic: 仅手动\n        - generic: 每日合集＋科学问题解说\n        - generic: 新建演练\n        - paragraph: 1 条来源声明 → 共享研究 → 2 个输出 · 下次 无自动触发\n        - button \"管理链路\"\n      - region \"AI Flash · 配置复建\":\n        - heading \"AI Flash · 配置复建\" [level=2]\n        - paragraph: AI 产品变化、使用方法与对用户的实际影响\n        - generic: 每天 07:30、18:30\n        - generic: 每日合集＋重点单条\n        - generic: 实际配置映射\n        - paragraph: 13 条来源声明 → 共享研究 → 2 个输出 · 下次 11/17 18:30\n        - button \"管理链路\"\n      - generic: 交互演练 · 不连接生产服务。AI Flash 初始记录取自 11/17 快照；新增运行使用示例材料。\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型",
+    "checks": [
+      {
+        "text": "科学发现 · 独立副本",
+        "pass": true
+      },
+      {
+        "text": "AI Flash · 配置复建",
+        "pass": true
+      }
+    ]
+  }
+]

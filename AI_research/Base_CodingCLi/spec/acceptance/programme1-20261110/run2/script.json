@@ -1,0 +1,189 @@
+{
+ "report": "./output/chatgpt_acquisition/2026-11-10_t05_comparison.md",
+ "item": "手机上只装一个 AI，先看“能不能用”而不是跑分：豆包、元宝、千问、DeepSeek、Kimi 对 ChatGPT",
+ "next_episode": "开完会谁写纪要？微信输入法、手机系统录音、ChatGPT 语音同题比",
+ "title": "豆包、元宝、千问全免费，还值得为 ChatGPT 付费吗？",
+ "sections": [
+  {
+   "title": "先过三关：能不能装、能不能说、能不能发",
+   "paragraphs": [
+    {
+     "text": "你手机里只打算留一个 AI，第一件事不是看谁分高，是打开应用商店，看它能不能直接下。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "我是洛洛，这期帮你把“手机上只装一个”这笔账算清楚：豆包、元宝、千问、DeepSeek、Kimi，对上一个 ChatGPT，到底怎么选。",
+     "citations": [
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "结论我先放在前面：如果你日常就是张嘴问一句、拍张照片问一下、再把答案转到微信里，国内这五家的免费档已经够用，一分钱不用花。要纠结的不是谁更聪明，是哪个更顺手。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "判断顺不顺手，就看三个动作。说一句话，比如“帮我排一个周六上午的时间表，带老人小孩”；拍一张照，比如对着空调遥控器问“哪个键是除湿”；然后把结果发出去。这三件事五家基本都能做，差别在做的过程：豆包主打的就是语音输入和语音通话，聊起来最像打电话；拍照识图大家都有。真正每天要碰的是最后一步，答案是要你复制粘贴，还是能直接转进微信群里。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/",
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "入口和生态，决定你每天多按几下",
+   "paragraphs": [
+    {
+     "text": "这五家的区别，其实是你手机里已经装了什么。元宝能用微信、QQ 登录，还能查微信公众号和视频号的内容，家里人转给你的文章，它能接着往下聊。千问接的是淘宝、支付宝、高德、飞猪，在对话里就能点外卖、订酒店、查办事流程。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "国行 iPhone 这边还有个变化：官方公告写的是，2026 年 10 月 31 日苹果和阿里宣布，部分机型在 12 月升到 iOS 27.3 之后，Siri、写作工具和视觉智能里会接入千问。也就是说，到时候你不一定非要单独装一个 App。",
+     "citations": [
+      "https://www.ithome.com/1/024/542.htm"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "剩下两家思路更窄也更专：DeepSeek 页面没列付费项目，就是拿来问问题；Kimi 偏长文档、PPT、深度研究和办公文件。所以“只装一个”这道题，答案是：微信重度用户选元宝；天天在淘宝支付宝之间转的选千问；要读长报告、做 PPT 的选 Kimi；只想白用一个通用问答，DeepSeek 和豆包都行，豆包在语音上更舍得给。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/",
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "ChatGPT 不是第六个 App，是另一条路",
+   "paragraphs": [
+    {
+     "text": "这里我要说清一件事：ChatGPT 在国内应用商店里下载不到。你得有海外账号，海外手机号，或者海外区的 Apple ID、Google Play；还得有能访问海外服务的网络；付费方式和国内 App 也不一样。真正在用的人，大多数是在电脑网页上用的。所以它不是手机上第六个并列的选项，它更像另一条路。",
+     "citations": [
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "它的免费版能试，文本聊天不限量，但上传、图像、语音、深度研究、记忆这些都有额度限制，而语音和拍照恰恰是你最常用的两个。往上是 Go、Plus、Pro 三档按月订阅，Go 档页面还注明可能含广告；具体月费页面只写了“每月”，没给确切数字，得去官网看。拿个参照，海外的 AI 订阅主流一档大概是每月 19.99 美元这个量级，你可以当心理价位。",
+     "citations": [
+      "https://chatgpt.com/pricing/",
+      "https://gemini.google/subscriptions/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "还有一个数字最容易把人带偏：有研究统计，ChatGPT 占了全球 AI 聊天机器人八成以上的流量，周活跃用户 12 亿。但最多人用，和最适合你手机上那三件事，完全是两回事。",
+     "citations": [
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "如果你是这种情况，就选……",
+   "paragraphs": [
+    {
+     "text": "所以我的建议是一张很小的表：手机只留一个、主要靠说话和拍照、还要往微信里转的，豆包或元宝，看你更依赖语音还是更依赖微信；生活围着淘宝支付宝高德转的，千问；要啃长文档、写 PPT 的，Kimi；只想免费问东问西的，DeepSeek 或豆包；用国行 iPhone 又不急着装的，可以等等 12 月的系统升级。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/",
+      "https://www.ithome.com/1/024/542.htm"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "那什么时候才轮得到 ChatGPT？当你要跨语言、做深度研究、追问长文件，或者有代码工作流的时候，这些地方它才值钱。如果只是排个时间表、认个遥控器按键，为它多掏一笔月费、多折腾一套账号，不划算。",
+     "citations": [
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "你会选哪边？",
+   "paragraphs": [
+    {
+     "text": "说到底，“手机上只装一个”这个答案不在跑分榜上，在你手机已经装了什么、你每天要把结果发到哪儿。你会选商店里直接下得到的国内五家，还是愿意为 ChatGPT 多折腾一步？在评论区说说你的选择。觉得有用就点个赞、收藏起来。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "下一期我接着讲：开完会谁写纪要？微信输入法、手机系统录音和 ChatGPT 语音，同一段会议录音，谁整理得更像人写的。我是洛洛，我们下期见。",
+     "citations": [
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "length_check": {
+  "spoken_length": 1230,
+  "estimated_seconds": 276,
+  "segments": 50,
+  "units_per_second": 4.35,
+  "voice": "voxcpm_anchor",
+  "target_minutes": 5,
+  "budget": 1305,
+  "ratio": 0.92,
+  "status": "OK",
+  "tolerance": 0.15,
+  "sections": [
+   {
+    "title": "先过三关：能不能装、能不能说、能不能发",
+    "spoken_length": 293,
+    "budget": 261
+   },
+   {
+    "title": "入口和生态，决定你每天多按几下",
+    "spoken_length": 290,
+    "budget": 261
+   },
+   {
+    "title": "ChatGPT 不是第六个 App，是另一条路",
+    "spoken_length": 311,
+    "budget": 261
+   },
+   {
+    "title": "如果你是这种情况，就选……",
+    "spoken_length": 192,
+    "budget": 261
+   },
+   {
+    "title": "你会选哪边？",
+    "spoken_length": 144,
+    "budget": 261
+   }
+  ],
+  "dropped_citations": 0
+ }
+}

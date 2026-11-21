@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 import signal
@@ -15,6 +16,7 @@ from g3 import music_assets
 from g3.music_jobs import MusicJobs
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'g2/music_engine/generate.py'
+logger = logging.getLogger(__name__)
 
 
 def stop(process: subprocess.Popen) -> None:
@@ -61,8 +63,15 @@ class MusicGeneration:
         try:
             self.execute(job,stop_event)
         except Exception as exc:
-            self.jobs.update(job['id'],status='FAILED',runner_pid=None,
-                             error_code=getattr(exc,'code','MUSIC_GENERATION_FAILED'),error_message=str(exc)[-400:])
+            while True:
+                try:
+                    self.jobs.fail(job['id'], getattr(exc, 'code', 'MUSIC_GENERATION_FAILED'), str(exc)[-400:])
+                    break
+                except Exception:
+                    logger.exception('Could not record music job %s failure; retrying', job['id'])
+                    if stop_event.wait(max(1.0, self.settings.worker_poll_seconds)):
+                        # The next exclusive worker recovers the persisted RUNNING row.
+                        break
         return True
 
     def execute(self, job: dict, stop_event: threading.Event) -> None:
@@ -75,9 +84,9 @@ class MusicGeneration:
         with (work / 'generation.log').open('w') as log:
             process = subprocess.Popen([str(model_root() / 'venv/bin/python'),'-u','-B',str(SCRIPT),str(request_file)],
                 cwd=self.settings.project_root,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
-            self.jobs.update(identity,runner_pid=process.pid)
             started, stage = time.monotonic(), ''
             try:
+                self.jobs.update(identity,runner_pid=process.pid)
                 while process.poll() is None:
                     state = self.jobs.get(identity)
                     if stop_event.is_set() or state['cancel_requested']:

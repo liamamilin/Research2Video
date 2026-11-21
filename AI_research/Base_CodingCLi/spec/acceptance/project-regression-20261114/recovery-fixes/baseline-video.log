@@ -1,0 +1,266 @@
+....FFFFFFF                                                              [100%]
+=================================== FAILURES ===================================
+_____________ test_failure_write_retries_before_claiming_next_job ______________
+
+job = {'active_stage': 'PLAN', 'attempt_count': 0, 'attempt_no': 1, 'background_music_json': None, ...}
+event = <threading.Event object at 0x10b99aad0>
+
+    def execute(job, event):
+        processed.append(job["job_id"])
+        if len(processed) == 1:
+            blocker.execute("BEGIN IMMEDIATE")
+>           raise OSError("temporary disk failure")
+E           OSError: temporary disk failure
+
+g3/tests/test_worker_recovery.py:121: OSError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_failure_write_retries_bef0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bd85900>
+
+    def test_failure_write_retries_before_claiming_next_job(tmp_path, monkeypatch):
+        store = JobStore(tmp_path / "data")
+        store.initialize()
+        ids = [str(uuid4()), str(uuid4())]
+        for ident in ids:
+            store.create_job(ident, {"title": "recovery", "source_text": "用于验证异常恢复的素材。" * 20,
+                                    "target_duration_sec": 18, "theme": "minimal_dark", "voice_id": "zf_xiaoxiao"})
+        original_connect = store._connect
+
+        def connect():
+            conn = original_connect()
+            conn.execute("PRAGMA busy_timeout=1")
+            return conn
+
+        monkeypatch.setattr(store, "_connect", connect)
+        blocker = sqlite3.connect(store.db_path, isolation_level=None)
+        processed, delays = [], []
+        stop = threading.Event()
+
+        def execute(job, event):
+            processed.append(job["job_id"])
+            if len(processed) == 1:
+                blocker.execute("BEGIN IMMEDIATE")
+                raise OSError("temporary disk failure")
+            assert store.get_job(processed[0])["status"] == "FAILED"
+            store.mark_completed(job["job_id"], job["attempt_no"], [])
+            event.set()
+
+        def wait(seconds):
+            delays.append(seconds)
+            # Restore the database after the first failed terminal-state write.
+            blocker.rollback()
+            return stop.is_set()
+
+        monkeypatch.setattr(stop, "wait", wait)
+        worker = SingleWorker(Settings(), store, SimpleNamespace(execute=execute))
+        worker.stop_event = stop
+        try:
+>           worker._loop()
+
+g3/tests/test_worker_recovery.py:136:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+g3/worker.py:524: in _loop
+    logger.exception("Video worker idle task failed; queue remains active")
+g3/store.py:550: in mark_failed
+    with self._transaction() as conn:
+../../../../.pyenv/versions/3.10.13/lib/python3.10/contextlib.py:135: in __enter__
+    return next(self.gen)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <g3.store.JobStore object at 0x10bd85840>
+
+    @contextmanager
+    def _transaction(self) -> Iterator[sqlite3.Connection]:
+        conn = self._connect()
+>       try:
+E       sqlite3.OperationalError: database is locked
+
+g3/store.py:55: OperationalError
+_______________ test_failure_persistence_retry_stops_on_shutdown _______________
+
+args = ({'attempt_no': 1, 'job_id': 'one'}, <test_worker_recovery.StopEvent object at 0x10bfcfa90>)
+
+    def fail(*args):
+        calls.append(args)
+>       raise sqlite3.OperationalError("database is locked")
+E       sqlite3.OperationalError: database is locked
+
+g3/tests/test_worker_recovery.py:155: OperationalError
+
+During handling of the above exception, another exception occurred:
+
+    def test_failure_persistence_retry_stops_on_shutdown():
+        calls = []
+        stop = StopEvent()
+
+        def fail(*args):
+            calls.append(args)
+            raise sqlite3.OperationalError("database is locked")
+
+        def wait(seconds):
+            stop.set()
+            return True
+
+        stop.wait = wait
+        store = SimpleNamespace(claim_next=lambda: {"job_id": "one", "attempt_no": 1}, mark_failed=fail)
+        worker = SingleWorker(Settings(), store, SimpleNamespace(execute=fail))
+        worker.stop_event = stop
+>       worker._loop()
+
+g3/tests/test_worker_recovery.py:165:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+g3/worker.py:524: in _loop
+    logger.exception("Video worker idle task failed; queue remains active")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = ('one', 1, 'PLAN', 'WORKER_UNEXPECTED_ERROR', 'OperationalError: database is locked', True)
+
+    def fail(*args):
+        calls.append(args)
+>       raise sqlite3.OperationalError("database is locked")
+E       sqlite3.OperationalError: database is locked
+
+g3/tests/test_worker_recovery.py:155: OperationalError
+___________ test_transaction_closes_connection_when_begin_is_locked ____________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_transaction_closes_connec0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b998520>
+
+    def test_transaction_closes_connection_when_begin_is_locked(tmp_path, monkeypatch):
+        store = JobStore(tmp_path)
+        cleanup = []
+
+        def begin(sql):
+            raise sqlite3.OperationalError("database is locked")
+
+        monkeypatch.setattr(store, "_connect", lambda: SimpleNamespace(
+            execute=begin, rollback=lambda: cleanup.append("rollback"), close=lambda: cleanup.append("close")))
+        with pytest.raises(sqlite3.OperationalError):
+            with store._transaction():
+                pytest.fail("locked transaction must not run its body")
+>       assert "close" in cleanup
+E       AssertionError: assert 'close' in []
+
+g3/tests/test_worker_recovery.py:181: AssertionError
+_____________ test_health_detects_a_primary_worker_that_has_exited _____________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_health_detects_a_primary_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bfcc040>
+
+    def test_health_detects_a_primary_worker_that_has_exited(tmp_path, monkeypatch):
+        alive = [True]
+
+        def start(self):
+            self.thread = SimpleNamespace(is_alive=lambda: alive[0])
+            return True
+
+        monkeypatch.setattr(SingleWorker, "start", start)
+        monkeypatch.setattr(SingleWorker, "stop", lambda self: None)
+        with TestClient(create_app(Settings(data_dir=tmp_path / "data"))) as client:
+            assert client.get("/api/health").json() == {"status": "ok", "worker_primary": True}
+            alive[0] = False
+>           assert client.get("/api/health").json() == {"status": "degraded", "worker_primary": False}
+E           AssertionError: assert {'status': 'o...rimary': True} == {'status': 'd...imary': False}
+E
+E             Differing items:
+E             {'status': 'ok'} != {'status': 'degraded'}
+E             {'worker_primary': True} != {'worker_primary': False}
+E             Use -v to get more diff
+
+g3/tests/test_worker_recovery.py:196: AssertionError
+_______ test_secondary_app_never_recovers_the_active_workers_jobs[True] ________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_secondary_app_never_recov0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bf7fc10>
+start_worker = True
+
+    @pytest.mark.parametrize("start_worker", [True, False])
+    def test_secondary_app_never_recovers_the_active_workers_jobs(tmp_path, monkeypatch, start_worker):
+        settings = Settings(data_dir=tmp_path / "data")
+        store = JobStore(settings.data_dir)
+        store.initialize()
+        ident = str(uuid4())
+        store.create_job(ident, {"title": "active", "source_text": "正在生成的任务素材。" * 20,
+                                "target_duration_sec": 18, "theme": "minimal_dark", "voice_id": "zf_xiaoxiao"})
+        store.claim_next()
+        reaped = []
+        monkeypatch.setattr(G2ProcessRunner, "reap_orphan", lambda self, pid: reaped.append(pid))
+        # Represent an already-running primary process holding the same worker lock.
+        with (settings.data_dir / "worker.lock").open("a+") as primary_lock:
+            fcntl.flock(primary_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with TestClient(create_app(settings, start_worker=start_worker)) as client:
+                assert client.get("/api/health").json()["worker_primary"] is False
+>               assert store.get_job(ident)["status"] == "RUNNING"
+E               AssertionError: assert 'FAILED' == 'RUNNING'
+E
+E                 - RUNNING
+E                 + FAILED
+
+g3/tests/test_worker_recovery.py:215: AssertionError
+_______ test_secondary_app_never_recovers_the_active_workers_jobs[False] _______
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_secondary_app_never_recov1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c017bb0>
+start_worker = False
+
+    @pytest.mark.parametrize("start_worker", [True, False])
+    def test_secondary_app_never_recovers_the_active_workers_jobs(tmp_path, monkeypatch, start_worker):
+        settings = Settings(data_dir=tmp_path / "data")
+        store = JobStore(settings.data_dir)
+        store.initialize()
+        ident = str(uuid4())
+        store.create_job(ident, {"title": "active", "source_text": "正在生成的任务素材。" * 20,
+                                "target_duration_sec": 18, "theme": "minimal_dark", "voice_id": "zf_xiaoxiao"})
+        store.claim_next()
+        reaped = []
+        monkeypatch.setattr(G2ProcessRunner, "reap_orphan", lambda self, pid: reaped.append(pid))
+        # Represent an already-running primary process holding the same worker lock.
+        with (settings.data_dir / "worker.lock").open("a+") as primary_lock:
+            fcntl.flock(primary_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with TestClient(create_app(settings, start_worker=start_worker)) as client:
+                assert client.get("/api/health").json()["worker_primary"] is False
+>               assert store.get_job(ident)["status"] == "RUNNING"
+E               AssertionError: assert 'FAILED' == 'RUNNING'
+E
+E                 - RUNNING
+E                 + FAILED
+
+g3/tests/test_worker_recovery.py:215: AssertionError
+__________________ test_startup_failure_releases_worker_lock ___________________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-387/test_startup_failure_releases_0')
+
+    def test_startup_failure_releases_worker_lock(tmp_path):
+        def fail():
+            raise OSError("temporary recovery error")
+
+        worker = SingleWorker(Settings(data_dir=tmp_path), None, None, on_start=fail)
+        try:
+            with pytest.raises(OSError):
+                worker.start()
+            with (tmp_path / "worker.lock").open("a+") as replacement:
+>               fcntl.flock(replacement, fcntl.LOCK_EX | fcntl.LOCK_NB)
+E               BlockingIOError: [Errno 35] Resource temporarily unavailable
+
+g3/tests/test_worker_recovery.py:228: BlockingIOError
+=============================== warnings summary ===============================
+../../../../.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; logfire
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+../../../../.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED g3/tests/test_worker_recovery.py::test_failure_write_retries_before_claiming_next_job
+FAILED g3/tests/test_worker_recovery.py::test_failure_persistence_retry_stops_on_shutdown
+FAILED g3/tests/test_worker_recovery.py::test_transaction_closes_connection_when_begin_is_locked
+FAILED g3/tests/test_worker_recovery.py::test_health_detects_a_primary_worker_that_has_exited
+FAILED g3/tests/test_worker_recovery.py::test_secondary_app_never_recovers_the_active_workers_jobs[True]
+FAILED g3/tests/test_worker_recovery.py::test_secondary_app_never_recovers_the_active_workers_jobs[False]
+FAILED g3/tests/test_worker_recovery.py::test_startup_failure_releases_worker_lock
+7 failed, 4 passed, 2 warnings in 0.23s

@@ -5,7 +5,7 @@
 
 name: 专题速览
 description: 带{{audience}}看见这个领域里有意思的新事情，把相关的发现串成一次好听的讲述，听过后对这个世界多懂一点。
-status: experimental
+status: enabled
 tags:
   domain:
     key: topics
@@ -16,7 +16,7 @@ tags:
   format:
     key: long
     name: B 站横屏长
-audiences: [general]
+audiences: [general, developer, non_tech]
 target_minutes: 3
 minutes_range: [3, 6]
 topic:

@@ -182,7 +182,9 @@ def write(script: dict, *, started_by: str, llm_config=None, style=None) -> str:
         binding = production.get(settings.paths.config_dir, settings.paths.jobs_dir, script['production'])
         default = content_columns.snapshot(settings.paths.config_dir, binding.key, binding.job) if binding else {}
         topic = episodes.material_topic(script['topic'], default)
-        context = episodes.snapshot_context(script.get('content_context') or default, topic)
+        frozen = script.get('content_context') or {}
+        # an A/B assignment mark alone does not count as a saved context (spec/ab-testing.md §2)
+        context = episodes.snapshot_context(frozen if any(k != 'experiments' for k in frozen) else {**default, **frozen}, topic)
         if topic != script['topic']:
             mode_update = {'topic': topic, 'content_context': context}
             script = {**script, 'topic': topic, 'content_context': context}

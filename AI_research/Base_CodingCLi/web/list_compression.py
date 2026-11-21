@@ -4,7 +4,17 @@ from starlette.middleware.gzip import GZipMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 
-LIST_PATHS = frozenset(('/api/video/scripts', '/api/video/shipments', '/api/video/autopilot'))
+LIST_PATHS = frozenset((
+    '/api/video/scripts', '/api/video/shipments', '/api/video/autopilot',
+    '/api/chains', '/api/chains/catalog', '/api/matrices', '/api/jobs', '/api/outputs',
+    '/api/video/board', '/api/video/topics/browser', '/api/sources',
+    '/api/reports', '/api/reports/tree', '/api/video/recipes', '/api/pipeline/rounds',
+    '/api/platforms/bilibili', '/api/platforms/douyin', '/api/scheduler',
+    '/api/assistant/workspace', '/api/video/production',
+))
+
+_COMPRESSIBLE_PREFIXES = ('/api/chains/', '/api/platforms/social/')
+_EXCLUDED_SEGMENTS = ('/stream', '/files/', '/covers/', '/artifacts/', '/screenshots/', '/download', '/events', '/media')
 
 
 def accepts_gzip(value: str) -> bool:
@@ -21,15 +31,24 @@ def accepts_gzip(value: str) -> bool:
     return False
 
 
+def _compressible_path(path: str) -> bool:
+    clean = path.rstrip('/')
+    if clean in LIST_PATHS:
+        return True
+    if any(clean.startswith(prefix) for prefix in _COMPRESSIBLE_PREFIXES):
+        return not any(seg in clean for seg in _EXCLUDED_SEGMENTS)
+    return False
+
+
 class ListCompressionMiddleware:
-    """Keep existing JSON contracts and negotiate compression only on list GETs."""
+    """Keep existing JSON contracts and negotiate compression on JSON API GETs."""
 
     def __init__(self, app: ASGIApp):
         self.app = app
         self.compressed = GZipMiddleware(app, minimum_size=1024, compresslevel=3)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope['type'] == 'http' and scope['method'] == 'GET' and scope['path'].rstrip('/') in LIST_PATHS:
+        if scope['type'] == 'http' and scope['method'] == 'GET' and _compressible_path(scope['path']):
             headers = Headers(scope=scope)
             if 'range' not in headers and accepts_gzip(headers.get('accept-encoding', '')):
                 # Content-coding names are case insensitive; Starlette's gzip

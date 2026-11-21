@@ -1,0 +1,15 @@
+范围：仅独立交互原型。正式代码、配置、数据库和生产任务保持不动。
+
+结果目标
+1. 保留现有产品导航位置，新增链路管理入口；各页操作同一份模拟对象。
+2. AI Flash 与新建科研链路均可从矩阵、来源、Job、周期、报告、文稿和成片页定位及返回。
+3. 专业页面的修改在链路中生效；链路修改在专业页面可见。历史批次保留启动设置。
+4. 分清暂停链路接续、暂停共享研究计划、矩阵停计划，以及删除配置后的历史保留。
+
+验证
+用浏览器完成现有链路修改和新链六步创建，运行后跨页找到产物；修改共享来源和矩阵默认；暂停/删除链路后检查调度、共享研究和历史。
+保存操作文本证据、截图及正式文件哈希。原型模拟不是正式集成、真实调度或视频生成验收。
+
+依据
+ui/src/components/Sidebar.tsx；ui/src/pages/Matrices.tsx；ui/src/pages/Scheduler.tsx；ui/src/pages/Sources.tsx；ui/src/components/SourceEditor.tsx。
+既有研究证据：../round2/SOURCE_EVIDENCE.txt 与 ../prototype-newcomer-20261117/WINDOW_FIX.txt。

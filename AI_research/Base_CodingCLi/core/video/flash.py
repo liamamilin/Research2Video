@@ -15,6 +15,8 @@ from __future__ import annotations
 import os
 import re
 
+from core.provenance import extract_urls
+
 from .sources import parse_list
 from .topics import Topic
 
@@ -24,7 +26,6 @@ _ITEM = re.compile(r"^#{2,4}\s+(\d+(?:\.\d+)*)(?:\s*[.．、:：]\s*|\s+)(.+?)\s
 _HEADING = re.compile(r"^#{1,4}\s")
 _FIELD = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*[:：]\s*(.*)$")
 _NESTED = re.compile(r"^\s{2,}[-*]\s+(.*)$")
-_URL = re.compile(r"https?://[^\s)\]；;，,>]+")
 _REF = re.compile(r"\[(\d+)\]")
 
 #: placeholder field ← the names it may go by (the first one found is used when the field is missing)
@@ -99,7 +100,7 @@ def _complete(topic: Topic, sources: dict[str, dict]) -> None:
                 fields[name] = found
     cited = fields.get("证据来源", "")
     chosen = [sources[n] for n in dict.fromkeys(_REF.findall(cited)) if n in sources]
-    urls = [s["url"] for s in chosen] or list(dict.fromkeys(u.rstrip(".") for u in _URL.findall(cited)))
+    urls = [s["url"] for s in chosen] or extract_urls(cited + "\n" + fields.get("来源网址", ""))
     fields["来源网址"] = "\n".join(urls)
     fields["来源明细"] = "\n".join(
         " | ".join(p for p in (s["title"], s["kind"], s["date"], s["url"]) if p) for s in chosen)

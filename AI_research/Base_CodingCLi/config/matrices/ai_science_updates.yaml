@@ -1,0 +1,11 @@
+name: AI 科研进展
+domain: AI 科研进展
+keywords: []
+jobs:
+- chains/ai_science_updates
+render:
+  video_speed: 1.25
+content:
+  name: AI 科研进展
+  role: domain
+  status: configured

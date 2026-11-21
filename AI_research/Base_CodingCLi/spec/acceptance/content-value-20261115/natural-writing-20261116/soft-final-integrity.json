@@ -1,0 +1,18 @@
+{
+  "files": 91,
+  "hashes_match": true,
+  "job_count": 74,
+  "bindings": 57,
+  "job_modifications": 43,
+  "module_guidance_sha256": "9b7c56c1816ff8b61dd1867a780fdf372f57af9101800c1ea6a999822f968b1e",
+  "goal_status": "scoped prompt cleanup and textual evidence complete",
+  "quality_stability": "No stability guarantee; sampled quality and limits documented.",
+  "service_status": "healthy restarted; author-input-dedup-activation.json",
+  "input_style_followup": "question_material.VERSION=3; 91 focused tests pass",
+  "research_brief_scope": "research-brief-scope.json",
+  "optional_role_config": "optional-role-config-diff.json",
+  "wrap_scope": "wrap-scope.json",
+  "t05_kept_item": "t05-kept-item-runtime.json",
+  "author_input_dedup": "author-input-dedup-runtime.json",
+  "research_field_soft_scope": "research-field-soft-scope.json"
+}

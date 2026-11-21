@@ -103,18 +103,21 @@ class BilibiliClient:
         self.cookies = {c["name"]: c["value"] for c in (credentials or {}).get("cookie_info", {}).get("cookies", [])}
 
     def request(self, path: str, *, passport: bool = False, member: bool = False,
-                data: dict | None = None, allowed_codes: tuple[int, ...] = (), timeout: float = 20, **params) -> tuple[dict, httpx.Cookies]:
+                data: dict | None = None, json_body: dict | None = None, allowed_codes: tuple[int, ...] = (),
+                timeout: float = 20, **params) -> tuple[dict, httpx.Cookies]:
         try:
             host = MEMBER if member else PASSPORT if passport else API
             headers = {**HEADERS, "Referer": MEMBER + "/"} if member else HEADERS
             with httpx.Client(headers=headers, cookies=self.cookies, timeout=timeout, follow_redirects=False) as client:
-                response = client.request("POST" if data is not None else "GET", host + path,
-                                          params=params, data=data)
+                response = client.request("POST" if data is not None or json_body is not None else "GET", host + path,
+                                          params=params, data=data, json=json_body)
                 response.raise_for_status()
                 result = response.json()
                 if result.get("code") != 0 and result.get("code") not in allowed_codes:
                     code = result.get("code")
-                    raise BilibiliRejected(f"B 站接口返回 {code}，请检查登录状态或稍后重试。", code=code)
+                    error = BilibiliRejected(f"B 站接口返回 {code}，请检查登录状态或稍后重试。", code=code)
+                    error.provider_message = str(result.get('message') or '')[:200]
+                    raise error
                 if result.get("code") in allowed_codes:
                     return {"pending_code": result["code"]}, response.cookies
                 return result.get("data") or {}, response.cookies
@@ -187,7 +190,14 @@ class BilibiliClient:
                 archive = entry["Archive"]
                 if archive.get("mid") and str(archive["mid"]) != self.cookies.get("DedeUserID"):
                     raise BilibiliError("稿件列表账号不一致，本次不改变投稿状态。")
-                rows.append({k: archive[k] for k in ("bvid", "title", "desc", "tid", "ctime", "state", "state_desc") if k in archive})
+                row = {k: archive[k] for k in ("bvid", "title", "desc", "tid", "ctime", "state", "state_desc") if k in archive}
+                # 流量受影响: the creator list carries the platform's own limit flag and per-problem detail.
+                row["limit_state"] = bool(archive.get("limit_state"))
+                row["problems"] = [{"reason": str(p.get("reject_reason") or ""),
+                                    "title": str(p.get("problem_description_title") or ""),
+                                    "position": str(p.get("violation_position") or "")}
+                                   for p in entry.get("problem_detail") or [] if isinstance(p, dict)]
+                rows.append(row)
             if page*metadata["ps"] >= total:
                 break
         return {"archives": rows, "total": total, "pages": page, "complete": page*metadata["ps"] >= total}
@@ -199,6 +209,114 @@ class BilibiliClient:
         if str((data.get("owner") or {}).get("mid")) != uid:
             raise BilibiliError("只能管理当前登录账号发布的视频。")
         return data
+
+    def archive_for_edit(self, bvid: str) -> dict:
+        """Creator view includes cover43 and existing part CIDs, even during review."""
+        if not BV.fullmatch(bvid):
+            raise BilibiliError('请输入完整的 BV 号。')
+        data, _ = self.request('/x/vupre/web/archive/view', member=True, bvid=bvid)
+        archive = data.get('archive') or {}
+        if str(archive.get('mid')) != self.cookies.get('DedeUserID') or archive.get('bvid') != bvid:
+            raise BilibiliError('只能修改当前账号的稿件封面。')
+        if not archive.get('aid') or not data.get('videos') or any(not v.get('cid') or not v.get('filename') for v in data['videos']):
+            raise BilibiliError('未取得完整的稿件分 P 信息，未修改封面。')
+        return data
+
+    def upload_cover(self, path: Path, cache_dir: Path) -> str:
+        """Upload an image only; cache by account and file contents, never by its filename."""
+        raw = path.read_bytes()
+        key = hashlib.sha256(self.cookies.get('DedeUserID', '').encode() + b'\0' + raw).hexdigest()
+        cache = cache_dir / f'cover-{key}.json'
+        if cache.is_file():
+            saved = json.loads(cache.read_text())
+            if saved.get('url'):
+                return saved['url']
+        mime = 'image/png' if raw.startswith(b'\x89PNG\r\n\x1a\n') else 'image/jpeg'
+        data, _ = self.request('/x/vu/web/cover/up', member=True, timeout=45,
+                               data={'cover': f'data:{mime};base64,' + base64.b64encode(raw).decode(),
+                                     'csrf': self.cookies.get('bili_jct', '')})
+        url = data.get('url', '')
+        if not isinstance(url, str) or not url.startswith(('https://', 'http://', '//')):
+            raise BilibiliError('B 站没有返回封面地址。')
+        private_json(cache, {'url': url, 'sha256': hashlib.sha256(raw).hexdigest()})
+        return url
+
+    def edit_covers(self, snapshot: dict, cover: str, cover43: str) -> None:
+        """Read-modify-write the existing archive; keep metadata and all part identities."""
+        archive = snapshot['archive']
+        # The creator view is a display model, not an edit DTO. In particular
+        # recreate/human_type2 are objects there but integers in /web/edit.
+        fields = ('aid', 'copyright', 'source', 'tid', 'tid_v2', 'title', 'desc_format_id',
+                  'desc', 'desc_v2', 'dynamic', 'dynamic_v2', 'tag', 'dtime', 'interactive',
+                  'mission_id', 'lossless_music', 'no_reprint', 'is_only_self', 'charging_pay',
+                  'is_360', 'no_public', 'is_space_hidden', 'topic_id', 'topic_name', 'neutral_mark')
+        payload = {k: archive[k] for k in fields if k in archive}
+        for key, member in (('human_type2', 'id'), ('recreate', 'switch')):
+            if key in archive:
+                value = archive[key]
+                payload[key] = value[member] if isinstance(value, dict) else value
+        if 'creation_statement' in archive:
+            # Unlike human_type2, this remains an object. Sending its id alone
+            # is rejected with 21001 (confirmed against an existing archive).
+            payload['creation_statement'] = archive['creation_statement']
+        if 'watermark' in snapshot:
+            payload['watermark'] = {'state': snapshot['watermark']['state']}
+        if 'no_disturbance' in snapshot:
+            payload['no_disturbance'] = snapshot['no_disturbance']
+        subtitle = snapshot.get('subtitle')
+        if subtitle:
+            payload['subtitle'] = {'open': int(subtitle.get('open', subtitle.get('allow', False))), 'lan': subtitle.get('lan', '')}
+        payload['dolby'] = archive.get('is_dolby', archive.get('dolby', 0))
+        reply = snapshot.get('reply') or {}
+        if 'up_selection' in reply:
+            payload['up_selection_reply'] = bool(reply['up_selection'])
+        payload.update({k: reply[k] for k in ('up_selection_reply', 'up_close_reply', 'up_close_danmu') if k in reply})
+        payload.update(cover=cover, cover43=cover43, csrf=self.cookies.get('bili_jct', ''), videos=[
+            {k: v[k] for k in ('filename', 'cid', 'title', 'desc') if k in v} for v in snapshot['videos']])
+        self.request('/x/vu/web/edit', member=True, csrf=self.cookies.get('bili_jct', ''),
+                     t=int(time.time() * 1000), json_body=payload, timeout=45)
+
+    # 合集 (UGC seasons): request shapes follow the creator center's own web client.
+    def season_sections(self) -> dict[int, int]:
+        """Each of the account's seasons mapped to the section new episodes join (the last one, as the web client does)."""
+        result: dict[int, int] = {}
+        for page in range(1, 11):
+            data, _ = self.request("/x2/creative/web/seasons", member=True, pn=page, ps=30,
+                                   order="mtime", sort="desc", draft=1)
+            for row in data.get("seasons") or []:
+                season = (row or {}).get("season") or {}
+                sections = ((row or {}).get("sections") or {}).get("sections") or []
+                if season.get("id") and sections and sections[-1].get("id"):
+                    result[int(season["id"])] = int(sections[-1]["id"])
+            if page * 30 >= int(data.get("total") or 0):
+                break
+        return result
+
+    def section_aids(self, section_id: int) -> set[int]:
+        data, _ = self.request("/x2/creative/web/season/section", member=True, id=section_id)
+        return {int(e["aid"]) for e in data.get("episodes") or [] if isinstance(e, dict) and e.get("aid")}
+
+    def season_episode_state(self, aids: list[int]) -> dict[int, dict]:
+        """Whether each video may join a season now; a non-zero ``code`` comes with the platform's reason."""
+        data, _ = self.request("/x2/creative/web/season/section/episode/verify/batch", member=True,
+                               aids=",".join(str(a) for a in aids))
+        audits = data.get("ep_audits") or {}
+        return {int(aid): {"cid": int((row or {}).get("cid") or 0), "code": int((row or {}).get("code") or 0),
+                           "msg": str((row or {}).get("msg") or "")} for aid, row in audits.items()}
+
+    def create_season(self, title: str, cover: str, desc: str = "") -> int:
+        data, _ = self.request("/x2/creative/web/season/add", member=True, csrf=self.cookies.get("bili_jct", ""),
+                               json_body={"title": title, "cover": cover, "desc": desc})
+        if not isinstance(data, int) or data <= 0:
+            raise BilibiliError("B 站没有返回合集 ID，请到创作中心核对是否已创建。")
+        return data
+
+    def add_to_season(self, section_id: int, episodes: list[dict]) -> None:
+        """``episodes``: dicts with aid, cid and title."""
+        self.request("/x2/creative/web/season/section/episodes/add", member=True, csrf=self.cookies.get("bili_jct", ""),
+                     json_body={"sectionId": section_id, "episodes": [
+                         {"title": e["title"], "aid": int(e["aid"]), "cid": int(e["cid"]),
+                          "charging_pay": 0, "member_first": 0} for e in episodes]})
 
     def comments(self, info: dict, page: int = 1) -> tuple[list[dict], bool]:
         data, _ = self.request("/x/v2/reply", oid=info["aid"], type=1, pn=page, ps=20, sort=0)
@@ -232,6 +350,30 @@ class BilibiliClient:
         if not rpid.isdigit() or int(rpid) <= 0:
             raise BilibiliError("B 站未返回评论 ID，请到视频下核对，避免重复发送。")
         return rpid
+
+    def own_comments(self, info: dict, mid: str, pages: int = 3) -> list[dict]:
+        """The owner's top-level comments: the pinned one plus the newest pages."""
+        data, _ = self.request("/x/v2/reply/main", type=1, oid=info["aid"], mode=3)
+        rows = list(data.get("top_replies") or [])
+        for page in range(1, pages + 1):
+            found, more = self.comments(info, page)
+            rows += [r for r in found if not r.get("root")]
+            if not more:
+                break
+        seen, mine = set(), []
+        for row in rows:
+            rpid = str(row.get("rpid") or "")
+            if rpid and rpid not in seen and str(row.get("mid") or (row.get("member") or {}).get("mid")) == str(mid):
+                seen.add(rpid)
+                mine.append({"rpid": rpid, "message": str((row.get("content") or {}).get("message") or "")})
+        return mine
+
+    def delete_comment(self, info: dict, rpid: str) -> None:
+        """Delete one of the owner's comments; one already gone (12022) counts as deleted."""
+        if not rpid.isdigit() or int(rpid) <= 0:
+            raise BilibiliError("没有可删除的评论 ID。")
+        self.request("/x/v2/reply/del", data={"oid": info["aid"], "type": 1, "rpid": rpid,
+                     "csrf": self.cookies.get("bili_jct", "")}, allowed_codes=(12022,))
 
     def pin_comment(self, info: dict, rpid: str) -> None:
         if not rpid.isdigit() or int(rpid) <= 0:
@@ -394,6 +536,21 @@ def upload(credentials: dict, video_path: Path, payload: dict, work_dir: Path) -
                 "--tid", str(payload["tid"]), "--title", payload["title"], "--desc", payload["description"],
                 "--tag", ",".join(payload["tags"])]
         args += ["--cover", str(cover)]
+        extra_fields = {}
+        if payload.get("ai_generated"):
+            extra_fields["creation_statement"] = {"id": 1}
+        if payload.get('cover43'):
+            try:
+                from web.services.bilibili_covers import image_data
+                path43 = Path(payload['cover43'])
+                image_data(path43.read_bytes(), '4x3')
+                url43 = BilibiliClient(credentials).upload_cover(path43, work_dir)
+            except (OSError, BilibiliError) as exc:
+                upload_diagnostic(work_dir, {'phase': 'cover', 'confirmed_not_submitted': True})
+                raise UploadFailed('4:3 封面上传失败，视频尚未提交，请检查图片或网络后重试。') from exc
+            extra_fields['cover43'] = url43
+        if extra_fields:
+            args += ['--extra-fields', json.dumps(extra_fields)]
         if payload.get("dtime"):  # scheduled publish; the platform requires more than 4 hours ahead
             args += ["--dtime", str(int(payload["dtime"]))]
         args += ["--", str(video_path.resolve())]

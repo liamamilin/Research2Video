@@ -11,8 +11,11 @@ const VIEWS = [
   { key: 'publish' as const, label: '可发布', detail: '当前定稿版本，成片可用', icon: Send },
 ];
 
-export function AssistantOverview({ onPrompt, disabled = false, readOnly = false }: {
-  onPrompt: (text: string) => void; disabled?: boolean; readOnly?: boolean;
+const OVERVIEW_CACHE_TTL_MS = 12_000;
+const overviewCache = new Map<string, { at: number; data: Awaited<ReturnType<typeof getOperationsOverview>> }>();
+
+export function AssistantOverview({ onPrompt, disabled = false, readOnly = false, visible = true }: {
+  onPrompt: (text: string) => void; disabled?: boolean; readOnly?: boolean; visible?: boolean;
 }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,13 +27,24 @@ export function AssistantOverview({ onPrompt, disabled = false, readOnly = false
   const [page, setPage] = useState({ scope: '', offset: 0 });
   const scope = `${matrix}:${platform}:${view}`;
   const offset = page.scope === scope ? page.offset : 0;
-  const load = useCallback((signal: AbortSignal) => getOperationsOverview({ matrix, platform, view, offset }, signal), [matrix, platform, view, offset]);
+  const cacheKey = `${scope}:${offset}`;
+  const load = useCallback(async (signal: AbortSignal) => {
+    const cached = overviewCache.get(cacheKey);
+    if (cached && Date.now() - cached.at < OVERVIEW_CACHE_TTL_MS) return cached.data;
+    const result = await getOperationsOverview({ matrix, platform, view, offset }, signal);
+    if (!signal.aborted) overviewCache.set(cacheKey, { at: Date.now(), data: result });
+    return result;
+  }, [cacheKey, matrix, platform, view, offset]);
   const [active, setActive] = useState(false);
   const resource = usePageResource(useCallback(async (signal: AbortSignal) => {
     const result = await load(signal);
     if (!signal.aborted) setActive(result.active);
     return result;
-  }, [load]), active ? 15000 : 0);
+  }, [load]), active && visible ? 15000 : 0);
+  const reloadFresh = () => {
+    overviewCache.delete(cacheKey);
+    void resource.reload();
+  };
   const data = resource.data;
   const change = (key: string, value: string) => {
     const next = new URLSearchParams(location.search);
@@ -47,9 +61,9 @@ export function AssistantOverview({ onPrompt, disabled = false, readOnly = false
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex-1"><h2 className="font-semibold text-lg">全局总览</h2><p className="text-xs text-text-muted mt-1">先看运营全貌，再进入具体工作。</p></div>
       <span className="text-xs text-text-muted">{data ? `更新 ${new Date(data.at).toLocaleTimeString('zh-CN')}` : ''}</span>
-      <button className="btn text-xs" disabled={resource.loading} onClick={() => void resource.reload()}><RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? 'animate-spin' : ''}`} />刷新总览</button>
+      <button className="btn text-xs" disabled={resource.loading} onClick={reloadFresh}><RefreshCw className={`w-3.5 h-3.5 ${resource.loading ? 'animate-spin' : ''}`} />刷新总览</button>
     </div>
-    {resource.error && <div role="alert" className="card p-4 text-sm text-danger">{resource.error}<button className="btn text-xs ml-3" onClick={() => void resource.reload()}>重试</button>{data && <p className="text-xs mt-2">当前保留上次成功读取的数据。</p>}</div>}
+    {resource.error && <div role="alert" className="card p-4 text-sm text-danger">{resource.error}<button className="btn text-xs ml-3" onClick={reloadFresh}>重试</button>{data && <p className="text-xs mt-2">当前保留上次成功读取的数据。</p>}</div>}
     {!data && resource.loading && <p role="status" className="text-sm text-text-muted">正在汇总各矩阵的工作…</p>}
     {data && <>
       {!!data.warnings.length && <div role="alert" className="card p-4 text-sm text-warning space-y-1">{data.warnings.map(w => <p key={w}>{w}</p>)}</div>}

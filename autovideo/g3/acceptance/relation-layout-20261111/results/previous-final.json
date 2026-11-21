@@ -1,0 +1,378 @@
+{
+  "split": "previous",
+  "sha256": "39748f1af715a0904d25b82fd6efb1e8258d4669fcce135d761d05612fb982f9",
+  "summary": {
+    "1": {
+      "cases": 20,
+      "failed": 0,
+      "index": 8
+    },
+    "0.9": {
+      "cases": 20,
+      "failed": 0,
+      "index": 11
+    }
+  },
+  "cases": [
+    {
+      "id": "holdout2-flow-00",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.89093120691985,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-00",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-01",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout2-flow-01",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout2-flow-02",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-02",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-03",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-03",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-04",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.75757575757576,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-04",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.18181818181818,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-05",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.69747899159664,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-05",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.127731092436974,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-06",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-06",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-07",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-07",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-08",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-08",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-09",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.89093120691985,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-09",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-10",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.81787521079258,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-10",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.23608768971332,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-11",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-11",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-12",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout2-flow-12",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout2-flow-13",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-13",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-14",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.87837837837838,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-14",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.29054054054054,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-15",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.89093120691985,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-15",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-16",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-16",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout2-flow-17",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-17",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-18",
+      "family": "flow",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-18",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 540
+    },
+    {
+      "id": "holdout2-flow-19",
+      "family": "flow",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout2-flow-19",
+      "family": "flow",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 34.0,
+      "duration_frames": 360
+    }
+  ]
+}

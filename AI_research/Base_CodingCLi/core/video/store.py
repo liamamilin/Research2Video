@@ -197,6 +197,16 @@ def init_db() -> None:
         if "content_context" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_production ON scripts(production,created_at DESC)")
+        for name, definition in (
+            ("idx_scripts_chain_summary", "scripts(production,created_at DESC,id,status,current_version,archived)"),
+            ("idx_scripts_archived_created", "scripts(archived,created_at DESC,id DESC)"),
+            ("idx_script_versions_summary", "script_versions(script_id,version,title)"),
+        ):
+            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='index' AND name=?", (name,)).fetchone():
+                conn.execute(f"CREATE INDEX {name} ON {definition}")
+                conn.execute(f"ANALYZE {name}")
+
         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
             if name not in pub_columns:
@@ -327,7 +337,7 @@ def update_script(script_id: str, **fields: Any) -> None:
 def topic_ids_in_use() -> set[str]:
     """Topic ids that already have a script that did not fail (a roundup covers each of its items)."""
     with connect() as conn:
-        rows = conn.execute("SELECT topic FROM scripts WHERE status != 'FAILED'").fetchall()
+        rows = conn.execute("SELECT topic FROM scripts WHERE status NOT IN ('FAILED', 'SKIPPED')").fetchall()
     ids: set = set()
     for row in rows:
         topic = json.loads(row["topic"])
@@ -340,7 +350,7 @@ def scripts_by_topic() -> dict[str, list[dict]]:
     """Topic id → the scripts that cover it (not failed, newest first), a roundup covering each of its items."""
     with connect() as conn:
         rows = conn.execute("SELECT id, column_key, topic, status, created_at, archived FROM scripts"
-                            " WHERE status != 'FAILED' ORDER BY created_at DESC").fetchall()
+                            " WHERE status NOT IN ('FAILED', 'SKIPPED') ORDER BY created_at DESC").fetchall()
     covered: dict[str, list[dict]] = {}
     for row in rows:
         topic = json.loads(row["topic"])
@@ -577,6 +587,24 @@ def list_rechecks(script_id: str) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def rechecks_by_script(script_ids: list[str]) -> dict[str, list[dict]]:
+    """Batch recheck rows for list/board views without N+1 queries."""
+    ids = list(dict.fromkeys(script_ids))
+    out: dict[str, list[dict]] = {}
+    if not ids:
+        return out
+    with connect() as conn:
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            marks = ",".join("?" for _ in batch)
+            for row in conn.execute(
+                f"SELECT * FROM rechecks WHERE script_id IN ({marks}) ORDER BY created_at DESC, id DESC",
+                batch,
+            ):
+                out.setdefault(row["script_id"], []).append(dict(row))
+    return out
+
+
 def update_recheck(recheck_id: str, **fields: Any) -> None:
     if not fields:
         return
@@ -635,8 +663,10 @@ def add_version(
     now = _now()
     with connect(write=True) as conn:
         context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
-        if context and context[0] != "{}":
-            meta = {**(meta or {}), "content_context": json.loads(context[0])}
+        frozen = json.loads(context[0]) if context and context[0] else {}
+        # An A/B assignment mark alone does not make a context (spec/ab-testing.md §2: arm A stays as today).
+        if any(key != "experiments" for key in frozen):
+            meta = {**(meta or {}), "content_context": frozen}
         current = conn.execute(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]
@@ -830,6 +860,22 @@ def resume_render_download(render_id: str) -> dict | None:
                 "UPDATE renders SET status='DOWNLOADING',error_code=NULL,error_message=NULL,"
                 " completed_at=NULL,updated_at=? WHERE id=? AND status='FAILED'"
                 " AND error_code='DOWNLOAD_FAILED' AND autovideo_job_id IS NOT NULL",
+                (_now(), render_id),
+            ).rowcount
+    except sqlite3.IntegrityError as exc:
+        raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+    return get_render(render_id) if changed else None
+
+
+def resume_unconfirmed_render(render_id: str) -> dict | None:
+    """Retry a SUBMIT_UNCONFIRMED render atomically, keeping its frozen payload and idempotency_key."""
+    try:
+        with connect(write=True) as conn:
+            changed = conn.execute(
+                "UPDATE renders SET status='SUBMITTING',error_code=NULL,error_message=NULL,"
+                " completed_at=NULL,submit_started_at=NULL,updated_at=?"
+                " WHERE id=? AND status='FAILED' AND error_code='SUBMIT_UNCONFIRMED'"
+                " AND autovideo_job_id IS NULL",
                 (_now(), render_id),
             ).rowcount
     except sqlite3.IntegrityError as exc:

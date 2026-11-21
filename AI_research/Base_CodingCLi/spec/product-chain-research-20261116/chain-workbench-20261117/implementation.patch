@@ -1,0 +1,2919 @@
+--- a/research/core/platform_store.py
++++ b/research/core/platform_store.py
+@@ -13,6 +13,9 @@
+ class PlatformStore:
+     def __init__(self, state_dir: str):
+         self.path = str(Path(state_dir) / "platforms.db")
++        sqlite_util.initialize_schema_once(self.path, self._initialize_schema)
++
++    def _initialize_schema(self):
+         with self.connect() as conn:
+             conn.executescript("""
+                 CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT NOT NULL);
+--- a/research/core/source_supply.py
++++ b/research/core/source_supply.py
+@@ -33,6 +33,8 @@
+ 
+ 
+ def for_job(config_dir: str, job: dict) -> dict | None:
++    if job.get("source_supply_enabled") is False:
++        return None
+     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
+ 
+ 
+@@ -153,7 +155,7 @@
+     metadata = {r['spec']: r for r in automatic}
+     metadata.update({r['spec']: r for r in coverage})
+     reference_specs.update(r['spec'] for r in coverage if r['role'] in {'state', 'snapshot'})
+-    specs = list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic]))
++    specs = resolve(list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic])), engine.config_dir)
+     # Snapshot volume is useful context but cannot displace product changes and articles.
+     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
+     scan = int(profile.get("scan_limit", 80))
+--- a/research/core/sources.py
++++ b/research/core/sources.py
+@@ -563,7 +563,7 @@
+             raise RegistryError(f"信息源 {key} 的 spec 不对：{spec or '（空）'}")
+         tags = entry.get("tags") or []
+         out[str(key)] = {"name": str(entry.get("name") or key), "spec": spec,
+-                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or "")}
++                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or ""), "enabled": entry.get("enabled", True)}
+     return out
+ 
+ 
+@@ -573,11 +573,10 @@
+     Raises ``RegistryError`` for an id or tag the registry does not have: a Job must not run on fewer sources than it
+     asked for without anyone being told. A caller resolving many Jobs may supply one already loaded registry
+     so the entire operation sees the same configuration snapshot."""
+-    if not any(str(s).startswith(("source:", "tag:")) for s in specs or []):
+-        return list(specs or [])
+     if registry is None:
+         registry = load_registry(config_dir)
+     out: list[str] = []
++    disabled = {e["spec"] for e in registry.values() if not e.get("enabled", True)}
+     for spec in specs:
+         spec = str(spec).strip()
+         kind, _, target = spec.partition(":")
+@@ -591,7 +590,7 @@
+                 raise RegistryError(f"信息源注册表里没有标签 {target.strip()} 的源")
+         else:
+             found = [spec]
+-        out += [f for f in found if f not in out]
++        out += [f for f in found if f not in out and f not in disabled]
+     return out
+ 
+ 
+--- a/research/core/schedule_store.py
++++ b/research/core/schedule_store.py
+@@ -9,12 +9,15 @@
+ import sqlite3
+ import time
+ import uuid
++import threading
+ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+ 
+ from core import cron
+ 
+ ACTIVE = ('queued', 'starting', 'running', 'retry')
+ LEASE_SECONDS = 120
++_INITIALIZED = {}
++_INITIALIZE_LOCK = threading.RLock()
+ 
+ 
+ class ScheduleConflict(ValueError):
+@@ -51,6 +54,18 @@
+         self.jobs_dir = jobs_dir or str(Path(self.state_dir).parent/'jobs')
+         Path(self.state_dir).mkdir(parents=True, exist_ok=True)
+         self.path = str(Path(self.state_dir) / 'schedules.db')
++        with _INITIALIZE_LOCK:
++            identity=self._file_identity()
++            if identity is not None and _INITIALIZED.get(self.path)==identity:return
++            self._initialize_schema()
++            _INITIALIZED[self.path]=self._file_identity()
++
++    def _file_identity(self):
++        try:
++            stat=Path(self.path).stat();return (stat.st_dev,stat.st_ino)
++        except FileNotFoundError:return None
++
++    def _initialize_schema(self):
+         with self.connect() as db:
+             db.executescript('''
+                 CREATE TABLE IF NOT EXISTS schedules (
+@@ -123,7 +138,8 @@
+         db.row_factory = sqlite3.Row
+         db.execute('PRAGMA busy_timeout=10000')
+         try:
+-            db.execute('PRAGMA journal_mode=WAL')
++            if _INITIALIZED.get(self.path)!=self._file_identity():
++                db.execute('PRAGMA journal_mode=WAL')
+         except sqlite3.OperationalError:
+             # Switching the journal mode needs a brief exclusive lock, and two
+             # connections doing it at once makes the loser fail immediately
+@@ -299,12 +315,14 @@
+                 db.execute('UPDATE schedule_runs SET cancel_requested=1 WHERE id=?', (run_id,))
+         return self.run(run_id)
+ 
+-    def enqueue_due(self, now: float | None = None) -> int:
++    def enqueue_due(self, now: float | None = None, *, job_names: set[str] | None = None) -> int:
+         """Coalesce overdue slots into one; never enqueue overlapping work for a job."""
+         now = time.time() if now is None else now
+         count = 0
+         with self.connect(True) as db:
+             for plan in db.execute('SELECT * FROM schedules WHERE enabled=1 AND deleted=0 AND next_run_at<=?', (now,)).fetchall():
++                if job_names is not None and plan['job_name'] not in job_names:
++                    continue
+                 active = db.execute("SELECT 1 FROM schedule_runs WHERE job_name=? AND status IN ('queued','starting','running','retry')", (plan['job_name'],)).fetchone()
+                 if active:
+                     continue
+@@ -328,17 +346,20 @@
+                 count += 1
+         return count
+ 
+-    def claim(self, now: float | None = None, concurrency: int = 2) -> dict | None:
++    def claim(self, now: float | None = None, concurrency: int = 2, *, job_names: set[str] | None = None) -> dict | None:
+         """Reserve one due execution atomically across any number of dispatchers."""
+         now = time.time() if now is None else now
+         with self.connect(True) as db:
+-            active = db.execute("SELECT count(*) FROM schedule_runs WHERE status IN ('starting','running')").fetchone()[0]
+-            if active >= concurrency:
+-                return None
+-            row = db.execute("""SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
++            allowed=list(job_names) if job_names is not None else None
++            if allowed==[]:return None
++            scope=(" AND job_name IN ("+','.join('?' for _ in allowed)+")") if allowed is not None else ''
++            active=db.execute("SELECT count(*) FROM schedule_runs WHERE status IN ('starting','running')"+scope,allowed or []).fetchone()[0]
++            if active>=concurrency:return None
++            scope=(" AND r.job_name IN ("+','.join('?' for _ in allowed)+")") if allowed is not None else ''
++            row=db.execute("""SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
+                 WHERE r.status IN ('queued','retry') AND r.ready_at<=? AND s.enabled=1 AND s.deleted=0
+-                  AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)
+-                ORDER BY r.ready_at,r.created_at LIMIT 1""", (now,)).fetchone()
++                AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)"""+scope+
++                " ORDER BY r.ready_at,r.created_at LIMIT 1",[now]+(allowed or [])).fetchone()
+             if not row:
+                 return None
+             db.execute("UPDATE schedule_runs SET status='starting',attempt=attempt+1,lease_until=? WHERE id=?", (now + LEASE_SECONDS, row['id']))
+--- a/research/core/source_coverage.py
++++ b/research/core/source_coverage.py
+@@ -100,7 +100,7 @@
+                 status = row['status']
+                 counts[status] = counts.get(status, 0) + 1
+         result.append({'key': profile['key'], 'name': profile.get('name', profile['key']),
+-                       'cells': cells, 'candidates': counts})
++                       'jobs':list(profile.get('jobs',{})), 'cells': cells, 'candidates': counts})
+     return {'profiles': result}
+ 
+ 
+--- a/research/core/douyin_store.py
++++ b/research/core/douyin_store.py
+@@ -15,6 +15,9 @@
+ class DouyinStore:
+     def __init__(self, state_dir: str):
+         self.path = str(Path(state_dir) / "douyin.db")
++        sqlite_util.initialize_schema_once(self.path, self._initialize_schema)
++
++    def _initialize_schema(self):
+         with self.connect(write=True) as conn:
+             conn.executescript("""
+                 CREATE TABLE IF NOT EXISTS jobs (
+--- a/research/core/sqlite_util.py
++++ b/research/core/sqlite_util.py
+@@ -28,8 +28,9 @@
+ 
+ import os
+ import sqlite3
++import threading
+ from contextlib import contextmanager
+-from typing import Iterator, Optional
++from typing import Callable, Iterator, Optional
+ 
+ #: Durable but not paranoid. ``FULL`` fsyncs on every commit; for the scheduler's
+ #: own bookkeeping that is the right trade, for a report index read on every page
+@@ -113,3 +114,26 @@
+         return None
+     finally:
+         conn.close()
++
++
++_SCHEMA_IDENTITIES: dict[str, tuple[int, int]] = {}
++_SCHEMA_LOCK = threading.RLock()
++
++
++def initialize_schema_once(path: str, initialize: Callable[[], None]) -> None:
++    """Ensure a schema once per physical database, including replacement recovery."""
++    def identity():
++        try:
++            stat = os.stat(path)
++            return stat.st_dev, stat.st_ino
++        except FileNotFoundError:
++            return None
++
++    with _SCHEMA_LOCK:
++        current = identity()
++        if current is not None and _SCHEMA_IDENTITIES.get(path) == current:
++            return
++        initialize()
++        current = identity()
++        if current is not None:
++            _SCHEMA_IDENTITIES[path] = current
+--- a/research/core/video/store.py
++++ b/research/core/video/store.py
+@@ -197,6 +197,15 @@
+         if "content_context" not in columns:
+             conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
+         conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
++        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_production ON scripts(production,created_at DESC)")
++        for name, definition in (
++            ("idx_scripts_chain_summary", "scripts(production,created_at DESC,id,status,current_version,archived)"),
++            ("idx_script_versions_summary", "script_versions(script_id,version,title)"),
++        ):
++            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='index' AND name=?", (name,)).fetchone():
++                conn.execute(f"CREATE INDEX {name} ON {definition}")
++                conn.execute(f"ANALYZE {name}")
++
+         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
+         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
+             if name not in pub_columns:
+--- a/research/core/video/reports.py
++++ b/research/core/video/reports.py
+@@ -70,6 +70,10 @@
+     columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
+     if "report_id" not in columns:
+         conn.execute("ALTER TABLE scripts ADD COLUMN report_id TEXT")
++    # Only unmatched legacy/new rows need backfilling. Keep this small set
++    # indexed so startup does not reread every historical topic payload.
++    conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_missing_reports ON scripts(created_at) "
++                 "WHERE report_path != '' AND (report_id IS NULL OR report_id = '')")
+     rows = conn.execute("SELECT id, report_path, research_job, topic, created_by FROM scripts"
+                         " WHERE report_path != '' AND (report_id IS NULL OR report_id = '') ORDER BY created_at").fetchall()
+     import json
+--- a/research/web/runner/executor.py
++++ b/research/web/runner/executor.py
+@@ -40,7 +40,7 @@
+ 
+ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
+                       verbose: bool = False, date_override: str = None, *,
+-                      flash_triggered_at: float | None = None):
++                      flash_triggered_at: float | None = None, run_context: dict | None = None):
+     """Run a job inside a thread.
+ 
+     Creates a ResearchEngine with the task's cancel token and a progress callback
+@@ -75,12 +75,19 @@
+             prompt_vars=getattr(task, "prompt_vars", None),
+         )
+         if flash_triggered_at is not None:
+-            engine.run_context = {"flash_triggered_at": flash_triggered_at}
++            engine.run_context = {"flash_triggered_at": flash_triggered_at, **(run_context or {})}
+         result = engine.run_job(job_name, verbose=verbose)
+         if task.cancel_token.is_set():
+             task.status = "cancelled"
+         elif result is not None:
+             task.status = "success"
++            try:
++                from core import state
++                from web.services.chain_reports import record
++                saved=state.StateManager.get(job_name) or {}
++                if saved.get("last_output"):record(job_name,saved["last_output"])
++            except Exception:
++                logger.exception("Report indexing will need retry: %s",job_name)
+         else:
+             task.status = "failed"
+     except CancelledError:
+@@ -112,7 +119,7 @@
+ 
+ def start_job(job_name: str, started_by: str,
+               config_dir: str = "config", jobs_dir: str = "jobs",
+-              verbose: bool = False, *, flash_triggered_at: float | None = None) -> RunningTask:
++              verbose: bool = False, *, flash_triggered_at: float | None = None, run_context: dict | None = None) -> RunningTask:
+     """Start a job asynchronously. Returns the RunningTask immediately.
+ 
+     Raises ``MatrixLimitReached`` when the Job's matrix has used up the month's searches (spec/matrices.md)."""
+@@ -141,7 +148,7 @@
+         submitted.wait()
+         if task.status == "failed":
+             return
+-        run_job_in_thread(task, config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at)
++        run_job_in_thread(task, config_dir, jobs_dir, verbose, flash_triggered_at=flash_triggered_at, run_context=run_context)
+ 
+     # Carry the caller's attribution (which video this research is for).
+     try:
+--- a/research/web/routes/chains.py
++++ b/research/web/routes/chains.py
+@@ -0,0 +1,73 @@
++from fastapi import APIRouter,Depends,HTTPException
++from web.deps import require_editor,require_viewer
++from web.services import chains,chain_runner,source_registry
++from core import sources
++router=APIRouter(prefix='/api/chains',tags=['chains'])
++
++@router.get('')
++def listing(user=Depends(require_viewer)):
++    return {'items':chains.summary(),'archived':chains.all_chains(True),'role':user['role']}
++
++@router.get('/catalog')
++def catalog(user=Depends(require_viewer)):
++    snap=source_registry.snapshot()
++    return {**snap,'chains':[{'key':m['key'],'job':m['job'],'name':m['name']} for m in chains.all_chains()]}
++
++@router.post('/sources/preview')
++def source_preview(body:dict,user=Depends(require_editor)):
++    specs=sources.resolve(body.get('sources',[]),chains.paths().config_dir)
++    results=[]
++    for spec in specs[:4]:
++        try:
++            items=sources.fetch_source(spec,limit=3,timeout=15)
++            results.append({'spec':spec,'items':[{'title':x.title,'url':x.url,'date':x.publish_date} for x in items],
++                            'error':'' if items else '未取得条目，请检查来源类型或地址'})
++        except Exception as e:results.append({'spec':spec,'items':[],'error':str(e)})
++    return {'results':results}
++
++@router.post('',status_code=201)
++def create(body:dict,user=Depends(require_editor)):
++    try:return chains.create(body,user)
++    except (ValueError,KeyError) as e:raise HTTPException(422,str(e)) from e
++
++@router.get('/runs/{rid}')
++def run_detail(rid:str,user=Depends(require_viewer)):
++    return chain_runner.get(rid)
++
++@router.post('/runs/{rid}/cancel')
++def cancel(rid:str,user=Depends(require_editor)):
++    return chain_runner.cancel(rid)
++
++@router.post('/runs/{rid}/retry')
++def retry(rid:str,user=Depends(require_editor)):
++    return chain_runner.retry(rid,user)
++
++@router.get('/{key}')
++def get(key:str,user=Depends(require_viewer)):
++    return chains.detail(key)
++
++@router.put('/{key}')
++def update(key:str,body:dict,user=Depends(require_editor)):
++    try:return chains.update(key,body,user)
++    except (ValueError,KeyError) as e:raise HTTPException(422,str(e)) from e
++
++@router.post('/{key}/toggle')
++def toggle(key:str,body:dict,user=Depends(require_editor)):
++    return chains.toggle(key,body,user)
++
++@router.get('/{key}/delete-preview')
++def delete_preview(key:str,user=Depends(require_viewer)):
++    return chains.delete_preview(key)
++
++@router.delete('/{key}')
++def delete(key:str,revision:str,user=Depends(require_editor)):
++    return chains.delete(key,revision)
++
++@router.post('/{key}/run',status_code=202)
++def run(key:str,body:dict,user=Depends(require_editor)):
++    return chain_runner.start(key,body,user)
++
++
++@router.get('/{key}/scope')
++def scope(key:str,user=Depends(require_viewer)):
++    return chains.scope(key)
+--- a/research/web/routes/matrices.py
++++ b/research/web/routes/matrices.py
+@@ -7,6 +7,7 @@
+ """
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ import os
+ import re
+@@ -223,6 +224,7 @@
+ 
+ 
+ @router.post("", status_code=201)
++@mutation
+ def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
+     key = _new_key(payload.key)
+     if not payload.name.strip():
+@@ -235,6 +237,7 @@
+ 
+ 
+ @router.put("/{key}")
++@mutation
+ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
+     import hashlib
+     from core.fileio import file_lock
+@@ -246,6 +249,11 @@
+         if not payload.name.strip():
+             raise _error(422, "missing_name", "矩阵要有名字")
+         members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
++        from core.video import production
++        removed = set(matrix.jobs) - {m.job for m in members}
++        used = [p.name or p.key for p in production.load_all(*_dirs()).values() if p.job in removed]
++        if used:
++            raise _error(409, 'matrix_member_in_use', '移除研究会改变视频继承设置：'+'、'.join(used)+'。请先在链路中处理其输出。')
+         matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
+                       keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
+                       render=payload.render, content=payload.content)
+@@ -255,8 +263,17 @@
+ 
+ 
+ @router.delete("/{key}")
++@mutation
+ def delete_matrix(key: str, user=Depends(require_editor)):
+     _get(key)
++    from core.video import content_columns, production
++    owned_jobs=set(_get(key).jobs)
++    bound=[p.name or p.key for p in production.load_all(*_dirs()).values() if p.job in owned_jobs]
++    if bound:
++        raise _error(409, "matrix_in_use", "矩阵仍为视频输出提供研究归属和默认设置："+"、".join(bound)+"。请先处理关联链路。")
++    referenced = [c.name for c in content_columns.load_all(_dirs()[0]).values() if c.matrix == key]
++    if referenced:
++        raise _error(409, 'matrix_in_use', '矩阵仍被栏目使用：' + '、'.join(referenced) + '。请先迁移栏目或从链路管理删除对应链路。')
+     matrices.remove(_dirs()[0], key)
+     audit.log("matrix_delete", user=user["username"], target=key)
+     return {"ok": True, "note": "只删了分组，里面的 Job 都还在"}
+@@ -273,6 +290,7 @@
+ 
+ 
+ @router.post("/{key}/copy", status_code=201)
++@mutation
+ def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
+     """A new matrix with new keywords: each picked member is made again from its template, manual, in jobs/<new key>/."""
+     from core.video import topic_store
+@@ -399,6 +417,7 @@
+ 
+ 
+ @router.put("/{key}/jobs/{job:path}/period")
++@mutation
+ def set_period(key: str, job: str, body: PeriodIn, user=Depends(require_admin)):
+     """Change a member's period. ``manual`` removes its plan; a timed one saves it (and turns a paused one back on)."""
+     from web.routes.scheduler import _mutate
+@@ -544,6 +563,7 @@
+ 
+ 
+ @router.post("/{key}/archive")
++@mutation
+ def archive_matrix(key: str, body: Optional[ArchiveIn] = None, user=Depends(require_editor)):
+     """Put a matrix away (or bring it back). Nothing is deleted or stopped: its Jobs keep belonging to it, and the
+     matrix list just stops showing it."""
+@@ -556,6 +576,7 @@
+ 
+ 
+ @router.post("/{key}/pause")
++@mutation
+ def pause_matrix(key: str, user=Depends(require_admin)):
+     """Stop every member's timed runs. Each Job keeps its own period (resuming turns the same ones back on) and can
+     still be run by hand. Runs missed while paused are not made up."""
+@@ -576,6 +597,7 @@
+ 
+ 
+ @router.post("/{key}/resume")
++@mutation
+ def resume_matrix(key: str, body: ResumeIn, user=Depends(require_admin)):
+     """Turn back on the timed runs that pausing stopped (the ones switched off by hand meanwhile stay as they are)."""
+     from web.routes.scheduler import _mutate
+--- a/research/web/routes/content_columns.py
++++ b/research/web/routes/content_columns.py
+@@ -1,5 +1,6 @@
+ """Independent business columns and their existing production bindings."""
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ from fastapi import APIRouter, Depends, HTTPException, Query
+ from pydantic import BaseModel, ConfigDict, Field
+@@ -166,10 +167,12 @@
+ 
+ 
+ @router.post("/api/content-columns", status_code=201)
++@mutation
+ def create_column(body: ColumnIn, user=Depends(require_editor)):
+     return _save(body.key, body, user, creating=True)
+ 
+ 
+ @router.put("/api/content-columns/{key}")
++@mutation
+ def update_column(key: str, body: ColumnIn, user=Depends(require_editor)):
+     return _save(key, body, user, creating=False)
+--- a/research/web/routes/jobs.py
++++ b/research/web/routes/jobs.py
+@@ -1,6 +1,7 @@
+ """Job-related routes (M1+M3: read-only, edit, run, cancel, SSE stream)."""
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ import asyncio
+ import json
+@@ -134,6 +135,7 @@
+ 
+ 
+ @router.post("/templates", status_code=status.HTTP_201_CREATED)
++@mutation
+ def create_template(payload: dict, user=Depends(require_editor)):
+     """Create a new reusable job template in jobs/_templates/."""
+     settings = get_settings()
+@@ -152,6 +154,7 @@
+ 
+ 
+ @router.put("/templates/{key}")
++@mutation
+ def update_template(key: str, payload: dict, user=Depends(require_editor)):
+     """Update an existing template. Built-in templates may be edited but not deleted."""
+     settings = get_settings()
+@@ -170,6 +173,7 @@
+ 
+ 
+ @router.delete("/templates/{key}")
++@mutation
+ def delete_template(key: str, user=Depends(require_editor)):
+     """Delete a user-created template. Built-in templates are protected."""
+     settings = get_settings()
+@@ -385,6 +389,7 @@
+ 
+ 
+ @router.post("", status_code=status.HTTP_201_CREATED)
++@mutation
+ def create_job(payload: dict, user=Depends(require_editor)):
+     """Create a new job file from a template."""
+     settings = get_settings()
+@@ -841,6 +846,7 @@
+ 
+ 
+ @router.put("/{name:path}", response_model=dict)
++@mutation
+ def update_yaml(
+     name: str,
+     payload: JobYamlUpdate,
+@@ -962,6 +968,7 @@
+ 
+ 
+ @router.delete("/{name:path}")
++@mutation
+ def delete_job(name: str, request: Request, user=Depends(require_editor)):
+     """Delete a job YAML file. Refuses while the job is running."""
+     settings = get_settings()
+@@ -978,6 +985,10 @@
+             detail=ApiError.make("already_running", "Job 正在运行，无法删除"),
+         )
+ 
++    from core.video import production
++    used = [c.name or c.key for c in production.load_all(settings.paths.config_dir, jobs_dir).values() if c.job == name]
++    if used:
++        raise HTTPException(409, '研究仍被视频输出使用：' + '、'.join(used) + '。请从链路管理处理关联后删除。')
+     rel = job["_file"]
+     deleted_path = None
+     for ext in (".yaml", ".yml"):
+--- a/research/web/routes/sources.py
++++ b/research/web/routes/sources.py
+@@ -1,6 +1,7 @@
+ """Information sources: the registry and how each source has been doing (web/services/source_catalog.py)."""
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ from fastapi import APIRouter, Depends, HTTPException, Query
+ from typing import Literal
+@@ -54,6 +55,7 @@
+     spec: str | None = None
+     tags: list[str] | None = None
+     note: str | None = None
++    enabled: bool | None = None
+ 
+ 
+ class SourceChange(BaseModel):
+@@ -85,15 +87,18 @@
+ 
+ 
+ @router.post('', status_code=201)
++@mutation
+ def create_source(body: SourceCreate, user=Depends(require_editor)) -> dict:
+     return _change('create', body.id, body, user)
+ 
+ 
+ @router.patch('/{key}')
++@mutation
+ def update_source(key: str, body: SourceChange, user=Depends(require_editor)) -> dict:
+     return _change('update', key, body, user)
+ 
+ 
+ @router.delete('/{key}')
++@mutation
+ def delete_source(key: str, expected_revision: str, user=Depends(require_editor)) -> dict:
+     return _change('delete', key, SourceChange(expected_revision=expected_revision), user)
+--- a/research/web/routes/reports.py
++++ b/research/web/routes/reports.py
+@@ -510,13 +510,18 @@
+ def search(
+     q: str = Query(..., min_length=1, max_length=200),
+     limit: int = Query(20, ge=1, le=100),
++    job: str | None = None,
+     user=Depends(require_viewer),
+ ):
+     """Full-text search across report titles and content using FTS5."""
+     if not q.strip():
+         return {"results": [], "total": 0}
+ 
+-    results = index_db.search_reports(q.strip(), limit=limit)
++    allowed_paths=None
++    if job:
++        with index_db.connect() as connection:
++            allowed_paths={r['path'] for r in connection.execute('SELECT path FROM reports WHERE job_name=?',(job,))}
++    results = index_db.search_reports(q.strip(), limit=limit, allowed_paths=allowed_paths)
+     meta_map = report_meta.load_all()
+     for item in results:
+         if not item.get("title"):
+--- a/research/web/routes/scheduler.py
++++ b/research/web/routes/scheduler.py
+@@ -1,6 +1,7 @@
+ """A unified schedule view; cron editing and read-only calendar previews."""
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ import os
+ import shlex
+@@ -205,6 +206,7 @@
+ 
+ 
+ @router.post("")
++@mutation
+ def add_scheduled(payload: ScheduleCreate, user=Depends(require_admin)):
+     """Every new job plan goes to the durable dispatcher, never to cron."""
+     job_id = payload.id.strip()
+@@ -218,6 +220,7 @@
+ 
+ 
+ @router.put("/{job_id}")
++@mutation
+ def edit_scheduled(job_id: str, payload: ScheduleEdit, user=Depends(require_admin)):
+     """Update a schedule without resetting its paused state."""
+     if _is_system_job(job_id):
+@@ -242,6 +245,7 @@
+ 
+ 
+ @router.delete("/{job_id}")
++@mutation
+ def remove_scheduled(job_id: str, user=Depends(require_admin)):
+     """Remove one schedule, preserving all unrelated entries.
+ 
+@@ -263,6 +267,7 @@
+ 
+ 
+ @router.post("/{job_id}/restore")
++@mutation
+ def restore_scheduled(job_id: str, user=Depends(require_admin)):
+     """Put a deleted system agent back and load it again."""
+     if not _is_system_job(job_id):
+@@ -275,6 +280,7 @@
+ 
+ 
+ @router.put("/{job_id}/toggle")
++@mutation
+ def toggle_scheduled(job_id: str, payload: ScheduleToggle, user=Depends(require_admin)):
+     """Set enabled state idempotently."""
+     if _is_system_job(job_id):
+--- a/research/web/routes/production.py
++++ b/research/web/routes/production.py
+@@ -5,6 +5,7 @@
+ """
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ from typing import Optional
+ 
+@@ -74,6 +75,7 @@
+ 
+ 
+ @router.patch('/{key}/settings')
++@mutation
+ def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(require_editor)) -> dict:
+     import hashlib
+     from pathlib import Path
+@@ -197,6 +199,7 @@
+ 
+ 
+ @router.post("", status_code=201)
++@mutation
+ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
+     paths = get_settings().paths
+     every = _all()
+@@ -224,6 +227,7 @@
+ 
+ 
+ @router.patch("/{key}")
++@mutation
+ def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
+     """Turn the unattended writing of a config on or off. Only reports that come out afterwards are written."""
+     config = _get(key)
+@@ -244,9 +248,11 @@
+ 
+ 
+ @router.delete("/{key}")
++@mutation
+ def remove_config(key: str, user=Depends(require_editor)) -> dict:
+     _get(key)
+-    production.remove(get_settings().paths.config_dir, key)
++    from web.services import chains
++    chains.remove_output(key)
+     audit.log("production_remove", user=user["username"], target=key)
+     return {"ok": True, "note": "已经写好的文稿和成片都还在"}
+ 
+--- a/research/web/routes/video_recipes.py
++++ b/research/web/routes/video_recipes.py
+@@ -5,6 +5,7 @@
+ """
+ 
+ from __future__ import annotations
++from web.services.chains import mutation
+ 
+ import os
+ import re
+@@ -147,6 +148,7 @@
+ 
+ 
+ @router.put("/parts/{kind}/{name}")
++@mutation
+ def save_part(kind: str, name: str, body: PartSaveIn, user=Depends(require_editor)) -> dict:
+     current = _part(kind, name)
+     _check_part(kind, name, body.content, current.get("used_by") or [])
+@@ -167,6 +169,7 @@
+ 
+ 
+ @router.post("/parts/{kind}", status_code=201)
++@mutation
+ def create_part(kind: str, body: PartCreateIn, user=Depends(require_editor)) -> dict:
+     content = _part(kind, body.copy_from)["content"]
+     path = _part_path(kind, body.name)
+@@ -218,6 +221,7 @@
+ 
+ 
+ @router.put("/{key}")
++@mutation
+ def save_recipe(key: str, body: RecipeSaveIn, user=Depends(require_editor)) -> dict:
+     path = _existing(key)
+     _check(key, body.content)
+@@ -240,6 +244,7 @@
+ 
+ 
+ @router.post("", status_code=201)
++@mutation
+ def create_recipe(body: RecipeCreateIn, user=Depends(require_editor)) -> dict:
+     if (body.copy_from is None) == (body.content is None):
+         raise HTTPException(422, detail=ApiError.make("recipe_source", "新配方要么从已有配方复制（copy_from），要么给出内容（content）"))
+@@ -265,6 +270,7 @@
+ 
+ 
+ @router.delete("/{key}")
++@mutation
+ def delete_recipe(key: str, user=Depends(require_editor)) -> dict:
+     path = _existing(key)
+     counts = store.count_scripts_by_column()
+--- a/research/web/services/chains.py
++++ b/research/web/services/chains.py
+@@ -0,0 +1,442 @@
++"""Persistent chain orchestration over the existing research/video business objects."""
++from __future__ import annotations
++import copy
++import hashlib
++import json
++import re
++import sqlite3
++import threading
++import time
++import uuid
++from contextlib import contextmanager
++from pathlib import Path
++import yaml
++from fastapi import HTTPException
++from core.config import load_job
++from core import matrices, sources
++from core.schedule_store import ScheduleStore
++from core.video import production, content_columns, store, recipes, autopilot_store as ap
++from web.settings import get_settings
++from web.services import yaml_io
++
++LOCK = threading.RLock()
++
++def paths():
++    return get_settings().paths
++
++def cfg():
++    return Path(paths().config_dir)
++
++def read(path):
++    return yaml.safe_load(Path(path).read_text()) if Path(path).exists() else {}
++
++def write(path, value):
++    Path(path).parent.mkdir(parents=True, exist_ok=True)
++    yaml_io.atomic_write(str(path), yaml.safe_dump(value, allow_unicode=True, sort_keys=False))
++
++def error(message, code=409):
++    raise HTTPException(code, message)
++
++def key_ok(key):
++    if not re.fullmatch(r'[a-z][a-z0-9_-]{1,59}', key):
++        error('标识使用 2–60 位小写英文、数字、短横线或下划线',422)
++    return key
++
++def schedule_store():
++    return ScheduleStore(paths().state_dir,config_dir=paths().config_dir,jobs_dir=paths().jobs_dir)
++
++def metadata():
++    return {f.stem:read(f) for f in (cfg()/'chains').glob('*.yaml')}
++
++def all_chains(archived=False):
++    configs=production.load_all(paths().config_dir,paths().jobs_dir)
++    meta=metadata(); owned={p for m in meta.values() for p in m.get('outputs',[])}
++    grouped={}
++    for p in configs.values():
++        if p.key not in owned:grouped.setdefault(p.job,[]).append(p.key)
++    for job, ids in grouped.items():
++        key='job-'+hashlib.sha1(job.encode()).hexdigest()[:12]
++        if key not in meta:
++            j=load_job(paths().jobs_dir,job) or {}
++            meta[key]={'key':key,'name':j.get('name',job),'job':job,'outputs':ids,'imported':True,'schedule_armed':False}
++    return [m for m in meta.values() if bool(m.get('archived'))==archived]
++
++def find(key, include_archived=False):
++    found=next((m for m in all_chains()+ (all_chains(True) if include_archived else []) if m['key']==key),None)
++    if found is None:error('链路不存在',404)
++    return found
++
++def digest(meta):
++    # A legacy-tab edit must invalidate a chain form too.
++    h=hashlib.sha256(json.dumps(meta,sort_keys=True,ensure_ascii=False).encode())
++    for f in sorted([*(cfg()).rglob('*.yaml'),*(Path(paths().jobs_dir)).rglob('*.yaml')]):
++        h.update(str(f).encode());h.update(f.read_bytes())
++    plans=[{k:v for k,v in p.items() if k not in ('next_run_at','updated_at')} for p in schedule_store().list()]
++    h.update(json.dumps(plans,sort_keys=True).encode())
++    return h.hexdigest()
++
++def assert_revision(meta,revision):
++    if not revision or revision!=digest(meta):error('链路或关联页面已修改，请重新载入后保存；本次没有覆盖其他修改')
++
++def remember(meta):
++    write(cfg()/'chains'/f"{meta['key']}.yaml",meta)
++
++@contextmanager
++def db():
++    from core import sqlite_util
++    with sqlite_util.connect(str(Path(paths().state_dir)/'chains.db'),timeout=30) as d:
++        d.execute('CREATE TABLE IF NOT EXISTS runs(id TEXT PRIMARY KEY, chain_id TEXT, data TEXT NOT NULL)')
++        yield d
++
++def save_run(row):
++    with db() as d:d.execute('INSERT OR REPLACE INTO runs VALUES(?,?,?)',(row['id'],row['chain_id'],json.dumps(row,ensure_ascii=False)))
++
++def runs(key):
++    with db() as d:return [json.loads(r['data']) for r in d.execute('SELECT data FROM runs WHERE chain_id=? ORDER BY rowid DESC',(key,))]
++
++def active_for_job(job):
++    with db() as d:
++        rows=[json.loads(r['data']) for r in d.execute('SELECT data FROM runs')]
++    return [r for r in rows if r['job']==job and r['status'] in ('RUNNING','CANCELLING')]
++
++@contextmanager
++def transaction():
++    # Serialize all management writes; worker orchestration uses this same lock.
++    with LOCK:
++        before={p:p.read_bytes() for folder in (cfg(),Path(paths().jobs_dir)) for p in folder.rglob('*.yaml')}
++        backup=sqlite3.connect(':memory:')
++        with sqlite3.connect(Path(paths().state_dir)/'schedules.db') as d:d.backup(backup)
++        try:yield
++        except BaseException:
++            for folder in (cfg(),Path(paths().jobs_dir)):
++                for p in folder.rglob('*.yaml'):
++                    if p not in before:p.unlink()
++            for p,data in before.items():p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
++            with sqlite3.connect(Path(paths().state_dir)/'schedules.db') as d:backup.backup(d)
++            raise
++        finally:backup.close()
++
++def detail(key):
++    meta=find(key,True);job=load_job(paths().jobs_dir,meta['job']) or {}
++    configs=production.load_all(paths().config_dir,paths().jobs_dir)
++    owner=matrices.of_job(meta['job'],paths().config_dir)
++    registry=sources.load_registry(paths().config_dir)
++    from web.services import source_registry
++    from core import source_supply, source_coverage
++    profile=next((p for p in source_supply.profiles(paths().config_dir).values() if meta['job'] in p.get('jobs',{})),None)
++    supply=None
++    if profile:
++        supply={'key':profile['key'],'enabled':job.get('source_supply_enabled',True),'pool_per_job':profile.get('pool_per_job',4),'targets':source_coverage.targets(profile,meta['job'])}
++    refs=[]
++    for ref in job.get('sources',[]):
++        k=ref[7:] if str(ref).startswith('source:') else None
++        e=registry.get(k,{})
++        refs.append({'ref':ref,'key':k,'name':e.get('name',ref),'enabled':e.get('enabled',True),
++                     'spec':e.get('spec',ref),'members':[{'key':rk,'name':rv.get('name',rk),'spec':rv['spec'],'enabled':rv.get('enabled',True)} for rk,rv in registry.items() if str(ref).startswith('tag:') and ref[4:] in rv.get('tags',[])],'used_by':source_registry.usages(registry,k) if k in registry else []})
++    outputs=[]
++    for pid in meta.get('outputs',[]):
++        p=configs.get(pid)
++        if p:
++            context=content_columns.snapshot(paths().config_dir,pid,meta['job'])
++            recipe=recipes.find(paths().config_dir,p.recipe)
++            outputs.append({**p.as_dict(),'audiences':list(recipe.audiences) if recipe else [],'effective_render':content_columns.render_settings(paths().config_dir,owner,context,p.render)})
++    ids=meta.get('outputs',[])+meta.get('retired_outputs',[])
++    scripts=[];script_count=0
++    if ids:
++        placeholders=','.join('?' for _ in ids)
++        with store.connect() as connection:
++            script_count=connection.execute('SELECT COUNT(*) FROM scripts WHERE production IN ('+placeholders+')',ids).fetchone()[0]
++            scripts=[dict(row) for row in connection.execute('SELECT s.id,s.status,s.current_version,s.archived,v.title FROM scripts s LEFT JOIN script_versions v ON v.script_id=s.id AND v.version=s.current_version WHERE s.production IN ('+placeholders+') ORDER BY s.created_at DESC LIMIT 100',ids)]
++    from core import production_policy
++    policy=production_policy.load(paths().config_dir)
++    window=policy.get('jobs',{}).get(meta['job']) or policy.get('window') or {'mode':'rolling','days':7}
++    plans=[p for p in schedule_store().list() if p['job_name']==meta['job']]
++    result={**meta,'revision':digest(meta),'research':{'name':job.get('name',''),'prompt':job.get('prompt',''),'sources':job.get('sources',[]),
++                'topics':job.get('topics',{}),'enabled':job.get('enabled',True),'search':job.get('search',False)},
++            'source_supply':supply,'window_days':window.get('days',7),'window_mode':window.get('mode','rolling'),'sources':refs,'matrix':{'key':owner.key,'name':owner.name} if owner else None,'outputs_detail':outputs,
++            'schedules':plans,'shared_chains':[{'key':m['key'],'name':m['name']} for m in all_chains() if m['key']!=key and m['job']==meta['job']],
++            'policy_managed':production_policy.manages(production_policy.load(paths().config_dir),paths().config_dir,job=meta['job']),
++            'scripts':scripts[:100], 'script_count':script_count,'runs':runs(key)}
++    if meta.get('archived') and meta.get('snapshot'):
++        for field in ('research','sources','matrix','outputs_detail','source_supply','window_days','window_mode'):
++            result[field]=meta['snapshot'].get(field,result.get(field))
++    return result
++
++def summary():
++    configs=production.load_all(paths().config_dir,paths().jobs_dir)
++    plans={p['job_name']:p for p in schedule_store().list()}
++    owners={job:m.key for m in matrices.load_all(paths().config_dir).values() for job in m.jobs}
++    latest={}
++    with db() as connection:
++        for row in connection.execute('SELECT chain_id,data FROM runs ORDER BY rowid DESC'):
++            latest.setdefault(row['chain_id'],json.loads(row['data']))
++    out=[]
++    for m in all_chains():
++        ps=[configs[p] for p in m.get('outputs',[]) if p in configs]
++        out.append({**m,'matrix_key':owners.get(m['job'],''),'output_count':len(ps),'automatic':sum(bool(p.auto) for p in ps),
++                    'errors':[e for p in ps for e in p.errors],'schedule':plans.get(m['job']),'latest_run':latest.get(m['key'])})
++    return out
++
++def create(body,user):
++    key=key_ok(body['key']);name=str(body.get('name','')).strip()
++    if not name:error('请填写链路名称',422)
++    from core.video.length import MIN_MINUTES,MAX_MINUTES
++    minutes=float(body.get('minutes',1.25))
++    if not MIN_MINUTES<=minutes<=min(MAX_MINUTES,10):error(f'目标时长应在 {MIN_MINUTES:g}–10 分钟之间',422)
++    kinds=list(dict.fromkeys(body.get('output_modes',[])))
++    if not kinds or set(kinds)-{'individual','episode'}:error('至少选择一种视频输出方式',422)
++    schedule=str(body.get('schedule','')).strip()
++    if schedule and user['role']!='admin':error('当前账号可以保存手动链路；设置周期需要管理员',403)
++    with transaction():
++        baseline_errors={(p.key,e) for p in production.load_all(paths().config_dir,paths().jobs_dir).values() for e in p.errors}
++        if key in metadata() or (cfg()/'matrices'/f'{key}.yaml').exists():error('这个标识已被使用')
++        job_id=body.get('existing_job') or f'chains/{key}'
++        owned=[]
++        if body.get('existing_job'):
++            job=load_job(paths().jobs_dir,job_id)
++            if not job or not job.get('topics'):error('共享研究必须已经提供条目型选题',422)
++            owner=matrices.of_job(job_id,paths().config_dir)
++            if not owner:error('共享研究尚未归属矩阵，请先设置',422)
++            matrix_key=owner.key
++            if schedule:error('共享研究沿用已有周期，请创建后从研究设置修改',422)
++        else:
++            refs=list(dict.fromkeys(body.get('sources',[])))
++            if not refs:error('至少选择一个信息源',422)
++            resolved=sources.resolve(refs,paths().config_dir)
++            if not resolved:error('所选信息源均已停用，请选择可用来源',422)
++            matrix_key=key
++            from core.video import topic_store
++            taken={s.prefix for s in topic_store.sources(paths().jobs_dir).values()}|set(topic_store.DEFAULT_PREFIXES.values())
++            prefix=next((a+b+c for a in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' for b in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' if a+b+c not in taken),None)
++            prompt=str(body.get('prompt','')).strip()
++            if not prompt:error('请说明这条链路研究什么、面向谁',422)
++            job={'name':name,'enabled':True,'language':'zh','keywords':body.get('keywords',[]),'search':False,'sources':refs,'sources_limit':10,
++                 'runtime':{'timeout_seconds':3600,'skip_if_running':True},'prompt':prompt+'\n\n日期：{date}。根据取得的材料形成可供视频作者使用的研究底稿。保留具体变化、例子、解释及原始链接。使用条目格式：\\n### 1.1 选题标题\\n- **一句话**：内容\\n- **发布日期**：日期\\n- **证据来源**：链接\\n正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。',
++                 'output':f'output/chains/{key}/{{date}}.md','topics':{'alias':key,'format':'flash','prefix':prefix,'refresh':True}}
++            job_path=Path(paths().jobs_dir)/(job_id+'.yaml')
++            write(job_path,job);owned.append(str(job_path.relative_to(Path(paths().jobs_dir).parent)))
++            write(cfg()/'matrices'/f'{key}.yaml',{'name':name,'domain':name,'keywords':body.get('keywords',[]),'jobs':[job_id],
++                  'render':{'video_speed':body.get('video_speed',1.25)},'content':{'name':name,'role':'domain','status':'configured'}})
++            owned.append(f'config/matrices/{key}.yaml')
++            policy=read(cfg()/'production_policy.yaml');policy.setdefault('matrices',[]).append(matrix_key)
++            policy.setdefault('jobs',{})[job_id]={'mode':'rolling','days':body.get('window_days',7),'timezone':'Asia/Shanghai'}
++            write(cfg()/'production_policy.yaml',policy)
++        recipe=read(cfg()/'video_recipes/flash.yaml');recipe.update(name=name+'讲稿',target_minutes=body.get('minutes',1.25))
++        recipe['topic']['sources']=[job['topics']['alias']]
++        recipe['tags']['domain']={'key':'chain_'+key,'name':name}
++        audience=body.get('audience','non_tech')
++        if audience not in ('developer','non_tech'):error('请选择开发者或普通观众',422)
++        recipe['audiences']=[audience]+[a for a in ('non_tech','developer') if a!=audience]
++        recipe['minutes_range']=[1,10]
++        # Keep the actual established writer and rendering path.
++        recipe_key='chain_'+key
++        write(cfg()/'video_recipes'/f'{recipe_key}.yaml',recipe);owned.append(f'config/video_recipes/{recipe_key}.yaml')
++        ids=[]
++        for mode in kinds:
++            pid=f'{key}_{"each" if mode=="individual" else "daily"}';ids.append(pid)
++            production.save(paths().config_dir,pid,job=job_id,recipe=recipe_key,name=name+(' · 单条' if mode=='individual' else ' · 合集'),
++                            reverify=False,auto=1,render={'video_speed':body.get('video_speed',1.25),'voice_id':body.get('voice_id') or 'zf_xiaoxiao'})
++            if mode=='episode':
++                col=key+'_episode';write(cfg()/'content_columns'/f'{col}.yaml',{'name':name+'合集','matrix':matrix_key,'type':'news','promise':str(body.get('prompt') or name),
++                    'production_ids':[pid],'content_mode':'episode'});owned.append(f'config/content_columns/{col}.yaml')
++        if len(ids)==2:
++            jp=read(cfg()/'joint_planning.yaml');jp.setdefault('pairs',[]).append({'episode_production':key+'_daily','single_production':key+'_each'});write(cfg()/'joint_planning.yaml',jp)
++        made=production.load_all(paths().config_dir,paths().jobs_dir)
++        new_errors={(p.key,e) for p in made.values() for e in p.errors}-baseline_errors
++        problems=[f'{p}：{e}' for p,e in new_errors]
++        if problems:error('；'.join(problems),422)
++        if schedule:schedule_store().save(job_id,schedule,timezone='Asia/Shanghai',missed_policy='skip')
++        meta={'key':key,'name':name,'job':job_id,'outputs':ids,'owned':owned,'imported':False,'schedule_armed':bool(schedule),'created_at':time.time()}
++        remember(meta)
++    return detail(key)
++
++def update(key,body,user):
++    with transaction():
++        m=find(key);assert_revision(m,body.get('revision'))
++        if active_for_job(m['job']):error('该研究正在运行，请等待完成或停止本次运行后保存设置')
++        if body.get('name') is not None:
++            if not body['name'].strip():error('名称不能为空',422)
++            m['name']=body['name'].strip()
++        jpath=Path(paths().jobs_dir)/(m['job']+'.yaml');job=read(jpath)
++        if any(k in body for k in ('sources','prompt','schedule','source_supply_enabled','window_days','window_mode')):
++            shared=[x for x in all_chains() if x['job']==m['job'] and x['key']!=key]
++            if shared and not body.get('apply_shared'):error('这项研究被其他链路共用，请查看影响范围后选择应用到共享研究')
++        if 'sources' in body:
++            if not body['sources']:error('研究至少需要一个来源',422)
++            sources.resolve(body['sources'],paths().config_dir);job['sources']=body['sources']
++        if 'prompt' in body:
++            if not body['prompt'].strip():error('研究目标不能为空',422)
++            job['prompt']=body['prompt']
++        if 'source_supply_enabled' in body:job['source_supply_enabled']=bool(body['source_supply_enabled'])
++        if 'window_days' in body or 'window_mode' in body:
++            days=int(body.get('window_days',7))
++            if not 1<=days<=90:error('研究窗口需要为 1–90 天',422)
++            policy=read(cfg()/'production_policy.yaml');mode=body.get('window_mode','rolling')
++            if mode not in ('rolling','previous_slot'):error('请选择滚动窗口或相邻周期',422)
++            policy.setdefault('jobs',{})[m['job']]={'mode':mode,'timezone':'Asia/Shanghai',**({'days':days} if mode=='rolling' else {})};write(cfg()/'production_policy.yaml',policy)
++        write(jpath,job)
++        for o in body.get('outputs',[]):
++            if o['key'] not in m['outputs']:error('输出不属于该链路',422)
++            path=cfg()/'production'/f"{o['key']}.yaml";data=read(path)
++            if 'auto' in o:data['auto']=int(bool(o['auto']))
++            for setting in ('minutes','audience'):
++                if setting in o:data[setting]=o[setting]
++            if 'render' in o:
++                from core.video.production_settings import validate
++                data['render']=validate(o['render'])
++            production._write(paths().config_dir,o['key'],data)
++            changed=production.get(paths().config_dir,paths().jobs_dir,o['key'])
++            if changed.errors:error('；'.join(changed.errors),422)
++        if 'schedule' in body:
++            if user['role']!='admin':error('设置周期需要管理员',403)
++            plans=[p for p in schedule_store().list() if p['job_name']==m['job']]
++            expression=body['schedule'].strip()
++            if expression:
++                p=plans[0] if plans else None
++                schedule_store().save(m['job'],expression,timezone='Asia/Shanghai',missed_policy='skip',schedule_id=p['id'] if p else None,
++                    editing=bool(p),expected_version=p['version'] if p else None)
++            else:
++                for p in plans:schedule_store().delete(p['id'])
++            m['schedule_armed']=bool(expression)
++        for pid in body.get('remove_outputs',[]):
++            if pid not in m['outputs']:error('输出不属于此链路',422)
++            remove_output(pid);m['outputs'].remove(pid);m.setdefault('retired_outputs',[]).append(pid)
++        if body.get('add_output'):
++            spec=body['add_output'];mode=spec.get('mode')
++            if mode not in ('individual','episode'):error('请选择单条或合集',422)
++            alias=(job.get('topics') or {}).get('alias')
++            if not alias:error('当前研究不是条目型报告，无法添加此类输出',422)
++            recipe_key='chain_'+key
++            if not (cfg()/'video_recipes'/f'{recipe_key}.yaml').exists():
++                recipe=read(cfg()/'video_recipes/flash.yaml');recipe['name']=m['name']+'讲稿';recipe['topic']['sources']=[alias];recipe['tags']['domain']={'key':'chain_'+key,'name':m['name']};recipe['audiences']=['non_tech']
++                write(cfg()/'video_recipes'/f'{recipe_key}.yaml',recipe)
++            pid=key+'_'+uuid.uuid4().hex[:6]
++            current_outputs=production.load_all(paths().config_dir,paths().jobs_dir)
++            template=next((current_outputs[k] for k in m['outputs'] if k in current_outputs),None)
++            production.save(paths().config_dir,pid,job=m['job'],recipe=recipe_key,name=spec.get('name') or m['name'],reverify=False,
++                            auto=template.auto if template else 1,render=copy.deepcopy(template.render) if template else {'voice_id':'zf_xiaoxiao'})
++            if mode=='episode':
++                owner=matrices.of_job(m['job'],paths().config_dir)
++                if not owner:error('请先把研究加入矩阵',422)
++                write(cfg()/'content_columns'/f'{pid}.yaml',{'name':spec.get('name') or m['name']+'合集','matrix':owner.key,'type':'news','promise':m['name'],'production_ids':[pid],'content_mode':'episode'})
++            made=production.get(paths().config_dir,paths().jobs_dir,pid)
++            if made.errors:error('；'.join(made.errors),422)
++            m['outputs'].append(pid)
++            configs=production.load_all(paths().config_dir,paths().jobs_dir)
++            peer=next((p for p in configs.values() if p.key in m['outputs'] and p.key!=pid and p.content_mode!=mode),None)
++            if peer:
++                jp=read(cfg()/'joint_planning.yaml');jp.setdefault('pairs',[]).append({'episode_production':pid if mode=='episode' else peer.key,'single_production':peer.key if mode=='episode' else pid});write(cfg()/'joint_planning.yaml',jp)
++        remember(m)
++    return detail(key)
++
++def toggle(key,body,user):
++    with transaction():
++        m=find(key);assert_revision(m,body.get('revision'));scope=body.get('scope','outputs');enabled=bool(body['enabled'])
++        if scope=='research':
++            if user['role']!='admin':error('控制研究周期需要管理员',403)
++            plans=[p for p in schedule_store().list() if p['job_name']==m['job']]
++            if not plans:error('尚未设置周期，请先保存运行安排',422)
++            for p in plans:schedule_store().toggle(p['id'],enabled)
++            m['schedule_armed']=enabled
++        elif scope=='outputs':
++            if not enabled:
++                current=production.load_all(paths().config_dir,paths().jobs_dir)
++                m['resume_outputs']={pid:current[pid].auto for pid in m['outputs'] if pid in current}
++            for pid in m['outputs']:
++                if (cfg()/'production'/f'{pid}.yaml').exists():production.set_auto(paths().config_dir,pid,m.get('resume_outputs',{}).get(pid,1) if enabled else 0)
++        else:error('未知暂停范围',422)
++        remember(m)
++    return detail(key)
++
++def remove_output(pid):
++    if active_output(pid):error('该输出仍有运行中的批次，请先取消或等待完成')
++    for f in (cfg()/'content_columns').glob('*.yaml'):
++        c=read(f)
++        if pid in c.get('production_ids',[]):
++            c['production_ids']=[x for x in c['production_ids'] if x!=pid]
++            if c['production_ids']:write(f,c)
++            else:f.unlink()
++    f=cfg()/'joint_planning.yaml';jp=read(f)
++    jp['pairs']=[p for p in jp.get('pairs',[]) if pid not in (p.get('episode_production'),p.get('single_production'))];write(f,jp)
++    production.remove(paths().config_dir,pid)
++    for key,m in metadata().items():
++        if pid in m.get('outputs',[]) and not m.get('archived'):
++            m['outputs'].remove(pid);m.setdefault('retired_outputs',[]).append(pid);remember(m)
++
++def active_output(pid):
++    with db() as d:rows=[json.loads(x['data']) for x in d.execute('SELECT data FROM runs')]
++    return any(r['status'] in ('RUNNING','CANCELLING') and pid in r.get('outputs',[]) for r in rows)
++
++def delete_preview(key):
++    m=find(key);configs=production.load_all(paths().config_dir,paths().jobs_dir)
++    remaining=[p.key for p in configs.values() if p.job==m['job'] and p.key not in m['outputs']]
++    shared=[{'key':other['key'],'name':other['name']} for other in all_chains() if other['key']!=key and other['job']==m['job']]
++    return {'outputs':m['outputs'],'job':m['job'],'remaining_outputs':remaining,'shared_chains':shared,'keep_job':bool(remaining or shared),
++            'keep_sources':True,'keep_history':True,'running':bool(active_for_job(m['job'])),'revision':digest(m)}
++
++def delete(key,revision):
++    with transaction():
++        m=find(key);assert_revision(m,revision)
++        if active_for_job(m['job']):error('链路仍在运行，请先取消或等待完成')
++        preview=delete_preview(key);snapshot=detail(key)
++        # Archive first to keep history ownership while individual output references are removed.
++        m['archived']=True;m['archived_at']=time.time();m['snapshot']=snapshot;remember(m)
++        for pid in list(m['outputs']):remove_output(pid)
++        if not preview['keep_job']:
++            schedule_store().delete_for_job(m['job'])
++            jp=Path(paths().jobs_dir)/(m['job']+'.yaml')
++            if jp.exists():jp.unlink()
++            for f in (cfg()/'matrices').glob('*.yaml'):
++                v=read(f);v['jobs']=[j for j in v.get('jobs',[]) if (j if isinstance(j,str) else j.get('job'))!=m['job']];write(f,v)
++            pol=read(cfg()/'production_policy.yaml');pol.get('jobs',{}).pop(m['job'],None);write(cfg()/'production_policy.yaml',pol)
++        return {'ok':True,'archived':key,'note':'链路已删除；共享来源和历史产出仍保留'}
++
++def mutation(fn):
++    """Apply the same transaction and relationship checks to legacy management tabs."""
++    from functools import wraps
++    @wraps(fn)
++    def wrapped(*args,**kwargs):
++        with transaction():
++            configs=production.load_all(paths().config_dir,paths().jobs_dir)
++            before={(p.key,e) for p in configs.values() for e in p.errors}
++            # Configuration edits during a run are explicit, never silently applied mid-script.
++            with db() as d:active=[json.loads(x['data']) for x in d.execute('SELECT data FROM runs')]
++            active=[x for x in active if x['status'] in ('RUNNING','CANCELLING')]
++            def dependencies(row):
++                job=load_job(paths().jobs_dir,row['job']) or {}
++                ps=production.load_all(paths().config_dir,paths().jobs_dir)
++                owner=matrices.of_job(row['job'],paths().config_dir)
++                selected=[ps[x] for x in row.get('outputs',[]) if x in ps]
++                registry=sources.load_registry(paths().config_dir)
++                refs=job.get('sources',[])
++                used={k:v for k,v in registry.items() if 'source:'+k in refs or v['spec'] in refs or any('tag:'+t in refs for t in v.get('tags',[]))}
++                return {'job':job,'sources':used,'matrix':read(cfg()/'matrices'/f'{owner.key}.yaml') if owner else None,
++                        'outputs':[{k:v for k,v in p.as_dict().items() if k!='auto'} for p in selected],
++                        'recipes':[read(cfg()/'video_recipes'/f'{p.recipe}.yaml') for p in selected],
++                        'columns':[content_columns.snapshot(paths().config_dir,p.key,row['job']) for p in selected]}
++            frozen={r['id']:dependencies(r) for r in active}
++            plans_before={p['id']:p for p in schedule_store().list()}
++            result=fn(*args,**kwargs)
++            if any(dependencies(r)!=frozen[r['id']] for r in active):
++                error('此修改会影响正在运行的链路，请等待该批次结束；其他链路可继续管理')
++            for plan in schedule_store().list():
++                prior=plans_before.get(plan['id'])
++                if not prior or any(plan[k]!=prior[k] for k in ('version','enabled')):
++                    for chain in all_chains():
++                        if chain['job']==plan['job_name']:
++                            chain['schedule_armed']=bool(plan['enabled']);remember(chain)
++            after={(p.key,e) for p in production.load_all(paths().config_dir,paths().jobs_dir).values() for e in p.errors}
++            introduced=after-before
++            if introduced:error('这项修改会使关联视频输出失效：'+'；'.join(f'{p}：{e}' for p,e in sorted(introduced)))
++            return result
++    return wrapped
++
++
++def scope(key):
++    m=find(key,True)
++    ids=set(m.get('outputs',[])+m.get('retired_outputs',[]))
++    with store.connect() as d:
++        script_ids=[row['id'] for row in d.execute('SELECT id FROM scripts WHERE production IN ('+','.join('?' for _ in ids)+')',sorted(ids))] if ids else []
++    owner=matrices.of_job(m['job'],paths().config_dir)
++    configs=production.load_all(paths().config_dir,paths().jobs_dir)
++    return {'key':key,'name':m['name'],'job':m['job'],'outputs':sorted(ids),'script_ids':script_ids,'matrix_key':owner.key if owner else None,'recipes':sorted({configs[k].base_recipe for k in ids if k in configs})}
+--- a/research/web/services/video_autopilot.py
++++ b/research/web/services/video_autopilot.py
+@@ -528,9 +528,12 @@
+     if script is None:
+         _fail(item, "文稿记录丢失")
+         return took
+-    selection = story_pool.selection(script["id"])
+-    gate = {**(item.get("gate") or {}), **({"story_selection": selection} if selection else {})}
+-    if selection:
++    # Once approved, the chosen story is frozen in this item's writing result.
++    # Video progress polling must not reread every selection decision or rewrite it.
++    previous_gate = item.get("gate") or {}
++    selection = (previous_gate.get("story_selection") or {}) if script["status"] == "APPROVED" and not script.get("archived") else story_pool.selection(script["id"])
++    gate = {**previous_gate, **({"story_selection": selection} if selection else {})}
++    if selection and gate != previous_gate:
+         ap.update_item(item["id"], gate=gate)
+     if script.get("archived"):
+         # Only our explicit exhausted selection can replace an item. A manual
+--- a/research/web/services/video_executor.py
++++ b/research/web/services/video_executor.py
+@@ -256,6 +256,14 @@
+     tries = lambda key: int((retries or {}).get(key, 0))  # noqa: E731
+     if status in ("RESEARCHING", "WRITING"):
+         return out
++    if status == "APPROVED":
++        # Following an existing render (or waiting for capacity) spends no new
++        # attempt. Keep the history check at the point a new render can start,
++        # instead of rereading the entire archive on every progress poll.
++        renders = store.list_renders(script["id"])
++        current = [row for row in renders if row["version"] == script["approved_version"]]
++        if not can_start_render or any(row["status"] in (*store.ACTIVE_RENDER_STATUSES, "COMPLETED") for row in current):
++            return _render_auto(script, can_start_render, out, retries)
+     if status in ("DRAFT", "APPROVED") and script.get("current_version"):
+         from core.video import content_guard
+ 
+@@ -355,6 +363,7 @@
+         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"
+         return out
+     if not can_start_render:
++        out['item']={'note':'上次出片失败；等待渲染名额后自动重试' if latest and latest['status']=='FAILED' else '等待渲染名额，已有讲稿保留'}
+         return out
+     from core.video import production_admission
+     from core.research_window import date_of
+--- a/research/web/services/chain_runner.py
++++ b/research/web/services/chain_runner.py
+@@ -0,0 +1,242 @@
++"""Only advance explicitly owned chain runs; never replay copied historic work."""
++from __future__ import annotations
++import copy,json,logging,threading,time,uuid,os,sqlite3
++from pathlib import Path
++from core import state
++from core.video import autopilot_store as ap,store,production
++from web.runner.registry import TaskRegistry
++from web.runner.executor import start_job
++from web.services import chains,video_autopilot
++logger=logging.getLogger(__name__)
++STOP=threading.Event()
++_last_heartbeat=0.0
++
++def get(rid):
++    with chains.db() as d:r=d.execute('SELECT data FROM runs WHERE id=?',(rid,)).fetchone()
++    if not r:chains.error('运行记录不存在',404)
++    row=json.loads(r['data'])
++    if row.get('report'):
++        from web.services.chain_reports import relative_path
++        row['report_view']=relative_path(row['report'])
++    if row.get('batch_id'):
++        row['batch']=ap.get_run(row['batch_id'])
++        for item in (row['batch'] or {}).get('items',[]):
++            render=store.get_render(item['render_id']) if item.get('render_id') else None
++            if render:item['render_progress']={k:render.get(k) for k in ('status','active_stage','error_message','created_at')}
++    if row.get('task_id'):
++        from web.runner.log_store import read_events
++        _,events=read_events(chains.paths().logs_dir,row['job'],row['task_id'],limit=8)
++        phases={'building_prompt':'准备研究材料','organizing_topics':'整理选题','supplementing_materials':'补充选题材料','saving_output':'保存研究报告'}
++        for event in events:
++            payload=event['event']
++            if payload.get('phase'):payload['message']=phases.get(payload['phase'],payload['phase'])+('：'+str(payload['detail']) if payload.get('detail') else '')
++        row['progress']=events
++    return row
++
++def put(row):
++    row=dict(row);row.pop('batch',None);row.pop('progress',None);chains.save_run(row)
++
++def start(key,body,user):
++    with chains.LOCK:
++        d=chains.detail(key)
++        if d.get('archived'):chains.error('已删除链路不能运行')
++        if chains.active_for_job(d['job']):chains.error('共享研究已有运行中的批次，请进入该批次查看')
++        if TaskRegistry().is_running(d['job']):chains.error('研究任务正在其他页面运行，请等待完成')
++        chosen=body.get('outputs') or [x['key'] for x in d['outputs_detail'] if x['auto']]
++        outputs=[x for x in d['outputs_detail'] if x['key'] in chosen]
++        if len(outputs)!=len(chosen) or any(x['errors'] for x in outputs):chains.error('本次输出不可用，请检查链路设置',422)
++        limit=int(body.get('limit',1))
++        if not 0<=limit<=10:chains.error('单条数量为 0（全部）或 1–10',422)
++        row={'id':uuid.uuid4().hex,'chain_id':key,'job':d['job'],'outputs':chosen,'limit':limit,'status':'RUNNING','stage':'RESEARCH',
++             'started_at':time.time(),'started_by':user['username'],'snapshot':{k:v for k,v in d.items() if k not in ('scripts','runs')},
++             'note':'正在获取信息源并生成研究报告','attempt':1,'events':[],'schedule_run_id':body.get('schedule_run_id')}
++        put(row)
++        try:
++            task=start_job(d['job'],user['username'],chains.paths().config_dir,chains.paths().jobs_dir,flash_triggered_at=time.time(),run_context=body.get('run_context'))
++            row['task_id']=task.task_id;put(row)
++        except Exception as exc:
++            row.update(status='FAILED',note=str(exc));put(row)
++        return get(row['id'])
++
++def cancel(rid):
++    with chains.LOCK:
++        row=get(rid)
++        if row['status'] not in ('RUNNING','CANCELLING'):return row
++        if row['stage']=='RESEARCH':TaskRegistry().cancel(row['job'])
++        if row.get('batch_id'):
++            batch=ap.get_run(row['batch_id'])
++            for item in batch['items']:
++                if item['state'] not in ('DONE','FAILED','HELD','CANCELLED'):ap.update_item(item['id'],state='CANCELLED',note='用户停止链路接续')
++            ap.update_run(batch['id'],status='CANCELLED')
++        _cancel_renders(row)
++        row.update(status='CANCELLING',note='已停止接续，并请求取消排队/运行中的渲染；等待当前工作退出，完成产物保留');put(row)
++        return get(rid)
++
++def retry(rid,user):
++    with chains.LOCK:
++        row=get(rid)
++        if row['status'] not in ('FAILED','HELD','CANCELLED','INTERRUPTED') and not (row['stage']=='VIDEO' and row['status']=='RUNNING' and any(i['state']=='HELD' for i in (row.get('batch') or {}).get('items',[]))):chains.error('当前运行不需要重试')
++        if any(r['id']!=rid for r in chains.active_for_job(row['job'])):chains.error('共享研究还有任务运行中')
++        if row.get('batch_id'):
++            batch=ap.get_run(row['batch_id'])
++            current=chains.detail(row['chain_id'])
++            row.setdefault('retry_history',[]).append({'at':time.time(),'by':user['username'],'outputs':[{k:o[k] for k in ('key','name','effective_render')} for o in current['outputs_detail'] if o['key'] in row['outputs']]})
++            for item in batch['items']:
++                if item['state'] in ('FAILED','HELD','CANCELLED'):
++                    history=store.list_renders(item['script_id']) if item.get('script_id') else []
++                    latest=history[0] if history else {}
++                    if latest.get('status')=='FAILED' and latest.get('error_code') in ('DOWNLOAD_FAILED','SUBMIT_UNCONFIRMED'):
++                        from web.services import video_render
++                        if latest['error_code']=='DOWNLOAD_FAILED':store.resume_render_download(latest['id'])
++                        else:store.update_render(latest['id'],status='SUBMITTING',error_code=None,error_message=None,completed_at=None)
++                        video_render.start(latest['id'])
++                    cutoff=max((r['created_at'] for r in store.list_renders(item['script_id']) if r['status'] in ('FAILED','CANCELLED')),default='') if item.get('script_id') else ''
++                    ap.update_item(item['id'],state='WORKING' if item.get('script_id') else 'PENDING',note='用户从失败步骤继续',
++                                   retries={'renders_forgiven_before':cutoff})
++            ap.update_run(batch['id'],status='RUNNING')
++            row.update(status='RUNNING',stage='VIDEO',note='复用已有报告与讲稿，采用当前出片设置继续未完成视频',attempt=row.get('attempt',1)+1)
++            put(row);return get(rid)
++        return start(row['chain_id'],{'outputs':row['outputs'],'limit':row['limit']},user)
++
++def _cancel_renders(row):
++    from web.services import video_render
++    sent=set(row.get('cancelled_render_requests',[]))
++    for item in (ap.get_run(row['batch_id']) or {}).get('items',[]) if row.get('batch_id') else []:
++        if not item.get('script_id'):continue
++        for render in store.list_renders(item['script_id']):
++            if render['id'] in sent or render['status'] not in ('QUEUED','RUNNING') or not render.get('autovideo_job_id'):continue
++            try:
++                video_render.get_client()._request('POST','/api/jobs/'+render['autovideo_job_id']+'/cancel')
++                sent.add(render['id'])
++            except Exception as exc:logger.warning('render cancel deferred: %s',exc)
++    row['cancelled_render_requests']=list(sent)
++
++def _still_working(row):
++    task=TaskRegistry().get(row['job'])
++    if task and task.future and not task.future.done():return True
++    if row.get('batch_id'):
++        from web.services import video_render
++        for i in (ap.get_run(row['batch_id']) or {}).get('items',[]):
++            if i.get('script_id'):
++                s=store.get_script(i['script_id']) or {}
++                if s.get('status') in ('RESEARCHING','WRITING','AUDITING'):return True
++                if any(r['status'] in ('SUBMITTING','QUEUED','RUNNING','DOWNLOADING') for r in store.list_renders(i['script_id'])):return True
++    return False
++
++def advance(row):
++    if row['status']=='CANCELLING':
++        _cancel_renders(row);put(row)
++        if not _still_working(row):row.update(status='CANCELLED',note='已停止，完成的产物与运行记录保留',finished_at=time.time());put(row)
++        return
++    if row['stage']=='RESEARCH':
++        task=TaskRegistry().get(row['job'])
++        if task and task.future and not task.future.done():return
++        if not task:
++            row.update(status='INTERRUPTED',note='应用重启时研究中断，可重新运行研究');put(row);return
++        result=state.StateManager.get(row['job']) or {}
++        if task.status!='success':
++            row.update(status='FAILED',note=result.get('last_error') or '研究未完成，请查看运行日志');put(row);return
++        report=result.get('last_output')
++        if not report:row.update(status='FAILED',note='研究返回成功但未记录报告路径');put(row);return
++        if not row['outputs']:
++            row.update(status='DONE',report=report,stage='RESEARCH',note='研究报告完成；视频输出已暂停，本次没有制作视频',finished_at=time.time());put(row);return
++        ps=production.load_all(chains.paths().config_dir,chains.paths().jobs_dir)
++        picks=[]
++        for pid in row['outputs']:
++            p=ps[pid];pick={'column':p.recipe,'production':pid,'count':row['limit'] or 1,'all':row['limit']==0}
++            if p.content_mode=='episode':pick['content_mode']='episode'
++            if p.split=='whole':pick['whole']=True
++            else:pick['source']=p.source
++            picks.append(pick)
++        from core.report_identity import describe
++        root=str(Path(chains.paths().config_dir).parent)
++        b=video_autopilot.start_run({'picks':picks,'refresh':False,'job':row['job'],'report':report,
++                                  'report_identity':describe(report,root)['id']},started_by=row['started_by'])
++        row.update(stage='VIDEO',report=report,batch_id=b['id'],note='报告完成，正在选题、写稿与生成视频');put(row)
++    if row['stage']=='VIDEO':
++        batch=ap.get_run(row['batch_id'])
++        video_autopilot._tick_run(batch,video_autopilot._in_flight([batch]))
++        batch=ap.get_run(row['batch_id'])
++        if batch['status']!='RUNNING':
++            states={i['state'] for i in batch['items']}
++            if states & {'FAILED'}:status='FAILED'
++            elif states & {'HELD'}:status='HELD'
++            elif batch['status']=='CANCELLED':status='CANCELLED'
++            elif not batch['items']:status='NO_CONTENT'
++            else:status='DONE'
++            row.update(status=status,note=batch.get('note',''),finished_at=time.time());put(row)
++
++def advance_safely(row):
++    try:
++        advance(row)
++    except Exception as exc:
++        if isinstance(exc, sqlite3.OperationalError) and any(word in str(exc).lower() for word in ('locked', 'busy')):
++            logger.warning('chain run %s waiting for database: %s', row['id'], exc)
++            return
++        logger.exception('chain run %s failed', row['id'])
++        row.update(status='FAILED', note=f'{type(exc).__name__}: {exc}')
++        put(row)
++
++
++def tick():
++    global _last_heartbeat
++    with chains.LOCK:
++        with chains.db() as d:rows=[json.loads(x['data']) for x in d.execute('SELECT data FROM runs')]
++        for row in rows:
++            if row['status'] not in ('RUNNING','CANCELLING'):continue
++            advance_safely(row)
++        # Reuse the real schedule ledger, retry policy and heartbeat, scoped to owned chains.
++        schedules=chains.schedule_store()
++        if time.monotonic()-_last_heartbeat>=15:
++            schedules.heartbeat({'checked_at':time.time(),'status':'ok','pid':os.getpid(),'mode':'isolated_chain_worker'})
++            _last_heartbeat=time.monotonic()
++        for row in rows:
++            sid=row.get('schedule_run_id')
++            if not sid:continue
++            ledger=schedules.run(sid)
++            current=get(row['id'])
++            if not ledger or ledger['status'] not in ('running','starting'):continue
++            if ledger.get('cancel_requested') and current['status']=='RUNNING':cancel(row['id'])
++            if current['status'] in ('RUNNING','CANCELLING'):schedules.renew(sid)
++            else:
++                status={'DONE':'success','NO_CONTENT':'success','CANCELLED':'cancelled','INTERRUPTED':'interrupted'}.get(current['status'],'failed')
++                schedules.finish(sid,status,error=current.get('note',''),output_path=current.get('report'))
++        armed={m['job']:m for m in chains.all_chains() if m.get('schedule_armed')}
++        available={job for job in armed if not chains.active_for_job(job) and not TaskRegistry().is_running(job)}
++        schedules.enqueue_due(job_names=available)
++        execution=schedules.claim(job_names=available)
++        if execution and schedules.start(execution['id'],os.getpid()):
++            try:
++                previous=next((r for r in reversed(rows) if r.get('schedule_run_id')==execution['id'] and r.get('batch_id')),None)
++                if previous:
++                    resumed=retry(previous['id'],{'username':'chain-scheduler','role':'admin'})
++                else:
++                    context=execution.get('context') or {}
++                    if isinstance(context,str):context=json.loads(context)
++                    resumed=start(armed[execution['job_name']]['key'],{'limit':0,'schedule_run_id':execution['id'],'run_context':context},
++                                  {'username':'chain-scheduler','role':'admin'})
++            except Exception as exc:
++                schedules.finish(execution['id'],'failed',str(exc));logger.exception('scheduled chain failed')
++
++def recover_owned():
++    # Only this workbench's batches are resumed, never copied historic work.
++    from web.services import video_render
++    with chains.db() as d:rows=[json.loads(r['data']) for r in d.execute('SELECT data FROM runs')]
++    for row in rows:
++        if row['status'] not in ('RUNNING','CANCELLING') or not row.get('batch_id'):continue
++        for item in (ap.get_run(row['batch_id']) or {}).get('items',[]):
++            sid=item.get('script_id')
++            if not sid:continue
++            script=store.get_script(sid) or {}
++            if script.get('status') in ('RESEARCHING','WRITING'):
++                store.update_script(sid,status='FAILED',error='隔离应用重启时写稿中断，正在从该步骤恢复')
++            for render in store.list_renders(sid):
++                if render['status'] in ('SUBMITTING','QUEUED','RUNNING','DOWNLOADING'):video_render.start(render['id'])
++
++def start_loop():
++    recover_owned()
++    def work():
++        while not STOP.wait(3):
++            try:tick()
++            except Exception:logger.exception('chain worker tick failed')
++    threading.Thread(target=work,name='isolated-chain-worker',daemon=True).start()
+--- a/research/web/services/distributions.py
++++ b/research/web/services/distributions.py
+@@ -19,23 +19,25 @@
+     ids = {s["id"] for s in scripts}
+     if not ids:
+         return {}
++    placeholders = ",".join("?" for _ in ids)
++    parameters = tuple(ids)
+     profiles = accounts()
+     with store.connect() as conn:
+-        publications = [dict(r) for r in conn.execute("SELECT * FROM publications ORDER BY created_at DESC") if r["script_id"] in ids]
+-        drafts = [dict(r) for r in conn.execute("SELECT script_id,version,platform,account_uid,render_id,updated_at FROM distribution_drafts") if r["script_id"] in ids]
++        publications = [dict(r) for r in conn.execute(f"SELECT * FROM publications WHERE script_id IN ({placeholders}) ORDER BY created_at DESC", parameters)]
++        drafts = [dict(r) for r in conn.execute(f"SELECT script_id,version,platform,account_uid,render_id,updated_at FROM distribution_drafts WHERE script_id IN ({placeholders})", parameters)]
+     tasks = []
+     with platform_manager.store().connect() as conn:
+-        for r in conn.execute("SELECT id,uid,script_id,version,render_id,status,error,bvid,updated_at FROM uploads ORDER BY created_at DESC"):
++        for r in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,bvid,updated_at FROM uploads WHERE script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
+             if r["script_id"] in ids:
+                 tasks.append({**dict(r), "platform": "bilibili", "work_id": r["bvid"]})
+     with douyin.store().connect() as conn:
+-        for r in conn.execute("SELECT id,uid,script_id,version,render_id,status,error,work_id,phase,updated_at FROM jobs WHERE kind='UPLOAD' ORDER BY created_at DESC"):
++        for r in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,work_id,phase,updated_at FROM jobs WHERE kind='UPLOAD' AND script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
+             if r["script_id"] in ids:
+                 tasks.append({**dict(r), "platform": "douyin"})
+     for platform in SOCIAL_PLATFORMS:
+-        for task in social_publishing.store(platform).list(kind="UPLOAD"):
+-            if task['script_id'] in ids:
+-                tasks.append({**task,"platform":platform})
++        with social_publishing.store(platform).connect() as conn:
++            for task in conn.execute(f"SELECT id,uid,script_id,version,render_id,status,error,work_id,updated_at FROM jobs WHERE kind='UPLOAD' AND script_id IN ({placeholders}) ORDER BY created_at DESC", parameters):
++                tasks.append({**dict(task), "platform": platform})
+     targets = {}
+ 
+     def target(script_id, version, platform, owner):
+@@ -50,7 +52,7 @@
+         return targets[key]
+ 
+     with store.connect() as conn:
+-        versions = {(r["script_id"], r["version"]) for r in conn.execute("SELECT DISTINCT script_id,version FROM renders") if r["script_id"] in ids}
++        versions = {(r["script_id"], r["version"]) for r in conn.execute(f"SELECT DISTINCT script_id,version FROM renders WHERE script_id IN ({placeholders})", parameters)}
+     versions.update((s["id"], s["current_version"]) for s in scripts)
+     for script_id, version in versions:
+         for platform, profile in profiles.items():
+--- a/research/web/services/video_render.py
++++ b/research/web/services/video_render.py
+@@ -21,6 +21,7 @@
+ import logging
+ import os
+ import re
++import sqlite3
+ import threading
+ import time
+ from datetime import datetime, timedelta, timezone
+@@ -475,7 +476,14 @@
+ 
+     def _target() -> None:
+         try:
+-            process(render_id, client=client)
++            while True:
++                try:
++                    process(render_id, client=client)
++                    break
++                except sqlite3.OperationalError as exc:
++                    if not _database_busy(exc):raise
++                    logger.warning('Render %s waits for local database; preserving the existing remote task',render_id)
++                    time.sleep(2)
+         finally:
+             with _running_lock:
+                 _running.discard(render_id)
+@@ -493,6 +501,10 @@
+     for render_id in ids:
+         start(render_id)
+     return len(ids)
++
++
++def _database_busy(exc: Exception) -> bool:
++    return isinstance(exc,sqlite3.OperationalError) and any(word in str(exc).lower() for word in ('locked','busy'))
+ 
+ 
+ def process(render_id: str, *, client: Optional[AutoVideoClient] = None) -> str:
+@@ -517,6 +529,7 @@
+                         _timing(render_id, process_seconds=round(previous.get("process_seconds", 0)
+                                                                  + time.monotonic() - started, 3))
+             except Exception as exc:  # noqa: BLE001 - a crashed render must not look in-flight
++                if _database_busy(exc):raise
+                 logger.exception("video render %s crashed", render_id)
+                 return _fail(render_id, "INTERNAL_ERROR", f"{type(exc).__name__}: {exc}")
+     except TimeoutError:
+--- a/research/web/services/chain_reports.py
++++ b/research/web/services/chain_reports.py
+@@ -0,0 +1,37 @@
++"""Keep report lists/search attached to the real producing Job."""
++from pathlib import Path
++import json,logging
++from web.settings import get_settings
++from web.indexer import db,scanner
++logger=logging.getLogger(__name__)
++def relative_path(report):
++    root=Path(get_settings().paths.output_dir).resolve()
++    path=Path(report)
++    if not path.is_absolute():path=root/str(path).removeprefix('output/')
++    resolved=path.resolve()
++    if not resolved.is_relative_to(root):raise ValueError('报告路径不在输出目录中')
++    return str(resolved.relative_to(root))
++
++def record(job,report):
++    root=Path(get_settings().paths.output_dir)
++    rel=relative_path(report)
++    file=root/rel
++    if not file.is_file():return
++    stat=file.stat()
++    db.upsert_report(path=rel,mtime=stat.st_mtime,size_bytes=stat.st_size,job_name=job,
++                     title=scanner.extract_title(str(file)),category=Path(rel).parts[0],
++                     content=file.read_text(errors='replace')[:scanner.MAX_INDEX_BYTES])
++def reconcile():
++    from core.video import store,topic_store
++    from web.services import chains
++    sources=topic_store.sources(get_settings().paths.jobs_dir)
++    with store.connect() as connection:
++        imported=[dict(r) for r in connection.execute('SELECT report_path,source FROM topic_imports')]
++        research=[dict(r) for r in connection.execute("SELECT report_path,job FROM research_reports WHERE job!=''")]
++    mapping={str(r['report_path']).removeprefix('output/'):sources[r['source']].job for r in imported if r['source'] in sources}
++    mapping.update({str(r['report_path']).removeprefix('output/'):r['job'] for r in research})
++    with db.connect() as connection:
++        connection.executemany('UPDATE reports SET job_name=? WHERE path=? AND job_name!=?',[(job,path,job) for path,job in mapping.items()])
++    with chains.db() as connection:rows=[json.loads(r['data']) for r in connection.execute('SELECT data FROM runs')]
++    for row in rows:
++        if row.get('report'):record(row['job'],row['report'])
+--- a/research/web/services/source_registry.py
++++ b/research/web/services/source_registry.py
+@@ -26,8 +26,8 @@
+ def validate_entry(key: str, fields: dict) -> None:
+     if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}', key):
+         raise ValueError('信息源 ID 使用字母、数字、下划线、点或连字符')
+-    if set(fields) - {'name', 'spec', 'tags', 'note'}:
+-        raise ValueError('仅支持 name、spec、tags、note')
++    if set(fields) - {'name', 'spec', 'tags', 'note', 'enabled'}:
++        raise ValueError('仅支持 name、spec、tags、note、enabled')
+     spec = fields.get('spec', '')
+     kind, _, target = spec.partition(':')
+     if kind not in sources._ADAPTERS or not target.strip():
+@@ -50,6 +50,12 @@
+         data = load_job(paths.jobs_dir, job) or {}
+         refs = [s for s in data.get('sources') or [] if s == 'source:' + key or
+                 str(s).startswith('tag:') and str(s)[4:] in entry.get('tags', [])]
++        if entry.get('spec') in (data.get('sources') or []):
++            refs.append(entry['spec'])
++        from core import source_supply, source_coverage
++        profile=source_supply.for_job(paths.config_dir,{**data,'_file':job})
++        if profile and any(x['spec']==entry.get('spec') for x in source_coverage.targets(profile,job)):
++            refs.append(entry['spec'])
+         if refs:
+             result.append({'job': job, 'name': data.get('name') or job, 'references': refs})
+     return result
+--- a/research/ui/src/App.tsx
++++ b/research/ui/src/App.tsx
+@@ -10,6 +10,7 @@
+ import { pageLoaders } from "@/lib/page-modules";
+ import { PageLoading } from "@/components/PageLoading";
+ 
++const ChainsPage = lazy(() => import("@/pages/Chains").then(m => ({ default: m.ChainsPage })));
+ const DashboardPage = lazy(pageLoaders.DashboardPage);
+ const HomeBoardPage = lazy(pageLoaders.HomeBoardPage);
+ const TopicsPage = lazy(pageLoaders.TopicsPage);
+@@ -69,6 +70,8 @@
+       <Route path="/share/:token" element={<ShareViewPage />} />
+       <Route element={<Layout />}>
+         <Route index element={<HomeBoardPage />} />
++        <Route path="/chains" element={<ChainsPage />} />
++        <Route path="/chains/:key" element={<ChainsPage />} />
+         <Route path="/engine" element={<DashboardPage />} />
+         <Route path="/matrices" element={<MatricesPage />} />
+         <Route path="/sources" element={<SourcesPage />} />
+--- a/research/ui/src/components/ChainContext.test.tsx
++++ b/research/ui/src/components/ChainContext.test.tsx
+@@ -0,0 +1,11 @@
++import { cleanup, render, screen } from '@testing-library/react';
++import { MemoryRouter } from 'react-router-dom';
++import { afterEach, expect, it, vi } from 'vitest';
++import { ChainContext } from './ChainContext';
++vi.mock('@/api/client',()=>({api:vi.fn(async()=>({items:[]}))}));
++afterEach(cleanup);
++it('exits chain filtering without discarding the report being viewed',()=>{
++ render(<MemoryRouter initialEntries={['/reports/view?path=chains%2Fscience%2F2026-11-17.md&chain=science']}><ChainContext/></MemoryRouter>);
++ expect(screen.getByRole('link',{name:'退出关联，查看全部'}).getAttribute('href')).toBe('/reports/view?path=chains%2Fscience%2F2026-11-17.md');
++ expect(screen.getByRole('link',{name:'← 返回链路'}).getAttribute('href')).toBe('/chains/science');
++});
+--- a/research/ui/src/components/SourceEditor.tsx
++++ b/research/ui/src/components/SourceEditor.tsx
+@@ -10,6 +10,7 @@
+   const [spec, setSpec] = useState('');
+   const [tags, setTags] = useState('');
+   const [note, setNote] = useState('');
++  const [enabled,setEnabled]=useState(true);
+   const [usedBy, setUsedBy] = useState<{ job: string; name: string }[]>([]);
+   const [loading, setLoading] = useState(!!id);
+   const [saving, setSaving] = useState(false);
+@@ -20,7 +21,7 @@
+     let active = true;
+     void getSource(id).then(data => {
+       if (!active) return;
+-      setName(data.name); setSpec(data.spec); setTags(data.tags.join(', ')); setNote(data.note); setVersion(data.revision); setUsedBy(data.used_by);
++      setEnabled(data.enabled!==false); setName(data.name); setSpec(data.spec); setTags(data.tags.join(', ')); setNote(data.note); setVersion(data.revision); setUsedBy(data.used_by);
+     }).catch(e => { if (active) setError(e instanceof Error ? e.message : '来源读取失败'); }).finally(() => { if (active) setLoading(false); });
+     return () => { active = false; };
+   }, [id]);
+@@ -28,7 +29,7 @@
+     setSaving(true); setError('');
+     try {
+       if (remove) await deleteSource(key, version);
+-      else await saveSource(key.trim(), version, { name: name.trim(), spec: spec.trim(), tags: [...new Set(tags.split(/[,，]/).map(t => t.trim()).filter(Boolean))], note }, !id);
++      else await saveSource(key.trim(), version, { name: name.trim(), spec: spec.trim(), tags: [...new Set(tags.split(/[,，]/).map(t => t.trim()).filter(Boolean))], note, enabled }, !id);
+       onSaved(); onClose();
+     } catch (e) { setError(e instanceof Error ? e.message : '保存失败'); }
+     finally { setSaving(false); }
+@@ -51,6 +52,7 @@
+           {id && !confirmDelete && <button className="btn text-xs text-danger" type="button" onClick={() => setConfirmDelete(true)}>删除来源</button>}
+           {confirmDelete && <button className="btn text-xs text-danger" type="button" onClick={() => void save(true)}>确认删除此来源</button>}
+         </div>
++        <label className="flex gap-2 text-sm"><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/>全局启用此来源（影响所有引用研究）</label>
+       </fieldset>
+       <button className="btn text-xs" type="button" disabled={saving} onClick={onClose}>关闭</button>
+     </form>
+--- a/research/ui/src/components/ChainContext.tsx
++++ b/research/ui/src/components/ChainContext.tsx
+@@ -0,0 +1,13 @@
++import {useEffect,useState} from 'react';
++import {Link,useLocation} from 'react-router-dom';
++import {api} from '@/api/client';
++type Row={key:string;name:string;job:string;matrix_key:string;archived?:boolean};
++export function ChainContext(){
++ const location=useLocation();const explicit=new URLSearchParams(location.search).get('chain');const [rows,setRows]=useState<Row[]>([]);
++ useEffect(()=>{if(location.pathname.startsWith('/chains'))return;void api<{items:Row[];archived?:Row[]}>('/api/chains').then(x=>setRows([...x.items,...(x.archived||[]).map(row=>({...row,archived:true}))])).catch(()=>{});},[location.pathname]);
++ const exitQuery=new URLSearchParams(location.search);exitQuery.delete('chain');const exitPath=location.pathname+(exitQuery.size?'?'+exitQuery.toString():'');
++ if(location.pathname.startsWith('/chains'))return null;
++ const relevant=rows.filter(x=>explicit?x.key===explicit:location.pathname==='/jobs/'+encodeURIComponent(x.job)||location.pathname==='/matrices/'+x.matrix_key);
++ if(!relevant.length&&!explicit)return null;
++ return <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 mb-4 flex flex-wrap gap-3 text-xs"><span className="text-text-muted">关联链路</span>{relevant.length?relevant.map(x=><Link key={x.key} className="text-accent font-medium" to={'/chains/'+x.key}>← {x.name}</Link>):<Link className="text-accent" to={'/chains/'+explicit}>← 返回链路</Link>}<span className="text-text-muted">{relevant.some(x=>x.archived)?'此链路已删除，当前查看保留的历史记录。':'在此保存的修改会在链路管理中生效。矩阵、报告、产出、文稿、看板、任务、来源、配方及周期列表已按此链路筛选。'}</span>{explicit&&<Link data-chain-exit="true" className="underline" to={exitPath}>退出关联，查看全部</Link>}</div>;
++}
+--- a/research/ui/src/components/Layout.tsx
++++ b/research/ui/src/components/Layout.tsx
+@@ -1,5 +1,6 @@
+ import { Suspense, useEffect, useLayoutEffect, useRef, type ReactNode, type SyntheticEvent } from "react";
+-import { Link, Outlet, useLocation, useNavigationType } from "react-router-dom";
++import { Link, Outlet, useLocation, useNavigationType, useNavigate } from "react-router-dom";
++import { ChainContext } from "./ChainContext";
+ import { PageLoading } from "./PageLoading";
+ import { AssistantDrawer } from "./AssistantDrawer";
+ import { Sidebar } from "./Sidebar";
+@@ -25,6 +26,8 @@
+   const { sidebarOpen, toggleSidebar, closeSidebar, setSidebar } = useAppStore();
+   const main = useRef<HTMLElement>(null);
+   const location = useLocation();
++  const navigate=useNavigate();
++  const chain=new URLSearchParams(location.search).get("chain") || /^\/chains\/(?!new$)([^/]+)$/.exec(location.pathname)?.[1];
+   const from = new URLSearchParams(location.search).get("from") ?? "";
+   const navigation = useNavigationType();
+   const page = location.pathname === "/reports/view"
+@@ -62,7 +65,13 @@
+   ) : null;
+ 
+   return (
+-    <div className="flex h-screen overflow-hidden" onPointerOverCapture={preloadDestination}
++    <div className="flex h-screen overflow-hidden" onClickCapture={e=>{
++      const anchor=e.target instanceof Element?e.target.closest('a[href]'):null;
++      if(!chain||!(anchor instanceof HTMLAnchorElement)||anchor.dataset.chainExit||anchor.target||anchor.hasAttribute('download')||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
++      const to=new URL(anchor.href,window.location.href);
++      if(to.origin!==window.location.origin||to.pathname.startsWith('/chains')||to.pathname.startsWith('/api/')||to.searchParams.has('chain'))return;
++      to.searchParams.set('chain',chain);e.preventDefault();e.stopPropagation();navigate(to.pathname+to.search+to.hash);handleNavigate();
++    }} onPointerOverCapture={preloadDestination}
+       onFocusCapture={preloadDestination} onTouchStartCapture={preloadDestination}>
+       {backdrop}
+       <Sidebar open={sidebarOpen} onNavigate={handleNavigate} />
+@@ -81,6 +90,7 @@
+           <Link className="text-accent font-medium hover:underline" to={`/video/${encodeURIComponent(from)}?tab=draft`}>← 返回文稿，继续迭代</Link>
+           <span className="text-text-muted">保存配置后回到文稿重新生成，已有结果会保留。</span>
+         </div> : null}
++        <ChainContext />
+         <Suspense fallback={<PageLoading />}><Outlet /></Suspense>
+         </main>
+       </div>
+--- a/research/ui/src/components/Sidebar.tsx
++++ b/research/ui/src/components/Sidebar.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from "react";
+-import { NavLink } from "react-router-dom";
++import { NavLink, useLocation } from "react-router-dom";
+ import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss, PanelsTopLeft, BarChart3 } from "lucide-react";
+ import { useAuthStore } from "@/lib/auth-store";
+ import { cn } from "@/lib/utils";
+@@ -7,6 +7,7 @@
+ 
+ // 矩阵是入口：Job 跑出报告，报告按视频配置写成文稿；产出按 矩阵 › Job › 报告 看（spec/product-redesign.md）
+ const mainItems = [
++  { to: "/chains", label: "链路管理", icon: Layers },
+   { to: "/matrices", label: "矩阵", icon: Boxes },
+   { to: "/outputs", label: "产出", icon: Layers },
+   { to: "/", label: "视频看板", icon: LayoutDashboard },
+@@ -35,6 +36,8 @@
+ const adminItems = [{ to: "/settings", label: "设置", icon: Settings }];
+ 
+ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () => void }) {
++  const location=useLocation();
++  const chain = new URLSearchParams(location.search).get("chain") || (/^\/chains\/(?!new$)([^/]+)$/.exec(location.pathname)?.[1]);
+   const user = useAuthStore((s) => s.user);
+   const logout = useAuthStore((s) => s.logout);
+   const [accountOpen, setAccountOpen] = useState(false);
+@@ -73,7 +76,7 @@
+             {group.items.map((item) => (
+               <NavLink
+                 key={item.to}
+-                to={item.to}
++                to={item.to + (chain && !item.to.startsWith("/chains") ? "?chain="+encodeURIComponent(chain) : "")}
+                 end={item.to === "/"}
+                 onClick={onNavigate}
+                 className={({ isActive }) =>
+--- a/research/ui/src/lib/use-chain-scope.test.tsx
++++ b/research/ui/src/lib/use-chain-scope.test.tsx
+@@ -0,0 +1,18 @@
++import {afterEach,expect,it,vi} from 'vitest';
++import {cleanup,render,screen,waitFor,fireEvent} from '@testing-library/react';
++import {MemoryRouter,Link} from 'react-router-dom';
++import {useChainScope} from './use-chain-scope';
++import {api} from '@/api/client';
++vi.mock('@/api/client',()=>({api:vi.fn()}));
++afterEach(()=>{cleanup();vi.resetAllMocks()});
++function List(){const scope=useChainScope();return <><Link to="/outputs">查看全部</Link>{['a','b'].filter(scope.script).map(id=><p key={id}>{'视频 '+id}</p>)}</>}
++it('只显示本链路的视频，退出关联恢复全局列表',async()=>{
++ vi.mocked(api).mockResolvedValue({key:'science',name:'科研',job:'jobs/science',outputs:['science_each'],script_ids:['a']});
++ render(<MemoryRouter initialEntries={['/outputs?chain=science']}><List/></MemoryRouter>);
++ await waitFor(()=>expect(screen.getByText('视频 a')).toBeTruthy());expect(screen.queryByText('视频 b')).toBeNull();
++ fireEvent.click(screen.getByText('查看全部'));await waitFor(()=>expect(screen.getByText('视频 b')).toBeTruthy());
++});
++it('关联范围未返回时不展示其他链路内容',()=>{
++ vi.mocked(api).mockReturnValue(new Promise(()=>{}));render(<MemoryRouter initialEntries={['/outputs?chain=science']}><List/></MemoryRouter>);
++ expect(screen.queryByText('视频 a')).toBeNull();expect(screen.queryByText('视频 b')).toBeNull();
++});
+--- a/research/ui/src/lib/use-chain-scope.ts
++++ b/research/ui/src/lib/use-chain-scope.ts
+@@ -0,0 +1,10 @@
++import {useEffect,useState} from 'react';
++import {useLocation} from 'react-router-dom';
++import {api} from '@/api/client';
++type Scope={key:string;name:string;job:string;outputs:string[];script_ids:string[];matrix_key?:string;recipes?:string[]};
++export function useChainScope(){
++ const location=useLocation();const key=new URLSearchParams(location.search).get('chain');
++ const [data,setData]=useState<Scope|null>(null);
++ useEffect(()=>{let alive=true;setData(null);const refresh=()=>{if(key)void api<Scope>('/api/chains/'+encodeURIComponent(key)+'/scope').then(d=>{if(alive)setData(d)}).catch(()=>{})};refresh();const timer=key?window.setInterval(refresh,5000):undefined;return()=>{alive=false;if(timer)clearInterval(timer)}},[key,location.pathname]);
++ return {key,data,job:(job:string)=>!key||data?.job===job,script:(id:string)=>!key||!!data?.script_ids.includes(id),output:(id:string)=>!key||!!data?.outputs.includes(id)};
++}
+--- a/research/ui/src/api/sources.ts
++++ b/research/ui/src/api/sources.ts
+@@ -3,6 +3,7 @@
+ // 信息源注册表（config/sources.yaml）：哪些 Job 在用、最近一次抓取怎么样
+ export interface SourceRow {
+   automatic?: boolean;
++  enabled?: boolean;
+   id: string; // 空的是 Job 里直接写了完整写法、注册表里没有的源
+   name: string;
+   spec: string;
+@@ -13,8 +14,8 @@
+ }
+ 
+ export interface SourceCatalog {
+-  coverage?: { key: string; name: string; candidates: Record<string, number>; cells: {
+-    key: string; subject: string; topics: string[]; status: string;
++  coverage?: { key: string; name: string; jobs?: string[]; candidates: Record<string, number>; cells: {
++    key: string; subject: string; topics: string[]; jobs?: string[]; status: string;
+     sources: { spec: string; role: string; status: string; read_at?: number; error?: string }[];
+   }[] }[];
+   revision?: string;
+@@ -25,7 +26,7 @@
+ 
+ export const listSources = (signal?: AbortSignal) => api<SourceCatalog>("/api/sources", { signal });
+ export const getSource = (id: string) => api<SourceRow & { revision: string }>(`/api/sources/${encodeURIComponent(id)}`);
+-export const saveSource = (id: string, revision: string, fields: { name: string; spec: string; tags: string[]; note: string }, create = false) => api(
++export const saveSource = (id: string, revision: string, fields: { name: string; spec: string; tags: string[]; note: string; enabled?: boolean }, create = false) => api(
+   create ? '/api/sources' : `/api/sources/${encodeURIComponent(id)}`, { method: create ? 'POST' : 'PATCH',
+     body: { ...(create ? { id } : {}), expected_revision: revision, fields } });
+ export const deleteSource = (id: string, revision: string) => api(`/api/sources/${encodeURIComponent(id)}`, {
+--- a/research/ui/src/api/index.ts
++++ b/research/ui/src/api/index.ts
+@@ -497,8 +497,8 @@
+   return api("/api/reports/raw", { query: { path }, signal });
+ }
+ 
+-export async function searchReports(q: string, limit = 20): Promise<{ results: any[]; total: number }> {
+-  return api("/api/reports/search", { query: { q, limit } });
++export async function searchReports(q: string, limit = 20, job?: string): Promise<{ results: any[]; total: number }> {
++  return api("/api/reports/search", { query: { q, limit, job } });
+ }
+ 
+ export async function getReportStats(signal?: AbortSignal): Promise<{ total: number; total_size_bytes: number; categories: number }> {
+--- a/research/ui/src/pages/Sources.tsx
++++ b/research/ui/src/pages/Sources.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { useMemo, useState } from "react";
+ import { Link } from "react-router-dom";
+ import { listSources, type SourceRow } from "@/api/sources";
+@@ -13,6 +14,7 @@
+ 
+ /** 信息源：每个源只登记一次，各矩阵的 Job 引用它；这里看谁在用、最近一次抓取怎么样。 */
+ export function SourcesPage() {
++  const chainScope=useChainScope();
+   const { data: catalog, error, loading, reload: load } = usePageResource(listSources);
+   const [filter, setFilter] = useState<Filter>("all");
+   const [tag, setTag] = useState("");
+@@ -21,20 +23,20 @@
+   const role = useAuthStore(s => s.user?.role);
+   const editable = role === 'admin' || role === 'editor';
+ 
+-  const tags = useMemo(() => Array.from(new Set((catalog?.sources ?? []).flatMap((s) => s.tags))).sort(), [catalog]);
++  const scopedSources = useMemo(() => (catalog?.sources ?? []).filter(s => !chainScope.key || s.used_by.some(u => u.job === chainScope.data?.job)), [catalog, chainScope.key, chainScope.data?.job]);
++  const tags = useMemo(() => Array.from(new Set(scopedSources.flatMap(s => s.tags))).sort(), [scopedSources]);
+   const shown = useMemo(() => {
+     const needle = text.trim().toLowerCase();
+-    return (catalog?.sources ?? []).filter((s) =>
++    return scopedSources.filter(s =>
+       (filter === "all" || (filter === "used" && s.used_by.length > 0) || (filter === "unused" && s.used_by.length === 0)
+         || (filter === "failing" && Boolean(s.last?.error))) &&
+       (!tag || s.tags.includes(tag)) &&
+       (!needle || `${s.name} ${s.id} ${s.spec} ${s.note}`.toLowerCase().includes(needle)));
+-  }, [catalog, filter, tag, text]);
+-
++  }, [scopedSources, filter, tag, text]);
+   if (!catalog) return <ErrorState error={error} onRetry={load} empty="加载中…" />;
+ 
+-  const failing = catalog.sources.filter((s) => s.last?.error).length;
+-  const FILTERS: [Filter, string][] = [["all", `全部 ${catalog.sources.length}`], ["used", "有 Job 在用"], ["unused", "还没人用"], ["failing", `最近抓取失败 ${failing}`]];
++  const failing = scopedSources.filter((s) => s.last?.error).length;
++  const FILTERS: [Filter, string][] = [["all", `全部 ${scopedSources.length}`], ["used", "有 Job 在用"], ["unused", "还没人用"], ["failing", `最近抓取失败 ${failing}`]];
+ 
+   return (
+     <div className="space-y-4">
+@@ -49,7 +51,7 @@
+       <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在此页或通过助手登记来源，研究任务使用 source:id 引用一个来源，或使用 tag:标签 引用一组。删除前会检查引用任务。</p></details>
+       {editing !== null && catalog.revision && <SourceEditor key={editing} id={editing || undefined} revision={catalog.revision} onClose={() => setEditing(null)} onSaved={load} />}
+ 
+-      {catalog.coverage?.map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
++      {catalog.coverage?.filter(profile => !chainScope.key || profile.jobs?.includes(chainScope.data?.job||'')).map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
+         <summary className="cursor-pointer font-medium">{profile.name} · 主题覆盖 · {profile.cells.filter(c => c.status !== 'current').length} 项有缺口</summary>
+         <p className="text-text-muted mt-2">分别跟踪当前状态页、更新公告、数据快照和文章案例。已交给研究模型的材料与报告已采用的材料分开记录；覆盖状态表示实际读取情况。</p>
+         <div className="grid gap-3 mt-3 sm:grid-cols-2">{profile.cells.map(cell => <div key={cell.key} className="border border-border rounded p-3">
+@@ -64,11 +66,11 @@
+         <p className="mt-3 text-text-muted">素材记录：已交付待记录采用 {profile.candidates.offered || 0} · 报告采用 {profile.candidates.reported || 0} · 解释背景 {profile.candidates.background || 0} · 延后处理 {profile.candidates.deferred || 0} · 历史采用关系未知 {profile.candidates.unknown || 0}</p>
+       </details>)}
+ 
+-      {catalog.problems.length ? (
++      {catalog.problems.some(p => chainScope.job(p.job)) ? (
+         <section className="card p-4 space-y-1 border-danger" aria-label="引用错误">
+           <h2 className="text-sm font-medium text-danger">有 Job 引用了注册表里没有的源（这些 Job 跑不起来）</h2>
+           <ul className="text-xs space-y-1">
+-            {catalog.problems.map((p) => (
++            {catalog.problems.filter(p=>chainScope.job(p.job)).map((p) => (
+               <li key={p.job}><Link className="hover:underline" to={`/jobs/${encodeURIComponent(p.job)}`}>{p.job}</Link>：{p.problem}</li>
+             ))}
+           </ul>
+@@ -87,7 +89,7 @@
+           {tags.map((t) => <option key={t} value={t}>{t}</option>)}
+         </select>
+         <input className="input text-xs py-1 w-48" placeholder="搜索名称、网址、备注" aria-label="搜索信息源" value={text} onChange={(e) => setText(e.target.value)} />
+-        <span className="ml-auto text-xs text-text-muted">显示 {shown.length} / {catalog.sources.length}</span>
++        <span className="ml-auto text-xs text-text-muted">显示 {shown.length} / {scopedSources.length}</span>
+       </div>
+ 
+       <div className="card overflow-x-auto p-0">
+--- a/research/ui/src/pages/Reports.tsx
++++ b/research/ui/src/pages/Reports.tsx
+@@ -1,3 +1,4 @@
++import { useChainScope } from '@/lib/use-chain-scope';
+ import { useEffect, useState, useCallback, useRef } from "react";
+ import { useNavigate, useSearchParams } from "react-router-dom";
+ import { listReports, getReportTree, searchReports, getReportCategories, listTags, updateReportMeta } from "@/api";
+@@ -71,6 +72,9 @@
+ }
+ 
+ export function ReportsPage() {
++  const chainScope=useChainScope();
++  const chainKey=chainScope.key;
++  const chainJob=chainKey?(chainScope.data?.job||"__loading_chain__"):undefined;
+   const navigate = useNavigate();
+   const [searchParams, setSearchParams] = useSearchParams();
+ 
+@@ -137,7 +141,7 @@
+ 
+   const openReport = (path: string) => {
+     patchUi({ lastVisited: path });
+-    navigate(`/reports/view?path=${encodeURIComponent(path)}`);
++    navigate(`/reports/view?path=${encodeURIComponent(path)}${chainKey?"&chain="+encodeURIComponent(chainKey):""}`);
+   };
+ 
+   // Search state
+@@ -163,7 +167,7 @@
+   const [tags, setTags] = useState<{ tag: string; count: number }[]>([]);
+   // Time filters key on the report's own date (from its path), not the file
+   // mtime: a backfill run would otherwise make June look like today.
+-  const [range, setRange] = useState("today");
++  const [range, setRange] = useState(chainKey?"all":"today");
+   const [customFrom, setCustomFrom] = useState("");
+   const [customTo, setCustomTo] = useState("");
+   const [latestOnly, setLatestOnly] = useState(false);
+@@ -203,12 +207,13 @@
+ 
+   const activeFilterParams = useCallback(() => ({
+     category: category || undefined,
++    job: chainJob,
+     favorite: scope === "fav" ? true : undefined,
+     unread: scope === "unread" ? true : undefined,
+     tag: tag || undefined,
+     latest_round: latestOnly || undefined,
+     ...dateBounds(),
+-  }), [category, scope, tag, latestOnly, dateBounds]);
++  }), [category, scope, tag, latestOnly, dateBounds, chainJob]);
+ 
+   const fetchReports = useCallback(async (
+     pageNum: number,
+@@ -307,15 +312,15 @@
+     const seq = ++searchSeq.current;
+     if (previousSearch.current !== term) { setSearchResults([]); setSearchTotal(0); previousSearch.current = term; }
+     setSearchedQuery(term); setSearchError("");
+-    setSearchParams(term ? { q: term } : {}, { replace: true });
++    setSearchParams({...(chainKey?{chain:chainKey}:{}),...(term?{q:term}:{})}, { replace: true });
+     if (!term) { setSearchResults([]); setSearchTotal(0); setSearching(false); return; }
+     setSearching(true);
+     try {
+-      const data = await searchReports(term, 50);
++      const data = await searchReports(term, 50, chainJob);
+       if (seq === searchSeq.current) { setSearchResults(data.results); setSearchTotal(data.total); }
+     } catch (e) { if (seq === searchSeq.current) setSearchError(errorMessage(e, "全文搜索失败")); }
+     finally { if (seq === searchSeq.current) setSearching(false); }
+-  }, [query, setSearchParams]);
++  }, [query, setSearchParams, chainJob, chainKey]);
+   useEffect(() => {
+     if (initialSearch.current) { initialSearch.current = false; if (query.trim()) void handleSearch(); }
+   }, [handleSearch, query]);
+@@ -350,7 +355,7 @@
+             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+           />
+         </div>
+-        {isSearching ? <button className="btn text-xs" onClick={() => { ++searchSeq.current; setQuery(""); setSearchedQuery(""); setSearchError(""); setSearching(false); setSearchParams({}); }}>退出搜索</button> : null}
++        {isSearching ? <button className="btn text-xs" onClick={() => { ++searchSeq.current; setQuery(""); setSearchedQuery(""); setSearchError(""); setSearching(false); setSearchParams(chainKey?{chain:chainKey}:{}); }}>退出搜索</button> : null}
+         <button onClick={handleSearch} disabled={searching} className="btn btn-primary">
+           {searching ? "搜索中..." : "搜索"}
+         </button>
+--- a/research/ui/src/pages/PublishQueue.tsx
++++ b/research/ui/src/pages/PublishQueue.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { documentPublishLink } from "@/lib/platform-links";
+ import { useTopicPosition } from "@/lib/use-topic-position";
+ import { useCallback, useRef, useState } from "react";
+@@ -49,6 +50,7 @@
+ }
+ 
+ export function PublishQueuePage() {
++  const chainScope=useChainScope();
+   const root = useRef<HTMLDivElement>(null);
+   const location = useLocation();
+   const [params, setParams] = useSearchParams();
+@@ -71,7 +73,7 @@
+ 
+   const { values: f } = filters;
+   const limit = Math.max(PAGE_SIZE, Math.min(100000, Number(params.get("limit")) || PAGE_SIZE));
+-  const scope = (rows ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
++  const scope = (rows ?? []).filter((s) => chainScope.script(s.script_id) && !f.matrix || (s.matrix || "_independent") === f.matrix);
+   const matrixOptions = [...new Map((rows ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
+   const shown = scope.filter(
+     (s) =>
+--- a/research/ui/src/pages/VideoRecipes.tsx
++++ b/research/ui/src/pages/VideoRecipes.tsx
+@@ -1,3 +1,4 @@
++import { useChainScope } from '@/lib/use-chain-scope';
+ import { useCallback, useEffect, useState } from "react";
+ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+ 
+@@ -29,6 +30,9 @@
+ 
+ // 文稿配方：一份 YAML 就是一种文稿的完整做法（调研 → 写稿 → 出片，外加自动流水线从哪挑题），像 Job 一样直接改、复制复用。
+ export function VideoRecipesPage() {
++  const chainScope=useChainScope();
++  const chainKey=chainScope.key;
++  const scopedPath=useCallback((path:string)=>path+(chainKey?(path.includes("?")?"&":"?")+"chain="+encodeURIComponent(chainKey):""),[chainKey]);
+   const { key, kind, name } = useParams();
+   const [search] = useSearchParams();
+   const from = search.get("from");
+@@ -79,11 +83,12 @@
+   }, [key, retry]);
+ 
+   useEffect(() => {
+-    if (!key && !kind && list.length) navigate(withOrigin(`/video-recipes/${list[0].key}`, from), { replace: true });
+-  }, [key, kind, list, navigate, from]);
++    const related=list.filter(r=>!chainKey||chainScope.data?.recipes?.includes(r.key));
++    if (!key && !kind && related.length) navigate(scopedPath(withOrigin(`/video-recipes/${related[0].key}`, from)), { replace: true });
++  }, [key, kind, list, navigate, from, chainKey, chainScope.data, scopedPath]);
+ 
+   const dirty = detail !== null && text !== detail.content;
+-  const jump = (path: string) => { if (dirty || partDirty) setPendingPath(withOrigin(path, from)); else navigate(withOrigin(path, from)); };
++  const jump = (path: string) => { if (dirty || partDirty) setPendingPath(scopedPath(withOrigin(path, from))); else navigate(scopedPath(withOrigin(path, from))); };
+   useEffect(() => {
+     if (!dirty && !partDirty) return;
+     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+@@ -158,7 +163,7 @@
+         <nav className="card p-2 space-y-1 md:max-h-[calc(100vh-12rem)] overflow-y-auto" aria-label="配方列表">
+           <input className="input text-xs mb-2" aria-label="搜索配方或部件" placeholder="搜索配方或部件" value={query} onChange={(e) => setQuery(e.target.value)} />
+           <p className="px-2 text-xs text-text-muted py-2">文稿配方（{list.length}）</p>
+-          {list.filter((r) => `${r.key} ${r.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((r) => (
++          {list.filter((r) => (!chainKey||chainScope.data?.recipes?.includes(r.key)) && `${r.key} ${r.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((r) => (
+             <button
+               key={r.key}
+               onClick={() => jump(`/video-recipes/${r.key}`)}
+--- a/research/ui/src/pages/VideoScripts.tsx
++++ b/research/ui/src/pages/VideoScripts.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+ import { useSearchParams } from "react-router-dom";
+ import { Link, useNavigate } from "react-router-dom";
+@@ -97,6 +98,7 @@
+ }
+ 
+ export function VideoScriptsPage() {
++  const chainScope=useChainScope();
+   const user = useAuthStore((s) => s.user);
+   const canEdit = user?.role === "editor" || user?.role === "admin";
+   const toast = useToast();
+@@ -188,7 +190,7 @@
+     const stage = stageOf(x);
+     return stage === "WRITING" ? "RESEARCHING" : stage;
+   };
+-  const scope = (scripts ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
++  const scope = (scripts ?? []).filter((s) => chainScope.script(s.id) && !f.matrix || (s.matrix || "_independent") === f.matrix);
+   const matrixOptions = [...new Map((scripts ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
+   const columnName = (key: string) => (scripts ?? []).find((s) => s.column_key === key)?.column_label || cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") || configNames[key] || key;
+   const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : key === "published" ? Boolean(x.published) : chipOf(x) === key;
+--- a/research/ui/src/pages/Chains.test.tsx
++++ b/research/ui/src/pages/Chains.test.tsx
+@@ -0,0 +1,129 @@
++import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import { MemoryRouter, Route, Routes } from 'react-router-dom';
++import { afterEach, beforeEach, expect, it, vi } from 'vitest';
++import { ChainsPage } from './Chains';
++import { useAuthStore } from '@/lib/auth-store';
++
++const apiMock = vi.hoisted(() => vi.fn());
++vi.mock('@/api/client', () => ({ api: apiMock }));
++function open() {
++  render(<MemoryRouter initialEntries={['/chains/new']}><Routes><Route path="/chains/:key" element={<ChainsPage/>}/></Routes></MemoryRouter>);
++}
++beforeEach(() => {
++  localStorage.clear();
++  useAuthStore.setState({ user: { id: 1, username: 'admin', role: 'admin', disabled: false, created_at: '', last_login_at: null } });
++  apiMock.mockReset();
++  apiMock.mockImplementation(async (path: string) => {
++    if (path === '/api/chains') return { items: [], archived: [] };
++    if (path === '/api/chains/catalog') return { chains: [], revision: '1', sources: { openai: { name: 'OpenAI News', spec: 'rss:https://openai.com/news/rss.xml', enabled: true, tags: [], note: '' } } };
++    if (path === '/api/video/autovideo') return { voices: [{ id: 'zf_xiaoxiao', label: '小晓 · 普通话女声' }] };
++    return {};
++  });
++});
++afterEach(()=>{cleanup();vi.useRealTimers();});
++it('keeps the newcomer on the current step until required research information is supplied', async () => {
++  open(); await screen.findByText('这条链路要持续产出什么？');
++  fireEvent.click(screen.getByRole('button', { name: '下一步' }));
++  expect(screen.getByRole('alert').textContent).toContain('请填写链路名称');
++  expect(apiMock.mock.calls.filter(c => c[1]?.method === 'POST')).toHaveLength(0);
++});
++it('preserves entered research information and requires an actual source selection', async () => {
++  open(); await screen.findByText('这条链路要持续产出什么？');
++  fireEvent.change(screen.getByLabelText('链路名称'), { target: { value: '科研进展' } });
++  fireEvent.change(screen.getByLabelText(/英文标识/), { target: { value: 'science' } });
++  fireEvent.change(screen.getByLabelText('研究目标与观众'), { target: { value: '向普通用户解释研究进展' } });
++  fireEvent.click(screen.getByRole('button', { name: '下一步' }));
++  fireEvent.click(screen.getByRole('button', { name: '下一步' }));
++  expect(screen.getByRole('alert').textContent).toContain('至少选择一个来源');
++  fireEvent.click(screen.getByRole('checkbox', { name: /OpenAI News/ }));
++  fireEvent.click(screen.getByRole('button', { name: '下一步' }));
++  await waitFor(() => expect((screen.getByLabelText('旁白声音') as HTMLSelectElement).value).toBe('zf_xiaoxiao'));
++  const draft = JSON.parse(localStorage.getItem('chain-wizard-v1')!);
++  expect(draft).toMatchObject({ name: '科研进展', sources: ['source:openai'], voice_id: 'zf_xiaoxiao' });
++});
++it('restores an unfinished creation form after a reload', async () => {
++  localStorage.setItem('chain-wizard-v1', JSON.stringify({ name: '未完成链路', key: 'unfinished', prompt: '研究可用工具', sources: ['source:openai'] }));
++  open(); await screen.findByText('这条链路要持续产出什么？');
++  expect((screen.getByLabelText('链路名称') as HTMLInputElement).value).toBe('未完成链路');
++  expect((screen.getByLabelText('研究目标与观众') as HTMLTextAreaElement).value).toBe('研究可用工具');
++});
++
++it('shows the actual shared schedule and window instead of editable independent settings', async () => {
++  localStorage.setItem('chain-wizard-v1',JSON.stringify({name:'共享验收',key:'shared',existing_job:'chains/science',sources:[]}));
++  apiMock.mockImplementation(async(path:string)=>{
++    if(path==='/api/chains/catalog')return {chains:[{key:'science',job:'chains/science',name:'科研'}],sources:{},revision:'1'};
++    if(path==='/api/chains/science')return {name:'科研',research:{sources:['source:openai']},sources:[{ref:'source:openai',name:'真实科研来源',enabled:true}],schedules:[{id:'s',schedule:'58 20 * * *',timezone:'Asia/Shanghai',enabled:false}],window_mode:'rolling',window_days:14};
++    if(path==='/api/video/autovideo')return {voices:[]};
++    return {};
++  });
++  open();await screen.findByText('这条链路要持续产出什么？');
++  fireEvent.click(screen.getByRole('button',{name:'下一步'}));
++  await screen.findByText('真实科研来源 · 已启用');
++  expect(screen.queryByRole('button',{name:'添加网址来源'})).toBeNull();
++  fireEvent.click(screen.getByRole('button',{name:'下一步'}));
++  fireEvent.click(screen.getByRole('button',{name:'下一步'}));
++  expect(screen.queryByRole('combobox',{name:'运行方式'})).toBeNull();
++  expect(screen.queryByRole('combobox',{name:'研究时间范围'})).toBeNull();
++  expect(screen.getByText(/每天 20:58.*已暂停/)).toBeTruthy();
++  expect(screen.getByText('研究范围：最近 14 天')).toBeTruthy();
++});
++
++it('keeps deleted-chain history reachable without live configuration links or controls', async () => {
++  const archived={key:'deleted',name:'已删除验收链路',archived:true,job:'chains/deleted',revision:'1',research:{name:'旧研究',sources:[],prompt:''},sources:[],schedules:[],shared_chains:[],scripts:[],script_count:0,outputs:[],outputs_detail:[],runs:[{id:'done-run',status:'DONE',started_at:'2026-11-17T20:00:00+08:00',note:'历史研究完成'}]};
++  apiMock.mockImplementation(async(path:string)=>{
++    if(path==='/api/chains/deleted')return archived;
++    if(path==='/api/chains/catalog')return {chains:[],sources:{},revision:'1'};
++    if(path==='/api/video/autovideo')return {voices:[]};
++    if(path==='/api/chains/runs/done-run')return {...archived.runs[0],stage:'RESEARCH',report:'chains/deleted/report.md',report_view:'chains/deleted/report.md',snapshot:{}};
++    return {};
++  });
++  render(<MemoryRouter initialEntries={['/chains/deleted']}><Routes><Route path="/chains/:key" element={<ChainsPage/>}/></Routes></MemoryRouter>);
++  await screen.findByText(/下方是删除前的只读配置/);
++  expect(screen.queryByRole('link',{name:'研究任务'})).toBeNull();
++  expect(screen.queryByRole('button',{name:'修改链路'})).toBeNull();
++  fireEvent.click(screen.getByRole('button',{name:'运行记录'}));
++  fireEvent.click(screen.getByRole('button',{name:/历史研究完成/}));
++  await screen.findByRole('link',{name:'打开本次报告'});
++  expect(screen.queryByRole('link',{name:'研究日志'})).toBeNull();
++});
++
++it('clears a transient initial load failure when automatic polling recovers', async () => {
++  vi.useFakeTimers();let attempts=0;
++  apiMock.mockImplementation(async(path:string)=>{
++    if(path==='/api/chains/recovered'){
++      if(++attempts===1)throw new Error('服务响应超时，请重试');
++      return {key:'recovered',name:'已恢复链路',job:'chains/recovered',revision:'1',research:{name:'研究',sources:[],prompt:''},sources:[],schedules:[],shared_chains:[],scripts:[],script_count:0,outputs:[],outputs_detail:[],runs:[]};
++    }
++    if(path==='/api/chains/catalog')return {chains:[],sources:{},revision:'1'};
++    return {};
++  });
++  await act(async()=>{render(<MemoryRouter initialEntries={['/chains/recovered']}><Routes><Route path="/chains/:key" element={<ChainsPage/>}/></Routes></MemoryRouter>)});
++  expect(screen.getByRole('alert').textContent).toContain('服务响应超时');
++  await act(async()=>{await vi.advanceTimersByTimeAsync(6000)});
++  expect(screen.getByRole('heading',{name:'已恢复链路'})).toBeTruthy();
++  expect(screen.queryByRole('alert')).toBeNull();
++});
++
++it('shows pending and failed retry feedback inside the open run drawer', async () => {
++  let rejectRetry: (reason: Error) => void = () => {};
++  const run={id:'retry-run',status:'FAILED',stage:'VIDEO',started_at:1794910000,note:'需要继续',batch:{items:[]}};
++  const chain={key:'retry',name:'恢复验收',job:'chains/retry',revision:'1',research:{name:'研究',sources:[],prompt:''},sources:[],schedules:[],shared_chains:[],scripts:[],script_count:0,outputs:[],outputs_detail:[],runs:[run]};
++  apiMock.mockImplementation(async(path:string)=>{
++    if(path==='/api/chains/retry')return chain;
++    if(path==='/api/chains/catalog')return {chains:[],sources:{},revision:'1'};
++    if(path==='/api/chains/runs/retry-run')return run;
++    if(path==='/api/chains/runs/retry-run/retry')return new Promise((_,reject)=>{rejectRetry=reject});
++    return {};
++  });
++  render(<MemoryRouter initialEntries={['/chains/retry']}><Routes><Route path="/chains/:key" element={<ChainsPage/>}/></Routes></MemoryRouter>);
++  await screen.findByRole('button',{name:'运行记录'});
++  fireEvent.click(screen.getByRole('button',{name:'运行记录'}));
++  fireEvent.click(await screen.findByRole('button',{name:/需要继续/}));
++  const dialog=within(await screen.findByRole('dialog',{name:'链路运行详情'}));
++  fireEvent.click(dialog.getByRole('button',{name:'重试未完成步骤'}));
++  expect((dialog.getByRole('button',{name:'重试未完成步骤'}) as HTMLButtonElement).disabled).toBe(true);
++  expect(dialog.getByRole('status').textContent).toContain('正在提交操作');
++  await act(async()=>rejectRetry(new Error('服务暂时不可用，请重试')));
++  expect(dialog.getByRole('alert').textContent).toContain('服务暂时不可用');
++  expect((dialog.getByRole('button',{name:'重试未完成步骤'}) as HTMLButtonElement).disabled).toBe(false);
++});
+--- a/research/ui/src/pages/Outputs.tsx
++++ b/research/ui/src/pages/Outputs.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import { Link, useSearchParams } from "react-router-dom";
+ import { ArrowLeft, ArrowUpRight, ChevronRight, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
+@@ -77,6 +78,7 @@
+ }
+ 
+ export function OutputsPage() {
++  const chainScope=useChainScope();
+   const filters = useFilters(["matrix", "render", "range", "archived"]);
+   const [params, setParams] = useSearchParams();
+   const { q, matrix, render, range } = filters.values;
+@@ -112,12 +114,12 @@
+   const scoped = useMemo(() => {
+     if (!data) return [];
+     const since = range ? Date.now() - Number(range) * 86400000 : 0;
+-    return data.scripts.filter((s) => (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
++    return data.scripts.filter((s) => chainScope.output(s.production) && (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
+       && matchesText(q, s.title, s.production_name, s.column_key, s.report_path, s.report_date, s.job, s.matrix, jobName(data, s.job), matrixName(data, ownerKey(s))))
+       .sort((a, b) => newest ? b.created_at.localeCompare(a.created_at) : a.created_at.localeCompare(b.created_at));
+-  }, [data, range, render, newest, q]);
++  }, [data, range, render, newest, q, chainScope.data, chainScope.key]);
+   const rows = useMemo(() => scoped.filter((s) => !matrix || ownerKey(s) === matrix), [scoped, matrix]);
+-  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })) : [];
++  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })).filter(x=>!chainScope.key||x.count>0) : [];
+   const dates = new Map<string, OutputScript[]>();
+   for (const row of rows.slice(0, limit)) { const day = row.created_at.slice(0, 10); const group = dates.get(day) || []; group.push(row); dates.set(day, group); }
+   const units = view === "owner" && !matrix ? new Set(rows.map(ownerKey)).size : rows.length;
+--- a/research/ui/src/pages/Matrices.tsx
++++ b/research/ui/src/pages/Matrices.tsx
+@@ -1,3 +1,4 @@
++import { useChainScope } from '@/lib/use-chain-scope';
+ import { useCallback, useEffect, useRef, useState } from "react";
+ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+ import { Activity, ArrowUpRight, Boxes, ChevronRight, RefreshCw, Search, TriangleAlert } from "lucide-react";
+@@ -153,6 +154,7 @@
+ }
+ 
+ export function MatricesPage() {
++  const chainScope=useChainScope();
+   const navigate = useNavigate();
+   const canEdit = useCanEdit();
+   const [data, setData] = useState<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] } | null>(null);
+@@ -180,7 +182,7 @@
+     document.addEventListener("visibilitychange", refresh);
+     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); flight.current?.abort(); flight.current = null; };
+   }, [load]);
+-  const rows = data?.matrices ?? [];
++  const rows = (data?.matrices ?? []).filter(m=>!chainScope.key||m.key===chainScope.data?.matrix_key);
+   const active = rows.filter((m) => !m.archived && (!m.content?.role || m.content.role === "domain"));
+   const sources = rows.filter((m) => !m.archived && m.content?.role && m.content.role !== "domain");
+   const scope = archived === "1" ? rows.filter((m) => m.archived) : archived === "sources" ? sources : active;
+--- a/research/ui/src/pages/Scheduler.tsx
++++ b/research/ui/src/pages/Scheduler.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { useCallback, useEffect, useMemo, useState } from "react";
+ import { usePageResource } from "@/lib/use-page-resource";
+ import { api } from "@/api/client";
+@@ -98,6 +99,7 @@
+ const displayTime = (iso?: string) => iso ? iso.slice(0, 16).replace("T", " ") : "—";
+ 
+ export function SchedulerPage() {
++  const chainScope=useChainScope();
+   const focusedPlan = new URLSearchParams(window.location.search).get('plan');
+   const toast = useToast();
+   const [historyId, setHistoryId] = useState("");
+@@ -123,9 +125,9 @@
+   const states = useMemo(() => Object.fromEntries([...(system.data?.health?.jobs || []), ...(managed.data?.health?.jobs || [])].map(s => [s.id, s])), [system.data, managed.data]);
+   const dispatcher = managed.data?.dispatcher || null;
+   const timezone = managed.data?.timezone || system.data?.timezone || "服务器本地时区";
+-  const warnings = [...new Set([...(managed.data?.warnings || []), ...(system.data?.warnings || [])])];
+-  const removed = system.data?.removed_system_jobs || [];
+-  const others = system.data?.others || [];
++  const warnings = [...new Set([...(managed.data?.warnings || []), ...(!chainScope.key?system.data?.warnings || []:[])])];
++  const removed = chainScope.key?[]:system.data?.removed_system_jobs || [];
++  const others = chainScope.key?[]:system.data?.others || [];
+   const loaded = !!managed.data || !!system.data;
+   const awaitingFirstJobs = !jobs.length && ((!managed.data && managed.loading) || (!system.data && system.loading));
+   const loading = managed.loading;
+@@ -243,11 +245,12 @@
+   // Only a legacy cron entry owns its own command line; managed plans and
+   // system agents get their trigger from somewhere else.
+   const legacyEdit = !!editing && !isSystemEdit && editingJob?.backend !== "managed";
+-  const filteredJobs = schedulable.filter(job => `${job.name} ${job.label} ${job.description}`.toLowerCase().includes(jobQuery.trim().toLowerCase()));
+-  const visibleSchedules = jobs.filter((j) => (!scheduleQuery || `${j.title} ${j.id} ${j.job_name} ${j.job_label || ""}`.toLowerCase().includes(scheduleQuery.trim().toLowerCase())) &&
++  const filteredJobs = schedulable.filter(job => chainScope.job(job.name) && `${job.name} ${job.label} ${job.description}`.toLowerCase().includes(jobQuery.trim().toLowerCase()));
++  const visibleSchedules = jobs.filter((j) => chainScope.job(j.job_name||"" ) && (!scheduleQuery || `${j.title} ${j.id} ${j.job_name} ${j.job_label || ""}`.toLowerCase().includes(scheduleQuery.trim().toLowerCase())) &&
+     (!statusScope || (statusScope === "enabled" ? j.enabled : statusScope === "paused" ? !j.enabled : ["overdue", "unverified", "no_schedule"].includes(states[j.id]?.status))));
+-  const hasLaunchd = jobs.some(job => job.backend === "launchd");
+-  const needsAttention = Object.values(states).filter(s => ["overdue", "unverified", "no_schedule"].includes(s.status)).length;
++  const scopedJobs=jobs.filter(j=>chainScope.job(j.job_name||""));
++  const hasLaunchd = !chainScope.key && jobs.some(job => job.backend === "launchd");
++  const needsAttention = scopedJobs.filter(j=>["overdue", "unverified", "no_schedule"].includes(states[j.id]?.status)).length;
+   const previewValid = preview?.schedule === form.schedule.trim().split(/\s+/).join(" ") && preview.requestedTimezone === form.timezone && !!preview?.next_runs?.length;
+   // A system agent carries no job and no command -- only the trigger -- so
+   // requiring either of those would leave its save button permanently disabled.
+@@ -262,15 +265,15 @@
+     </div>
+ 
+     <div className="card p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+-      <span><strong className="text-lg mr-1.5">{loaded ? jobs.filter(j => j.enabled).length : "—"}</strong>已启用</span>
+-      <span className="text-text-muted">{loaded ? jobs.filter(j => !j.enabled).length : "—"} 个已暂停</span>
++      <span><strong className="text-lg mr-1.5">{loaded ? scopedJobs.filter(j => j.enabled).length : "—"}</strong>已启用</span>
++      <span className="text-text-muted">{loaded ? scopedJobs.filter(j => !j.enabled).length : "—"} 个已暂停</span>
+       <span className={needsAttention ? "text-warning" : "text-text-muted"}>{loaded ? needsAttention : "—"} 个待检查 / 验证</span>
+       <span className="ml-auto text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{timezone}</span>
+     </div>
+ 
+     {dispatcher && <div className={cn("card p-4 flex flex-wrap items-center gap-3", dispatcher.online ? "border-success/30" : "border-danger/50")}>
+       <ShieldCheck className={cn("w-5 h-5", dispatcher.online ? "text-success" : "text-danger")} />
+-      <div className="flex-1"><p className="text-sm font-medium">{dispatcher.online ? "周期执行器在线" : "周期执行器离线"}</p><p className="text-xs text-text-muted mt-1">{dispatcher.detail}。新 job 使用托管计划，关闭页面或重启 Web 不影响执行。</p></div>
++      <div className="flex-1"><p className="text-sm font-medium">{dispatcher.online ? "周期执行器在线" : "周期执行器离线"}</p><p className="text-xs text-text-muted mt-1">{dispatcher.detail}。{dispatcher.detail?.includes("隔离")?"关闭浏览器后继续执行；重新启动隔离应用后恢复已保存计划。":"新 job 使用托管计划，关闭页面或重启 Web 不影响执行。"}</p></div>
+       {!dispatcher.online && <button className="btn text-xs" disabled={!!busy} onClick={startDispatcher}>{busy === "host" ? "正在验证心跳…" : "启动 / 恢复执行器"}</button>}
+     </div>}
+     {hasLaunchd && <div className="card border-accent/30 p-4 flex gap-3">
+@@ -333,7 +336,7 @@
+     </div>}
+ 
+     {error && jobs.length > 0 ? <ErrorState error={error} onRetry={() => fetchJobs()} compact /> : null}
+-    {jobs.length ? <div className="flex flex-wrap items-center gap-3"><input className="input max-w-sm text-xs" aria-label="搜索调度计划" placeholder="搜索计划名称或研究任务" value={scheduleQuery} onChange={(e) => setScheduleQuery(e.target.value)} /><select aria-label="调度状态" className="input w-auto text-xs" value={statusScope} onChange={(e) => setStatusScope(e.target.value)}><option value="">全部状态</option><option value="enabled">已启用</option><option value="paused">已暂停</option><option value="attention">待检查 / 验证</option></select><span className="text-xs text-text-muted ml-auto">显示 {visibleSchedules.length} / {jobs.length}</span></div> : null}
++    {jobs.length ? <div className="flex flex-wrap items-center gap-3"><input className="input max-w-sm text-xs" aria-label="搜索调度计划" placeholder="搜索计划名称或研究任务" value={scheduleQuery} onChange={(e) => setScheduleQuery(e.target.value)} /><select aria-label="调度状态" className="input w-auto text-xs" value={statusScope} onChange={(e) => setStatusScope(e.target.value)}><option value="">全部状态</option><option value="enabled">已启用</option><option value="paused">已暂停</option><option value="attention">待检查 / 验证</option></select><span className="text-xs text-text-muted ml-auto">显示 {visibleSchedules.length} / {scopedJobs.length}</span></div> : null}
+     {loaded && jobs.length > 0 && !visibleSchedules.length ? <p className="text-sm text-text-muted">没有符合筛选的计划</p> : null}
+     {awaitingFirstJobs ? <p className="text-sm text-text-muted">加载中…</p> : error && !jobs.length ? <ErrorState error={error} onRetry={() => fetchJobs()} /> : jobs.length === 0 ? <div className="card p-10 text-center space-y-2">
+       <Clock className="w-8 h-8 mx-auto text-text-muted" />
+--- a/research/ui/src/pages/JobsList.tsx
++++ b/research/ui/src/pages/JobsList.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { useEffect, useState } from "react";
+ import { Link, useSearchParams } from "react-router-dom";
+ import { RefreshCw } from "lucide-react";
+@@ -32,6 +33,7 @@
+ }
+ 
+ export function JobsListPage() {
++  const chainScope=useChainScope();
+   const { data: jobData, error, loading, reload: fetchJobs } = usePageResource(listJobs, 15000);
+   const jobs = jobData ?? [];
+   const { data: matrices } = usePageResource(listMatrices);
+@@ -157,6 +159,7 @@
+   };
+ 
+   const visible = jobs.filter((j) => {
++    if (!chainScope.job(j.name)) return false;
+     if (matrix && (owner(j.name)?.key || "_independent") !== matrix) return false;
+     if (statusFilter === "failed" && j.state?.last_status !== "failed") return false;
+     if (statusFilter === "enabled" && !j.enabled) return false;
+--- a/research/ui/src/pages/Scheduler.test.tsx
++++ b/research/ui/src/pages/Scheduler.test.tsx
+@@ -1,3 +1,4 @@
++import {MemoryRouter} from "react-router-dom";
+ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ 
+@@ -64,7 +65,7 @@
+ describe("Scheduler job picker", () => {
+   it("creates a durable job plan with an automatic ID and no shell command input", async () => {
+     const calls = mockFetch();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(screen.getByText(/新建调度/));
+ 
+     await waitFor(() => {
+@@ -86,7 +87,7 @@
+   });
+ 
+   it("filters the job list by query", async () => {
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(screen.getByText(/新建调度/));
+ 
+     await waitFor(() => {
+@@ -102,7 +103,7 @@
+   });
+ 
+   it("marks disabled jobs", async () => {
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(screen.getByText(/新建调度/));
+     await waitFor(() => {
+       expect(screen.getByText("已停用")).toBeTruthy();
+@@ -148,7 +149,7 @@
+       overdue: 1,
+       paused: 0,
+     });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("存在漏跑记录")).toBeTruthy();
+     expect(screen.getByText(/上次应运行 09-24 06:00/)).toBeTruthy();
+   });
+@@ -164,7 +165,7 @@
+       overdue: 0,
+       paused: 1,
+     });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("已暂停", { selector: "p" })).toBeTruthy();
+     expect(screen.queryByText(/漏跑/)).toBeNull();
+   });
+@@ -175,7 +176,7 @@
+       overdue: 0,
+       paused: 0,
+     });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     await waitFor(() => {
+       expect(screen.getByText("practical_ai_intelligence")).toBeTruthy();
+     });
+@@ -188,7 +189,7 @@
+ describe("Schedule editing and previews", () => {
+   it("switches selected jobs and refuses disabled ones", async () => {
+     const calls = mockFetch({ ...JOBS, jobs: [...JOBS.jobs, {...JOBS.jobs[0], name: 'research/中文任务', label: '中文任务'}] });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(screen.getByText(/新建调度/));
+     fireEvent.click(await screen.findByText("Model and Pricing Radar"));
+     expect((screen.getByText('Daily AI Agents').closest('button') as HTMLButtonElement).disabled).toBe(true);
+@@ -205,7 +206,7 @@
+       id: "com.arec.pipeline.daily", title: "情报矩阵 · 每日运行", backend: "launchd", editable: false,
+       enabled: true, schedule_label: "每天 06:00", next_runs: ["2026-09-26T06:00:00+08:00"], command: "ensure_round.py",
+     }], timezone: "Asia/Shanghai (UTC+0800)" })));
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("情报矩阵 · 每日运行")).toBeTruthy();
+     expect(screen.getByText("2026-09-26 06:00")).toBeTruthy();
+     expect(screen.queryByRole("button", { name: /暂停 com.arec/ })).toBeNull();
+@@ -222,7 +223,7 @@
+         next_run: null, where: "launchd；本页只读", link: null, cost: "",
+         last_run: { status: "ok", note: "", started_at: "2026-10-20T04:30:00+0800" } },
+     ] })));
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("每周二早上一批")).toBeTruthy();
+     expect(screen.getByText("上次空跑")).toBeTruthy();
+     expect(screen.getByText("没有可写的新选题")).toBeTruthy();
+@@ -239,7 +240,7 @@
+       if (init?.method === "PUT") return jsonResponse({ ok: true });
+       return jsonResponse({ jobs: [{ id: "report", minute: "0", hour: "8", day_of_month: "*", month: "*", day_of_week: "*", command: "echo report", enabled: false }] });
+     }));
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: "编辑 report" }));
+     fireEvent.change(screen.getByLabelText("执行时间"), { target: { value: "09:00" } });
+     await screen.findByText("2026-09-26 09:00");
+@@ -285,7 +286,7 @@
+     // that has never produced a run has no evidence at all.
+     mockManaged({ id: MANAGED.id, status: "unverified", schedule: "0 3 * * *",
+                    detail: "计划已保存，尚未执行过；第一次执行后才能确认模型与网络真的可用" });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("待验证")).toBeTruthy();
+     expect(screen.queryByText("正常")).toBeNull();
+     expect(screen.getByText(/尚未执行过/)).toBeTruthy();
+@@ -296,7 +297,7 @@
+   it("shows healthy only after a run actually succeeded", async () => {
+     mockManaged({ id: MANAGED.id, status: "ok", schedule: "0 3 * * *",
+                    detail: "最近一次执行成功，报告已生成", last_ran_at: "2026-09-25T03:01:00+08:00" });
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("正常")).toBeTruthy();
+     expect(screen.getByText(/最近一次执行成功/)).toBeTruthy();
+   });
+@@ -345,7 +346,7 @@
+       init?.method === "POST" && url.includes("/api/scheduler")
+         ? errorResponse(409, "schedule_conflict", "这个 job 已有周期计划，请编辑现有计划")
+         : null);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(screen.getByText(/新建调度/));
+     // The card and the picker both carry the name; the picker button is the one
+     // inside the form dialog.
+@@ -363,7 +364,7 @@
+     vi.spyOn(window, "confirm").mockReturnValue(true);
+     mockWithFailure((_url, init) =>
+       init?.method === "DELETE" ? errorResponse(500, "internal", "删除失败，请重试") : null);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: /删除 research\/夜间巡检/ }));
+     expect((await screen.findByRole("alert")).textContent).toContain("删除失败");
+   });
+@@ -372,7 +373,7 @@
+     mockWithFailure((url, init) =>
+       init?.method === "PUT" && url.includes("/toggle")
+         ? errorResponse(503, "host_offline", "执行器离线") : null);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
+     expect((await screen.findByRole("alert")).textContent).toContain("执行器离线");
+   });
+@@ -381,7 +382,7 @@
+     mockWithFailure((url, init) =>
+       init?.method === "PUT" && url.includes("/toggle")
+         ? errorResponse(409, "conflict", "计划正在执行中") : null);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
+     expect((await screen.findByRole("alert")).textContent).toContain("计划正在执行中");
+     expect(screen.getByText("夜间巡检")).toBeTruthy();
+@@ -431,7 +432,7 @@
+ 
+   it("offers edit, pause and delete on the system tasks", async () => {
+     mockSystem();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByRole("button", { name: `编辑 ${DAILY}` })).toBeTruthy();
+     expect(screen.getByRole("button", { name: `暂停 ${DAILY}` })).toBeTruthy();
+     expect(screen.getByRole("button", { name: `删除 ${DAILY}` })).toBeTruthy();
+@@ -442,7 +443,7 @@
+ 
+   it("opens the editor on the real cron expression, not undefined fields", async () => {
+     mockSystem();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
+     expect(await screen.findByText(/这是情报矩阵的系统任务/)).toBeTruthy();
+     // "0 6 * * *" must decode to 每天 06:00. Before the fix the card carried no
+@@ -457,7 +458,7 @@
+ 
+   it("saves only the trigger for a system task", async () => {
+     const calls = mockSystem();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
+     const save = (await screen.findByRole("button", { name: /保存修改/ })) as HTMLButtonElement;
+     await waitFor(() => expect(save.disabled).toBe(false));
+@@ -470,7 +471,7 @@
+   it("warns that deleting stops the matrix and can be undone", async () => {
+     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+     const calls = mockSystem();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: `删除 ${DAILY}` }));
+     expect(confirm).toHaveBeenCalled();
+     expect(String(confirm.mock.calls[0][0])).toContain("不再自动运行");
+@@ -480,7 +481,7 @@
+ 
+   it("pauses a system task through the toggle endpoint", async () => {
+     const calls = mockSystem();
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     fireEvent.click(await screen.findByRole("button", { name: `暂停 ${DAILY}` }));
+     await waitFor(() => expect(calls.some(c => c.url.includes("/toggle"))).toBe(true));
+     expect(calls.find(c => c.url.includes("/toggle"))!.init!.body).toBe(JSON.stringify({ enabled: false }));
+@@ -489,7 +490,7 @@
+   it("restores a deleted system task", async () => {
+     vi.spyOn(window, "confirm").mockReturnValue(true);
+     const calls = mockSystem([{ label: DAILY, kind: "daily", deleted_at: "20260926_101500", schedule: "0 6 * * *" }]);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("已删除的系统任务")).toBeTruthy();
+     fireEvent.click(screen.getByRole("button", { name: `恢复 ${DAILY}` }));
+     await waitFor(() => expect(calls.some(c => c.url.includes(`${DAILY}/restore`) && c.init?.method === "POST")).toBe(true));
+@@ -497,7 +498,7 @@
+ 
+   it("does not offer restore for a plan that was never a system task", async () => {
+     mockSystem([]);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     await screen.findByRole("button", { name: `编辑 ${DAILY}` });
+     expect(screen.queryByText("已删除的系统任务")).toBeNull();
+   });
+@@ -511,7 +512,7 @@
+       [{ label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false }],
+       [],
+     );
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+ 
+     // The empty state must not claim nothing was ever configured.
+     expect(await screen.findByText("情报矩阵的系统任务已全部删除")).toBeTruthy();
+@@ -528,7 +529,7 @@
+       { label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false },
+       { label: CATCHUP, kind: "interval", deleted_at: "20260926_213039", schedule: "*/30 * * * *", installed: false },
+     ], []);
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+ 
+     fireEvent.click(await screen.findByRole("button", { name: "全部恢复" }));
+     await waitFor(() => {
+@@ -545,7 +546,7 @@
+       if (String(url).includes("scope=system")) return new Promise<Response>(resolve => { resolveSystem = resolve; });
+       return jsonResponse({ jobs: [] });
+     }));
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     await screen.findByText(/正在检查系统任务/);
+     expect(screen.queryByText("暂无周期调度任务")).toBeNull();
+     await act(async () => resolveSystem(jsonResponse({ jobs: [{
+@@ -567,7 +568,7 @@
+       }], dispatcher: { online: true, detail: "心跳正常" } });
+       return jsonResponse({});
+     }));
+-    const view = render(<SchedulerPage />);
++    const view = render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("无需等待系统检查的计划")).toBeTruthy();
+     expect(screen.getByRole("button", { name: "编辑 fast" })).toBeTruthy();
+     expect(screen.getByText(/正在检查系统任务/)).toBeTruthy();
+@@ -583,7 +584,7 @@
+       }] });
+       return jsonResponse({});
+     }));
+-    render(<SchedulerPage />);
++    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
+     expect(await screen.findByText("正常读取的计划")).toBeTruthy();
+     expect((await screen.findByRole("alert")).textContent).toContain("系统任务读取失败");
+   });
+--- a/research/ui/src/pages/Chains.tsx
++++ b/research/ui/src/pages/Chains.tsx
+@@ -0,0 +1,114 @@
++import { useEffect, useState, useRef, useCallback } from 'react';
++import { Link, useNavigate, useParams } from 'react-router-dom';
++import { api } from '@/api/client';
++import { useAuthStore } from '@/lib/auth-store';
++import { ArrowRight, Plus, Play, RefreshCw, Settings2, Trash2, Pause, ExternalLink, ChevronLeft } from 'lucide-react';
++
++type Source = { name:string; spec:string; tags:string[]; note:string; enabled?:boolean };
++type Output = {recipe:string;base_recipe:string;audience_key:string;audiences:string[];target_minutes:number;minutes_range:number[];key:string;name:string;auto:number;content_mode:string;errors:string[];render:Record<string,unknown>;effective_render:Record<string,unknown>};
++type Plan = {id:string;schedule:string;enabled:boolean;next_run_at:number;timezone:string};
++type Run = {retry_history?:{at:number;by:string;outputs:unknown[]}[];progress?:{ts:string;event:{message?:string;event_type?:string;chars?:number;elapsed?:number}}[];id:string;chain_id:string;status:string;stage:string;note:string;started_at:number;report?:string;report_view?:string;task_id?:string;snapshot?:unknown;batch?:{note:string;items:{id:string;state:string;note:string;script_id:string;render_id:string;render_progress?:{status:string;active_stage:string;error_message?:string};topic?:{title?:string}}[]}};
++type Chain = {window_mode:string;window_days:number;source_supply?:{key:string;enabled:boolean;pool_per_job:number;targets:{spec:string;subject:string;role:string}[]}|null;key:string;name:string;job:string;revision:string;imported?:boolean;archived?:boolean;schedule_armed:boolean;matrix_key?:string;output_count:number;automatic:number;errors:string[];schedule?:Plan;latest_run?:Run;outputs:string[];outputs_detail:Output[];matrix:{key:string;name:string}|null;research:{prompt:string;sources:string[];name:string};sources:{members?:{key:string;name:string;spec:string;enabled:boolean}[];ref:string;key?:string;name:string;enabled:boolean;spec:string;used_by:{name:string;job:string}[]}[];schedules:Plan[];shared_chains:{key:string;name:string}[];policy_managed:boolean;scripts:{id:string;title?:string;status:string;archived?:boolean;current_version:number}[];script_count:number;runs:Run[]};
++type Catalog = {revision:string;sources:Record<string,Source>;chains:{key:string;job:string;name:string}[]};
++type Preview = {results:{spec:string;error:string;items:{title:string;url:string;date:string}[]}[]};
++type Wizard = {voice_id:string;audience:string;key:string;name:string;prompt:string;sources:string[];output_modes:string[];schedule:string;video_speed:number;minutes:number;window_days:number;existing_job:string};
++const status:Record<string,string>={RUNNING:'运行中',DONE:'已完成',FAILED:'失败',HELD:'需要处理',CANCELLED:'已停止',CANCELLING:'正在停止',INTERRUPTED:'已中断',NO_CONTENT:'本次无新内容',WORKING:'制作中',PENDING:'等待开始'};
++const time=(t:number)=>new Date(t*1000).toLocaleString('zh-CN',{hour12:false});
++const empty:Wizard={voice_id:'zf_xiaoxiao',audience:'non_tech',key:'',name:'',prompt:'',sources:[],output_modes:['individual'],schedule:'',video_speed:1.25,minutes:1.25,window_days:7,existing_job:''};
++const msg=(e:unknown)=>e instanceof Error?e.message:String(e);
++const field='w-full rounded-lg border border-border bg-bg p-2.5 text-sm';
++const section='card p-5 space-y-4';
++
++function SourcePicker({catalog,values,onChange}:{catalog:Catalog;values:string[];onChange:(v:string[])=>void}){
++  const [q,setQ]=useState('');const entries=Object.entries(catalog.sources).filter(([k,s])=>[k,s.name,s.spec].join(' ').toLowerCase().includes(q.toLowerCase()));
++  return <div className="space-y-3"><input aria-label="搜索来源库" placeholder="搜索来源名称或网址" className={field} value={q} onChange={e=>setQ(e.target.value)}/><div className="max-h-72 overflow-auto rounded-lg border border-border divide-y divide-border">{entries.map(([id,s])=><label key={id} className="flex gap-3 p-3 cursor-pointer hover:bg-bg-hover"><input type="checkbox" checked={values.includes('source:'+id)} disabled={s.enabled===false&&!values.includes('source:'+id)} onChange={e=>onChange(e.target.checked?[...values,'source:'+id]:values.filter(x=>x!=='source:'+id))}/><span className="min-w-0 text-sm"><b>{s.name}</b>{s.enabled===false&&<span className="text-warning"> · 全局停用</span>}<span className="block truncate text-xs text-text-muted">{s.spec}</span></span></label>)}</div><p className="text-xs text-text-muted">已选 {values.length} 项。{values.filter(x=>!x.startsWith('source:')).map(x=><span className="inline-flex gap-2 mr-2" key={x}>{x}<button type="button" onClick={()=>onChange(values.filter(v=>v!==x))}>移除</button></span>)}</p></div>;
++}
++
++export function ChainsPage(){
++  const {key}=useParams();const navigate=useNavigate();const role=useAuthStore(s=>s.user?.role);const canEdit=role!=='viewer';
++  const [items,setItems]=useState<Chain[]>([]);const [archived,setArchived]=useState<Chain[]>([]);const [data,setData]=useState<Chain|null>(null);const [catalog,setCatalog]=useState<Catalog|null>(null);
++  const [error,setError]=useState('');const [loadError,setLoadError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false);const [query,setQuery]=useState('');const [tab,setTab]=useState('overview');
++  const [edit,setEdit]=useState(false);const [draft,setDraft]=useState<{name:string;prompt:string;sources:string[];schedule:string;outputs:Output[];apply_shared:boolean;source_supply_enabled:boolean;window_days:number;window_mode:string}|null>(null);
++  const [wizard,setWizard]=useState<Wizard>(()=>{try{return {...empty,...JSON.parse(localStorage.getItem('chain-wizard-v1')||'{}')}}catch{return empty}});const [step,setStep]=useState(0);
++  const [sharedResearch,setSharedResearch]=useState<Chain|null>(null);
++  const [voices,setVoices]=useState<{id:string;label:string}[]>([]);
++  const [preview,setPreview]=useState<Preview|null>(null);const [newSource,setNewSource]=useState(false);const [sourceName,setSourceName]=useState('');const [sourceUrl,setSourceUrl]=useState('');const [sourceKind,setSourceKind]=useState('rss');
++  const [run,setRun]=useState<Run|null>(null);const [limit,setLimit]=useState(1);const [confirmDelete,setConfirmDelete]=useState<{outputs:string[];keep_job:boolean;shared_chains?:{key:string;name:string}[];remaining_outputs:string[];running:boolean;revision:string}|null>(null);
++  const [addOutput,setAddOutput]=useState(false);const [outputName,setOutputName]=useState('');const [outputMode,setOutputMode]=useState('individual');const [removeOutput,setRemoveOutput]=useState<Output|null>(null);
++  const route=useRef(key);route.current=key;
++  const load=useCallback(async()=>{
++    const requested=key;
++    const requests:Promise<unknown>[]=[api<Catalog>('/api/chains/catalog').then(cat=>{if(route.current===requested)setCatalog(cat)})];
++    if(key&&key!=='new')requests.push(api<Chain>('/api/chains/'+key).then(detail=>{if(route.current===requested)setData(detail)}));
++    else if(!key)requests.push(api<{items:Chain[];archived:Chain[]}>('/api/chains').then(list=>{if(route.current===requested){setItems(list.items);setArchived(list.archived)}}));
++    await Promise.all(requests);if(route.current===requested)setLoadError('');
++  },[key]);
++  useEffect(()=>{setData(null);setRun(null);setNotice('');setError('');setLoadError('');setBusy(false);setEdit(false);setConfirmDelete(null);setTab('overview');void load().catch(e=>{if(route.current===key)setLoadError(msg(e))});},[key,load]);
++  useEffect(()=>{if(key==='new'&&step===2)void api<{voices:{id:string;label:string}[]}>('/api/video/autovideo').then(x=>setVoices(x.voices)).catch(()=>{});},[key,step]);
++  useEffect(()=>{localStorage.setItem('chain-wizard-v1',JSON.stringify(wizard));},[wizard]);
++  const sharedKey=catalog?.chains.find(c=>c.job===wizard.existing_job)?.key;
++  useEffect(()=>{let alive=true;setSharedResearch(null);if(key==='new'&&sharedKey)void api<Chain>('/api/chains/'+sharedKey).then(d=>{if(alive)setSharedResearch(d)}).catch(e=>{if(alive)setError(msg(e))});return()=>{alive=false}},[key,sharedKey]);
++
++  const runId=run?.id;
++  useEffect(()=>{
++    if(!key||key==='new'||edit)return;
++    let stopped=false;let timer:number|undefined;
++    async function poll(){
++      if(stopped)return;
++      await Promise.allSettled([
++        loadError?load():api<Chain>('/api/chains/'+key).then(d=>{if(!stopped&&route.current===key)setData(d)}),
++        ...(runId?[api<Run>('/api/chains/runs/'+runId).then(r=>{if(!stopped&&route.current===key)setRun(r)})]:[]),
++      ]);
++      if(!stopped)timer=window.setTimeout(()=>void poll(),6000);
++    }
++    timer=window.setTimeout(()=>void poll(),6000);
++    return()=>{stopped=true;clearTimeout(timer)};
++  },[key,edit,runId,load,loadError]);
++  async function act(fn:()=>Promise<unknown>,success='已保存，关联页面将读取同一配置'){const requested=route.current;setBusy(true);setError('');setNotice('');try{await fn();await load();if(route.current===requested)setNotice(success);}catch(e){if(route.current===requested)setError(msg(e));}finally{if(route.current===requested)setBusy(false);}}
++  const link=(path:string)=>path+(path.includes('?')?'&':'?')+'chain='+encodeURIComponent(key||'');
++  function beginEdit(){if(!data)return;void api<{voices:{id:string;label:string}[]}>('/api/video/autovideo').then(x=>setVoices(x.voices)).catch(()=>{});setDraft({name:data.name,prompt:data.research.prompt,sources:[...data.research.sources],schedule:data.schedules[0]?.schedule||'',outputs:data.outputs_detail.map(x=>({...x,render:{...x.render}})),apply_shared:false,source_supply_enabled:data.source_supply?.enabled??true,window_days:data.window_days||7,window_mode:data.window_mode||'rolling'});setEdit(true);}
++  async function create(){await act(async()=>{const d=await api<Chain>('/api/chains',{method:'POST',body:wizard});localStorage.removeItem('chain-wizard-v1');setWizard(empty);navigate('/chains/'+d.key);},'链路已创建，可以立即运行');}
++  function next(){setError('');if(step===0&&(!wizard.name.trim()||!wizard.key.trim()||(!wizard.existing_job&&!wizard.prompt.trim()))){setError('请填写链路名称、英文标识和研究目标');return;}if(step===1&&!wizard.existing_job&&!wizard.sources.length){setError('请至少选择一个来源');return;}if(step===2&&!wizard.output_modes.length){setError('请至少选择一个输出');return;}if(step===2&&(wizard.minutes<1||wizard.minutes>10)){setError('目标时长应在 1–10 分钟之间');return;}setStep(step+1);}
++  const title=key==='new'?'创建一条内容链路':key?(data?.name||'正在载入链路…'):'链路管理';
++  return <div className="mx-auto max-w-6xl space-y-5 pb-16">
++    <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-xs text-text-muted">隔离开发环境 · 真实研究与视频生成 · 数据独立保存 · 发布不连接真实平台</div>
++    <header className="flex items-start justify-between gap-3"><div>{key&&<Link className="text-xs text-accent flex items-center gap-1 mb-2" to="/chains"><ChevronLeft size={14}/>全部链路</Link>}<h1 className="text-2xl font-semibold">{title}</h1><p className="text-sm text-text-muted mt-1">从信息源到视频，在这里管理一条完整的生产流程。</p></div><div className="flex gap-2">{!key&&canEdit&&<button className="btn btn-primary" onClick={()=>{setStep(0);navigate('/chains/new')}}><Plus size={16}/>创建链路</button>}<button className="btn" aria-label="刷新链路" onClick={()=>void act(load,'已读取最新配置')}><RefreshCw size={15}/></button></div></header>
++    {(error||loadError)&&<div role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger">{error||loadError}<button className="ml-3 underline" onClick={()=>void act(load,'已重新载入，请核对设置后继续')}>重新载入</button></div>}{notice&&<div role="status" className="rounded-lg bg-success/10 p-3 text-sm">{notice}</div>}
++    {!key&&<><input aria-label="搜索链路" className={field} value={query} onChange={e=>setQuery(e.target.value)} placeholder="按链路名称或研究任务搜索"/><div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{items.filter(x=>(x.name+' '+x.job).toLowerCase().includes(query.toLowerCase())).sort((a,b)=>Number(b.job==='monitoring/ai_flash_discovery')-Number(a.job==='monitoring/ai_flash_discovery')).map(x=><Link key={x.key} to={'/chains/'+x.key} className="card p-5 hover:border-accent transition space-y-3"><div className="flex justify-between gap-2"><h2 className="font-semibold">{x.name}</h2><ArrowRight size={16}/></div><p className="text-xs text-text-muted break-all">{x.job}</p><div className="flex gap-3 text-sm"><span>{x.output_count} 个输出</span><span>{x.automatic} 个自动制作</span></div><p className="text-xs text-text-muted">{x.schedule?(x.schedule.enabled?(x.schedule_armed?'周期已启用':'已保留周期 · 未在隔离环境接管'):'研究周期已暂停'):'手动运行'}</p>{x.errors.length>0&&<p className="text-xs text-danger">配置需要处理：{x.errors[0]}</p>}{x.latest_run&&<p className="text-xs">最近：{status[x.latest_run.status]||x.latest_run.status}</p>}</Link>)}</div>{archived.length>0&&<details className={section}><summary>已删除链路 · 历史记录保留（{archived.length}）</summary>{archived.map(x=><Link className="block text-accent" key={x.key} to={'/chains/'+x.key}>{x.name}</Link>)}</details>}</>}
++    {key==='new'&&catalog&&<><ol className="flex flex-wrap gap-2 text-xs">{['研究目标','信息来源','视频输出','运行安排','确认创建'].map((s,i)=><li key={s} className={'rounded-full px-3 py-2 '+(i===step?'bg-accent text-white':'bg-bg-card text-text-muted')}>{i+1}. {s}</li>)}</ol><section className={section}>
++      {step===0&&<><h2 className="font-semibold">这条链路要持续产出什么？</h2><label className="block text-sm">链路名称<input className={field} value={wizard.name} onChange={e=>setWizard({...wizard,name:e.target.value})} placeholder="例如：AI 科研进展"/></label><label className="block text-sm">英文标识<input className={field} value={wizard.key} onChange={e=>setWizard({...wizard,key:e.target.value})} placeholder="例如 science_updates"/><span className="text-xs text-text-muted">用于稳定识别链路，创建后名称仍可修改。</span></label><label className="block text-sm">研究方式<select className={field} value={wizard.existing_job} onChange={e=>setWizard({...wizard,existing_job:e.target.value,schedule:e.target.value?'':wizard.schedule})}><option value="">创建独立研究</option>{catalog.chains.map(c=><option key={c.key} value={c.job}>共用：{c.name}</option>)}</select></label>{!wizard.existing_job?<label className="block text-sm">研究目标与观众<textarea rows={5} className={field} value={wizard.prompt} onChange={e=>setWizard({...wizard,prompt:e.target.value})} placeholder="说明关注什么、面向谁、希望观众理解什么。系统会处理报告格式与视频配方关联。"/></label>:<p className="text-sm text-text-muted">共用已有信息来源、报告和研究周期；只为这条链路新增视频输出。</p>}</>}
++      {step===1&&<><div className="flex justify-between"><h2 className="font-semibold">选择研究会读取的信息源</h2>{!wizard.existing_job&&<button className="btn text-sm" onClick={()=>setNewSource(true)}>添加网址来源</button>}</div>{wizard.existing_job?<div className="space-y-2 text-sm"><p>沿用共享研究的信息源：</p>{sharedResearch?sharedResearch.sources.map(source=><p key={source.ref}>{source.name} · {source.enabled?'已启用':'已停用'}</p>):<p>正在读取共享研究…</p>}</div>:<SourcePicker catalog={catalog} values={wizard.sources} onChange={sources=>setWizard({...wizard,sources})}/>}<button className="btn" disabled={busy||!(wizard.existing_job?sharedResearch?.research.sources.length:wizard.sources.length)} onClick={()=>void act(async()=>setPreview(await api<Preview>('/api/chains/sources/preview',{method:'POST',body:{sources:wizard.existing_job?sharedResearch?.research.sources:wizard.sources}})),'已读取真实来源样例')}>读取来源样例</button>{preview&&preview.results.map(x=><div key={x.spec} className="text-sm border-t border-border pt-3"><small className="break-all text-text-muted">{x.spec}</small>{x.error&&<p className="text-danger">{x.error}</p>}{x.items.map(i=><a key={i.url} className="block text-accent py-1" href={i.url} target="_blank" rel="noreferrer">{i.title} · {i.date}</a>)}</div>)}</>}
++      {step===2&&<><h2 className="font-semibold">一份研究报告要做成哪些视频？</h2><label className="block text-sm">旁白声音<select className={field} value={wizard.voice_id} onChange={e=>setWizard({...wizard,voice_id:e.target.value})}>{(voices.length?voices:[{id:"zf_xiaoxiao",label:"小晓 · 普通话女声"}]).map(v=><option key={v.id} value={v.id}>{v.label}</option>)}</select></label><label className="block text-sm">目标观众<select className={field} value={wizard.audience} onChange={e=>setWizard({...wizard,audience:e.target.value})}><option value="non_tech">普通观众</option><option value="developer">开发者</option></select></label>{[['individual','单条视频','每个选中的题材独立讲解'],['episode','合集节目','多个题材组织成一期节目']].map(([v,n,d])=><label key={v} className="flex gap-3 border border-border rounded-lg p-4"><input type="checkbox" checked={wizard.output_modes.includes(v)} onChange={e=>setWizard({...wizard,output_modes:e.target.checked?[...wizard.output_modes,v]:wizard.output_modes.filter(x=>x!==v)})}/><span><b>{n}</b><span className="block text-xs text-text-muted">{d}</span></span></label>)}<p className="text-xs text-text-muted">同时选择时，系统建立合集与单条的内容分配关系。实际题材数量由当次材料决定。片长由内容决定：单条参考时长用于安排讲述深浅，合集按选题组织整期，不保证固定分钟数。</p><div className="grid md:grid-cols-2 gap-4"><label className="text-sm">单条参考时长（分钟）<input type="number" min="1" max="10" step="0.25" className={field} value={wizard.minutes} onChange={e=>setWizard({...wizard,minutes:Number(e.target.value)})}/></label><label className="text-sm">播放速度<select className={field} value={wizard.video_speed} onChange={e=>setWizard({...wizard,video_speed:Number(e.target.value)})}>{[0.5,1,1.25,1.5,2].map(n=><option key={n} value={n}>{n} 倍</option>)}</select></label></div></>}
++      {step===3&&<><h2 className="font-semibold">什么时候运行？</h2>{wizard.existing_job?<SharedResearchSummary data={sharedResearch}/>:<><label className="block text-sm">运行方式<select className={field} disabled={!!wizard.existing_job||role!=='admin'} value={wizard.schedule?'daily':'manual'} onChange={e=>setWizard({...wizard,schedule:e.target.value==='manual'?'':'0 10 * * *'})}><option value="manual">手动运行</option><option value="daily">每天定时运行</option></select></label>{wizard.schedule&&<DailyTime value={wizard.schedule} onChange={schedule=>setWizard({...wizard,schedule})}/>}{role!=='admin'&&<p className="text-sm text-text-muted">当前账号可创建与手动运行链路。周期调度由管理员设置。</p>}<label className="block text-sm">研究时间范围<select className={field} value={wizard.window_days} onChange={e=>setWizard({...wizard,window_days:Number(e.target.value)})}>{[1,3,7,14,30].map(n=><option key={n} value={n}>最近 {n} 天</option>)}</select></label></>}<p className="text-sm text-text-muted">定时运行会实际读取信息源并生成内容。未选择定时也可以立即运行；现有历史任务不会被自动接续。</p></>}
++      {step===4&&<><h2 className="font-semibold">确认这条完整链路</h2><div className="grid md:grid-cols-3 gap-3"><div className="rounded-lg bg-bg p-4"><b>信息与研究</b><p className="text-sm mt-2">{wizard.existing_job?'共用现有研究':`${wizard.sources.length} 个来源 · 独立研究`}</p><p className="text-xs text-text-muted mt-2">{wizard.prompt||wizard.existing_job}</p></div><div className="rounded-lg bg-bg p-4"><b>视频输出</b><p className="text-sm mt-2">{wizard.output_modes.map(x=>x==='episode'?'合集':'单条').join(' + ')} · {wizard.video_speed} 倍速</p><p className="text-xs text-text-muted mt-2">系统建立选题来源、专属配方与栏目，组合输出时建立联合规划。</p></div><div className="rounded-lg bg-bg p-4"><b>运行安排</b><p className="text-sm mt-2">{wizard.existing_job?'沿用共享研究':wizard.schedule?'每天 '+wizard.schedule.split(' ')[1]+':'+wizard.schedule.split(' ')[0].padStart(2,'0'):'手动运行'}</p>{wizard.existing_job?<SharedResearchSummary data={sharedResearch}/>:<p className="text-xs text-text-muted mt-2">独立研究纳入生产策略，范围为最近 {wizard.window_days} 天。</p>}</div></div><p className="text-sm">创建失败会撤销本次对象写入，填写内容仍保留，可以修正后继续。</p></>}
++      <footer className="flex justify-between border-t border-border pt-4"><button className="btn" disabled={step===0||busy} onClick={()=>setStep(step-1)}>上一步</button>{step<4?<button className="btn btn-primary" onClick={next}>下一步</button>:<button className="btn btn-primary" disabled={busy} onClick={()=>void create()}>{busy?'正在创建…':'创建完整链路'}</button>}</footer></section></>}
++    {data&&<>{data.archived&&<div className="p-4 bg-warning/10 rounded-lg text-sm">这条链路已删除。下方是删除前的只读配置，历史运行、报告与产出仍可查看。</div>}<div className="flex flex-wrap gap-2">{[['overview','链路与设置'],['runs','运行记录'],['outputs','全部产出']].map(([t,n])=><button key={t} className={'btn '+(tab===t?'btn-primary':'')} onClick={()=>setTab(t)}>{n}</button>)}{!data.archived&&<><Link className="btn" to={link('/jobs/'+encodeURIComponent(data.job))}>研究任务 <ExternalLink size={13}/></Link>{data.matrix&&<Link className="btn" to={link('/matrices/'+data.matrix.key)}>所属矩阵</Link>}<Link className="btn" to={link('/sources')}>信息源库</Link>{role==='admin'&&<Link className="btn" to={link('/scheduler')}>周期调度</Link>}</>}</div>
++      {tab==='overview'&&<><section className={section}><div className="flex items-center flex-wrap gap-3 text-sm"><span className="rounded-lg bg-bg px-4 py-3">{data.sources.length} 项来源</span><ArrowRight size={16}/><span className="rounded-lg bg-bg px-4 py-3">{data.research.name||data.job}</span><ArrowRight size={16}/><span className="rounded-lg bg-bg px-4 py-3">{data.outputs_detail.length} 个视频输出</span><ArrowRight size={16}/><span className="rounded-lg bg-bg px-4 py-3">{data.script_count} 条历史文稿</span></div>{data.shared_chains.length>0&&<p className="text-sm text-warning">研究共用于：{data.shared_chains.map(c=><Link className="underline mr-3" key={c.key} to={'/chains/'+c.key}>{c.name}</Link>)}。修改来源或周期会影响这些链路。</p>}{!data.archived&&<p className="text-xs text-text-muted">{data.policy_managed?'研究已纳入生产窗口策略。':'沿用该研究原有策略。'} {data.schedule_armed?'此链路已接管隔离周期。':data.schedules.length?'已保留原周期，启用后在隔离环境执行。':'当前手动运行，保存周期后可自动执行。'}</p>}{data.schedules.map(plan=><div key={plan.id} className="rounded-lg bg-bg p-3 text-sm space-y-1"><p>{/^\d+ \d+ \* \* \*$/.test(plan.schedule)?`每天 ${String(plan.schedule.split(' ')[1]).padStart(2,'0')}:${String(plan.schedule.split(' ')[0]).padStart(2,'0')}`:`周期：${plan.schedule}`} · {plan.timezone} · {plan.enabled?'已启用':'已暂停'}</p><p className="text-xs text-text-muted">{plan.enabled?`下次研究：${time(plan.next_run_at)}`:'暂停期间不启动新的研究；已开始的运行在运行记录中管理。'}</p></div>)}{!data.archived&&canEdit&&<div className="flex flex-wrap gap-2"><button className="btn" onClick={beginEdit}><Settings2 size={15}/>修改链路</button>{data.outputs_detail.length>0&&<button className="btn" disabled={busy} onClick={()=>void act(()=>api('/api/chains/'+key+'/toggle',{method:'POST',body:{revision:data.revision,scope:'outputs',enabled:!data.outputs_detail.some(o=>o.auto)}}),'视频输出的自动制作状态已更新')}><Pause size={15}/>{data.outputs_detail.some(o=>o.auto)?'暂停自动制作':'恢复自动制作'}</button>}{role==='admin'&&data.schedules.length>0&&<button className="btn" onClick={()=>void act(()=>api('/api/chains/'+key+'/toggle',{method:'POST',body:{revision:data.revision,scope:'research',enabled:!data.schedule_armed||!data.schedules[0].enabled}}),'共享研究周期状态已更新')}>{data.schedule_armed&&data.schedules[0].enabled?'暂停研究周期':'启用隔离研究周期'}</button>}<button className="btn text-danger" onClick={()=>void act(async()=>setConfirmDelete(await api('/api/chains/'+key+'/delete-preview')),'已读取删除影响范围')}><Trash2 size={15}/>删除链路</button></div>}</section>
++      {!data.archived&&canEdit&&<section className={section}><div className="flex flex-wrap justify-between gap-3 items-center"><div><h2 className="font-semibold">立即运行这条链路</h2><p className="text-xs text-text-muted mt-1">{data.outputs_detail.some(o=>o.auto)?'重新读取来源、生成报告，接续当前开启的视频输出。原有结果保留。':'当前没有开启的视频输出，本次只更新研究报告，不制作视频。'}</p></div><div className="flex gap-2">{data.outputs_detail.some(o=>o.auto&&o.content_mode!=='episode')&&<select aria-label="本次单条视频数量" className="input text-sm" value={limit} onChange={e=>setLimit(Number(e.target.value))}><option value={1}>单条最多 1 条</option><option value={3}>单条最多 3 条</option><option value={0}>全部可用选题</option></select>}<button className="btn btn-primary" disabled={busy||data.runs.some(r=>['RUNNING','CANCELLING'].includes(r.status))} onClick={()=>void act(async()=>{setRun(await api<Run>('/api/chains/'+key+'/run',{method:'POST',body:{limit}}));setTab('runs')},'运行已开始，可查看每一步进展')}><Play size={15}/>{data.outputs_detail.some(o=>o.auto)?'运行':'仅运行研究'}</button></div></div></section>}
++      <section className={section}><h2 className="font-semibold">实际采集范围</h2><p className="text-sm">{data.window_mode==='previous_slot'?'按相邻周期之间的时间范围研究':`研究最近 ${data.window_days||7} 天的材料`}，显式来源 {data.sources.length} 项。</p>{data.source_supply&&<><p className="text-sm">补充采集：{data.source_supply.enabled?"启用":"停用"} · 覆盖来源 {data.source_supply.targets.length} 项 · 每次最多再选择 {data.source_supply.pool_per_job} 个已发现来源。</p><details className="text-xs"><summary>查看额外覆盖来源</summary>{data.source_supply.targets.map((t,i)=><p className="py-2 break-all" key={i}>{t.subject} · {t.role}<br/>{t.spec}</p>)}</details></>}</section><div className="grid lg:grid-cols-2 gap-4"><section className={section}><h2 className="font-semibold">信息来源</h2>{data.sources.map(s=><div key={s.ref} className="border-b border-border pb-3 text-sm"><div className="flex justify-between gap-3"><b>{s.name}</b><span className={s.enabled?'text-success':'text-warning'}>{s.enabled?'启用':'全局停用'}</span></div><p className="break-all text-xs text-text-muted">{s.spec}</p><details className="text-xs mt-2"><summary>来源成员及影响范围</summary>{s.members?.map(m=><p className="break-all py-1" key={m.key}>{m.name} · {m.enabled?"启用":"停用"}<br/>{m.spec}</p>)}{!data.archived&&s.used_by.map(u=><Link key={u.job} className="block text-accent py-1" to={link("/jobs/"+encodeURIComponent(u.job))}>{u.name}</Link>)}</details>{s.key&&canEdit&&!data.archived&&<button className="text-xs text-accent mt-2" onClick={()=>void act(async()=>{const snap=await api<{revision:string}>('/api/sources/'+s.key);await api('/api/sources/'+s.key,{method:'PATCH',body:{expected_revision:snap.revision,fields:{enabled:!s.enabled}}})},'全局来源状态已保存，所有引用它的研究会按新状态执行')}>{s.enabled?'全局停用此来源':'恢复此来源'}</button>}</div>)}</section><section className={section}><div className="flex justify-between"><h2 className="font-semibold">视频输出</h2>{canEdit&&!data.archived&&<button className="text-sm text-accent" onClick={()=>{setOutputName('');setAddOutput(true)}}>＋ 添加输出</button>}</div>{data.outputs_detail.map(o=><div key={o.key} className="border-b border-border pb-3"><div className="flex justify-between gap-2"><b className="text-sm">{o.name||o.key}</b><span className="text-xs">{data.archived?(o.auto?'删除前：自动制作':'删除前：已暂停'):(o.auto?'自动制作':'已暂停')}</span></div><p className="text-xs text-text-muted mt-1">{o.content_mode==='episode'?'合集节目':'独立视频'} · 实际速度 {String(o.effective_render.video_speed||1)} 倍</p>{o.errors.map(e=><p className="text-xs text-danger" key={e}>{e}</p>)}<p className="text-xs text-text-muted mt-1">{o.content_mode==='episode'?'合集片长按内容组织':`单条参考时长约 ${o.target_minutes} 分钟`} · {data.archived?<span>删除前配方：{o.base_recipe}</span>:<Link className="text-accent" to={link('/video-recipes/'+encodeURIComponent(o.base_recipe))}>文稿与画面配方</Link>}</p><details className="text-xs text-text-muted mt-2"><summary>查看实际生效设置</summary><pre className="whitespace-pre-wrap break-all">{JSON.stringify(o.effective_render,null,2)}</pre></details>{canEdit&&!data.archived&&<button className="text-xs text-danger mt-2" onClick={()=>setRemoveOutput(o)}>移除此输出</button>}</div>)}</section></div></>}
++      {tab==='runs'&&<section className={section}><h2 className="font-semibold">运行记录</h2>{!data.runs.length&&<p className="text-sm text-text-muted">还没有从链路入口发起运行。已有产物在“全部产出”中保留。</p>}{data.runs.map(r=><button key={r.id} className="w-full text-left border border-border rounded-lg p-4 hover:bg-bg-hover" onClick={()=>void act(async()=>setRun(await api<Run>('/api/chains/runs/'+r.id)),'')}><div className="flex justify-between"><b>{status[r.status]||r.status}</b><small>{time(r.started_at)}</small></div><p className="text-sm text-text-muted mt-2">{r.note}</p></button>)}</section>}
++      {tab==='outputs'&&<section className={section}><div className="flex justify-between"><h2 className="font-semibold">历史产出（{data.script_count}）</h2><Link className="text-accent text-sm" to={link('/outputs')}>打开产出页</Link></div><p className="text-xs text-text-muted">包括已归档文稿。列表展示最近 100 条，版本与成片在文稿详情中管理。</p>{data.scripts.map(s=><Link className="flex justify-between gap-4 p-3 border-b border-border text-sm" key={s.id} to={link('/video/'+s.id)}><span>{s.title||s.id}{s.archived?' · 已归档':''}</span><span className="text-text-muted whitespace-nowrap">v{s.current_version} · {s.status}</span></Link>)}</section>}
++    </>}
++    {edit&&draft&&data&&catalog&&<div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3"><div role="dialog" aria-modal="true" aria-label="修改链路" className="card p-5 w-full max-w-3xl max-h-[90vh] overflow-auto space-y-4"><h2 className="text-lg font-semibold">修改链路</h2><p className="text-xs text-text-muted">修改影响后续运行；运行中的批次需先结束或停止。旧页面的修改同样会在这里生效。</p><label className="block text-sm">名称<input className={field} value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label className="block text-sm">研究目标与报告要求<textarea rows={5} className={field} value={draft.prompt} onChange={e=>setDraft({...draft,prompt:e.target.value})}/></label><SourcePicker catalog={catalog} values={draft.sources} onChange={sources=>setDraft({...draft,sources})}/><label className="block text-sm">研究时间范围<select className={field} value={draft.window_mode} onChange={e=>setDraft({...draft,window_mode:e.target.value})}><option value="rolling">最近若干天</option><option value="previous_slot">相邻周期之间（沿用生产策略）</option></select></label><label className="block text-sm">滚动窗口天数（仅选择最近若干天时生效）<input type="number" min="1" max="90" className={field} value={draft.window_days} onChange={e=>setDraft({...draft,window_days:Number(e.target.value)})}/></label>{data.source_supply&&<label className="flex gap-2 text-sm"><input type="checkbox" checked={draft.source_supply_enabled} onChange={e=>setDraft({...draft,source_supply_enabled:e.target.checked})}/>启用覆盖方案及已发现来源的补充采集</label>}{role==='admin'&&<ScheduleEditor value={draft.schedule} onChange={schedule=>setDraft({...draft,schedule})}/>}{data.shared_chains.length>0&&<label className="flex gap-2 text-sm"><input type="checkbox" checked={draft.apply_shared} onChange={e=>setDraft({...draft,apply_shared:e.target.checked})}/>将研究设置应用到全部 {data.shared_chains.length+1} 条共享链路</label>}<h3 className="font-semibold text-sm">各输出的观众、时长、声音与速度</h3><p className="text-xs text-text-muted">时长是讲述节奏参考。当前写稿流程优先讲完整内容，合集按选题组织，最终片长可能更长。</p>{draft.outputs.map((o,i)=><div key={o.key} className="flex flex-wrap gap-3 items-center text-sm"><span className="w-full font-medium">{o.name}</span>{o.audiences?.length>1&&<label>观众<select className="input" value={o.audience_key} onChange={e=>setDraft({...draft,outputs:draft.outputs.map((x,j)=>j===i?{...x,audience_key:e.target.value}:x)})}>{o.audiences.map(a=><option key={a} value={a}>{a==='non_tech'?'普通观众':a==='developer'?'开发者':a}</option>)}</select></label>}{o.minutes_range?.length===2&&<label>参考时长<select className="input" value={o.target_minutes} onChange={e=>setDraft({...draft,outputs:draft.outputs.map((x,j)=>j===i?{...x,target_minutes:Number(e.target.value)}:x)})}>{Array.from(new Set([o.target_minutes,...Array.from({length:Math.floor((o.minutes_range[1]-o.minutes_range[0])*2)+1},(_,n)=>o.minutes_range[0]+n*.5)])).sort((a,b)=>a-b).map(n=><option key={n} value={n}>{n} 分钟</option>)}</select></label>}<label>声音<select className="input" value={String(o.render.voice_id||'')} onChange={e=>setDraft({...draft,outputs:draft.outputs.map((x,j)=>{if(j!==i)return x;const render={...x.render};if(e.target.value)render.voice_id=e.target.value;else delete render.voice_id;return {...x,render}})})}><option value="">继承默认声音</option>{voices.map(v=><option key={v.id} value={v.id}>{v.label}</option>)}</select></label><label><input type="checkbox" checked={!!o.auto} onChange={e=>setDraft({...draft,outputs:draft.outputs.map((x,j)=>j===i?{...x,auto:e.target.checked?1:0}:x)})}/>自动制作</label><select aria-label={o.name+'播放速度'} className="input" value={String(o.render.video_speed||'inherit')} onChange={e=>setDraft({...draft,outputs:draft.outputs.map((x,j)=>{if(i!==j)return x;const render={...x.render};if(e.target.value==='inherit')delete render.video_speed;else render.video_speed=Number(e.target.value);return {...x,render}})})}><option value="inherit">继承默认</option>{[.5,1,1.25,1.5,2].map(n=><option key={n} value={n}>{n} 倍</option>)}</select></div>)}{error&&<p className="text-danger text-sm" role="alert">{error}</p>}<footer className="flex justify-end gap-2"><button className="btn" onClick={()=>setEdit(false)}>取消</button><button className="btn btn-primary" disabled={busy} onClick={()=>void act(async()=>{const body={revision:data.revision,name:draft.name,prompt:draft.prompt,sources:draft.sources,outputs:draft.outputs.map(o=>({key:o.key,auto:o.auto,render:o.render,...(o.target_minutes!==data.outputs_detail.find(x=>x.key===o.key)?.target_minutes?{minutes:o.target_minutes}:{}),...(o.audience_key!==data.outputs_detail.find(x=>x.key===o.key)?.audience_key?{audience:o.audience_key}:{})})),apply_shared:draft.apply_shared,...(draft.window_days!==data.window_days||draft.window_mode!==data.window_mode?{window_days:draft.window_days,window_mode:draft.window_mode}:{}),source_supply_enabled:draft.source_supply_enabled,...(role==='admin'&&draft.schedule!==(data.schedules[0]?.schedule||'')?{schedule:draft.schedule}:{})};await api('/api/chains/'+key,{method:'PUT',body});setEdit(false)})}>保存修改</button></footer></div></div>}
++    {newSource&&catalog&&<div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3"><div role="dialog" aria-modal="true" aria-label="添加网址来源" className="card p-5 w-full max-w-lg space-y-4"><h2 className="font-semibold">添加真实信息源</h2><label className="block text-sm">来源名称<input className={field} value={sourceName} onChange={e=>setSourceName(e.target.value)}/></label><label className="block text-sm">来源类型<select className={field} value={sourceKind} onChange={e=>setSourceKind(e.target.value)}><option value="rss">RSS / Atom 订阅</option><option value="page">单个网页</option><option value="catalog">文章目录页</option></select></label><label className="block text-sm">网址<input type="url" className={field} value={sourceUrl} onChange={e=>setSourceUrl(e.target.value)} placeholder="https://…"/></label><p className="text-xs text-text-muted">单篇介绍文章只提供该页内容，不会自动成为科学博客全部文章的订阅。添加后可读取样例核对范围。</p>{error&&<p className="text-sm text-danger">{error}</p>}<footer className="flex gap-2 justify-end"><button className="btn" onClick={()=>setNewSource(false)}>取消</button><button className="btn btn-primary" disabled={busy||!sourceName.trim()||!sourceUrl.trim()} onClick={()=>void act(async()=>{const id='chain_source_'+Date.now().toString(36);await api('/api/sources',{method:'POST',body:{id,expected_revision:catalog.revision,fields:{name:sourceName,spec:sourceKind+':'+sourceUrl,tags:[],note:'通过链路创建向导添加'}}});setWizard({...wizard,sources:[...wizard.sources,'source:'+id]});setNewSource(false);setSourceName('');setSourceUrl('')},'来源已保存并加入当前选择')}>保存并选中</button></footer></div></div>}
++    {confirmDelete&&data&&<div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3"><div role="dialog" aria-modal="true" aria-label="删除链路影响" className="card p-5 max-w-lg space-y-4"><h2 className="font-semibold">删除「{data.name}」</h2><p className="text-sm">将移除 {confirmDelete.outputs.length} 个输出，并清理其栏目与联合规划引用。</p><p className="text-sm">{confirmDelete.keep_job?'共享研究与周期保留，仍有其他链路或输出使用。':'此研究没有其他链路或输出引用，将同时移除研究及其周期。'}</p>{confirmDelete.shared_chains?.map(other=><p key={other.key} className="text-sm">继续使用研究：{other.name}</p>)}<p className="text-sm">共享来源、已有报告、讲稿与成片保留，删除后的历史仍可打开。</p>{confirmDelete.running&&<p className="text-warning text-sm">当前仍在运行，请先停止或等待完成。</p>}<footer className="flex justify-end gap-2"><button className="btn" onClick={()=>setConfirmDelete(null)}>保留链路</button><button className="btn text-danger" disabled={busy||confirmDelete.running} onClick={()=>void act(async()=>{await api('/api/chains/'+key,{method:'DELETE',query:{revision:confirmDelete.revision}});setConfirmDelete(null);navigate('/chains')},'链路已删除，历史记录已保留')}>确认删除链路</button></footer></div></div>}
++    {addOutput&&data&&<div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3"><div role="dialog" aria-modal="true" aria-label="添加视频输出" className="card p-5 max-w-lg w-full space-y-4"><h2 className="font-semibold">为本链路添加输出</h2><label className="block text-sm">输出名称<input className={field} value={outputName} onChange={e=>setOutputName(e.target.value)}/></label><label className="block text-sm">内容组织<select className={field} value={outputMode} onChange={e=>setOutputMode(e.target.value)}><option value="individual">单条独立视频</option><option value="episode">合集节目</option></select></label><p className="text-xs text-text-muted">系统建立所需配方与栏目；另一种输出已存在时同时配置联合规划。</p>{error&&<p className="text-sm text-danger">{error}</p>}<footer className="flex gap-2 justify-end"><button className="btn" onClick={()=>setAddOutput(false)}>取消</button><button className="btn btn-primary" disabled={busy||!outputName.trim()} onClick={()=>void act(async()=>{await api('/api/chains/'+key,{method:'PUT',body:{revision:data.revision,add_output:{name:outputName,mode:outputMode}}});setAddOutput(false)},'新输出已创建')}>添加输出</button></footer></div></div>}
++    {removeOutput&&data&&<div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3"><div role="dialog" aria-modal="true" aria-label="移除视频输出" className="card p-5 max-w-lg space-y-4"><h2 className="font-semibold">移除「{removeOutput.name}」</h2><p className="text-sm">同时解除此输出的栏目与联合规划关联，其他输出和研究不变，历史产出保留。</p>{error&&<p className="text-danger text-sm">{error}</p>}<footer className="flex gap-2 justify-end"><button className="btn" onClick={()=>setRemoveOutput(null)}>取消</button><button className="btn text-danger" disabled={busy} onClick={()=>void act(async()=>{await api('/api/chains/'+key,{method:'PUT',body:{revision:data.revision,remove_outputs:[removeOutput.key]}});setRemoveOutput(null)},'输出已移除，关联已清理')}>确认移除</button></footer></div></div>}
++    {run&&<div className="fixed inset-0 z-50 bg-black/60 flex justify-end"><div role="dialog" aria-modal="true" aria-label="链路运行详情" className="w-full max-w-2xl bg-bg-card h-full overflow-auto p-6 space-y-5"><div className="flex justify-between"><h2 className="text-lg font-semibold">{status[run.status]||run.status} · {run.stage==='RESEARCH'?'研究与报告':'选题到视频'}</h2><button className="btn" onClick={()=>setRun(null)}>关闭</button></div><p className="text-xs text-text-muted">{time(run.started_at)} · {run.id}</p><p className="text-sm">{run.note}</p>{busy&&<p role="status" className="text-sm text-accent">正在提交操作，请稍候…</p>}{error&&<p role="alert" className="text-sm text-danger">{error}</p>}{run.progress?.length? <div className="rounded-lg bg-bg p-3 text-xs space-y-2"><b>最新运行进度</b>{run.progress.slice(-5).map((p,i)=><p className="break-all" key={i}>{p.ts.slice(11,19)} · {p.event.message|| (p.event.chars?`正在生成内容，已输出 ${p.event.chars} 字符`:p.event.event_type==='heartbeat'?'任务仍在执行':p.event.event_type||'状态更新')}</p>)}</div>:null}<div className="flex flex-wrap gap-2">{run.report&&<Link className="btn text-sm" to={link('/reports/view?path='+encodeURIComponent(run.report_view||run.report.replace(/^output\//,'')))} onClick={()=>setRun(null)}>打开本次报告</Link>}{!data?.archived&&<Link className="btn text-sm" to={link('/jobs/'+encodeURIComponent(data?.job||''))} onClick={()=>setRun(null)}>研究日志</Link>}{canEdit&&run.status==='RUNNING'&&<button className="btn text-warning" disabled={busy} onClick={()=>void act(async()=>setRun(await api('/api/chains/runs/'+run.id+'/cancel',{method:'POST'})),'已请求停止，等待当前工作退出')}>停止本次运行</button>}{canEdit&&(['FAILED','HELD','CANCELLED','INTERRUPTED'].includes(run.status)||run.status==='RUNNING'&&run.batch?.items.some(i=>i.state==='HELD'))&&<button className="btn btn-primary" disabled={busy} onClick={()=>void act(async()=>setRun(await api('/api/chains/runs/'+run.id+'/retry',{method:'POST'})),'正在从失败步骤继续')}>重试未完成步骤</button>}</div>{run.batch?.items.map(i=><div key={i.id} className="rounded-lg border border-border p-4 space-y-2"><div className="flex justify-between gap-3"><b className="text-sm">{i.topic?.title||'视频制作任务'}</b><span className="text-xs">{status[i.state]||i.state}</span></div><p className="text-xs text-text-muted">{i.note}</p>{i.render_progress&&<p className="text-xs">{i.render_progress.status==='FAILED'?'上次出片失败：':'当前出片步骤：'}{({PLAN:"制作规划",BUILD_IR:"生成字幕并同步画面",VOICE_ALIGN:"生成旁白与对齐",STORYBOARD:"设计画面",RENDER:"渲染视频",SCENE_IMAGES:"准备画面素材",QUALITY_CHECK:"检查成片",QA:"检查成片",PACKAGE:"封装成片",AUDIO_MIX:"混合音轨",DOWNLOAD:"复制成片",COMPLETE:"成片已生成"} as Record<string,string>)[i.render_progress.active_stage]||i.render_progress.active_stage||i.render_progress.status}{i.render_progress.error_message?" · "+i.render_progress.error_message:""}</p>}{i.script_id&&<Link className="text-accent text-sm" to={link('/video/'+i.script_id+(i.render_id?'?tab=video':'?tab=draft'))} onClick={()=>setRun(null)}>打开文稿与成片 →</Link>}</div>)}<p className="text-xs text-text-muted">重试会保留报告和已完成讲稿，并使用当前声音、速度等出片设置。</p>{run.retry_history?.map((r,i)=><details className="text-xs text-text-muted" key={i}><summary>第 {i+1} 次继续 · {time(r.at)} · 实际出片设置</summary><pre className="whitespace-pre-wrap break-all mt-3">{JSON.stringify(r.outputs,null,2)}</pre></details>)}<details className="text-xs text-text-muted"><summary>最初启动配置</summary><pre className="whitespace-pre-wrap break-all mt-3">{JSON.stringify(run.snapshot,null,2)}</pre></details></div></div>}
++  </div>;
++}
++
++function ScheduleEditor({value,onChange}:{value:string;onChange:(value:string)=>void}){
++ const daily=/^\d+ \d+ \* \* \*$/.test(value);const [advanced,setAdvanced]=useState(!!value&&!daily);
++ return <div className="space-y-3"><label className="block text-sm">运行方式<select className={field} value={!value?'manual':advanced?'advanced':'daily'} onChange={e=>{setAdvanced(e.target.value==='advanced');onChange(e.target.value==='manual'?'':e.target.value==='daily'?'0 10 * * *':value||'0 10 * * *')}}><option value="manual">手动运行</option><option value="daily">每天定时</option><option value="advanced">自定义周期</option></select></label>{value&&(advanced?<label className="block text-sm">自定义周期表达式<input className={field} value={value} onChange={e=>onChange(e.target.value)}/><small>保留现有复杂周期；完整周期设置也可在周期调度中修改。</small></label>:<DailyTime value={value} onChange={onChange}/>)}</div>;
++}
++
++function DailyTime({value,onChange}:{value:string;onChange:(value:string)=>void}){
++ const parts=value.split(' ');const hour=Number(parts[1]||10);const minute=Number(parts[0]||0);
++ return <fieldset className="space-y-2"><legend className="text-sm">每天时间（北京时间）</legend><div className="flex items-center gap-2"><select aria-label="每天小时（北京时间）" className="input" value={hour} onChange={e=>onChange(`${minute} ${e.target.value} * * *`)}>{Array.from({length:24},(_,n)=><option key={n} value={n}>{String(n).padStart(2,'0')} 时</option>)}</select><select aria-label="每天分钟" className="input" value={minute} onChange={e=>onChange(`${e.target.value} ${hour} * * *`)}>{Array.from({length:60},(_,n)=><option key={n} value={n}>{String(n).padStart(2,'0')} 分</option>)}</select></div></fieldset>;
++}
++
++function SharedResearchSummary({data}:{data:Chain|null}){
++ if(!data)return <p className="text-sm text-text-muted">正在读取共享研究…</p>;
++ return <div className="rounded-lg bg-bg p-3 text-sm space-y-2"><p>共用「{data.name}」的研究安排，创建本链路不会修改它。</p>{data.schedules.length?data.schedules.map(plan=><p key={plan.id}>研究周期：{/^\d+ \d+ \* \* \*$/.test(plan.schedule)?`每天 ${String(plan.schedule.split(' ')[1]).padStart(2,'0')}:${String(plan.schedule.split(' ')[0]).padStart(2,'0')}`:plan.schedule} · {plan.timezone} · {plan.enabled?'已启用':'已暂停'}</p>):<p>研究周期：手动运行</p>}<p>研究范围：{data.window_mode==='previous_slot'?'相邻研究周期':`最近 ${data.window_days} 天`}</p><p className="text-xs text-text-muted">之后修改来源、目标或周期会同时影响共用这项研究的链路；本链路的视频输出独立管理。</p></div>;
++}
+--- a/research/ui/src/pages/HomeBoard.tsx
++++ b/research/ui/src/pages/HomeBoard.tsx
+@@ -1,3 +1,4 @@
++import {useChainScope} from '@/lib/use-chain-scope';
+ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import { Link, useSearchParams } from "react-router-dom";
+ import { Activity, ArrowUpRight, CheckCircle2, ChevronRight, ClipboardCheck, Layers, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
+@@ -59,6 +60,7 @@
+ }
+ 
+ export function HomeBoardPage() {
++  const chainScope=useChainScope();
+   const [board, setBoard] = useState<VideoBoard | null>(null);
+   const [error, setError] = useState("");
+   const [loading, setLoading] = useState(false);
+@@ -120,7 +122,7 @@
+     return [...names].map(([key, name]) => ({ key, name, count: items.filter((i) => (i.matrix || INDEPENDENT) === key).length }))
+       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
+   }, [board, items]);
+-  const scope = items.filter((i) => !matrix || (i.matrix || INDEPENDENT) === matrix);
++  const scope = items.filter((i) => chainScope.script(i.script_id) && !matrix || (i.matrix || INDEPENDENT) === matrix);
+   const scopeName = matrix === INDEPENDENT ? "独立视频" : matrix ? matrices.find((m) => m.key === matrix)?.name ?? "该矩阵" : "全部矩阵";
+   const counts = { todo: scope.filter((i) => i.group === "todo").length, publish: scope.filter((i) => i.group === "publish").length,
+     working: scope.filter((i) => i.group === "working").length, all: scope.length };
+--- a/research/ui/src/pages/Sources.test.tsx
++++ b/research/ui/src/pages/Sources.test.tsx
+@@ -83,3 +83,21 @@
+     expect(await screen.findByRole("alert")).toBeTruthy();
+   });
+ });
++
++it('scopes source totals, tags, problems and coverage to the current chain', async () => {
++  const scope={key:'tech',name:'科技',job:'monitoring/tech_weekly',outputs:[],script_ids:[]};
++  const body={...BODY,coverage:[
++    {key:'tech',name:'科技覆盖',jobs:['monitoring/tech_weekly'],cells:[],candidates:{}},
++    {key:'economy',name:'经济覆盖',jobs:['monitoring/economy_weekly'],cells:[],candidates:{}},
++  ]};
++  vi.stubGlobal('fetch',vi.fn(async (url:string)=>({ok:true,status:200,statusText:'ok',text:async()=>JSON.stringify(String(url).includes('/scope')?scope:body)}) as Response));
++  render(<MemoryRouter initialEntries={['/sources?chain=tech']}><SourcesPage/></MemoryRouter>);
++  await screen.findByText('IEEE Spectrum');
++  expect(screen.getByRole('button',{name:'全部 1'})).toBeTruthy();
++  expect(screen.getByText('显示 1 / 1')).toBeTruthy();
++  expect(screen.queryByText('BLS')).toBeNull();
++  expect(screen.queryByRole('option',{name:'economy'})).toBeNull();
++  expect(screen.queryByLabelText('引用错误')).toBeNull();
++  expect(screen.getByText(/科技覆盖/)).toBeTruthy();
++  expect(screen.queryByText(/经济覆盖/)).toBeNull();
++});
+--- a/renderer/g2/align_captions.py
++++ b/renderer/g2/align_captions.py
+@@ -14,6 +14,7 @@
+ 
+ 
+ def align(ir_path: Path, output: Path) -> None:
++    print("CAPTION: loading local alignment software", flush=True)
+     import numpy as np
+     import soundfile as sf
+     from scipy.signal import resample_poly
+@@ -36,7 +37,9 @@
+     model_dir = ROOT / "g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit"
+     if not (model_dir / "model.safetensors").is_file():
+         raise ValueError("Missing local Qwen3 forced alignment model; install the pinned weights first")
++    print("CAPTION: loading fixed local alignment model", flush=True)
+     model = load_model(str(model_dir))
++    print("CAPTION: local alignment model ready", flush=True)
+     samples, rate = sf.read(audio_path, dtype="float32")
+     if samples.ndim != 1:
+         raise ValueError("Caption alignment requires mono narration")
+--- a/renderer/g2/explanation.py
++++ b/renderer/g2/explanation.py
+@@ -99,7 +99,9 @@
+     """Only rendering structure: pages, registered props and chart array dimensions."""
+     Draft202012Validator(json.loads(SCHEMA.read_text())).validate(plan)
+     if [p['id'] for p in plan['pages']] != [g['id'] for g in context['groups']]:
+-        raise ValueError('画面页需要按顺序覆盖输入分组')
++        expected=[g['id'] for g in context['groups']]
++        actual=[p['id'] for p in plan['pages']]
++        raise ValueError(f'画面页的 id 必须逐字使用输入分组 id，不能自行增减后缀。应为 {expected}；实际为 {actual}。按上述顺序返回每页，保留已规划的画面内容。')
+     for page in plan['pages']:
+         group = next(g for g in context['groups'] if g['id'] == page['id'])
+         # An assignment edit is best understood in its original code context,
+--- a/renderer/g2/workspace.py
++++ b/renderer/g2/workspace.py
+@@ -5,7 +5,7 @@
+ 
+ 
+ def project_path(project: Path, path: Path) -> Path:
+-    """Return the project alias, allowing only configured data and run links.
++    """Return the project alias, allowing only configured top-level data links.
+ 
+     Workers pass physical paths, while manifests use project-relative names.
+     Resolve before matching so a link inside a task cannot escape its data root.
+@@ -15,10 +15,10 @@
+     if resolved.is_relative_to(project):
+         return resolved
+     data = project / "g3/data"
+-    aliases = sorted(data.iterdir()) if data.is_dir() else []
+-    for alias in [*aliases, project / "g2/runs"]:
+-        if alias.is_symlink() and alias.is_dir():
+-            target = alias.resolve()
+-            if resolved.is_relative_to(target):
+-                return alias / resolved.relative_to(target)
++    if data.is_dir():
++        for alias in [data, *sorted(data.iterdir())]:
++            if alias.is_symlink() and alias.is_dir():
++                target = alias.resolve()
++                if resolved.is_relative_to(target):
++                    return alias / resolved.relative_to(target)
+     raise ValueError("Path must remain inside the project or its configured video storage")
+--- a/renderer/g2/caption_alignment.py
++++ b/renderer/g2/caption_alignment.py
+@@ -153,7 +153,9 @@
+ def prepare(pipeline, ir: dict) -> dict:
+     from g2.voices import qwen_paths
+     target = pipeline.ARTIFACTS / "caption-alignment.json"
+-    python = qwen_paths(pipeline.PROJECT)[0]
++    python = pipeline.PROJECT / "g3/data/caption-runtime/bin/python"
++    if not python.is_file():
++        python = qwen_paths(pipeline.PROJECT)[0]
+     model = pipeline.PROJECT / "g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit/model.safetensors"
+     if not python.is_file() or not model.is_file():
+         raise pipeline.G2Fault("CAPTION_ALIGNER_NOT_CONFIGURED", "短句字幕需要本机字幕对齐运行时和固定模型，请完成模型配置")

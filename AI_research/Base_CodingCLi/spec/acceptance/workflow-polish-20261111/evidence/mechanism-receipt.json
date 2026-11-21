@@ -1,0 +1,19 @@
+{
+  "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-illustrated-explainer-20261109/jobs/ea20813e-1908-433f-a892-251234c2d941/attempts/1/g2-run",
+  "chapter": 2,
+  "seconds": 31.5,
+  "change": "layout=diagram only; original diagram, image and narration reused",
+  "manual_trial": true,
+  "new_model_calls": 0,
+  "narration_unchanged": true,
+  "decode": {
+    "before": {
+      "exit_code": 0,
+      "stderr": ""
+    },
+    "after": {
+      "exit_code": 0,
+      "stderr": ""
+    }
+  }
+}

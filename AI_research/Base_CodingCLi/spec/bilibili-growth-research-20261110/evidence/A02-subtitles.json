@@ -1,0 +1,455 @@
+{
+  "bvid": "BV1xBnN65Eeu",
+  "observed_at": "2026-11-10T08:56:49.488819+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 55.12,
+      "to": 56.82,
+      "sid": 1,
+      "location": 2,
+      "content": "同一道算法测试题",
+      "music": 0.0
+    },
+    {
+      "from": 56.82,
+      "to": 58.5,
+      "sid": 2,
+      "location": 2,
+      "content": "供应商相同的情况下",
+      "music": 0.0
+    },
+    {
+      "from": 58.5,
+      "to": 60.82,
+      "sid": 3,
+      "location": 2,
+      "content": "标准模式花了23.3M",
+      "music": 0.0
+    },
+    {
+      "from": 60.82,
+      "to": 62.84,
+      "sid": 4,
+      "location": 2,
+      "content": "用时23分15秒",
+      "music": 0.0
+    },
+    {
+      "from": 62.84,
+      "to": 64.18,
+      "sid": 5,
+      "location": 2,
+      "content": "装上V3预设",
+      "music": 0.0
+    },
+    {
+      "from": 64.18,
+      "to": 67.38,
+      "sid": 6,
+      "location": 2,
+      "content": "也就是我们的插件之后只花了7.8M",
+      "music": 0.0
+    },
+    {
+      "from": 67.38,
+      "to": 68.82,
+      "sid": 7,
+      "location": 2,
+      "content": "14分26秒",
+      "music": 0.0
+    },
+    {
+      "from": 68.82,
+      "to": 71.2,
+      "sid": 8,
+      "location": 2,
+      "content": "在正确率和性能都相同的情况下",
+      "music": 0.0
+    },
+    {
+      "from": 71.2,
+      "to": 73.54,
+      "sid": 9,
+      "location": 2,
+      "content": "token消耗减少了66%",
+      "music": 0.0
+    },
+    {
+      "from": 73.54,
+      "to": 75.37,
+      "sid": 10,
+      "location": 2,
+      "content": "用时减少了38%",
+      "music": 0.0
+    },
+    {
+      "from": 75.37,
+      "to": 76.59,
+      "sid": 11,
+      "location": 2,
+      "content": "这是怎么做到的",
+      "music": 0.0
+    },
+    {
+      "from": 76.59,
+      "to": 79.69,
+      "sid": 12,
+      "location": 2,
+      "content": "这就涉及AI智能体工作的机制",
+      "music": 0.0
+    },
+    {
+      "from": 80.16,
+      "to": 82.2,
+      "sid": 13,
+      "location": 2,
+      "content": "智能体是一轮一轮干活的",
+      "music": 0.0
+    },
+    {
+      "from": 82.2,
+      "to": 85.42,
+      "sid": 14,
+      "location": 2,
+      "content": "每多一轮就要把前面的上下文再读一遍",
+      "music": 0.0
+    },
+    {
+      "from": 85.42,
+      "to": 86.54,
+      "sid": 15,
+      "location": 2,
+      "content": "轮次增加之后",
+      "music": 0.0
+    },
+    {
+      "from": 86.54,
+      "to": 88.28,
+      "sid": 16,
+      "location": 2,
+      "content": "上下文读取就会剧烈膨胀",
+      "music": 0.0
+    },
+    {
+      "from": 88.28,
+      "to": 90.18,
+      "sid": 17,
+      "location": 2,
+      "content": "直接导致计费陡增",
+      "music": 0.0
+    },
+    {
+      "from": 90.18,
+      "to": 92.22,
+      "sid": 18,
+      "location": 2,
+      "content": "为此除了调整上下文窗口",
+      "music": 0.0
+    },
+    {
+      "from": 92.22,
+      "to": 94.6,
+      "sid": 19,
+      "location": 2,
+      "content": "我还设计了一套配套的机制",
+      "music": 0.0
+    },
+    {
+      "from": 94.6,
+      "to": 99.65,
+      "sid": 20,
+      "location": 2,
+      "content": "其中第一条就是要按照轮次估计预算目标",
+      "music": 0.0
+    },
+    {
+      "from": 99.65,
+      "to": 100.75,
+      "sid": 21,
+      "location": 2,
+      "content": "20轮以内",
+      "music": 0.0
+    },
+    {
+      "from": 100.75,
+      "to": 102.65,
+      "sid": 22,
+      "location": 2,
+      "content": "超过60轮就停下来",
+      "music": 0.0
+    },
+    {
+      "from": 102.65,
+      "to": 103.37,
+      "sid": 23,
+      "location": 2,
+      "content": "重新规划",
+      "music": 0.0
+    },
+    {
+      "from": 103.37,
+      "to": 104.45,
+      "sid": 24,
+      "location": 2,
+      "content": "不在原地打转",
+      "music": 0.0
+    },
+    {
+      "from": 104.45,
+      "to": 108.59,
+      "sid": 25,
+      "location": 2,
+      "content": "三个以上的互不依赖的调用会合并成一段程序",
+      "music": 0.0
+    },
+    {
+      "from": 108.59,
+      "to": 109.43,
+      "sid": 26,
+      "location": 2,
+      "content": "一次跑完",
+      "music": 0.0
+    },
+    {
+      "from": 109.43,
+      "to": 112.0,
+      "sid": 27,
+      "location": 2,
+      "content": "通过这种方式减少部署",
+      "music": 0.0
+    },
+    {
+      "from": 112.4,
+      "to": 115.47,
+      "sid": 28,
+      "location": 2,
+      "content": "第二条就是少往上下文里塞东西",
+      "music": 0.0
+    },
+    {
+      "from": 115.47,
+      "to": 117.43,
+      "sid": 29,
+      "location": 2,
+      "content": "常输出都写进文件里",
+      "music": 0.0
+    },
+    {
+      "from": 117.43,
+      "to": 120.29,
+      "sid": 30,
+      "location": 2,
+      "content": "需要时只用搜索来查找需要的部分",
+      "music": 0.0
+    },
+    {
+      "from": 120.29,
+      "to": 122.2,
+      "sid": 31,
+      "location": 2,
+      "content": "避免频繁读取上下文",
+      "music": 0.0
+    },
+    {
+      "from": 122.2,
+      "to": 124.64,
+      "sid": 32,
+      "location": 2,
+      "content": "此外上汽轮到250K就压缩",
+      "music": 0.0
+    },
+    {
+      "from": 124.64,
+      "to": 127.36,
+      "sid": 33,
+      "location": 2,
+      "content": "只留2万尾部作为缓冲",
+      "music": 0.0
+    },
+    {
+      "from": 128.08,
+      "to": 130.54,
+      "sid": 34,
+      "location": 2,
+      "content": "那么这个插件也存在一定的短板",
+      "music": 0.0
+    },
+    {
+      "from": 130.54,
+      "to": 132.32,
+      "sid": 35,
+      "location": 2,
+      "content": "就是更容易提前收工",
+      "music": 0.0
+    },
+    {
+      "from": 132.32,
+      "to": 134.48,
+      "sid": 36,
+      "location": 2,
+      "content": "在一道卡实现的题中",
+      "music": 0.0
+    },
+    {
+      "from": 134.48,
+      "to": 138.12,
+      "sid": 37,
+      "location": 2,
+      "content": "原题面下本插件三次只有一次满分",
+      "music": 0.0
+    },
+    {
+      "from": 138.12,
+      "to": 139.84,
+      "sid": 38,
+      "location": 2,
+      "content": "标准模式则两次全满",
+      "music": 0.0
+    },
+    {
+      "from": 139.84,
+      "to": 141.26,
+      "sid": 39,
+      "location": 2,
+      "content": "必须在前面加一句",
+      "music": 0.0
+    },
+    {
+      "from": 141.26,
+      "to": 142.46,
+      "sid": 40,
+      "location": 2,
+      "content": "以满分为目标",
+      "music": 0.0
+    },
+    {
+      "from": 142.46,
+      "to": 144.16,
+      "sid": 41,
+      "location": 2,
+      "content": "言下之意就是可以许愿",
+      "music": 0.0
+    },
+    {
+      "from": 144.16,
+      "to": 147.01,
+      "sid": 42,
+      "location": 2,
+      "content": "但要给一个尽量明确的目标或边界",
+      "music": 0.0
+    },
+    {
+      "from": 149.72,
+      "to": 152.1,
+      "sid": 43,
+      "location": 2,
+      "content": "所以使用本插件只要记住一件事",
+      "music": 0.0
+    },
+    {
+      "from": 152.1,
+      "to": 153.7,
+      "sid": 44,
+      "location": 2,
+      "content": "就是要把验收标准",
+      "music": 0.0
+    },
+    {
+      "from": 153.7,
+      "to": 155.38,
+      "sid": 45,
+      "location": 2,
+      "content": "任务目标写进题面",
+      "music": 0.0
+    },
+    {
+      "from": 155.38,
+      "to": 157.7,
+      "sid": 46,
+      "location": 2,
+      "content": "同一道题题面没有写啊",
+      "music": 0.0
+    },
+    {
+      "from": 157.7,
+      "to": 159.68,
+      "sid": 47,
+      "location": 2,
+      "content": "32兆的内存限制时",
+      "music": 0.0
+    },
+    {
+      "from": 159.68,
+      "to": 161.58,
+      "sid": 48,
+      "location": 2,
+      "content": "早期测试版只拿60分",
+      "music": 0.0
+    },
+    {
+      "from": 161.58,
+      "to": 164.119,
+      "sid": 49,
+      "location": 2,
+      "content": "写清之后就是满分标准越清楚",
+      "music": 0.0
+    },
+    {
+      "from": 164.119,
+      "to": 165.639,
+      "sid": 50,
+      "location": 2,
+      "content": "他收手的位置就越准确",
+      "music": 0.0
+    },
+    {
+      "from": 165.639,
+      "to": 166.84,
+      "sid": 51,
+      "location": 2,
+      "content": "总耗费就越低",
+      "music": 0.0
+    },
+    {
+      "from": 166.84,
+      "to": 168.8,
+      "sid": 52,
+      "location": 2,
+      "content": "如果实在不知道怎么写目标",
+      "music": 0.0
+    },
+    {
+      "from": 168.8,
+      "to": 171.88,
+      "sid": 53,
+      "location": 2,
+      "content": "也可以结合计划模式提前规划边界",
+      "music": 0.0
+    },
+    {
+      "from": 171.88,
+      "to": 175.0,
+      "sid": 54,
+      "location": 2,
+      "content": "从而最大程度发挥本插件的优势",
+      "music": 0.0
+    },
+    {
+      "from": 175.65,
+      "to": 177.41,
+      "sid": 55,
+      "location": 2,
+      "content": "那么安装方式如图所示",
+      "music": 0.0
+    },
+    {
+      "from": 177.41,
+      "to": 180.36,
+      "sid": 56,
+      "location": 2,
+      "content": "后续我也会在评论区置顶放置我的仓库链接",
+      "music": 0.0
+    }
+  ]
+}

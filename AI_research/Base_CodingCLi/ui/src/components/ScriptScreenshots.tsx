@@ -9,7 +9,9 @@ import { errorMessage } from "@/lib/toast";
 const MODES: Record<ScreenshotMode, string> = { viewport: "当前首屏", full_page: "完整网页", element: "指定元素", crop: "矩形裁切" };
 const ROLES: Record<MaterialRole, string> = { reference: "参考画面", overall: "整体界面", detail: "功能细节", comparison: "对比画面" };
 
-export function ScriptScreenshots({ id, version, canEdit }: { id: string; version: number; canEdit: boolean }) {
+export function ScriptScreenshots({ id, version, canEdit, visible = true, refreshKey = "" }: {
+  id: string; version: number; canEdit: boolean; visible?: boolean; refreshKey?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<ScreenshotOverview | null>(null);
   const [url, setUrl] = useState("");
@@ -24,6 +26,7 @@ export function ScriptScreenshots({ id, version, canEdit }: { id: string; versio
   const [saved, setSaved] = useState(false);
   const [reload, setReload] = useState(0);
   const loaded = useRef(false);
+  const lastRefreshKey = useRef(refreshKey);
 
   useEffect(() => {
     if (!open || loaded.current) return;
@@ -32,25 +35,43 @@ export function ScriptScreenshots({ id, version, canEdit }: { id: string; versio
     getScreenshots(id, version).then(value => {
       if (stopped) return;
       loaded.current = true;
+      lastRefreshKey.current = refreshKey;
       setData(value); setMaterials(value.selection.materials); setForm(value.selection.form);
       setUrl(value.sources[0]?.url ?? ""); setProblem(value.problem);
     }).catch(e => { if (!stopped) setProblem(errorMessage(e, "加载截图素材失败")); })
       .finally(() => { if (!stopped) setBusy(""); });
     return () => { stopped = true; };
-  }, [id, version, open, reload]);
+  }, [id, version, open, reload, refreshKey]);
+
+  useEffect(() => {
+    if (lastRefreshKey.current === refreshKey) return;
+    lastRefreshKey.current = refreshKey;
+    if (!open || !loaded.current || dirty) return;
+    let stopped = false;
+    void getScreenshots(id, version).then(value => {
+      if (stopped) return;
+      setData(value); setMaterials(value.selection.materials); setForm(value.selection.form);
+    }).catch(() => undefined);
+    return () => { stopped = true; };
+  }, [id, version, open, dirty, refreshKey]);
 
   const preparing = data?.automatic?.state === "pending" || data?.automatic?.state === "running";
   useEffect(() => {
-    if (!open || !preparing || dirty) return;
+    if (!open || !visible || !preparing || dirty) return;
     let stopped = false;
-    const timer = setInterval(() => {
-      getScreenshots(id, version).then(value => {
+    let inFlight = false;
+    const refresh = () => {
+      if (stopped || document.hidden || inFlight) return;
+      inFlight = true;
+      void getScreenshots(id, version).then(value => {
         if (stopped) return;
         setData(value); setMaterials(value.selection.materials); setForm(value.selection.form);
-      }).catch(() => undefined);
-    }, 3000);
-    return () => { stopped = true; clearInterval(timer); };
-  }, [id, version, open, preparing, dirty]);
+      }).catch(() => undefined).finally(() => { inFlight = false; });
+    };
+    const timer = window.setInterval(refresh, 3000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { stopped = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, [id, version, open, visible, preparing, dirty]);
 
   const changed = () => { setDirty(true); setSaved(false); };
   const update = (assetId: string, values: Partial<ScreenshotMaterial>) => {

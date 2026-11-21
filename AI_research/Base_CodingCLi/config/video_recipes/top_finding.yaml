@@ -4,7 +4,8 @@
 
 name: 本期头条
 description: 从材料中挑出最值得{{audience}}听的一个发现，把它讲透，让人明白它为什么值得专门讲一期。
-status: experimental
+status: blocked
+reason: 已归档：0 生产绑定且长期未使用，单点聚焦请改用深度单点。
 tags:
   domain:
     key: ai

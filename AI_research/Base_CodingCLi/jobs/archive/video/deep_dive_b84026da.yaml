@@ -1,0 +1,24 @@
+name: deep_dive_b84026da
+description: 深度解读：助手发起的选题
+enabled: true
+keywords:
+  - 助手发起的选题
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 3600
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。
+  选题：助手发起的选题
+  目标观众：开发者
+  选题资料：（未提供）
+  来源资料：（未提供）
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_deep_dive_b84026da.md

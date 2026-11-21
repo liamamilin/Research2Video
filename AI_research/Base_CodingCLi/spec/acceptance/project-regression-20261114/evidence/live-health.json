@@ -1,0 +1,42 @@
+[
+  {
+    "url": "http://127.0.0.1:8775/api/health",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 774,
+    "health": {
+      "status": "ok"
+    }
+  },
+  {
+    "url": "http://127.0.0.1:8766/api/health",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 774,
+    "health": {
+      "status": "ok"
+    }
+  },
+  {
+    "url": "http://127.0.0.1:8011/api/health",
+    "status": 200,
+    "content_type": "application/json",
+    "bytes": 37,
+    "health": {
+      "status": "ok",
+      "worker_primary": true
+    }
+  },
+  {
+    "url": "http://127.0.0.1:8775/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 685
+  },
+  {
+    "url": "http://127.0.0.1:8011/",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 498
+  }
+]

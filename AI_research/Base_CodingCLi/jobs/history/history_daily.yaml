@@ -1,5 +1,7 @@
 name: 历史与考古动态
-description: 近期值得讲的历史话题和考古发现（读 World History Encyclopedia、Smithsonian、JSTOR Daily、美国国会图书馆、Medievalists 抓取的内容），不联网搜索
+description: 近期值得讲的历史话题和考古发现（读 World History Encyclopedia、Smithsonian、JSTOR Daily、美国国会图书馆、Medievalists 
+  抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 历史与文明
 enabled: true
 keywords:
 - 世界史
@@ -21,23 +23,32 @@ sources:
 - source:medievalists
 - source:archaeology_mag
 - source:history_blog
-prompt: '为「回到那个现场」整理研究底稿。优先从已有材料选择能展开人物活动、带有物件或档案细节的一个历史现场。沿具体行动让普通观众认出人物的身份、目标与处境，保留工具、形制、图案、原话和完整例子。
-
-  围绕材料中一件物件或一次具体行动，完整展开当时人的使用过程、工具、关系与处境。正文先让人物和活动成立，再把需要的背景贴在选择发生之处，沿动作解释用途和结果。新发现、入藏与现代纪念保留为研究背景和图像入口，主体篇幅留给过去的生活如何发生；保留具体例子、原话、物件细节与后续处境，研究备忘供作者构思。
-
-  取材说明和相关背景完整留给作者构思，后续讲述沿人物行动与结果组织，结构和节奏由本期材料决定。
-
+prompt: |
+  为「回到那个现场」整理研究底稿。优先从已有材料选择能展开人物活动、带有物件或档案细节的一个历史现场。沿具体行动让普通观众认出人物的身份、目标与处境，保留工具、形制、图案、原话和完整例子。
+  围绕材料中一件物件或一次具体行动，完整展开当时人的使用过程、工具、关系与处境。人物活动、当时背景和具体动作可以帮助解释用途与结果，组织顺序按材料决定。新发现、入藏与现代纪念保留为研究背景和图像入口，主体篇幅留给过去的生活如何发生；保留具体例子、原话、物件细节与后续处境，研究备忘供作者构思。
+  取材说明和相关背景完整留给作者构思，人物行动与结果可为后续讲述提供线索，结构和节奏由本期材料决定。
   任务：{name}
-
   领域：{domain}
-
   关键词：{keywords}
-
   日期：{date}
-
   输出语言：{language}
-
   数据格式：Markdown；候选或解释单元以「### 2.1 名称」标识，内部用「####」保留完整过程与例子。已有的档案、物件或图像页面链接贴在对应解释小节，供后续画面使用；末尾「### 来源清单」记录链接。
-
-  '
 output: output/history/{date}_history_daily.md
+audience_channel: history_daily
+content_strategy: audience-v1
+# 仅在回退 research_mode: legacy 时生效；opencode_topic_v1 模式下由 Stage 3 逐题深挖直接替代。
+question_material: question-v1
+
+# Four-stage OpenCode pipeline (pilot): Discover -> Soft Filter -> Per-Topic Gather -> Assemble
+research_mode: opencode_topic_v1
+topic_criteria: |
+  优先选择能够展开具体人物活动、带有明确器物/遗址/档案细节的历史现场或考古发现。
+  避免纯泛泛而谈的展讯通告、无具体史料支撑的网传逸事，以及近期已报道且无实质新进展的旧发现。
+  同一遗址或同一批出土器物的多篇报道请用相同 cluster_key 合并为一个选题。
+  不设数量上限；只要有扎实一手馆藏、考古报告或权威史学资料支撑即可保留。
+gather_requirements: |
+  围绕具体物件、档案或人物行动展开深挖，必须补齐：
+  1. 博物馆馆藏页、考古机构发布或权威史学文章的一手链接；
+  2. 当时的具体时间、地点、制度/生活处境与约束条件；
+  3. 器物形制、使用过程、人物行动细节、原始引语及后续结果；
+  4. 明确区分原始史料/考古实证与现代学界推论或争议点。

@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listSources, type SourceRow } from "@/api/sources";
@@ -13,6 +14,7 @@ type Filter = "all" | "used" | "unused" | "failing";
 
 /** 信息源：每个源只登记一次，各矩阵的 Job 引用它；这里看谁在用、最近一次抓取怎么样。 */
 export function SourcesPage() {
+  const chainScope=useChainScope();
   const { data: catalog, error, loading, reload: load } = usePageResource(listSources);
   const [filter, setFilter] = useState<Filter>("all");
   const [tag, setTag] = useState("");
@@ -21,20 +23,20 @@ export function SourcesPage() {
   const role = useAuthStore(s => s.user?.role);
   const editable = role === 'admin' || role === 'editor';
 
-  const tags = useMemo(() => Array.from(new Set((catalog?.sources ?? []).flatMap((s) => s.tags))).sort(), [catalog]);
+  const scopedSources = useMemo(() => (catalog?.sources ?? []).filter(s => !chainScope.key || s.used_by.some(u => u.job === chainScope.data?.job)), [catalog, chainScope.key, chainScope.data?.job]);
+  const tags = useMemo(() => Array.from(new Set(scopedSources.flatMap(s => s.tags))).sort(), [scopedSources]);
   const shown = useMemo(() => {
     const needle = text.trim().toLowerCase();
-    return (catalog?.sources ?? []).filter((s) =>
+    return scopedSources.filter(s =>
       (filter === "all" || (filter === "used" && s.used_by.length > 0) || (filter === "unused" && s.used_by.length === 0)
         || (filter === "failing" && Boolean(s.last?.error))) &&
       (!tag || s.tags.includes(tag)) &&
       (!needle || `${s.name} ${s.id} ${s.spec} ${s.note}`.toLowerCase().includes(needle)));
-  }, [catalog, filter, tag, text]);
-
+  }, [scopedSources, filter, tag, text]);
   if (!catalog) return <ErrorState error={error} onRetry={load} empty="加载中…" />;
 
-  const failing = catalog.sources.filter((s) => s.last?.error).length;
-  const FILTERS: [Filter, string][] = [["all", `全部 ${catalog.sources.length}`], ["used", "有 Job 在用"], ["unused", "还没人用"], ["failing", `最近抓取失败 ${failing}`]];
+  const failing = scopedSources.filter((s) => s.last?.error).length;
+  const FILTERS: [Filter, string][] = [["all", `全部 ${scopedSources.length}`], ["used", "有 Job 在用"], ["unused", "还没人用"], ["failing", `最近抓取失败 ${failing}`]];
 
   return (
     <div className="space-y-4">
@@ -49,7 +51,7 @@ export function SourcesPage() {
       <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在此页或通过助手登记来源，研究任务使用 source:id 引用一个来源，或使用 tag:标签 引用一组。删除前会检查引用任务。</p></details>
       {editing !== null && catalog.revision && <SourceEditor key={editing} id={editing || undefined} revision={catalog.revision} onClose={() => setEditing(null)} onSaved={load} />}
 
-      {catalog.coverage?.map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
+      {catalog.coverage?.filter(profile => !chainScope.key || profile.jobs?.includes(chainScope.data?.job||'')).map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
         <summary className="cursor-pointer font-medium">{profile.name} · 主题覆盖 · {profile.cells.filter(c => c.status !== 'current').length} 项有缺口</summary>
         <p className="text-text-muted mt-2">分别跟踪当前状态页、更新公告、数据快照和文章案例。已交给研究模型的材料与报告已采用的材料分开记录；覆盖状态表示实际读取情况。</p>
         <div className="grid gap-3 mt-3 sm:grid-cols-2">{profile.cells.map(cell => <div key={cell.key} className="border border-border rounded p-3">
@@ -64,11 +66,11 @@ export function SourcesPage() {
         <p className="mt-3 text-text-muted">素材记录：已交付待记录采用 {profile.candidates.offered || 0} · 报告采用 {profile.candidates.reported || 0} · 解释背景 {profile.candidates.background || 0} · 延后处理 {profile.candidates.deferred || 0} · 历史采用关系未知 {profile.candidates.unknown || 0}</p>
       </details>)}
 
-      {catalog.problems.length ? (
+      {catalog.problems.some(p => chainScope.job(p.job)) ? (
         <section className="card p-4 space-y-1 border-danger" aria-label="引用错误">
           <h2 className="text-sm font-medium text-danger">有 Job 引用了注册表里没有的源（这些 Job 跑不起来）</h2>
           <ul className="text-xs space-y-1">
-            {catalog.problems.map((p) => (
+            {catalog.problems.filter(p=>chainScope.job(p.job)).map((p) => (
               <li key={p.job}><Link className="hover:underline" to={`/jobs/${encodeURIComponent(p.job)}`}>{p.job}</Link>：{p.problem}</li>
             ))}
           </ul>
@@ -87,7 +89,7 @@ export function SourcesPage() {
           {tags.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
         <input className="input text-xs py-1 w-48" placeholder="搜索名称、网址、备注" aria-label="搜索信息源" value={text} onChange={(e) => setText(e.target.value)} />
-        <span className="ml-auto text-xs text-text-muted">显示 {shown.length} / {catalog.sources.length}</span>
+        <span className="ml-auto text-xs text-text-muted">显示 {shown.length} / {scopedSources.length}</span>
       </div>
 
       <div className="card overflow-x-auto p-0">

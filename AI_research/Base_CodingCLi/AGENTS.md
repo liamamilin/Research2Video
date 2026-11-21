@@ -14,8 +14,16 @@ python run.py --validate          # Check configs
 
 # Web UI
 python run_web.py create-admin <username> <password>
-python run_web.py serve           # http://localhost:8765
+python run_web.py serve           # cold start / dev; production local stack uses gateway :8775 → app :8766
+
+# Restart running local services (preferred; idle-safe)
+bash scripts/restart_service.sh                      # Research app only
+bash ../../scripts/restart_local_services.sh         # AutoVideo + Research
+bash ../../scripts/restart_local_services.sh --research-only
 ```
+
+Need to load new code or recycle the app process: always use `scripts/restart_service.sh` (or the repo-root combined script). Do not hand-roll `kill`/`run_web.py`. With the gateway up, the script restarts the app on `:8766` and leaves `:8775` alone.
+
 
 ## How It Works (CLI)
 
@@ -40,7 +48,7 @@ generation.
 
 | File | Contents |
 |------|----------|
-| `config/system.yaml` | `ai` (LLM endpoint), `search` (provider + limits), `research` (loop limits), optional `extraction` cleanup |
+| `config/system.yaml` | `ai` (LLM endpoint), `search` (provider + limits), `research` (loop limits), optional `extraction` cleanup, `network.proxy` (Clash port or headless mihomo) |
 | `.env` | `LLM_API_KEY`, `PARALLEL_API_KEY` (env vars referenced by system.yaml) |
 | `jobs/*.yaml` | Per-job prompt, keywords, output path, `runtime.timeout_seconds` |
 
@@ -70,6 +78,15 @@ switch can expose it to a phone. The app then always listens on
 - **Config**: YAML only, no Python config files
 - **LLM access**: OpenAI-compatible HTTP API only — never shell out to CLI agents
 - **Frontend**: React 18 + Vite + TypeScript + TailwindCSS
+- **Console performance**: after changing list reads, SQL, polling, shared page data or route loading, run
+  `python scripts/check_console_performance.py` (also part of `scripts/check.sh`). See
+  [spec/console-performance.md](spec/console-performance.md) for the fixed workload, evidence and baseline updates.
+  Keep list responses to summaries; load detail/editing data on demand. Batch per-row database reads and share
+  common page context. Initialize schemas outside normal reads. Bound initial DOM rows while searching all records.
+  Hidden pages pause polling and overlapping reads coalesce. Cache changes must cover save/reload, account and filter
+  changes, cancellation and late responses; a pre-save read must not replace saved state or return to the cache.
+  Attach before/after measurements for relevant changes. Do not refresh the baseline merely to make a regression pass;
+  an intentional increase needs its page, cause and tradeoff recorded with the change.
 - **Model output is untrusted**: sanitize HTML before serving it
   (`core/render.py`), and validate a report before saving it
   (`core/research.py:report_problem`) — a refusal or an error string must fail
@@ -169,3 +186,17 @@ Jobs can be referenced by basename (`daily_ai_agents`) or full path (`monitoring
 | `viewer` | Browse jobs, reports, logs. Read-only. |
 | `editor` | Viewer + trigger/cancel runs, edit job YAML |
 | `admin` | Editor + system config, user management, audit log |
+
+## 端到端生产链路
+
+从信源、Job、报告、选题、文稿到 AutoVideo 成片与平台投稿的总览见 [end-to-end-production-chain.md](spec/end-to-end-production-chain.md)。三段细挖：[chain-research.md](spec/chain-research.md)、[chain-video-production.md](spec/chain-video-production.md)、[chain-autovideo.md](spec/chain-autovideo.md)。按 Job / 生产绑定细查见 [job-generation-pipelines.md](spec/job-generation-pipelines.md)。配置减负计划见 [config-simplification.md](spec/config-simplification.md)。
+
+## 文稿质量优化偏好
+
+文稿优先讲观众愿意听的发现和作者的判断。来源随内容自然带出，条件在会改变理解或用法时再讲。写稿和核验过程留在制作侧，普通口播可以有不影响理解的小瑕疵。
+
+质量不稳定时，优先检查并改善交给写稿 Agent 的输入：选题价值、具体材料、解释过程、上下文及材料之间的关系。写稿提示保持简短，以内容目标和软建议为主；不要用新增固定句式、段落顺序、角度/步骤/例子数量或必备结论补救不稳定。自然写出几条或条件句不等于八股，重点看是否被提示词强迫，以及是否有助于理解。
+
+作者请求白名单、输入清洗与成稿收口的边界见 [manuscript-input-gates.md](spec/manuscript-input-gates.md)。新口播毛病优先改输入或记入该文档的收口清单，不要另开净化旁路。
+
+在用 job 的提示词调整要检查研究、栏目/配方、共用作者、材料交接和启用的改稿提示，避免约束在另一层被加回来。未归档矩阵即使未开周期任务也在范围内；归档任务不作本地修改或生成验证。保留数据接口与实际业务所需格式，不把技术格式扩成内容模板。

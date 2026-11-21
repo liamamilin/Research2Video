@@ -1,0 +1,1916 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="749" failures="0" errors="0" time="42.356350166">
+    <testsuite name="src/App.test.tsx" timestamp="2026-11-14T09:31:31.481Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.041085084">
+        <testcase classname="src/App.test.tsx" name="AdminOnly route guard &gt; blocks a viewer deep-linking to an admin page" time="0.03824825">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="AdminOnly route guard &gt; lets admins through" time="0.001510958">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/markdown.test.ts" timestamp="2026-11-14T09:31:31.482Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="0.002864291">
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; styles headings with a real hierarchy" time="0.000717083">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; restores list markers that Tailwind&apos;s preflight removes" time="0.000211542">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; gives inline code a background and code blocks no inline chrome" time="0.000096959">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; limits the line length for answers and lets documents go wide" time="0.000067875">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; keeps tables scrollable instead of stretching the measure" time="0.000093292">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="markdown styles &gt; uses the project&apos;s own colour tokens, not a foreign palette" time="0.00006475">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="pages that render markdown &gt; Ask.tsx uses the shared md-body classes" time="0.000161166">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="pages that render markdown &gt; ReportView.tsx uses the shared md-body classes" time="0.000130042">
+        </testcase>
+        <testcase classname="src/markdown.test.ts" name="pages that render markdown &gt; ShareView.tsx uses the shared md-body classes" time="0.000176625">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/theme-contrast.test.ts" timestamp="2026-11-14T09:31:31.483Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.028838959">
+        <testcase classname="src/theme-contrast.test.ts" name="theme contrast &gt; keeps a solid accent for surfaces carrying white text" time="0.0031195">
+        </testcase>
+        <testcase classname="src/theme-contrast.test.ts" name="theme contrast &gt; uses the solid accent wherever white text sits on it" time="0.024833917">
+        </testcase>
+        <testcase classname="src/theme-contrast.test.ts" name="theme contrast &gt; gives primary buttons the solid accent too" time="0.000118208">
+        </testcase>
+        <testcase classname="src/theme-contrast.test.ts" name="theme contrast &gt; keeps badges and small controls at the 24px AA target size" time="0.000066375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/api/client.test.ts" timestamp="2026-11-14T09:31:31.484Z" hostname="MiLinsMacBook.local" tests="24" failures="0" errors="0" skipped="0" time="0.10012475">
+        <testcase classname="src/api/client.test.ts" name="api() &gt; does not refresh or expire a remembered session for a rejected login" time="0.010254791">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; rejects an HTML success response before it reaches page state" time="0.002977583">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; preserves structured errors even when an upstream error payload is null" time="0.000712792">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; bounds stalled read requests, including stalls while reading the response body" time="0.001624958">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; keeps stream cancellation attached after returning the live response" time="0.0003665">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; returns a live stream without buffering the body, preserving CSRF" time="0.000469542">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; sends GET with credentials and no CSRF header" time="0.000313458">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; adds CSRF header and JSON body on unsafe methods" time="0.0004635">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; serializes query params and skips undefined" time="0.000588875">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; appends query params to a path that already has a query string" time="0.000242125">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; returns undefined for 204" time="0.000133166">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; maps error payloads to ApiError" time="0.00030225">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; refreshes once on 401 and retries the original request" time="0.000536625">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; fires the auth error handler when refresh fails" time="0.000376083">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; preserves the login session when refresh hits a temporary service failure" time="0.000551083">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; retries refresh with the latest CSRF cookie after another tab rotates it" time="0.002963166">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; bounds rejected CSRF refreshes without logging out a potentially valid session" time="0.002634791">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; wraps network errors as ApiError" time="0.000279792">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; does not expire a newer login when an earlier refresh fails late" time="0.000471625">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; retries a late 401 against the new login instead of refreshing the old one" time="0.000411625">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; rearms expiry handling after a successful new login" time="0.010687417">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; does not treat a gateway HTML page as successful authentication" time="0.000658125">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; retries a CSRF rejection only when the browser session actually changed" time="0.000473333">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api() &gt; shares an in-flight refresh for concurrent requests from one session" time="0.060582333">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/api/publish-binding.test.ts" timestamp="2026-11-14T09:31:31.487Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.006165958">
+        <testcase classname="src/api/publish-binding.test.ts" name="refuses an unbound legacy response instead of showing chapters from another render" time="0.005040667">
+        </testcase>
+        <testcase classname="src/api/publish-binding.test.ts" name="keeps the requested render and version in the native request" time="0.000574708">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/api/screenshots.test.ts" timestamp="2026-11-14T09:31:31.487Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.006877084">
+        <testcase classname="src/api/screenshots.test.ts" name="resaves a server snapshot using only editable fields, without engine UUID or source metadata" time="0.005967958">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/hooks/useLogStream.test.ts" timestamp="2026-11-14T09:31:31.487Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.047341375">
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; connects and marks finished on a terminal status event" time="0.012923625">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; treats idle as terminal so the UI stops waiting" time="0.003348791">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; resubscribes when clear() is called after a run starts" time="0.007461042">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; stops after repeated transport errors" time="0.002549708">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; recover() forces a new subscription" time="0.005014625">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; does not connect when disabled" time="0.012894375">
+        </testcase>
+        <testcase classname="src/hooks/useLogStream.test.ts" name="useLogStream &gt; does not report a run while merely connected but silent" time="0.002334">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/assistant-draft.test.tsx" timestamp="2026-11-14T09:31:31.488Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.0316505">
+        <testcase classname="src/lib/assistant-draft.test.tsx" name="restores an unsent attachment and text without uploading it again" time="0.009316458">
+        </testcase>
+        <testcase classname="src/lib/assistant-draft.test.tsx" name="keeps a full failed paste through a reload and retries exactly that content" time="0.006131">
+        </testcase>
+        <testcase classname="src/lib/assistant-draft.test.tsx" name="isolates conversation drafts including a late upload response" time="0.007441958">
+        </testcase>
+        <testcase classname="src/lib/assistant-draft.test.tsx" name="keeps pending uploads with a draft when its first conversation is resolved" time="0.00327075">
+        </testcase>
+        <testcase classname="src/lib/assistant-draft.test.tsx" name="retries a failed file without asking the user to select it again and preserves successful siblings" time="0.004399459">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/auth-store.test.ts" timestamp="2026-11-14T09:31:31.488Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.018871625">
+        <testcase classname="src/lib/auth-store.test.ts" name="ignores an older account check that completes after a new login" time="0.013276125">
+        </testcase>
+        <testcase classname="src/lib/auth-store.test.ts" name="does not restore an older account check after an explicit logout" time="0.000963875">
+        </testcase>
+        <testcase classname="src/lib/auth-store.test.ts" name="does not announce an older logout after a later successful login" time="0.001546667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/bilibili-categories.test.ts" timestamp="2026-11-14T09:31:31.489Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="0.009654459">
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; recommends 海床下七百米的坑：远古撞击怎样被还原 from content instead of generic generated tags" time="0.001541209">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; recommends DeepSeek 开源 DeepInfer：缺的是服务层 from content instead of generic generated tags" time="0.000269708">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; recommends 四件历史与考古新线索，最值得辨真伪的是日食传说 from content instead of generic generated tags" time="0.000114083">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; recommends 新工厂之外，美国军工高纯铝缺在哪 from content instead of generic generated tags" time="0.000129917">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; recommends 财报里的营收与利润，为什么影响股价 from content instead of generic generated tags" time="0.000091375">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; uses current official IDs and never invents an unavailable category" time="0.00034525">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; ignores bibliography noise, generic AI tags and Latin substrings" time="0.000142708">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="Bilibili category suggestions &gt; shows the strongest source of evidence and caps alternatives at three" time="0.005652083">
+        </testcase>
+        <testcase classname="src/lib/bilibili-categories.test.ts" name="category search &gt; matches category names, parent names, explanations and aliases" time="0.000712583">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/distributions.test.ts" timestamp="2026-11-14T09:31:31.489Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.001879292">
+        <testcase classname="src/lib/distributions.test.ts" name="target distribution filters &gt; finds Bilibili-published videos still unpublished on Douyin" time="0.000786292">
+        </testcase>
+        <testcase classname="src/lib/distributions.test.ts" name="target distribution filters &gt; counts platforms rather than records or accounts and excludes old accounts from target filtering" time="0.000179">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/page-modules.test.ts" timestamp="2026-11-14T09:31:31.489Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.002236875">
+        <testcase classname="src/lib/page-modules.test.ts" name="destination code preloading &gt; selects list, detail and nested configuration pages without fetching data" time="0.000839">
+        </testcase>
+        <testcase classname="src/lib/page-modules.test.ts" name="destination code preloading &gt; coalesces repeated intent and allows retry after a failed preload" time="0.000610166">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/page-recovery.test.ts" timestamp="2026-11-14T09:31:31.489Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.002546208">
+        <testcase classname="src/lib/page-recovery.test.ts" name="refreshes a stale chunk once with the exact route and flushes drafts before reloading" time="0.001892708">
+        </testcase>
+        <testcase classname="src/lib/page-recovery.test.ts" name="does not refresh unrelated errors or loop when storage fails" time="0.000277209">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/publish-text.test.ts" timestamp="2026-11-14T09:31:31.490Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.001468792">
+        <testcase classname="src/lib/publish-text.test.ts" name="counts the actual composed caption including separators and topics at the boundary" time="0.000873208">
+        </testcase>
+        <testcase classname="src/lib/publish-text.test.ts" name="uses the comment adapter&apos;s UTF-16 counter for Kuaishou without mixing it into the caption" time="0.000163041">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/toast.test.tsx" timestamp="2026-11-14T09:31:31.490Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.229217292">
+        <testcase classname="src/lib/toast.test.tsx" name="toast &gt; shows an error toast and keeps it until dismissed" time="0.15831625">
+        </testcase>
+        <testcase classname="src/lib/toast.test.tsx" name="toast &gt; auto-dismisses success toasts but not errors" time="0.051912">
+        </testcase>
+        <testcase classname="src/lib/toast.test.tsx" name="toast &gt; keeps the toast API referentially stable" time="0.014984083">
+        </testcase>
+        <testcase classname="src/lib/toast.test.tsx" name="toast &gt; does not loop when an effect depends on the toast API" time="0.001438625">
+        </testcase>
+        <testcase classname="src/lib/toast.test.tsx" name="toast &gt; falls back gracefully outside a provider" time="0.00097825">
+        </testcase>
+        <testcase classname="src/lib/toast.test.tsx" name="errorMessage &gt; uses the error message, string, or fallback" time="0.000112083">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/topic-progress.test.ts" timestamp="2026-11-14T09:31:31.490Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.006982208">
+        <testcase classname="src/lib/topic-progress.test.ts" name="topic workflow &gt; shares the same cell matching for variants, other audiences and failed attempts" time="0.003532042">
+        </testcase>
+        <testcase classname="src/lib/topic-progress.test.ts" name="topic workflow &gt; uses the current version and prioritizes a live script over archived failures" time="0.001096791">
+        </testcase>
+        <testcase classname="src/lib/topic-progress.test.ts" name="topic workflow &gt; never allows an external or unrelated return destination" time="0.000246208">
+        </testcase>
+        <testcase classname="src/lib/topic-progress.test.ts" name="topic workflow &gt; classifies explicit skips separately from real failures without hiding live work" time="0.000101541">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/use-page-resource.test.tsx" timestamp="2026-11-14T09:31:31.491Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.160138167">
+        <testcase classname="src/lib/use-page-resource.test.tsx" name="page resource lifecycle &gt; keeps successful data after a refresh fails, then recovers" time="0.084717208">
+        </testcase>
+        <testcase classname="src/lib/use-page-resource.test.tsx" name="page resource lifecycle &gt; cancels the old scope and ignores its late response" time="0.058465083">
+        </testcase>
+        <testcase classname="src/lib/use-page-resource.test.tsx" name="page resource lifecycle &gt; avoids concurrent loads and pauses hidden-page polling" time="0.016084459">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/use-publish-draft.test.tsx" timestamp="2026-11-14T09:31:31.491Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.012334459">
+        <testcase classname="src/lib/use-publish-draft.test.tsx" name="tracks every field, survives remount, retains saved baselines and isolates platform/account/render/user" time="0.010565375">
+        </testcase>
+        <testcase classname="src/lib/use-publish-draft.test.tsx" name="resets a mounted editor on account or render changes without copying old edits" time="0.001156916">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/utils.test.ts" timestamp="2026-11-14T09:31:31.491Z" hostname="MiLinsMacBook.local" tests="11" failures="0" errors="0" skipped="0" time="0.004210792">
+        <testcase classname="src/lib/utils.test.ts" name="cn &gt; merges conflicting tailwind classes" time="0.002072791">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="cn &gt; drops falsy values" time="0.000162042">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="formatTokens &gt; handles null and undefined" time="0.000067167">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="formatTokens &gt; formats raw, thousands and millions" time="0.000098541">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="formatTokens &gt; rounds boundaries at 1k and 1M" time="0.000078167">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; returns empty string for missing value" time="0.000078">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; parses backend timestamps with +0800 offset" time="0.00033075">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; handles hours and days" time="0.000106417">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; shows 刚刚 for just now" time="0.000263833">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; says 后 for a time that has not come yet (the next run of a Job), not 刚刚" time="0.000133625">
+        </testcase>
+        <testcase classname="src/lib/utils.test.ts" name="timeAgo &gt; falls back to the raw string on invalid dates" time="0.000102708">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AlertsCard.test.tsx" timestamp="2026-11-14T09:31:31.492Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.282774708">
+        <testcase classname="src/components/AlertsCard.test.tsx" name="Automation alerts card &gt; keeps compact alerts collapsed, groups repeats, and separates the raw diagnostic details" time="0.222053375">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AlertsCard.test.tsx" name="Automation alerts card &gt; lists what went wrong on its own, with the cause, and an editor can acknowledge one" time="0.014182416">
+        </testcase>
+        <testcase classname="src/components/AlertsCard.test.tsx" name="Automation alerts card &gt; shows nothing when nothing went wrong, and a viewer gets no acknowledge button" time="0.026793375">
+        </testcase>
+        <testcase classname="src/components/AlertsCard.test.tsx" name="Automation alerts card &gt; folds a long list, and 全部知道了 acknowledges every one" time="0.01888725">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ApplicationBatchCard.test.tsx" timestamp="2026-11-14T09:31:31.492Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.31949575">
+        <testcase classname="src/components/ApplicationBatchCard.test.tsx" name="shows actionable publication recovery alongside preserved completed results" time="0.209876625">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ApplicationBatchCard.test.tsx" name="shows per-item progress and an explicit start without starting on render" time="0.044726042">
+        </testcase>
+        <testcase classname="src/components/ApplicationBatchCard.test.tsx" name="preserves successful items when explicitly continuing and hides writes from viewers" time="0.029463667">
+        </testcase>
+        <testcase classname="src/components/ApplicationBatchCard.test.tsx" name="keeps a failed API response visible without claiming completion" time="0.034759">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ArticleCreate.test.tsx" timestamp="2026-11-14T09:31:31.492Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.346055291">
+        <testcase classname="src/components/ArticleCreate.test.tsx" name="article creation &gt; creates a pasted article using the selected mode and shared recipe" time="0.234013334">
+        </testcase>
+        <testcase classname="src/components/ArticleCreate.test.tsx" name="article creation &gt; uploads with multipart and retains the original import when the preview is edited" time="0.048061208">
+        </testcase>
+        <testcase classname="src/components/ArticleCreate.test.tsx" name="article creation &gt; keeps existing pasted text when uploading fails" time="0.06287525">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantAction.test.tsx" timestamp="2026-11-14T09:31:31.493Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.140868667">
+        <testcase classname="src/components/AssistantAction.test.tsx" name="submits secrets directly, clears inputs, and keeps a new token out of session storage" time="0.078253958">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AssistantAction.test.tsx" name="restores completed protected forms without allowing another submission" time="0.006434166">
+        </testcase>
+        <testcase classname="src/components/AssistantAction.test.tsx" name="rolls back configuration directly without a model request" time="0.009043416">
+        </testcase>
+        <testcase classname="src/components/AssistantAction.test.tsx" name="verifies an interrupted protected input and revokes a selected token without replay" time="0.027239292">
+        </testcase>
+        <testcase classname="src/components/AssistantAction.test.tsx" name="discovers configuration recovery independently of conversation history" time="0.012129917">
+        </testcase>
+        <testcase classname="src/components/AssistantAction.test.tsx" name="shows the latest run and labels paused future times as a preview" time="0.0064485">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantCapabilities.test.tsx" timestamp="2026-11-14T09:31:31.493Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.061083709">
+        <testcase classname="src/components/AssistantCapabilities.test.tsx" name="shows whole application areas and only prefills a selected goal" time="0.06015625">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantOverview.test.tsx" timestamp="2026-11-14T09:31:31.493Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.462101">
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="shows complete totals, versions and exact native links; handing off only prefills" time="0.25353025">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="pages the full scope and resets pagination on matrix/platform/view changes" time="0.083347709">
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="does not show the previous scope while the new matrix is loading and cancels stale requests" time="0.002939334">
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="shows partial errors and unknown totals without pretending that no work remains" time="0.018018916">
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="handles a failed initial request with retry and disconnected platform with a direct entry" time="0.03117975">
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="polls local state only while work is active, then stops" time="0.012349292">
+        </testcase>
+        <testcase classname="src/components/AssistantOverview.test.tsx" name="keeps read-only requests analytical and blocks handoff while a chat is running" time="0.05988375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantTaskCard.test.tsx" timestamp="2026-11-14T09:31:31.494Z" hostname="MiLinsMacBook.local" tests="8" failures="0" errors="0" skipped="0" time="0.412993583">
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="shows publication recovery and only prefills resuming the exact original task" time="0.234887708">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="pins a research run and prefills cancellation and report reuse without starting them" time="0.024022375">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="connects report, changes, pinned versions and soft review meanings in one card" time="0.044002292">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="offers only the failed step without submitting or replaying successful changes" time="0.04271925">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="shows configuration scope, recovered conflict and a precise before/after link" time="0.014331083">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="polls live progress to completion without calling the chat/model endpoint" time="0.039270125">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="shows prepared exact-version publishing fields and only prefills a user request" time="0.007897625">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCard.test.tsx" name="keeps submitted uploads pending and offers diagnosis without replaying them" time="0.004727042">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantTaskCenter.test.tsx" timestamp="2026-11-14T09:31:31.494Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.296333417">
+        <testcase classname="src/components/AssistantTaskCenter.test.tsx" name="filters across conversations and opens the original conversation without executing anything" time="0.233894">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCenter.test.tsx" name="preserves a pending chat and disables cross-conversation actions while busy" time="0.025010458">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCenter.test.tsx" name="loads earlier work explicitly and searches only the visible scope" time="0.023965084">
+        </testcase>
+        <testcase classname="src/components/AssistantTaskCenter.test.tsx" name="refreshes the native projection until completion without polling a model" time="0.012677125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AssistantWorkspace.test.tsx" timestamp="2026-11-14T09:31:31.496Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.279781334">
+        <testcase classname="src/components/AssistantWorkspace.test.tsx" name="keeps imported video actions focused on publishing" time="0.202522375">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AssistantWorkspace.test.tsx" name="shows manuscript and video versions and fills an action instead of submitting it" time="0.049823542">
+        </testcase>
+        <testcase classname="src/components/AssistantWorkspace.test.tsx" name="derives references from all primary detail pages" time="0.000956042">
+        </testcase>
+        <testcase classname="src/components/AssistantWorkspace.test.tsx" name="offers matrix-wide management and publish preparation without sending requests" time="0.026005833">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AuthProvider.test.tsx" timestamp="2026-11-14T09:31:31.496Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.334573583">
+        <testcase classname="src/components/AuthProvider.test.tsx" name="offers session recovery after a temporary refresh failure without clearing browser login" time="0.236170041">
+        </testcase>
+        <testcase classname="src/components/AuthProvider.test.tsx" name="clears only the local view when a refresh is truly expired" time="0.016548292">
+        </testcase>
+        <testcase classname="src/components/AuthProvider.test.tsx" name="recovers the login page when another tab signs in without a page reload" time="0.057472833">
+        </testcase>
+        <testcase classname="src/components/AuthProvider.test.tsx" name="ignores an old logout event queued before a newer login" time="0.01365375">
+        </testcase>
+        <testcase classname="src/components/AuthProvider.test.tsx" name="recovers on focus without hiding an open workspace" time="0.010188125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/AutopilotCard.test.tsx" timestamp="2026-11-14T09:31:31.497Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.17587125">
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; distinguishes the full queue from actual execution without starting work" time="0.073406167">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; shows selection and links to a covered event even when a current draft has another note" time="0.022012541">
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; uses the current draft title and audit label instead of an obsolete batch snapshot" time="0.00868725">
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; shows the weekly plan, where each video of the latest batch is, and what an automatic approval let through" time="0.009112458">
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; does not promise a next run for a plan that is switched off" time="0.007570208">
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; is hidden from a viewer when nothing has ever run" time="0.023550125">
+        </testcase>
+        <testcase classname="src/components/AutopilotCard.test.tsx" name="Autopilot card &gt; selects recipes and queues all topics without a quantity input" time="0.028127334">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/BilibiliCategorySelect.test.tsx" timestamp="2026-11-14T09:31:31.498Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.371348">
+        <testcase classname="src/components/BilibiliCategorySelect.test.tsx" name="searchable Bilibili category picker &gt; filters names and chooses the matching category without clearing a prior choice while typing" time="0.2467775">
+        </testcase>
+        <testcase classname="src/components/BilibiliCategorySelect.test.tsx" name="searchable Bilibili category picker &gt; supports keyboard choice, Escape and IME composition without submitting a form" time="0.0319055">
+        </testcase>
+        <testcase classname="src/components/BilibiliCategorySelect.test.tsx" name="searchable Bilibili category picker &gt; keeps the saved choice when a search has no results and allows explicit clearing" time="0.067819791">
+        </testcase>
+        <testcase classname="src/components/BilibiliCategorySelect.test.tsx" name="searchable Bilibili category picker &gt; explains a recommendation, applies it only on click and preserves manual choices as content changes" time="0.022220167">
+        </testcase>
+        <testcase classname="src/components/BilibiliCategorySelect.test.tsx" name="searchable Bilibili category picker &gt; does not force a category when there is insufficient content evidence" time="0.001904625">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/BilibiliCovers.test.tsx" timestamp="2026-11-14T09:31:31.499Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.186106583">
+        <testcase classname="src/components/BilibiliCovers.test.tsx" name="uploads each selected file to its own slot without submitting a video" time="0.135450291">
+        </testcase>
+        <testcase classname="src/components/BilibiliCovers.test.tsx" name="updates an existing task only after both separate covers are present" time="0.050015583">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/BrandingSettings.test.tsx" timestamp="2026-11-14T09:31:31.499Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.499365125">
+        <testcase classname="src/components/BrandingSettings.test.tsx" name="loads when opened, creates Demo and activates the saved profile" time="0.269941875">
+        </testcase>
+        <testcase classname="src/components/BrandingSettings.test.tsx" name="keeps editing available after a failed save" time="0.056140875">
+        </testcase>
+        <testcase classname="src/components/BrandingSettings.test.tsx" name="can turn the generic call to action off while retaining the brand" time="0.077616125">
+        </testcase>
+        <testcase classname="src/components/BrandingSettings.test.tsx" name="saves content palette choice independently from the corner and CTA" time="0.028566792">
+        </testcase>
+        <testcase classname="src/components/BrandingSettings.test.tsx" name="uses the editable brand slogan for the optional corner subtitle" time="0.065369334">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ContentColumns.test.tsx" timestamp="2026-11-14T09:31:31.499Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.710999291">
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; separates named column, script recipe and mixed visual preferences" time="0.238194">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; loads recent content only when expanded and links to the script" time="0.13829675">
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; saves only the business column and makes fast mode a compatible mixed request" time="0.245971042">
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; reads the engine recipe library only when requested" time="0.020864708">
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; keeps viewer access read only" time="0.014566334">
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; opens the linked column editor and keeps the return-to-script link" time="0.047680708">
+        </testcase>
+        <testcase classname="src/components/ContentColumns.test.tsx" name="ContentColumns &gt; does not open an editor from a deep link for a viewer" time="0.004749667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ContentColumnsPrefill.test.tsx" timestamp="2026-11-14T09:31:31.499Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.001159125">
+        <testcase classname="src/components/ContentColumnsPrefill.test.tsx" name="fills only the suggested fields and keeps the rest" time="0.000785667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/CronBuilder.test.tsx" timestamp="2026-11-14T09:31:31.500Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.186941667">
+        <testcase classname="src/components/CronBuilder.test.tsx" name="keeps a complex cron expression intact in advanced mode" time="0.033442375">
+        </testcase>
+        <testcase classname="src/components/CronBuilder.test.tsx" name="changes weekdays without losing the selected time" time="0.132495541">
+        </testcase>
+        <testcase classname="src/components/CronBuilder.test.tsx" name="warns when a month may lack the selected day" time="0.020160459">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/DeleteJobDialog.test.tsx" timestamp="2026-11-14T09:31:31.500Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.261779958">
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; names the file and the backup location before deleting" time="0.074670583">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; does not call the API until the user confirms" time="0.03807825">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; reports the backup path after a successful delete" time="0.01644275">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; blocks deletion while the job is running" time="0.003140625">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; warns before deleting a pipeline stage" time="0.002020333">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; shows the server&apos;s refusal instead of closing" time="0.126314916">
+        </testcase>
+        <testcase classname="src/components/DeleteJobDialog.test.tsx" name="DeleteJobDialog &gt; renders nothing without a job" time="0.000552292">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/DouyinConnectionStatus.test.tsx" timestamp="2026-11-14T09:31:31.500Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.266639459">
+        <testcase classname="src/components/DouyinConnectionStatus.test.tsx" name="Douyin connection status &gt; moves old lookup failures into dated history after a successful login" time="0.182424792">
+        </testcase>
+        <testcase classname="src/components/DouyinConnectionStatus.test.tsx" name="Douyin connection status &gt; keeps failures after the last successful login visible and identifies their kind" time="0.025872292">
+        </testcase>
+        <testcase classname="src/components/DouyinConnectionStatus.test.tsx" name="Douyin connection status &gt; does not claim verified login or suppress failures for a disconnected account" time="0.006103375">
+        </testcase>
+        <testcase classname="src/components/DouyinConnectionStatus.test.tsx" name="Douyin connection status &gt; does not assume a connected account without a verification timestamp was verified" time="0.0405225">
+        </testcase>
+        <testcase classname="src/components/DouyinConnectionStatus.test.tsx" name="Douyin connection status &gt; keeps an ongoing check visible even when it started before the latest successful login" time="0.011060375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/DouyinPlatform.test.tsx" timestamp="2026-11-14T09:31:31.500Z" hostname="MiLinsMacBook.local" tests="11" failures="0" errors="0" skipped="0" time="0.940316083">
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="Douyin platform &gt; opens the Douyin connection page without starting login or uploading" time="0.104600041">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="Douyin platform &gt; starts login explicitly and displays its QR code without posting" time="0.0941795">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="Douyin platform &gt; restricts connection to administrators" time="0.029839208">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="Douyin platform &gt; keeps uncertain outcomes in reconciliation and never offers automatic retry" time="0.114172042">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="Douyin platform &gt; searches candidates and submits edited metadata for the selected version only on confirmation" time="0.199918084">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="opens an exact render from the document return link without posting" time="0.063207042">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="captures an optional author comment and disables unsupported pinning" time="0.140286042">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="adds one comment to an existing submitted work and explains automatic verification" time="0.051700292">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="never offers retry for an uncertain comment and only offers read-only verification" time="0.05809025">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="offers read-only verification for a receipt that has not been read back" time="0.039670292">
+        </testcase>
+        <testcase classname="src/components/DouyinPlatform.test.tsx" name="saves an account template explicitly without enqueueing old works" time="0.043394708">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/EpisodeProgramme.test.tsx" timestamp="2026-11-14T09:31:31.501Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.123257709">
+        <testcase classname="src/components/EpisodeProgramme.test.tsx" name="lists content items separately from opening, closing and paragraphs" time="0.096296417">
+        </testcase>
+        <testcase classname="src/components/EpisodeProgramme.test.tsx" name="seeks using the final packaged chapter timing and highlights the playing item" time="0.025094792">
+        </testcase>
+        <testcase classname="src/components/EpisodeProgramme.test.tsx" name="leaves historical individual videos playable without loading programme files" time="0.001328125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ErrorState.test.tsx" timestamp="2026-11-14T09:31:31.501Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.160224583">
+        <testcase classname="src/components/ErrorState.test.tsx" name="ErrorState &gt; shows the empty state when there is no error" time="0.0180845">
+        </testcase>
+        <testcase classname="src/components/ErrorState.test.tsx" name="ErrorState &gt; distinguishes a failure from empty data and offers a retry" time="0.129723083">
+        </testcase>
+        <testcase classname="src/components/ErrorState.test.tsx" name="ErrorState &gt; omits the retry button when no handler is given" time="0.007654958">
+        </testcase>
+        <testcase classname="src/components/ErrorState.test.tsx" name="RoleGate &gt; hides editor-only actions from viewers" time="0.0012505">
+        </testcase>
+        <testcase classname="src/components/ErrorState.test.tsx" name="RoleGate &gt; shows editor-only actions to editors and admins" time="0.001770667">
+        </testcase>
+        <testcase classname="src/components/ErrorState.test.tsx" name="RoleGate &gt; renders the fallback instead of children when denied" time="0.000667375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ExperimentsTab.test.tsx" timestamp="2026-11-14T09:31:31.502Z" hostname="MiLinsMacBook.local" tests="10" failures="0" errors="0" skipped="0" time="0.557607458">
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="shows the master switch off, an empty list and the switch registry" time="0.07401425">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="lists saved experiments and starts a draft" time="0.147103334">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="asks before turning the master switch on" time="0.037294542">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="saves a new A/A check with both arms unchanged" time="0.069874625">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="labels a script with its experiment and arm, and nothing otherwise" time="0.004425666">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="shows A and B side by side once a preview is done and confirms it" time="0.047694625">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="opens a prefilled draft from a weekly review finding and warns about earlier experiments" time="0.030139209">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="lists experiment records with the conclusion and the choice" time="0.006945833">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="words the estimate from recent output, coverage and the day limit" time="0.000313459">
+        </testcase>
+        <testcase classname="src/components/ExperimentsTab.test.tsx" name="reads an A/A result as a check of the process, with the video list on demand" time="0.13886925">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/Layout.test.tsx" timestamp="2026-11-14T09:31:31.502Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.469015541">
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; warms internal destination code on pointer, keyboard and touch intent" time="0.256549625">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; keeps navigation available while the next page module loads" time="0.099001625">
+        </testcase>
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; starts a different page at the top while keeping the scroll position for same-page filters" time="0.045270333">
+        </testcase>
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; opens the sidebar on desktop mount" time="0.021112625">
+        </testcase>
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; keeps the sidebar visible after navigating on desktop" time="0.038273708">
+        </testcase>
+        <testcase classname="src/components/Layout.test.tsx" name="Layout sidebar &gt; closes the drawer after navigating on mobile" time="0.008158666">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/MatrixRuns.test.tsx" timestamp="2026-11-14T09:31:31.503Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.3013465">
+        <testcase classname="src/components/MatrixRuns.test.tsx" name="Matrix run pagination &gt; ignores an old page that arrives after switching the status filter" time="0.189189375">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/MatrixRuns.test.tsx" name="Matrix run pagination &gt; retries failures and never duplicates overlapping history entries" time="0.111147875">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/Modal.test.tsx" timestamp="2026-11-14T09:31:31.503Z" hostname="MiLinsMacBook.local" tests="10" failures="0" errors="0" skipped="0" time="0.260247625">
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; is a labelled modal dialog and takes focus on open" time="0.122106542">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; closes on Escape" time="0.005930958">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; keeps focus inside on Tab and restores it on close" time="0.053578583">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; restores focus to the trigger after closing" time="0.012116375">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; locks body scroll while open and restores it after" time="0.002748625">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; asks before discarding unsaved work" time="0.018056625">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; closes after the discard is confirmed" time="0.004373333">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; supports a custom discard action" time="0.007694375">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; ignores Escape and backdrop clicks when not dismissible" time="0.015834875">
+        </testcase>
+        <testcase classname="src/components/Modal.test.tsx" name="Modal &gt; closes on backdrop click but not on panel click" time="0.016971292">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/PlanReview.test.tsx" timestamp="2026-11-14T09:31:31.504Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.084791709">
+        <testcase classname="src/components/PlanReview.test.tsx" name="PlanReview &gt; confirms an unchanged plan without sending any edit" time="0.037440292">
+        </testcase>
+        <testcase classname="src/components/PlanReview.test.tsx" name="PlanReview &gt; sends only the words that changed" time="0.025322333">
+        </testcase>
+        <testcase classname="src/components/PlanReview.test.tsx" name="PlanReview &gt; redoes only with a note, and can discard" time="0.020234792">
+        </testcase>
+        <testcase classname="src/components/PlanReview.test.tsx" name="PlanReview &gt; shows nothing to a script that is not waiting" time="0.001008834">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ProductionConfigs.test.tsx" timestamp="2026-11-14T09:31:31.505Z" hostname="MiLinsMacBook.local" tests="13" failures="0" errors="0" skipped="0" time="0.350383">
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; lists each source Job&apos;s configs, says which Job has none, and leaves out other matrices&apos;" time="0.074723541">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; writes the picked items one script each, after saying it researches each" time="0.035271917">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; a roundup config needs at least two items" time="0.019023">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; adds a config by picking the Job, the recipe, then who it is for" time="0.045498708">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; asks for a length only where the recipe allows one, and sends it when filled in" time="0.051053458">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; offers to skip the research only where the recipe says it is optional, and sends reverify false when it is turned off" time="0.030778959">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; leaves reverify out when the research is kept" time="0.012481042">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; turns auto on for a recipe that writes one video per item, after saying what it spends, and off again" time="0.01079375">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; says when a Job with auto has no schedule, so nothing will start it" time="0.004154416">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; on one Job&apos;s own page the Job is already chosen" time="0.01563325">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; a Job whose report is not a list of items takes a config that writes each report as one video" time="0.027968167">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; offers only the recipes that can be written from a whole report when adding to such a Job" time="0.010175083">
+        </testcase>
+        <testcase classname="src/components/ProductionConfigs.test.tsx" name="ProductionConfigs &gt; is read-only for a viewer" time="0.010804333">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ProviderModels.test.tsx" timestamp="2026-11-14T09:31:31.507Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.149743375">
+        <testcase classname="src/components/ProviderModels.test.tsx" name="provider catalog &gt; shows official input/output prices and picks only the model ID" time="0.090203416">
+        </testcase>
+        <testcase classname="src/components/ProviderModels.test.tsx" name="provider catalog &gt; forces a refresh and updates all cards for that provider, removing old free models" time="0.030018667">
+        </testcase>
+        <testcase classname="src/components/ProviderModels.test.tsx" name="provider catalog &gt; retains the prior catalog and a retry button on network failure" time="0.016829">
+        </testcase>
+        <testcase classname="src/components/ProviderModels.test.tsx" name="provider catalog &gt; marks unknown prices and warns about delisted current and fallback models" time="0.00716875">
+        </testcase>
+        <testcase classname="src/components/ProviderModels.test.tsx" name="provider catalog &gt; shows price ranges and distinguishes Go&apos;s subscription allowance" time="0.004919916">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/PublicationFlow.test.tsx" timestamp="2026-11-14T09:31:31.507Z" hostname="MiLinsMacBook.local" tests="10" failures="0" errors="0" skipped="0" time="1.045858333">
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps Douyin preparation after Bilibili publication and opens its editor inline" time="0.53518425">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps QUEUED scoped to its target without a duplicate action" time="0.028510958">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps UPLOADING scoped to its target without a duplicate action" time="0.007608042">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps SUBMITTED scoped to its target without a duplicate action" time="0.029835709">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps UNKNOWN scoped to its target without a duplicate action" time="0.026430375">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps FAILED scoped to its target without a duplicate action" time="0.072683041">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; never mistakes a Douyin record for Bilibili publication" time="0.043157583">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; keeps old versions and disconnected accounts separate" time="0.014122084">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="multi-platform document publishing &gt; requires an available MP4 and editor permissions" time="0.004033958">
+        </testcase>
+        <testcase classname="src/components/PublicationFlow.test.tsx" name="prepares two platform editors without posting and keeps the other platform&apos;s unsaved input" time="0.283105542">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/PublishAdaptation.test.tsx" timestamp="2026-11-14T09:31:31.507Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.284035708">
+        <testcase classname="src/components/PublishAdaptation.test.tsx" name="previews before changing anything, then saves both copies without a publishing call" time="0.205605667">
+        </testcase>
+        <testcase classname="src/components/PublishAdaptation.test.tsx" name="refuses to apply a stale preview after further manual edits" time="0.036547375">
+        </testcase>
+        <testcase classname="src/components/PublishAdaptation.test.tsx" name="can restore a saved long copy while preserving the current copy" time="0.022950542">
+        </testcase>
+        <testcase classname="src/components/PublishAdaptation.test.tsx" name="reports a failed read-only preview locally without changing the draft" time="0.018450333">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ReportReuse.test.tsx" timestamp="2026-11-14T09:31:31.508Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.200048542">
+        <testcase classname="src/components/ReportReuse.test.tsx" name="ReportReuse &gt; lists the other scripts from the same research and writes one more without researching again" time="0.18358725">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ReportReuse.test.tsx" name="ReportReuse &gt; only lists for a viewer" time="0.015489583">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ReportToVideo.test.tsx" timestamp="2026-11-14T09:31:31.508Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.321093125">
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="ReportToVideo &gt; records the report and writes a video from it, with no topic and no research" time="0.186172417">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="ReportToVideo &gt; offers the Job&apos;s own whole-report configs first and writes through one, so the script records it" time="0.054202792">
+        </testcase>
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="ReportToVideo &gt; sends a typed title" time="0.028369">
+        </testcase>
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="ReportToVideo &gt; sends a topic-source report to the topics page instead" time="0.01417875">
+        </testcase>
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="offers the owning column&apos;s programme for a topic-source report and creates one script" time="0.01934425">
+        </testcase>
+        <testcase classname="src/components/ReportToVideo.test.tsx" name="offers one programme per business column even when a column has several recipe bindings" time="0.017870584">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/RoundDetail.priority.test.tsx" timestamp="2026-11-14T09:31:31.508Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.021546916">
+        <testcase classname="src/components/RoundDetail.priority.test.tsx" name="normalizePriority &gt; reduces every shape the tracking database actually holds" time="0.000724542">
+        </testcase>
+        <testcase classname="src/components/RoundDetail.priority.test.tsx" name="PriorityBadge &gt; styles a bolded P0 as urgent rather than falling back to P2" time="0.012272875">
+        </testcase>
+        <testcase classname="src/components/RoundDetail.priority.test.tsx" name="PriorityBadge &gt; distinguishes the three real levels" time="0.003141208">
+        </testcase>
+        <testcase classname="src/components/RoundDetail.priority.test.tsx" name="PriorityBadge &gt; still falls back for an unrecognised level" time="0.001433458">
+        </testcase>
+        <testcase classname="src/components/RoundDetail.priority.test.tsx" name="PriorityBadge &gt; renders nothing for an absent priority" time="0.003442208">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ScheduleRuns.test.tsx" timestamp="2026-11-14T09:31:31.508Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.27784875">
+        <testcase classname="src/components/ScheduleRuns.test.tsx" name="shows persisted outcomes and retry reasons in the schedule timezone" time="0.126816167">
+        </testcase>
+        <testcase classname="src/components/ScheduleRuns.test.tsx" name="labels a UTC timestamp as UTC" time="0.03616175">
+        </testcase>
+        <testcase classname="src/components/ScheduleRuns.test.tsx" name="surfaces a failed history load instead of showing an empty list" time="0.109748792">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ScriptIteration.test.tsx" timestamp="2026-11-14T09:31:31.509Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="0.333373625">
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; keeps older video accessible without calling it the current draft&apos;s output" time="0.1574975">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; shows a failed latest attempt alongside the retained usable movie" time="0.025270083">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; shows the recovered RUNNING movie instead of a newer cancelled duplicate" time="0.015323083">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; shows the recovered COMPLETED movie instead of a newer cancelled duplicate" time="0.002596667">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; retains regeneration and exact shared-config links in a secondary section" time="0.053442375">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; allows saved-material tasks to regenerate without a research report" time="0.011130959">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; points to the effective column direction and shows the exact saved writer input" time="0.044811083">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; blocks re-generation while working, editing or viewing history" time="0.018631166">
+        </testcase>
+        <testcase classname="src/components/ScriptIteration.test.tsx" name="Script state and iteration &gt; distinguishes optional review, stale model results and approved text" time="0.0039975">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ScriptPolish.test.tsx" timestamp="2026-11-14T09:31:31.509Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.032138166">
+        <testcase classname="src/components/ScriptPolish.test.tsx" name="ScriptPolish &gt; shows each reworded paragraph with its reason and the original wording" time="0.014948167">
+        </testcase>
+        <testcase classname="src/components/ScriptPolish.test.tsx" name="ScriptPolish &gt; stays hidden when nothing was changed or attempted" time="0.015694375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ScriptScreenshots.test.tsx" timestamp="2026-11-14T09:31:31.509Z" hostname="MiLinsMacBook.local" tests="4" failures="0" errors="0" skipped="0" time="0.377474625">
+        <testcase classname="src/components/ScriptScreenshots.test.tsx" name="网页截图与段落配图 &gt; shows automatically applied pictures and fallback reasons without asking for confirmation" time="0.202661583">
+        </testcase>
+        <testcase classname="src/components/ScriptScreenshots.test.tsx" name="网页截图与段落配图 &gt; loads only when expanded, requires a paragraph, preserves edits across collapse and saves explicit positions" time="0.0921005">
+        </testcase>
+        <testcase classname="src/components/ScriptScreenshots.test.tsx" name="网页截图与段落配图 &gt; keeps an unregistered screenshot visible and offers registration retry" time="0.072588625">
+        </testcase>
+        <testcase classname="src/components/ScriptScreenshots.test.tsx" name="网页截图与段落配图 &gt; shows historical version assets without capture or editing controls" time="0.009565084">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ScriptSteps.test.tsx" timestamp="2026-11-14T09:31:31.509Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.207746458">
+        <testcase classname="src/components/ScriptSteps.test.tsx" name="ScriptSteps &gt; shows each step&apos;s state and reruns one after saying what it costs" time="0.177979667">
+        </testcase>
+        <testcase classname="src/components/ScriptSteps.test.tsx" name="ScriptSteps &gt; offers no reruns to a viewer or while the script is working, and no audit rerun for an adapted script" time="0.029274042">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ShareLinks.test.tsx" timestamp="2026-11-14T09:31:31.510Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.219869667">
+        <testcase classname="src/components/ShareLinks.test.tsx" name="ShareLinks &gt; lists a live link with the report it exposes" time="0.056788875">
+        </testcase>
+        <testcase classname="src/components/ShareLinks.test.tsx" name="ShareLinks &gt; revokes a link and stops offering it as live" time="0.1377235">
+        </testcase>
+        <testcase classname="src/components/ShareLinks.test.tsx" name="ShareLinks &gt; does not offer to revoke something already revoked" time="0.014242292">
+        </testcase>
+        <testcase classname="src/components/ShareLinks.test.tsx" name="ShareLinks &gt; says so when nothing has ever been shared" time="0.003814375">
+        </testcase>
+        <testcase classname="src/components/ShareLinks.test.tsx" name="ShareLinks &gt; shows why the list failed instead of an empty panel" time="0.004555125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SocialPublishing.test.tsx" timestamp="2026-11-14T09:31:31.510Z" hostname="MiLinsMacBook.local" tests="54" failures="0" errors="0" skipped="0" time="1.748577542">
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="warns that an expired login paused checks and reconnection is needed" time="0.132497125">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="preserves the original upload and shows paused verification instead of automatic checking" time="0.036627208">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="does not present an unknown login as verified" time="0.019341709">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="offers connection recovery while keeping checking tied to the original upload" time="0.056197417">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Kuaishou first comments &gt; loads an account template and snapshots edited opt-in only on explicit submission" time="0.111350166">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Kuaishou first comments &gt; saves a per-video comment in a draft without posting a video or comment" time="0.08266375">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Kuaishou first comments &gt; exposes only read-only checking for uncertain comments and preserves video publication" time="0.021679">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Kuaishou first comments &gt; shows explicit add for an existing video without silently sending a template" time="0.048212375">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Xiaohongshu author comments &gt; uses Xiaohongshu labels, opt-in text and an isolated account template" time="0.073294875">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Xiaohongshu author comments &gt; persists a per-video draft snapshot and submits it only after confirmation" time="0.088833875">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Xiaohongshu author comments &gt; connects the comment login explicitly and renews the same login purpose" time="0.03192275">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Xiaohongshu author comments &gt; does not expose comment account mutation to editors" time="0.007010792">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="Xiaohongshu author comments &gt; shows uncertain comments with read-only checking and no resend" time="0.021532709">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; opens kuaishou without automatic login, upload, or comments" time="0.005847584">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; opens xiaohongshu without automatic login, upload, or comments" time="0.021786041">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; starts kuaishou QR login only after the administrator clicks" time="0.018039375">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; starts xiaohongshu QR login only after the administrator clicks" time="0.020268083">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; does not expose account mutation to editor" time="0.015382083">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; does not expose account mutation to viewer" time="0.003769292">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; lets viewers inspect existing results but offers no publishing editor" time="0.006110042">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; disables connection if the isolated runtime is unavailable" time="0.010168125">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; clears old task routing and ignores a late task response after switching platform" time="0.054816208">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="new platform account and read-only navigation &gt; does not reuse another platform&apos;s QR login ID or screenshot" time="0.019207542">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; defaults to finalized current versions and searches historical and archived videos explicitly" time="0.0244065">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; opens exact kuaishou render/version from its source document without publishing" time="0.0257375">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; opens exact xiaohongshu render/version from its source document without publishing" time="0.016866792">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; saves each platform draft independently and restores its own edits on return" time="0.057669541">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; enqueues kuaishou only on explicit confirmation with edited metadata" time="0.026229042">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; enqueues xiaohongshu only on explicit confirmation with edited metadata" time="0.027379375">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="platform-specific finished videos and publish packages &gt; respects an explicitly disabled first-comment capability without sending comment fields" time="0.024119541">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; explains oversized saved Kuaishou topics and only trims them on an explicit click" time="0.040152625">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; identifies Kuaishou topic length errors without submitting" time="0.037893125">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; flags malformed saved topics until the user corrects them" time="0.036393542">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; counts emoji as code points for the Xiaohongshu maximum instead of UTF-16 units" time="0.065790791">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; enforces Channels&apos; six-character minimum and sixteen-character maximum including emoji" time="0.093113958">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; enforces Kuaishou&apos;s combined caption limit with separators and emoji" time="0.056548333">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; includes Channels hashtags and newlines in its combined 1000-character limit" time="0.038992667">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; never shows retry for UNKNOWN even if can_retry=false" time="0.013130209">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; never shows retry for UNKNOWN even if can_retry=true" time="0.011876083">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; only offers retry for a failed task confirmed not submitted" time="0.017156791">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; requires a separate explicit human absence decision before restoring kuaishou retry" time="0.02967925">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; requires a separate explicit human absence decision before restoring xiaohongshu retry" time="0.028586958">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; does not let viewers confirm absence" time="0.008854708">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; keeps accepted Kuaishou submissions without an ID out of the absence and retry flows" time="0.010382666">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; automatically refreshes kuaishou publication without another upload" time="0.02761725">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; automatically refreshes xiaohongshu publication without another upload" time="0.013807333">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; lets an accepted post request read-only discovery without requiring a work ID" time="0.012746458">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; does not describe an unknown outcome as an accepted submission while checking" time="0.005273167">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; keeps historical work-query failures out of account login status" time="0.007992958">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; does not pretend to automatically confirm xiaohongshu public status" time="0.011074125">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; does not pretend to automatically confirm weixin_channels public status" time="0.006972458">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="character limits and safe queue actions &gt; labels Kuaishou ownership checking separately from public confirmation" time="0.015217667">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="one finished video across independent platforms &gt; still prepares kuaishou after that version was published to Bilibili" time="0.0202365">
+        </testcase>
+        <testcase classname="src/components/SocialPublishing.test.tsx" name="one finished video across independent platforms &gt; still prepares xiaohongshu after that version was published to Bilibili" time="0.025090625">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SourceEditor.test.tsx" timestamp="2026-11-14T09:31:31.513Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.190699125">
+        <testcase classname="src/components/SourceEditor.test.tsx" name="registers a reusable source with the shown revision and no implicit task changes" time="0.087760583">
+        </testcase>
+        <testcase classname="src/components/SourceEditor.test.tsx" name="shows affected jobs and retains edits after a conflict" time="0.102012875">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SystemConfig.test.tsx" timestamp="2026-11-14T09:31:31.514Z" hostname="MiLinsMacBook.local" tests="22" failures="0" errors="0" skipped="0" time="1.474767291">
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; renders parsed values into the form" time="0.069108292">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; warns when the model is not one the provider has, fallbacks included" time="0.063983208">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; keeps a half-typed fallback list: the comma typed is not swallowed" time="0.051727334">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; switching the search provider switches the key variable with it" time="0.164277334">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; shows configured API keys masked" time="0.031787708">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; saves changed fields as a patch with mtime" time="0.068169375">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; writes typed API keys through the secrets endpoint" time="0.06965275">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; tests the LLM with the current form values" time="0.033814458">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; includes notification toggles in the patch" time="0.04398125">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; fills base_url, env var and headers together when a provider is picked" time="0.068987916">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; puts back the model last used with a provider, or leaves the field empty, and will not save an empty one" time="0.109879625">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; does not remember a model the provider does not have" time="0.107450917">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; warns when an API key is typed into the env-name field" time="0.036885791">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; says so when the key slot of the provider in use is empty" time="0.017118416">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; takes the key next to the provider and saves it with the config" time="0.069422166">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; configures report cleanup like the other models: provider picks address, key and model together" time="0.07709975">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; stays quiet when that slot is filled" time="0.041683041">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; shows free models as clickable chips and sets the model field" time="0.028770708">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; edits the paid fallback list as a comma-separated field and saves it" time="0.040000833">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; renders review_ai as a separate, optional card with its own test button" time="0.017471291">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="SystemConfig form &gt; deletes a configured review_ai section on save" time="0.049773583">
+        </testcase>
+        <testcase classname="src/components/SystemConfig.test.tsx" name="preserves unsaved form changes when switching editing modes is cancelled" time="0.212386">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/TemplateLibrary.test.tsx" timestamp="2026-11-14T09:31:31.514Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="0.246775917">
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateGrid &gt; filters by search query and category" time="0.051672584">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateGrid &gt; selects a template and shows preview with full prompt" time="0.024541541">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateGrid &gt; hides delete for built-in templates only" time="0.002556209">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateGrid &gt; renders gracefully when a template entry is malformed" time="0.01199075">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateLibrary &gt; opens with template count and creates a new template" time="0.051792083">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateLibrary &gt; rejects an invalid key client-side" time="0.05493975">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateLibrary &gt; imports an existing job into the form" time="0.021042417">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateLibrary &gt; deletes a user template after confirm" time="0.020228834">
+        </testcase>
+        <testcase classname="src/components/TemplateLibrary.test.tsx" name="TemplateLibrary &gt; uses a picked template via onUse" time="0.007212917">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ThemeUsage.test.tsx" timestamp="2026-11-14T09:31:31.515Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.180171208">
+        <testcase classname="src/components/ThemeUsage.test.tsx" name="reads recorded shared usage on demand and keeps unknown cost distinct from zero" time="0.179780042">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/ThemeWorkbench.test.tsx" timestamp="2026-11-14T09:31:31.515Z" hostname="MiLinsMacBook.local" tests="18" failures="0" errors="0" skipped="0" time="1.150303">
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; filters a larger reference library by subject" time="0.270484708">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; keeps earlier categories visible and lets their retained formats generate again" time="0.0834885">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; keeps platform discovery as an explicit supplementary action" time="0.021930583">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; keeps an older backend usable during a graceful rollout" time="0.044770625">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; keeps the legacy discovery schedule payload compatible" time="0.079142042">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; saves reference generation and a permanent direction on the daily plan" time="0.052918417">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; records a specific ignore reason and restores the retained topic" time="0.091132791">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; generates a batch from the matrix without requiring a topic or extra direction" time="0.042940958">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; retains library examples and lets a user reuse a format with optional direction" time="0.086596125">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; keeps used topics in history and keeps their format available for new questions" time="0.090768292">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; shows different categories and distinguishes actual counters from public content clues" time="0.009835333">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; sorts categories using real reference counters and keeps observed zeroes visible" time="0.019039792">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; creates a manual theme with a category, audience and optional supplied material" time="0.050247041">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; starts a chosen theme through research and video and shows its script link" time="0.057794542">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; lets viewers inspect themes while hiding mutation controls" time="0.0084585">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; shows failed production with a link to its existing retry controls" time="0.044170792">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; saves a daily schedule without starting theme production" time="0.06106175">
+        </testcase>
+        <testcase classname="src/components/ThemeWorkbench.test.tsx" name="matrix topic workbench &gt; recovers a failed read without losing the manual topic entry" time="0.034100542">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/VideoAnalytics.test.tsx" timestamp="2026-11-14T09:31:31.516Z" hostname="MiLinsMacBook.local" tests="8" failures="0" errors="0" skipped="0" time="1.074855583">
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="shows actual account cutoff, zero and negative fans without making missing values zero" time="0.105808708">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="loads search, workflow filter, sorting, paging, and 30-day overview from cache API" time="0.536512292">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="explains first baseline, provides comment route, and preserves negative net change" time="0.072660292">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="queues manual collection and independently pauses automatic collection" time="0.052267542">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="enforces read-only view, unpublished statistics, and reports stale data" time="0.041353791">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="disables duplicate or rate-limited manual requests" time="0.160417792">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="filters by matrix across pages and exposes an unlinked bucket without changing account totals" time="0.0814055">
+        </testcase>
+        <testcase classname="src/components/VideoAnalytics.test.tsx" name="shows matrix, source job and production configuration on the published version" time="0.023469041">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/VideoComparison.test.tsx" timestamp="2026-11-14T09:31:31.516Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.283059666">
+        <testcase classname="src/components/VideoComparison.test.tsx" name="compares saved text, exact videos and configuration without regenerating" time="0.231742583">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/components/VideoComparison.test.tsx" name="shows read errors and retains comparison controls for recovery" time="0.05096775">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/VideoModelConfig.test.tsx" timestamp="2026-11-14T09:31:31.517Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.393581583">
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; shows what AutoVideo uses now and recognises the provider from its address" time="0.141348125">
+        </testcase>
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; choosing a provider fills address, key variable and a model that provider offers, then saves them" time="0.105165208">
+        </testcase>
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; warns when the provider does not have the model typed, and lets the list fill it in" time="0.027393125">
+        </testcase>
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; puts back the model last used with a provider when switching back" time="0.016171958">
+        </testcase>
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; tests the candidate without saving it" time="0.090354542">
+        </testcase>
+        <testcase classname="src/components/VideoModelConfig.test.tsx" name="VideoModelConfig &gt; says so, and disables editing, when AutoVideo is not running" time="0.011256917">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/VideoStorageConfig.test.tsx" timestamp="2026-11-14T09:31:31.517Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.242351">
+        <testcase classname="src/components/VideoStorageConfig.test.tsx" name="VideoStorageConfig &gt; browses folders and saves the selected absolute path with migration" time="0.209138833">
+        </testcase>
+        <testcase classname="src/components/VideoStorageConfig.test.tsx" name="VideoStorageConfig &gt; shows failure and leaves the entered path editable" time="0.032688667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Analytics.test.tsx" timestamp="2026-11-14T09:31:31.517Z" hostname="MiLinsMacBook.local" tests="18" failures="0" errors="0" skipped="0" time="1.197905417">
+        <testcase classname="src/pages/Analytics.test.tsx" name="shows tokens, requests and time per part, with every figure in readable units" time="0.108357542">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="flags amounts that leave out unpriced calls and can hide all money, remembering the choice" time="0.054692583">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="opens one video&apos;s stages on demand" time="0.056405">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="compares videos by the chosen attribute and reloads" time="0.211648583">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="sets cost against plays per group and per published video" time="0.077238125">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="asks for a Bilibili account when there are no plays to compare with" time="0.021297042">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="breaks the assistant down by turn, tool and request, and opens one request turn by turn" time="0.062451333">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="splits the assistant&apos;s requests by where they were sent from" time="0.101531042">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="changes the range for every section" time="0.067346333">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="hosts the video data tab with full rights, since only administrators reach the page" time="0.01096">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="is closed to anyone but administrators and asks the server for nothing" time="0.00723175">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="shows what is stored and previews a cleanup before deleting anything" time="0.100364542">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="offers no delete button when nothing is old enough, and forgets a preview when the period changes" time="0.078498875">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="sends someone without a connected account to connect one instead of an empty panel" time="0.01567875">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="sends the old platform-management data link to its new home" time="0.043051916">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="opens the weekly review from the URL, picks another week and keeps gaps apart from plays" time="0.036181">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="shows completion, watch time and early exits once the creator centre has been read" time="0.087300375">
+        </testcase>
+        <testcase classname="src/pages/Analytics.test.tsx" name="opens a saved week from a notice link and offers its report" time="0.056494875">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Ask.performance.test.tsx" timestamp="2026-11-14T09:31:31.518Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.28029825">
+        <testcase classname="src/pages/Ask.performance.test.tsx" name="typing and receiving a new response do not parse the completed history again" time="0.279380667">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Ask.test.tsx" timestamp="2026-11-14T09:31:31.518Z" hostname="MiLinsMacBook.local" tests="29" failures="0" errors="0" skipped="0" time="1.419113417">
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; pastes an image into the existing composer and sends its persistent material id" time="0.264655792">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; keeps a long pasted article as an attachment instead of truncating at the chat limit" time="0.036058666">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; restores the material references with the conversation after reload" time="0.024888416">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; restores unsent materials and the request after remounting" time="0.066862583">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; keeps the full failed paste and offers retry before sending" time="0.146958">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; keeps old attachments in their original conversation when starting a new one" time="0.057666542">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; opens long conversations at recent messages and reveals older replies without another request" time="0.052954209">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; loads /ask?tasks=1 panel once after initial conversation recovery" time="0.024603958">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; loads /ask panel once after initial conversation recovery" time="0.014344875">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; opens the global overview and returns to the existing conversation without sending or losing its draft" time="0.116064833">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; prefills a global action with no stale object context or duplicate conversation recovery" time="0.068558333">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; opens the task center directly from a verified action link" time="0.013490084">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; opens a task-center conversation link instead of the tab last-used conversation" time="0.008516833">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; continues a task in its original conversation with a prefilled request and no automatic send" time="0.05685275">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; restores actual server receipts without replay and carries the conversation ID" time="0.026054625">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; streams before completion and preserves a pending request through navigation" time="0.095071958">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; keeps partial output after disconnect without automatic replay" time="0.044138625">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; stops the assistant response without cancelling research jobs" time="0.021943">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; renders timezone, next runs and report citations" time="0.019150333">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; starts a new server conversation and clears cached messages" time="0.014365292">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; blocks submission until recovery succeeds and isolates accounts" time="0.0110005">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; pins the tab to its own conversation when another conversation becomes latest" time="0.083447667">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; reads actual receipts after disconnect without a second model request" time="0.034603208">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="Application assistant &gt; restores a partial task and continues only after an explicit click" time="0.016069">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="fills an example without submitting a model request" time="0.018454459">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="switches historical conversations without sending another model request" time="0.016046625">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="sends the selected page object as structured context without auto-submitting it" time="0.016146">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="persists removal of the current object without sending a model request" time="0.01326525">
+        </testcase>
+        <testcase classname="src/pages/Ask.test.tsx" name="shows recorded model usage after a reply and after restoring history" time="0.035222958">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Dashboard.test.tsx" timestamp="2026-11-14T09:31:31.519Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.239567333">
+        <testcase classname="src/pages/Dashboard.test.tsx" name="Dashboard system health &gt; does not overlap slow statistic refreshes and cancels them when leaving" time="0.166701458">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Dashboard.test.tsx" name="Dashboard system health &gt; shows a normal badge and hides details until clicked" time="0.044589958">
+        </testcase>
+        <testcase classname="src/pages/Dashboard.test.tsx" name="Dashboard system health &gt; counts warnings in the badge and lists failing checks" time="0.0095515">
+        </testcase>
+        <testcase classname="src/pages/Dashboard.test.tsx" name="Dashboard system health &gt; surfaces errors distinctly" time="0.009283416">
+        </testcase>
+        <testcase classname="src/pages/Dashboard.test.tsx" name="Dashboard system health &gt; renders no health badge when the endpoint fails" time="0.008234792">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/HomeBoard.test.tsx" timestamp="2026-11-14T09:31:31.520Z" hostname="MiLinsMacBook.local" tests="8" failures="0" errors="0" skipped="0" time="0.863324708">
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; groups the same recipe by actual source matrix and scopes every count together" time="0.270661833">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; deep links preserve matrix and view, and primary actions open the matching tab" time="0.058564041">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; previews the highest priority video and exposes every remaining video inside its matrix" time="0.091798041">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; shows an older finished video as history beside its current draft" time="0.021736708">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; loads automation only when opened and never shows the same batch video beside the queue" time="0.08136">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; keeps empty scopes, filtered emptiness and independent videos understandable" time="0.12852975">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; keeps the last successful result when refresh fails and supports retry" time="0.165579542">
+        </testcase>
+        <testcase classname="src/pages/HomeBoard.test.tsx" name="Matrix video board &gt; suspends background polling and refreshes when the page becomes visible" time="0.043779792">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/JobDetail.logstream.test.tsx" timestamp="2026-11-14T09:31:31.520Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.199241209">
+        <testcase classname="src/pages/JobDetail.logstream.test.tsx" name="JobDetail log stream is gated by the tab &gt; subscribes when the log tab is opened, not only after 运行" time="0.128126209">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/JobDetail.logstream.test.tsx" name="JobDetail log stream is gated by the tab &gt; keeps working after the pre-run subscription reports idle" time="0.046898958">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.logstream.test.tsx" name="JobDetail log stream is gated by the tab &gt; reconnects from the log panel&apos;s own button" time="0.022191375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/JobDetail.test.tsx" timestamp="2026-11-14T09:31:31.520Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="1.706950416">
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail persisted logs &gt; replays the previous run log when idle" time="0.05393825">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail persisted logs &gt; labels the persisted run with status and event count" time="0.02024525">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail persisted logs &gt; does not show the panel when there is no persisted log" time="0.008431584">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail persisted logs &gt; refresh button reloads persisted logs" time="0.018629916">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail YAML preflight &gt; shows blocking errors before the user attempts a save" time="0.729728542">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail YAML preflight &gt; confirms a clean document" time="0.725593416">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail YAML preflight &gt; does not validate before anything is edited" time="0.013625833">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="JobDetail YAML preflight &gt; blocks leaving the YAML tab with unsaved edits" time="0.032873417">
+        </testcase>
+        <testcase classname="src/pages/JobDetail.test.tsx" name="keeps unsaved YAML and its conflict baseline when refreshing task status" time="0.102463">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/JobsList.test.tsx" timestamp="2026-11-14T09:31:31.521Z" hostname="MiLinsMacBook.local" tests="11" failures="0" errors="0" skipped="0" time="0.888916833">
+        <testcase classname="src/pages/JobsList.test.tsx" name="Jobs category picker &gt; shows a category filter with counts" time="0.280026333">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="Jobs category picker &gt; filters the list by category" time="0.045901209">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="Jobs category picker &gt; normalizes typed category and warns for new ones" time="0.115249792">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="Jobs category picker &gt; fills the category when clicking an existing chip" time="0.095902417">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; filters by status" time="0.030808292">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; filters by when the file was last modified" time="0.03593625">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; sorts by name, most recently run and never run" time="0.0584565">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; searches description and keywords, not just the name" time="0.03462825">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; shows how many jobs pass the filters" time="0.033032041">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="JobsList filters &gt; clears every filter in one click" time="0.035668583">
+        </testcase>
+        <testcase classname="src/pages/JobsList.test.tsx" name="registers a recurrence when the new-job checkbox is selected" time="0.122134125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Login.test.tsx" timestamp="2026-11-14T09:31:31.521Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.362550166">
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; offers remember-me and keeps the username out of the password field" time="0.205996583">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; sends remember:false when the box is cleared" time="0.031102583">
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; remembers only the username, never the password" time="0.012004042">
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; clears the remembered username when remember-me is off" time="0.064861042">
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; prefills the username on a later visit" time="0.003380167">
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; skips the form when a session is already live" time="0.009577917">
+        </testcase>
+        <testcase classname="src/pages/Login.test.tsx" name="Login page &gt; keeps a rejected password visible instead of navigating away" time="0.034997667">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Matrices.test.tsx" timestamp="2026-11-14T09:31:31.522Z" hostname="MiLinsMacBook.local" tests="26" failures="0" errors="0" skipped="0" time="1.418354875">
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; keeps business domains in the main list and research groups in the source view" time="0.176257875">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; opens business domains on columns and reads production only when research sources are requested" time="0.061281042">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; lists each matrix with its domain and Jobs, and the Jobs in none" time="0.035667959">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; filters by live matrix health, separates archived matrices and searches source tasks" time="0.088563042">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; retries a failed list request and preserves a successful list on a later refresh failure" time="0.066605875">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; keeps management off the task workspace and loads ungrouped tasks only for settings" time="0.060282125">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; shows each Job&apos;s schedule and last run, and adds a Job by sending the new member list" time="0.09566775">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; gives every Job a way into its own video configs, and keeps them off the matrix page" time="0.064398417">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; saves video speed once for the matrix and explains task inheritance" time="0.040188416">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; the Job&apos;s own page is that Job&apos;s configs: no Job to pick, and a whole-report Job can be given one" time="0.017681875">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; lists only the first of a Job&apos;s many keywords, the rest on request" time="0.010711917">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; copies with new keywords only the Jobs that have a neutral template" time="0.026185375">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; is read-only for a viewer" time="0.014514292">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; runs a Job once after asking, and says when its report is ready to be written" time="0.081244791">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; does not run when the question is declined" time="0.011129">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; lets an admin change a Job&apos;s period with a preview, and an editor cannot" time="0.08181775">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; lists the runs of every Job with what came of them, filters, and offers the next step for a report with no video" time="0.08621025">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; shows the next week of timed runs, with a warning when too many are due together" time="0.018498375">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; switches between the Job table and the tabs" time="0.041569959">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; pauses and resumes a whole matrix: the resume says what it costs and only a yes confirms it" time="0.056827708">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; says whether the newest report still needs a video: a link when nothing writes it, a count once written" time="0.089402375">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; starts a run that did not finish again from the beginning, after asking" time="0.026741">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; shows the month&apos;s search limit against what is used, and lets an admin set it" time="0.056524458">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; warns when the month&apos;s searches are used up, and an editor cannot change the limit" time="0.020120792">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; opens the runs already filtered to the Job it was linked for" time="0.010108792">
+        </testcase>
+        <testcase classname="src/pages/Matrices.test.tsx" name="Matrices &gt; lists a config whose Job is in no matrix on the list page, and removes it after asking" time="0.078878417">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Outputs.test.tsx" timestamp="2026-11-14T09:31:31.524Z" hostname="MiLinsMacBook.local" tests="10" failures="0" errors="0" skipped="0" time="1.087941709">
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; keeps multiple programme contents inside one output card and one video link" time="0.117864833">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; retries failed reads, then preserves the result if a later refresh fails" time="0.162952958">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; ignores an old response after switching the archive scope" time="0.073294125">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; previews videos immediately, then narrows to one matrix without nested expansion" time="0.154126041">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; lists by time, reverses order and filters creation time and current render state" time="0.119203209">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; preserves deep links and shows current version, old video and fact audit independently" time="0.023255959">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; does not lose a script whose matrix is absent from the current catalog" time="0.077985416">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="Outputs &gt; opens a selected matrix automatically and keeps other matrices out of its records" time="0.105933334">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="clears search conditions while preserving the selected matrix" time="0.073554542">
+        </testcase>
+        <testcase classname="src/pages/Outputs.test.tsx" name="bounds long lists and reveals more without fetching again" time="0.178915458">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Platforms.test.tsx" timestamp="2026-11-14T09:31:31.524Z" hostname="MiLinsMacBook.local" tests="25" failures="0" errors="0" skipped="0" time="1.583662375">
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; shows durable Bilibili recovery notes and checks the original task without reuploading" time="0.208425083">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; explains missing upload authorization and links to account settings" time="0.081557542">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; continues the existing task when reopening a render that is already queued" time="0.03866725">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; focuses an existing document task outside the overview list and returns to its exact version" time="0.060942541">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; shows the Bilibili account, upload readiness and three tabs" time="0.031170083">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; routes an unconnected account to connection settings" time="0.019778041">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; defaults to current approved videos and keeps archived/history search available" time="0.093527292">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; explains when the running backend still exposes the old incomplete list" time="0.044147584">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; saves a draft without sending it and sends only on the explicit button" time="0.056870417">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; keeps viewer access read-only and prevents resending an uncertain reply" time="0.022470833">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; loads a render&apos;s publish pack and submits the reviewed metadata" time="0.115195083">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; submits the ID belonging to the category selected by name" time="0.0803615">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; lets the user adopt a content recommendation before submitting its official ID" time="0.115161375">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; requires a new choice when the saved category is no longer available" time="0.054601833">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; can retry category loading without losing the edited upload fields" time="0.050645792">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; saves the default category selected by name and identifies cached lists" time="0.045878583">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; edits the publish window and blocks an empty range" time="0.058357417">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; shows backend failures without losing the edited reply" time="0.054542209">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; keeps polling an unchanged waiting QR state" time="0.035390084">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; includes an edited first comment and its optional pin in the upload only on submit" time="0.0701955">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; loads the common comment but allows disabling it for one upload" time="0.07783075">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; saves a common comment without uploading or sending it" time="0.069071625">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; shows successful posting separately from failed pinning and retries the pin only" time="0.028554042">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; never offers to resend an uncertain first comment" time="0.025655542">
+        </testcase>
+        <testcase classname="src/pages/Platforms.test.tsx" name="Platform management &gt; saves the default first comment with the automation policy" time="0.043191417">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/PublishQueue.test.tsx" timestamp="2026-11-14T09:31:31.526Z" hostname="MiLinsMacBook.local" tests="8" failures="0" errors="0" skipped="0" time="0.802802292">
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; bounds initial cards, reveals the rest, and searches the entire list" time="0.376687125">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; shows this login&apos;s last list immediately on return, then replaces it with fresh statuses" time="0.035201625">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; does not reuse the previous login&apos;s list for another login" time="0.055424959">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; shows what is ready to publish, what is published and the freshness warnings" time="0.08633675">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; filters by credibility label, so a video with a serious finding is easy to pick out" time="0.045035125">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="Publish queue &gt; lets an editor open the folder of a finished video, and nobody else" time="0.149257416">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="finds a Bilibili-published asset under Douyin unpublished and retains its distribution entry" time="0.053147334">
+        </testcase>
+        <testcase classname="src/pages/PublishQueue.test.tsx" name="counts only prepared targets when no platform is selected" time="0.000498125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/ReportView.test.tsx" timestamp="2026-11-14T09:31:31.526Z" hostname="MiLinsMacBook.local" tests="3" failures="0" errors="0" skipped="0" time="0.356975542">
+        <testcase classname="src/pages/ReportView.test.tsx" name="Report reader &gt; gives repeated headings distinct anchors shared with the table of contents" time="0.273273875">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/ReportView.test.tsx" name="Report reader &gt; keeps the report readable after a refresh fails and offers retry" time="0.041721">
+        </testcase>
+        <testcase classname="src/pages/ReportView.test.tsx" name="folds a legacy model preamble while showing the report, and preserves literal tags in code examples" time="0.040800458">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Reports.test.tsx" timestamp="2026-11-14T09:31:31.527Z" hostname="MiLinsMacBook.local" tests="12" failures="0" errors="0" skipped="0" time="0.825584458">
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports tree state &gt; remembers the last visited report and highlights it after returning" time="0.157145417">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports tree state &gt; remembers an explicitly collapsed directory" time="0.057810208">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports tree state &gt; restores the collapsed state of the tree panel" time="0.079798917">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; changes list sorting without refetching the unchanged directory and facets" time="0.035520125">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; sends the chosen time range to both the list and the tree" time="0.02774475">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; filters by the latest round" time="0.022719958">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; passes the sort order through" time="0.03299875">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; shows date inputs for a custom range" time="0.039056">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filters &gt; shows the count the tree reports for each directory" time="0.011834459">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filter race &gt; keeps the newest filter&apos;s result when an older response lands last" time="0.070691708">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Reports filter race &gt; defaults to today&apos;s reports" time="0.03770275">
+        </testcase>
+        <testcase classname="src/pages/Reports.test.tsx" name="Report search recovery &gt; keeps browsing results while typing, and shows a failed search with retry" time="0.251059958">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Rounds.test.tsx" timestamp="2026-11-14T09:31:31.527Z" hostname="MiLinsMacBook.local" tests="2" failures="0" errors="0" skipped="0" time="0.299876834">
+        <testcase classname="src/pages/Rounds.test.tsx" name="Rounds list &gt; shows seven rounds and one control to reveal the remaining history" time="0.275396958">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Rounds.test.tsx" name="Rounds list &gt; shows an initial failure with retry instead of an empty history" time="0.024039292">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Scheduler.test.tsx" timestamp="2026-11-14T09:31:31.527Z" hostname="MiLinsMacBook.local" tests="28" failures="0" errors="0" skipped="0" time="2.152095042">
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler job picker &gt; creates a durable job plan with an automatic ID and no shell command input" time="0.358419333">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler job picker &gt; filters the job list by query" time="0.036134459">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler job picker &gt; marks disabled jobs" time="0.025151583">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler missed-run banners &gt; shows an overdue banner with the missed slot" time="0.010167959">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler missed-run banners &gt; shows a paused banner without claiming a failure" time="0.010656542">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler missed-run banners &gt; stays silent when every job is on time" time="0.00691825">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Schedule editing and previews &gt; switches selected jobs and refuses disabled ones" time="0.315719375">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Schedule editing and previews &gt; shows system agents without cron edit, pause or delete controls" time="0.013003084">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Schedule editing and previews &gt; lists the video batches and maintenance read-only, with where to change them and an empty last batch" time="0.020247708">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Schedule editing and previews &gt; previews a changed schedule and saves an edit with PUT" time="0.36003325">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="managed plan status honesty &gt; does not call a never-run plan healthy" time="0.009628125">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="managed plan status honesty &gt; shows healthy only after a run actually succeeded" time="0.005618042">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="write failures stay visible &gt; reports a rejected create instead of closing the form" time="0.329031834">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="write failures stay visible &gt; reports a rejected delete" time="0.019207458">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="write failures stay visible &gt; reports a rejected pause" time="0.022455666">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="write failures stay visible &gt; keeps the plan on screen when pausing fails" time="0.027939417">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; offers edit, pause and delete on the system tasks" time="0.035779333">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; opens the editor on the real cron expression, not undefined fields" time="0.023654959">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; saves only the trigger for a system task" time="0.3427375">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; warns that deleting stops the matrix and can be undone" time="0.023698667">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; pauses a system task through the toggle endpoint" time="0.025956084">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; restores a deleted system task" time="0.030262">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; does not offer restore for a plan that was never a system task" time="0.0145595">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; keeps restore reachable after the last system task is deleted" time="0.014917">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="Scheduler matrix system tasks &gt; restores every deleted system task in one click" time="0.031091292">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="independent scheduler reads &gt; waits for the system list before claiming there are no schedules" time="0.010420875">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="independent scheduler reads &gt; shows managed plans while system discovery is still waiting and cancels it on exit" time="0.011093125">
+        </testcase>
+        <testcase classname="src/pages/Scheduler.test.tsx" name="independent scheduler reads &gt; keeps managed plans visible when system inspection fails" time="0.016376">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Settings.access.test.tsx" timestamp="2026-11-14T09:31:31.529Z" hostname="MiLinsMacBook.local" tests="10" failures="0" errors="0" skipped="0" time="1.02138175">
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; places video branding beside runtime logs and outside system config" time="0.36581325">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; keeps both links readable without expanding anything" time="0.144320375">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; sits at the bottom, after the tab content" time="0.038550042">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; stays collapsed by default" time="0.030230125">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; marks the card as reachable from a phone when LAN access is on" time="0.068959375">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; offers no phone link when LAN access is off" time="0.055239042">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; warns that LAN access is cleartext HTTP once expanded" time="0.052495791">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; tells the user a restart is needed after switching LAN on" time="0.138682333">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; shows how to enable the gateway when it is not installed" time="0.066046542">
+        </testcase>
+        <testcase classname="src/pages/Settings.access.test.tsx" name="Settings access card &gt; copies the link to the clipboard" time="0.060284417">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Sources.test.tsx" timestamp="2026-11-14T09:31:31.530Z" hostname="MiLinsMacBook.local" tests="5" failures="0" errors="0" skipped="0" time="0.370999833">
+        <testcase classname="src/pages/Sources.test.tsx" name="Sources page &gt; identifies automatic sources without showing an unregistered warning" time="0.076297333">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Sources.test.tsx" name="Sources page &gt; keeps automatic sources from different matrices distinct when their URLs match" time="0.03226325">
+        </testcase>
+        <testcase classname="src/pages/Sources.test.tsx" name="Sources page &gt; lists every source with who uses it and how its last fetch went, and names Jobs that point at a missing source" time="0.023370959">
+        </testcase>
+        <testcase classname="src/pages/Sources.test.tsx" name="Sources page &gt; filters by use, by failure and by tag" time="0.227303333">
+        </testcase>
+        <testcase classname="src/pages/Sources.test.tsx" name="Sources page &gt; shows a load failure as a failure, not as an empty list" time="0.009610875">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/Topics.test.tsx" timestamp="2026-11-14T09:31:31.530Z" hostname="MiLinsMacBook.local" tests="20" failures="0" errors="0" skipped="0" time="2.056685125">
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; starts the picked topic once in place and restores its context and scroll on return" time="0.280743792">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; keeps a failed start visible on its card and does not automatically retry" time="0.112731084">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; provides task shortcuts for actionable work and includes writing failures in exceptions" time="0.194929958">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; separates duplicate skips from failures and opens the existing video without production requests" time="0.175550167">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; starts only the selected approved script&apos;s render and immediately shows its progress" time="0.215402125">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; shows separate draft/video states, plays current and old videos within the topic card" time="0.103921958">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; filters by the newest matching script&apos;s current version and preserves the filter in the URL" time="0.089281875">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; refreshes production progress on returning to the page without another catalog request" time="0.14333275">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; matches production variants and does not let an archived failed draft hide the usable current video" time="0.058252584">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; gets the first topics with one browser request, without waiting for discovery status" time="0.019566084">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; keeps the last list during a failed refresh and still lets the user change sources" time="0.14903">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; reads fresh topics when returning to the default source and ignores an older source response" time="0.084801583">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; keeps publication history and offers a direct start instead of another picker" time="0.057990625">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; shows the event date next to the report date and which script already covers a topic, and filters" time="0.028895708">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; has a tab per cell; a cell without a source says it is chosen by hand" time="0.042246625">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; leaves out a recipe written from a whole report: it has no items to pick here" time="0.047215208">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; marks old news, hides what was marked not-writing, and disables discovery while it runs" time="0.023547208">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; offers a roundup built from the ticked flash items" time="0.050112792">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; adds a topic by hand, which lands under the 手动添加 tab, and flags a source no job declares" time="0.117334959">
+        </testcase>
+        <testcase classname="src/pages/Topics.test.tsx" name="Topics page &gt; gives each domain its own grid, so a second domain&apos;s recipe for the same type and audience is not hidden" time="0.060480417">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/VideoPublish.test.tsx" timestamp="2026-11-14T09:31:31.532Z" hostname="MiLinsMacBook.local" tests="7" failures="0" errors="0" skipped="0" time="0.35880525">
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Publish pack &gt; shows the pack, its warnings and the unverified chapter format, and copies the description" time="0.041571542">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Publish pack &gt; includes report material in the copied description and offers clickable original links" time="0.149733417">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Publish pack &gt; starts a recheck for a flash script and shows the latest verdict" time="0.033754542">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Publish pack &gt; offers no recheck for other columns, and records a publication link" time="0.035352458">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Render folder &gt; lists the files and asks the app to show the folder in Finder" time="0.047638625">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="Render folder &gt; has no buttons for a viewer" time="0.001165583">
+        </testcase>
+        <testcase classname="src/pages/VideoPublish.test.tsx" name="recognizes Douyin links and records the chosen account and platform without replacing Bilibili" time="0.048897375">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/VideoQuality.test.tsx" timestamp="2026-11-14T09:31:31.532Z" hostname="MiLinsMacBook.local" tests="1" failures="0" errors="0" skipped="0" time="0.058420292">
+        <testcase classname="src/pages/VideoQuality.test.tsx" name="Draft quality &gt; shows the share of the draft kept per column and the edits of one script on request" time="0.057891667">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/VideoRecipes.test.tsx" timestamp="2026-11-14T09:31:31.532Z" hostname="MiLinsMacBook.local" tests="6" failures="0" errors="0" skipped="0" time="0.404010833">
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="Video recipes page &gt; keeps the originating manuscript across shared-part links and protects unsaved edits on return" time="0.185374833">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="Video recipes page &gt; lists the audiences a recipe offers, each linked to its profile, and the column each one is" time="0.054444375">
+        </testcase>
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="Video recipes page &gt; shows which shared parts a recipe uses, linked to them, and lists every part with how many recipes use it" time="0.039222166">
+        </testcase>
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="Video recipes page &gt; opens a part, names the recipes it feeds, and saves an edit" time="0.033663916">
+        </testcase>
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="Video recipes page &gt; is read-only for a viewer" time="0.016241166">
+        </testcase>
+        <testcase classname="src/pages/VideoRecipes.test.tsx" name="keeps a changed recipe until the author explicitly discards it before switching" time="0.074050125">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/VideoScriptView.test.tsx" timestamp="2026-11-14T09:31:31.533Z" hostname="MiLinsMacBook.local" tests="39" failures="0" errors="0" skipped="0" time="1.5535275">
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; uses the topic heading before the first draft while RESEARCHING" time="0.126235917">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; uses the topic heading before the first draft while WRITING" time="0.01416125">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; falls back from blank version and detail titles and retains an existing version title" time="0.0568585">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; has a default heading when a new task has no title yet" time="0.030260375">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; shows an archived duplicate as a skip with original links instead of a failure" time="0.072604792">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; keeps the topic return destination while changing tabs and rejects unrelated return links" time="0.080065625">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; refreshes an idle draft and follows automatic approval without a page reload" time="0.056646708">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; shows an imported local video with playback and publishing, without generation or AutoVideo dependency" time="0.032466208">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; keeps polling a social UNKNOWN task and receives its automatic publication record" time="0.037899208">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; starts rewriting from the prominent entry only after its scope is accepted" time="0.015132459">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; submits the approved manuscript as fast cards only when explicitly selected" time="0.071079167">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; shows each paragraph&apos;s evidence, citations and the length check" time="0.010956583">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; saves an edit as a new version" time="0.048829583">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; approves the version on screen" time="0.032607542">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; shows the style, the review results and restyles from the same research" time="0.053613625">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; restyles a material script without requiring a research report or an adapt recipe" time="0.020548583">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Video script review &gt; loads draft-only styles and fact labels when entering the draft tab" time="0.029053875">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; opens the precise render linked by an assistant task card" time="0.023790208">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; shows the published label and automatically written publication on the document" time="0.029768">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; restores the selected historical publish version from the platform return link" time="0.018482166">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; keeps publication available for an older video while current status is DRAFT" time="0.073685584">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; keeps publication available for an older video while current status is WRITING" time="0.066714">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; keeps publication available for an older video while current status is FAILED" time="0.085948333">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; opens the publication pack from the selected completed video and switches versions explicitly" time="0.071473584">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; does not offer a publish tab for a draft whose only render failed" time="0.010695542">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; shows measured total and copy time for a completed render" time="0.016987708">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; shows historical versions read-only with an explicit return to current" time="0.013768459">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Script version context &gt; labels an older video and does not call it the current draft&apos;s progress" time="0.00891025">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; does not create a version for an unchanged editor and recovers local work after remount" time="0.042762583">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; scopes local recovery to the person, manuscript and base version" time="0.022379833">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; keeps failed saves editable and locally recoverable without retrying" time="0.022638291">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; does not save over a version advanced by another task" time="0.019968375">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; locates a review issue, focuses its editor, retains notes and hides audit submission while editing" time="0.117259667">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; approves from an explicit review tab and goes to render settings without starting a render" time="0.024285417">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; uses one render submission with explicit voice and mode, despite repeated clicks" time="0.023471458">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; keeps the submit button disabled on unavailable service and allows a read-only status retry" time="0.019907167">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="Continuous manuscript workflow &gt; opens a completed current version on the video tab while keeping explicit publication links" time="0.01181075">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="opens the new approved version&apos;s settings instead of silently selecting an old movie" time="0.0191665">
+        </testcase>
+        <testcase classname="src/pages/VideoScriptView.test.tsx" name="keeps an explicit same-version render through preview, pack and version selection" time="0.018973292">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/VideoScripts.test.tsx" timestamp="2026-11-14T09:31:31.535Z" hostname="MiLinsMacBook.local" tests="13" failures="0" errors="0" skipped="0" time="0.830465958">
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; allows a topic covered by another cell but blocks a matching cell&apos;s active task" time="0.159720625">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; marks unverified cells, disables blocked ones and offers the cell&apos;s other video forms" time="0.027562792">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; sends the chosen cell&apos;s key and video form" time="0.046584">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; builds a roundup from flash items in the order they were ticked" time="0.061090167">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; asks a comparison for two different subjects and what to compare them on" time="0.068739958">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Video script cell picker &gt; filters the script list by status and keeps the topic from the topics page highlighted" time="0.103382041">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list columns &gt; names a column made by a production config with the config&apos;s name, not its internal key" time="0.038719667">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list stages &gt; shows how far an approved script got with its video, counts them per stage and groups by day" time="0.046101167">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list filters &gt; filters by credibility label and by text, shows when each script was made, and clears" time="0.068272125">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list scope and independent loading &gt; keeps an explicit all-status link instead of applying the unpublished default" time="0.034194375">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list scope and independent loading &gt; filters unpublished current versions across stages and keeps matrix counts" time="0.085562083">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list scope and independent loading &gt; loads existing scripts without loading authoring catalogs, and scopes counts by matrix" time="0.035228875">
+        </testcase>
+        <testcase classname="src/pages/VideoScripts.test.tsx" name="Script list scope and independent loading &gt; uses the selected topic source and report date from the topics page" time="0.054328875">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/videoNext.test.ts" timestamp="2026-11-14T09:31:31.536Z" hostname="MiLinsMacBook.local" tests="9" failures="0" errors="0" skipped="0" time="0.003023666">
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; waits while researching or writing and reports a failure" time="0.000612542">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; guides explicit duplicate and exhausted skips without reporting a technical failure" time="0.000544375">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; asks for approval of a draft and mentions must-fix findings" time="0.000111125">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; walks an approved script from render to publication" time="0.000322208">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; ignores earlier-version videos and publications, and keeps a completed video after a failed retry" time="0.000074125">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="nextStep &gt; waits for an audit and treats style-only findings as advice" time="0.000129667">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="does not assign an unknown legacy publication version to the current draft" time="0.000095667">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="keeps polling guidance for the Douyin worker RUNNING status" time="0.000097625">
+        </testcase>
+        <testcase classname="src/pages/videoNext.test.ts" name="names the real renderer phases for the manuscript UI" time="0.000271292">
+        </testcase>
+    </testsuite>
+</testsuites>

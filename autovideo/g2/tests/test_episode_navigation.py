@@ -83,6 +83,34 @@ def test_agenda_lights_each_item_when_the_briefing_gives_it_its_own_paragraph():
     assert '0:00:02.00' in text and '0:00:03.00' in text
 
 
+def test_ten_item_agenda_keeps_long_titles_at_readable_size():
+    title = '比较不同条件下的研究结果和证据如何影响普通用户的实际选择'
+    items = [{'index': i + 1, 'title': title, 'start_frame': 180 + 120 * i, 'end_frame': 300 + 120 * i}
+             for i in range(10)]
+    output = ass(items, 1400, opening={'start_frame': 0, 'end_frame': 180, 'highlights': None})
+    titles = [event for event in output.splitlines() if event.startswith('Dialogue: 8,') and r'\N' in event]
+    assert len(titles) == 10
+    assert all(r'\fs40' in event and event.split('}')[-1].replace(r'\N', '') == title for event in titles)
+
+
+def test_agenda_keeps_a_multiplier_value_and_unit_together():
+    title = '同一任务0.23元，比DeepSeek省5倍'
+    items = [{'index': i + 1, 'title': title, 'start_frame': 180 + 120 * i, 'end_frame': 300 + 120 * i}
+             for i in range(8)]
+    output = ass(items, 1300, opening={'start_frame': 0, 'end_frame': 180, 'highlights': None})
+    titles = [event for event in output.splitlines() if event.startswith('Dialogue: 8,') and title[:7] in event]
+    assert len(titles) == 8 and all('5倍' in event for event in titles)
+
+
+def test_over_capacity_agenda_leaves_opening_picture_and_item_navigation():
+    items = [{'index': i + 1, 'title': f'条目{i + 1}', 'start_frame': 180 + 120 * i, 'end_frame': 300 + 120 * i}
+             for i in range(13)]
+    output = ass(items, 1800, opening={'start_frame': 0, 'end_frame': 180, 'highlights': None},
+                 item_cards=cards(items))
+    assert not any(event.startswith('Dialogue: 4,0:00:00.00,') for event in output.splitlines())
+    assert '13 / 13' in output and '条目13' in output
+
+
 def test_a_long_opening_is_not_read_as_a_briefing():
     """Seven opening paragraphs for two items: the last two are not necessarily the items' lines."""
     ids = [f'n{i}' for i in range(10)]

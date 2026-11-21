@@ -1,0 +1,67 @@
+{
+  "applied_at": 1794803720.688267,
+  "files": [
+    {
+      "file": "core/video/persona.py",
+      "original_sha256": "a80ea835315aef6fd797e6ff4cc83238c33f0dd89d3de9d53f2df02365204f8e",
+      "candidate_sha256": "d960255ad2aa5161048697888d6fa01aafd0dad05d691ae147bd42e010b0113f"
+    },
+    {
+      "file": "core/video/writer.py",
+      "original_sha256": "73b722819f8e5192cc0fd75b53a862f954e45ae13704fa98f6581001c2ff8693",
+      "candidate_sha256": "c504d75761e80fa40697d41f77d839265f14e26fb8523448848296bb6c911d9f"
+    },
+    {
+      "file": "core/video/manuscript_workflow.py",
+      "original_sha256": "956400e2e8d5fa79afd478501c1312fcc147507af7b55efcaaf63b7af77b5b36",
+      "candidate_sha256": "2979ad7da507286151b932f21b5a31aee2a0f28676cc1188b84b8a6839afbe13"
+    },
+    {
+      "file": "core/video/angles.py",
+      "original_sha256": "8d137a0c2029bcfa7faf6361f02720e058157c1305ca7e88056f7a31b0f0dfd9",
+      "candidate_sha256": "54a132f2b40aecafd8d0d5f4f3f8475230825997250be43c768fbcb4d81f7192"
+    },
+    {
+      "file": "config/video_recipes/flash.yaml",
+      "original_sha256": "3a7a7e3cb413a01439e63aa417ba1a201386b9d189bb7be40c5b5fc8e5d11d87",
+      "candidate_sha256": "048693e9429b5e126d507b13ca4d5dff3447ec60531be1eaf0d48a280b5c742a"
+    },
+    {
+      "file": "config/content_columns/chatgpt_t05_comparison.yaml",
+      "original_sha256": "7545b460821625f1cb384f424af98e3e4b85d7edc3e9db4f1a36f08737586571",
+      "candidate_sha256": "c5710a98c9995a4489c01e31962d57a596110dbde00581b3ae9a36b8092cac7d"
+    },
+    {
+      "file": "tests/test_manuscript_workflow.py",
+      "original_sha256": "ab6da2a47b306cda13ed2e98e15be0e00a5e14d3cd1eac37a360a120e23ed697",
+      "candidate_sha256": "d11d7b8130251da15bf60b37e6fbfe9edba10f9f67e32ecda7ef7f8883f0ae30"
+    },
+    {
+      "file": "tests/test_video_goal_first.py",
+      "original_sha256": "85abfb55714849983eb6cb1839a95ce2f3201a248c4d19cb397c96b3bcc32f8f",
+      "candidate_sha256": "47511a01805feb1684a77543e9bf8f6d4c8e6613adfe2585faa6797e2b0be2bf"
+    },
+    {
+      "file": "tests/test_video_persona.py",
+      "original_sha256": "223e0fa1e141545b424994667348a5c4a99c383255b92b7bd043999af0c9fd48",
+      "candidate_sha256": "a1187cb8bc20b41c1d5bc777a23c11e762810fc8f897db97bd3dc76bfdd0ec2e"
+    },
+    {
+      "file": "tests/golden/video_cells.json",
+      "original_sha256": "1b83ce945e2493acec34df9790f043992cdbde411486348f5c5e185ec87e9eaa",
+      "candidate_sha256": "3bb28eb0390e5b7c973f085d141e8d451e3879ee104a0b4aa6c8a61ca9d2d9b3"
+    }
+  ],
+  "adoption_basis": [
+    "ROUND8-REVIEW.txt",
+    "HOLDOUT-SECOND-REVIEW.txt",
+    "ROUND10-REVIEW.txt"
+  ],
+  "rejected": [
+    "broad round1/2",
+    "illustrated research quotas candidate",
+    "illustrated recipe candidate",
+    "culture round9 broad digest"
+  ],
+  "production_generated_or_published": false
+}

@@ -26,7 +26,7 @@ export async function getMe(): Promise<User> {
 // --- Jobs ---
 
 export async function listJobs(signal?: AbortSignal): Promise<JobSummary[]> {
-  return api("/api/jobs", { signal });
+  return api("/api/jobs", { signal, query: { compact: "true" } });
 }
 
 export async function getJob(name: string, signal?: AbortSignal): Promise<JobDetail> {
@@ -389,7 +389,7 @@ export async function chatWithAssistant(
       ...('context' in options ? { context: options.context } : {}),
       ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
       ...(options.request_id ? { request_id: options.request_id } : {}),
-      history: history.slice(-20).map((item) => ({
+      history: options.conversation_id ? [] : history.slice(-20).map((item) => ({
         role: item.role,
         content: (item.content + (item.actions?.length
           ? "\n操作结果：\n" + item.actions.map((a) => `${a.ok ? "成功" : "失败"}：${a.message}`).join("\n")
@@ -497,8 +497,8 @@ export async function getReportRaw(path: string, signal?: AbortSignal): Promise<
   return api("/api/reports/raw", { query: { path }, signal });
 }
 
-export async function searchReports(q: string, limit = 20): Promise<{ results: any[]; total: number }> {
-  return api("/api/reports/search", { query: { q, limit } });
+export async function searchReports(q: string, limit = 20, job?: string): Promise<{ results: any[]; total: number }> {
+  return api("/api/reports/search", { query: { q, limit, job } });
 }
 
 export async function getReportStats(signal?: AbortSignal): Promise<{ total: number; total_size_bytes: number; categories: number }> {

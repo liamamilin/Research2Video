@@ -236,3 +236,20 @@ describe("ProductionConfigs", () => {
     expect(screen.queryByLabelText("自动写")).toBeNull();
   });
 });
+
+it('keeps same-Job outputs from other chains out of the scoped matrix editor', async()=>{
+  const original=globalThis.fetch;
+  vi.stubGlobal('fetch',vi.fn(async(input:RequestInfo|URL,init?:RequestInit)=>{
+    if(String(input).includes('/api/chains/first/scope'))return {ok:true,status:200,statusText:'ok',text:async()=>JSON.stringify({key:'first',name:'第一条',job:'monitoring/ai_flash_discovery',outputs:['flash'],script_ids:[]})} as Response;
+    return original(input,init);
+  }));
+  render(<ToastProvider><MemoryRouter initialEntries={['/matrices/ai_media?chain=first']}><ProductionConfigs members={MEMBERS} canEdit/></MemoryRouter></ToastProvider>);
+  expect(await screen.findByLabelText('配置 快讯 · 开发者')).toBeTruthy();
+  expect(screen.queryByLabelText('配置 盘点 · 开发者')).toBeNull();
+  expect(screen.queryByText('别的矩阵的')).toBeNull();
+  fireEvent.change(screen.getByLabelText('加配置用的配方'),{target:{value:'flash'}});
+  fireEvent.change(screen.getByLabelText('加配置给谁看'),{target:{value:'non_tech'}});
+  fireEvent.click(screen.getByRole('button',{name:'加一套配置'}));
+  await waitFor(()=>expect(posts).toHaveLength(1));
+  expect(posts[0].body).toEqual({chain_key:'first',job:'monitoring/ai_flash_discovery',recipe:'flash',audience:'non_tech'});
+});

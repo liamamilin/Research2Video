@@ -1,0 +1,28 @@
+name: flash_6176b582
+description: 快讯：ChatGPT 订阅开始送 API credits：Pro 每月 $100–$500，Business 池化到 $500，年付上限 $6,000
+enabled: true
+keywords:
+  - ChatGPT 订阅开始送 API credits
+  - Pro 每月 $100–$500
+  - Business 池化到 $500
+  - 年付上限 $6
+  - '000'
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。
+  选题：ChatGPT 订阅开始送 API credits：Pro 每月 $100–$500，Business 池化到 $500，年付上限 $6,000
+  目标观众：开发者
+  选题资料：OpenAI 把 ChatGPT 订阅和 API 额度打通，Pro 100/200/500 每月可领等额 credits，Business 按座位池化，年付预付工作区全年上限 $6,000，但只能用于 API。；（未提供）
+  来源资料：https://aicatchup.com/news/openai-chatgpt-api-credits-benefit
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_flash_6176b582.md

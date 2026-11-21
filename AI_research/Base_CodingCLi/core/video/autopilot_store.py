@@ -261,9 +261,10 @@ def used_topic_ids() -> set[str]:
     return {json.loads(r["topic"]).get("id") for r in rows} - {None}
 
 
-def held_items(limit: int = 50) -> list[dict]:
-    """Items waiting for the user, newest first (the user may have approved their script since)."""
+def held_items(limit: Optional[int] = 50) -> list[dict]:
+    """Recent holds for display; limit=None scans all holds for recovery."""
     with connect() as conn:
-        rows = conn.execute("SELECT * FROM autopilot_items WHERE state = 'HELD' ORDER BY updated_at DESC LIMIT ?",
-                            (limit,)).fetchall()
+        query = "SELECT * FROM autopilot_items WHERE state = 'HELD' ORDER BY updated_at DESC"
+        rows = conn.execute(query if limit is None else query + " LIMIT ?",
+                            () if limit is None else (limit,)).fetchall()
     return [_dec(r, _ITEM_JSON) for r in rows]

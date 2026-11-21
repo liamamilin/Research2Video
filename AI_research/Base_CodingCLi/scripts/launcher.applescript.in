@@ -21,7 +21,7 @@
 --     bind and the launcher would spin until it timed out.
 --   * Server output goes to @LOG_FILE@
 
-property baseUrl : "http://127.0.0.1:8775"
+property baseUrl : "@BASE_URL@"
 property projectDir : "@PROJECT_DIR@"
 property pythonBin : "@PYTHON_BIN@"
 property logFile : "@LOG_FILE@"
@@ -35,7 +35,7 @@ property restartsTried : 0
 
 on healthOk()
 	try
-		do shell script "/usr/bin/curl -s -m 3 -o /dev/null " & quoted form of (baseUrl & "/api/health")
+		do shell script "/usr/bin/curl --noproxy '*' -fsS -m 3 " & quoted form of (baseUrl & "/api/live") & " | /usr/bin/grep -Eq '\"status\"[[:space:]]*:[[:space:]]*\"ok\"'"
 		return true
 	on error
 		return false

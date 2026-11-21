@@ -49,7 +49,7 @@ beforeEach(() => {
       : method === "POST" && u.includes("/api/jobs/") ? { ok: true, task_id: "t1", started_at: "x" }
       : method === "POST" && u.endsWith("/copy") ? { ...AI, key: "medical", name: "医疗矩阵", members: [] }
       : method === "PUT" ? AI : u.includes("/api/production") ? PRODUCTION : u.includes("/api/video/cells") ? []
-      : u.endsWith("/api/matrices") ? LIST : AI;
+      : u.split("?")[0].endsWith("/api/matrices") ? LIST : AI;
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
 });
@@ -74,6 +74,38 @@ const at = (path: string) =>
   );
 
 describe("Matrices", () => {
+  it("restores the last visit while the latest list is still loading", async () => {
+    const first = at("/matrices");
+    await screen.findByRole("link", { name: "AI 矩阵" });
+    first.unmount();
+    vi.mocked(fetch).mockImplementation(() => new Promise(() => {}));
+    at("/matrices");
+    expect(screen.getByRole("link", { name: "AI 矩阵" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "刷新矩阵" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("keeps the linked matrix on its own research and outputs and exposes shared settings explicitly", async () => {
+    const original = vi.mocked(fetch).getMockImplementation()!;
+    PRODUCTION = [{ key: "own", job: "monitoring/ai_flash_discovery", recipe: "flash", name: "本链路输出", auto: 1, errors: [], split: "each" },
+      { key: "other", job: "research/deep", recipe: "deep", name: "其他链路输出", auto: 1, errors: [], split: "each" }];
+    vi.mocked(fetch).mockImplementation(async (url, init) => {
+      if (String(url).endsWith("/api/chains/flash/scope")) return { ok: true, status: 200, text: async () => JSON.stringify({
+        key: "flash", name: "快讯链路", job: "monitoring/ai_flash_discovery", matrix_key: "ai", outputs: ["own"], script_ids: [] }) } as Response;
+      return original(url, init);
+    });
+    at("/matrices/ai?chain=flash&tab=settings");
+    expect(await screen.findByRole("region", { name: "当前链路研究" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "AI Flash Discovery" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "AI 深度" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "矩阵设置" })).toBeNull();
+    const shared = screen.getByRole("link", { name: "查看整个矩阵与共用设置" });
+    expect(shared.getAttribute("href")).toBe("/matrices/ai");
+    expect(shared.getAttribute("data-chain-exit")).toBe("true");
+    expect(screen.getByText(/共用栏目、关键词、预算和主题设置会影响其他链路/)).toBeTruthy();
+    expect(await screen.findByText("本链路输出")).toBeTruthy();
+    expect(screen.queryByText("其他链路输出")).toBeNull();
+  });
+
   it("keeps business domains in the main list and research groups in the source view", async () => {
     const business = { ...AI, content: { role: "domain", name: "AI 与科技", audience: "开发者" },
       content_summary: { columns: 5, configured: 5, planned: 0 } };
@@ -150,11 +182,11 @@ describe("Matrices", () => {
   it("keeps management off the task workspace and loads ungrouped tasks only for settings", async () => {
     at("/matrices/ai");
     await screen.findByRole("link", { name: "AI Flash Discovery" });
-    expect(calls.some((c) => c.url.endsWith("/api/matrices"))).toBe(false);
+    expect(calls.some((c) => c.url.split("?")[0].endsWith("/api/matrices"))).toBe(false);
     expect(screen.queryByRole("button", { name: "归档" })).toBeNull();
     fireEvent.click(screen.getByRole("tab", { name: "矩阵设置" }));
     await screen.findByLabelText("放进来的 Job");
-    expect(calls.some((c) => c.url.endsWith("/api/matrices"))).toBe(true);
+    expect(calls.some((c) => c.url.split("?")[0].endsWith("/api/matrices"))).toBe(true);
     expect(screen.getByRole("button", { name: "归档" })).toBeTruthy();
   });
 
@@ -319,9 +351,9 @@ describe("Matrices", () => {
     at("/matrices/ai");
     fireEvent.click(await screen.findByRole("tab", { name: "运行记录" }));
     expect(await screen.findByLabelText("按 Job 筛")).toBeTruthy();
-    expect(screen.queryByLabelText("矩阵里的 Job")).toBeNull();
+    expect(screen.queryByRole("region", { name: "矩阵里的 Job" })).toBeNull();
     fireEvent.click(screen.getByRole("tab", { name: "研究任务" }));
-    expect(await screen.findByLabelText("矩阵里的 Job")).toBeTruthy();
+    expect(await screen.findByRole("region", { name: "矩阵里的 Job" })).toBeTruthy();
   });
 
   it("pauses and resumes a whole matrix: the resume says what it costs and only a yes confirms it", async () => {
@@ -342,7 +374,7 @@ describe("Matrices", () => {
         state = AI;
         return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(AI) } as Response;
       }
-      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(u.includes("/api/production") || u.includes("/cells") ? [] : u.endsWith("/api/matrices") ? LIST : state) } as Response;
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(u.includes("/api/production") || u.includes("/cells") ? [] : u.split("?")[0].endsWith("/api/matrices") ? LIST : state) } as Response;
     }));
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     at("/matrices/ai");
@@ -402,7 +434,7 @@ describe("Matrices", () => {
   it("warns when the month's searches are used up, and an editor cannot change the limit", async () => {
     const limited = { ...AI, monthly_searches: 100, searches_this_month: 100 };
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, status: 200, statusText: "ok",
-      text: async () => JSON.stringify(String(url).includes("/api/production") || String(url).includes("/cells") ? [] : String(url).endsWith("/api/matrices") ? LIST : limited) }) as Response));
+      text: async () => JSON.stringify(String(url).includes("/api/production") || String(url).includes("/cells") ? [] : String(url).split("?")[0].endsWith("/api/matrices") ? LIST : limited) }) as Response));
     at("/matrices/ai");
     expect(await screen.findByText(/100 次，本月已用 100 次，这个矩阵的 Job 本月不会再启动/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "改上限" })).toBeNull(); // an editor

@@ -1,0 +1,71 @@
+{
+  "8766": {
+    "http": 200,
+    "status": "ok",
+    "instance_id": "1b70da2d94c1440c8775e76cd4be3d76"
+  },
+  "8775": {
+    "http": 200,
+    "status": "ok",
+    "instance_id": "1b70da2d94c1440c8775e76cd4be3d76"
+  },
+  "8011": {
+    "http": 200,
+    "status": "ok",
+    "worker_primary": true
+  },
+  "8257": {
+    "http": 200,
+    "status": "ok",
+    "worker_primary": true
+  },
+  "research_ui": {
+    "http": 200,
+    "bytes": 685,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "video_ui": {
+    "http": 200,
+    "bytes": 498,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "video_bundle": {
+    "http": 200,
+    "bytes": 306930,
+    "content_type": "text/javascript; charset=utf-8"
+  },
+  "video_config": {
+    "http": 200,
+    "bytes": 380,
+    "content_type": "application/json",
+    "ready": true,
+    "blockers": []
+  },
+  "video_jobs": {
+    "http": 200,
+    "bytes": 10593,
+    "content_type": "application/json"
+  },
+  "research_code_loaded_after_changes": true,
+  "processes": [
+    " 7448     1 Sat Nov 14 22:34:22 2026     /Users/milin/.pyenv/versions/3.10.13/bin/python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011",
+    " 7484     1 Sat Nov 14 22:34:24 2026     /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/run_web.py serve --host 127.0.0.1 --port 8766",
+    "44775     1 Sat Nov 14 09:51:54 2026     /Users/milin/.pyenv/versions/3.10.13/bin/python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8257"
+  ],
+  "checked_at": "2026-11-14T22:35:05.783440+08:00",
+  "source_sha256": {
+    "autovideo/g3/app.py": "5fc9f946c41e67ff807117b1e63d2e36f2019e85e65adda4b070003fedc3866c",
+    "autovideo/g3/worker.py": "7a6df2e8ad9ed59f38de1d4418144ec748bb254abf67f62e8061a31ce9019ec3",
+    "autovideo/g3/store.py": "f7c5c9c226ed53760e5b7f4269ec758f07d537994a50401794dd29828a2dc8c3",
+    "AI_research/Base_CodingCLi/web/runner/executor.py": "057181adcbcc6055e22fd3eab75f090d49665b49dd7c9916e2b9e57b72965c6f",
+    "AI_research/Base_CodingCLi/web/runner/log_bus.py": "885aade4dc3acf0e17098c27497385a3267a3f0834959995fd191a8137fca7a2",
+    "AI_research/Base_CodingCLi/web/routes/jobs.py": "62cc82be1e4051b0104b6677907affc59a3461848d5882b5fd3fcdaa90fad952"
+  },
+  "video_code_loaded_after_changes": true,
+  "regression": {
+    "research_passed": 69,
+    "video_passed": 250,
+    "total_passed": 319,
+    "failed": 0
+  }
+}

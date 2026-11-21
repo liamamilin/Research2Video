@@ -18,15 +18,17 @@ discovery_objective: 为「消费科技与购买决策」寻找可持续读取�
 jobs:
   consumer/consumer_daily:
     mode: context
-    direction: 产品的一处差异怎样影响具体使用体验；保留操作、表现和设计细节
+    direction: 产品的一处差异怎样影响具体使用体验；保留操作、表现和设计细节；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - consumer technology product review repairability testing news RSS
     - 数码 产品 体验 测试 拆解 维修 评测 RSS
     - consumer electronics usability product testing teardown publication
+    - 数码 选购 使用 维修 升级 真实体验 比较 新品与评测日报
   consumer/consumer_weekly:
     mode: context
-    direction: 同一需求下比较产品的实际取舍；保留测试场景、使用过程和维修例子
+    direction: 同一需求下比较产品的实际取舍；保留测试场景、使用过程和维修例子；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - consumer product comparative testing usability repairability reviews
     - electronics buying comparison practical testing repair institute blog
     - 数码 产品 比较 实际 使用 测试 可维修性 专题
+    - 数码 选购 使用 维修 升级 真实体验 比较 数码选购周观察

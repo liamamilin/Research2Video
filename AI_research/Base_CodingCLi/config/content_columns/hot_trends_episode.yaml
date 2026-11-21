@@ -1,0 +1,7 @@
+name: 每日重要热点合集
+matrix: hot_trends
+type: news
+promise: 串联当日除重磅单条外的跨领域重要热点，帮观众一气看完经济、商业、科技与产业的关键动态。
+production_ids:
+- hot_trends_daily
+content_mode: episode

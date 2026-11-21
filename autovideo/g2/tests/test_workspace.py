@@ -27,6 +27,17 @@ def test_local_fixtures_still_work(tmp_path):
     assert project_path(project, project / "g2/fixtures/source.txt") == project / "g2/fixtures/source.txt"
 
 
+def test_default_run_directory_can_be_linked_to_external_storage(tmp_path):
+    project, _, external = moved_workspace(tmp_path)
+    alias = project / "g2/runs"
+    alias.parent.mkdir()
+    target = external.parent / "g2-runs"
+    target.mkdir()
+    alias.symlink_to(target, target_is_directory=True)
+    assert project_path(project, alias / "run") == alias / "run"
+    assert project_path(project, target / "run") == alias / "run"
+
+
 def test_an_unconfigured_external_directory_is_rejected(tmp_path):
     project, _, external = moved_workspace(tmp_path)
     with pytest.raises(ValueError):

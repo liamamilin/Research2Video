@@ -1,0 +1,141 @@
+{
+  "title": "Claude Opus 5.5 默认了，先把“think hard”删掉",
+  "sections": [
+    {
+      "title": "开场：那句“think hard”现在反着使",
+      "paragraphs": [
+        {
+          "text": "你每天在 Claude 里敲的那句“think hard”，Anthropic 现在建议删掉。大家好，我是洛洛，今天聊聊 Opus 5.5 成了所有付费计划的默认模型之后，我们那套旧提示习惯该怎么改。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "官方指南的第一条就是别再堆“think hard”，effort 从 Medium 起步。这跟我们过去两年的直觉是反的——以前能拉满就拉满，能加一句“仔细想”就加一句。官方的说法是，这些旧习惯现在反而在拖慢它。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "一个真活儿：30 页财报变一页对比表",
+      "paragraphs": [
+        {
+          "text": "拿一个具体活儿走一遍。周三下午，你要把一份 30 页财报 PDF 变成一页对比表。旧流程是：让它读，发现图表里的数字它读不准，自己手打进去，再要个草稿，再一轮轮改。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "现在的建议是一条消息说完：要一页对比表，列是哪三年，单位人民币亿元，缺哪年数据就回来问我。图表别手打，当文件附上。要成品直说，不用先要草稿。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "官方说它常常一遍就从请求走到成品；即使最低 effort，读密集图表的数值也比 Opus 5 最高档更准。你给一次初始输入，它能自己把后面几步问自己一遍。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "设计任务同理，以及我的建议：先在一个任务上试",
+      "paragraphs": [
+        {
+          "text": "设计任务同理：别笼统禁“generic design”，直接点名不要奶油色背景、不要胶囊按钮。笼统的禁令只是把一个默认风格换成另一个。接上 connectors 让它自己取文件，结果也更贴你的东西。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=Naming%20specific%20styles%20works%20better%20than%20banning%20generic%20design"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的建议是先别急着改团队流程。这些是 Anthropic 自己的说法，我还没看到独立复现。挑一个你真在做的任务，删掉“think hard”、effort 放到 Medium、一条消息把目标和格式说全，跑一次看结果。跑通了，再改习惯。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "删掉“think hard”不是图省事，是把话一次说清，把来回留给它。我是洛洛，我们下期见。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 494,
+    "estimated_seconds": 113,
+    "segments": 23,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.509,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "开场：那句“think hard”现在反着使",
+        "spoken_length": 133,
+        "budget": 109
+      },
+      {
+        "title": "一个真活儿：30 页财报变一页对比表",
+        "spoken_length": 188,
+        "budget": 109
+      },
+      {
+        "title": "设计任务同理，以及我的建议：先在一个任务上试",
+        "spoken_length": 173,
+        "budget": 108
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2319,
+      "completion_tokens": 3184,
+      "total_tokens": 5503,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2119,
+      "cost_usd": 0.00225825,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 34.861,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 1
+  }
+}

@@ -85,7 +85,11 @@ def script_owners(config_dir: str, jobs_dir: str, scripts: list[dict]) -> tuple[
     sources = topic_store.sources(jobs_dir)
     configs = production.load_all(config_dir, jobs_dir)
     ids = {s["id"] for s in scripts}
-    every = scripts + [s for s in store.list_scripts(limit=100000, archived=True) if s["id"] not in ids]
+    needs_archived = any(
+        (s.get("topic") or {}).get("parent_script") and (s.get("topic") or {}).get("parent_script") not in ids
+        for s in scripts
+    )
+    every = scripts + ([s for s in store.list_scripts(limit=100000, archived=True) if s["id"] not in ids] if needs_archived else [])
     names: dict[str, str] = {s.job: s.label for s in sources.values()}
     out = {}
     for attributed in _attribute(config_dir, jobs_dir, configs, sources, owner, scripts=every):
@@ -121,7 +125,7 @@ def count_by_config(config_dir: str, jobs_dir: str, *, configs: dict | None = No
     owner = {j: m for m in matrices.load_all(config_dir).values() for j in m.jobs}
     counts: dict[str, int] = {}
     for a in _attribute(config_dir, jobs_dir, configs, topic_store.sources(jobs_dir), owner):
-        if a["production"] and a["script"]["status"] != "FAILED":
+        if a["production"] and a["script"]["status"] not in ("FAILED", "SKIPPED"):
             counts[a["production"]] = counts.get(a["production"], 0) + 1
     return counts
 
@@ -137,7 +141,7 @@ def count_by_report(config_dir: str, jobs_dir: str) -> dict[tuple[str, str], int
     for item in _attribute(config_dir, jobs_dir, configs, topic_store.sources(jobs_dir), owner):
         script = item["script"]
         matrix = every.get(item["matrix"])
-        if script["status"] == "FAILED" or script.get("archived") or (matrix and matrix.archived):
+        if script["status"] in ("FAILED", "SKIPPED") or script.get("archived") or (matrix and matrix.archived):
             continue
         counts[(item["job"], item["origin"].get("report_path", ""))] += 1
     return counts

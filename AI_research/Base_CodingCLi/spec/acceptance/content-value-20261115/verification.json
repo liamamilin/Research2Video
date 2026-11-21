@@ -1,0 +1,32 @@
+{
+  "production_files_unchanged": {
+    "core/video/writer.py": true,
+    "jobs/monitoring/ai_flash_discovery.yaml": true,
+    "jobs/chatgpt_acquisition/t05_comparison.yaml": true,
+    "jobs/chatgpt_acquisition/t06_value.yaml": true,
+    "config/source_supply/ai_media.yaml": true,
+    "config/source_supply/chatgpt_acquisition.yaml": true
+  },
+  "overlay_matches_tested_candidate": {
+    "core/video/audience_strategy.py": true,
+    "core/video/writer.py": true,
+    "config/source_supply/chatgpt_acquisition.yaml": true,
+    "config/source_supply/ai_media.yaml": true,
+    "tests/test_audience_strategy.py": true,
+    "jobs/chatgpt_acquisition/t06_value.yaml": true,
+    "jobs/chatgpt_acquisition/t05_comparison.yaml": true,
+    "jobs/monitoring/ai_flash_discovery.yaml": true
+  },
+  "new_candidates": 12,
+  "final_manuscripts": 15,
+  "preserved_first_attempts": 2,
+  "full_text_export_verified": true,
+  "archive": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115",
+  "archive_files": 136,
+  "services": {
+    "both_healthy_after": true,
+    "research_instance_changed_during_experiment": true,
+    "restart_performed_by_this_experiment": false,
+    "instance_change_cause": "unconfirmed"
+  }
+}

@@ -1,0 +1,1417 @@
+{
+  "id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+  "column_key": "flash-nr",
+  "topic": {
+    "id": "2026-11-17/F9@rfe1be2f4a73a1e02~howto",
+    "round": "2026-11-17",
+    "code": "F9",
+    "title": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+    "fields": {
+      "一句话": "讲清选择性记忆为什么优于穷举存档、Dreaming如何用旧会话纠正错误笔记、wiki加搜索在什么任务上有用，以及记笔记分心、额外计算和坏笔记传播这些局限。",
+      "目标受众": "做多会话 agent 的开发者、Claude Code 重度用户、企业知识库负责人",
+      "选题策略": "audience-v1",
+      "选题入口": "flash",
+      "证据来源": "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/ https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Anthropic%20says%20the%20key%20to%20agent%20memory%20is%20knowing%20what%20to%20forget%2C%20not%20how%20much%20to%20store https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Key%20Points https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Agents%20that%20save%20everything%20lose%20track https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Dreaming%20aims%20to%20fix%20false%20memories https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Memory%20is%20still%20a%20work%20in%20progress https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Anthropic%20says%20the%20key%20to%20agent%20memory%20is%20knowing%20what%20to%20forget%2C%20not%20how%20much%20to%20store https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Key%20Points https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Agents%20that%20save%20everything%20lose%20track https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Dreaming%20aims%20to%20fix%20false%20memories https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Memory%20is%20still%20a%20work%20in%20progress",
+      "核心角度": "合集讲研究结论，这里给 Claude Code 当前默认、MEMORY.md 200行或25KB上限、转录默认30天清理、如何提高保留期并本地跑审计和纠错脚本及限制。",
+      "来源网址": "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Anthropic%20says%20the%20key%20to%20agent%20memory%20is%20knowing%20what%20to%20forget%2C%20not%20how%20much%20to%20store\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Key%20Points\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Agents%20that%20save%20everything%20lose%20track\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Dreaming%20aims%20to%20fix%20false%20memories\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Memory%20is%20still%20a%20work%20in%20progress\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Anthropic%20says%20the%20key%20to%20agent%20memory%20is%20knowing%20what%20to%20forget%2C%20not%20how%20much%20to%20store\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Key%20Points\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Agents%20that%20save%20everything%20lose%20track\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Dreaming%20aims%20to%20fix%20false%20memories\nhttps://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/#:~:text=Memory%20is%20still%20a%20work%20in%20progress",
+      "来源明细": ""
+    },
+    "score": null,
+    "event_date": null,
+    "stale": false,
+    "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+    "from_item": "2026-11-17/F9@rfe1be2f4a73a1e02",
+    "from_item_title": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+    "matrix_dedup": {
+      "job": "monitoring/ai_flash_discovery",
+      "policy": "matrix-story-v3"
+    },
+    "_story_fallbacks": [],
+    "joint_plan": {
+      "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+      "entry": "2026-11-17/F9@rfe1be2f4a73a1e02"
+    },
+    "preserve_audience_scope": true,
+    "base_id": "2026-11-17/F9@rfe1be2f4a73a1e02",
+    "angle": "howto",
+    "audience_strategy": "flash",
+    "story": {
+      "title": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+      "subject": "Claude Code agent 记忆审计与本地 dreaming pass",
+      "action": "analysis",
+      "edition": "Claude Code 2.1.319",
+      "event_date": "",
+      "summary": "共同问题不是再介绍 agent 记忆分层，而是落到一次可执行的审计：Claude Code 2.1.319 默认把会话转录放在 ~/.claude/projects/<project>/*.jsonl，cleanupPeriodDays 默认 30 天且超期静默清理；memory 笔记放在 memory/*.md，会一直保留；每个会话只加载 MEMORY.md 前 200 行或 25KB 作为索引，topic 文件要 Claude 自己决定去读。审计要检查索引行数/字节数是否越过上限、索引指向不存在文件的悬空链接、以及未被索引的 topic 文件。跑 dreaming pass 时先把记忆目录放进 git，复制记忆和最近转录到临时目录，必要时在 ~/.claude/settings.json 提高 cleanupPeriodDays；用 headless claude -p 只改副本，加上 --restricted、--tools Read,Grep,Glob,Edit,Write、--permission-mode acceptEdits、--no-session-persistence，并设 CLAUDE_CODE_DISABLE_AUTO_MEMORY=1，最后用 diff 审阅是否采用。限制是转录没记录的变更纠正不了，例如队友 commit 或会议决定；子代理转录可能被遗漏；脚本按处理量计费。",
+      "changes": [],
+      "reference_changes": [],
+      "primary": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7"
+      ],
+      "background": [],
+      "previous": [
+        "ad185da5b6074494bc015d15cb3a4ebf"
+      ],
+      "previous_refs": [
+        {
+          "script_id": "ad185da5b6074494bc015d15cb3a4ebf",
+          "version": 1,
+          "event_key": "",
+          "chapter": 9
+        }
+      ],
+      "family_key": "322393551a9330a5803f43d31a078cc85f9ccf6134bc9e550fdc478c263625b7",
+      "event_key": "592e37b82444df995ef975dfd29559cc2f77e1aadbb68a6793445bc48df2087a#howto",
+      "primary_sources": [
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#:~:text=Anthropic%27s%20components%20of%20agent%20memory%20in%20Claude%20Code%3A%20audit%20MEMORY.md%2C%20keep%20the%20transcripts%2C%20run%20your%20own%20dreaming%20pass",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-are-the-four-layers-in-anthropics-components-of-agent-memory",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#where-does-each-memory-layer-live-in-claude-code",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-long-does-claude-code-keep-the-transcripts-a-dreaming-pass-needs",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself",
+        "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-does-a-dreaming-pass-not-fix-in-agent-memory"
+      ],
+      "angle": "howto",
+      "pool_id": "c78c6c210289eb827c6916e8462e185b1938c446b885abb47b3362e9c0aa004a",
+      "scope": "matrix:ai_media"
+    }
+  },
+  "status": "APPROVED",
+  "research_job": "",
+  "report_path": "output/flash/2026-11-17_ai_flash_discovery.md",
+  "current_version": 1,
+  "approved_version": 1,
+  "error": null,
+  "created_by": "autopilot",
+  "created_at": "2026-11-17T08:41:37+0800",
+  "updated_at": "2026-11-17T08:44:51+0800",
+  "heartbeat_at": 1794876277.9304929,
+  "stage": null,
+  "archived": 0,
+  "report_id": "7800cebc4faf45ba85d4a06b7266103f",
+  "production": "flash_each",
+  "content_column_id": "",
+  "content_matrix_id": "",
+  "source_matrix_id": "",
+  "content_context": {
+    "content_mode": "individual"
+  },
+  "selection_skip": null,
+  "credibility": {
+    "tier": "generated",
+    "text": "按素材生成",
+    "reasons": [],
+    "cited_share": 1.0
+  },
+  "auto": true,
+  "column": {
+    "key": "flash-nr",
+    "name": "快讯",
+    "description": "让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+    "target_minutes": 1.25,
+    "video_form": "information_motion",
+    "writer": "legacy",
+    "voice_id": "voxcpm_anchor",
+    "default_style": {
+      "depth": "intermediate",
+      "tone": "news"
+    },
+    "allowed_tones": [],
+    "package": {},
+    "packaging": {
+      "preset": "common",
+      "accent": "#1f7a4d",
+      "label": "快讯",
+      "intro": {
+        "subtitle": "{date}",
+        "seconds": 1.5
+      },
+      "outro": {
+        "lines": [
+          "面向开发者的 快讯"
+        ],
+        "seconds": 3
+      }
+    },
+    "source_card": true,
+    "audience": "开发者",
+    "allowed_forms": [
+      "information_motion"
+    ],
+    "topic_kind": "single",
+    "recheck": true,
+    "research_mode": "none",
+    "topic_sources": [
+      "flash"
+    ]
+  },
+  "configuration": {
+    "links": [
+      {
+        "label": "文稿配方与提示词",
+        "name": "快讯 · 开发者 · B 站横屏短",
+        "href": "/video-recipes/flash",
+        "scope": "此配方的后续写稿",
+        "next": "保存后重新生成文稿"
+      },
+      {
+        "label": "受众与表达深度",
+        "name": "developer",
+        "href": "/video-recipes/parts/audience/developer",
+        "scope": "所有引用它的配方",
+        "next": "本稿受众已随选题保存；此处调整配方受众用于后续新稿"
+      },
+      {
+        "label": "调研模板",
+        "name": "quick_take",
+        "href": "/video-recipes/parts/research/quick_take",
+        "scope": "所有引用它的配方",
+        "next": "仅重新写稿会沿用旧报告；新调研使用新模板"
+      },
+      {
+        "label": "出片形式与配音",
+        "name": "motion",
+        "href": "/video-recipes/parts/output/motion",
+        "scope": "所有引用它的配方",
+        "next": "保存后重新生成视频"
+      },
+      {
+        "label": "片头片尾与包装",
+        "name": "common",
+        "href": "/video-recipes/parts/packaging/common",
+        "scope": "所有引用它的配方",
+        "next": "保存后重新生成视频"
+      },
+      {
+        "label": "矩阵的共用视频设置",
+        "name": "AI 视频栏目",
+        "href": "/matrices/ai_media?tab=settings",
+        "scope": "本矩阵所有未单独覆盖的任务",
+        "next": "调整默认输出倍速后重新生成视频"
+      },
+      {
+        "label": "任务的视频生成设置",
+        "name": "快讯 · 每条一期（不再调研）",
+        "href": "/matrices/ai_media/video/monitoring%2Fai_flash_discovery",
+        "scope": "该研究任务的后续视频",
+        "next": "在此调整制作配方、制作档位等设置"
+      },
+      {
+        "label": "原研究任务与提示词",
+        "name": "monitoring/ai_flash_discovery",
+        "href": "/jobs/monitoring%2Fai_flash_discovery",
+        "scope": "该任务后续研究报告",
+        "next": "不会改写已有报告"
+      }
+    ],
+    "changed_since_generation": false,
+    "recipe_available": true,
+    "writing": {
+      "source": "recipe",
+      "direction": "面向本条选题的目标观众，讲清这件新事。\n只沿上游选定的一条消息讲，找出这条消息最值得理解的变化，用具体依据解释它为什么重要。背景在听众需要时出现，作者依据材料提出自己的认识或判断。\n本条只回答：Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？。观众收获：合集讲研究结论，这里给 Claude Code 当前默认、MEMORY.md 200行或25KB上限、转录默认30天清理、如何提高保留期并本地跑审计和纠错脚本及限制。。同批合集仅介绍：Anthropic 研究 Claude 跨会话记忆：选择性记录策略和规则优于穷举存档；宝可梦测试中旧 Sonnet 3.7 存413个文件只拿1个徽章，Fable 5 只存少量策略文件拿4个徽章。Dreaming 用原始会话转录核对笔记、纠正错误记忆，还能建链接 wiki；wiki 加搜索在跨文档任务上有增益，但单独 wiki 不一定优于搜索，且需维护。对做多会话 agent 的开发者，关键是记忆的选择和事后纠错，不是存得越多越好。。这条展开已分配的独立问题，发布概况只作必要背景。",
+      "note": "本稿使用文稿配方的写稿风格；修改配方后重新生成文稿。"
+    }
+  },
+  "version_shown": {
+    "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+    "version": 1,
+    "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+    "sections": [
+      {
+        "title": "笔记留到有人删，证据 30 天就没了",
+        "paragraphs": [
+          {
+            "text": "如果你在用 Claude Code 做多会话的活，先打开 ~/.claude/projects 看一眼。这里有两样东西，命运完全不一样：memory 目录下的 .md 笔记，没人动它就一直在；它背后的会话转录 *.jsonl，默认 30 天就被清掉，而且是静默的，不给你任何提示。问题是，能证明一条笔记写错了的证据，恰恰只在转录里。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#where-does-each-memory-layer-live-in-claude-code"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "Claude Code 2.1.319 的默认是这样：转录放在 ~/.claude/projects/<project>/*.jsonl，cleanupPeriodDays 默认 30，最小 1，会话启动后后台扫一遍，超期的直接删掉；memory 目录被明确排除在这次清扫之外。每个会话开始时，只有 memory/MEMORY.md 的前 200 行或 25KB 作为索引加载进来，topic 文件不加载，Claude 自己决定要不要读，多数时候就靠索引里那一行。所以一条笔记活得越久，能核对它的证据越少。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-long-does-claude-code-keep-the-transcripts-a-dreaming-pass-needs",
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#where-does-each-memory-layer-live-in-claude-code"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "Anthropic 那个宝可梦的例子很能说明这件事的价值。笔记里写错了宝可梦中心的位置，Claude 在月见山的单向台阶上掉了三次；dreaming 拿同一段会话转录去核对这条笔记、把它改写之后，才过了洞。写错本身不稀奇，稀奇的是，改对的依据在转录里。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-are-the-four-layers-in-anthropics-components-of-agent-memory"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "MEMORY.md 要查三件事，孤儿优先",
+        "paragraphs": [
+          {
+            "text": "所以审计先查 MEMORY.md，三件事。第一件事是看有没有越线：行数上限 200 行，字节上限 25KB，按 25,600 字节算，两个谁先到都算越线。判断哪个先到，就看平均每行多少字节——200 行摊满 25KB，等于每行 128 字节。平均一行低于这个数，先到的是行数：有人在自己机器上量过，最大的那个索引平均一行约 56 字节，200 行下来也就 11KB 左右，行数先撞线，离字节上限还远。反过来，平均一行超过 128 字节，字节就先到；那通常说明某条目录写得太长，内容本该放进 topic 文件。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "二是悬空链接：索引里指向的 .md 文件已经不存在了，这种把那行直接删掉。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "三是孤儿 topic 文件，这个我会先看。文件还在盘上，但索引里已经不点名它了。Claude 搜索目录还能找到，可启动时看不到它，一个不主动翻文件夹的会话就当它不存在。处理只有两条：把那一行加回 MEMORY.md，或者把文件删了。Claude Code 自己会盯着索引大小，写完之后接近上限会提醒 Claude 缩短，超了报错；但没有任何东西盯着一个从索引里掉出去的 topic 文件。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "写这个检查脚本有两个坑。文件名按普通子串匹配会漏，note.md 会藏在 other_note.md 后面；只按链接目标匹配会误报，索引里用反引号点名的笔记 Claude 读得到。按整词匹配才两头都对。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "时间戳也别太信。Claude 写笔记时会在 frontmatter 里记修改时间，但很多 topic 文件没有；退回看文件 mtime，它只说文件什么时候变过，不说内容什么时候还成立，复制或恢复还会重置。它适合用来排复查顺序，不适合用来判哪条过期。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "先把保留期调长，再谈核对",
+        "paragraphs": [
+          {
+            "text": "第二件事，在你开始核对之前，先把转录留住。在 ~/.claude/settings.json 里把 cleanupPeriodDays 调大，比如 365；有人直接设 36500，等于永久。标准是：超过你打算复查的笔记的年龄。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-long-does-claude-code-keep-the-transcripts-a-dreaming-pass-needs"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "代价也得说清楚：转录会积累，而且里面什么都有——工具结果、文件内容、任何被打印出来的密钥。所以后面那一步只复制最近一段窗口，跑完把副本删掉。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-long-does-claude-code-keep-the-transcripts-a-dreaming-pass-needs"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "用 claude -p 在副本上跑一次 dreaming pass",
+        "paragraphs": [
+          {
+            "text": "然后是 dreaming pass 本身。第一步不是敲命令，是把 memory 目录放进 git：接受一次修改就是一个 commit，不接受就是一次 revert。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "接着把 memory 目录和最近一段时间的顶层 *.jsonl 复制到一个临时目录，默认 14 天。让一个 headless 的 claude -p 只改这份副本，prompt 交代清楚：逐条把笔记和转录对一遍；转录和笔记矛盾，就按最新证据改写笔记；转录里出现了纠正或验证过的规则、而笔记里没有，就补一条并索引进 MEMORY.md；转录没提到的笔记别动；只改 ./memory 下的文件；最后写一个 CHANGES.md，每处改动标出依据的转录文件和行号。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "安全靠的是参数，不是 prompt。--restricted 把文件工具限制在工作目录，也就是那份副本；--tools Read,Grep,Glob,Edit,Write 不给它任何执行命令的工具；--permission-mode acceptEdits 让它能改副本；--no-session-persistence 很关键，否则这次 pass 自己会存一份转录，等于把它刚读过的所有内容又复制一份，按你的保留期留着；环境变量 CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 让它别写自己的记忆。脚本退出时用 trap 删掉复制的转录，只留 diff、建议的文件和 CHANGES.md 给你审。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "有人拿合成环境试过：两条笔记，一条说测试跑 npm test、需要本地 Redis，一条说 staging 从 staging 分支部署；配一份四行的转录，用户说上周搬到 pnpm 了、Redis 没了，agent 报告 214 个测试通过。三次运行，测试那条笔记每次都改了，部署那条一次没动——因为转录里没提它。这既是对的行为，也暴露了它的边界。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "它修不了什么",
+        "paragraphs": [
+          {
+            "text": "边界就是：转录没记录的变化，它纠正不了。队友的 commit 挪了依赖，会上定了新方案，这些在任何转录里都没有一行，pass 会跟以前一样自信地保留旧笔记。一个本地 pass 可以顺手读仓库和 git log 补一点，但那要你自己加。还有两个具体的：脚本只取顶层 transcript、最近 N 天修改的文件，每个 session 文件夹下的子代理转录被漏掉了；以及它按处理量计费，先拿几天试。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-does-a-dreaming-pass-not-fix-in-agent-memory"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "顺便提一句表示层：Anthropic 的 wiki 结果两头都有——Stainless 那个约 35 万文件的语料上，单独 wiki 到 48%，还是输给纯搜索的 53%，wiki 加搜索才到 61%；但 Harvey 需要跨文档综合的 LAB 题，wiki 87% 对搜索 73%。同一个东西在两个任务上结论相反，所以如果你顺手建 wiki，配着搜索用，按加载成本去量它，别默认它是在压缩。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-are-the-four-layers-in-anthropics-components-of-agent-memory"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "所以顺序别搞反。200 行上限管的只是索引装不装得下；哪条笔记还成立，要证据，而默认设置里证据一个月就没了。先调 cleanupPeriodDays，趁转录还在的时候做裁剪和核对，改动看过 diff 再采用。你的 MEMORY.md 里有没有哪一条，你已经想不起来它是哪次会话、因为什么写下的？我是洛洛，我们下期见。",
+            "citations": [
+              "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-does-a-dreaming-pass-not-fix-in-agent-memory"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 1797,
+      "estimated_seconds": 403,
+      "segments": 76,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 4.0,
+      "budget": 1044,
+      "ratio": 1.678,
+      "status": "OVER",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "笔记留到有人删，证据 30 天就没了",
+          "spoken_length": 336,
+          "budget": 209
+        },
+        {
+          "title": "MEMORY.md 要查三件事，孤儿优先",
+          "spoken_length": 519,
+          "budget": 209
+        },
+        {
+          "title": "先把保留期调长，再谈核对",
+          "spoken_length": 123,
+          "budget": 209
+        },
+        {
+          "title": "用 claude -p 在副本上跑一次 dreaming pass",
+          "spoken_length": 448,
+          "budget": 209
+        },
+        {
+          "title": "它修不了什么",
+          "spoken_length": 371,
+          "budget": 208
+        }
+      ],
+      "dropped_citations": 0
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 1,
+        "prompt_tokens": 7529,
+        "completion_tokens": 6450,
+        "total_tokens": 13979,
+        "cache_read_tokens": 0,
+        "cache_reported_requests": 1,
+        "reasoning_tokens": 4000,
+        "cost_usd": 0.00499935,
+        "cost_reported_requests": 1
+      },
+      "problems": [],
+      "model": "deepseek-v4.1-flash",
+      "model_switches": [],
+      "duration_seconds": 72.05,
+      "generation": "goal_first",
+      "prompt_version": 20,
+      "introduction": {
+        "status": "authored",
+        "requests": 0
+      },
+      "creative_direction": "面向本条选题的目标观众，讲清这件新事。\n只沿上游选定的一条消息讲，找出这条消息最值得理解的变化，用具体依据解释它为什么重要。背景在听众需要时出现，作者依据材料提出自己的认识或判断。\n本条只回答：Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？。观众收获：合集讲研究结论，这里给 Claude Code 当前默认、MEMORY.md 200行或25KB上限、转录默认30天清理、如何提高保留期并本地跑审计和纠错脚本及限制。。同批合集仅介绍：Anthropic 研究 Claude 跨会话记忆：选择性记录策略和规则优于穷举存档；宝可梦测试中旧 Sonnet 3.7 存413个文件只拿1个徽章，Fable 5 只存少量策略文件拿4个徽章。Dreaming 用原始会话转录核对笔记、纠正错误记忆，还能建链接 wiki；wiki 加搜索在跨文档任务上有增益，但单独 wiki 不一定优于搜索，且需维护。对做多会话 agent 的开发者，关键是记忆的选择和事后纠错，不是存得越多越好。。这条展开已分配的独立问题，发布概况只作必要背景。",
+      "author_system_prompt_sha256": "4f7f01ceff9d03fa87aae21c61635c7148cfbf27e0ba050c53232b109c951020",
+      "trusted_urls": 4,
+      "manuscript_workflow": {
+        "result": "revised",
+        "mode": "focused",
+        "version": 3,
+        "profile": "flash-explanation-v2",
+        "reader_prompt_sha256": "51f10712317c11a5a0a2c1a3cb98da74129ef86d0e0c3e8eec48aec468c0dcbd",
+        "reading": {
+          "takeaway": "先留住证据，再审计笔记。Claude Code 的 memory 笔记会一直保留，但会话转录默认 30 天被静默清掉，而核对笔记是否仍成立、改写错误笔记的证据恰恰在转录里；所以先调大 cleanupPeriodDays，再做 MEMORY.md 三查（越线、悬空链接、孤儿 topic 优先），并用 headless claude -p 在 git 管理的副本上跑 dreaming pass，安全靠参数、改动写进 CHANGES.md 并标转录行号，审 diff 后采用；它只能纠正转录里出现过的变化。",
+          "keep_quote": "写错本身不稀奇，稀奇的是，改对的依据在转录里。",
+          "issue_quote": "25KB 摊到 200 行，是每行 128 字节；有人在自己机器上量过，最大的那个索引平均一行约 56 字节，那 200 行大概 11KB 就先撞线了。字节先撞线，通常说明某条目录得太长，内容本该放进 topic 文件。",
+          "revision": "把两种撞线拆开说：先给出行数上限 200、字节上限 25KB；再明确平均每行约 56 字节时，200 行只有约 11KB，先到的是行数上限，不是字节上限；只有平均每行超过 128 字节时才是字节先到，并说明这通常意味着单条太长、该拆到 topic 文件。想听到的变化是：先讲判断规则，再给数字例子，不要让同一个“先撞线”指代两个主语。",
+          "targets": [
+            "S2P1"
+          ]
+        },
+        "revision_prompt_sha256": "0b8adfc9656fcfbfd557475ee29a040e1c38f26f8ea747cd873599c7ee7ca2dd",
+        "changes": [
+          {
+            "id": "S2P1",
+            "before": "所以审计先查 MEMORY.md，三件事。一是越线：行数过 200，或者字节过 25KB，按 25,600 字节算。25KB 摊到 200 行，是每行 128 字节；有人在自己机器上量过，最大的那个索引平均一行约 56 字节，那 200 行大概 11KB 就先撞线了。字节先撞线，通常说明某条目录得太长，内容本该放进 topic 文件。",
+            "after": "所以审计先查 MEMORY.md，三件事。第一件事是看有没有越线：行数上限 200 行，字节上限 25KB，按 25,600 字节算，两个谁先到都算越线。判断哪个先到，就看平均每行多少字节——200 行摊满 25KB，等于每行 128 字节。平均一行低于这个数，先到的是行数：有人在自己机器上量过，最大的那个索引平均一行约 56 字节，200 行下来也就 11KB 左右，行数先撞线，离字节上限还远。反过来，平均一行超过 128 字节，字节就先到；那通常说明某条目录写得太长，内容本该放进 topic 文件。"
+          }
+        ]
+      },
+      "polish": {
+        "version": 5,
+        "findings": [],
+        "changes": [],
+        "rejected": [],
+        "usage": {
+          "requests": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "joint_plan": {
+        "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+        "entry": "2026-11-17/F9@rfe1be2f4a73a1e02"
+      },
+      "audience_strategy": {
+        "strategy": "audience-v1",
+        "channel": "flash",
+        "writer": "original_with_audience_scope"
+      },
+      "programme_direction": "面向本条选题的目标观众，讲清这件新事。\n只沿上游选定的一条消息讲，找出这条消息最值得理解的变化，用具体依据解释它为什么重要。背景在听众需要时出现，作者依据材料提出自己的认识或判断。",
+      "input_kind": "report_and_original_material",
+      "research_dossier": {
+        "version": 4,
+        "selection": "audience_selection",
+        "report_sha256": "4d63064d9800a6b42b671f92aebf00f6e71b14c56ce39672a332bc87ff1a9272",
+        "material_sha256": "b88c3e1bc8187ee46edafb3dd825a3d86891bbc4c32e010b2cd21bd58591f17b",
+        "report_chars": 1773,
+        "material_chars": 19628
+      },
+      "material": {
+        "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-17_ai_flash_discovery.materials-5e01d31e44446660.json",
+        "sha256": "5e01d31e44446660bad8611ca9862c96cc26f4c0c60e1c8a4cd2dc79bde4375f",
+        "report_sha256": "6b7d2ea72c40fbe2fee6962a398f6f27d521867e9a8cea0167b4304286800eb6"
+      },
+      "content_dedup": {
+        "pool_id": "c78c6c210289eb827c6916e8462e185b1938c446b885abb47b3362e9c0aa004a",
+        "candidates": 1,
+        "selected": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+        "decisions": [
+          {
+            "decision": "select",
+            "title": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+            "peer_id": "",
+            "reason": "已占用主事件，开始写稿"
+          }
+        ],
+        "skipped": 0
+      },
+      "story": {
+        "title": "Claude Code 的 agent 记忆怎么审计：MEMORY.md 查什么、怎么用保留的转录跑一次 dreaming pass？",
+        "subject": "Claude Code agent 记忆审计与本地 dreaming pass",
+        "action": "analysis",
+        "edition": "Claude Code 2.1.319",
+        "event_date": "",
+        "summary": "共同问题不是再介绍 agent 记忆分层，而是落到一次可执行的审计：Claude Code 2.1.319 默认把会话转录放在 ~/.claude/projects/<project>/*.jsonl，cleanupPeriodDays 默认 30 天且超期静默清理；memory 笔记放在 memory/*.md，会一直保留；每个会话只加载 MEMORY.md 前 200 行或 25KB 作为索引，topic 文件要 Claude 自己决定去读。审计要检查索引行数/字节数是否越过上限、索引指向不存在文件的悬空链接、以及未被索引的 topic 文件。跑 dreaming pass 时先把记忆目录放进 git，复制记忆和最近转录到临时目录，必要时在 ~/.claude/settings.json 提高 cleanupPeriodDays；用 headless claude -p 只改副本，加上 --restricted、--tools Read,Grep,Glob,Edit,Write、--permission-mode acceptEdits、--no-session-persistence，并设 CLAUDE_CODE_DISABLE_AUTO_MEMORY=1，最后用 diff 审阅是否采用。限制是转录没记录的变更纠正不了，例如队友 commit 或会议决定；子代理转录可能被遗漏；脚本按处理量计费。",
+        "changes": [],
+        "reference_changes": [],
+        "primary": [
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7"
+        ],
+        "background": [],
+        "previous": [
+          "ad185da5b6074494bc015d15cb3a4ebf"
+        ],
+        "previous_refs": [
+          {
+            "script_id": "ad185da5b6074494bc015d15cb3a4ebf",
+            "version": 1,
+            "event_key": "",
+            "chapter": 9
+          }
+        ],
+        "family_key": "322393551a9330a5803f43d31a078cc85f9ccf6134bc9e550fdc478c263625b7",
+        "event_key": "592e37b82444df995ef975dfd29559cc2f77e1aadbb68a6793445bc48df2087a#howto",
+        "primary_sources": [
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#:~:text=Anthropic%27s%20components%20of%20agent%20memory%20in%20Claude%20Code%3A%20audit%20MEMORY.md%2C%20keep%20the%20transcripts%2C%20run%20your%20own%20dreaming%20pass",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-are-the-four-layers-in-anthropics-components-of-agent-memory",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#where-does-each-memory-layer-live-in-claude-code",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-check-memorymd-against-claude-codes-200-line-and-25kb-cutoff",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-long-does-claude-code-keep-the-transcripts-a-dreaming-pass-needs",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#how-do-you-run-a-dreaming-pass-on-claude-code-memory-yourself",
+          "https://max.nardit.com/articles/anthropic-agent-memory-components-dreaming-memory-md#what-does-a-dreaming-pass-not-fix-in-agent-memory"
+        ],
+        "angle": "howto",
+        "pool_id": "c78c6c210289eb827c6916e8462e185b1938c446b885abb47b3362e9c0aa004a",
+        "scope": "matrix:ai_media"
+      },
+      "report_path": "output/flash/2026-11-17_ai_flash_discovery.md",
+      "written_at": "2026-11-17T08:44:40+0800",
+      "cell": {
+        "recipe": "flash-nr",
+        "sha256": "048693e9429b5e126d507b13ca4d5dff3447ec60531be1eaf0d48a280b5c742a",
+        "cell": "ai-developer-quick_take-short",
+        "status": "enabled",
+        "parts": {
+          "domain": {
+            "key": "ai"
+          },
+          "type": {
+            "key": "quick_take"
+          },
+          "format": {
+            "key": "short"
+          },
+          "audience": {
+            "key": "developer"
+          }
+        },
+        "resolved_sha256": "be8762b8df7d593d9c756b52c35dffc3d6ed3ea85cf0113dfd0d12df799e62d8",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "developer",
+            "sha256": "0ce139d005d64a51134df6823eae3f6fc7c4ae3ddc82a54a4cac6b05f27ba333"
+          },
+          "research": {
+            "kind": "research_template",
+            "name": "quick_take",
+            "sha256": "2abf9be7c109cda75501d2dfdc6c9c1a536ddf321e53399e86b8e164a84e88fb"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          },
+          "packaging": {
+            "kind": "part",
+            "name": "common",
+            "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "mode": "on_request",
+        "issues": [],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": false,
+        "audits_complete": false,
+        "pending_review": false,
+        "rounds": 0,
+        "deletions": [],
+        "initial": [],
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 0,
+          "rule_must": 0,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            }
+          },
+          "passed": false,
+          "rank": 0
+        }
+      },
+      "content_context": {
+        "content_mode": "individual"
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-11-17T08:44:40+0800",
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    }
+  },
+  "versions": [
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "edit_type": "GENERATED",
+      "length_check": {
+        "spoken_length": 1797,
+        "estimated_seconds": 403,
+        "segments": 76,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 4.0,
+        "budget": 1044,
+        "ratio": 1.678,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "笔记留到有人删，证据 30 天就没了",
+            "spoken_length": 336,
+            "budget": 209
+          },
+          {
+            "title": "MEMORY.md 要查三件事，孤儿优先",
+            "spoken_length": 519,
+            "budget": 209
+          },
+          {
+            "title": "先把保留期调长，再谈核对",
+            "spoken_length": 123,
+            "budget": 209
+          },
+          {
+            "title": "用 claude -p 在副本上跑一次 dreaming pass",
+            "spoken_length": 448,
+            "budget": 209
+          },
+          {
+            "title": "它修不了什么",
+            "spoken_length": 371,
+            "budget": 208
+          }
+        ],
+        "dropped_citations": 0
+      },
+      "created_by": "autopilot",
+      "created_at": "2026-11-17T08:44:40+0800",
+      "style": null
+    }
+  ],
+  "renders": [
+    {
+      "id": "d657281aef1f46a8a4bc93b5db145b0b",
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "status": "COMPLETED",
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "autovideo_job_id": "e0fe5e5d-5851-4fcf-981e-b25e3dbb5726",
+      "active_stage": "COMPLETE",
+      "attempt_count": 1,
+      "resolved_video_form": "information_motion",
+      "error_code": null,
+      "error_message": null,
+      "submitted_at": "2026-11-17T11:24:04+0800",
+      "completed_at": "2026-11-17T11:52:01+0800",
+      "created_at": "2026-11-17T11:24:04+0800",
+      "updated_at": "2026-11-17T11:52:01+0800",
+      "source_chars": 2804,
+      "timings": {
+        "process_runs": 1,
+        "last_process_started_at": "2026-11-17T03:24:04.304497+00:00",
+        "submit_seconds": 0.095,
+        "poll_seconds": 1673.727,
+        "poll_count": 335,
+        "poll_failures": 0,
+        "remote_completed_at": "2026-11-17T03:51:58.069+00:00",
+        "completion_observed_at": "2026-11-17T03:51:58.149041+00:00",
+        "download_seconds": 3.08,
+        "artifact_list_seconds": 0.002,
+        "download_attempts": 1,
+        "download_workers": 4,
+        "artifacts": [
+          {
+            "name": "authored-narration.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 1108
+          },
+          {
+            "name": "brand-qa.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 1827
+          },
+          {
+            "name": "caption-alignment.json",
+            "seconds": 0.007,
+            "reused": false,
+            "bytes": 203687
+          },
+          {
+            "name": "captions.srt",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 10571
+          },
+          {
+            "name": "chapters.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 27424
+          },
+          {
+            "name": "content-captions.srt",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 10571
+          },
+          {
+            "name": "content-chapters.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 27079
+          },
+          {
+            "name": "content.mp4",
+            "seconds": 3.069,
+            "reused": false,
+            "bytes": 30601566
+          },
+          {
+            "name": "execution-log.txt",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 1008
+          },
+          {
+            "name": "generation-schedule.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 456
+          },
+          {
+            "name": "information-timing.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 27681
+          },
+          {
+            "name": "input-brief.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 11219
+          },
+          {
+            "name": "manifest.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 115164
+          },
+          {
+            "name": "model-cost.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 5925
+          },
+          {
+            "name": "narration-check.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 332
+          },
+          {
+            "name": "narration.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 71784
+          },
+          {
+            "name": "package-qa.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 699
+          },
+          {
+            "name": "package.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 3484
+          },
+          {
+            "name": "packaging-resolved.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 1604
+          },
+          {
+            "name": "playback.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 133
+          },
+          {
+            "name": "prepared-source.txt",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 6417
+          },
+          {
+            "name": "production-execution.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 381
+          },
+          {
+            "name": "production-plan.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 8686
+          },
+          {
+            "name": "qa.json",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 43263
+          },
+          {
+            "name": "render-resources.json",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 247
+          },
+          {
+            "name": "storyboard.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 128282
+          },
+          {
+            "name": "tts-metrics.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 897
+          },
+          {
+            "name": "unbranded.mp4",
+            "seconds": 2.912,
+            "reused": false,
+            "bytes": 24798224
+          },
+          {
+            "name": "video-ir.json",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 161263
+          },
+          {
+            "name": "video.mp4",
+            "seconds": 1.797,
+            "reused": false,
+            "bytes": 22830313
+          },
+          {
+            "name": "voice-report.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 20577
+          }
+        ],
+        "process_seconds": 1676.955,
+        "elapsed_seconds": 1677.0
+      },
+      "visuals": {
+        "state": "skipped",
+        "reason": "自动配图未开启",
+        "version": 3,
+        "images": 0,
+        "needs": 0,
+        "accepted": 0,
+        "text": 0,
+        "seconds": 0,
+        "model_calls": 0
+      },
+      "autovideo_url": "http://127.0.0.1:8011/#job/e0fe5e5d-5851-4fcf-981e-b25e3dbb5726",
+      "files": [
+        {
+          "name": "authored-narration.json",
+          "content_type": "application/json",
+          "bytes": 1108,
+          "sha256": "d81b4f773ef32e8438c0abdaf97895bcc09fbee545211169caf20b9d396b0fe3",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/authored-narration.json"
+        },
+        {
+          "name": "brand-qa.json",
+          "content_type": "application/json",
+          "bytes": 1827,
+          "sha256": "9a23096c505d448efee2bcd85084f23caeea552c65321504ba5d19de85f4987a",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/brand-qa.json"
+        },
+        {
+          "name": "caption-alignment.json",
+          "content_type": "application/json",
+          "bytes": 203687,
+          "sha256": "40a21329d91f30e83fd7fa243b1d680ded6f62b41e10ba92fae28827d6913dd4",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/caption-alignment.json"
+        },
+        {
+          "name": "captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 10571,
+          "sha256": "2ebe191bf48f7aac1c4b9a385590be2e2bedc5505d402026cf0523f5c568375a",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/captions.srt"
+        },
+        {
+          "name": "chapters.json",
+          "content_type": "application/json",
+          "bytes": 27424,
+          "sha256": "fa48ad4acfcabba6fc6d429a2350f2413f87aac40d4374034a44a8f3c684de6b",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/chapters.json"
+        },
+        {
+          "name": "content-captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 10571,
+          "sha256": "2ebe191bf48f7aac1c4b9a385590be2e2bedc5505d402026cf0523f5c568375a",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/content-captions.srt"
+        },
+        {
+          "name": "content-chapters.json",
+          "content_type": "application/json",
+          "bytes": 27079,
+          "sha256": "97058a084184eb84c15eff3b5d29b54c63452f9d339dcc21f926ff3c6110e7bb",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/content-chapters.json"
+        },
+        {
+          "name": "content.mp4",
+          "content_type": "video/mp4",
+          "bytes": 30601566,
+          "sha256": "da499dcfcf8deb2a79265630608db9b7862ab754dae2782caa5ad03e7c5cd31e",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/content.mp4"
+        },
+        {
+          "name": "execution-log.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 1008,
+          "sha256": "6660aee057ac49c88b485f59ba4b6075346ca71cb255ee9ea0d2c2d524c3e502",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/execution-log.txt"
+        },
+        {
+          "name": "generation-schedule.json",
+          "content_type": "application/json",
+          "bytes": 456,
+          "sha256": "d4ad4e2e67407b6b11f32266b152d96b20ed4a68445fb54a0a6eb3f9db8ff994",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/generation-schedule.json"
+        },
+        {
+          "name": "information-timing.json",
+          "content_type": "application/json",
+          "bytes": 27681,
+          "sha256": "9524239d3ad96f774ae4982224bc006aac59bfe8920c6371cceb9433578fa4a3",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/information-timing.json"
+        },
+        {
+          "name": "input-brief.json",
+          "content_type": "application/json",
+          "bytes": 11219,
+          "sha256": "390f66c5eef79509027b49734db599d5d9f86bccac224a8c886119571f7ddc84",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/input-brief.json"
+        },
+        {
+          "name": "manifest.json",
+          "content_type": "application/json",
+          "bytes": 115164,
+          "sha256": "ecc3767fad7cf0fadecef41cd72333c6ff9cf1699ad4c078a888ff940496623b",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/manifest.json"
+        },
+        {
+          "name": "model-cost.json",
+          "content_type": "application/json",
+          "bytes": 5925,
+          "sha256": "cb22e2bbca0b0f609fecc6596b8143ca4c84e5fa120ebdccfc33e89a1e1f132a",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/model-cost.json"
+        },
+        {
+          "name": "narration-check.json",
+          "content_type": "application/json",
+          "bytes": 332,
+          "sha256": "04664a10b39c881dc60768bc880d3231eccce44a7b93881dd8a794c3809bae8f",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/narration-check.json"
+        },
+        {
+          "name": "narration.json",
+          "content_type": "application/json",
+          "bytes": 71784,
+          "sha256": "8349089fe6aa515bd4c4856b4821b5032aa79cd2d8c5a9e600e61e87fe25c466",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/narration.json"
+        },
+        {
+          "name": "package-qa.json",
+          "content_type": "application/json",
+          "bytes": 699,
+          "sha256": "1c793fafddbcdc87f213d366c61bd589d87616103d937deac389843e3001cad3",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/package-qa.json"
+        },
+        {
+          "name": "package.json",
+          "content_type": "application/json",
+          "bytes": 3484,
+          "sha256": "81cb257e601623c2e1fd276219546824d311f4e8a218823d15cba663a310395b",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/package.json"
+        },
+        {
+          "name": "packaging-resolved.json",
+          "content_type": "application/json",
+          "bytes": 1604,
+          "sha256": "8aae03674731458388f5a167c48228d64f4fe960057bd9ea2ebe1575d187ec72",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/packaging-resolved.json"
+        },
+        {
+          "name": "playback.json",
+          "content_type": "application/json",
+          "bytes": 133,
+          "sha256": "02fd81f24c088cfe99bcc62a14122989557db3b5d0916eec87deff34bc282109",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/playback.json"
+        },
+        {
+          "name": "prepared-source.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 6417,
+          "sha256": "5a9623873d765621620add11401a41b8fc5ca22a60b73a149d751d744bb62437",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/prepared-source.txt"
+        },
+        {
+          "name": "production-execution.json",
+          "content_type": "application/json",
+          "bytes": 381,
+          "sha256": "cab47b29ee04a897657691a65faf6027d363ccaf6fcdac0459b18bc713d35faf",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/production-execution.json"
+        },
+        {
+          "name": "production-plan.json",
+          "content_type": "application/json",
+          "bytes": 8686,
+          "sha256": "eddc62dc6f35e81a1689d52f580a58638157ed15b36ff0cc403cafbfd6087de1",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/production-plan.json"
+        },
+        {
+          "name": "qa.json",
+          "content_type": "application/json",
+          "bytes": 43263,
+          "sha256": "03866d5820b468f6e68370fbb2a0de99e886ef6185e4c632cdfc6f5ef8ae8888",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/qa.json"
+        },
+        {
+          "name": "render-resources.json",
+          "content_type": "application/json",
+          "bytes": 247,
+          "sha256": "e55561dd2254b9f2f8c88ad9ed1c856314447a2a5904e4734bdf206dadec7b23",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/render-resources.json"
+        },
+        {
+          "name": "storyboard.json",
+          "content_type": "application/json",
+          "bytes": 128282,
+          "sha256": "edc95746073cf4c2756494f5e433d6aa6cffd6d70aca5d5a714a44dbc18ddf8f",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/storyboard.json"
+        },
+        {
+          "name": "tts-metrics.json",
+          "content_type": "application/json",
+          "bytes": 897,
+          "sha256": "acf6f485fb3364e508234a27fee8960eb5327d10227a7cb25646ed5b1dc730a3",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/tts-metrics.json"
+        },
+        {
+          "name": "unbranded.mp4",
+          "content_type": "video/mp4",
+          "bytes": 24798224,
+          "sha256": "295cfbf6eb1f083e03d991ea368c031cef8fd92dbf07a54a8c867ef7a1bfedb8",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/unbranded.mp4"
+        },
+        {
+          "name": "video-ir.json",
+          "content_type": "application/json",
+          "bytes": 161263,
+          "sha256": "cf25c193abbfbc3b09691be656eacc477d421f1b6180f6a6d4736759cc648d71",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/video-ir.json"
+        },
+        {
+          "name": "video.mp4",
+          "content_type": "video/mp4",
+          "bytes": 22830313,
+          "sha256": "6e4cd38ad5083ea53670ee357a8e8d5f61b3f9f14054c97cd7b489658e092f67",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/video.mp4"
+        },
+        {
+          "name": "voice-report.json",
+          "content_type": "application/json",
+          "bytes": 20577,
+          "sha256": "95a2474557998edd1d55e674d90af599d6a679a227aa2b9858b9a13d4aacaee0",
+          "url": "/api/video/renders/d657281aef1f46a8a4bc93b5db145b0b/files/voice-report.json"
+        }
+      ]
+    }
+  ],
+  "publications": [
+    {
+      "id": "fd30540dbc854360a77e8cbcae94d6cd",
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "render_id": "d657281aef1f46a8a4bc93b5db145b0b",
+      "platform": "bilibili",
+      "url": "https://www.bilibili.com/video/BV1X1sg6UEtd",
+      "published_on": "2026-11-17",
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "note": "平台管理确认视频已公开，自动回写发布记录。",
+      "recorded_by": "platform-manager",
+      "created_at": "2026-11-17T13:01:53+0800",
+      "account_uid": "382769913",
+      "account_name": "安托里亚",
+      "work_id": "BV1X1sg6UEtd",
+      "confirmed_at": "2026-11-17T13:01:53+0800",
+      "removed_at": "",
+      "sources": "[\"automatic\"]"
+    }
+  ],
+  "platform_uploads": [],
+  "distributions": [
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "bilibili",
+      "account_uid": "",
+      "account_name": "",
+      "connected": false,
+      "current_account": false,
+      "status": "UNPUBLISHED",
+      "task": null,
+      "publications": [],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    },
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "douyin",
+      "account_uid": "",
+      "account_name": "",
+      "connected": false,
+      "current_account": false,
+      "status": "UNPUBLISHED",
+      "task": null,
+      "publications": [],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    },
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "kuaishou",
+      "account_uid": "",
+      "account_name": "",
+      "connected": false,
+      "current_account": false,
+      "status": "UNPUBLISHED",
+      "task": null,
+      "publications": [],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    },
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "xiaohongshu",
+      "account_uid": "",
+      "account_name": "",
+      "connected": false,
+      "current_account": false,
+      "status": "UNPUBLISHED",
+      "task": null,
+      "publications": [],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    },
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "weixin_channels",
+      "account_uid": "",
+      "account_name": "",
+      "connected": false,
+      "current_account": false,
+      "status": "UNPUBLISHED",
+      "task": null,
+      "publications": [],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    },
+    {
+      "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "version": 1,
+      "platform": "bilibili",
+      "account_uid": "382769913",
+      "account_name": "安托里亚",
+      "connected": false,
+      "current_account": false,
+      "status": "PUBLISHED",
+      "task": null,
+      "publications": [
+        {
+          "id": "fd30540dbc854360a77e8cbcae94d6cd",
+          "script_id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+          "version": 1,
+          "render_id": "d657281aef1f46a8a4bc93b5db145b0b",
+          "platform": "bilibili",
+          "url": "https://www.bilibili.com/video/BV1X1sg6UEtd",
+          "published_on": "2026-11-17",
+          "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+          "note": "平台管理确认视频已公开，自动回写发布记录。",
+          "recorded_by": "platform-manager",
+          "created_at": "2026-11-17T13:01:53+0800",
+          "account_uid": "382769913",
+          "account_name": "安托里亚",
+          "work_id": "BV1X1sg6UEtd",
+          "confirmed_at": "2026-11-17T13:01:53+0800",
+          "removed_at": "",
+          "sources": "[\"automatic\"]"
+        }
+      ],
+      "draft": null,
+      "can_prepare": false,
+      "blocked_reason": ""
+    }
+  ],
+  "rechecks": [],
+  "steps": [
+    {
+      "step": "research",
+      "label": "调研",
+      "state": "SKIPPED",
+      "note": "用已有的研究报告，没有再调研"
+    },
+    {
+      "step": "write",
+      "label": "写稿",
+      "state": "DONE",
+      "note": "v1"
+    },
+    {
+      "step": "audit",
+      "label": "审计",
+      "state": "SKIPPED",
+      "note": "按需发起"
+    },
+    {
+      "step": "approve",
+      "label": "定稿",
+      "state": "DONE",
+      "note": "v1"
+    },
+    {
+      "step": "render",
+      "label": "出片",
+      "state": "DONE",
+      "note": ""
+    }
+  ],
+  "events": [
+    {
+      "step": "write",
+      "event": "start",
+      "note": "用已有的研究报告",
+      "by": "autopilot",
+      "at": "2026-11-17T08:41:37+0800"
+    },
+    {
+      "step": "approve",
+      "event": "approve",
+      "note": "自动定稿 v1（按素材生成）",
+      "by": "autopilot",
+      "at": "2026-11-17T08:44:51+0800"
+    },
+    {
+      "step": "render",
+      "event": "start",
+      "note": "出片 v1",
+      "by": "autopilot",
+      "at": "2026-11-17T11:24:04+0800"
+    }
+  ],
+  "pending_plan": null
+}

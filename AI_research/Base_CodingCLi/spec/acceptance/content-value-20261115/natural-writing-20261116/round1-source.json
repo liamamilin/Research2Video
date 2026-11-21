@@ -1,0 +1,32 @@
+[
+  {
+    "variant": "control",
+    "file": "persona.py",
+    "sha256": "a80ea835315aef6fd797e6ff4cc83238c33f0dd89d3de9d53f2df02365204f8e"
+  },
+  {
+    "variant": "control",
+    "file": "writer.py",
+    "sha256": "73b722819f8e5192cc0fd75b53a862f954e45ae13704fa98f6581001c2ff8693"
+  },
+  {
+    "variant": "control",
+    "file": "manuscript_workflow.py",
+    "sha256": "956400e2e8d5fa79afd478501c1312fcc147507af7b55efcaaf63b7af77b5b36"
+  },
+  {
+    "variant": "candidate",
+    "file": "persona.py",
+    "sha256": "fcbf364df21a95326a54500d00d5fbfe00b8766383c4d7cdd3740f61c8edde3d"
+  },
+  {
+    "variant": "candidate",
+    "file": "writer.py",
+    "sha256": "c7691330a134ff13e8f8a157c6a649687296c079c951d3447f5ecd6d9f66ba50"
+  },
+  {
+    "variant": "candidate",
+    "file": "manuscript_workflow.py",
+    "sha256": "b8f012d4b4ea42ef4162f0d39e0b6fa375bf790a11b88469fee2f26a7ee1066d"
+  }
+]

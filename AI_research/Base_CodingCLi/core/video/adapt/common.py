@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 CONFIDENCE = ("已证实", "厂商自述", "有迹象", "推导", "推测", "有冲突", "未核实")
 #: Untraced facts need review; sourced disputes may be reported with clear attribution.
@@ -75,15 +75,18 @@ def parse_json(content: str) -> dict:
 JSON_TRIES = 3
 
 
-def call_json(client, system: str, user: str, model: type[BaseModel], *, temperature: float) -> BaseModel:
+def call_json(client, system: str, user: str, model: type[BaseModel], *, temperature: float, validator: Callable[[BaseModel], None] | None = None) -> BaseModel:
     """One call whose reply must validate as ``model``; retries that name the problem, each a little calmer."""
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
     problem = ""
     for attempt in range(JSON_TRIES):
         response = client.chat(messages, temperature=min(temperature, 0.2) if attempt else temperature)
         try:
-            return model.model_validate(parse_json(response.content))
-        except (AdaptError, ValidationError) as exc:
+            value = model.model_validate(parse_json(response.content))
+            if validator is not None:
+                validator(value)
+            return value
+        except (AdaptError, ValueError) as exc:
             problem = str(exc)[:600]
             cut = getattr(response, "finish_reason", "") == "length"
             ask = ("上面的回复被截断了。请重新输出完整的 JSON，可精简重复说明和无关旁支，"

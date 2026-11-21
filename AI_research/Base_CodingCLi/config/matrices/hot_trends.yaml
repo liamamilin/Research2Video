@@ -1,0 +1,15 @@
+name: 每日重要热点
+domain: 每日重要热点
+keywords:
+- 宏观经济
+- 财经商业
+- 科技产业
+- 民生消费
+jobs:
+- chains/hot_trends
+render:
+  video_speed: 1.25
+content:
+  name: 每日重要热点
+  role: domain
+  status: configured

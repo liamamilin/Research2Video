@@ -206,6 +206,8 @@ def test_api_errors_are_actionable_and_timings_are_available(client, web_env, mo
     assert client.get("/api/live").status_code == 200
     from fastapi.testclient import TestClient
 
+    # Drop the short-lived healthy cache so this call exercises run_checks again.
+    client.app.state.health_cache.clear()
     tolerant = TestClient(client.app, raise_server_exceptions=False)
     response = tolerant.get("/api/health")
     tolerant.close()

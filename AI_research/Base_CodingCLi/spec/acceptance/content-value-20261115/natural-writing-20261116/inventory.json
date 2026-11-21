@@ -1,0 +1,2086 @@
+{
+  "date": "2026-11-16",
+  "scope": "All jobs in current unarchived matrices, regardless of schedules; active matrix helper entry points; enabled external schedules. Archived excluded.",
+  "status": "configuration inventory; runtime reachability and prompt analysis remain separate",
+  "candidate_count": 74,
+  "active_matrices": [
+    "ai_media",
+    "assistant_app_check",
+    "assistant_ops_check",
+    "chatgpt_acquisition",
+    "company",
+    "consumer",
+    "culture",
+    "economy",
+    "education",
+    "geography",
+    "history",
+    "industry",
+    "science",
+    "software",
+    "tech"
+  ],
+  "jobs": [
+    {
+      "job": "ai_media/ai_tool_tutorials",
+      "name": "AI 工具教程",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/ai_media/ai_tool_tutorials.yaml",
+      "sha256": "4decf6633404b153985e7ee7c7d893ea799b81e254d92971c4afff522077f7b7",
+      "production_ids": [
+        "ai_tool_tutorials"
+      ],
+      "content_columns": [
+        "ai_tutorial"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 6,
+      "baseline_script_ids": [
+        "72a8e8b64c964cf6b6b27d4b4521d9d2",
+        "624f310b290c487a9a39894037c4cf65"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/ai_media__ai_tool_tutorials.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "ai_media/daily_opensource_radar",
+      "name": "AI 开源雷达",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/ai_media/daily_opensource_radar.yaml",
+      "sha256": "bedf2c54ba4d8cef14db04822845647c917a32cba21a69158469fd3fbf16802a",
+      "production_ids": [
+        "ai_media_opensource_digest"
+      ],
+      "content_columns": [
+        "ai_opensource"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 15,
+      "baseline_script_ids": [
+        "494e954f88c4425fa130b4718c81d843",
+        "31760ad2267f450db9140935404a4db5"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/ai_media__daily_opensource_radar.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "ai_media/weekly_business_watch",
+      "name": "AI 商业观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/ai_media/weekly_business_watch.yaml",
+      "sha256": "e80433a43b1f6f189984ffec1b742840623ae4ee80e0b9e95188b0d3f3c80858",
+      "production_ids": [
+        "ai_media_business_digest"
+      ],
+      "content_columns": [
+        "ai_business"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 5,
+      "baseline_script_ids": [
+        "49d1464b516c4cfaab817984569b717d",
+        "4edda9730b074550a9064e05c96154a5"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/ai_media__weekly_business_watch.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "ai_media/weekly_deep_research",
+      "name": "AI 深度研究",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/ai_media/weekly_deep_research.yaml",
+      "sha256": "6c8b07bc0400ad3a1e5f553590bd709b74f6669544d1fcfb0a26ce075b54e70d",
+      "production_ids": [
+        "ai_media_deep_dive"
+      ],
+      "content_columns": [
+        "ai_deep_research"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 10,
+      "baseline_script_ids": [
+        "56aff07f8373469d9a4074f84303c4a5",
+        "29c5f7e0e6af44a49182174a8c7782d7"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/ai_media__weekly_deep_research.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "ai_media/weekly_model_arena",
+      "name": "AI 模型竞技场",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/ai_media/weekly_model_arena.yaml",
+      "sha256": "bdfc6380a21e4e30c3937f7bcf547d8ea0e73c2a6ecc7aeb79b7f6240b573a82",
+      "production_ids": [
+        "ai_media_arena_digest"
+      ],
+      "content_columns": [
+        "ai_model_review"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 6,
+      "baseline_script_ids": [
+        "a3eb6fe50527405f85b032f887ce7c6b",
+        "b4629b4b15774641a477c5740357ef8c"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/ai_media__weekly_model_arena.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t01_product",
+      "name": "T01 · 产品与能力认知",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t01_product.yaml",
+      "sha256": "ba68ca5e0cdc53b16cd553e711a53ccf0b29bedf909db3f1a0ee08ca15078a98",
+      "production_ids": [
+        "chatgpt_t01_product"
+      ],
+      "content_columns": [
+        "chatgpt_t01_product"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 5,
+      "baseline_script_ids": [
+        "823047f2817542df9beccfaa76c657e1",
+        "9cb066a2cd5f410993280e475c918f43"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t01_product.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t02_scenarios",
+      "name": "T02 · 应用场景与成果",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t02_scenarios.yaml",
+      "sha256": "23a7bf62dcf4529b0ba01aefb411a968d36381c3606ca00d492b1471c350ff33",
+      "production_ids": [
+        "chatgpt_t02_scenarios"
+      ],
+      "content_columns": [
+        "chatgpt_t02_scenarios"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 7,
+      "baseline_script_ids": [
+        "6887a757d8da41978f7692a5c43a39ed",
+        "50090ee672714310976cf7af77bafe7e"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t02_scenarios.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "name": "T03 · 使用方法与教程",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t03_tutorials.yaml",
+      "sha256": "c213df14f0af63c980374d7af7c34e7666aab0540af9dfdfe83621c716553c5f",
+      "production_ids": [
+        "chatgpt_t03_tutorials"
+      ],
+      "content_columns": [
+        "chatgpt_t03_tutorials"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 11,
+      "baseline_script_ids": [
+        "0e9c91678ce94122b5c8a7e2dec1cc59",
+        "39885bd1dc5e4a9e8ccb60c62e2473ce"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t03_tutorials.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t04_testing",
+      "name": "T04 · 实测与能力验证",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t04_testing.yaml",
+      "sha256": "c60d4041dc45ef58027639450f793d3189c8119332b25c43633591073d08ccf7",
+      "production_ids": [
+        "chatgpt_t04_testing"
+      ],
+      "content_columns": [
+        "chatgpt_t04_testing"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 4,
+      "baseline_script_ids": [
+        "2045bd6607094f18bf93575b37e70d53",
+        "921e92c0b9c940298238f58995bd2c8d"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t04_testing.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t05_comparison",
+      "name": "T05 · AI 产品横向选择",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t05_comparison.yaml",
+      "sha256": "0ad0607f5f6b9c5f668d215497bec0a6ab549edbcfe18035f71686ff2561e31d",
+      "production_ids": [
+        "chatgpt_t05_comparison"
+      ],
+      "content_columns": [
+        "chatgpt_t05_comparison"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 53,
+      "baseline_script_ids": [
+        "194a1831aabc4f9e9558f75544c2293b",
+        "5749903e81e54ff48e042cd3ac988892"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t05_comparison.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t06_value",
+      "name": "T06 · 套餐与付费价值",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t06_value.yaml",
+      "sha256": "541d718a6cfb993a443e13a72ae356e988cc3965829b0d5f1450c8c3b282767f",
+      "production_ids": [
+        "chatgpt_t06_value"
+      ],
+      "content_columns": [
+        "chatgpt_t06_value"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 5,
+      "baseline_script_ids": [
+        "01235ff1e05c48e9afe2cdbb92fe2e99",
+        "8f1208f0c4f44ba6a53260bd7d68d31a"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t06_value.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t07_subscription",
+      "name": "T07 · 订阅与支付",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t07_subscription.yaml",
+      "sha256": "094ae46034d40527fee1c61f40cc920948787eced06fe5f16606f088b0a75da5",
+      "production_ids": [
+        "chatgpt_t07_subscription"
+      ],
+      "content_columns": [
+        "chatgpt_t07_subscription"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 5,
+      "baseline_script_ids": [
+        "572d434f57f444a2ad1e9a5ea508d3cd",
+        "325122b351d44d818610485bdf0330f3"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t07_subscription.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t08_troubleshooting",
+      "name": "T08 · 使用问题与避坑",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t08_troubleshooting.yaml",
+      "sha256": "28625d3385d51474d5b7370835698bd8e2c0dada99388527b6a4f1f64aacb68a",
+      "production_ids": [
+        "chatgpt_t08_troubleshooting"
+      ],
+      "content_columns": [
+        "chatgpt_t08_troubleshooting"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "ea11be6a6dfd41e1a0b78e179e89c253",
+        "eb83cbd116f04baea85d94ed808de541"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t08_troubleshooting.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "chatgpt_acquisition/t09_updates",
+      "name": "T09 · 产品动态与热点",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/chatgpt_acquisition/t09_updates.yaml",
+      "sha256": "19d99e8d638fa78e202bc512d9275f426529eb30a1436146644f5b15f9213f89",
+      "production_ids": [
+        "chatgpt_t09_updates",
+        "chatgpt_t09_updates_each"
+      ],
+      "content_columns": [
+        "chatgpt_t09_updates"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 31,
+      "baseline_script_ids": [
+        "3ac88ef2e6304502a04a0e4325d541f1",
+        "b17b3df264b64901bdc6ae79e4e28356",
+        "12bb6b7e8ca447ee832287ba1b69dea0",
+        "7a32a7917fc6472bac6c1137597649d6"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/chatgpt_acquisition__t09_updates.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "company/company_daily",
+      "name": "商业动态日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/company/company_daily.yaml",
+      "sha256": "28913e409ec865797e09700dab0d01485024505b3848fe1c59fd357b35599937",
+      "production_ids": [
+        "company_daily"
+      ],
+      "content_columns": [
+        "company_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 7,
+      "baseline_script_ids": [
+        "af2e23da9d7b4b11a4187c1b1ce0e594",
+        "681fe47f7e484c21814652f2d8f39826"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/company__company_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "company/company_illustrated",
+      "name": "商业插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/company/company_illustrated.yaml",
+      "sha256": "c07cc26c27c2a15ca8315ded7ac8b7b6c4684336dc5ed29fdbe26364c502d057",
+      "production_ids": [
+        "company_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "fc05346fc6e945d1ad42ca51f32fb317"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/company__company_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "company/company_weekly",
+      "name": "公司与商业模式周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/company/company_weekly.yaml",
+      "sha256": "e8ecdabf52f72b832e30f92487b7d32ebb4dfc7d4d47985d30b6c2a691074c57",
+      "production_ids": [
+        "company_weekly"
+      ],
+      "content_columns": [
+        "company_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 2,
+      "baseline_script_ids": [
+        "ac0bb76382184eab98dca4e195639b6d",
+        "2e2c466e8b1b4174ab65ebb0faf15dbc"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/company__company_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "consumer/consumer_daily",
+      "name": "新品与评测日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/consumer/consumer_daily.yaml",
+      "sha256": "e56f3c809fdac9a2f503a70dfc944b0707d7e23f2eb98bf205b00eddb63b3edd",
+      "production_ids": [
+        "consumer_daily"
+      ],
+      "content_columns": [
+        "consumer_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "78c3e6650560464dbf184ddeb21456a0",
+        "0eff65a992354bfa94833b67e867c370"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/consumer__consumer_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "consumer/consumer_illustrated",
+      "name": "消费科技插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/consumer/consumer_illustrated.yaml",
+      "sha256": "81f6eec9c0ccb6451af7831c85120d9ef4385d3c691524dfc7b0697d29030be2",
+      "production_ids": [
+        "consumer_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "c99f96fe2c004797987cfb466c91bdcf"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/consumer__consumer_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "consumer/consumer_weekly",
+      "name": "数码选购周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/consumer/consumer_weekly.yaml",
+      "sha256": "9aaea09cf331d13712f3e8cca8f3b92339b2601cb6b98709caa29b3faa9802eb",
+      "production_ids": [
+        "consumer_weekly"
+      ],
+      "content_columns": [
+        "consumer_weekly"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 2,
+      "baseline_script_ids": [
+        "0f1f6328dc1441bd81ef1d56592f76d2",
+        "df90997c3d1b41a9ae02e2d66df2a9ac"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/consumer__consumer_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "culture/culture_daily",
+      "name": "文化艺术动态",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/culture/culture_daily.yaml",
+      "sha256": "c5327fffe00fe29345c3aa293219f4e6b3c1a1a17876d85c2e78a67df40ef7c3",
+      "production_ids": [
+        "culture_daily"
+      ],
+      "content_columns": [
+        "culture_daily"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 2,
+      "baseline_script_ids": [
+        "e98bc786ac224100a783bcb6fb69cf4a",
+        "d387ebe5194c46b89e2fc19e8183062d"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/culture__culture_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "culture/culture_illustrated",
+      "name": "文化插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/culture/culture_illustrated.yaml",
+      "sha256": "c4471dc6950fbd9e7eaca8689483d81994443a2af09362146c06cd9e67c0a910",
+      "production_ids": [
+        "culture_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "f2c742f07ca04e8b979bb08b023ce7b1"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/culture__culture_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "culture/culture_weekly",
+      "name": "文化艺术周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/culture/culture_weekly.yaml",
+      "sha256": "609b4d609d3816462c53970ae8f8733beff83c6b6b1fd5740e0c80beceda0c93",
+      "production_ids": [
+        "culture_weekly"
+      ],
+      "content_columns": [
+        "culture_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 2,
+      "baseline_script_ids": [
+        "e8b070da92f34c80b1bbf558c491150d",
+        "c1524905196d41bea575ab50beaa5e72"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/culture__culture_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "economy/economy_daily",
+      "name": "全球经济日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/economy/economy_daily.yaml",
+      "sha256": "c0a8c3e0f7795b5c7b50c28cd40b77b21644867d3edb03e13082fe1ab2ed7616",
+      "production_ids": [
+        "ai-non_tech-deep_dive-long-2",
+        "economy_daily"
+      ],
+      "content_columns": [
+        "economy_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 11,
+      "baseline_script_ids": [
+        "bf9fc2ccc3064f9da0b45d5bf2ab0fd9",
+        "dee7b8c496da4dcdaa588232620756c5",
+        "16460be2ef974b8780acb5bc539052fc",
+        "570d1351828e4d31b22dd5689b71f826"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/economy__economy_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "economy/economy_illustrated",
+      "name": "财经插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/economy/economy_illustrated.yaml",
+      "sha256": "a104e520a4b706d9fffdb939dc84eeb11ec41df96af880ae265bb9782fb2aca1",
+      "production_ids": [
+        "economy_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 7,
+      "baseline_script_ids": [
+        "757f9e723f3c46afb7fa9761f8a80f2f",
+        "2e1910d120cd454aa0fcd88acf26fa9c"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/economy__economy_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "economy/economy_weekly",
+      "name": "宏观与数据周解读",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/economy/economy_weekly.yaml",
+      "sha256": "3edb600e766eeb17e2fb88f8b555659721b894d4e7004ab0d7c9a3653e034e0a",
+      "production_ids": [
+        "economy_weekly"
+      ],
+      "content_columns": [
+        "economy_weekly"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "3bdddc0e07a84a1787d7484059e9382f"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/economy__economy_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "geography/geography_daily",
+      "name": "世界与地球动态",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/geography/geography_daily.yaml",
+      "sha256": "16a79411dedb30b19b3407f93acd52e0c540d856c33c8bb8084f1dc10b5949e2",
+      "production_ids": [
+        "geography_daily"
+      ],
+      "content_columns": [
+        "geography_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "237b8cde9a464079b42c90f50233e926",
+        "632e1ee1bbc34b2f80100a92818e81e0"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/geography__geography_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "geography/geography_illustrated",
+      "name": "地理插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/geography/geography_illustrated.yaml",
+      "sha256": "e32d377377d82090af46194d3cf43d35f110067927ef9926d38fc195018ed313",
+      "production_ids": [
+        "geography_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "4ff9fc2cc49843448f36150d99abafee"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/geography__geography_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "geography/geography_weekly",
+      "name": "地理专题周读",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/geography/geography_weekly.yaml",
+      "sha256": "796055e77411f6e929dd6b38385e3c24bdebfb110aadf7df69c1a897d82bbbbc",
+      "production_ids": [
+        "geography_weekly"
+      ],
+      "content_columns": [
+        "geography_weekly"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "102f15bf16e84094ae793777bc17a955"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/geography__geography_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "history/history_daily",
+      "name": "历史与考古动态",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/history/history_daily.yaml",
+      "sha256": "2f66dae307a1749c6587e5d0ad5455fbd9e0203b0f7965917b66dcff086b745a",
+      "production_ids": [
+        "history_daily"
+      ],
+      "content_columns": [
+        "history_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "9184ed167fc44cf995ca47b7589148ed",
+        "877bdac069f74bf998832a27eadecd54"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/history__history_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "history/history_illustrated",
+      "name": "历史插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/history/history_illustrated.yaml",
+      "sha256": "0cc557035427a5d49c9671cd395202d0c413b82e07ad1a8e71de7849aa329880",
+      "production_ids": [
+        "history_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "ffb4f81678cf4826bec8812a0d3fd5c7"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/history__history_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "history/history_weekly",
+      "name": "历史专题周读",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/history/history_weekly.yaml",
+      "sha256": "78b63f4b779bb7d1fc9dd616459d71622729d4048e08374d0a4adea7c2eedd54",
+      "production_ids": [
+        "history_weekly"
+      ],
+      "content_columns": [
+        "history_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "2fa663c60fa847d987c81736f801b0d1"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/history__history_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "industry/industry_daily",
+      "name": "产业动态日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/industry/industry_daily.yaml",
+      "sha256": "f0637ef7f7ebbcab2f84dafdf38e753deabfd92f3f96f95a4680f35d995dbc71",
+      "production_ids": [
+        "industry_daily"
+      ],
+      "content_columns": [
+        "industry_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 4,
+      "baseline_script_ids": [
+        "16d6ddfc3e2b408a8c6df1ceac603a28",
+        "111efdd1173d4d0a8c82a9cd61f79a08"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/industry__industry_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "industry/industry_illustrated",
+      "name": "产业插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/industry/industry_illustrated.yaml",
+      "sha256": "9f36e2a30be576cae5487fea105fbf10657f3c581969041744201d0a0f4f4f77",
+      "production_ids": [
+        "industry_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "fba99ffb1968493ba02aba43e604147c"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/industry__industry_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "industry/industry_weekly",
+      "name": "产业链周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/industry/industry_weekly.yaml",
+      "sha256": "cfa917dc6861aec08edecf340c83de2fabf83442c103db738ed9cdbfde916a35",
+      "production_ids": [
+        "industry_weekly"
+      ],
+      "content_columns": [
+        "industry_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "9d6ba001f72c4ea88d94eab667bd5274",
+        "0372d39e0b124492bfe851d4563259c8"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/industry__industry_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "monitoring/ai_flash_discovery",
+      "name": "AI Flash Discovery",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/monitoring/ai_flash_discovery.yaml",
+      "sha256": "1dde900dba0077ab51217ad599cfdf7eb722c20118260045bc31270bd1c37ba9",
+      "production_ids": [
+        "ai-developer-roundup-long",
+        "ai-non_tech-one_point-short",
+        "ai-non_tech-quick_take-short",
+        "flash",
+        "flash_daily",
+        "flash_each",
+        "point_short"
+      ],
+      "content_columns": [
+        "ai_flash"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 131,
+      "baseline_script_ids": [
+        "2ebffe908d484210bab9f2f5a19d7828",
+        "8f9e295ec6874080bf9700dbdffdea35",
+        "d9228e36107240b6baf1e8266297e756",
+        "4d2d4beb98a04b86837841e9cc26e79d",
+        "175b2ecd9a1f4256be77a3e13531269a",
+        "b52e464e4f024d3b9126a627a476055e"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/monitoring__ai_flash_discovery.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "research/assistant_app_acceptance_20261025",
+      "name": "Pyodide 浏览器 Python 验收",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_app_check",
+          "paused": false
+        }
+      ],
+      "job_enabled": false,
+      "source_collection_only": false,
+      "job_path": "jobs/research/assistant_app_acceptance_20261025.yaml",
+      "sha256": "e5572b20c843a10a330a9576dec061a261166d33d623d56cb2ba5768eda3a6c9",
+      "production_ids": [
+        "deep_dive-4"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": true,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "9cffe666a5434c0f8b55662f37d4c573"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/research__assistant_app_acceptance_20261025.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "research/assistant_iteration_acceptance_20261025",
+      "name": "Assistant Iteration Acceptance 20261025",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_ops_check",
+          "paused": false
+        }
+      ],
+      "job_enabled": false,
+      "source_collection_only": false,
+      "job_path": "jobs/research/assistant_iteration_acceptance_20261025.yaml",
+      "sha256": "76c7bf80dcd0a3853b00c2abbe51661efc84286aefa2b80b85400cb411733747",
+      "production_ids": [
+        "deep_dive-2"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/research__assistant_iteration_acceptance_20261025.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "research/assistant_ops_acceptance_20261025",
+      "name": "Assistant Ops Acceptance 20261025",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_ops_check",
+          "paused": false
+        }
+      ],
+      "job_enabled": false,
+      "source_collection_only": false,
+      "job_path": "jobs/research/assistant_ops_acceptance_20261025.yaml",
+      "sha256": "0111070237dd7c1290c5ac8b7729ab32e2bffb687d3db6fa3ecd227392f9df57",
+      "production_ids": [
+        "deep_dive-3"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/research__assistant_ops_acceptance_20261025.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "science/science_daily",
+      "name": "科学新发现日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/science/science_daily.yaml",
+      "sha256": "c3f406c6937561702695c3ac6306f49a725866eb8d41b61a21f26edfaf868579",
+      "production_ids": [
+        "science_daily"
+      ],
+      "content_columns": [
+        "science_daily"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "83f95f8986b146c484624fa85bb92cb3",
+        "f30f9b94c3a345da82069fac22b24b4f"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/science__science_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "science/science_illustrated",
+      "name": "科学插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/science/science_illustrated.yaml",
+      "sha256": "5b15ff19cb3890572cef04dd4ebb9601c95d1d4106f82870dd82a30d4da2fa6c",
+      "production_ids": [
+        "science_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 7,
+      "baseline_script_ids": [
+        "4e99439efa84453997e519b74e679477",
+        "954bd499ab8c43f4a28bf1373a1679a1"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/science__science_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "science/science_weekly",
+      "name": "科学深度周读",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/science/science_weekly.yaml",
+      "sha256": "307bb6bfa2e104d2f0f8977d0be285595ff420fe54559258093ada47088acf2a",
+      "production_ids": [
+        "science_weekly"
+      ],
+      "content_columns": [
+        "science_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "e73d770fa4f741cfa58fbfb14de24516"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/science__science_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "software/software_daily",
+      "name": "每日软件发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/software/software_daily.yaml",
+      "sha256": "3c2aea616b7a3db73758cd233f42dd125d8dba78af9c33e5fdcf37b611d1d82d",
+      "production_ids": [
+        "software_daily"
+      ],
+      "content_columns": [
+        "ai_software_daily"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 3,
+      "baseline_script_ids": [
+        "fe2917ebc3bb43ebb30470d6a946bb59",
+        "ba1300f5538f44618104f901ace60ebc"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/software__software_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "software/software_illustrated",
+      "name": "软件插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/software/software_illustrated.yaml",
+      "sha256": "7c658fae5041c55a12d968b34ad631255dca1de8c99a38730c3d5b700f1b19f5",
+      "production_ids": [
+        "software_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "864d5c5228074036a31f1e5338103742"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/software__software_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "software/software_weekly",
+      "name": "软件与工具周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/software/software_weekly.yaml",
+      "sha256": "52c80f090d1baef0daeebcb16b42535f8e432346cb4f7745063f4a35c449d32f",
+      "production_ids": [
+        "software_weekly"
+      ],
+      "content_columns": [
+        "ai_software_weekly"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 4,
+      "baseline_script_ids": [
+        "106e40a2266041868cf59a3e558deec2",
+        "2b8260f3dc28409797bcc989487ff102"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/software__software_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/ai_media",
+      "name": "AI 矩阵 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        },
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "ai_media",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/ai_media.yaml",
+      "sha256": "8248f8ae81ea83f0259d7b163314feebbb2303e1e48ab436af8f3fc907c6afbf",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__ai_media.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/chatgpt_acquisition",
+      "name": "ChatGPT 获客矩阵 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        },
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/chatgpt_acquisition.yaml",
+      "sha256": "d429c8bbd7aafa8a47e5b468f53d4143e2c23d91febfa0b00023214ac3f0381c",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__chatgpt_acquisition.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/company",
+      "name": "商业与公司研究 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "company",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/company.yaml",
+      "sha256": "ed8fb506bc53c4a3e5cce5f2e3b315d0d13ba610e8afb2c2111e4196ccf7357e",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__company.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/consumer",
+      "name": "消费科技与购买决策 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "consumer",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/consumer.yaml",
+      "sha256": "efba37bcf52850941d8166cf34454b2addf27517b24cd7ac276fe4b97df51fda",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__consumer.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/culture",
+      "name": "文化与艺术 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "culture",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/culture.yaml",
+      "sha256": "96729dbe4ed9f488b359535f6e9a61e2f6f8d20cb411ba1cb7deac70d2cb1e5b",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__culture.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/economy",
+      "name": "财经与经济 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "economy",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/economy.yaml",
+      "sha256": "887d263903171479e512a720698ef5dbc10e0a0a53a0cf342fce129cfb0a3b3a",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__economy.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/geography",
+      "name": "地理与世界探索 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "geography",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/geography.yaml",
+      "sha256": "c1e8b13f6b4326fb5d1a32528bf8c2e9e58945e8a784bb1a22153568bb7d9970",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__geography.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/history",
+      "name": "历史与文明 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "history",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/history.yaml",
+      "sha256": "e210d34731c9bd14e097e6c71d16075f14c9e9014fc1d0ca8e5fb29987981101",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__history.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/industry",
+      "name": "产业与制造业 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "industry",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/industry.yaml",
+      "sha256": "614d6ff4f8bb40a4879a59767c123abaf9ed9e14c054bcc23345dc6deb51a9e2",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__industry.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/science",
+      "name": "科学与知识百科 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "science",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/science.yaml",
+      "sha256": "122320e3895b0af1ca58598bcb9d0c59c6f393d77169093c50af6c64fa86717e",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__science.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/software",
+      "name": "软件与数字工具 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "software",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/software.yaml",
+      "sha256": "3888e902f8a0aa68ad77c03169d1d40e33145db27d46d47f3689b2766f593b00",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__software.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "source_discovery/tech",
+      "name": "科技与未来产业 · 信息源发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "tech",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/source_discovery/tech.yaml",
+      "sha256": "f798e0849a094b3dd7477e7e44311f75c1cccb5f8851d06e3524093f3a34034a",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/source_discovery__tech.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "system/material_collection",
+      "name": "矩阵素材积累",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": true,
+      "job_path": "jobs/system/material_collection.yaml",
+      "sha256": "c9765cf6930b8e607e48dcda3be5db1dab694efb4db931b5a941582aff9548a3",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/system__material_collection.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "tech/tech_daily",
+      "name": "科技前沿日报",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/tech/tech_daily.yaml",
+      "sha256": "8159e40985096b2899bc0944cb47e6ef7e4dad82afab252dba7d314ae07cd0e2",
+      "production_ids": [
+        "ai-non_tech-headline-short",
+        "tech_daily"
+      ],
+      "content_columns": [
+        "ai_tech_daily"
+      ],
+      "manuscript_enabled": false,
+      "saved_script_count": 13,
+      "baseline_script_ids": [
+        "eea2e9820e0346f9b957ad4bc95f022f",
+        "42d972ba56ec4b95bf14182d0cddc316",
+        "a1da0fbee6e3433aa242b34ceb5e1b23",
+        "53529472467443e4b962a7e0ca96f2b7"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/tech__tech_daily.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "tech/tech_illustrated",
+      "name": "科技插画讲解",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/tech/tech_illustrated.yaml",
+      "sha256": "6b53b4fcc94da431132abd532a386f594fd37c4f789c570a8daa2bc41a248c13",
+      "production_ids": [
+        "tech_illustrated"
+      ],
+      "content_columns": [],
+      "manuscript_enabled": true,
+      "saved_script_count": 1,
+      "baseline_script_ids": [
+        "028810267cf74d6c818fcb379c15ba49"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/tech__tech_illustrated.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "tech/tech_weekly",
+      "name": "科技周观察",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/tech/tech_weekly.yaml",
+      "sha256": "87ef57c9bc7d483602989bef84e50896f70e972b6d2b4da0c2d5adc058bbc463",
+      "production_ids": [
+        "tech_weekly"
+      ],
+      "content_columns": [
+        "ai_tech_weekly"
+      ],
+      "manuscript_enabled": true,
+      "saved_script_count": 2,
+      "baseline_script_ids": [
+        "6f08493b75bb43e8b751c6a1c129090b",
+        "7137446fe8e444188b4b4bc6e460f480"
+      ],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/tech__tech_weekly.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/ai_media",
+      "name": "AI 视频栏目 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "ai_media",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/ai_media.yaml",
+      "sha256": "51759a8d577a48767548a441b7a593c48221dbf8f088ae46080f68a4fd018113",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__ai_media.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/chatgpt_acquisition",
+      "name": "ChatGPT 获客矩阵 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/chatgpt_acquisition.yaml",
+      "sha256": "4fe574d3194b6580c41589b780451ab9bda194d300d06914c9345c5fc368c713",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__chatgpt_acquisition.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/company",
+      "name": "商业与公司研究 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "company",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/company.yaml",
+      "sha256": "4308abffe3f9fbb7b5562a9d6500065e2a62b0c6c36dc77f6d830bb2f38c1de8",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__company.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/consumer",
+      "name": "消费科技与购买决策 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "consumer",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/consumer.yaml",
+      "sha256": "24f6c49e1eaeceb672c28fa6b339eb5f69d21cd8142c8d9d69ac8c7ea5538519",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__consumer.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/culture",
+      "name": "文化与艺术 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "culture",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/culture.yaml",
+      "sha256": "88ead5b04937f6b0f7c6c29994c75a8c5f9fe10f8119ecde5e16291d3d585d4e",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__culture.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/economy",
+      "name": "财经与经济 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "economy",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/economy.yaml",
+      "sha256": "10c1594dfaca91d60f68986b84465f597603a709070dfef88c920611572eea38",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__economy.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/education",
+      "name": "教育与方法 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "education",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/education.yaml",
+      "sha256": "baa238d9b1016a628db06eed2665e887a66aade0adea3dbdb112dcf2bb1accf6",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__education.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/geography",
+      "name": "地理与世界探索 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "geography",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/geography.yaml",
+      "sha256": "42ac5db295ac45faeee659133b6f8f6e4c3ce4360a072589633a7f9dab9c33a7",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__geography.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/history",
+      "name": "历史与文明 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "history",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/history.yaml",
+      "sha256": "29c9731f7e82ed5889615dab72e0a2e90d21e53669e65413599368219db5af3f",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__history.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/industry",
+      "name": "产业与制造业 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "industry",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/industry.yaml",
+      "sha256": "7e99fbbd9a2543b49c07271789cdff10f4121c1fd7ef0f14b3e32996f6d6c984",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__industry.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_discovery/science",
+      "name": "科学与知识百科 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "science",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_discovery/science.yaml",
+      "sha256": "8148558102c5ba128fcf3874a79ccddf7d3d96a0895eefb060c1a8353fd375cd",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_discovery__science.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_ideas/chatgpt_acquisition",
+      "name": "ChatGPT 获客矩阵 · 参考题型出题",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_ideas/chatgpt_acquisition.yaml",
+      "sha256": "6a40ff73043905198be6649c409f7b2c6454ac7c8f1c5b2a35427c59fb20d5fa",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_ideas__chatgpt_acquisition.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    },
+    {
+      "job": "topic_platform/chatgpt_acquisition",
+      "name": "ChatGPT 获客矩阵 · 每日主题发现",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "job_enabled": true,
+      "source_collection_only": false,
+      "job_path": "jobs/topic_platform/chatgpt_acquisition.yaml",
+      "sha256": "7a81e4c1e1fdc34226edd744c817cf7501893e50cd84b5f0ed2088d07b391e8f",
+      "production_ids": [],
+      "content_columns": [],
+      "manuscript_enabled": false,
+      "saved_script_count": 0,
+      "baseline_script_ids": [],
+      "input_snapshot": "state/acceptance-content-value-20261115/natural-writing-20261116/baseline/inputs/topic_platform__chatgpt_acquisition.json",
+      "analysis_status": "pending",
+      "runtime_usage_verification": "pending"
+    }
+  ]
+}

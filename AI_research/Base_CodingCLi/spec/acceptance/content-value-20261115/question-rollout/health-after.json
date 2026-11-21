@@ -1,0 +1,114 @@
+{
+  "runtime": {
+    "pid": 69019,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1794758353.498129,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "b3eb759bfb1247779480272f2ee5aaf1"
+  },
+  "busy": [],
+  "health": {
+    "research": {
+      "status": "ok",
+      "checked_at": "2026-11-15T23:59:49+0800",
+      "deep": false,
+      "checks": [
+        {
+          "name": "config",
+          "status": "ok",
+          "detail": "model=deepseek-v4.1-flash, search=exa",
+          "model": "deepseek-v4.1-flash",
+          "search_provider": "exa"
+        },
+        {
+          "name": "state_dir",
+          "status": "ok",
+          "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state"
+        },
+        {
+          "name": "output_dir",
+          "status": "ok",
+          "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output"
+        },
+        {
+          "name": "reports_db",
+          "status": "ok",
+          "detail": "728 rows",
+          "value": 728
+        },
+        {
+          "name": "tracking_db",
+          "status": "ok",
+          "detail": "194 rows",
+          "value": 194
+        },
+        {
+          "name": "disk_free",
+          "status": "ok",
+          "detail": "36430 MB free",
+          "free_mb": 36430
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "instance_id": "b3eb759bfb1247779480272f2ee5aaf1"
+    },
+    "video": {
+      "status": "ok",
+      "worker_primary": true
+    }
+  },
+  "enabled_jobs": [
+    "monitoring/ai_flash_discovery",
+    "chatgpt_acquisition/t01_product",
+    "chatgpt_acquisition/t02_scenarios",
+    "chatgpt_acquisition/t03_tutorials",
+    "chatgpt_acquisition/t04_testing",
+    "chatgpt_acquisition/t05_comparison",
+    "chatgpt_acquisition/t06_value",
+    "chatgpt_acquisition/t07_subscription",
+    "chatgpt_acquisition/t08_troubleshooting",
+    "chatgpt_acquisition/t09_updates",
+    "ai_media/ai_tool_tutorials",
+    "ai_media/daily_opensource_radar",
+    "ai_media/weekly_model_arena",
+    "ai_media/weekly_business_watch",
+    "ai_media/weekly_deep_research",
+    "science/science_daily",
+    "science/science_weekly",
+    "science/science_illustrated",
+    "company/company_daily",
+    "company/company_weekly",
+    "company/company_illustrated",
+    "economy/economy_daily",
+    "economy/economy_weekly",
+    "economy/economy_illustrated",
+    "industry/industry_daily",
+    "industry/industry_weekly",
+    "industry/industry_illustrated",
+    "consumer/consumer_daily",
+    "consumer/consumer_weekly",
+    "consumer/consumer_illustrated",
+    "history/history_daily",
+    "history/history_weekly",
+    "history/history_illustrated",
+    "geography/geography_daily",
+    "geography/geography_weekly",
+    "geography/geography_illustrated",
+    "culture/culture_daily",
+    "culture/culture_weekly",
+    "culture/culture_illustrated",
+    "software/software_daily",
+    "software/software_weekly",
+    "software/software_illustrated",
+    "tech/tech_daily",
+    "tech/tech_weekly",
+    "tech/tech_illustrated"
+  ],
+  "deployment_files_match": 51,
+  "git_diff_check": "passed",
+  "video_health_unchanged": true
+}

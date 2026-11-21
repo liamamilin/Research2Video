@@ -65,6 +65,7 @@ it("names the real renderer phases for the manuscript UI", async () => {
   const { renderPhase } = await import("./videoNext");
   expect(renderPhase("STORYBOARD")).toBe("规划分镜");
   expect(renderPhase("VOICE_ALIGN")).toBe("生成旁白与对齐");
+  expect(renderPhase("WAITING_DRAW_THINGS")).toContain("Draw Things");
   expect(renderPhase("NEW_INTERNAL_STAGE")).toBe("后台处理中");
   expect(renderPhase(null)).toBe("");
 });

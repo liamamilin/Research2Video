@@ -1,0 +1,11 @@
+key: ai_science_updates
+name: AI 科研进展
+job: chains/ai_science_updates
+outputs:
+- ai_science_updates_each
+owned:
+- jobs/chains/ai_science_updates.yaml
+- config/matrices/ai_science_updates.yaml
+imported: false
+schedule_armed: false
+created_at: 1794985272.215283

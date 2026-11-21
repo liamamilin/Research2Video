@@ -40,9 +40,10 @@ def _job_state_path(job_name: str) -> str:
     return os.path.join(_STATE_DIR, f"{safe}.json")
 
 
-def _history_path(job_name: str) -> str:
+def _history_path(job_name: str, state_dir: Optional[str] = None) -> str:
     safe = job_name.replace("/", "_").replace("\\", "_")
-    return os.path.join(_HISTORY_DIR, f"{safe}.jsonl")
+    directory = _HISTORY_DIR if state_dir is None else os.path.join(state_dir, "history")
+    return os.path.join(directory, f"{safe}.jsonl")
 
 
 def _ensure_state_dir():
@@ -145,9 +146,9 @@ class StateManager:
             logger.error("Failed to write history for '%s': %s", job_name, e)
 
     @staticmethod
-    def get_history(job_name: str, limit: int = 50) -> list[dict]:
+    def get_history(job_name: str, limit: int = 50, *, state_dir: Optional[str] = None) -> list[dict]:
         """Return the last `limit` history entries for a job (most-recent first)."""
-        path = _history_path(job_name)
+        path = _history_path(job_name, state_dir)
         if not os.path.isfile(path):
             return []
         try:

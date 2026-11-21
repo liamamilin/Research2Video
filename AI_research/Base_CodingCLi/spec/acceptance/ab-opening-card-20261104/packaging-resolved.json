@@ -1,0 +1,83 @@
+{
+  "library": "autovideo-packaging",
+  "version": 2,
+  "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+  "selection": {
+    "preset": "common",
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "recipe": "chatgpt_acquisition",
+    "intro": {
+      "enabled": false
+    },
+    "outro": {
+      "enabled": false
+    },
+    "badge": {
+      "enabled": false
+    },
+    "sound": {
+      "enabled": false
+    }
+  },
+  "components": {
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+      "component": "stinger",
+      "enabled": false,
+      "seconds": 1.5
+    },
+    "outro": {
+      "component": "end_card",
+      "enabled": false,
+      "seconds": 2.5
+    },
+    "badge": {
+      "component": "corner_badge",
+      "enabled": false
+    },
+    "source_card": {
+      "component": "source_card",
+      "enabled": true,
+      "seconds": 4.5
+    },
+    "sound": {
+      "component": "synth_sting",
+      "enabled": false
+    }
+  },
+  "package": {
+    "accent": "#1f7a4d"
+  },
+  "badge": {
+    "text": "",
+    "color": "#1f7a4d"
+  },
+  "source_card": null,
+  "source_card_state": "no_sources",
+  "component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 2
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 2
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "sha256": "86bdf51a34f5deac3d210f9dbaf2d2494f58455872352047c110ade16abb360a"
+}

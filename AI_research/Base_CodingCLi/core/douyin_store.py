@@ -15,6 +15,9 @@ ACTIVE = ("QUEUED", "RUNNING")
 class DouyinStore:
     def __init__(self, state_dir: str):
         self.path = str(Path(state_dir) / "douyin.db")
+        sqlite_util.initialize_schema_once(self.path, self._initialize_schema)
+
+    def _initialize_schema(self):
         with self.connect(write=True) as conn:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS jobs (
@@ -29,6 +32,7 @@ class DouyinStore:
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_version
                     ON jobs(uid,script_id,version) WHERE kind='UPLOAD';
                 CREATE INDEX IF NOT EXISTS work_queue ON jobs(status,created_at);
+                CREATE INDEX IF NOT EXISTS jobs_parent ON jobs(uid,kind,parent_id);
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_author_comment ON jobs(uid,parent_id) WHERE kind='FIRST_COMMENT';
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_comment_work ON jobs(uid,work_id) WHERE kind='FIRST_COMMENT' AND work_id<>'';
                 CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL);
@@ -81,18 +85,32 @@ class DouyinStore:
                                      " WHERE id=?" + (" AND status=?" if expected else ""),
                                      (*fields.values(), key, *((expected,) if expected else ()))).rowcount)
 
-    def list(self, *, uid: str | None = None, kind: str | None = None, statuses: tuple[str, ...] = ()) -> list[dict]:
+    def list(self, *, uid: str | None = None, kind: str | None = None, parent_id: str | None = None,
+             parent_ids: list[str] | tuple[str, ...] | None = None,
+             kinds: tuple[str, ...] = (), statuses: tuple[str, ...] = (),
+             limit: int | None = None) -> list[dict]:
         terms, params = [], []
-        for key, value in (("uid", uid), ("kind", kind)):
+        for key, value in (("uid", uid), ("kind", kind), ("parent_id", parent_id)):
             if value is not None:
                 terms.append(f"{key}=?")
                 params.append(value)
+        if parent_ids is not None:
+            if not parent_ids:
+                return []
+            terms.append("parent_id IN (" + ",".join("?" for _ in parent_ids) + ")")
+            params.extend(parent_ids)
+        if kinds:
+            terms.append("kind IN (" + ",".join("?" for _ in kinds) + ")")
+            params.extend(kinds)
         if statuses:
             terms.append("status IN (" + ",".join("?" for _ in statuses) + ")")
             params.extend(statuses)
+        sql = ("SELECT * FROM jobs" + (" WHERE " + " AND ".join(terms) if terms else "") +
+               " ORDER BY created_at DESC" + (" LIMIT ?" if limit is not None else ""))
+        if limit is not None:
+            params.append(limit)
         with self.connect() as conn:
-            rows = conn.execute("SELECT * FROM jobs" + (" WHERE " + " AND ".join(terms) if terms else "") +
-                                " ORDER BY created_at DESC", params).fetchall()
+            rows = conn.execute(sql, params).fetchall()
         return [self.decode(row) for row in rows]
 
     def claim(self) -> dict | None:

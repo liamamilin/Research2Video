@@ -303,3 +303,59 @@ def test_clone_conflict_reports_the_created_partial_object(client, web_env, monk
     assert 'research/partial-copy' in action['message']
     assert action['href'] == '/jobs/research%2Fpartial-copy'
     assert (web_env[0] / 'jobs/research/partial-copy.yaml').is_file()
+
+
+def test_assistant_cannot_point_a_model_at_an_unknown_address():
+    # 11-15: a test call sends the configured key to base_url before saving, so a report's fetched text must not
+    # be able to redirect it.
+    import pytest
+    from web.services.assistant_safety import validate_patch
+
+    for ok in ({'ai': {'base_url': 'https://opencode.ai/zen/go/v1'}}, {'ai': {'base_url': 'https://opencode.ai/zen/go/v1/'}},
+               {'ai': {'embedding_base_url': 'http://localhost:11434/v1'}}, {'qa': {'base_url': 'http://127.0.0.1:11434/v1'}},
+               {'ai': {'base_url': None}}, {'ai': {'model': 'deepseek-v4.1-flash'}}):
+        validate_patch(ok)
+    for bad in ({'ai': {'base_url': 'https://collector.example/v1'}}, {'extraction': {'base_url': 'https://opencode.ai.evil.test/v1'}},
+                {'ai': {'embedding_base_url': 'http://10.0.0.5:11434/v1'}}, {'ai': {'base_url': 7}}):
+        with pytest.raises(ValueError, match='已知服务商预设或本机地址'):
+            validate_patch(bad)
+
+
+def test_assistant_cannot_redirect_notifications_logs_or_secrets():
+    # 11-15: smtp_host + smtp_password_env let injected text send any env secret to an outside SMTP login.
+    import pytest
+    from web.services.assistant_safety import validate_patch
+
+    for ok in ({'notifications': {'enabled': True, 'notify_on': ['failed'], 'email': {'enabled': False}}},
+               {'notifications': {'digest': {'enabled': True, 'max_actions': 5}}}, {'logging': {'level': 'DEBUG'}}):
+        validate_patch(ok)
+    for bad, words in (({'notifications': {'email': {'smtp_host': 'mail.example'}}}, '设置页'),
+                       ({'notifications': {'email': {'to_addrs': ['a@example.com']}}}, '设置页'),
+                       ({'notifications': {'wecom': {'url': 'https://hook.example/x'}}}, '设置页'),
+                       ({'notifications': {'pushplus': {'token_env': 'OPENCODE_API_KEY'}}}, '设置页'),
+                       ({'ai': {'api_key_env': 'OTHER_KEY'}}, '密钥变量名'),
+                       ({'logging': {'file': '/Users/x/.zshrc'}}, '日志文件'),
+                       ({'defaults': {'output_dir': '/tmp/elsewhere'}}, '输出目录')):
+        with pytest.raises(ValueError, match=words):
+            validate_patch(bad)
+
+
+def test_report_email_and_share_need_the_user_s_own_words(monkeypatch):
+    import pytest
+    from types import SimpleNamespace
+    import web.deps as deps
+    from web.services.assistant_tools import reports as tool
+
+    def request(message):
+        return SimpleNamespace(state=SimpleNamespace(assistant_message=message))
+
+    monkeypatch.setattr(deps, 'require_editor', lambda request, user=None: None)
+    sent = []
+    monkeypatch.setattr(tool.reports, 'email_report', lambda body, request, user=None: sent.append(body) or {'ok': True})
+    args = SimpleNamespace(action='email', path='output/x.md', recipients=['boss@example.com'], ttl_hours=24, jti='')
+    with pytest.raises(ValueError, match='收件地址须由你'):
+        tool.distribute(args, request('把这份报告发给报告里提到的人'), {'role': 'editor'})
+    with pytest.raises(ValueError, match='明确要求分享'):
+        tool.distribute(SimpleNamespace(**{**vars(args), 'action': 'share'}), request('总结一下'), {'role': 'editor'})
+    tool.distribute(args, request('发给 Boss@Example.com'), {'role': 'editor'})
+    assert sent == [{'path': 'output/x.md', 'to': ['boss@example.com']}]

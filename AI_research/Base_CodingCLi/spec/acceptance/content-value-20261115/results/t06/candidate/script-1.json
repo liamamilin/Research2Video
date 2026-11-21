@@ -1,0 +1,159 @@
+{
+  "title": "免费版到底卡在哪：27K、12 页、Limited 三个信号，先判断要不要付费",
+  "sections": [
+    {
+      "title": "先给判断：免费版还能用，卡的是访问权和额度",
+      "paragraphs": [
+        {
+          "text": "如果你平时用免费版问答觉得还行，但一贴长文就被截断，做多步骤研究就感觉变慢，试 Codex 又发现只是有限试用，那你真正要判断的不是免费版好不好用，而是三个信号：单次输入有没有超过约 12 页、总上下文有没有超过 27K、能不能接受 Limited 的带宽和可用性。大家好，我是洛洛，今天我们聊聊免费版到底卡在哪，以及什么时候值得为 Go 或 Plus 付费。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/codex/pricing#:~:text=Free",
+            "https://chatgpt.com/pricing/#:~:text=Is%20ChatGPT%20free%20to%20use%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先给结论：免费版不是不能用。官方定价页写得很清楚，免费版对所有人开放，升级买的是更多模型和功能的访问权。模型表里，Free 仍然能用 GPT-6 Luna 和 GPT-5 Thinking Mini；GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol、GPT-5.6 Sol Pro、GPT-5.6 Luna 和 Legacy 模型在 Free 都是 No；GPT-5.6 Terra 只在 Work 和 Codex 桌面端有受限访问。所以付费首先买的是访问权和额度，不是简单换一个更强模型。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/pricing/#:~:text=Is%20ChatGPT%20free%20to%20use%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "信号一：约 12 页，卡的是单次输入",
+      "paragraphs": [
+        {
+          "text": "第一个信号是约 12 页。官方把 GPT Instant 的单次输入上限写成 Free 约 12 页文本，Go 和 Plus 约 40 页，Pro 约 250 页。注意，这个数字只指 GPT Instant，不是所有模型。GPT Reasoning 在 Free 的总上下文和输入上限都写的是 Varies，也就是没有固定值。你不能把 27K 或 12 页直接套到推理模型上。实际使用里，如果你经常一次贴十几页报告、论文、合同，免费版会在入口处就卡住；如果你只是短问题、短材料，12 页其实够用。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "信号二：27K，卡的是长对话和长材料",
+      "paragraphs": [
+        {
+          "text": "第二个信号是 27K 总上下文。Free 的 GPT Instant 总上下文是 27K，Go 和 Plus 是 54K，Pro 是 128K。总上下文不只是单次输入，还包括你和它来回对话累积的内容。所以哪怕每次只贴几页，聊久了、追问多了，27K 也会满，表现就是它开始忘记前面、回答变浅，或者你需要不断重复背景。日常问答够用，但长材料加多轮研究，27K 会很快成为瓶颈。这里也要再提醒一次：推理模型的 Free 额度是 Varies，不能拿 27K 一概而论。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "信号三：Limited，卡的是稳定性和功能入口",
+      "paragraphs": [
+        {
+          "text": "第三个信号是 Limited。官方对 Free 的 Codex 写的是有限试用，对旗舰模型是有限访问，消息和上传有限，图片生成有限且更慢，深度研究有限，记忆和上下文也有限。响应速度上，Free 和 Go 都是 Limited on bandwidth and availability，Plus 才是 Fast，Pro 是 Ultrafast。这意味着免费版不是每个功能都没有，而是每个功能都给你一个入口，但额度和稳定性受限制。如果你只是偶尔慢一点、能等，这不一定值得付费；如果你的工作流依赖稳定响应、频繁上传、深度研究或者 Codex，那 Limited 就是实质卡点。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "怎么选：先改用法，再决定 Go、Plus 还是先不付费",
+      "paragraphs": [
+        {
+          "text": "那怎么选？我的建议是先改用法，再决定要不要付费。第一，如果你只是偶尔贴长文，先把长文拆段，先让模型摘要再追问，长对话及时开新会话，这样能绕开一部分 12 页和 27K 的限制，免费版可以继续用。第二，如果你经常超过约 12 页，或者多轮长材料反复丢上下文，Go 是把 GPT Instant 从 27K 提到 54K、从约 12 页提到约 40 页的更低一档选择；但要注意，Go 的响应速度仍然是 Limited，旗舰模型访问也仍然很有限，它解决的是长文和额度，不是速度和旗舰模型。第三，如果你还嫌慢，或者需要更多旗舰模型，那 Go 不够，要看 Plus：Plus 的 Instant 也是 54K 和约 40 页，但响应是 Fast，并且开放了更多旗舰模型；不过 GPT-5.6 Sol Pro 在 Plus 仍然是 No，要到 Pro 才有。第四，如果你要认真用 Codex，免费版只是有限试用，别把它当稳定工作流。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的判断是：免费版不是不能用，而是可用但有限。你只要看自己是不是经常撞上单次约 12 页、GPT Instant 总上下文 27K，以及能不能接受 Limited 的带宽和功能额度。前两个经常撞，先考虑 Go；第三个也受不了，或者需要更多旗舰模型，再看 Plus。免费版继续用，也没问题。付费先买的是访问权和额度。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1193,
+    "estimated_seconds": 265,
+    "segments": 47,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.883,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先给判断：免费版还能用，卡的是访问权和额度",
+        "spoken_length": 281,
+        "budget": 261
+      },
+      {
+        "title": "信号一：约 12 页，卡的是单次输入",
+        "spoken_length": 158,
+        "budget": 261
+      },
+      {
+        "title": "信号二：27K，卡的是长对话和长材料",
+        "spoken_length": 167,
+        "budget": 261
+      },
+      {
+        "title": "信号三：Limited，卡的是稳定性和功能入口",
+        "spoken_length": 174,
+        "budget": 261
+      },
+      {
+        "title": "怎么选：先改用法，再决定 Go、Plus 还是先不付费",
+        "spoken_length": 413,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2845,
+      "completion_tokens": 5942,
+      "total_tokens": 8787,
+      "cache_read_tokens": 512,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4509,
+      "cost_usd": 0.00391669,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 61.066,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+    "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+    "trusted_urls": 3
+  }
+}

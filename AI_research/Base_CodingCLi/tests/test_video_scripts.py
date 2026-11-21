@@ -118,6 +118,9 @@ class FakeLLM:
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
 
+    def close(self):
+        pass
+
     def chat(self, messages, **kwargs):
         from core.video import audit as video_audit
         from core.video import editorial
@@ -202,15 +205,20 @@ def llm(monkeypatch):
     return FakeLLM
 
 
-#: the jobs that declare ``topics:`` (core/video/topic_store.py), copied as shipped
-TOPIC_SOURCE_JOBS = ("monitoring/ai_flash_discovery.yaml", "practical_ai_intelligence/07_product_content_opportunities.yaml")
+#: topic-source Jobs copied into isolated test trees (live list skips ``jobs/archive/``)
+TOPIC_SOURCE_JOBS = (
+    ("monitoring/ai_flash_discovery.yaml", "monitoring/ai_flash_discovery.yaml"),
+    # archived PAI opportunities Job: still the deep_dive item-list fixture for video tests
+    ("archive/practical_ai_intelligence/07_product_content_opportunities.yaml",
+     "practical_ai_intelligence/07_product_content_opportunities.yaml"),
+)
 
 
 def install_topic_sources(jobs_dir: Path) -> None:
     shipped = Path(__file__).resolve().parents[1] / "jobs"
-    for rel in TOPIC_SOURCE_JOBS:
-        (jobs_dir / rel).parent.mkdir(parents=True, exist_ok=True)
-        (jobs_dir / rel).write_text((shipped / rel).read_text(encoding="utf-8"), encoding="utf-8")
+    for src_rel, dest_rel in TOPIC_SOURCE_JOBS:
+        (jobs_dir / dest_rel).parent.mkdir(parents=True, exist_ok=True)
+        (jobs_dir / dest_rel).write_text((shipped / src_rel).read_text(encoding="utf-8"), encoding="utf-8")
 
 
 @pytest.fixture
@@ -219,8 +227,10 @@ def video_env(web_env, monkeypatch):
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
     golden.install_recipes(tmp / "config", replace=(("  pipeline: adapt\n", "  pipeline: single\n"),))
-    # This fixture installs the legacy matrix's two source Jobs. The acquisition matrix has its own integration test.
+    # This fixture installs the legacy matrix's two source Jobs. Acquisition / science-chain
+    # recipes need their own Jobs and have dedicated integration coverage.
     (tmp / "config/video_recipes/chatgpt_acquisition.yaml").unlink()
+    (tmp / "config/video_recipes/chain_ai_science_updates.yaml").unlink(missing_ok=True)
     install_topic_sources(tmp / "jobs")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
@@ -397,6 +407,18 @@ def _write(**kwargs):
                     topic={"title": "crewAI eval", "fields": {}}, column_style="深度解读",
                     target_minutes=6, llm_config=None)
     return writer.write(**{**defaults, **kwargs})
+
+
+def test_episode_accepts_titled_citations_without_bypassing_source_filter(llm):
+    llm.replies = [script_json(citations={
+        (0, 0): [{"url": GOOD, "title": "公开的资料"}, {"url": OUTSIDE, "title": "无关资料"}],
+    })]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期", "content_mode": "episode"},
+                           column_style="", target_minutes=2, llm_config=None)
+    paragraph = written.sections[0]["paragraphs"][0]
+    assert len(llm.calls) == 1
+    assert paragraph["citations"] == [GOOD]
+    assert paragraph["evidence"] == "NEEDS_REVIEW"
 
 
 def test_writer_keeps_only_citations_the_report_traced(llm):

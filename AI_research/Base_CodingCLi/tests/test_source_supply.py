@@ -310,7 +310,7 @@ def test_announcements_pick_dated_sentences_only():
         "自 2026 年 12 月 1 日起，Plus 调整为 25 美元。"]
 
 
-def test_every_news_original_is_read_exa_comes_last_and_its_quota_stops_the_run(setup, monkeypatch):
+def test_every_news_original_is_read_and_paid_quota_stops_the_run(setup, monkeypatch):
     from core.errors import SearchUnavailableError
     engine, job, profile, _ = setup
     del profile["detail_pages"]
@@ -320,23 +320,55 @@ def test_every_news_original_is_read_exa_comes_last_and_its_quota_stops_the_run(
         replace(item(i, provider="rss", text="teaser"), url=f"https://news.example/a{i}", publish_date="2026-11-02")
         for i in range(8)])
     readers = []
-    def read(url, *, search_client=None, browser=True, **k):
-        readers.append((url[-2:], "exa" if search_client is not None else "direct"))
-        if url.endswith("a0") and search_client is None:
-            raise ValueError("403")  # direct and browser refused: only the paid reader is left
+    def read(url, *, search_client=None, browser=True, allow_paid=True, **k):
+        readers.append((url[-2:], bool(search_client and allow_paid)))
         return [SearchResult("Body", url, excerpts=["正文" * 3000])]
     monkeypatch.setattr(supply, "read_page", read)
     engine._source_options = lambda specs: {"search_client": SimpleNamespace(calls=0)}
     got, _, _, receipt = supply.collect(engine, job, profile)
-    assert receipt["detail_budget"]["successful"] == 8 and ("a0", "exa") in readers
+    assert receipt["detail_budget"]["successful"] == 8 and readers.count(("a0", True)) == 1
     assert sum(r.title == "Body" for r in got) == 8
-    def out_of_quota(url, *, search_client=None, **k):
-        if search_client is None:
-            raise ValueError("403")
-        raise RuntimeError("HTTP 402: insufficient credits")
+    def out_of_quota(url, *, search_client=None, allow_paid=True, **k):
+        if search_client is not None and allow_paid:
+            raise RuntimeError("HTTP 402: insufficient credits")
+        raise ValueError("403")
     monkeypatch.setattr(supply, "read_page", out_of_quota)
     with pytest.raises(SearchUnavailableError):
         supply.collect(engine, job, profile)
+
+
+def test_optional_article_details_keep_available_material_after_exa_quota_failure(setup, monkeypatch):
+    engine, job, profile, _ = setup
+    del profile["detail_pages"]
+    profile["jobs"][JOB]["optional_article_details"] = True
+    job["sources"].append("rss:https://news.example/feed")
+    feed = [replace(item(i, text=f"feed excerpt {i}", provider="rss"),
+                    url=f"https://news.example/a{i}", publish_date="2026-11-02") for i in range(3)]
+    monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: feed)
+    paid_reads = []
+
+    def read(url, *, search_client=None, allow_paid=True, **kwargs):
+        if url == "https://source.example/notes":
+            return [item(text="Official release notes")]
+        if url == feed[2].url:
+            return [SearchResult("Article 2", url, excerpts=["Usable original text"])]
+        if search_client is not None and allow_paid:
+            paid_reads.append(url)
+            raise RuntimeError("HTTP 402: insufficient credits")
+        raise ValueError("Direct page unavailable")
+
+    monkeypatch.setattr(supply, "read_page", read)
+    got, _, pending, receipt = supply.collect(engine, job, profile)
+
+    assert paid_reads == [feed[0].url]
+    details = {row["url"]: row for row in receipt["details"]}
+    assert details[feed[0].url]["status"] == details[feed[1].url]["status"] == "unavailable"
+    assert "HTTP 402" in details[feed[1].url]["fallback_error"]
+    assert details[feed[2].url]["status"] == "read"
+    block = supply.material_block(got, receipt)
+    assert "Official release notes" in block and "Usable original text" in block
+    assert "feed excerpt 0" in block and block.count("原网页未能补读") == 2
+    assert all("原网页未能补读" not in row["item"]["excerpts"] for row in pending["candidates"])
 
 
 def test_news_a_run_did_not_hand_over_is_owed_to_the_next_run(setup, monkeypatch):
@@ -419,3 +451,28 @@ def test_collect_offers_todays_new_section_before_a_backlog_from_days_ago(setup,
     monkeypatch.setattr(supply, "read_page", lambda *a, **k: page)
     got = supply.collect(engine, job, profile)[0]
     assert "new today" in got[0].excerpts[0]
+
+
+def test_collect_detail_reading_stops_at_time_budget(setup, monkeypatch):
+    engine, job, profile, _ = setup
+    del profile["detail_pages"]
+    profile["detail_timeout_seconds"] = 3.0
+    profile["jobs"][JOB]["optional_article_details"] = True
+    job["sources"] = ["rss:https://news.example/feed"]
+    feed = [replace(item(i, text=f"teaser {i}", provider="rss"),
+                    url=f"https://news.example/a{i}", publish_date="2026-11-02") for i in range(3)]
+    monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: feed)
+
+    now = [100.0]
+    monkeypatch.setattr(supply.time, "monotonic", lambda: now[0])
+
+    def slow_read(url, **k):
+        now[0] += 4.0
+        return [SearchResult("Body", url, excerpts=["完整正文" * 20])]
+
+    monkeypatch.setattr(supply, "read_page", slow_read)
+    got, _, _, receipt = supply.collect(engine, job, profile)
+    budget = receipt["detail_budget"]
+    assert budget["attempts"] == 1 and budget["successful"] == 1
+    assert budget["timed_out"] is True and budget["skipped_by_timeout"] == 2
+    assert sum("时间预算" in "\n".join(r.excerpts) for r in got) == 2

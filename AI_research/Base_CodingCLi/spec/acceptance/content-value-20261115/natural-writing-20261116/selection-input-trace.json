@@ -1,0 +1,248 @@
+{
+  "classification_previous_turn": "progress",
+  "case": "Selected Flash file-deletion topic from real capture",
+  "original_body": [
+    {
+      "source_id": "S191",
+      "title": "Rogue Claude AI tasked with renumbering pages accidentally deletes law professor's entire syllabus, one year of lecture notes — 'You're right to be angry. I deleted your files through my own carelessness,' humbled agent admits",
+      "body_sha256": "f5d999c33a99b3b3dc0bc6551f656c8ab7dc715a74a1ef8739fa7fd2f0f7828a",
+      "known_terms": {
+        "Dropbox": true,
+        "unrestricted": false,
+        "permission": false,
+        "version control": false,
+        "ambiguity": false
+      }
+    },
+    {
+      "source_id": "S21",
+      "title": "Claude asked to renumber pages deletes professor's syllabus, year of notes",
+      "body_sha256": "e617edbc8cb72e7ae312fe4e70f5e955e53315a5b758ea95795c3b4a98db62a3",
+      "known_terms": {
+        "Dropbox": false,
+        "unrestricted": false,
+        "permission": false,
+        "version control": false,
+        "ambiguity": false
+      }
+    }
+  ],
+  "first_source_research_call": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-full-sources/calls/1794817478062207000-request.json",
+  "refinement_call": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/same-supply-full-sources/calls/1794818212028332000-request.json",
+  "chain": [
+    "Research draft introduced possible causes and said the write scope had no limits.",
+    "Initial selection promoted those causes into the candidate promise.",
+    "The selected-source reread still received that tentative promise and narrative.",
+    "Supplement provided actual product and recovery background while prefacing it with the same three causes.",
+    "The author treated the three as the established circumstances."
+  ],
+  "trial": {
+    "flash_handle": 83947,
+    "t05_handle": 16021,
+    "control": "only the second pass is repeated, with the same source documents as the captured call",
+    "variable": "pass only the automatically selected topic, audience, source IDs and product routing when present; leave index-stage interpretations out of the full-source draft",
+    "status": "both refinement drafts reviewed",
+    "result": {
+      "flash": {
+        "status": {
+          "status": "selected",
+          "calls": 1,
+          "topics": 9,
+          "seconds": 130.7
+        },
+        "candidate_sha256": "192def8f620c4558833b070c15fa51dbf16b7988ed16dd1c62bc450906a8dc2c",
+        "source_ids_per_topic": [
+          4,
+          8,
+          3,
+          2,
+          2,
+          2,
+          2,
+          4,
+          2
+        ],
+        "only_refinement_handoff_changed": true,
+        "review": "Original article body and source IDs are intact. The changed refinement did not repeat the assumed three causes, but it still derives general advice. It separated the Fable price topic from the demonstration, creating some topic overlap."
+      },
+      "t05": {
+        "status": {
+          "status": "selected",
+          "calls": 1,
+          "topics": 4,
+          "seconds": 101.3
+        },
+        "candidate_sha256": "375e16fa97c747f41b6010a5bf4fa1144f06dc739a8f8794c4a94d98b8965f71",
+        "source_ids_per_topic": [
+          6,
+          2,
+          9,
+          3
+        ],
+        "only_refinement_handoff_changed": true,
+        "review": "Matching-prompt writing examples, identical-document comparison and existing usage/price limits remain. The broader pricing topic still cites Mistral. A new broad domestic product overview is thinner than the strongest items."
+      }
+    },
+    "writer_replay": {
+      "control_handle": 13674,
+      "candidate_handle": 25898,
+      "scope": "one selected Flash item with identical original documents; reports are real selector outputs, no enrichment",
+      "status": "both complete manuscripts inspected",
+      "variants": {
+        "control": {
+          "status": {
+            "status": "DRAFT",
+            "seconds": 124.27844862500206,
+            "error": null,
+            "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+          },
+          "collection": {
+            "mode": "same_selected_item_and_original_documents",
+            "material_sha256": "dbfb110ae09e3120d039f63f828878f5c349da498c42df56d4936cb285a2b205",
+            "source_ids": [
+              "S191",
+              "S21"
+            ],
+            "report_sha256": "317a5d733aed0b0d1319667e4b441248ef43c59a6a74131da107369f9e2510d6",
+            "kind": "selection-replay-control"
+          },
+          "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-control/script.txt",
+          "script_sha256": "01ef593d7d7a646c304e8ed40bd58935925948932c91560d19506e3ef457f102",
+          "report_sha256": "317a5d733aed0b0d1319667e4b441248ef43c59a6a74131da107369f9e2510d6",
+          "production": "flash_each",
+          "calls": [
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-control/calls/1794820309028059000-request.json",
+              "sha256": "dd10788074ed769c33a6be02e9188bd4d5957a581145e8d1d9e12a51ba94900c",
+              "response_sha256": "a7f513ce291373e7c12b3abbd8ff0f84213d871c8aae6024f83c478975b76499"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-control/calls/1794820336766289000-request.json",
+              "sha256": "38b963bbbbf826a05e665b88b54a522e9f14de83b1c493f25df35608dab0159e",
+              "response_sha256": "79ecea09a08f4d38b83caf6e3d0154ce24613d0715f7686d3dadfe54875d2a9d"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-control/calls/1794820376566207000-request.json",
+              "sha256": "ab83cfb62747c335d1d34e32466068c44058a6aa85d2313cca43a02fd722146a",
+              "response_sha256": "c85e4e506140bbf3884a2f8cec32492290ed85bb658d99c297442d00a0de0d00"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-control/calls/1794820414341226000-request.json",
+              "sha256": "313e52f4c8c40ee1dda7e212059b16b939e947f9d65a6564b8b98dec8ca76827",
+              "response_sha256": "faa5a81381619c3b34144cfb233e541fa8be53a89074e5f235ea0b90ad4bd3b1"
+            }
+          ],
+          "review": "Retains dates, workflow, recovery and original limits, but explicitly says three alleged conditions held simultaneously."
+        },
+        "candidate": {
+          "status": {
+            "status": "DRAFT",
+            "seconds": 128.28554037504364,
+            "error": null,
+            "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+          },
+          "collection": {
+            "mode": "same_selected_item_and_original_documents",
+            "material_sha256": "dbfb110ae09e3120d039f63f828878f5c349da498c42df56d4936cb285a2b205",
+            "source_ids": [
+              "S191",
+              "S21"
+            ],
+            "report_sha256": "cd96564a8065953cab292358ecb328006f5364523dd450ae202d3c5a583b0218",
+            "kind": "selection-replay-candidate"
+          },
+          "script": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-candidate/script.txt",
+          "script_sha256": "48f6a3a37375e21535f0704b69b0afb94439a08afdc65324242a36b549477a0e",
+          "report_sha256": "cd96564a8065953cab292358ecb328006f5364523dd450ae202d3c5a583b0218",
+          "production": "flash_each",
+          "calls": [
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-candidate/calls/1794820307161429000-request.json",
+              "sha256": "25458b3bdb741a68102c02e2a145e8d2be1b3fad70be963c65fa30c4d4d6d585",
+              "response_sha256": "0798542155d7923c85dcf8b374ba2b2e9ec99be0940b8706649205b772f9a48b"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-candidate/calls/1794820337049242000-request.json",
+              "sha256": "297b97f0cf3c9b493899595e3bfc09757f99f3069a19060fd7b40d5e41ee49aa",
+              "response_sha256": "36d5dc4998357e2db351fe911fa57ec27d2f2c74c7d325238b982a0174c73b62"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-candidate/calls/1794820390703749000-request.json",
+              "sha256": "90df662472c91f201eddcf4a996dd7a4af84c02ea9dc48e57b4e492dd1636a42",
+              "response_sha256": "4e050452a27e87de87a3bfd6de36b7d24ea7f0f75e511b927d6de63005ca28f5"
+            },
+            {
+              "request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-candidate/calls/1794820418931216000-request.json",
+              "sha256": "e135e880d2ac9f32082384cc89c64d9de8b703960eed0e4b406c87bba772af1d",
+              "response_sha256": "42f08ab7d78432274a90383fef2011f52a784c0e68682a88cdf8cb6907a11455"
+            }
+          ],
+          "review": "Retains deletion and recovery sequence, three concrete safeguards, and the difference between a case and incidence data. Removes the alleged three-cause finding. Still omits some unknown product/mode caveats and the detailed git operation; advises safeguards in a list."
+        }
+      },
+      "original_material_identical": true,
+      "first_author_system_identical": true
+    }
+  },
+  "adoption": {
+    "state": "active",
+    "details": "Source reread receives candidate identity, audience, source IDs, and tutorial routing/example evidence. Tentative promise, material, and subjective metadata stay in the search stage.",
+    "limit": "Evidence on two real selection briefs and one paired single-news writer case. The running new collection was started on selector version 6.",
+    "version": 7,
+    "files": {
+      "core/video/audience_strategy.py": {
+        "before_sha256": "f62f28e0c200e66c99dfda92b0e73b2abf6fc4e864b08320b93ed4a0d0ea6c5a",
+        "after_sha256": "688dd0c163f264af964fdf4f9a29e034a0b1af6b9660fe5368d66bbb406640e6"
+      },
+      "tests/test_audience_rollout.py": {
+        "before_sha256": "462f1f34d75eced7db790d1ccf2b196a9f1a14462fc61a4a9bdc4c406c621b3b",
+        "after_sha256": "1a2bfff0c88a56bb9304f737ee5a03b1d0548c695c3d2638e5dc54139b8a8970"
+      }
+    },
+    "test_result": "329 passed",
+    "activation": "selection-input-activation.json",
+    "actual_job_count": 35,
+    "actual_binding_count": 44,
+    "active_jobs": {
+      "ai_media/ai_tool_tutorials": "ai_tutorial",
+      "ai_media/daily_opensource_radar": "ai_opensource",
+      "ai_media/weekly_business_watch": "ai_business",
+      "ai_media/weekly_deep_research": "ai_deep",
+      "ai_media/weekly_model_arena": "ai_arena",
+      "chatgpt_acquisition/t01_product": "t01",
+      "chatgpt_acquisition/t02_scenarios": "t02",
+      "chatgpt_acquisition/t03_tutorials": "t03",
+      "chatgpt_acquisition/t04_testing": "t04",
+      "chatgpt_acquisition/t05_comparison": "t05",
+      "chatgpt_acquisition/t06_value": "t06",
+      "chatgpt_acquisition/t07_subscription": "t07",
+      "chatgpt_acquisition/t08_troubleshooting": "t08",
+      "chatgpt_acquisition/t09_updates": "t09",
+      "company/company_daily": "company_daily",
+      "company/company_weekly": "company_weekly",
+      "consumer/consumer_daily": "consumer_daily",
+      "consumer/consumer_weekly": "consumer_weekly",
+      "culture/culture_daily": "culture_daily",
+      "culture/culture_weekly": "culture_weekly",
+      "economy/economy_daily": "economy_daily",
+      "economy/economy_weekly": "economy_weekly",
+      "geography/geography_daily": "geography_daily",
+      "geography/geography_weekly": "geography_weekly",
+      "history/history_daily": "history_daily",
+      "history/history_weekly": "history_weekly",
+      "industry/industry_daily": "industry_daily",
+      "industry/industry_weekly": "industry_weekly",
+      "monitoring/ai_flash_discovery": "flash",
+      "science/science_daily": "science_daily",
+      "science/science_weekly": "science_weekly",
+      "software/software_daily": "software_daily",
+      "software/software_weekly": "software_weekly",
+      "tech/tech_daily": "tech_daily",
+      "tech/tech_weekly": "tech_weekly"
+    },
+    "matched_current_runtime_second_request": [
+      "flash",
+      "t05"
+    ]
+  }
+}

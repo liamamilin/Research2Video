@@ -58,7 +58,7 @@ def morning_of_the_20th(env) -> dict:
 def test_the_morning_of_the_20th_shows_up_with_its_cause(jobs, monkeypatch):
     run = morning_of_the_20th(jobs)
     monkeypatch.setattr(pilot, "fresh_topics", lambda spec, r: True)
-    monkeypatch.setattr(pilot, "pick_topics", lambda spec: [])  # the 19th's report was all written
+    monkeypatch.setattr(pilot, "pick_topics", lambda spec, notes=None: [])  # the 19th's report was all written
     pilot._tick_run(ap.get_run(run["id"]))
     done = ap.get_run(run["id"])
     # the cause is kept next to the outcome; it used to be overwritten by "no topics"

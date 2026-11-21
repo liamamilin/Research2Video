@@ -1,7 +1,10 @@
 name: T03 · 使用方法与教程
 description: 怎样才能用好 ChatGPT？ — 培养兴趣；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT 教程
 - ChatGPT 文件处理
 - ChatGPT 提示词
@@ -56,8 +59,13 @@ prompt: |
   记录实际使用的来源链接。
   若变化监测显示没有新增或修改，只输出本次暂无新题材及简短说明，不生成重复候选。
 output: output/chatgpt_acquisition/{date}_t03_tutorials.md
+audience_channel: t03
+content_strategy: audience-v1
 topics:
   alias: chatgpt_t03_tutorials
   format: items
   prefix: CGC
   refresh: true
+
+# After initial research and audience-led selection; preserves the existing writer.
+question_material: question-v1

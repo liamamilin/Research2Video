@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "seeds": {
+    "development": 2026111101,
+    "holdout": 2026111102
+  },
+  "files": {
+    "development.json": {
+      "sha256": "7d31eca953ea5789396fd7e2667fb771589c4a273908818cc6323e1fa72bc282",
+      "cases": 52
+    },
+    "holdout.json": {
+      "sha256": "847e945666f88ef3954198d38eead3a198b4372efae107eacdff5a1d17329f8e",
+      "cases": 52
+    }
+  },
+  "representative_indices": {
+    "flow": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7
+    ],
+    "material": [
+      0,
+      3
+    ],
+    "comparison": [
+      0,
+      3
+    ],
+    "motion": [
+      0
+    ],
+    "timing": [
+      0
+    ]
+  },
+  "holdout_policy": "Do not inspect or run holdout until implementation is frozen. If used to tune, add a new holdout cohort."
+}

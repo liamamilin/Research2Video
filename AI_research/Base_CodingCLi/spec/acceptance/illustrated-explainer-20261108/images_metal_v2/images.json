@@ -1,0 +1,54 @@
+{
+ "style": "极简几何",
+ "version": 2,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, short black hair, mustard yellow knit sweater, dark blue jeans steps through a winter doorway, one hand jerking back from a metal doorknob, the other hand resting on a wooden doorframe; a cold draft enters behind., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 32.2,
+   "kind": "scene"
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, The warm bare hand of short black hair, mustard yellow knit sweater, dark blue jeans hovers beside a cool metal block and a cool wood block; heat wisps leave the hand toward both, a steady stream toward metal and a weaker stream toward wood., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 30.1,
+   "kind": "analogy"
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, short black hair, mustard yellow knit sweater, dark blue jeans and curly brown hair tied back, green long-sleeve shirt, black trousers press fingertips onto a metal countertop and a wood countertop; each fingertip is a small cup of warm water, with a thick pipe descending from the metal side and a thin straw from the wood side., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 30.1,
+   "kind": "analogy"
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, A thick pipe from a warm fingertip cup runs through a large metal block into a room-sized reservoir; a thin straw from another cup ends in a bottle-cap-sized shallow pit that is full and blocked., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 30.4,
+   "kind": "analogy"
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, Cross-section of short black hair, mustard yellow knit sweater, dark blue jeans's skin under metal and wood: many tiny cold-sensor beads glow under metal, few under wood; beside it, curly brown hair tied back, green long-sleeve shirt, black trousers's fingertip reddens on hot metal but stays calm on hot wood., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 30.2,
+   "kind": "analogy"
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, Barefoot short black hair, mustard yellow knit sweater, dark blue jeans steps with one foot on tile and one on thick carpet; nearby a pot with a plain wooden handle sits on a stove, and a glass of water waits on the counter., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 37.5,
+   "kind": "scene"
+  }
+ ]
+}

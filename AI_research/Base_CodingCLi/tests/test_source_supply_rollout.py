@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from core import matrices, source_supply
+from core import knowledge_job, matrices, source_supply
 from core.config import load_job
 from core.cron import parse_schedule
 from core.source_discovery import search_queries
@@ -19,7 +19,9 @@ def test_rollout_profiles_match_existing_matrix_jobs_without_changing_production
     for key in TARGETS:
         profile = yaml.safe_load((Path('config/source_supply') / f'{key}.yaml').read_text())
         assert profile['matrix'] == key
-        assert set(profile['jobs']) == set(domain[key].jobs)
+        # knowledge Jobs (knowledge: true) read their own topic-idea sources, not the matrix's supply pool
+        news = [j for j in domain[key].jobs if not knowledge_job.enabled(load_job('jobs', j) or {})]
+        assert set(profile['jobs']) == set(news)
         assert not seen.intersection(profile['jobs'])
         seen.update(profile['jobs'])
         assert profile['timezone'] == 'Asia/Shanghai'
@@ -30,7 +32,7 @@ def test_rollout_profiles_match_existing_matrix_jobs_without_changing_production
         assert job['source_discovery'] == key
         assert job['enabled'] == profile['enabled']
         assert not any(field in job for field in ['production', 'topics', 'auto', 'publish'])
-        assert len(search_queries(profile)) == len(domain[key].jobs)
+        assert len(search_queries(profile)) == len(news)
         for canonical, column in profile['jobs'].items():
             original = load_job('jobs', canonical)
             assert original and column['mode'] in {'changes', 'context'}

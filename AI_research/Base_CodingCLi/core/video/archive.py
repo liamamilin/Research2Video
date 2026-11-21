@@ -179,14 +179,14 @@ def archive_jobs(conf: dict, *, dry_run: bool) -> dict:
             continue
         if _age_days(updated_at, folder.stat().st_mtime) < conf["keep_days"]:
             out["kept"] += 1
-            if not dry_run and status is not None and _rsync(folder, jobs_archive(conf["dir"]) / folder.name):
+            if not dry_run and status is not None and _rsync(folder, jobs_archive(conf["dir"]) / folder.name, checksum=True):
                 out["mirrored"] += 1
             continue
         size = _du(folder)
         if dry_run:
             out["moved"] += 1
             out["bytes"] += size
-        elif _move(folder, jobs_archive(conf["dir"]) / folder.name):
+        elif _move(folder, jobs_archive(conf["dir"]) / folder.name, checksum=True):
             out["moved"] += 1
             out["bytes"] += size
         else:
@@ -228,7 +228,7 @@ def restore_job(config_dir: str, job_id: str) -> bool:
         return False
     source = jobs_archive(conf["dir"]) / job_id
     dest = Path(conf["autovideo_data"]) / "jobs" / job_id
-    return source.is_dir() and _rsync(source, dest)
+    return source.is_dir() and _rsync(source, dest, checksum=True)
 
 
 def run(config_dir: str, state_dir: str, renders: list[dict], *, dry_run: bool = False) -> dict:

@@ -1,6 +1,7 @@
 """Information sources: the registry and how each source has been doing (web/services/source_catalog.py)."""
 
 from __future__ import annotations
+from web.services.chains import mutation
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Literal
@@ -54,6 +55,7 @@ class SourceFields(BaseModel):
     spec: str | None = None
     tags: list[str] | None = None
     note: str | None = None
+    enabled: bool | None = None
 
 
 class SourceChange(BaseModel):
@@ -85,15 +87,18 @@ def get_source(key: str, user=Depends(require_viewer)) -> dict:
 
 
 @router.post('', status_code=201)
+@mutation
 def create_source(body: SourceCreate, user=Depends(require_editor)) -> dict:
     return _change('create', body.id, body, user)
 
 
 @router.patch('/{key}')
+@mutation
 def update_source(key: str, body: SourceChange, user=Depends(require_editor)) -> dict:
     return _change('update', key, body, user)
 
 
 @router.delete('/{key}')
+@mutation
 def delete_source(key: str, expected_revision: str, user=Depends(require_editor)) -> dict:
     return _change('delete', key, SourceChange(expected_revision=expected_revision), user)

@@ -1,0 +1,7 @@
+{
+  "recorded_at": "2026-11-11T09:23:45.803789+00:00",
+  "changed": {
+    "g2/explanation.py": "3a7316ec9d24335148d5d913e56ceaa604bbe707704ab90bffb404585cc9399a"
+  },
+  "reason": "Independent final diff review found a remaining maxItems=5 prompt override inconsistent with the runtime limit 8. Removed override; no renderer, layout, camera, timing, corpus or measurement change. Held-out results cover fixed-structure rendering, not LLM planning quality."
+}

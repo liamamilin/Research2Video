@@ -1,0 +1,21 @@
+{
+  "title": "回归验证：任务重试与完成记录",
+  "input_mode": "narration",
+  "chapters": [
+    {
+      "title": "任务如何恢复",
+      "paragraphs": [
+        "一个视频任务先整理讲稿，再生成配音，最后把画面和声音合成视频。某一步暂时失败时，保留已有记录，继续处理后面的工作。",
+        "完成后，我们可以查看成片，下载视频，也可以回到任务详情，检查每个阶段的状态。旧的尝试仍然保留，方便比较。"
+      ]
+    }
+  ],
+  "duration_mode": "content",
+  "target_duration_sec": 30,
+  "video_form": "process_diagram",
+  "voice_id": "voxcpm_anchor",
+  "use_draw_things": false,
+  "packaging": {
+    "enabled": false
+  }
+}

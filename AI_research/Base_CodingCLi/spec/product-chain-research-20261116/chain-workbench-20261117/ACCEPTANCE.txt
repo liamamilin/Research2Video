@@ -1,0 +1,77 @@
+链路管理隔离应用 · 完整可用验收
+验收日期：2026-11-18
+结论：PLAN.txt中8项验收目标全部完成。现有链路与新建链路均通过真实业务入口完成来源→研究报告→自动讲稿→真实视频生成→回传→浏览器播放，原始批次自动收尾。
+
+使用入口
+http://chain-workbench.localhost:9252/chains
+服务持续运行，关闭浏览器不终止任务。账号与重启方式见README.txt；数据继续保存在外接盘。
+
+新人管理完整链路
+1. 创建：五步向导选择或新增来源、研究目标、单条/合集、受众与出片设置、手动/每天周期；不用手写YAML。真实来源预览、表单草稿、失败保留与修正可用。
+2. 修改：来源、研究范围、研究目标、周期与各输出可分别修改；添加/移除输出不覆盖其他设置。实际继承值可展开查看，合集时长语义与真实写稿规则一致。
+3. 运行：同一页启动，运行详情串联报告、研究日志、各份文稿、制作阶段与成片。失败后复用已有报告/讲稿继续，保留最初与历次继续的配置。
+4. 暂停与停止：未来研究周期、视频自动制作分别管理；停止本次批次与暂停未来生产分开。视频全部暂停时仍可只更新研究报告。
+5. 删除：先展示影响范围；共享研究、包括零视频输出的共享链路受到保护。最后引用删除后配置清理，已产生的报告、文稿、视频、运行历史继续保留，归档页只读。
+6. 跨Tab：Jobs、信息源、矩阵、产出、报告、文稿、视频、配方及周期关联同一业务对象；保留当前链路上下文，列表按链路筛选，原入口保存后在链路页生效。全局功能仍保持全局含义。
+
+8项验收目标对应证据
+1. 现有Flash接入：保留7个输出、13个显式来源、ai_media补充来源与历史文稿；真实运行和成片见下。
+2. 新建链路：research_updates从浏览器创建，真实OpenAI News RSS，单条与合集各一份；new-chain-preview.png、research_updates-completed-run.json。
+3. 创建/修改异常：final-management-tests.log，35次真实HTTP管理请求，覆盖角色、版本冲突、失败回滚与共享引用；创建表单失败修正及草稿恢复的界面回归通过。
+4. 跨Tab/删除：source-output-roundtrip.png、shared-research-survived.png、last-shared-delete-preview.png、deleted-chain-report.png、archived-chain-readonly.png；shared-delete-tests.json、source-scope-tests.log、related-tabs-tests.log、management-ui-tests.log。
+5. 运行管理：final-runner-tests.log、render-following-tests.json、chain-busy-tests.log、两条原批次完成记录；停止、更换声音、重试均在真实运行中走过。
+6. 两条真实完整链路：final-acceptance.json，四份最终回传MP4，ffprobe、完整解码、浏览器播放与下载证据全部通过。
+7. 浏览器及持久化：创建、独立修改、旧Tab修改、暂停/恢复、共享删除、归档历史、刷新及服务重启通过；390×844窄屏无横向溢出，mobile-chain.png。
+8. 持续使用与交付：README.txt、serve.py、storage.json、implementation/及implementation.patch；源码SHA清单已导出，最终构建、lint、git diff --check通过。lint为0错误、1条Outputs.tsx的依赖提示（已包含实际筛选依赖data/key）；构建保留原有大分块提示。
+
+真实端到端结果
+- 现有Flash：job-050ab505483c，Job monitoring/ai_flash_discovery。
+  原始运行751e7cc9b99e477a9c9973197db8d73d：DONE，两个项目DONE。
+  报告flash/2026-11-17_ai_flash_discovery_1.md。
+- 新链路：research_updates（OpenAI 科研与应用进展）。
+  原始运行604580ff078347c6815d2468068ed4e1：DONE，两个项目DONE。
+  报告chains/research_updates/2026-11-17.md。
+- 定时研究：acceptance_science于20:58自动触发，运行22ce54ff8b1447b1b8d6dbb7df2eda0a，DONE。
+  视频输出全部暂停时实际生成报告，不创建视频批次。周期从原Tab暂停后链路同步显示暂停。
+
+成片明细
+- Flash 合集：551.100秒，1920×1080 H.264/AAC；全片解码PASS、浏览器播放PASS。
+  文稿：ceaaf17bc5ff41849878b1159971c99e
+  渲染：f021f19f491f47cebe1b941599b4b3f7
+  文件：/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/state/video_renders/f021f19f491f47cebe1b941599b4b3f7/video.mp4
+- 新链路单条：163.967秒，1920×1080 H.264/AAC；全片解码PASS、浏览器播放PASS。
+  文稿：9541c940e2004129ab0a4288edfd822d
+  渲染：f9668022a3f2476f8057e880a2a1ae8a
+  文件：/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/state/video_renders/f9668022a3f2476f8057e880a2a1ae8a/video.mp4
+- Flash 单条：306.800秒，1920×1080 H.264/AAC；全片解码PASS、浏览器播放PASS。
+  文稿：115d4ebe6c1648dc8b2ede59a2e6542a
+  渲染：fbcaab3ec568444d8473881719fa2573
+  文件：/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/state/video_renders/fbcaab3ec568444d8473881719fa2573/video.mp4
+- 新链路合集：306.500秒，1920×1080 H.264/AAC；全片解码PASS、浏览器播放PASS。
+  文稿：4fd059213d4643cf9ea0d39b00e72687
+  渲染：251556e9b5d345dd86a092031fb99eac
+  文件：/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/state/video_renders/251556e9b5d345dd86a092031fb99eac/video.mp4
+
+最终机器验收
+verify_final_acceptance.py：PASS。
+自动检查两条原始批次DONE、四个项目DONE且渲染COMPLETED、四份最终文件全片解码通过、四份浏览器播放证据存在、浏览器下载与回传MP4完全相同。
+最终记录：runtime/evidence/final-acceptance.json。
+最终截图：final-chain-workbench.png、research-original-run-completed.png、flash-original-run-completed.png，以及四份*-playback.png。
+全部证据文件位于runtime/evidence（外接盘持久存储）。
+
+实际发现并解决的问题
+- 关系遗漏：统一新旧入口的关系规则，修复共享零输出链路的删除判断、归档页失效配置入口及来源页全局计数混入。
+- 配置/交互偏差：暂停后添加输出保持暂停，单条修改不覆盖合集，真实显示共享来源与周期，明确参考片长与合集语义。
+- 报告打不开：修复真实Job索引与外接盘相对路径映射。
+- 失败恢复：数据库短暂锁不再误报远端失败或重复提交；继续跟踪原任务，原始批次自动收尾。
+- 真实生成依赖：接通可用配音，建立本机字幕软件环境、继续使用外接盘固定模型；画面ID错误提供明确预期/实际反馈后，实际模型自动重试成功。
+- 页面不可用的慢查询：消除重复数据库迁移、全量历史读取及相同状态写回；真实成片详情连续响应0.115/0.042/0.042秒，16项发布目标相关回归通过。
+- 运行反馈：补齐中文阶段、操作等待/防重复提交、抽屉内错误提示及瞬时加载错误恢复。
+
+人工介入与失败保留
+本轮通过界面更换不可用VoxCPM声音为Kokoro小晓、停止和重试未完成任务；修复隔离副本依赖、数据库争用和查询性能后重启隔离应用。一次历史错误状态依据真实远端状态恢复，并撤销误报产生的重复排队，详见db-lock-render-reconciliation.json。
+没有手写替代研究报告或讲稿、没有替换模型画面产物、没有伪造成片、没有跳过字幕/渲染/成片检查等关键生产步骤。所有失败尝试及配置历史保留。
+详细开发过程保留在DEVELOPMENT-LOG.txt，其中阶段性“正在推进”记录属于历史；当前结论以本文件和final-acceptance.json为准。
+
+交付范围
+这是已接通真实服务、可持续使用的隔离链路管理应用。正式产品源码、配置、数据库、系统调度未应用本目录改动；实际平台发布不属于本轮范围。本轮验证链路管理和真实生成可用性，不对视频审美质量或传播效果作扩展结论。

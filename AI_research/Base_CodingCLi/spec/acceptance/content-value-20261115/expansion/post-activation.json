@@ -1,0 +1,61 @@
+{
+  "enabled_jobs": 45,
+  "flags": {
+    "monitoring/ai_flash_discovery": "flash",
+    "chatgpt_acquisition/t01_product": "t01",
+    "chatgpt_acquisition/t02_scenarios": "t02",
+    "chatgpt_acquisition/t03_tutorials": "t03",
+    "chatgpt_acquisition/t04_testing": "t04",
+    "chatgpt_acquisition/t05_comparison": "t05",
+    "chatgpt_acquisition/t06_value": "t06",
+    "chatgpt_acquisition/t07_subscription": "t07",
+    "chatgpt_acquisition/t08_troubleshooting": "t08",
+    "chatgpt_acquisition/t09_updates": "t09",
+    "ai_media/ai_tool_tutorials": "ai_tutorial",
+    "ai_media/daily_opensource_radar": "ai_opensource",
+    "ai_media/weekly_model_arena": "ai_arena",
+    "ai_media/weekly_business_watch": "ai_business",
+    "ai_media/weekly_deep_research": "ai_deep",
+    "science/science_daily": "science_daily",
+    "science/science_weekly": "science_weekly",
+    "science/science_illustrated": "science_illustrated",
+    "company/company_daily": "company_daily",
+    "company/company_weekly": "company_weekly",
+    "company/company_illustrated": "company_illustrated",
+    "economy/economy_daily": "economy_daily",
+    "economy/economy_weekly": "economy_weekly",
+    "economy/economy_illustrated": "economy_illustrated",
+    "industry/industry_daily": "industry_daily",
+    "industry/industry_weekly": "industry_weekly",
+    "industry/industry_illustrated": "industry_illustrated",
+    "consumer/consumer_daily": "consumer_daily",
+    "consumer/consumer_weekly": "consumer_weekly",
+    "consumer/consumer_illustrated": "consumer_illustrated",
+    "history/history_daily": "history_daily",
+    "history/history_weekly": "history_weekly",
+    "history/history_illustrated": "history_illustrated",
+    "geography/geography_daily": "geography_daily",
+    "geography/geography_weekly": "geography_weekly",
+    "geography/geography_illustrated": "geography_illustrated",
+    "culture/culture_daily": "culture_daily",
+    "culture/culture_weekly": "culture_weekly",
+    "culture/culture_illustrated": "culture_illustrated",
+    "software/software_daily": "software_daily",
+    "software/software_weekly": "software_weekly",
+    "software/software_illustrated": "software_illustrated",
+    "tech/tech_daily": "tech_daily",
+    "tech/tech_weekly": "tech_weekly",
+    "tech/tech_illustrated": "tech_illustrated"
+  },
+  "file_checksums": "79/79 match",
+  "health": {
+    "8766": {
+      "status": "ok",
+      "instance_id": "b67de9263e3a48a28d272d2b46523e93"
+    },
+    "8011": {
+      "status": "ok"
+    }
+  },
+  "busy_after": []
+}

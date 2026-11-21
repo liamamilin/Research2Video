@@ -29,7 +29,9 @@ reports turn into, and every script records which config made it.
 
 from __future__ import annotations
 
+from core.config_transaction import remove as remove_config_file
 import os
+import threading
 import time
 from dataclasses import dataclass, field, replace
 from typing import Optional
@@ -80,6 +82,7 @@ class Config:
     target_minutes: float = 0.0
     label: str = ""          # the recipe's label
     render: dict = field(default_factory=dict)
+    selection: dict = field(default_factory=dict)  # {"heat_min": N}: keep only items with B站 heat >= N (core/video/heat.py)
 
     @property
     def usable(self) -> bool:
@@ -130,12 +133,38 @@ def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None
     return key, ""
 
 
+def _selection(value) -> tuple[dict, str]:
+    """``selection: {heat_min: N, angle_min: M}`` (plays): which report items are worth making (core/video/heat.py),
+    and from what heat the hottest one is also told as 算账 / 上手 (core/video/angles.py). Absent: every item, once."""
+    if value is None:
+        return {}, ""
+    if not isinstance(value, dict) or set(value) - {"heat_min", "angle_min", "next_episode"}:
+        return {}, "selection 只认 heat_min（B站近 7 天同产品视频的播放门槛）、angle_min（多讲几个角度的门槛）和 next_episode（结尾预告下一期）"
+    out = {}
+    if "next_episode" in value:
+        if not isinstance(value["next_episode"], bool):
+            return {}, "selection.next_episode 应是 true 或 false"
+        if value["next_episode"]:
+            out["next_episode"] = True
+    for name in ("heat_min", "angle_min"):
+        number = value.get(name)
+        if number is None:
+            continue
+        if isinstance(number, bool) or not isinstance(number, int) or number < 0:
+            return {}, f"selection.{name} 应是不小于 0 的整数（播放数）"
+        out[name] = number
+    if "angle_min" in out and "heat_min" not in out:
+        return {}, "selection.angle_min 要和 heat_min 一起用：没有热度就不知道哪条最热"
+    return out, ""
+
+
 def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: dict,
            sources: dict, matrix_jobs: set[str]) -> Config:
     job, recipe_key = str(data.get("job") or "").strip(), str(data.get("recipe") or "").strip()
     audience = str(data.get("audience") or "").strip()
     errors: list[str] = []
-    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify", "auto", "auto_enabled_at", "render"}
+    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify", "auto", "auto_enabled_at", "render",
+                         "selection"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     from .production_settings import validate as validate_render
@@ -144,6 +173,9 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     except ValueError as exc:
         errors.append(str(exc))
         render_settings = {}
+    selection, why_selection = _selection(data.get("selection"))
+    if why_selection:
+        errors.append(why_selection)
     minutes = data.get("minutes")
     reverify = data.get("reverify")
     recipe_key, why = column_key(every_recipe, recipe_key, audience, minutes, reverify)
@@ -208,7 +240,40 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
                   reverify=bool(column is not None and column.research_mode == "job" and split != "whole"), auto=auto,
                   auto_enabled_at=float(data.get("auto_enabled_at") or 0),
                   audience=column.audience if column is not None else "",
-                  target_minutes=column.target_minutes if column is not None else 0.0, label=label, render=render_settings)
+                  target_minutes=column.target_minutes if column is not None else 0.0, label=label, render=render_settings,
+                  selection=selection)
+
+
+_LOAD_ALL_CACHE: dict[tuple[str, str], tuple[tuple, dict[str, Config]]] = {}
+_LOAD_ALL_LOCK = threading.Lock()
+
+
+def _production_cache_sig(config_dir: str, jobs_dir: str) -> tuple:
+    entries: list[tuple[str, int, int]] = []
+    for sub in (DIR, "video_recipes", "matrices", "content_columns"):
+        base = os.path.join(config_dir, sub)
+        if not os.path.isdir(base):
+            continue
+        try:
+            with os.scandir(base) as it:
+                for entry in it:
+                    if entry.name.endswith(".yaml") and not entry.name.startswith((".", "_")):
+                        st = entry.stat()
+                        entries.append((entry.path, st.st_mtime_ns, st.st_size))
+        except OSError:
+            continue
+    for root, dirs, files in os.walk(jobs_dir):
+        dirs[:] = [d for d in dirs if d not in ("archive", "_templates") and not d.startswith(".")]
+        for name in files:
+            if name.endswith(".yaml") and not name.startswith((".", "_")):
+                full = os.path.join(root, name)
+                try:
+                    st = os.stat(full)
+                    entries.append((full, st.st_mtime_ns, st.st_size))
+                except OSError:
+                    continue
+    entries.sort()
+    return tuple(entries)
 
 
 def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
@@ -218,6 +283,12 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
         names = sorted(f for f in os.listdir(folder) if f.endswith(".yaml") and not f.startswith((".", "_")))
     except OSError:
         return {}
+    cache_key = (os.path.abspath(config_dir), os.path.abspath(jobs_dir))
+    sig = _production_cache_sig(config_dir, jobs_dir)
+    with _LOAD_ALL_LOCK:
+        cached = _LOAD_ALL_CACHE.get(cache_key)
+        if cached is not None and cached[0] == sig:
+            return dict(cached[1])
     every_recipe = recipes.expanded(config_dir)
     # These are one request's snapshots, not a persistent cache. Loading them
     # inside _check rescanned every Job and reopened the topics DB per config.
@@ -260,6 +331,8 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
         if config.auto and config.split == "some":
             out[key] = replace(config, auto=0, errors=(*config.errors,
                 "盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方"))
+    with _LOAD_ALL_LOCK:
+        _LOAD_ALL_CACHE[cache_key] = (sig, dict(out))
     return out
 
 
@@ -288,15 +361,19 @@ def _write(config_dir: str, key: str, data: dict) -> None:
 
 def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "",
          minutes=None, reverify=None, auto=None, render=None) -> None:
+    path = os.path.join(directory(config_dir), f"{key}.yaml")
+    existing: dict = {}
+    if os.path.isfile(path):
+        with open(path, encoding="utf-8") as stream:
+            existing = yaml.safe_load(stream) or {}
     if render is None:
-        path = os.path.join(directory(config_dir), f"{key}.yaml")
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8") as stream:
-                render = (yaml.safe_load(stream) or {}).get("render")
+        render = existing.get("render")
     from .production_settings import validate as validate_render
     render = validate_render(render)
+    selection = existing.get("selection")  # set in the file; the form does not edit it, so a save keeps it
     _write(config_dir, key, {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes,
-                             "reverify": reverify, "auto": auto, **({"render": render} if render else {})})
+                             "reverify": reverify, "auto": auto, **({"render": render} if render else {}),
+                             **({"selection": selection} if selection else {})})
 
 
 def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:
@@ -317,7 +394,7 @@ def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:
 
 def remove(config_dir: str, key: str) -> bool:
     try:
-        os.remove(os.path.join(directory(config_dir), f"{key}.yaml"))
+        remove_config_file(os.path.join(directory(config_dir), f"{key}.yaml"))
         return True
     except FileNotFoundError:
         return False

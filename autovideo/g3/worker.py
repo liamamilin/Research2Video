@@ -214,7 +214,16 @@ class G2ProcessRunner:
         failed_stage = None
         pending_log = b""
         started = time.monotonic()
-        timeout_seconds = self.settings.runner_timeout_seconds + (300 if input_payload.get("package") else 0)
+        base_timeout_seconds = self.settings.runner_timeout_seconds + (300 if input_payload.get("package") else 0)
+        timeout_seconds = base_timeout_seconds
+        if job.get("duration_mode") == "content":
+            try:
+                source_chars = len(Path(job["source_abs_path"]).read_text(encoding="utf-8").strip())
+            except OSError:
+                source_chars = len(str(input_payload.get("source_text") or ""))
+            if source_chars > 2500:
+                # Long scripts can spend >45m in local MLX TTS before alignment.json is written.
+                timeout_seconds += min(3600, round((source_chars - 2500) / 4.2 * 3))
         workload_timeout_loaded = False
         input_analysis_loaded = False
         error_code = None
@@ -231,15 +240,18 @@ class G2ProcessRunner:
                 )
                 self.store.set_runner_pid(job_id, attempt_no, process.pid)
                 self.store.update_stage(job_id, attempt_no, active_stage, "RUNNING")
+                poll_tick = 0
                 while True:
-                    if not input_analysis_loaded:
+                    check_slow = (poll_tick % 5 == 0)
+                    poll_tick += 1
+                    if check_slow and not input_analysis_loaded:
                         try:
                             brief = json.loads((run_dir / "artifacts/input-brief.json").read_text())
                             self.store.record_input_analysis(job_id, attempt_no, brief)
                             input_analysis_loaded = True
                         except (OSError, ValueError, KeyError):
                             pass
-                    is_cancelled = self.store.cancel_requested(job_id)
+                    is_cancelled = self.store.cancel_requested(job_id) if check_slow else False
                     is_stopping = stop_event.is_set()
                     if is_cancelled or is_stopping:
                         self._stop_process(process)
@@ -250,11 +262,12 @@ class G2ProcessRunner:
                             self.store.mark_failed(job_id, attempt_no, active_stage, "WORKER_INTERRUPTED",
                                                    "服务停止时任务进程被中断，可以重启后重试", True)
                         return
-                    if job.get("duration_mode") == "content" and not workload_timeout_loaded:
+                    if check_slow and job.get("duration_mode") == "content" and not workload_timeout_loaded:
                         try:
                             measured = json.loads((run_dir / "artifacts/alignment.json").read_text())
                             # Preserve the startup/model allowance and add time for measured render work.
-                            timeout_seconds += max(0, float(measured["duration_seconds"])) * 6
+                            measured_budget = base_timeout_seconds + max(0, float(measured["duration_seconds"])) * 6
+                            timeout_seconds = max(timeout_seconds, measured_budget)
                             workload_timeout_loaded = True
                         except (OSError, ValueError, KeyError, TypeError):
                             pass
@@ -317,7 +330,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING", "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "RENDER_CONFIG_INVALID", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"} | PACKAGE_FINAL_ERRORS:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING", "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "RENDER_CONFIG_INVALID", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH", "MODEL_COST_BUDGET_EXCEEDED"} | PACKAGE_FINAL_ERRORS:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)
@@ -384,6 +397,7 @@ class G2ProcessRunner:
             (artifacts_dir / "prepared-source.txt", "prepared-source.txt", "text/plain; charset=utf-8"),
             (artifacts_dir / "creative-form-plan.json", "creative-form-plan.json", "application/json"),
             (artifacts_dir / "slideshow-images.json", "slideshow-images.json", "application/json"),
+            (artifacts_dir / "cover-frame.png", "cover-frame.png", "image/png"),
             (artifacts_dir / "information-plan.json", "information-plan.json", "application/json"),
             (artifacts_dir / "information-timing.json", "information-timing.json", "application/json"),
             (artifacts_dir / "diagram-plan.json", "diagram-plan.json", "application/json"),
@@ -414,6 +428,7 @@ class G2ProcessRunner:
                     raise ValueError("mix QA missing")
             except Exception:
                 self.store.mark_failed(job_id, attempt_no, "AUDIO_MIX", "MIX_UNVERIFIED", "混音缺少通过的验收报告", False)
+                self._write_failure_report(attempt_root, "MIX_UNVERIFIED", "混音缺少通过的验收报告", "AUDIO_MIX")
                 return
             artifact_specs = [(path, "unmixed.mp4" if name == "video.mp4" else name, kind) for path, name, kind in artifact_specs]
             artifact_specs += [(mix_dir / "video.mp4", "video.mp4", "video/mp4"),
@@ -430,6 +445,7 @@ class G2ProcessRunner:
                     raise ValueError("brand QA missing")
             except (OSError, ValueError):
                 self.store.mark_failed(job_id, attempt_no, "PACKAGE", "BRAND_UNVERIFIED", "品牌成片缺少通过的检查报告", False)
+                self._write_failure_report(attempt_root, "BRAND_UNVERIFIED", "品牌成片缺少通过的检查报告", "PACKAGE")
                 return
             artifact_specs = [(path, "unbranded.mp4" if name == "video.mp4" else name, kind)
                               for path, name, kind in artifact_specs]
@@ -447,6 +463,7 @@ class G2ProcessRunner:
         if not any(item["name"] == "video.mp4" for item in artifacts):
             self.store.mark_failed(job_id, attempt_no, "QUALITY_CHECK", "OUTPUT_MISSING",
                                    "视频文件缺失，不能将任务标记为完成", False)
+            self._write_failure_report(attempt_root, "OUTPUT_MISSING", "视频文件缺失", "QUALITY_CHECK")
             return
         self.store.mark_completed(job_id, attempt_no, artifacts)
 
@@ -479,10 +496,16 @@ class SingleWorker:
             self._lock_file.close()
             self._lock_file = None
             return False
-        if self.on_start:
-            self.on_start()
-        self.thread = threading.Thread(target=self._loop, name="autovideo-single-worker", daemon=True)
-        self.thread.start()
+        try:
+            if self.on_start:
+                self.on_start()
+            self.thread = threading.Thread(target=self._loop, name="autovideo-single-worker", daemon=True)
+            self.thread.start()
+        except Exception:
+            self.thread = None
+            self._lock_file.close()
+            self._lock_file = None
+            raise
         return True
 
     def stop(self) -> None:
@@ -500,6 +523,7 @@ class SingleWorker:
                 self._lock_file = None
 
     def _loop(self) -> None:
+        idle_polls = 0
         while not self.stop_event.is_set():
             try:
                 job = self.store.claim_next()
@@ -507,18 +531,34 @@ class SingleWorker:
                 # A temporary SQLite lock or filesystem outage must not kill
                 # the sole queue consumer for the rest of the app's lifetime.
                 logger.exception("Could not read video queue; retrying")
+                idle_polls = 0
                 self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds))
                 continue
             if job is None:
                 try:
                     if self.idle_task and self.idle_task(self.stop_event):
+                        idle_polls = 0
                         continue
                 except Exception:
                     logger.exception("Video worker idle task failed; queue remains active")
-                self.stop_event.wait(self.settings.worker_poll_seconds)
+                base = self.settings.worker_poll_seconds
+                delay = base if idle_polls == 0 else min(max(2.0, base), base * (2 ** min(idle_polls, 3)))
+                idle_polls += 1
+                self.stop_event.wait(delay)
                 continue
+            idle_polls = 0
             try:
                 self.processor.execute(job, self.stop_event)
             except Exception as exc:
-                self.store.mark_failed(job["job_id"], job["attempt_no"], job.get("active_stage") or "PLAN",
-                                       "WORKER_UNEXPECTED_ERROR", f"{type(exc).__name__}: {str(exc)[:300]}", True)
+                # Resolve this claimed job before consuming another. A temporary
+                # DB outage must neither kill the consumer nor strand RUNNING rows.
+                while True:
+                    try:
+                        self.store.mark_failed(job["job_id"], job["attempt_no"], job.get("active_stage") or "PLAN",
+                                               "WORKER_UNEXPECTED_ERROR", f"{type(exc).__name__}: {str(exc)[:300]}", True)
+                        break
+                    except Exception:
+                        logger.exception("Could not record failure for video job %s; retrying", job["job_id"])
+                        if self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds)):
+                            # Startup recovery will finish this persisted RUNNING job.
+                            return

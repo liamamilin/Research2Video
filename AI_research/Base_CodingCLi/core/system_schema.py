@@ -71,6 +71,53 @@ SCHEMA = {
     'defaults': {'output_dir': str},
     'logging': {'level': ('enum', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'NOTSET'), 'file': str},
     'cleanup': {},
+    'network': {
+        'proxy': {
+            'enabled': bool,
+            'host': str,
+            'port': (int, 1, 65535),
+            'sidecar_port': (int, 1, 65535),
+            'auto_start': bool,
+            'core_path': str,
+            'config_path': str,
+            'data_dir': str,
+            'work_dir': str,
+            'startup_timeout_seconds': NONNEGATIVE_NUMBER,
+            'required': bool,
+            'no_proxy': str,
+        },
+    },
+    # Declared-source page readers after HTTP/Chrome fail; OpenCode before Exa.
+    'page_readers': {
+        'opencode_cli': {
+            'enabled': bool,
+            'binary': str,
+            'timeout_seconds': POSITIVE_INT,
+            'workdir': str,
+        },
+    },
+    # OpenCode CLI gather worker (materials only; report agent still writes).
+    # apply_to: all = searching Jobs; fetch_only = search:false Jobs; flagged = explicit only.
+    # search:false Jobs are excluded from "all" unless Job sets opencode_gather: true.
+    'gather': {
+        'opencode_cli': {
+            'enabled': bool,
+            'binary': str,
+            'workdir': str,
+            'model_provider': str,
+            'free_models': STRINGS,
+            'paid_models': STRINGS,
+            'probe_timeout_seconds': POSITIVE_INT,
+            'gather_timeout_seconds': POSITIVE_INT,
+            'model_cache_seconds': NONNEGATIVE_INT,
+            'apply_to': ('enum', 'fetch_only', 'flagged', 'all'),
+            'pipeline_mode': ('enum', '', 'legacy', 'opencode_topic_v1'),
+            'discovery_timeout_seconds': POSITIVE_INT,
+            'per_topic_timeout_seconds': POSITIVE_INT,
+            'max_concurrency': POSITIVE_INT,
+            'soft_filter_llm': bool,
+        },
+    },
 }
 
 

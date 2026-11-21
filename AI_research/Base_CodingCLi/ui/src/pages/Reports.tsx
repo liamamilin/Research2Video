@@ -1,3 +1,4 @@
+import { useChainScope } from '@/lib/use-chain-scope';
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { listReports, getReportTree, searchReports, getReportCategories, listTags, updateReportMeta } from "@/api";
@@ -71,6 +72,9 @@ function pageWindow(page: number, pages: number, span = 2): (number | "…")[] {
 }
 
 export function ReportsPage() {
+  const chainScope=useChainScope();
+  const chainKey=chainScope.key;
+  const chainJob=chainKey?(chainScope.data?.job||"__loading_chain__"):undefined;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -137,7 +141,7 @@ export function ReportsPage() {
 
   const openReport = (path: string) => {
     patchUi({ lastVisited: path });
-    navigate(`/reports/view?path=${encodeURIComponent(path)}`);
+    navigate(`/reports/view?path=${encodeURIComponent(path)}${chainKey?"&chain="+encodeURIComponent(chainKey):""}`);
   };
 
   // Search state
@@ -163,7 +167,7 @@ export function ReportsPage() {
   const [tags, setTags] = useState<{ tag: string; count: number }[]>([]);
   // Time filters key on the report's own date (from its path), not the file
   // mtime: a backfill run would otherwise make June look like today.
-  const [range, setRange] = useState("today");
+  const [range, setRange] = useState(chainKey?"all":"today");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [latestOnly, setLatestOnly] = useState(false);
@@ -203,12 +207,13 @@ export function ReportsPage() {
 
   const activeFilterParams = useCallback(() => ({
     category: category || undefined,
+    job: chainJob,
     favorite: scope === "fav" ? true : undefined,
     unread: scope === "unread" ? true : undefined,
     tag: tag || undefined,
     latest_round: latestOnly || undefined,
     ...dateBounds(),
-  }), [category, scope, tag, latestOnly, dateBounds]);
+  }), [category, scope, tag, latestOnly, dateBounds, chainJob]);
 
   const fetchReports = useCallback(async (
     pageNum: number,
@@ -307,15 +312,15 @@ export function ReportsPage() {
     const seq = ++searchSeq.current;
     if (previousSearch.current !== term) { setSearchResults([]); setSearchTotal(0); previousSearch.current = term; }
     setSearchedQuery(term); setSearchError("");
-    setSearchParams(term ? { q: term } : {}, { replace: true });
+    setSearchParams({...(chainKey?{chain:chainKey}:{}),...(term?{q:term}:{})}, { replace: true });
     if (!term) { setSearchResults([]); setSearchTotal(0); setSearching(false); return; }
     setSearching(true);
     try {
-      const data = await searchReports(term, 50);
+      const data = await searchReports(term, 50, chainJob);
       if (seq === searchSeq.current) { setSearchResults(data.results); setSearchTotal(data.total); }
     } catch (e) { if (seq === searchSeq.current) setSearchError(errorMessage(e, "全文搜索失败")); }
     finally { if (seq === searchSeq.current) setSearching(false); }
-  }, [query, setSearchParams]);
+  }, [query, setSearchParams, chainJob, chainKey]);
   useEffect(() => {
     if (initialSearch.current) { initialSearch.current = false; if (query.trim()) void handleSearch(); }
   }, [handleSearch, query]);
@@ -350,7 +355,7 @@ export function ReportsPage() {
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
-        {isSearching ? <button className="btn text-xs" onClick={() => { ++searchSeq.current; setQuery(""); setSearchedQuery(""); setSearchError(""); setSearching(false); setSearchParams({}); }}>退出搜索</button> : null}
+        {isSearching ? <button className="btn text-xs" onClick={() => { ++searchSeq.current; setQuery(""); setSearchedQuery(""); setSearchError(""); setSearching(false); setSearchParams(chainKey?{chain:chainKey}:{}); }}>退出搜索</button> : null}
         <button onClick={handleSearch} disabled={searching} className="btn btn-primary">
           {searching ? "搜索中..." : "搜索"}
         </button>

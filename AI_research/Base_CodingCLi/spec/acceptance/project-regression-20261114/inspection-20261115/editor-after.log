@@ -1,0 +1,18 @@
+
+> ai-research-ui@0.1.0 test
+> vitest run --run src/lib/use-script-editor.test.tsx src/pages/VideoScriptView.test.tsx
+
+
+ RUN  v3.2.7 /private/tmp/video-workflow-regression-20261115/source/AI_research/Base_CodingCLi/ui
+
+ ✓ src/lib/use-script-editor.test.tsx (2 tests) 9ms
+stderr | src/pages/VideoScriptView.test.tsx > Video script review > uses the topic heading before the first draft while RESEARCHING
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/pages/VideoScriptView.test.tsx (39 tests) 739ms
+
+ Test Files  2 passed (2)
+      Tests  41 passed (41)
+   Start at  10:29:30
+   Duration  1.85s (transform 300ms, setup 0ms, collect 701ms, tests 747ms, environment 598ms, prepare 97ms)

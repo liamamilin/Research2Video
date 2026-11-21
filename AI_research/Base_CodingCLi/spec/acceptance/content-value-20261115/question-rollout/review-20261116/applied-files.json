@@ -1,0 +1,112 @@
+[
+  {
+    "path": "core/report_title.py",
+    "before": null,
+    "after": "75409edf9765d463bb402659cc4c9a7a04447dd1964481f870fc5e2ca6b8b8e8"
+  },
+  {
+    "path": "core/engine.py",
+    "before": "0498e84d998c83ea4fbb4d176778051825b497a541e815f963b778ae20849af7",
+    "after": "b61e9eb990be2e2209480c65e112187d9a3db03b33a12da63bdf939b9054cfd1"
+  },
+  {
+    "path": "core/knowledge_job.py",
+    "before": "b12a5b9844847feb753a36a79395816bb0ddefc0af573f3e5d95ec5fca229569",
+    "after": "778cb00bee63ad371d4896c122477424ce81fcf853722161b1e4bb00daaafa11"
+  },
+  {
+    "path": "core/video/audience_profiles.py",
+    "before": "b75ec26b9476a1491966b97e737ad19f2d9fa596cbb65554aa35379d54478cda",
+    "after": "d0b307b98a7f111ce88dea2f52cc489ca0cd5dcc7898ae9b7121bedc5ab16857"
+  },
+  {
+    "path": "core/video/question_material.py",
+    "before": "f3855ff93d3234ad35ac27d5fc8f993302bd6175870dc7a09e2255375dd43148",
+    "after": "378cefd988e9df05ef13fe7409f966204eda402a7ea4a9596128580e03b1ac1b"
+  },
+  {
+    "path": "core/video/story_pool.py",
+    "before": "d47c3ed1f7ba7bd6e2c46c4ac1d30e9fb0d377129402b9fee086978662f774b2",
+    "after": "cc38b0f3f4812ec6b3ad1c1e8bbec45cb9cf3ec9b564b68e4d72b4a146ccbe19"
+  },
+  {
+    "path": "core/video/content_guard.py",
+    "before": "d21704cf72f2f8131a1d587aa50e915fb2cecf9d44885f12a09bfdf59995c635",
+    "after": "f6b6359511605629e5e26dee8784baa9a321f13a33768b8a29c79edb1a755f9c"
+  },
+  {
+    "path": "core/video/audience_strategy.py",
+    "before": "5caa8a819c7f95a69c9b39361c64bf54061e25668dfbccf2339f13672e52a88c",
+    "after": "7e518bc40ee7e808aa50fd3e3f75390b847c30e475d11daf5870d4ffccf4146a"
+  },
+  {
+    "path": "core/video/reports.py",
+    "before": "8859c4e03a8272357f85565c8123d3fcb609ce76338e65191ae6367a5cf30f1c",
+    "after": "58e2ea8c2185c6a8e331f8e8f97016241f0da91fa080695b0875df13d404b9ac"
+  },
+  {
+    "path": "core/video/adapt/common.py",
+    "before": "9e8bbc98104b7705de6fdef4fc6fe281baae664e046104a572177a220d286f5a",
+    "after": "19b62f55ea89ef4ac384f0bc6811ac76a3fcc6e45f88813a89bddc9099a8deea"
+  },
+  {
+    "path": "web/indexer/scanner.py",
+    "before": "532d031edabd9b24ad1e94b72f671dbc83083e541906acdfe11520d4503d9372",
+    "after": "427afeb27b0adac50aaf98a23f97fd6496d3c592bf75838bd96712fb87b4a507"
+  },
+  {
+    "path": "web/services/video_autopilot.py",
+    "before": "6c179cbacc1644ddfaf7ccec80cc6eaf6f0580b1c945e5a686db8924d0aa0ba2",
+    "after": "9de49361b7968622ef1d4e6ee511d7a1d69cbb728d35a479c6e0cd184c1d1616"
+  },
+  {
+    "path": "web/services/video_workflow.py",
+    "before": "9173af8542030d6989d2d97f364554fa4a22453db25a058e1f89a21d7bdcb2d2",
+    "after": "4e016bf72cdd47462b92b11f6a0a13b77fc66fea9caca08d9d2eb0acea4f59be"
+  },
+  {
+    "path": "web/services/assistant_tools/reports.py",
+    "before": "defdd6bca2f79c4a04bedc33c09466faf402d7309c91e93a96e440e12144ae10",
+    "after": "78f9b9b7db0203d88fb5266a9ec1d71bcd15dc3798814bd771c7d9180fac2dae"
+  },
+  {
+    "path": "tests/test_remember_and_gateway_api.py",
+    "before": "9ee530bcf16ef43c8d252723d6240a2d48da18d26b63921e839278efea39933c",
+    "after": "532d9fa6ed7a47d59cfc44432cead4fee342319497b4d7a0a80d6ec8771b499c"
+  },
+  {
+    "path": "tests/test_flash_joint_rollout.py",
+    "before": null,
+    "after": "0c92111c16308c12fae292a925d3b3256baf5e970a55e9becb0de9f46ac12b2c"
+  },
+  {
+    "path": "tests/test_video_story_pool.py",
+    "before": "302c791cdfbf150224fb1f15afd14557d7ab12e8d7e656d44239fca416d5bc1f",
+    "after": "170690da5f8d238e21577770fa3ca70fbf5d9cc8b3851479c96df2df9f6ae744"
+  },
+  {
+    "path": "tests/test_question_material.py",
+    "before": "823d1372f48241320324f4b6565fa7d7beda7e8ee01827c47d24060e75f95bb5",
+    "after": "382064cc4edca9414b626ff59fc459b2fddb01e23b674657a04e9699d8f019b7"
+  },
+  {
+    "path": "tests/test_video_scripts.py",
+    "before": "7d900d25c895e3468f21d592c652da33b86614fb3841754176f64d0640a926fc",
+    "after": "fedd710b2ae1ea985ab12f3cbd0961be62300bd367184d57c7a4a2f45805335a"
+  },
+  {
+    "path": "tests/test_job_rollout_recovery.py",
+    "before": null,
+    "after": "e00d3a91ce79bb796dfecfc8e2d14a1565c2bb7374e434a140d3b90021922801"
+  },
+  {
+    "path": "tests/test_audience_rollout.py",
+    "before": "78125f7a4f752417ece325271017d7d69cc358829c5a0ca89c90e40965cb673c",
+    "after": "98e30f47473df09691923a5e5317c24308147d0c5c4e9eae0cc9c535d84b8a01"
+  },
+  {
+    "path": "config/content_strategy.yaml",
+    "before": "3f356999aea011325243a66d5ff192cb5df1da6ada1ab5392a18cd4701f88edd",
+    "after": "851216256284b4f4c06186d87fc63daf04b32b4e67aaf2f97d375988f58b4a25"
+  }
+]

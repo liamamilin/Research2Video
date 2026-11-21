@@ -1,0 +1,11 @@
+离线业务入口核对：24份实际组装请求，模型调用前停止
+
+执行 capture_candidate_entry.py 的 control 与 candidate 两个独立进程。复制当前代码/config/jobs到各自临时目录，所有数据库、锁、状态和报告写入都在隔离目录；未复制凭证。socket连接被禁止，LLMClient.chat捕获messages后立即停止，无外发、无模型回复、无文稿生成。
+
+10个知识job分别经 ResearchEngine.run_job -> knowledge分支 -> ResearchAgent.run_fetch_only -> _fetch_call 走到请求边界。候选逐项去除了机制/例子/误解数量及末尾重复的保留结构要求，保留自身题库、知识模式和领域解释要求。这里以空信息源和空历史替代外部取材，仅证明配置和分派可达，不是正常取材的端到端证据。
+
+T05经 video_executor.create -> video_workflow.start -> run -> _write -> manuscript_workflow.write -> writer 写稿请求。原始报告来自冻结的真实T05报告，由原有from_item读取相同条目。验证创建者使用项目既有prompt-quality-validation，避开选题和发布，因此不证明真实选题流程。control的新建请求带旧三维度/结尾表要求；candidate新建请求带新notes，旧要求没有从同名未启用profile回流。
+
+另外克隆旧script.content_context，调用run_rewrite：两边提示词完全相同，都保留旧三维度要求。这是旧稿保存创作上下文的现有行为，不把它伪装成新配置未生效。对新候选的效果对照需从新建入口加载当前配置；不擅自回写已有文稿快照。
+
+本轮结论：候选位置正确；静态字段改动能够进入初始研究/新建写稿请求。全稿自然度、具体性、解释深度、正常选题与模型修订仍未验证。没有采用生产改动。

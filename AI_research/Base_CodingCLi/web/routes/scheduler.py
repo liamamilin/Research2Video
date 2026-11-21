@@ -1,6 +1,7 @@
 """A unified schedule view; cron editing and read-only calendar previews."""
 
 from __future__ import annotations
+from web.services.chains import mutation
 
 import os
 import shlex
@@ -205,6 +206,7 @@ def get_scheduled(schedule_id: str, user=Depends(require_admin)):
 
 
 @router.post("")
+@mutation
 def add_scheduled(payload: ScheduleCreate, user=Depends(require_admin)):
     """Every new job plan goes to the durable dispatcher, never to cron."""
     job_id = payload.id.strip()
@@ -218,6 +220,7 @@ def add_scheduled(payload: ScheduleCreate, user=Depends(require_admin)):
 
 
 @router.put("/{job_id}")
+@mutation
 def edit_scheduled(job_id: str, payload: ScheduleEdit, user=Depends(require_admin)):
     """Update a schedule without resetting its paused state."""
     if _is_system_job(job_id):
@@ -242,6 +245,7 @@ def edit_scheduled(job_id: str, payload: ScheduleEdit, user=Depends(require_admi
 
 
 @router.delete("/{job_id}")
+@mutation
 def remove_scheduled(job_id: str, user=Depends(require_admin)):
     """Remove one schedule, preserving all unrelated entries.
 
@@ -263,6 +267,7 @@ def remove_scheduled(job_id: str, user=Depends(require_admin)):
 
 
 @router.post("/{job_id}/restore")
+@mutation
 def restore_scheduled(job_id: str, user=Depends(require_admin)):
     """Put a deleted system agent back and load it again."""
     if not _is_system_job(job_id):
@@ -275,6 +280,7 @@ def restore_scheduled(job_id: str, user=Depends(require_admin)):
 
 
 @router.put("/{job_id}/toggle")
+@mutation
 def toggle_scheduled(job_id: str, payload: ScheduleToggle, user=Depends(require_admin)):
     """Set enabled state idempotently."""
     if _is_system_job(job_id):

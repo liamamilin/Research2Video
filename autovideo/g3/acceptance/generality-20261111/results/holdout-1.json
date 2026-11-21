@@ -1,0 +1,443 @@
+{
+  "split": "holdout",
+  "corpus_sha256": "34d70f88d6c386ecc273fe84f112570baff56830663caeab69f87b632178d5f2",
+  "summary": {
+    "comparison": {
+      "cases": 8,
+      "with_issues": 0
+    },
+    "flow": {
+      "cases": 20,
+      "with_issues": 9
+    },
+    "material": {
+      "cases": 8,
+      "with_issues": 0
+    },
+    "motion": {
+      "cases": 8,
+      "with_issues": 0
+    },
+    "timing": {
+      "cases": 8,
+      "with_issues": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "holdout-flow-00",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 3,
+      "total_anchors": 3,
+      "node_count": 3,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-01",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 19.23570146191331,
+      "readable_anchors": 7,
+      "total_anchors": 8,
+      "node_count": 8,
+      "detail_views": 8
+    },
+    {
+      "id": "holdout-flow-02",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 22.12063117534287,
+      "readable_anchors": 4,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 5
+    },
+    {
+      "id": "holdout-flow-03",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 21.031968592260238,
+      "readable_anchors": 2,
+      "total_anchors": 8,
+      "node_count": 8,
+      "detail_views": 8
+    },
+    {
+      "id": "holdout-flow-04",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 5,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 5
+    },
+    {
+      "id": "holdout-flow-05",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 8,
+      "total_anchors": 8,
+      "node_count": 8,
+      "detail_views": 8
+    },
+    {
+      "id": "holdout-flow-06",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 33.171163202122955,
+      "readable_anchors": 5,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-07",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 18.26595226497808,
+      "readable_anchors": 7,
+      "total_anchors": 8,
+      "node_count": 8,
+      "detail_views": 8
+    },
+    {
+      "id": "holdout-flow-08",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 20.31419284940412,
+      "readable_anchors": 4,
+      "total_anchors": 7,
+      "node_count": 7,
+      "detail_views": 7
+    },
+    {
+      "id": "holdout-flow-09",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 32.89093120691985,
+      "readable_anchors": 5,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-10",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 4,
+      "total_anchors": 4,
+      "node_count": 4,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-11",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 19.23570146191331,
+      "readable_anchors": 5,
+      "total_anchors": 6,
+      "node_count": 6,
+      "detail_views": 6
+    },
+    {
+      "id": "holdout-flow-12",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 35.03562945368171,
+      "readable_anchors": 7,
+      "total_anchors": 7,
+      "node_count": 7,
+      "detail_views": 7
+    },
+    {
+      "id": "holdout-flow-13",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 24.24438338451592,
+      "readable_anchors": 2,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 5
+    },
+    {
+      "id": "holdout-flow-14",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 4,
+      "total_anchors": 4,
+      "node_count": 4,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-15",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 4,
+      "total_anchors": 4,
+      "node_count": 4,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-16",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 18.26595226497808,
+      "readable_anchors": 5,
+      "total_anchors": 6,
+      "node_count": 6,
+      "detail_views": 6
+    },
+    {
+      "id": "holdout-flow-17",
+      "family": "flow",
+      "issues": [
+        "focus_text_below_30px"
+      ],
+      "minimum_focus_font": 28.22732404968009,
+      "readable_anchors": 3,
+      "total_anchors": 4,
+      "node_count": 4,
+      "detail_views": 4
+    },
+    {
+      "id": "holdout-flow-18",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 36,
+      "readable_anchors": 5,
+      "total_anchors": 5,
+      "node_count": 5,
+      "detail_views": 0
+    },
+    {
+      "id": "holdout-flow-19",
+      "family": "flow",
+      "issues": [],
+      "minimum_focus_font": 35.81787521079258,
+      "readable_anchors": 8,
+      "total_anchors": 8,
+      "node_count": 8,
+      "detail_views": 8
+    },
+    {
+      "id": "holdout-material-00",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-01",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-02",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-03",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-04",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-05",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-06",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-material-07",
+      "family": "material",
+      "issues": []
+    },
+    {
+      "id": "holdout-comparison-00",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 380,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-01",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 318,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-02",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 491,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-03",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 491,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-04",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 553,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-05",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 460,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-06",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 502,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-comparison-07",
+      "family": "comparison",
+      "issues": [],
+      "measured_height": 349,
+      "body_font": 34
+    },
+    {
+      "id": "holdout-motion-00",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-01",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-02",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-03",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-04",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-05",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [
+        "node:n0",
+        "node:n1",
+        "node:n2",
+        "node:n3"
+      ],
+      "overview_only": true
+    },
+    {
+      "id": "holdout-motion-06",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-motion-07",
+      "family": "motion",
+      "issues": [],
+      "missing_targets": [],
+      "overview_only": false
+    },
+    {
+      "id": "holdout-timing-00",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-01",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-02",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-03",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-04",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-05",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-06",
+      "family": "timing",
+      "issues": []
+    },
+    {
+      "id": "holdout-timing-07",
+      "family": "timing",
+      "issues": []
+    }
+  ]
+}

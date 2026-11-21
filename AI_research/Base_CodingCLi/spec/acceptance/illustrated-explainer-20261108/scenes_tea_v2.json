@@ -1,0 +1,74 @@
+{
+ "cast": {
+  "A": "middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers",
+  "B": "young East Asian woman, long dark ponytail, light blue hoodie, black jeans"
+ },
+ "scenes": [
+  {
+   "section": 1,
+   "kind": "scene",
+   "scene": "middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers stands behind a small milk tea counter, pressing five plain colored paper strips—red, yellow, blue, green, white—onto a cup sleeve beside a row of cups.",
+   "overlay": [
+    "五张贴纸",
+    "单杯价格"
+   ],
+   "note": "店长把五笔不同性质的开支贴到杯套上，叠出一杯奶茶的价格。",
+   "scene_template": "{A} stands behind a small milk tea counter, pressing five plain colored paper strips—red, yellow, blue, green, white—onto a cup sleeve beside a row of cups."
+  },
+  {
+   "section": 2,
+   "kind": "analogy",
+   "scene": "A red paper strip is taped to a single cup; a yellow strip and a blue strip hang from a thick blank wall-mounted block, both stretching down past many cups.",
+   "overlay": [
+    "按杯走",
+    "按月走"
+   ],
+   "note": "红贴纸跟着单杯走，黄蓝贴纸挂在整月的固定开支上，要靠卖出很多杯来稀释。",
+   "scene_template": "A red paper strip is taped to a single cup; a yellow strip and a blue strip hang from a thick blank wall-mounted block, both stretching down past many cups."
+  },
+  {
+   "section": 3,
+   "kind": "scene",
+   "scene": "Left: a tall stack of yellow and blue paper strips rises far above a cup sleeve while middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers peels away half of a white strip. Right: the same five strips lie thin, and a tall white strip covers them.",
+   "overlay": [
+    "固定开支",
+    "卖出的杯数"
+   ],
+   "note": "左右对比：雨天单少时黄蓝贴纸叠得高过杯套，周五单多时五张贴纸薄薄一层。",
+   "scene_template": "Left: a tall stack of yellow and blue paper strips rises far above a cup sleeve while {A} peels away half of a white strip. Right: the same five strips lie thin, and a tall white strip covers them."
+  },
+  {
+   "section": 4,
+   "kind": "analogy",
+   "scene": "A blank plain colored menu board stays unchanged; beneath it, one cup grows taller, one is mostly ice with a thin foam layer, and one is propped up by a stack of plain colored paper strips.",
+   "overlay": [
+    "牌价没动",
+    "暗着变"
+   ],
+   "note": "灯箱数字没变，杯子里的冰量、奶盖和加料却在变，旁边产品暗中补贴。",
+   "scene_template": "A blank plain colored menu board stays unchanged; beneath it, one cup grows taller, one is mostly ice with a thin foam layer, and one is propped up by a stack of plain colored paper strips."
+  },
+  {
+   "section": 5,
+   "kind": "analogy",
+   "scene": "Four identical cups in a row each wear a different thickness of plain colored paper strips: one huge yellow-and-blue stack, one medium pile, one thin layer, one with extra green strips beside a small plain delivery bag.",
+   "overlay": [
+    "四份账单",
+    "渠道"
+   ],
+   "note": "同一款奶茶在机场、商场、社区店和外卖上的成本叠法完全不同。",
+   "scene_template": "Four identical cups in a row each wear a different thickness of plain colored paper strips: one huge yellow-and-blue stack, one medium pile, one thin layer, one with extra green strips beside a small plain delivery bag."
+  },
+  {
+   "section": 6,
+   "kind": "scene",
+   "scene": "young East Asian woman, long dark ponytail, light blue hoodie, black jeans holds one cup at the counter and counts on her fingers toward middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers; three plain colored paper strips lie on the counter between them.",
+   "overlay": [
+    "改问三件事",
+    "成本结构"
+   ],
+   "note": "顾客端着杯子，用三个手指追问成本、杯数和渠道。",
+   "scene_template": "{B} holds one cup at the counter and counts on her fingers toward {A}; three plain colored paper strips lie on the counter between them."
+  }
+ ]
+}

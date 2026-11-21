@@ -1,0 +1,482 @@
+Window: "研映 · Research2Video", App: Google Chrome.
+0 标准窗口 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/publish, Secondary Actions: Raise
+	1 container 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/publish
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 container
+					8 弹出式按钮 查看网站信息
+					9 文本栏 (settable) 地址和搜索栏, Value: http://127.0.0.1:8775/publish?chain=job-050ab505483c, Placeholder: 问问 Google 或输入网址
+					10 按钮 为此标签页添加书签
+				11 container
+					12 弹出式按钮 Ghelper
+					13 弹出式按钮 MetaMask
+可以访问此网站
+					14 弹出式按钮 ChatGPT
+可以访问此网站
+					15 弹出式按钮 扩展程序
+				16 按钮 Liam
+				17 弹出式按钮 完成更新
+			18 工具栏 书签
+				19 工具栏 已保存的标签页分组
+					20 “已保存的标签页分组”按钮 “⚡ 页面性能”分组 - 已打开
+					21 按钮 标签页分组
+				22 分离器 分隔符
+				23 书签文件夹按钮 不常用
+				24 书签文件夹按钮 常用
+				25 书签文件夹按钮 大模型
+				26 书签文件夹按钮 项目
+				27 书签文件夹按钮 数据发现
+				28 书签文件夹按钮 阅读
+				29 书签文件夹按钮 工具
+				30 书签文件夹按钮 所有书签
+				31 分离器 分隔符
+			32 container
+				33 滚动区
+					34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/publish
+						35 container
+							36 标题 研映 · Research2Video, Value: 2
+								37 文本 研映 · Research2Video
+							38 按钮 admin · admin （账号设置）
+							39 container
+								40 link 链路管理, Value: 127.0.0.1:8775/chains
+								41 link 矩阵, Value: 127.0.0.1:8775/matrices
+								42 link 产出, Value: 127.0.0.1:8775/outputs
+								43 link 视频看板, Value: 127.0.0.1:8775/
+								44 link 文稿, Value: 127.0.0.1:8775/video
+								45 link 成片与发布, Value: 127.0.0.1:8775/publish
+								46 link 平台管理, Value: 127.0.0.1:8775/platforms
+								47 link 助手, Value: 127.0.0.1:8775/ask
+								48 文本 研究引擎
+								49 link 研究总览, Value: 127.0.0.1:8775/engine
+								50 link Jobs, Value: 127.0.0.1:8775/jobs
+								51 link 情报轮次, Value: 127.0.0.1:8775/rounds
+								52 link 报告, Value: 127.0.0.1:8775/reports
+								53 link 周期调度, Value: 127.0.0.1:8775/scheduler
+								54 文本 高级
+								55 link 选题, Value: 127.0.0.1:8775/topics
+								56 link 信息源, Value: 127.0.0.1:8775/sources
+								57 link 文稿配方, Value: 127.0.0.1:8775/video-recipes
+								58 link 数据分析, Value: 127.0.0.1:8775/analytics
+								59 link 设置, Value: 127.0.0.1:8775/settings
+							60 按钮 退出
+							61 文本 关联链路
+							62 link ← AI Flash Discovery, Value: 127.0.0.1:8775/chains/job-050ab505483c
+							63 文本 在此保存的修改会在链路管理中生效。矩阵、报告、产出、文稿、看板、任务、来源、配方及周期列表已按此链路筛选。
+							64 link 退出关联，查看全部, Value: 127.0.0.1:8775/publish
+							65 container
+								66 标题 成片与发布, Value: 1
+									67 文本 成片与发布
+								68 文本 先原地看片，再为这条成片准备平台草稿、跟进投稿结果。
+								69 link 全部文稿 ↗, Value: 127.0.0.1:8775/video
+								70 按钮 刷新成片
+							71 弹出式按钮 成片范围, Value: 当前定稿
+								72 (selected) 当前定稿
+							73 弹出式按钮 发布待办, Value: 全部待办
+								74 (selected) 全部待办
+							75 弹出式按钮 成片矩阵, Value: 全部矩阵
+								76 (selected) 全部矩阵
+							77 弹出式按钮 发布平台, Value: 全部平台
+								78 (selected) 全部平台
+							79 弹出式按钮 平台发布状态, Value: 全部发布状态
+								80 (selected) 全部发布状态
+							81 按钮 筛选
+							82 切换按钮 成片完成 135, Value: 0
+								83 文本 成片完成
+								84 文本 135
+							85 切换按钮 待出片 12, Value: 0
+								86 文本 待出片
+								87 文本 12
+							88 切换按钮 出片中 0, Value: 0
+								89 文本 出片中
+								90 文本 0
+							91 切换按钮 出片失败 4, Value: 0
+								92 文本 出片失败
+								93 文本 4
+							94 文本 发布待办按所选平台计算；全部平台时，只计算已保存草稿或已有投稿记录的目标。
+							95 container 筛选
+								96 搜索文本字段 (settable) 搜索, Placeholder: 搜索视频或来源任务
+								97 text 显示  151  /  151
+							98 container
+								99 标题 AI 与科技 151 个视频, Value: 2
+									100 text AI 与科技 151  个视频
+								101 内容列表
+									102 container
+										103 文本 待出片
+										104 link Seedance 2.5 的 4K 和试错到底怎么算钱？, Value: 127.0.0.1:8775/video/7982dbbfaf0542a88cb4cacab7a65dc7
+										105 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										106 container 2026-11-18T14:18:52+0800
+											107 text 创建  11-18 14:18  ·  33 分钟前
+										108 text 来源： AI Flash Discovery
+										109 link 去出片 →, Value: 127.0.0.1:8775/video/7982dbbfaf0542a88cb4cacab7a65dc7
+										110 container 各平台发布状态
+											111 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									112 container
+										113 文本 待出片
+										114 link Mac 上收回 AI agent 的完整磁盘访问：只留项目文件夹，四步验收, Value: 127.0.0.1:8775/video/56ff15e52fce4980a6221faf12007cea
+										115 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										116 container 2026-11-18T13:28:29+0800
+											117 text 创建  11-18 13:28  ·  1 小时前
+										118 text 来源： AI Flash Discovery
+										119 link 去出片 →, Value: 127.0.0.1:8775/video/56ff15e52fce4980a6221faf12007cea
+										120 container 各平台发布状态
+											121 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									122 container
+										123 文本 待出片
+										124 link Gem 12 月 17 日移除，11 月 17 日就先变只读：备份重建三步走, Value: 127.0.0.1:8775/video/382749df4fc34a6c873caab3f2adfd46
+										125 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										126 container 2026-11-18T13:27:21+0800
+											127 text 创建  11-18 13:27  ·  1 小时前
+										128 text 来源： AI Flash Discovery
+										129 link 去出片 →, Value: 127.0.0.1:8775/video/382749df4fc34a6c873caab3f2adfd46
+										130 container 各平台发布状态
+											131 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									132 container
+										133 文本 待出片
+										134 link Claude Code 到底怎么算钱？订阅额度、API credits、token 账单是三本账, Value: 127.0.0.1:8775/video/7546b534a86644b198d5bc96670699f2
+										135 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										136 container 2026-11-18T13:25:42+0800
+											137 text 创建  11-18 13:25  ·  1 小时前
+										138 text 来源： AI Flash Discovery
+										139 link 去出片 →, Value: 127.0.0.1:8775/video/7546b534a86644b198d5bc96670699f2
+										140 container 各平台发布状态
+											141 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									142 container
+										143 文本 待出片
+										144 link GPT-6.2 Astra 长任务老卡住：这五处集成改成追加，别改前缀, Value: 127.0.0.1:8775/video/ca9f57bcda944b58b61cc091c67bcebc
+										145 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										146 container 2026-11-18T13:24:35+0800
+											147 text 创建  11-18 13:24  ·  1 小时前
+										148 text 来源： AI Flash Discovery
+										149 link 去出片 →, Value: 127.0.0.1:8775/video/ca9f57bcda944b58b61cc091c67bcebc
+										150 container 各平台发布状态
+											151 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									152 container
+										153 文本 待出片
+										154 link DeepSeek 限额，Claude Code 客户月花 20 倍, Value: 127.0.0.1:8775/video/142faa5375ce4c769201b1871c786431
+										155 text 按素材生成 自动 快讯 · 每天（不再调研）  · 成片文稿 v 1
+										156 container 2026-11-18T13:22:24+0800
+											157 text 创建  11-18 13:22  ·  1 小时前
+										158 text 来源： AI Flash Discovery
+										159 link 去出片 →, Value: 127.0.0.1:8775/video/142faa5375ce4c769201b1871c786431
+										160 container 各平台发布状态
+											161 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									162 container
+										163 文本 成片完成
+										164 link 五个 Grok Bot 接管会计后台：上线顺序和审批表可以照着排, Value: 127.0.0.1:8775/video/3ab89a8e292f4719aad2b78359375a23
+										165 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										166 container 2026-11-18T09:35:58+0800
+											167 text 创建  11-18 09:35  ·  5 小时前
+										168 container 2026-11-18T13:57:09+0800
+											169 text 成片完成  11-18 13:57  ·  55 分钟前
+										170 text 来源： AI Flash Discovery
+										171 按钮 看成片
+										172 按钮 在访达中显示
+										173 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/3ab89a8e292f4719aad2b78359375a23
+										174 container 各平台发布状态
+											175 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										176 text 2026-11-18  · 
+										177 link https://www.bilibili.com/video/BV1Ffsm6vExY, Value: bilibili.com/video/BV1Ffsm6vExY
+									178 container
+										179 文本 成片完成
+										180 link Gemini 历史关了还留两个月：两个开关怎么设，跟着走一遍, Value: 127.0.0.1:8775/video/ce164153c7eb49b6a11dd010a2b7c090
+										181 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										182 container 2026-11-18T09:33:16+0800
+											183 text 创建  11-18 09:33  ·  5 小时前
+										184 container 2026-11-18T13:28:18+0800
+											185 text 成片完成  11-18 13:28  ·  1 小时前
+										186 text 来源： AI Flash Discovery
+										187 按钮 看成片
+										188 按钮 在访达中显示
+										189 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/ce164153c7eb49b6a11dd010a2b7c090
+										190 container 各平台发布状态
+											191 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										192 text 2026-11-18  · 
+										193 link https://www.bilibili.com/video/BV1E7s16REPu, Value: bilibili.com/video/BV1E7s16REPu
+									194 container
+										195 文本 成片完成
+										196 link GPT-6.2 Astra 降到 $8/$40，但越过 272K 这行，整单翻倍, Value: 127.0.0.1:8775/video/2cb218cfdea246d2af77274ba771f8ba
+										197 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										198 container 2026-11-18T09:32:11+0800
+											199 text 创建  11-18 09:32  ·  5 小时前
+										200 container 2026-11-18T14:18:17+0800
+											201 text 成片完成  11-18 14:18  ·  34 分钟前
+										202 text 来源： AI Flash Discovery
+										203 按钮 看成片
+										204 按钮 在访达中显示
+										205 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/2cb218cfdea246d2af77274ba771f8ba
+										206 container 各平台发布状态
+											207 text B 站  ·  排队中 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+									208 container
+										209 文本 成片完成
+										210 link 豆包工作台怎么建、怎么切、怎么分享？一条讲清, Value: 127.0.0.1:8775/video/f2c5d8710e9f4a9ba780a994ba0d5d4a
+										211 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										212 container 2026-11-18T09:29:33+0800
+											213 text 创建  11-18 09:29  ·  5 小时前
+										214 container 2026-11-18T12:35:34+0800
+											215 text 成片完成  11-18 12:35  ·  2 小时前
+										216 text 来源： AI Flash Discovery
+										217 按钮 看成片
+										218 按钮 在访达中显示
+										219 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/f2c5d8710e9f4a9ba780a994ba0d5d4a
+										220 container 各平台发布状态
+											221 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										222 text 2026-11-18  · 
+										223 link https://www.bilibili.com/video/BV1Lps16HEfq, Value: bilibili.com/video/BV1Lps16HEfq
+									224 container
+										225 文本 成片完成
+										226 link DeepSeek 长对话限额后：导出、切成四万字一段、在新窗口接着用, Value: 127.0.0.1:8775/video/86d5b4cb45de49fc85bcda52e429a2f3
+										227 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										228 container 2026-11-18T09:28:29+0800
+											229 text 创建  11-18 09:28  ·  5 小时前
+										230 container 2026-11-18T12:16:33+0800
+											231 text 成片完成  11-18 12:16  ·  3 小时前
+										232 text 来源： AI Flash Discovery
+										233 按钮 看成片
+										234 按钮 在访达中显示
+										235 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/86d5b4cb45de49fc85bcda52e429a2f3
+										236 container 各平台发布状态
+											237 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										238 text 2026-11-18  · 
+										239 link https://www.bilibili.com/video/BV1wgs16hEKU, Value: bilibili.com/video/BV1wgs16hEKU
+									240 container
+										241 文本 成片完成
+										242 link DeepSeek 开始限额，腾讯新模型成本只到 1/20, Value: 127.0.0.1:8775/video/3980f8d6b1a94f32b875cd87dc15445e
+										243 text 按素材生成 自动 快讯 · 每天（不再调研）  · 成片文稿 v 1
+										244 container 2026-11-18T09:25:50+0800
+											245 text 创建  11-18 09:25  ·  5 小时前
+										246 container 2026-11-18T11:49:15+0800
+											247 text 成片完成  11-18 11:49  ·  3 小时前
+										248 text 来源： AI Flash Discovery
+										249 按钮 看成片
+										250 按钮 在访达中显示
+										251 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/3980f8d6b1a94f32b875cd87dc15445e
+										252 container 各平台发布状态
+											253 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										254 text 2026-11-18  · 
+										255 link https://www.bilibili.com/video/BV18vs16VEBb, Value: bilibili.com/video/BV18vs16VEBb
+									256 container
+										257 文本 出片失败
+										258 link Wan 3.0 打六折、Prime 打七折：降得多的偏偏是便宜的那个版本, Value: 127.0.0.1:8775/video/7fdd54093fae422a8b3946a070a33f07
+										259 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										260 container 2026-11-17T20:11:16+0800
+											261 text 创建  11-17 20:11  ·  19 小时前
+										262 text 来源： AI Flash Discovery
+										263 link 去出片 →, Value: 127.0.0.1:8775/video/7fdd54093fae422a8b3946a070a33f07
+										264 container 各平台发布状态
+											265 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										266 文本 caption-forced-alignment exceeded 900s; see /Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/b86015b8-2c84-4647-b74f-e4d7c4139770/attempts/1/g2-run/logs/caption-forced-alignment.log
+									267 container
+										268 文本 出片失败
+										269 link DeepSeek 开始限额，国产模型把单任务成本打到 1/20, Value: 127.0.0.1:8775/video/3b99052359a34aef9ecd31eccffc4081
+										270 text 按素材生成 自动 快讯 · 每天（不再调研）  · 成片文稿 v 1
+										271 container 2026-11-17T19:56:50+0800
+											272 text 创建  11-17 19:56  ·  19 小时前
+										273 text 来源： AI Flash Discovery
+										274 link 去出片 →, Value: 127.0.0.1:8775/video/3b99052359a34aef9ecd31eccffc4081
+										275 container 各平台发布状态
+											276 text B 站  ·  未发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										277 文本 local-mlx-voice exceeded 3600s; see /Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/681993cb-afeb-4874-bdc3-5f2a5893f495/attempts/1/g2-run/logs/local-mlx-voice.log
+									278 container
+										279 文本 成片完成
+										280 link Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了, Value: 127.0.0.1:8775/video/ba8e1ffc2135414eb32a84b3e5af56c1
+										281 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										282 container 2026-11-17T08:41:37+0800
+											283 text 创建  11-17 08:41  ·  1 天前
+										284 container 2026-11-17T11:52:01+0800
+											285 text 成片完成  11-17 11:52  ·  1 天前
+										286 text 来源： AI Flash Discovery
+										287 按钮 看成片
+										288 按钮 在访达中显示
+										289 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/ba8e1ffc2135414eb32a84b3e5af56c1
+										290 container 各平台发布状态
+											291 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										292 text 2026-11-17  · 
+										293 link https://www.bilibili.com/video/BV1X1sg6UEtd, Value: bilibili.com/video/BV1X1sg6UEtd
+									294 container
+										295 文本 成片完成
+										296 link Poppy 支持名单很长，但真能读到文件的只有 16 家, Value: 127.0.0.1:8775/video/6df6881c9975433989423a290741eaa3
+										297 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										298 container 2026-11-17T08:40:01+0800
+											299 text 创建  11-17 08:40  ·  1 天前
+										300 container 2026-11-17T11:23:38+0800
+											301 text 成片完成  11-17 11:23  ·  1 天前
+										302 text 来源： AI Flash Discovery
+										303 按钮 看成片
+										304 按钮 在访达中显示
+										305 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/6df6881c9975433989423a290741eaa3
+										306 container 各平台发布状态
+											307 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										308 text 2026-11-17  · 
+										309 link https://www.bilibili.com/video/BV1Hus36AEP2, Value: bilibili.com/video/BV1Hus36AEP2
+									310 container
+										311 文本 成片完成
+										312 link Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？, Value: 127.0.0.1:8775/video/5bb378b65d8e425ebdb700b82977c6a0
+										313 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										314 container 2026-11-17T08:36:53+0800
+											315 text 创建  11-17 08:36  ·  1 天前
+										316 container 2026-11-17T10:59:36+0800
+											317 text 成片完成  11-17 10:59  ·  1 天前
+										318 text 来源： AI Flash Discovery
+										319 按钮 看成片
+										320 按钮 在访达中显示
+										321 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/5bb378b65d8e425ebdb700b82977c6a0
+										322 container 各平台发布状态
+											323 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										324 text 2026-11-17  · 
+										325 link https://www.bilibili.com/video/BV1tRsg6kEiL, Value: bilibili.com/video/BV1tRsg6kEiL
+									326 container
+										327 文本 成片完成
+										328 link FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP, Value: 127.0.0.1:8775/video/18ddc9402e084787ac80d57b4fbd636a
+										329 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										330 container 2026-11-17T08:34:49+0800
+											331 text 创建  11-17 08:34  ·  1 天前
+										332 container 2026-11-17T10:31:42+0800
+											333 text 成片完成  11-17 10:31  ·  1 天前
+										334 text 来源： AI Flash Discovery
+										335 按钮 看成片
+										336 按钮 在访达中显示
+										337 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/18ddc9402e084787ac80d57b4fbd636a
+										338 container 各平台发布状态
+											339 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										340 text 2026-11-17  · 
+										341 link https://www.bilibili.com/video/BV1AJsM6fEqS, Value: bilibili.com/video/BV1AJsM6fEqS
+									342 container
+										343 文本 成片完成
+										344 link 豆包工作台月费68元起，金融投研为什么可能还要再买一份数据, Value: 127.0.0.1:8775/video/d5b8a7b2a9d8415b9e9a98d01ee3ab20
+										345 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										346 container 2026-11-17T08:33:45+0800
+											347 text 创建  11-17 08:33  ·  1 天前
+										348 container 2026-11-17T10:03:32+0800
+											349 text 成片完成  11-17 10:03  ·  1 天前
+										350 text 来源： AI Flash Discovery
+										351 按钮 看成片
+										352 按钮 在访达中显示
+										353 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/d5b8a7b2a9d8415b9e9a98d01ee3ab20
+										354 container 各平台发布状态
+											355 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										356 text 2026-11-17  · 
+										357 link https://www.bilibili.com/video/BV1DKsM6qEPE, Value: bilibili.com/video/BV1DKsM6qEPE
+									358 container
+										359 文本 成片完成
+										360 link 豆包21个工作台，苹果给Siri上日限额, Value: 127.0.0.1:8775/video/ad185da5b6074494bc015d15cb3a4ebf
+										361 text 按素材生成 自动 快讯 · 每天（不再调研）  · 成片文稿 v 1
+										362 container 2026-11-17T08:30:37+0800
+											363 text 创建  11-17 08:30  ·  1 天前
+										364 container 2026-11-17T09:39:01+0800
+											365 text 成片完成  11-17 09:39  ·  1 天前
+										366 text 来源： AI Flash Discovery
+										367 按钮 看成片
+										368 按钮 在访达中显示
+										369 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/ad185da5b6074494bc015d15cb3a4ebf
+										370 container 各平台发布状态
+											371 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										372 text 2026-11-17  · 
+										373 link https://www.bilibili.com/video/BV1m3sM6PELG, Value: bilibili.com/video/BV1m3sM6PELG
+									374 container
+										375 文本 成片完成
+										376 link CarPlay 上的 Gemini 图标没出现？先查这三步, Value: 127.0.0.1:8775/video/21e60a394915460289892bd4a996ee30
+										377 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										378 container 2026-11-16T19:54:36+0800
+											379 text 创建  11-16 19:54  ·  2 天前
+										380 container 2026-11-16T22:00:01+0800
+											381 text 成片完成  11-16 22:00  ·  2 天前
+										382 text 来源： AI Flash Discovery
+										383 按钮 看成片
+										384 按钮 在访达中显示
+										385 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/21e60a394915460289892bd4a996ee30
+										386 container 各平台发布状态
+											387 text B 站  ·  已取消 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										388 文本 研究是 42 小时前做的，快讯超过 24 小时建议点「发布前复核」。
+									389 container
+										390 文本 成片完成
+										391 link Cursor 事件后，先查 10 月 29 日那 11 个小时, Value: 127.0.0.1:8775/video/6c7148518ab74c38ae7212ac08538c32
+										392 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										393 container 2026-11-16T19:53:33+0800
+											394 text 创建  11-16 19:53  ·  2 天前
+										395 container 2026-11-16T21:34:40+0800
+											396 text 成片完成  11-16 21:34  ·  2 天前
+										397 text 来源： AI Flash Discovery
+										398 按钮 看成片
+										399 按钮 在访达中显示
+										400 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/6c7148518ab74c38ae7212ac08538c32
+										401 container 各平台发布状态
+											402 text B 站  ·  已取消 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										403 文本 研究是 42 小时前做的，快讯超过 24 小时建议点「发布前复核」。
+									404 container
+										405 文本 成片完成
+										406 link ChatGPT Wallet 怎么用上：借记卡不行，批准前先看这五项, Value: 127.0.0.1:8775/video/8dc02c00558e448e95ad82d9f6510d1e
+										407 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										408 container 2026-11-16T19:50:28+0800
+											409 text 创建  11-16 19:50  ·  2 天前
+										410 container 2026-11-16T21:08:25+0800
+											411 text 成片完成  11-16 21:08  ·  2 天前
+										412 text 来源： AI Flash Discovery
+										413 按钮 看成片
+										414 按钮 在访达中显示
+										415 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/8dc02c00558e448e95ad82d9f6510d1e
+										416 container 各平台发布状态
+											417 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										418 text 2026-11-16  · 
+										419 link https://www.bilibili.com/video/BV1y5sK6WEK6, Value: bilibili.com/video/BV1y5sK6WEK6
+									420 container
+										421 文本 成片完成
+										422 link 同一个 3D 网页：Hy4 flash 0.23 元，DeepSeek 1.21 元，差的不只是单价, Value: 127.0.0.1:8775/video/ac650ddfddaf4a9799764784254c77a9
+										423 text 按素材生成 自动 快讯 · 每条一期（不再调研）  · 成片文稿 v 1
+										424 container 2026-11-16T19:48:55+0800
+											425 text 创建  11-16 19:48  ·  2 天前
+										426 container 2026-11-16T20:47:15+0800
+											427 text 成片完成  11-16 20:47  ·  2 天前
+										428 text 来源： AI Flash Discovery
+										429 按钮 看成片
+										430 按钮 在访达中显示
+										431 link 各平台发布与记录 →, Value: 127.0.0.1:8775/video/ac650ddfddaf4a9799764784254c77a9
+										432 container 各平台发布状态
+											433 text 已发布至  1  个平台 B 站  ·  已发布 抖音  ·  未发布 快手  ·  未发布 小红书  ·  未发布
+										434 text 2026-11-16  · 
+										435 link https://www.bilibili.com/video/BV1gcsK6PE1k, Value: bilibili.com/video/BV1gcsK6PE1k
+							436 text 已展示  24  /  151  个视频
+							437 按钮 显示更多成片
+							438 按钮 让助手处理当前页面
+			439 弹出式按钮 标签页搜索
+			440 container
+				441 标签组
+					442 标签 (settable, boolean) Master of Science in Blockchain | NTU Singapore - 已固定, Value: off
+					443 标签 (settable, boolean) ChatGPT - 已固定, Value: off
+					444 标签 (settable, boolean) ChatGPT - 内存用量高 - 1.0 GB, Value: off
+					445 标签 (settable, boolean) 鹈鹕骑自行车 | AI 考题博物馆 - 闲置标签页 - 已释放 143 MB, Value: off
+					446 标签 (settable, boolean) Cursor Vibe Jam 2026 - 闲置标签页 - 已释放 170 MB, Value: off
+					447 标签 (settable, boolean) OpenCode Console - 闲置标签页 - 已释放 51.1 MB, Value: off
+					448 标签 (settable, boolean) Go | OpenCode - 闲置标签页 - 已释放 73.4 MB, Value: off
+					449 标签 (settable, boolean) 登录 | AutoDL算力云 - 闲置标签页 - 已释放 108 MB, Value: off
+					450 标签 (settable, boolean) 社会机制库 - 闲置标签页 - 已释放 132 MB, Value: off
+					451 标签 (settable, boolean) LLM&Agent 课程 - 闲置标签页 - 已释放 137 MB, Value: off
+					452 标签 (settable, boolean) Open Design Cloud - 闲置标签页, Value: off
+					453 标签 (settable, boolean) Some-Project/个人重要/****** 我的书.md at master · liamamilin/Some-Project - 闲置标签页 - 已释放 74.1 MB, Value: off
+					454 标签 (settable, boolean) liamamilin/ATLAS-METHODS - 闲置标签页 - 已释放 81.1 MB, Value: off
+					455 标签 (settable, boolean) 第 03 章 Python 组织程序的基本工具 · Python 设计模式：从问题到方案 - 闲置标签页 - 已释放 121 MB, Value: off
+					456 标签组 分组“⚡ 页面性能”- 2 个标签页•  研映 · Research2Video•  研映 · Research2Video - 已展开
+					457 标签 (selected, settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: on
+						458 按钮 关闭
+					459 标签 (settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: off
+					460 标签 (settable, boolean) Mureka：AI音乐生成器，轻松创作旋律、歌曲与歌词 | 最佳AI作曲平台与音乐创作工具, Value: off
+			461 按钮 新标签页
+			462 按钮 打开 Chrome 中的 Gemini
+	463 关闭按钮
+	464 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	465 最小化按钮
+466 menu bar
+	467 Chrome
+	468 文件
+	469 编辑
+	470 显示
+	471 历史记录
+	472 书签
+	473 个人资料
+	474 标签页
+	475 窗口
+	476 帮助
+
+The focused UI element is 34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/publish

@@ -1,0 +1,109 @@
+{
+  "candidates": [
+    {
+      "title": "免费版到底卡在哪：用 27K、12 页、Limited 三个信号先判断要不要付费",
+      "audience": "日常问答够用，但一贴长文、做多步骤研究或试 Codex 就感觉被截断/变慢的人；不覆盖团队采购、已明确重度使用 Pro 的人",
+      "stake": "少花错钱：先确认痛点是 Free 的上下文、单次输入、速度还是模型/工具限制，避免把限制误判成工具不行而冲动升级；也避免为用不到的能力付费",
+      "novelty": "不是“付费更好”，而是 Free 仍有可用模型，付费首先买的是访问权与额度；且 27K 只指 GPT Instant，GPT Reasoning 是 Varies，不能一概而论",
+      "promise": "看完能对照自己的用法：是否经常超过约 12 页单次输入、是否需要 27K 以上上下文、是否能接受 Limited 带宽/可用性、是否需要 Codex 或旗舰模型；据此决定改用法、升 Go/Plus 或暂不付费",
+      "commercial": "连接“先诊断再订阅”的实际决策，可自然承接 Go/Plus 选择；不是转化预测",
+      "structure": "choice",
+      "priority_reason": "先建立免费版限制的诊断框架，受众最广，且能用页面量化差异直接排除“盲目升级”",
+      "source_ids": [
+        "S13",
+        "S8",
+        "S27",
+        "S9"
+      ],
+      "source_roles": {
+        "S13": "需求线索",
+        "S8": "比较背景",
+        "S27": "需求线索",
+        "S9": "比较背景"
+      },
+      "material": "S13 列 Free：Limited trial access to Codex；Limited access to flagship models；Limited messages and uploads；Limited and slower image generation；Limited deep research；Limited memory and context。S8 给 GPT Instant：Free 总上下文 27K、单次输入约 12 页；Go 54K/~40 页；Plus 54K/~40 页；Pro 128K/~250 页。响应速度 Free/Go 为 Limited on bandwidth & availability，Plus 为 Fast，Pro 为 Ultrafast (on eligible tiers)。Free 的 GPT Reasoning 总上下文为 Varies，输入上限 Varies，不能把 27K 套到推理模型。模型表里 Free：GPT-6 Luna、GPT-5 Thinking Mini 为 Yes；GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol、GPT-5.6 Sol Pro、GPT-5.6 Luna、Legacy 为 No；GPT-5.6 Terra 仅在 Work 和 Codex 桌面受限访问。S27 说 Free 对所有人开放，升级是更多模型与功能访问；S9 说 Go/Plus/Business/Enterprise 按每用户每月计价。",
+      "missing": "Free 的实际截断提示、超限报错、等待时长和不同任务成功率未提供；脚本需实测后再写“卡住”的具体表现。Go 金额未在原文出现，不能报具体价。"
+    },
+    {
+      "title": "每月 20 美元的 Plus 买到什么：九项增量里，哪些是任务解锁，哪些只是额度变大",
+      "audience": "职场与学习人群，日常做资料研究、多步骤项目、代码或长文档，正在考虑 Plus；不覆盖只需要轻量聊天、团队采购或已明确需要 Pro 的高强度用户",
+      "stake": "每月固定 20 美元、且 Plus 目前不支持年付/预付多月，买错会持续后悔；买对的关键不是“用得多”，而是任务里是否出现 Projects、计划任务、custom GPTs、Deep research、Codex、桌面 Work 这类入口",
+      "novelty": "把 Plus 从“更快的免费版”改写成“Go 之上的任务类型解锁”：九项增量中既有能力入口，也有额度扩大和早期功能；同时提醒限额会变、以模型选择器为准",
+      "promise": "看完能逐条对照九项：哪些直接改变你的每周流程，哪些只是更多消息/上传/记忆；并知道 $20/月是网页订阅、Plus 无年付，避免把“早期功能”当稳定承诺",
+      "commercial": "直接连接 Plus 订阅决策，也能劝退用不到 Projects/Deep research/Codex/Work 的人；是决策辅助，不是硬广或转化预测",
+      "structure": "choice",
+      "priority_reason": "价格锚点最明确（$20/月），素材能逐条拆九项权益，适合承接免费版诊断后回答“要不要买 Plus”",
+      "source_ids": [
+        "S26",
+        "S38",
+        "S22",
+        "S9",
+        "S31"
+      ],
+      "source_roles": {
+        "S26": "需求线索",
+        "S38": "比较背景",
+        "S22": "比较背景",
+        "S9": "比较背景",
+        "S31": "比较背景"
+      },
+      "material": "S38：Plus 是 $20/month，提供 ChatGPT web app 的 enhanced access，比 Free 有更广的模型和工具访问；但模型可用性与限额会变，要以账号里的 model picker 为准。S26 写 Plus “Everything in Go and:” 九项：① advanced reasoning models with GPT-6；② expanded messages and uploads；③ more complex and accurate image creation；④ expanded deep research；⑤ expanded memory and context；⑥ Projects、scheduled tasks、custom GPTs；⑦ expanded Codex usage；⑧ expanded ChatGPT Work on desktop/web/mobile；⑨ early access to new features；并注明 Limits apply。S22：Plus 目前不支持年付，也不支持预付多月；S9：Go/Plus/Business 有月付，Business/Enterprise 才有年付，所有付费档按每用户每月计价。S31：Pro 在 “Everything in Plus and” 之上另列 3 档用量自选、GPT-6 Astra 推理、更长 Codex/Work 会话、Dot 常驻 agent、无限且更快图像、最大 deep research、最大记忆/上下文、扩展 projects/tasks/custom GPTs、研究预览、每月 API credits（数量为空）。这说明 Plus 不是顶配，九项中很多是 “expanded” 而非 “unlimited”。",
+      "missing": "九项的实际额度、Deep research 耗时、scheduled task 操作路径、Work 各端差异、early access 的具体功能未提供；区域税费和第三方渠道不能由官方 $20 直接外推。Pro 的 API credits 数量为空。"
+    },
+    {
+      "title": "Go 不是小 Plus：它把上下文从 27K 拉到 54K、输入从 12 页拉到 40 页，但速度和 Plus 工具没跟上",
+      "audience": "Free 勉强够用、觉得 Plus 贵、主要想多消息/上传/更长记忆的轻度用户；不覆盖需要 Deep research、Codex 重度任务或常驻 agent 的人",
+      "stake": "Go 是最容易买错的中间档：买低可能很快不够用，买高可能为用不到的工具付费；关键看你是缺额度，还是缺 Plus 的任务入口",
+      "novelty": "Go 的增量集中在额度：上下文翻倍、输入页数约 3 倍、推理上下文 256K/约 320 页；但响应速度仍与 Free 同为 Limited，Codex 仍是 Limited trial，且 Plus 页面把 Projects/计划任务/custom GPTs、扩展 Deep research、Work 等列在 Go 之上",
+      "promise": "看完能用 Free→Go 对照表判断：Go 补了哪些额度（模型访问、消息/上传/图像、上下文/页数、记忆），哪些没有补（速度、Plus 的工具边界），避免只因中间档看起来划算就下单",
+      "commercial": "连接 Go 与 Plus 的二选一；适合精准选择辅助，不承诺转化",
+      "structure": "choice",
+      "priority_reason": "中间档错配风险高，且 S8 的数值能清楚显示 Go 与 Plus 的断点；放在 Plus 之后讲，观众已有 $20 价格锚点",
+      "source_ids": [
+        "S19",
+        "S8",
+        "S13",
+        "S26",
+        "S15",
+        "S9"
+      ],
+      "source_roles": {
+        "S19": "需求线索",
+        "S8": "比较背景",
+        "S13": "比较背景",
+        "S26": "比较背景",
+        "S15": "比较背景",
+        "S9": "比较背景"
+      },
+      "material": "S19：Go 为 Limited trial access to Codex，另有 More access to flagship models、More messages、More uploads、More image creation、Longer memory、Access the latest models；但原文没有给出 Go 的月费金额。S8 数值：GPT Instant 上下文 Free 27K→Go 54K，Plus 也是 54K；单次输入 Free 约 12 页→Go 约 40 页，Plus 也是约 40 页；GPT Reasoning 总上下文 Free 为 Varies→Go 256K，Plus 256K；推理输入 Free 为 Varies→Go 约 320 页，Plus 约 320 页；响应速度 Free 与 Go 都是 Limited on bandwidth & availability，Plus 才是 Fast。Go 的模型表：GPT-6 Luna、GPT-5 Thinking Mini 可用（后者 Expanded），GPT-5.6 Terra 仅 Work/Codex 桌面受限；GPT-6.1 Sol、GPT-6 Astra、GPT-6 Sol、GPT-5.6 Sol、GPT-5.6 Sol Pro、GPT-5.6 Luna、Legacy 在 Go 为 No。S26 显示 Plus 在 “Everything in Go and” 之上增加 advanced reasoning with GPT-6、expanded deep research、Projects/计划任务/custom GPTs、expanded Codex、ChatGPT Work 桌面/web/mobile 等。S15：Go/Free/Plus 面向个人，Business/Enterprise 面向企业，Business 2 人起。S9：Go/Plus/Business 月付，Business/Enterprise 有年付。",
+      "missing": "Go 的具体月费金额在原文中缺失，不能写具体价；Go 账号里 Projects、Deep research、Codex、Work 的实际可用边界未说明，需实测；Plus-only 入口是否完全不可用也要实机确认。"
+    },
+    {
+      "title": "扣款后仍显示 Free：先查邮箱和登录方式，再谈恢复购买、退款与年付",
+      "audience": "准备第一次付款、已经扣款但账号仍显示 Free、或纠结 Plus 能不能一次买一年的人；不覆盖企业采购、VAT 豁免和复杂团队账单",
+      "stake": "钱扣了权益没到、想退款找不到正确账号、误以为能年付省钱，都会造成直接损失和焦虑；先排查账号绑定比重复付款更重要",
+      "novelty": "把付费价值从“功能值不值”扩展到“钱扣了权益到没到、不想要了能不能退、能不能一次付一年”，补上售前最容易劝退的环节",
+      "promise": "看完能按 Settings > Account 查邮箱、Apple Hide My Email 的 @privaterelay.appleid.com、iOS/Android Restore purchases、登出再登入、联系客服附收据或卡号后四位、退款 5–10 个工作日、Plus 无年付的顺序排查",
+      "commercial": "连接首次付款前后的实际决策，降低错付和退款摩擦；商业关联较弱但信任价值高",
+      "structure": "explanation",
+      "priority_reason": "这是付费决策的最后一道门槛，和前三条形成“诊断→选档→付款后排查”的闭环；S32/S28 给的是官方步骤，事实边界清楚",
+      "source_ids": [
+        "S32",
+        "S28",
+        "S22",
+        "S4",
+        "S9"
+      ],
+      "source_roles": {
+        "S32": "具体案例",
+        "S28": "具体案例",
+        "S22": "比较背景",
+        "S4": "需求线索",
+        "S9": "比较背景"
+      },
+      "material": "S32：若扣款后仍显示 Free，先在网页 Settings > Account 确认订阅绑定邮箱；若通过 Apple 注册并选 Hide My Email，ChatGPT 账号可能是 @privaterelay.appleid.com，需选 Continue with Apple 并用同一 Apple 账号登录；iOS/Android App 到 Settings > Restore purchases 同步订阅；确认邮箱和登录方式后，在显示 Free 的设备登出，再用订阅对应账号登入；仍不解决则联系客服，附收据或扣款卡后四位。S28：认为扣错款可申请退款，获批后通常 5–10 个工作日处理；提交时须登录与 Plus/Pro 订阅关联的 ChatGPT 账号，该账号邮箱可能与接收收据的邮箱不同。S22：Plus 目前不支持年付，也不支持预付多月。S9：Go/Plus/Business 为月付，Business/Enterprise 才有年付；所有付费档按每用户每月计价。S4：取消订阅指向官方专文。",
+      "missing": "Restore purchases 的具体菜单位置、退款审批标准、取消订阅的完整步骤未在原文展开；第三方代充/低价渠道不采用。"
+    }
+  ],
+  "tradeoffs": "优先做 Free 诊断、Plus $20、Go 中间档、付款排查，形成连续路径。Pro 后置：S31 虽列出 Plus 之上增量，但价格与 API credits 数量为空，且受众更窄；Business/Enterprise 后置：S9/S15 仅说明按月/年、2 人起和联系销售，缺采购细节；取消订阅不单独成篇：S4 只有专文链接，步骤不足，合并进付款排查。没有把“产品热度”当作需求证明，也没有把官方页面当实测体验。"
+}

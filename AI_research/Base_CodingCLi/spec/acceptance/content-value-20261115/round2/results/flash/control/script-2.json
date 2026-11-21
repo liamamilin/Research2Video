@@ -1,0 +1,172 @@
+{
+  "title": "DeepSeek 把语音搜索拆成 API：一场会一块多",
+  "sections": [
+    {
+      "title": "先把一场会的账单摆出来",
+      "paragraphs": [
+        {
+          "text": "一场一小时的会，全程走 API：录音转成文字、读进 20 页 PDF、搜 100 次、最后把摘要念出来，加起来大概一块三人民币。这不是我砍到极限的方案，是我照官方价目表一项一项加出来的。大家好，我是洛洛，今天聊聊 DeepSeek 把 App 里的搜索、文件解析、语音这些能力拆成 API 之后，做会议记录、语音助手的小团队该先接哪几项、先算哪一笔。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这块三怎么来的。语音转文字按小时卖，一小时音频列表价 0.116 美元，现在限时五折，人民币四毛上下。文件解析和 OCR 按页卖，一千页 0.225 美元，20 页就是三分钱。语音合成按字符，一万字符折后一块六，念一段两千字的摘要三毛多。搜索和网页抓取按次，一千次 0.75 美元，100 次五毛三。剩下的模型 token 反而是零头，Flash 跑一趟几分钱。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "真正会放大的是搜索那一项",
+      "paragraphs": [
+        {
+          "text": "所以顺序不该按哪个听起来高级来排。我的建议是先接语音转文字和文件解析——这两项单价低到可以当固定开销，先把“会议能录进去、PDF 能读进来”做掉，用户当天就有感觉。一千页两毛二五美元这个价，意味着你不用再纠结要不要给用户开上传入口，开了也花不了几个钱。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "真正要留神的是搜索。它按次数计费，看着便宜，但它是唯一会跟着用户量线性长、还容易被自己的流程浪费掉的一项。设想一个具体场景：同一份产品文档，用户上午问一次、下午问一次，你的流程每次都重新抓一遍，一场会下来 100 次变 500 次，搜索这块从五毛三变成两块七，比语音加解析加起来还贵。所以接搜索之前先把缓存和次数配额写进去，这一步比选哪个模型重要。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "语音合成我建议往后放，或者干脆别默认开。它按字符收，一万字一块六，一场会的全文播报就是一块六，跟整条链路其他开销一个量级。让用户点一下“朗读”再生成，这个按钮本身就替你省钱。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "模型层有一个能省钱的时间差",
+      "paragraphs": [
+        {
+          "text": "模型这块有个容易漏的细节：峰谷价差一半。官方写的峰时是 UTC 周一到周五 01:00–04:00 和 06:00–10:00，换成北京时间正好是上午九点到十二点、下午两点到六点——就是国内团队上班那几个小时。会议记录这种实时任务基本躲不开高峰价，这部分钱省不掉；但批量跑历史录音、批量解析存量文档，排到晚上六点以后或者周末，同样的 token 直接半价，我建议批处理一律挪到非高峰。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有两个参数影响你怎么选模型：Flash 支持视觉，Pro 不支持；两个都是 1M 上下文，都支持工具调用，也都提供 Anthropic 格式的接口。最后这条对已有代码的团队最实用——你现在如果走 Anthropic 格式，改一下 base URL 就能拿同一套请求跑一遍对比，不用重写。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的结论",
+      "paragraphs": [
+        {
+          "text": "回到那场一块三的会。这个数字成立的前提是三件事：搜索带缓存、播报由用户主动触发、批处理排非高峰。少做一件，账单就不是一块三——搜索不设限可能翻五倍，播报默认全开一场多一块六。所以我先不全接，先上语音转文字和文件解析把体验做出来，搜索接上但必须带缓存，语音合成放到用户点的那一下，模型先用 Flash 跑通，需要深度推理的环节再切 Pro。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一句提醒：语音现在是限时五折，ASR 从 0.116 打到 0.058 美元。做长期成本模型的时候按原价算，折后当红包，别当底价，不然折扣一停，你的毛利表就对不上了。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你们现在这条链路里，钱主要花在哪一项？是语音时长、文档页数，还是搜索次数？评论区报一下你的用量，我下次拿真实数字再算一遍。我是洛洛，我们下期见。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1142,
+    "estimated_seconds": 253,
+    "segments": 40,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 3.372,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先把一场会的账单摆出来",
+        "spoken_length": 270,
+        "budget": 82
+      },
+      {
+        "title": "真正会放大的是搜索那一项",
+        "spoken_length": 343,
+        "budget": 82
+      },
+      {
+        "title": "模型层有一个能省钱的时间差",
+        "spoken_length": 254,
+        "budget": 81
+      },
+      {
+        "title": "我的结论",
+        "spoken_length": 275,
+        "budget": 81
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3015,
+      "completion_tokens": 5466,
+      "total_tokens": 8481,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 3963,
+      "cost_usd": 0.00373185,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 61.072,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 19
+  }
+}

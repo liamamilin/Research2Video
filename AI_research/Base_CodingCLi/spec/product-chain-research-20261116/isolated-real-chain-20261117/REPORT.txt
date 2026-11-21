@@ -1,0 +1,94 @@
+真实链路隔离接入检查 — 2026-11-17
+
+结论
+完成真实业务接口和独立数据库副本的管理检查。现有 Flash 链路可以读取、修改、停用并保留历史；但原型中的新链路一键创建、跨页一致删除、全局来源停用还没有对应的完整后端保证。不能据此宣布“原型已覆盖整个链路”或“新链路已自动生成视频”。
+
+本轮没有修改正式产品代码或生产配置。新增内容仅在本验收目录。v9 原型文件未改为直接调用真实 API；本轮建立的是独立联调入口和检查页面，避免把真实接口能力与原型模拟能力混淆。
+
+检查对象与隔离方式
+- 现有 Job：monitoring/ai_flash_discovery，矩阵 ai_media。
+- 实际共享该 Job 的生产配置有 7 个，不只有原型重点展示的 flash_daily 与 flash_each。两个 Flash 输出开启自动生产，其余五个关闭。
+- 研究周期每天 07:30、18:30，Asia/Shanghai。
+- Flash 两个输出合计 226 条讲稿、151 条渲染记录；渲染记录数不是成功成片数。
+- 复制真实代码、配置、报告及 5 个 SQLite 库。生产库用 mode=ro 连接和 SQLite online backup；隔离副本不使用生产账号或 .env。
+- 使用未改动的业务 HTTP 路由及读写逻辑；关闭应用默认启动恢复、自动循环、执行器安装。审计钩子限制写入本验收目录并阻止外连和子进程。生成/发布请求在隔离入口被拦截。
+- 检查使用实际鉴权、CSRF、版本字段、YAML/SQLite 持久化。检查后还原配置、Job 和视频/调度库。
+- 隔离服务：http://chain-isolation.localhost:9251/isolation ，仅绑定 127.0.0.1。独立子域避免覆盖正式应用登录 Cookie。
+
+实际检查结果
+最终 check.py 执行了 49 次业务接口请求，26 项预期行为检查通过。此处“通过”包括成功复现缺口，不代表产品没有问题。原始请求、请求体、状态码和响应见 requests.json；结构化结论见 results.json。
+
+一、现有链路可复用的真实能力
+1. 来源名称修改 200；旧 revision 写入 409；删除被引用的来源 409。
+2. 周期修改写入 schedules.db，重新读取正确；旧 version 修改返回 409。
+3. 关闭 flash_daily/flash_each 的 auto 后，共享研究计划仍开启；随后单独停用计划成功。原型应区分“停止这个输出”和“停止共享研究”。
+4. 矩阵默认速度从 1.25 改为 1.5 后，Flash 合集 settings 的 effective_render 更新；单条输出覆盖为 1.0 不影响合集。
+5. 真实讲稿 ba8e1ffc2135414eb32a84b3e5af56c1 编辑后从 v1 变为 v2，渲染记录数量不变。没有重新渲染，也没有证明新版本成片有效。
+6. 现有 POST /api/matrices/ai_media/copy 返回 201，自动生成 IF 编号、独立 alias 和 refresh:false 的 Job；但新 Job 对应生产输出数量为 0。应复用复制能力，补齐后续对象组合，不能说产品完全没有创建基础。
+
+二、新人创建新链路：按实际顺序暴露的问题
+目标：科研信息源 → 定期报告 → 科研单条＋科研合集。
+使用现有 cg_openai_news 作为隔离演练输入，没有新增或验证 OpenAI 科学博客抓取。本轮验证管理关系，不主张该来源已具备完整科研覆盖。
+
+1. 新建 research/isolation_science 并创建周期成功，但立刻创建 Flash 视频输出返回 422：报告不是配方要求的条目列表。
+2. 通过 Job YAML 补 topics.alias、format、refresh 后，首次使用默认 F 编号又返回 422：与现有 Flash 冲突。改为 SCI 后继续。首次失败见 requests-attempt1.json。
+3. 补完整选题契约后仍返回 422：flash 配方的 topic.sources 只接受 flash，不接受科研 alias。通过现有 POST /api/video/recipes 提交专属科研配方 YAML 后，单条输出创建成功。配方创建能力是现成的；缺口是向导没有组装和解释这个依赖。
+4. 创建名为“科研合集”的第二个输出仍得到 individual。通过 POST /api/content-columns 建立合集栏目后，settings 才变为 episode。
+5. 两个输出＋栏目不会自动进入 joint_planning.pairs；本轮手工修改隔离配置补上一对。此步骤是明确的人工介入，不算产品自动完成。
+6. 新矩阵没有自动进入 production_policy.matrices，manages(...) 返回 false。现有生产窗口策略不会据此自动套用。源码 core/production_policy.py:117、:166 支持该结论；未进一步执行采集或研究。
+
+最终：Job、周期、矩阵、专属配方、两个生产输出和合集栏目均通过真实接口创建；联合规划在副本手工补齐；生产策略归属仍未配置。测试对象检查后已清理。没有生成新科研报告、文稿或视频，不能认定新链路已经自动跑通。
+
+三、跨 Tab 管理已经复现的问题
+D1 删除矩阵会改变后续生产语义
+- DELETE /api/matrices/ai_media 返回 200，响应仍表示“只删了分组，里面的 Job 都还在”。
+- 实际再次读取 flash_daily/settings：content_mode 从 episode 变为 individual，split 从 whole 变为 each，effective_render 从带速度与包装设置变为 {}。
+- ai_flash 栏目 errors 为“所属领域矩阵不存在”。
+- 依据：web/routes/matrices.py:258，core/video/content_columns.py:91、:161。
+- 影响是未来配置解析发生变化，不是已生成历史视频被修改。删除预览必须列出栏目和继承依赖；不能把矩阵当作无业务影响的文件夹。
+
+D2 删除输出留下其他页面仍引用的对象
+- DELETE /api/production/flash_daily 返回 200。
+- content_columns/ai_flash.yaml 和 joint_planning.yaml 仍引用 flash_daily。
+- 历史讲稿 226、渲染记录 151 保留。
+- 依据：core/video/production.py:353 仅删除生产配置文件。
+- 原型“自动解除关联”目前只是模拟；正式实现需要所有入口共同执行相同的解除/迁移规则。
+
+D3 共享 Job 的运行保护不等于引用保护
+- 有 running 记录时删除返回 409 already_running，保护有效。
+- 本轮明确在副本里将该 Job 的 1 条 running 记录改为 failed，以模拟空闲状态；没有结束或取消生产任务。随后 DELETE 返回 200。
+- 剩余 6 个生产配置仍存在，全部出现“没有这个 Job：monitoring/ai_flash_discovery”。
+- 依据：web/routes/jobs.py:965、:1008；core/schedule_store.py:256。
+- 因此只在新链路 Tab 做删除提示不够，旧 Jobs 页也能破坏其他链路；必须共用生命周期规则。
+
+S1 全局来源开关没有真实模型
+- PATCH /api/sources/cg_openai_news 的 fields.enabled:false 返回 422。
+- 当前字段仅 name/spec/tags/note。不能把原型的全局停用开关直接映射过去，也不能将本链路移除来源与全局停用混用。
+
+R1 跨页权限不同
+- editor 访问 GET /api/scheduler?scope=managed 返回 403，而来源/生产配置允许 editor 修改。
+- 单条链路页面需要按动作表达权限与可操作范围，不能让用户创建到最后才发现无权保存周期。
+
+四、原型下一轮应怎样收敛
+P0 创建：提供“研究输入、视频输出、运行安排”三段可理解的设置；内部复用 Job/矩阵复制、配方、栏目和调度能力，展示将创建/共用的对象。alias、编号和配方来源关系由系统组装；高级设置仍可查看。部分失败要保留可继续的草稿与具体失败步骤，不能显示整链已完成。
+P0 删除与修改：链路页展示“本链路独有/与哪些链路共用”，所有旧 Tab 与链路 Tab 使用同一套引用检查与变更服务；矩阵、Job、栏目、生产输出、联合规划、计划必须一起计算影响。历史产出独立保留。
+P0 运行：分开显示研究计划、输出自动生产、正在运行的批次。暂停未来运行不承诺取消已开始任务；失败后从哪一步继续、是否复用报告、是否创建新讲稿版本需要后续真实执行验证。
+P1 一致性：保存后重新读取各对象的实际生效值；表达来自矩阵/栏目/本输出的继承。保留已存在的 revision/version 冲突保护与角色限制。
+
+五、验证边界与后续验收
+本轮是“真实管理接口已验证、端到端生成未验证”。未验证抓取、报告、选题、写稿、渲染、发布的连续执行，也未验证外部失败重试、断点续跑、修改发生在运行中的行为。现有 v9 仍是交互模拟；本检查页读取真实副本配置并展示 HTTP 检查证据，不是假称 v9 已全部接入后端。
+
+后续完成标准应包括：新人不用 YAML 完成一条新链路；从链路页或任何旧 Tab 修改后呈现相同生效值；删除不留悬空引用；隔离真实运行证明产出与运行记录归属于同一链路。现有研究入口、写稿与渲染服务逐步接入，无需全面重构。
+
+文件与复现
+- prepare.py：建立副本，目标已存在时拒绝覆盖。
+- isolated_app.py：隔离入口；关闭启动副作用、执行器、外连和生成发布路由。
+- check.py：真实 HTTP 检查并在 finally 中还原副本。复跑：从模块目录执行 python3 spec/product-chain-research-20261116/isolated-real-chain-20261117/check.py。
+- inspection.html：检查结果和真实副本读取入口。
+- requests.json / results.json / check.log：最终有效结果。
+- requests-attempt1/2：创建过程中遭遇编号/配方失败的原始过程；对应 results 中旧 status 不作为最终完成依据。
+- attempt3 曾错误概括 running 状态下的 Job 删除结果；attempt4 与最终结果已用明确空闲场景复现并纠正，不引用 attempt3 的 D3 结论。
+- snapshot.json / verification.json：代码配置哈希。832 个受检源文件中 827 个与起始快照一致；检查期间变化的文件为：core/video/persona.py、core/video/writer.py、config/content_strategy.yaml、config/content_columns/chatgpt_t05_comparison.yaml、config/content_columns/chatgpt_t09_updates.yaml。本轮没有写入或回滚这些文件，隔离脚本也禁止写出本验收目录。副本业务代码仍与起始快照完全一致，配置/Job 还原差异为 0；不能将整个工作区宣称为完全未变。
+- 生产数据库备份后仍可由正常应用继续运行，因此不以数据库当前哈希相同作为隔离证明，不覆盖生产状态。
+
+补充验证：git diff --check 通过；浏览器已登录隔离账号、读取真实副本 7 个生产配置并核对最终 49 请求的结果页，截图 inspection.png。

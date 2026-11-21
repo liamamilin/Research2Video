@@ -186,7 +186,7 @@ def test_a_batch_scripts_steps_are_logged_as_autopilot(video_env, monkeypatch):
 
     monkeypatch.setattr(video_workflow, "spawn", lambda *a, **k: None)
     monkeypatch.setattr(pilot, "fresh_topics", lambda spec, run: True)
-    monkeypatch.setattr(pilot, "pick_topics", lambda spec: [{"column_key": "flash", "topic": {"id": "x/F1", "title": "一条快讯"}}])
+    monkeypatch.setattr(pilot, "pick_topics", lambda spec, notes=None: [{"column_key": "flash", "topic": {"id": "x/F1", "title": "一条快讯"}}])
     run = pilot.start_run({"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": False})
     pilot.tick()
     script_id = ap.get_run(run["id"])["items"][0]["script_id"]

@@ -1,0 +1,38 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_pool_rejection_cannot_run_a_work_item_already_queued ___________
+
+registry = <web.runner.registry.TaskRegistry object at 0x113683370>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x113682ec0>
+
+    def test_pool_rejection_cannot_run_a_work_item_already_queued(registry, monkeypatch):
+        from core import matrices
+        initialized, queued = [], []
+        monkeypatch.setattr(matrices, "cap_block", lambda *args: None)
+        monkeypatch.setattr(executor, "_attach_persistence", lambda *args: None)
+        monkeypatch.setattr(executor, "ResearchEngine", lambda **kwargs: initialized.append(kwargs))
+
+        def reject_after_enqueue(callback, *args, **kwargs):
+            queued.append(lambda: callback(*args, **kwargs))
+            raise RuntimeError("cannot start new thread")
+
+        monkeypatch.setattr(executor, "_executor", SimpleNamespace(submit=reject_after_enqueue))
+        with pytest.raises(RuntimeError, match="cannot start"):
+            executor.start_job("demo", "test")
+        # ThreadPoolExecutor enqueues before adjusting thread count. Another worker
+        # can eventually pick up the item even though submit raised to the caller.
+        queued[0]()
+>       assert len(initialized) == 1  # Only the admission-time engine stub.
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'config_dir': 'config', 'jobs_dir': 'jobs'}, {'cancel_token': <threading.Event object at 0x1135a7520>, 'config_dir': 'config', 'date_override': None, 'jobs_dir': 'jobs', ...}])
+
+tests/test_task_lifecycle.py:112: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    ai_research.web.runner:executor.py:93 Job demo failed with unhandled error
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/runner/executor.py", line 78, in run_job_in_thread
+    result = engine.run_job(job_name, verbose=verbose)
+AttributeError: 'NoneType' object has no attribute 'run_job'
+=========================== short test summary info ============================
+FAILED tests/test_task_lifecycle.py::test_pool_rejection_cannot_run_a_work_item_already_queued
+1 failed, 5 deselected in 0.39s

@@ -15,7 +15,7 @@ import sqlite3
 import threading
 import time
 from contextlib import contextmanager
-from typing import Iterable, Optional
+from typing import Iterable, Iterator, Optional
 from urllib.parse import unquote, urlparse
 
 from core import sqlite_util
@@ -441,13 +441,16 @@ def register_report(job: str, date: str, content: str,
 
 def recent_events(days: int = 7, limit: int = 50,
                   before: Optional[str] = None,
-                  exclude_jobs: Optional[set] = None) -> list[dict]:
+                  exclude_jobs: Optional[set] = None,
+                  prefer_job: Optional[str] = None) -> list[dict]:
     """Events seen within the last ``days`` days, most recent first.
 
     One entry per story: sources folded into an earlier event are listed as
     corroborating hosts instead of appearing as separate events. With
     ``exclude_jobs``, an event that only those Jobs reported is left out (one
-    any other Job also reported stays).
+    any other Job also reported stays). With ``prefer_job``, events reported
+    by that Job are ranked first before filling remaining slots from other
+    in-scope Jobs so high-volume sibling Jobs do not crowd out its history.
     """
     init_db()
     cutoff = time.strftime("%Y-%m-%d", time.localtime(time.time() - days * 86400))
@@ -457,7 +460,7 @@ def recent_events(days: int = 7, limit: int = 50,
         query += " AND first_seen < ?"
         params.append(before)
     query += " ORDER BY last_seen DESC, times_seen DESC"
-    if not exclude_jobs:
+    if not exclude_jobs and not prefer_job:
         query += " LIMIT ?"
         params.append(int(limit))
     with connect() as conn:
@@ -465,7 +468,15 @@ def recent_events(days: int = 7, limit: int = 50,
         if exclude_jobs:
             events = [e for e in events
                       if not {j for j in (e.get("jobs") or "").split(",") if j} <= set(exclude_jobs)
-                      or not e.get("jobs")][:int(limit)]
+                      or not e.get("jobs")]
+        if prefer_job:
+            own, others = [], []
+            for e in events:
+                job_set = {j for j in (e.get("jobs") or "").split(",") if j}
+                (own if prefer_job in job_set else others).append(e)
+            events = (own + others)[:int(limit)]
+        elif exclude_jobs:
+            events = events[:int(limit)]
         keys = [e["url_key"] for e in events]
         if keys:
             placeholders = ",".join("?" * len(keys))
@@ -519,10 +530,12 @@ def round_counts(round_date: str) -> dict:
 
 
 def reported_block(days: int = 7, limit: int = 15,
-                   exclude_jobs: Optional[set] = None) -> str:
+                   exclude_jobs: Optional[set] = None,
+                   prefer_job: Optional[str] = None) -> str:
     """Prompt-ready "already reported" list (empty string when nothing to add)."""
     try:
-        events = recent_events(days=days, limit=limit, exclude_jobs=exclude_jobs)
+        events = recent_events(days=days, limit=limit, exclude_jobs=exclude_jobs,
+                               prefer_job=prefer_job)
     except sqlite3.Error:
         return ""
     if not events:

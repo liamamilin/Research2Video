@@ -1,0 +1,3714 @@
+{
+  "scope": "All jobs in current unarchived matrices, regardless of schedules; active matrix helper entry points; enabled external schedules. Archived excluded.",
+  "jobs": [
+    {
+      "job": "ai_media/ai_tool_tutorials",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "4decf6633404b153985e7ee7c7d893ea799b81e254d92971c4afff522077f7b7",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "ai_media/ai_tool_tutorials",
+          "production": "ai_tool_tutorials",
+          "recipe": "chatgpt_acquisition",
+          "profile": "ai-tool-natural-v4",
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai_tool_tutorials.json"
+        }
+      ],
+      "previous_review": "上游的入口、输入、动作、结果是教程必要信息；当前 draft 又规定钩子后紧接问候、下一段第一个动作、讲完动作再补解释。试验放松段落位置，必须保住新手听懂和能跟做，不能只删步骤。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/ai_media/ai_tool_tutorials.yaml",
+        "before_sha256": "4decf6633404b153985e7ee7c7d893ea799b81e254d92971c4afff522077f7b7",
+        "after_sha256": "bd4a7e0f97dc668e78c528d468d787bc0e95daf8ec863b266ba0206133297a89",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai_tool_tutorials"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "ai_tutorial",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "ai_media/daily_opensource_radar",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "448c9163a994896d08e49bff3ef2eb341e1d4d027f7a1a7870abf841875233d4",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+      ],
+      "effective_routes": [
+        {
+          "job": "ai_media/daily_opensource_radar",
+          "production": "ai_media_opensource_digest",
+          "recipe": "report_digest",
+          "profile": "opensource-radar-v2",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai_media_opensource_digest.json"
+        }
+      ],
+      "previous_review": "研究与栏目都要求同一输入推进并回到工作位置；启用的 profile draft 为空，主要作用在读稿修订。保留工具用途和真实输出，检查是否把认识项目强迫写成部署教程；改未启用模板不算解决。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/ai_media/daily_opensource_radar.yaml",
+        "before_sha256": "448c9163a994896d08e49bff3ef2eb341e1d4d027f7a1a7870abf841875233d4",
+        "after_sha256": "aca8b80b33698560420c0f6e0bf59e60cc923f8557c4b1002486df013998b2dd",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "ai_media/daily_opensource_radar",
+            "production": "ai_media_opensource_digest",
+            "recipe": "report_digest",
+            "profile": "opensource-radar-v2",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/ai_media_opensource_digest.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai_media_opensource_digest"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "ai_opensource",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "ai_media/weekly_business_watch",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        }
+      ],
+      "source_sha256": "e80433a43b1f6f189984ffec1b742840623ae4ee80e0b9e95188b0d3f3c80858",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "ai_media/weekly_business_watch",
+          "production": "ai_media_business_digest",
+          "recipe": "report_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai_media_business_digest.json"
+        }
+      ],
+      "previous_review": "当前使用栏目 notes，不使用代码里定义的 business-watch-v1。一次交易可帮助理解，但把每个概念都限制在一次交付中可能缩窄商业解释。保留角色关系和成本机制，先比较去掉固定回到开场的要求。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/ai_media/weekly_business_watch.yaml",
+        "before_sha256": "e80433a43b1f6f189984ffec1b742840623ae4ee80e0b9e95188b0d3f3c80858",
+        "after_sha256": "707a0ee1325aada22dd0aa7b370bc82f69f4a1420944a7812b604f7f633b665c",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "ai_media/weekly_business_watch",
+            "production": "ai_media_business_digest",
+            "recipe": "report_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/ai_media_business_digest.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai_media_business_digest"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "ai_business",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "ai_media/weekly_deep_research",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "702ba4e95f8da5d79c2fe5ebef27edaec1c408561fb675eac44bca690bf63e73",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+      ],
+      "effective_routes": [
+        {
+          "job": "ai_media/weekly_deep_research",
+          "production": "ai_media_deep_dive",
+          "recipe": "deep_dive",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai_media_deep_dive.json"
+        }
+      ],
+      "previous_review": "研究、栏目及原始材料衔接都要求主例子每解释一层前进一步、最后迁移到工作场景。先检查跨实验解释是否被迫绕回例子；保留方法、实验条件和机制深度，专用 profile 当前未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/ai_media/weekly_deep_research.yaml",
+        "before_sha256": "702ba4e95f8da5d79c2fe5ebef27edaec1c408561fb675eac44bca690bf63e73",
+        "after_sha256": "a243de5dca8d5227fcdd3b3233f441662f167325f8dbc7bbd70ca1e45fb97e3e",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "ai_media/weekly_deep_research",
+            "production": "ai_media_deep_dive",
+            "recipe": "deep_dive",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/ai_media_deep_dive.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai_media_deep_dive"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "ai_deep",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "ai_media/weekly_model_arena",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        }
+      ],
+      "source_sha256": "bdfc6380a21e4e30c3937f7bcf547d8ea0e73c2a6ecc7aeb79b7f6240b573a82",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "ai_media/weekly_model_arena",
+          "production": "ai_media_arena_digest",
+          "recipe": "report_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai_media_arena_digest.json"
+        }
+      ],
+      "previous_review": "栏目允许对象数量由问题决定，比固定维度宽松；选择导向符合选型用途。保留同口径读数和取舍，重点检查通用开场与收尾，不把所有条件选择当八股；model-arena-v1 当前未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/ai_media/weekly_model_arena.yaml",
+        "before_sha256": "bdfc6380a21e4e30c3937f7bcf547d8ea0e73c2a6ecc7aeb79b7f6240b573a82",
+        "after_sha256": "76eb3c69c3e0d51edbf51cbfd212aaf9db47de4a4837f09677874fe042d51dba",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "ai_media/weekly_model_arena",
+            "production": "ai_media_arena_digest",
+            "recipe": "report_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/ai_media_arena_digest.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai_media_arena_digest"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "ai_arena",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t01_product",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "ba68ca5e0cdc53b16cd553e711a53ccf0b29bedf909db3f1a0ee08ca15078a98",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t01_product",
+          "production": "chatgpt_t01_product",
+          "recipe": "chatgpt_acquisition",
+          "profile": "t01-task-boundary-v1-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t01_product.json"
+        }
+      ],
+      "previous_review": "启用的 draft 把能力认知改成每例一个选择，并规定开场交付难题、结尾最推荐的第一次尝试，read/revise 也以拿主意为主。候选去掉每例必须决策，保留输入产物和实际边界。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t01_product.yaml",
+        "before_sha256": "ba68ca5e0cdc53b16cd553e711a53ccf0b29bedf909db3f1a0ee08ca15078a98",
+        "after_sha256": "644b719915036767b8d6f3a539bf7569794a4b2c7240b35ac508f45635a4b25e",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "chatgpt_acquisition/t01_product",
+            "production": "chatgpt_t01_product",
+            "recipe": "chatgpt_acquisition",
+            "profile": "t01-task-boundary-v1-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/chatgpt_t01_product.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t01_product"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t01",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t02_scenarios",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "23a7bf62dcf4529b0ba01aefb411a968d36381c3606ca00d492b1471c350ff33",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t02_scenarios",
+          "production": "chatgpt_t02_scenarios",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t02_scenarios.json"
+        }
+      ],
+      "previous_review": "当前栏目 notes 简短、以案例成果和可迁移用法为目标，专用 profile 未启用。保留案例的输入过程和成果，优先检查共用固定开场/条尾是否掩盖故事，不无差别删去任务线。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t02_scenarios.yaml",
+        "before_sha256": "23a7bf62dcf4529b0ba01aefb411a968d36381c3606ca00d492b1471c350ff33",
+        "after_sha256": "b933af66f4594ec6ae4d5070175e41e33c57857dabad5b617d7e0a38e0819090",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "chatgpt_acquisition/t02_scenarios",
+            "production": "chatgpt_t02_scenarios",
+            "recipe": "chatgpt_acquisition",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/chatgpt_t02_scenarios.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t02_scenarios"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t02",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "c213df14f0af63c980374d7af7c34e7666aab0540af9dfdfe83621c716553c5f",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t03_tutorials",
+          "production": "chatgpt_t03_tutorials",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t03_tutorials.json"
+        }
+      ],
+      "previous_review": "操作起点、关键步骤、示例提示词与结果是必要内容；当前专用 profile 未启用。需检查实际 tutorial 模板与章节契约，放松套话不能打乱动作顺序，也不能套用 AI 工具教程特有段落规则。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t03_tutorials.yaml",
+        "before_sha256": "c213df14f0af63c980374d7af7c34e7666aab0540af9dfdfe83621c716553c5f",
+        "after_sha256": "bc5d5fec6b479dce70fa20dc0d5b4d2925deb5cbba081468acc2a0dcae38019a",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "wrap_followup": {
+        "change": "首尾写法改成可选，保留真实操作条件与目标",
+        "configuration": "wrap-scope.json",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t03_tutorials"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t03",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t04_testing",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "c60d4041dc45ef58027639450f793d3189c8119332b25c43633591073d08ccf7",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t04_testing",
+          "production": "chatgpt_t04_testing",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t04_testing.json"
+        }
+      ],
+      "previous_review": "研究要求实际测试归属和未执行项的性质，栏目 type=comparison 又可能为单一验证套比较结构。保留观察与结果，检查是否把制作计划念进口播；不用新增审核来解决。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t04_testing.yaml",
+        "before_sha256": "c60d4041dc45ef58027639450f793d3189c8119332b25c43633591073d08ccf7",
+        "after_sha256": "7bd1bc9fad9f7569661fe0fd4b84c81d9ce21dfea8e21c23333a30cd94da8819",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "chatgpt_acquisition/t04_testing",
+            "production": "chatgpt_t04_testing",
+            "recipe": "chatgpt_acquisition",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/chatgpt_t04_testing.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t04_testing"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t04",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t05_comparison",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "0ad0607f5f6b9c5f668d215497bec0a6ab549edbcfe18035f71686ff2561e31d",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t05_comparison",
+          "production": "chatgpt_t05_comparison",
+          "recipe": "chatgpt_acquisition-m5",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t05_comparison.json"
+        }
+      ],
+      "previous_review": "notes 同时硬定开头时长、三维度、先结果后解释、改选条件、结尾决策表及七套结构。明确优先删减对象之外的表达定额；同任务/同维度和差异解释保留。t05 profile 未启用，不能改错层。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "wrap_followup": {
+        "change": "真实下一期预告保留，去掉固定一句问句和关注措辞",
+        "configuration": "wrap-scope.json",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "comparison_material_followup": {
+        "config": "chatgpt_t05_comparison",
+        "fix": "旧报告保存已选横评全文和对应原文，有无排重均不缩成单家公司；不赋予旧报告选题标记。",
+        "evidence": "t05-kept-item-runtime.json",
+        "marked_report": "已有受众标记的报告使用原现行流程"
+      },
+      "duplicated_author_input_followup": {
+        "decision": "仅删除交接中逐字相同的第二份摘要，保持事实、排重、选题和来源。",
+        "evidence": "author-input-dedup-runtime.json"
+      },
+      "research_selection_fields_followup": {
+        "rendered_prompt_sha256": "ca55d4d3daeb96903a434cf0a1d76333c56df8033ee3a3bd2cbda8249a8820f6",
+        "bindings": [
+          "chatgpt_t05_comparison"
+        ],
+        "job_sha256": "c67e8d8c185d63fa52acde9adae3ec8b41e3716031358621c7534691de72a1d0",
+        "change": "把重复的固定选题说明改为按材料需要；T05结构不再七选一",
+        "evidence": "research-field-soft-scope.json"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t05_comparison"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t05",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t06_value",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "541d718a6cfb993a443e13a72ae356e988cc3965829b0d5f1450c8c3b282767f",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t06_value",
+          "production": "chatgpt_t06_value",
+          "recipe": "chatgpt_acquisition-m5",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t06_value.json"
+        }
+      ],
+      "previous_review": "收费选择本来就需要条件，当前 notes 没有限定三维度或固定结尾。保留价格币种、渠道和权益口径，主要试验共用层放松；不把必要条件句禁掉。专用 profile 未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "chatgpt_acquisition/t06_value",
+            "production": "chatgpt_t06_value",
+            "recipe": "chatgpt_acquisition-m5",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/chatgpt_t06_value.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "research_selection_fields_followup": {
+        "rendered_prompt_sha256": "4e5db7a8903a928f1dc694d07731e0c1096bb2de81927ef5a23663958254f15e",
+        "bindings": [
+          "chatgpt_t06_value"
+        ],
+        "job_sha256": "ca196900d6bd0be3a5fc378e554a873415c18f2a94e2d26fa9cb0c1221770fa8",
+        "change": "把重复的固定选题说明改为按材料需要；T05结构不再七选一",
+        "evidence": "research-field-soft-scope.json"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t06_value"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t06",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t07_subscription",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "094ae46034d40527fee1c61f40cc920948787eced06fe5f16606f088b0a75da5",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t07_subscription",
+          "production": "chatgpt_t07_subscription",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t07_subscription.json"
+        }
+      ],
+      "previous_review": "付款渠道、地区、账单和排查分支属于完成任务所需内容；条件句本身不是问题。保留路径区别，检查共用钩子和收尾是否增加无用铺垫。专用 profile 未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t07_subscription.yaml",
+        "before_sha256": "094ae46034d40527fee1c61f40cc920948787eced06fe5f16606f088b0a75da5",
+        "after_sha256": "35c33072ae3b655735ebcee0e2cc1e0e1f2e55bc37970d4f59f2f4db6f4a3b4e",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "wrap_followup": {
+        "change": "首尾写法改成可选，保留真实操作条件与目标",
+        "configuration": "wrap-scope.json",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t07_subscription"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t07",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t08_troubleshooting",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "28625d3385d51474d5b7370835698bd8e2c0dada99388527b6a4f1f64aacb68a",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t08_troubleshooting",
+          "production": "chatgpt_t08_troubleshooting",
+          "recipe": "chatgpt_acquisition",
+          "profile": "t08-v2",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t08_troubleshooting.json"
+        }
+      ],
+      "previous_review": "启用 profile 只读一处真实操作断点，draft 为空，目标贴合排障。优先保留，检查通用开场；分支与信号不可为追求多样性改成随意叙事。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t08_troubleshooting.yaml",
+        "before_sha256": "28625d3385d51474d5b7370835698bd8e2c0dada99388527b6a4f1f64aacb68a",
+        "after_sha256": "2e30f62678baabce0501d11b90b5a9a57ec4487a570c54301c93b145833c87d8",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "wrap_followup": {
+        "change": "首尾写法改成可选，保留真实操作条件与目标",
+        "configuration": "wrap-scope.json",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t08_troubleshooting"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t08",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "chatgpt_acquisition/t09_updates",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "chatgpt_acquisition",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "19d99e8d638fa78e202bc512d9275f426529eb30a1436146644f5b15f9213f89",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "chatgpt_acquisition/t09_updates",
+          "production": "chatgpt_t09_updates",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t09_updates.json"
+        },
+        {
+          "job": "chatgpt_acquisition/t09_updates",
+          "production": "chatgpt_t09_updates_each",
+          "recipe": "chatgpt_acquisition",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/chatgpt_t09_updates_each.json"
+        }
+      ],
+      "previous_review": "研究和栏目强调同一变化合并、普通用户实际用法，属于防止拆题重复的内容组织。合集与单条是不同绑定，须分别检查联合规划及共用写作。当前 t09 profile 未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/chatgpt_acquisition/t09_updates.yaml",
+        "before_sha256": "19d99e8d638fa78e202bc512d9275f426529eb30a1436146644f5b15f9213f89",
+        "after_sha256": "48902114dad6bc3660545338f817fa12e1d2e9c95d3d6936ba8bd42bbb34b0b9",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "chatgpt_acquisition/t09_updates",
+            "production": "chatgpt_t09_updates",
+            "recipe": "chatgpt_acquisition",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/chatgpt_t09_updates.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "chatgpt_t09_updates",
+          "chatgpt_t09_updates_each"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "t09",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "company/company_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "source_sha256": "5239d7bb5d9c070a59f8c752e7350a586f417c8cc8d00abf4717fda9c4d4e1c0",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "company/company_daily",
+          "production": "company_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/company_daily.json"
+        }
+      ],
+      "previous_review": "研究及 notes 规定同一客户/交付者贯穿、其他背景简短、结尾回到原动作。保留业务因果和实际参与者，试验将全程单人物和固定回环改为按材料选择。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/company/company_daily.yaml",
+        "before_sha256": "5239d7bb5d9c070a59f8c752e7350a586f417c8cc8d00abf4717fda9c4d4e1c0",
+        "after_sha256": "b03254411b51920c74b13841c19b0d1e85313bfdc978a98748bf3f08f30ae5d7",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "company/company_daily",
+            "production": "company_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/company_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "company_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "company_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "company/company_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "source_sha256": "618859e5232c610c0c179f949db8225139945fd24304b7289ac115f19810dc65",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "company/company_illustrated",
+          "production": "company_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/company_illustrated.json"
+        }
+      ],
+      "previous_review": "题库聚焦生意原理，但底稿硬定机制步数、比喻、例子数和误解数。保留一个清楚商业问题及解释素材，试验撤掉凑数量和每题必备比喻/误解，检查是否损失因果解释。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/company/company_illustrated.yaml",
+        "before_sha256": "618859e5232c610c0c179f949db8225139945fd24304b7289ac115f19810dc65",
+        "after_sha256": "6b28fafd094173d47802464d04d24fdc5e9c69454fdf878059c7ff55b4a20879",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "company/company_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "company",
+          "paused": false
+        }
+      ],
+      "source_sha256": "c91b57058b4a0efc1fec0ee44bd567a817bfb2a538b0075c6e832990123d7f8a",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "company/company_weekly",
+          "production": "company_weekly",
+          "recipe": "topic_digest",
+          "profile": "company-weekly-v3-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/company_weekly.json"
+        }
+      ],
+      "previous_review": "启用专用整期模板、draft、lead、reader 都沿同一笔交易，连续叠加；交易可讲透生意，但可能遮挡商业模式或竞争解释。先保留资金/交付关系，放松固定旅程和角色出场时点。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/company/company_weekly.yaml",
+        "before_sha256": "c91b57058b4a0efc1fec0ee44bd567a817bfb2a538b0075c6e832990123d7f8a",
+        "after_sha256": "e18f0e74c70b36358d69ad472a1dfd91b16bd0caecbc0885e8e5c176a71fc86b",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "company/company_weekly",
+            "production": "company_weekly",
+            "recipe": "topic_digest",
+            "profile": "company-weekly-v3-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/company_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "company_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "company_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "consumer/consumer_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "source_sha256": "09a642b41b4d29daf17f09aef0e92d2716778b7707ce57ff380a132ebf70f038",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "consumer/consumer_daily",
+          "production": "consumer_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/consumer_daily.json"
+        }
+      ],
+      "previous_review": "从准备到善后的全过程和结尾下一次使用被上下游重复规定。保留真实体验与参数影响，允许某些变化通过直接对比说清，不强行补齐一次使用旅程。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/consumer/consumer_daily.yaml",
+        "before_sha256": "09a642b41b4d29daf17f09aef0e92d2716778b7707ce57ff380a132ebf70f038",
+        "after_sha256": "978345b3475c77d2b2fe8c0650727e20d0eac51e7eff3c2c11ff1a323dd3491c",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "consumer/consumer_daily",
+            "production": "consumer_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/consumer_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "consumer_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "consumer_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "consumer/consumer_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "source_sha256": "e21c54dae1461010373b68e6ac0b098d46720cf496c9edccce345fc6a7934e14",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "consumer/consumer_illustrated",
+          "production": "consumer_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/consumer_illustrated.json"
+        }
+      ],
+      "previous_review": "手机充电、降噪、扫地等题材共用固定八段底稿，且一律要求人物物件类比。保留产品机制和可感知例子，按实际难点决定是否类比、举几例。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/consumer/consumer_illustrated.yaml",
+        "before_sha256": "e21c54dae1461010373b68e6ac0b098d46720cf496c9edccce345fc6a7934e14",
+        "after_sha256": "1637ddeb7b0aac21eb1405f7681aa39878bd548221c64aa398b99166a0448192",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "consumer/consumer_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "consumer",
+          "paused": false
+        }
+      ],
+      "source_sha256": "dd739a54207394eef5900ce3d93964cea2054fe4ab16042ee4f7c640c9595a20",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "consumer/consumer_weekly",
+          "production": "consumer_weekly",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/consumer_weekly.json"
+        }
+      ],
+      "previous_review": "同任务、同使用周期比较有必要；逐项改变下一步和结尾完成选择后的新状态不应强制。保留长期成本、维护和兼容条件，放松固定的用户旅程。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/consumer/consumer_weekly.yaml",
+        "before_sha256": "dd739a54207394eef5900ce3d93964cea2054fe4ab16042ee4f7c640c9595a20",
+        "after_sha256": "0edf82bd355293faeb64be08fb04c48babd48a23489a88e2f7d1892b18fdf05c",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "consumer/consumer_weekly",
+            "production": "consumer_weekly",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/consumer_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "consumer_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "consumer_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "culture/culture_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "source_sha256": "3a56cd062389f3460045e3f1c51449c0e1615556c881e9e5be8753edc6b58442",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+      ],
+      "effective_routes": [
+        {
+          "job": "culture/culture_daily",
+          "production": "culture_daily",
+          "recipe": "topic_digest",
+          "profile": "culture-daily-v1-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/culture_daily.json"
+        }
+      ],
+      "previous_review": "研究、栏目及启用 profile/整期模板都要求单作品单细节，最后给再看再听的理由。具体作品很有价值，但固定注意力路线可能把评论和多作品对照限制过头；保留审美细节，试验减少反复返回。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/culture/culture_daily.yaml",
+        "before_sha256": "3a56cd062389f3460045e3f1c51449c0e1615556c881e9e5be8753edc6b58442",
+        "after_sha256": "59b0324a423dad7174faea8d627ebd5ad182057dbb1858b390d1727beedec647",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "culture/culture_daily",
+            "production": "culture_daily",
+            "recipe": "topic_digest",
+            "profile": "culture-daily-v1-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/culture_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "culture_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "culture_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "culture/culture_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "source_sha256": "74e72b8548b65e3324495f70249b9d2ae778cff19a883fe77dac1da8667f63f5",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "culture/culture_illustrated",
+          "production": "culture_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/culture_illustrated.json"
+        }
+      ],
+      "previous_review": "留白、副歌、京剧等题目都预先分成机制/比喻/生活例子/误解。保留具体作品和听看感受，检查是否为了固定机制步数把审美问题讲成流程。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-final-illustrated/culture/candidate",
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-research/culture",
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-input-pair-r2/culture"
+      ],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/culture/culture_illustrated.yaml",
+        "before_sha256": "74e72b8548b65e3324495f70249b9d2ae778cff19a883fe77dac1da8667f63f5",
+        "after_sha256": "3006f84b01297776dcbbe447ac54f380d9388bd12667aa03fd60d000f8ff2959",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "culture/culture_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "culture",
+          "paused": false
+        }
+      ],
+      "source_sha256": "601c59664f067d253c488f2ab4dd21a3bb1315cd6c92fae2a15eb45ab2fdbd5b",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "culture/culture_weekly",
+          "production": "culture_weekly",
+          "recipe": "topic_digest",
+          "profile": "culture-weekly-reader-v4-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/culture_weekly.json"
+        }
+      ],
+      "previous_review": "启用 draft 规定两个场合的意义反差、追最早用途、按场合推进、结尾再遇到的变化。对传播史适合，对其他文化问题未必适合；保留作品来路与创作者行为，试验取消统一的两场合开头。 实际两版changes证实专用读稿/修订强制回主作品，把新案例替换为已经讲过的录音棚故事。第九轮仅放松该专用要求，候选验证中。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/culture/culture_weekly.yaml",
+        "before_sha256": "601c59664f067d253c488f2ab4dd21a3bb1315cd6c92fae2a15eb45ab2fdbd5b",
+        "after_sha256": "6e3ec8ae5cc766ece9e1fbe7c0023688f23dbb1f6285753c5b47b82599b92b5d",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "culture/culture_weekly",
+            "production": "culture_weekly",
+            "recipe": "topic_digest",
+            "profile": "culture-weekly-reader-v4-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/culture_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "culture_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "culture_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "economy/economy_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        }
+      ],
+      "source_sha256": "c8002c45717d79ca2b4b6932e096345a59cdcc1c21d260ba5abe2cd78cd28c1c",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "economy/economy_daily",
+          "production": "ai-non_tech-deep_dive-long-2",
+          "recipe": "ai-non_tech-deep_dive-long",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai-non_tech-deep_dive-long-2.json"
+        },
+        {
+          "job": "economy/economy_daily",
+          "production": "economy_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/economy_daily.json"
+        }
+      ],
+      "previous_review": "研究/notes 把每个解释都写成家庭或企业先选、再传给下一方、结尾连回账单。保留传导关系和数据含义，允许直接从价格差异或制度机制展开，不硬安一位主人公。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/economy/economy_daily.yaml",
+        "before_sha256": "c8002c45717d79ca2b4b6932e096345a59cdcc1c21d260ba5abe2cd78cd28c1c",
+        "after_sha256": "915a314cbc58d55658d247286e729382471689d537c3f61c40d0c5b983290ee1",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "economy/economy_daily",
+            "production": "economy_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/economy_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai-non_tech-deep_dive-long-2",
+          "economy_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "economy_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "economy/economy_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "cbce06cb51aa7102c161d9d9a242032dfe29313f9f4d0f8dcb4cbfb770342e0a",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "economy/economy_illustrated",
+          "production": "economy_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/economy_illustrated.json"
+        }
+      ],
+      "previous_review": "生活价格题库合理，但八段底稿强制比喻、3到5情境和2到3误解，可能重复同一解释。保留直观算例与机制深度，先试验按问题需要取舍展开。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/economy/economy_illustrated.yaml",
+        "before_sha256": "cbce06cb51aa7102c161d9d9a242032dfe29313f9f4d0f8dcb4cbfb770342e0a",
+        "after_sha256": "07f38165aa535a1c56e54d8f76378f86944c520d929e9545cffc10c6e0590dbd",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "economy/economy_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "economy",
+          "paused": false
+        }
+      ],
+      "source_sha256": "703d37c56308db1135408cbd1353a760327a4cbe0f8eaba37e4f4bbb796da780",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "economy/economy_weekly",
+          "production": "economy_weekly",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/economy_weekly.json"
+        }
+      ],
+      "previous_review": "同一笔钱/交易贯穿及结尾迁移到相近用途多次出现。保留钱的去向、激励和成本，放松每层都推进交易与必须再举相近用途的固定动作。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/economy/economy_weekly.yaml",
+        "before_sha256": "703d37c56308db1135408cbd1353a760327a4cbe0f8eaba37e4f4bbb796da780",
+        "after_sha256": "b8d5186fd677c1f83a9ede449b55822bf30051ffeaba8319fd39b431259fc0e3",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "economy/economy_weekly",
+            "production": "economy_weekly",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/economy_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "economy_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "economy_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "geography/geography_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "source_sha256": "16a79411dedb30b19b3407f93acd52e0c540d856c33c8bb8084f1dc10b5949e2",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "geography/geography_daily",
+          "production": "geography_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/geography_daily.json"
+        }
+      ],
+      "previous_review": "地图、空间位置和尺度是必要内容；研究与notes都固定从设施活动进入再跟随新状态收束。保留空间关系，允许地貌或区域差异直接成为主体。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/geography/geography_daily.yaml",
+        "before_sha256": "16a79411dedb30b19b3407f93acd52e0c540d856c33c8bb8084f1dc10b5949e2",
+        "after_sha256": "3aed74aac11c98fdb3ef177559a71b00da5ac6d37926a444b7251e3da54a70ce",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "geography/geography_daily",
+            "production": "geography_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/geography_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "geography_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "geography_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "geography/geography_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "source_sha256": "369d86f2ff78899da2926c8004e82bf9fb5af85aa403533265e8f7e62cedbe93",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "geography/geography_illustrated",
+          "production": "geography_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/geography_illustrated.json"
+        }
+      ],
+      "previous_review": "地形气候题库使用商业插画同一八段结构；不应每个自然现象都依赖人物物件的比喻。保留空间想象与过程，放松统一段数和误解清单。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/geography/geography_illustrated.yaml",
+        "before_sha256": "369d86f2ff78899da2926c8004e82bf9fb5af85aa403533265e8f7e62cedbe93",
+        "after_sha256": "6fb8b1d25471e54faaebc0400749a7c2b9ab1c9f3c5aab3a9fc532f7655cb017",
+        "evidence": "research-brief-scope.json",
+        "runtime": "隔离地理/历史对照见同任务research-brief目录"
+      }
+    },
+    {
+      "job": "geography/geography_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "geography",
+          "paused": false
+        }
+      ],
+      "source_sha256": "8e42ca90e6f118d1bf8fc02bed4a7a52ab59c8b43cc7fe1b8c79cc0dfecf7a61",
+      "local_change": [
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "geography/geography_weekly",
+          "production": "geography_weekly",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/geography_weekly.json"
+        }
+      ],
+      "previous_review": "以同地点/可比地点解释空间差异合理，但每层必须接回同例移动可能压缩跨区域对比。保留尺度和路径，试验减少固定回到例子的句子。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/geography/geography_weekly.yaml",
+        "before_sha256": "8e42ca90e6f118d1bf8fc02bed4a7a52ab59c8b43cc7fe1b8c79cc0dfecf7a61",
+        "after_sha256": "3558ba9ac296acb4e86e4cf09dba6408bbfa216d32966b872a802907163d11f3",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "geography/geography_weekly",
+            "production": "geography_weekly",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/geography_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "geography_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "geography_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "history/history_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "source_sha256": "986341f6ad9ab990fcbd2d3b2fe9282384ab17f06a1aeac4a5c1bdba2b05450f",
+      "local_change": [
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "history/history_daily",
+          "production": "history_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/history_daily.json"
+        }
+      ],
+      "previous_review": "人物身份、物件细节、时代背景有价值；必须把背景贴在动作发生处、结尾追新处境可能强迫所有史料走同一路线。保留原话与历史情境，按史料选择展开。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/history/history_daily.yaml",
+        "before_sha256": "986341f6ad9ab990fcbd2d3b2fe9282384ab17f06a1aeac4a5c1bdba2b05450f",
+        "after_sha256": "f7a91dd0d5c8d04348538aa23f391fac408035216eef3078fbc17c324d1d3b04",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "history/history_daily",
+            "production": "history_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/history_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "history_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "history_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "history/history_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "source_sha256": "f8ad8cb48582d338d5a6b8848ed3b72f6516d9729518860d39606ecf0e074b6c",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "history/history_illustrated",
+          "production": "history_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/history_illustrated.json"
+        }
+      ],
+      "previous_review": "古代日常题库适合具体过程，但统一机制/比喻/误解配额易制造不存在的争议。保留时代与操作细节，允许直接讲真实生活过程而不凑类比。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/history/history_illustrated.yaml",
+        "before_sha256": "f8ad8cb48582d338d5a6b8848ed3b72f6516d9729518860d39606ecf0e074b6c",
+        "after_sha256": "dfbe79c4d27f3650277cff19c49166462ed7900cf2097aa8d9d8258a0d24ab69",
+        "evidence": "research-brief-scope.json",
+        "runtime": "隔离地理/历史对照见同任务research-brief目录"
+      }
+    },
+    {
+      "job": "history/history_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "history",
+          "paused": false
+        }
+      ],
+      "source_sha256": "c8b74e65add32126cdf570278029f396ef52d87590b3453f2fc03cef2a11ea3e",
+      "local_change": [
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "history/history_weekly",
+          "production": "history_weekly",
+          "recipe": "topic_digest",
+          "profile": "history-weekly-v1-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/history_weekly.json"
+        }
+      ],
+      "previous_review": "启用 draft 让所有开场从人物选择或物件使用开始，读稿也只复述选择及结果。保留事件先后和因果，试验让制度演变或多人冲突有合适的讲法，不能都改成人物小故事。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/history/history_weekly.yaml",
+        "before_sha256": "c8b74e65add32126cdf570278029f396ef52d87590b3453f2fc03cef2a11ea3e",
+        "after_sha256": "472a035b4fcaf4834a04d44cdeeef8fae969cd28f6ebf77c60deb655464756cc",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "history/history_weekly",
+            "production": "history_weekly",
+            "recipe": "topic_digest",
+            "profile": "history-weekly-v1-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/history_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "history_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "history_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "industry/industry_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "source_sha256": "9514a22625d2238a2ae4d938eb8182c91dd5ae7659ec3c37ded659a86ecbdeaf",
+      "local_change": [
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "industry/industry_daily",
+          "production": "industry_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/industry_daily.json"
+        }
+      ],
+      "previous_review": "上下游交接和工艺变化是核心；研究/notes要求所有公司、数字都只在产品经过该步骤出现。保留产业依赖，放松单件产品流转的唯一结构。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/industry/industry_daily.yaml",
+        "before_sha256": "9514a22625d2238a2ae4d938eb8182c91dd5ae7659ec3c37ded659a86ecbdeaf",
+        "after_sha256": "69a52b86b3d0f2fc2dec6799a43da9f181d1a37ff516fb93bb9f0208e29a92c8",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "industry/industry_daily",
+            "production": "industry_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/industry_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "industry_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "industry_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "industry/industry_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "source_sha256": "7ab339c68fd7e414cb962df8a4b8a7edf193fa8b148fc3a99cd29b1b7312e14a",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "industry/industry_illustrated",
+          "production": "industry_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/industry_illustrated.json"
+        }
+      ],
+      "previous_review": "制造问题通常已有自然工序，不必再外加3到5机制、一个好比喻和2到3误区。保留实际工序因果，试验去除与工序无关的必备栏目。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/industry/industry_illustrated.yaml",
+        "before_sha256": "7ab339c68fd7e414cb962df8a4b8a7edf193fa8b148fc3a99cd29b1b7312e14a",
+        "after_sha256": "00886edb32fd067c3601103892f47bb59b837976b6757e559faff48f4d575f61",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "industry/industry_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "industry",
+          "paused": false
+        }
+      ],
+      "source_sha256": "d54775f5d805b1b9892d7ff421608400d26a8cd6c4b36e5e83fb3376fd513a08",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "industry/industry_weekly",
+          "production": "industry_weekly",
+          "recipe": "topic_digest",
+          "profile": "industry-weekly-v1-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/industry_weekly.json"
+        }
+      ],
+      "previous_review": "专用模板、draft、lead、reader共同要求原料到交付，并指定结尾区分做一个和持续交货。对制造过程有用但重复叠加；保留关键工艺与重复交付条件，取消每题相同收尾考题。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/industry/industry_weekly.yaml",
+        "before_sha256": "d54775f5d805b1b9892d7ff421608400d26a8cd6c4b36e5e83fb3376fd513a08",
+        "after_sha256": "950344d76b2716062b8869f7e60276566fd9481e4975886a4cd3e545a06b2c0b",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "industry/industry_weekly",
+            "production": "industry_weekly",
+            "recipe": "topic_digest",
+            "profile": "industry-weekly-v1-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/industry_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "industry_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "industry_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "monitoring/ai_flash_discovery",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "ai_media",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "de827e2bdcfdf51d3bfcee01f953065ff22b2989192cc9b941c5f690923f6f03",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+      ],
+      "effective_routes": [
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "ai-developer-roundup-long",
+          "recipe": "ai-developer-roundup-long",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai-developer-roundup-long.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "ai-non_tech-one_point-short",
+          "recipe": "ai-non_tech-one_point-short",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai-non_tech-one_point-short.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "ai-non_tech-quick_take-short",
+          "recipe": "ai-non_tech-quick_take-short",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai-non_tech-quick_take-short.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "flash",
+          "recipe": "flash",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/flash.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "flash_daily",
+          "recipe": "flash-nr",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/flash_daily.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "flash_each",
+          "recipe": "flash-nr",
+          "profile": "flash-explanation-v2",
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/flash_each.json"
+        },
+        {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "point_short",
+          "recipe": "point_short",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/point_short.json"
+        }
+      ],
+      "previous_review": "快讯单条的 draft/read/revise 都强制围绕决定及改选条件；三篇真实稿的同位置复现已有直接证据。先试验撤掉固定决策框架，保留新闻变化、具体解释和有依据的判断；合集另查，不拿单条结论覆盖。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "monitoring/ai_flash_discovery",
+            "production": "flash_daily",
+            "recipe": "flash-nr",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/flash_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "wrap_followup": {
+        "change": "研究条目按材料解释变化，合集不再为每条规定开场和收尾",
+        "configuration": "wrap-scope.json",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "duplicated_author_input_followup": {
+        "decision": "仅删除交接中逐字相同的第二份摘要，保持事实、排重、选题和来源。",
+        "evidence": "author-input-dedup-runtime.json"
+      },
+      "research_selection_fields_followup": {
+        "rendered_prompt_sha256": "1ec65e4ee7c20ae0fb70dfb4a42113aa083317b72f8752ffde147dbd36b2795b",
+        "bindings": [
+          "ai-developer-roundup-long",
+          "ai-non_tech-one_point-short",
+          "ai-non_tech-quick_take-short",
+          "flash",
+          "flash_daily",
+          "flash_each",
+          "point_short"
+        ],
+        "job_sha256": "24f75c7e82787516616de110f23278423fc813f9055797e86c5cdf44b72c50da",
+        "change": "把重复的固定选题说明改为按材料需要；T05结构不再七选一",
+        "evidence": "research-field-soft-scope.json"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai-developer-roundup-long",
+          "ai-non_tech-one_point-short",
+          "ai-non_tech-quick_take-short",
+          "flash",
+          "flash_daily",
+          "flash_each",
+          "point_short"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "flash",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "research/assistant_app_acceptance_20261025",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_app_check",
+          "paused": false
+        }
+      ],
+      "source_sha256": "e5572b20c843a10a330a9576dec061a261166d33d623d56cb2ba5768eda3a6c9",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "research/assistant_app_acceptance_20261025",
+          "production": "deep_dive-4",
+          "recipe": "deep_dive",
+          "profile": "assistant-app-acceptance-v2",
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/deep_dive-4.json"
+        }
+      ],
+      "previous_review": "矩阵仍保留，job.enabled=false也纳入分析但不启用。研究prompt简短，启用profile以项目选型为判断标准，可能把Pyodide机制说明转为采用建议；先记录通用路径影响，实际运行验证标未启用。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "research/assistant_iteration_acceptance_20261025",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_ops_check",
+          "paused": false
+        }
+      ],
+      "source_sha256": "76c7bf80dcd0a3853b00c2abbe51661efc84286aefa2b80b85400cb411733747",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "research/assistant_iteration_acceptance_20261025",
+          "production": "deep_dive-2",
+          "recipe": "deep_dive",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/deep_dive-2.json"
+        }
+      ],
+      "previous_review": "矩阵仍保留但job.enabled=false，研究prompt仅跟踪能力与取舍，未见自身固定结构。共用deep_dive配方和作者层待核对，不为本任务启用旧验收任务。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "research/assistant_ops_acceptance_20261025",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "assistant_ops_check",
+          "paused": false
+        }
+      ],
+      "source_sha256": "0111070237dd7c1290c5ac8b7729ab32e2bffb687d3db6fa3ecd227392f9df57",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "research/assistant_ops_acceptance_20261025",
+          "production": "deep_dive-3",
+          "recipe": "deep_dive",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/deep_dive-3.json"
+        }
+      ],
+      "previous_review": "矩阵仍保留但job.enabled=false，研究prompt无具体段落模板。保留原用途，仅分析deep_dive绑定与共用层影响，不触发研究或修改调度。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "science/science_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        }
+      ],
+      "source_sha256": "03fb02ce764962036427d34ddf48112869963860671dc9990e2cd77f24227c12",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段"
+      ],
+      "effective_routes": [
+        {
+          "job": "science/science_daily",
+          "production": "science_daily",
+          "recipe": "topic_digest",
+          "profile": "science-daily-v3",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/science_daily.json"
+        }
+      ],
+      "previous_review": "研究和栏目保留实验对象、操作、观察；启用 reader 着眼跟丢处而非强制建议，方向较合理。保留它们，主要检查单实验与通用固定开场是否过窄。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/science/science_daily.yaml",
+        "before_sha256": "03fb02ce764962036427d34ddf48112869963860671dc9990e2cd77f24227c12",
+        "after_sha256": "52f6696d5dcfcc0b87cf6ed2ca5b988f3db5961a5c724de79dd69776dabbd04e",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "science/science_daily",
+            "production": "science_daily",
+            "recipe": "topic_digest",
+            "profile": "science-daily-v3",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/science_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "science_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "science_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "science/science_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        },
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "9da054ce30c8f3762e3283ddcd6a8dacc9f0a838283846243e7f4a8c23419a45",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "science/science_illustrated",
+          "production": "science_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/science_illustrated.json"
+        }
+      ],
+      "previous_review": "教科书原理与生活问题范围合理；强制一个类比和多组误区不适合所有现象。保留直观现象、观察和原理，验证取消配额后是否仍讲透。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-final-illustrated/science/candidate",
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-research/science",
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-input-pair-r2/science"
+      ],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/science/science_illustrated.yaml",
+        "before_sha256": "9da054ce30c8f3762e3283ddcd6a8dacc9f0a838283846243e7f4a8c23419a45",
+        "after_sha256": "ace4d4931d8b94a6b3b5041fcbea9de14f36a89085f508c8acced9bdcd4d55c2",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "science/science_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "science",
+          "paused": false
+        }
+      ],
+      "source_sha256": "6a4f557f11357464ea0b22c24a06258b9a8d5e0f373e5e9815b01bad8953be7d",
+      "local_change": [
+        "上游取材建议取消固定叙事回环，保留内容信息与解析字段",
+        "研究输入保留具体关系与过程，放松贯穿案例、开场次序和结尾回环"
+      ],
+      "effective_routes": [
+        {
+          "job": "science/science_weekly",
+          "production": "science_weekly",
+          "recipe": "topic_digest",
+          "profile": "science-weekly-v2-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/science_weekly.json"
+        }
+      ],
+      "previous_review": "专用整期模板及draft/read要求同一对象前后状态贯穿、每节回答上节、结尾重看开场。保留机制递进，试验允许必要的多尺度或多实验论证，不为回到同物件牺牲解释。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/science/science_weekly.yaml",
+        "before_sha256": "6a4f557f11357464ea0b22c24a06258b9a8d5e0f373e5e9815b01bad8953be7d",
+        "after_sha256": "72d43ca6c2dfad415a943f79b708bbc0e2aa1ed5f4cf0298d5bed8dd56e082d3",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "science/science_weekly",
+            "production": "science_weekly",
+            "recipe": "topic_digest",
+            "profile": "science-weekly-v2-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/science_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "science_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "science_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "software/software_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "source_sha256": "3c2aea616b7a3db73758cd233f42dd125d8dba78af9c33e5fdcf37b611d1d82d",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "software/software_daily",
+          "production": "software_daily",
+          "recipe": "topic_digest",
+          "profile": "software-daily-v3",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/software_daily.json"
+        }
+      ],
+      "previous_review": "job与notes较宽松，notes为空，实际会保留配方风格；启用 reader 关注听感和怎么用。不要误把旧专用draft当在用，先检查配方与通用人设的固定动作。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/software/software_daily.yaml",
+        "before_sha256": "3c2aea616b7a3db73758cd233f42dd125d8dba78af9c33e5fdcf37b611d1d82d",
+        "after_sha256": "2610e56f97dbb97fba4915951d0f9d656cb7b63176e55c6e1a412d43135c9b6a",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "software/software_daily",
+            "production": "software_daily",
+            "recipe": "topic_digest",
+            "profile": "software-daily-v3",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/software_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "software_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "software_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "software/software_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "source_sha256": "385d230cb42037467990452e489f8373bfa3ba7aa165df91b5ad0f119f2e9045",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "software/software_illustrated",
+          "production": "software_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/software_illustrated.json"
+        }
+      ],
+      "previous_review": "数字工具题库都用同样八段结构。保留输入输出与机制，试验不为凑人物物件比喻增加理解负担。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/software/software_illustrated.yaml",
+        "before_sha256": "385d230cb42037467990452e489f8373bfa3ba7aa165df91b5ad0f119f2e9045",
+        "after_sha256": "6fdbc34f84dac26d8749d657555ba08753a71385fe7283abb7f6b3d988de87cd",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "software/software_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "software",
+          "paused": false
+        }
+      ],
+      "source_sha256": "52c80f090d1baef0daeebcb16b42535f8e432346cb4f7745063f4a35c449d32f",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "software/software_weekly",
+          "production": "software_weekly",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/software_weekly.json"
+        }
+      ],
+      "previous_review": "job要求变化与联系，notes为空，专用profile未启用。保留具体软件任务与关键变化，查实际recipe及整期指令是否把深度解释变成同样的条目简报。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [
+        "state/acceptance-content-value-20261115/natural-writing-20261116/soft-final-entry/software/candidate"
+      ],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/software/software_weekly.yaml",
+        "before_sha256": "52c80f090d1baef0daeebcb16b42535f8e432346cb4f7745063f4a35c449d32f",
+        "after_sha256": "513df5a70fcea2d561f64cd87a3bd98fcc53f67393c00a3573416f140584438b",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "software/software_weekly",
+            "production": "software_weekly",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/software_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "software_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "software_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "source_discovery/ai_media",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        },
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "ai_media",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "8248f8ae81ea83f0259d7b163314feebbb2303e1e48ab436af8f3fc907c6afbf",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "ai_media矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/chatgpt_acquisition",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        },
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "d429c8bbd7aafa8a47e5b468f53d4143e2c23d91febfa0b00023214ac3f0381c",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "chatgpt_acquisition矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/company",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "company",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "ed8fb506bc53c4a3e5cce5f2e3b315d0d13ba610e8afb2c2111e4196ccf7357e",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "company矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/consumer",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "consumer",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "efba37bcf52850941d8166cf34454b2addf27517b24cd7ac276fe4b97df51fda",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "consumer矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/culture",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "culture",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "96729dbe4ed9f488b359535f6e9a61e2f6f8d20cb411ba1cb7deac70d2cb1e5b",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "culture矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/economy",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "economy",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "887d263903171479e512a720698ef5dbc10e0a0a53a0cf342fce129cfb0a3b3a",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "economy矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/geography",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "geography",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "c1e8b13f6b4326fb5d1a32528bf8c2e9e58945e8a784bb1a22153568bb7d9970",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "geography矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/history",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "history",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "e210d34731c9bd14e097e6c71d16075f14c9e9014fc1d0ca8e5fb29987981101",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "history矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/industry",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "industry",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "614d6ff4f8bb40a4879a59767c123abaf9ed9e14c054bcc23345dc6deb51a9e2",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "industry矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/science",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "science",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "122320e3895b0af1ca58598bcb9d0c59c6f393d77169093c50af6c64fa86717e",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "science矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/software",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "software",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "3888e902f8a0aa68ad77c03169d1d40e33145db27d46d47f3689b2766f593b00",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "software矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "source_discovery/tech",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "tech",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "f798e0849a094b3dd7477e7e44311f75c1cccb5f8851d06e3524093f3a34034a",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "tech矩阵的信息源分派入口；YAML仅为说明，实际来源分配提示词在core/source_discovery.py。JSON里的id/jobs/coverage是业务契约，未要求文稿固定开头或结尾；暂保留，后续只核对其提供的来源是否把解释素材缩成公告。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "system/material_collection",
+      "scope_evidence": [
+        {
+          "kind": "enabled_schedule"
+        }
+      ],
+      "source_sha256": "c9765cf6930b8e607e48dcda3be5db1dab694efb4db931b5a941582aff9548a3",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "素材积累走source_collection专用分支，不调用研究或写稿模型；这条prompt不是成稿约束。不修改，后续保留采集输入与供给路径证据即可。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": []
+    },
+    {
+      "job": "tech/tech_daily",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "source_sha256": "8159e40985096b2899bc0944cb47e6ef7e4dad82afab252dba7d314ae07cd0e2",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "tech/tech_daily",
+          "production": "ai-non_tech-headline-short",
+          "recipe": "ai-non_tech-headline-short",
+          "profile": null,
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/ai-non_tech-headline-short.json"
+        },
+        {
+          "job": "tech/tech_daily",
+          "production": "tech_daily",
+          "recipe": "topic_digest",
+          "profile": null,
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/tech_daily.json"
+        }
+      ],
+      "previous_review": "job与notes没有复杂叙事流程，主要风险来自共用作者、人设及整期模板。保留技术变化与具体场景，以此作放松共享规则时的回归样本。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/tech/tech_daily.yaml",
+        "before_sha256": "8159e40985096b2899bc0944cb47e6ef7e4dad82afab252dba7d314ae07cd0e2",
+        "after_sha256": "e8e0de96cb1be20958a3970727c967f2387613ba8357688d9a008dc5af213da4",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "tech/tech_daily",
+            "production": "tech_daily",
+            "recipe": "topic_digest",
+            "profile": null,
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/tech_daily.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "ai-non_tech-headline-short",
+          "tech_daily"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "tech_daily",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "tech/tech_illustrated",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "source_sha256": "661687ffe5be790e3969a37a12dc65e9bb5f63f2881b4e1dac18be9ba96ce672",
+      "local_change": [
+        "去掉固定栏目、机制/例子/误解数量和强制人物类比，保留解释深度"
+      ],
+      "effective_routes": [
+        {
+          "job": "tech/tech_illustrated",
+          "production": "tech_illustrated",
+          "recipe": "illustrated_explainer",
+          "profile": "tech-illustrated-v3",
+          "mode": "individual",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/tech_illustrated.json"
+        }
+      ],
+      "previous_review": "底稿八段结构仍固定；启用 reader/revise 只修机制或比喻断点，draft为空。研究结构与改稿作用分开处理，不能删掉有效的理解修补来换表面自由。",
+      "decision": "研究去掉固定标题序列、3–5步骤/例子、2–3误解；配方去掉章节、字数、人物与数字配额。底稿可按现象与机制自行组织。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/tech/tech_illustrated.yaml",
+        "before_sha256": "661687ffe5be790e3969a37a12dc65e9bb5f63f2881b4e1dac18be9ba96ce672",
+        "after_sha256": "acef790061253c8b1b172e1f049da1d46e3fac90b9da70418d4f3ce4244e2b98",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      }
+    },
+    {
+      "job": "tech/tech_weekly",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix",
+          "matrix": "tech",
+          "paused": false
+        }
+      ],
+      "source_sha256": "87ef57c9bc7d483602989bef84e50896f70e972b6d2b4da0c2d5adc058bbc463",
+      "local_change": [],
+      "effective_routes": [
+        {
+          "job": "tech/tech_weekly",
+          "production": "tech_weekly",
+          "recipe": "topic_digest",
+          "profile": "tech-weekly-v1-soft-v1",
+          "mode": "episode",
+          "path": "state/acceptance-content-value-20261115/natural-writing-20261116/current-binding-audit/routes/tech_weekly.json"
+        }
+      ],
+      "previous_review": "启用 draft 强制第二例必须带来限制/例外、结尾说改变了判断。保留案例解释和新的认识，取消每期都需要反转自己观点的动作。",
+      "decision": "共用作者与材料交接取消必备人物、固定贯穿案例和首尾回环；栏目/profile 方向按实际绑定改为软建议。保留教程操作关系、比较对象身份和输入事实。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "input_style_followup": {
+        "change": "补材不再要求继承原文风格，题目/受众/承诺保留",
+        "implementation": "core/video/question_material.py",
+        "effect": "only constraint removal adopted; input restructuring trials not adopted; old draft/append propagation remains",
+        "evidence": "INPUT-FOCUS-REVIEW.txt"
+      },
+      "research_brief_followup": {
+        "change": "上游研究正文不再要求说明观看动机、新意与实际收获，原有题材选择与结构化字段仍适用",
+        "file": "jobs/tech/tech_weekly.yaml",
+        "before_sha256": "87ef57c9bc7d483602989bef84e50896f70e972b6d2b4da0c2d5adc058bbc463",
+        "after_sha256": "6d27f57a35cd908e05209795cd752d26da6a9d85ef6d7cc71ec33af957b10a9b",
+        "evidence": "research-brief-scope.json",
+        "runtime": "本轮实组装研究提示，未单独调用模型"
+      },
+      "optional_section_roles": {
+        "routes": [
+          {
+            "job": "tech/tech_weekly",
+            "production": "tech_weekly",
+            "recipe": "topic_digest",
+            "profile": "tech-weekly-v1-soft-v1",
+            "mode": "episode",
+            "path": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-role-config/routes/tech_weekly.json",
+            "changed_fields": [
+              "system",
+              "user_shape"
+            ]
+          }
+        ],
+        "decision": "可选独立开场或收尾；保留章节角色字段和实际教程步骤导航"
+      },
+      "shared_selection_softening": {
+        "stage": "two-stage audience selection",
+        "bindings": [
+          "tech_weekly"
+        ],
+        "change": "取消固定评语、四选一结构和来源数，摘要只写一次，保留实际材料",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "真实快讯/T05样本可证效果，未逐一运行所有入口模型"
+      },
+      "selection_material_handoff": {
+        "channel": "tech_weekly",
+        "decision": "读原文时保留题目、受众、来源、教程系列及示例，解释由所选原文形成",
+        "evidence": "selection-input-trace.json",
+        "coverage": "两种相同原文的真实选题，以及一个独立单条稿对照"
+      }
+    },
+    {
+      "job": "topic_discovery/ai_media",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "ai_media",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "51759a8d577a48767548a441b7a593c48221dbf8f088ae46080f68a4fd018113",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/chatgpt_acquisition",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "4fe574d3194b6580c41589b780451ab9bda194d300d06914c9345c5fc368c713",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/company",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "company",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "4308abffe3f9fbb7b5562a9d6500065e2a62b0c6c36dc77f6d830bb2f38c1de8",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/consumer",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "consumer",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "24f6c49e1eaeceb672c28fa6b339eb5f69d21cd8142c8d9d69ac8c7ea5538519",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/culture",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "culture",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "88ead5b04937f6b0f7c6c29994c75a8c5f9fe10f8119ecde5e16291d3d585d4e",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/economy",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "economy",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "10c1594dfaca91d60f68986b84465f597603a709070dfef88c920611572eea38",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/education",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "education",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "baa238d9b1016a628db06eed2665e887a66aade0adea3dbdb112dcf2bb1accf6",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/geography",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "geography",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "42ac5db295ac45faeee659133b6f8f6e4c3ce4360a072589633a7f9dab9c33a7",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/history",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "history",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "29c9731f7e82ed5889615dab72e0a2e90d21e53669e65413599368219db5af3f",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/industry",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "industry",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "7e99fbbd9a2543b49c07271789cdff10f4121c1fd7ef0f14b3e32996f6d6c984",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_discovery/science",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "science",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "8148558102c5ba128fcf3874a79ccddf7d3d96a0895eefb060c1a8353fd375cd",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_ideas/chatgpt_acquisition",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "6a40ff73043905198be6649c409f7b2c6454ac7c8f1c5b2a35427c59fb20d5fa",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    },
+    {
+      "job": "topic_platform/chatgpt_acquisition",
+      "scope_evidence": [
+        {
+          "kind": "current_matrix_helper",
+          "matrix": "chatgpt_acquisition",
+          "runtime_note": "Inspect dispatch and live factory; a historical request ID is not a reusable request."
+        }
+      ],
+      "source_sha256": "7a81e4c1e1fdc34226edd744c817cf7501893e50cd84b5f0ed2088d07b391e8f",
+      "local_change": [],
+      "effective_routes": [],
+      "previous_review": "已追踪实际分支与下游消费：题型 outline 仅为灵感界面数据，未传入作者，不修改其数量契约。实际会传入 category.notes 或绑定栏目 notes；这些按对应内容栏目处理，不能把入口 YAML 占位提示误当写稿要求。",
+      "decision": "沿前轮逐项分析保留辅助任务的检索、候选、提取或机器字段契约；没有直接文稿生产绑定，不把检索批量与 JSON 字段当写作配额。未为本轮重新执行。",
+      "effect_status": "configuration_reviewed; effect only claimed for listed samples",
+      "runtime_evidence": [],
+      "shared_selection_softening": {
+        "stage": "topic discovery or ideas helper",
+        "bindings": [],
+        "change": "题型提纲按内容，取消固定段数、句数与候选评语顺序",
+        "evidence": "shared-selection-soft-scope.json",
+        "effect_limit": "相关入口回归，未逐一调用所有矩阵辅助模型"
+      }
+    }
+  ],
+  "bindings": 57,
+  "source_changes": 62,
+  "retained_contracts": [
+    "机器 JSON/ID 与已有导航角色",
+    "每轮教程候选上限（生产数量，不是文稿几点）",
+    "横向比较至少涉及两家公司（栏目定义）",
+    "有界局部改稿 targets（编辑范围，不是内容数量）",
+    "已设定的账号身份与道别"
+  ],
+  "current_configuration_evidence": "current-binding-audit-route-captures.json"
+}

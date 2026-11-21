@@ -110,10 +110,37 @@ MAX_LLM_ATTEMPTS = 3
 MAX_TOTAL_CALLS = 16
 MAX_TOKENS_PER_CALL = PROVIDER.max_tokens
 MAX_INPUT_TOKENS_PER_CALL = 10000
-MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (
-    MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
+
+
+def model_cost_budget(env_path: Path, environ: dict[str, str] | None = None) -> float:
+    """A fixed per-video USD cap, independent of provider prices and chapter count."""
+    environ = os.environ if environ is None else environ
+    name = "AUTOVIDEO_G2_MAX_COST_USD"
+    value = environ.get(name, llm_provider.read_env_file(env_path).get(name, "20"))
+    try:
+        budget = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a positive finite USD amount") from exc
+    if not math.isfinite(budget) or budget <= 0:
+        raise ValueError(f"{name} must be a positive finite USD amount")
+    return budget
+
+
+MAX_PROJECTED_API_COST_USD = model_cost_budget(PROJECT / ".env")
 LLM_TIMEOUT_SECONDS = 240
 HTTP_RETRY_DELAYS = (2, 4)
+#: HTTP 429 is a rate limit, not an outage: wait longer on the same model before switching or failing (11-11: nine
+#: renders failed on their first 429). A Retry-After header, when given, replaces the default wait, up to the cap.
+RATE_LIMIT_RETRY_DELAYS = (15, 45, 90)
+RATE_LIMIT_MAX_WAIT = 120
+
+
+def rate_limit_wait(headers, http_attempt: int) -> float:
+    try:
+        given = float((headers or {}).get("Retry-After") or "")
+    except (TypeError, ValueError):
+        given = 0.0
+    return min(given if given > 0 else RATE_LIMIT_RETRY_DELAYS[http_attempt - 1], RATE_LIMIT_MAX_WAIT)
 RETRYABLE_HTTP_STATUSES = {500, 502, 503, 504, 520, 521, 522, 523, 524}
 PROJECT_INPUT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")))
 NARRATION_SCHEMA_PATH = ROOT / "schemas/narration-plan.schema.json"
@@ -360,13 +387,12 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
     started = time.monotonic()
 
     def record_failed_request(error_type: str, *, http_status: int | None = None) -> None:
-        # Count every request attempt, including transport and provider failures, against the hard cap.
-        # When token usage is unavailable, reserve the full configured per-call upper bound.
-        maximum_call_cost = (MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
+        # Count every request attempt against MAX_TOTAL_CALLS, without charging phantom worst-case
+        # token cost for failed HTTP/transport attempts that produced no billed completion.
         record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": active_model(),
                   "prompt_version": PROMPT_VERSION, "status": "failed", "error_type": error_type,
                   "http_status": http_status, "elapsed_seconds": round(time.monotonic() - started, 3),
-                  "peak_uncached_cost_upper_bound_usd": round(maximum_call_cost, 8),
+                  "peak_uncached_cost_upper_bound_usd": 0.0,
                   "request_file": str(request_path.relative_to(PROJECT)),
                   "response_file": str(response_path.relative_to(PROJECT)),
                   "reasoning_content_saved": False, "usage_unavailable": True}
@@ -383,11 +409,22 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request("HTTPError", http_status=exc.code)
+        headers = exc.headers
         exc.close()
         previous = PROVIDER
         if exc.code in SWITCH_HTTP_STATUSES and _next_model():
             _switch_note(previous, f"answered HTTP {exc.code}")
             return deepseek_json_call(stage, messages, schema, attempt, _request_no=_request_no + 1)
+        if exc.code == 429 and _http_attempt <= len(RATE_LIMIT_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
+            delay = rate_limit_wait(headers, _http_attempt)
+            append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage, "http_status": 429,
+                "http_attempt": _http_attempt, "next_http_attempt": _http_attempt + 1,
+                "wait_seconds": delay, "remaining_call_budget": MAX_TOTAL_CALLS - len(CALL_RECORDS)})
+            print(f"{PROVIDER.label}: HTTP 429 (rate limited); retrying the same model in {delay:g}s "
+                  f"({_http_attempt + 1}/{len(RATE_LIMIT_RETRY_DELAYS) + 1})", flush=True)
+            time.sleep(delay)
+            return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
+                                      _request_no=_request_no + 1)
         if exc.code in RETRYABLE_HTTP_STATUSES and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
             delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
             append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage, "http_status": exc.code,
@@ -409,7 +446,7 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         write_json(response_path, error)
         record_failed_request(type(exc).__name__)
         reason = getattr(exc, "reason", exc)
-        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.IncompleteRead))
+        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.HTTPException, OSError))
         if transient and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
             delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
             append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage,
@@ -482,11 +519,30 @@ def strip_schema_echo(result, schema: dict):
     request's ``response_format`` value ``"json_object"``.
 
     It happens about once per job (narration-form and chapter plans), is never a real field, and each
-    occurrence wasted a whole model call on a retry.
+    occurrence wasted a whole model call on a retry. Also gently normalizes a known adjacent-field confusion
+    where a model writes ``story_role: "support"`` (an ``importance`` value) into an explanation page.
     """
     if isinstance(result, dict) and result.get("type") in ("object", "json_object") \
             and "type" not in (schema.get("properties") or {}):
-        return {key: value for key, value in result.items() if key != "type"}
+        result = {key: value for key, value in result.items() if key != "type"}
+    if isinstance(result, dict) and isinstance(result.get("pages"), list):
+        page_props = ((((schema.get("properties") or {}).get("pages") or {}).get("items") or {})
+                      .get("properties") or {})
+        role_enum = (page_props.get("story_role") or {}).get("enum")
+        entity_name_max = (((((page_props.get("entities") or {}).get("items") or {}).get("properties") or {})
+                            .get("name") or {}).get("maxLength"))
+        for page in result["pages"]:
+            if not isinstance(page, dict):
+                continue
+            if isinstance(role_enum, list) and "support" not in role_enum and "explain" in role_enum:
+                if page.get("story_role") == "support":
+                    page["story_role"] = "explain"
+            if isinstance(entity_name_max, int) and entity_name_max > 0 and isinstance(page.get("entities"), list):
+                for entity in page["entities"]:
+                    if isinstance(entity, dict) and isinstance(entity.get("name"), str):
+                        cleaned = re.sub(r"\s+", " ", entity["name"].strip())
+                        if len(cleaned) > entity_name_max:
+                            entity["name"] = cleaned[:entity_name_max]
     return result
 
 
@@ -566,8 +622,8 @@ def generate_validated_plan(stage: str, source_builder, schema_path: Path, valid
                         "error_code": exc.code, "error": str(exc), "retry_limit": MAX_LLM_ATTEMPTS})
             feedback = f"上一次输出被本地验证器拒绝：{exc}。请修正后只输出完整 JSON。"
             if attempt == MAX_LLM_ATTEMPTS or exc.code in {
-                    *llm_provider.ALL_FAULT_CODES, "LLM_PROVIDER_INVALID", "MODEL_CALL_BUDGET_EXHAUSTED",
-                    "MODEL_COST_BUDGET_EXCEEDED"} - {PROVIDER.code("INVALID_RESPONSE")}:
+                    *llm_provider.ALL_FAULT_CODES, "LLM_PROVIDER_INVALID",
+                    "MODEL_CALL_BUDGET_EXHAUSTED", "MODEL_COST_BUDGET_EXCEEDED"} - {PROVIDER.code("INVALID_RESPONSE")}:
                 if fallback is not None:
                     append_log(LOGS / "fidelity-warnings.jsonl", {"stage": stage, "attempt": 1, "problems": fallback[1],
                                 "retry_failed_with": exc.code})
@@ -603,8 +659,9 @@ def write_fact_ledger(plan: dict, source: str | None = None) -> None:
                "faithfulness_method": "not evaluated; source quotes are model-supplied metadata"})
 
 
-def fit_voiceover_to_duration(initial_plan: dict) -> tuple[dict, dict]:
-    alignment = synthesize_and_align(initial_plan)
+def fit_voiceover_to_duration(initial_plan: dict, *, on_chapter_ready=None) -> tuple[dict, dict]:
+    alignment = (synthesize_and_align(initial_plan, on_chapter_ready=on_chapter_ready)
+                 if on_chapter_ready is not None else synthesize_and_align(initial_plan))
     write_fact_ledger(initial_plan)
     write_json(ARTIFACTS / "final-narration-plan.json", initial_plan)
     return initial_plan, alignment
@@ -615,7 +672,103 @@ def spoken_text(text: str) -> str:
     return text.replace("`", "")
 
 
-def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
+_VOICE_READY_LINE = re.compile(r"^VOICE\s+([a-z][a-z0-9_]{0,47})\s+")
+
+
+def _watch_mlx_chapters(plan: dict, cached_ids: set[str], stop_event: threading.Event, on_chapter_ready) -> None:
+    """Emit measured chapter timings as soon as each chapter's MLX WAVs are flushed to disk."""
+    import numpy as np
+    import soundfile as sf
+
+    segments = plan["segments"]
+    chapters: list[tuple[str | None, list[tuple[int, dict]]]] = []
+    for idx, seg in enumerate(segments):
+        cid = seg.get("chapter_id")
+        if not chapters or chapters[-1][0] != cid:
+            chapters.append((cid, []))
+        chapters[-1][1].append((idx, seg))
+    paragraph_file = ARTIFACTS / "paragraph-starts.json"
+    paragraph_starts = (set(json.loads(paragraph_file.read_text(encoding="utf-8"))["segment_ids"])
+                        if paragraph_file.is_file() else set())
+    log_path = LOGS / "local-mlx-voice.log"
+    ready_ids = set(cached_ids)
+    log_offset = 0
+    cursor = round(SAMPLE_RATE * 0.25)
+    guard = round(SAMPLE_RATE * 0.05)
+    chapter_idx = 0
+
+    def refresh_ready() -> None:
+        nonlocal log_offset
+        if not log_path.is_file():
+            return
+        try:
+            with log_path.open("rb") as stream:
+                stream.seek(log_offset)
+                chunk = stream.read()
+                if not chunk:
+                    return
+                nl = chunk.rfind(b"\n")
+                if nl < 0:
+                    return
+                log_offset += nl + 1
+                for raw_line in chunk[:nl].splitlines():
+                    match = _VOICE_READY_LINE.match(raw_line.decode("utf-8", errors="replace").strip())
+                    if match:
+                        ready_ids.add(match.group(1))
+        except OSError:
+            return
+
+    def try_emit() -> bool:
+        nonlocal cursor, chapter_idx
+        while chapter_idx < len(chapters):
+            cid, entries = chapters[chapter_idx]
+            if not all(seg["id"] in ready_ids and (SEGMENTS_DIR / f"{seg['id']}.wav").is_file() for _, seg in entries):
+                return True
+            chapter_rows = []
+            local_cursor = cursor
+            for idx, seg in entries:
+                try:
+                    samples, sample_rate = sf.read(SEGMENTS_DIR / f"{seg['id']}.wav", dtype="float32")
+                    samples = pauses.trim(samples, sample_rate)
+                except (OSError, ValueError):
+                    # Transient read/flush error on external storage: retry on next poll without corrupting cursor.
+                    return True
+                samples = np.asarray(samples, dtype=np.float32)
+                if sample_rate != SAMPLE_RATE or samples.size == 0:
+                    return False
+                active = np.flatnonzero(np.abs(samples) > 0.003)
+                if active.size == 0:
+                    return False
+                start_sample = local_cursor + max(0, int(active[0]) - guard)
+                end_sample = local_cursor + min(len(samples), int(active[-1]) + guard)
+                chapter_rows.append({
+                    "id": seg["id"], "text": seg["text"],
+                    "start_ms": (start_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                    "end_ms": (end_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                })
+                local_cursor += len(samples)
+                if idx < len(segments) - 1:
+                    next_segment = segments[idx + 1]
+                    chapter_boundary = seg.get("chapter_id") != next_segment.get("chapter_id")
+                    boundary = "chapter" if chapter_boundary else "paragraph" if next_segment["id"] in paragraph_starts else "sentence"
+                    gap_ms = pauses.gap_ms(spoken_text(seg["text"]), spoken_text(next_segment["text"]), boundary)
+                    local_cursor += round(SAMPLE_RATE * gap_ms / 1000)
+            cursor = local_cursor
+            on_chapter_ready(cid, chapter_rows)
+            chapter_idx += 1
+        return False
+
+    while True:
+        refresh_ready()
+        if not try_emit():
+            return
+        if stop_event.wait(0.5):
+            refresh_ready()
+            try_emit()
+            return
+
+
+def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict, *, on_chapter_ready=None) -> dict:
     full = {**plan, "voice_settings": settings,
             "segments": [{**s, "text": spoken_text(s["text"])} for s in plan["segments"]]}
     plan_path = ARTIFACTS / "voice-input.json"
@@ -633,12 +786,27 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     fingerprint_seconds = round(time.monotonic() - fingerprint_started, 3)
     missing = [s for s in full["segments"] if s["id"] not in cached]
     fresh = {}
+    watcher_stop = threading.Event()
+    watcher = None
+    if on_chapter_ready is not None:
+        if missing:
+            watcher = threading.Thread(target=_watch_mlx_chapters,
+                                       args=(plan, set(cached), watcher_stop, on_chapter_ready),
+                                       name="voice-chapter-watch", daemon=True)
+            watcher.start()
+        else:
+            watcher_stop.set()
+            _watch_mlx_chapters(plan, set(cached), watcher_stop, on_chapter_ready)
     if missing:
         work_path = ARTIFACTS / "voice-work-input.json"
         write_json(work_path, {**full, "segments": missing})
         try:
-            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
+            voice_timeout = max(3600, min(7200, len(missing) * 45))
+            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=voice_timeout)
         finally:
+            if watcher is not None:
+                watcher_stop.set()
+                watcher.join(timeout=30)
             # The child checkpoints each finished segment, even if a later one
             # fails or times out. Preserve complete chapters before propagating
             # the original failure; incomplete continuation chains are redone.
@@ -663,7 +831,7 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     return {"enabled": False, "segment_hits": 0, "segment_misses": len(missing), "error": cache_error}
 
 
-def synthesize_and_align(plan: dict) -> dict:
+def synthesize_and_align(plan: dict, *, on_chapter_ready=None) -> dict:
     import numpy as np
     import soundfile as sf
 
@@ -673,6 +841,17 @@ def synthesize_and_align(plan: dict) -> dict:
     ASSETS.mkdir(parents=True, exist_ok=True)
     SEGMENTS_DIR.mkdir(parents=True, exist_ok=True)
     start_time = time.monotonic()
+    emitted_chapters: set[str | None] = set()
+    emit_lock = threading.Lock()
+
+    def _emit_chapter(cid, chapter_rows) -> None:
+        with emit_lock:
+            if cid in emitted_chapters:
+                return
+            emitted_chapters.add(cid)
+        on_chapter_ready(cid, chapter_rows)
+
+    emit_chapter = _emit_chapter if on_chapter_ready is not None else None
     mlx = mlx_engine(VOICE, PROJECT)  # None for Kokoro, which runs in this process
     use_qwen = mlx is not None  # the voice comes as one wav per segment from a fixed local MLX entry point
     cache_metrics = None
@@ -681,7 +860,7 @@ def synthesize_and_align(plan: dict) -> dict:
                           "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", VOXCPM_DEFAULT_CHAIN),
                           "compile": os.environ.get("AUTOVIDEO_G2_VOXCPM_COMPILE", "1") != "0",
                           "reference_cache": os.environ.get("AUTOVIDEO_G2_VOXCPM_REFERENCE_CACHE", "1") != "0"} if VOICE.startswith("voxcpm_") else {}
-        cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings)
+        cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings, on_chapter_ready=emit_chapter)
     else:
         from kokoro_onnx import Kokoro
         from misaki import zh
@@ -695,6 +874,7 @@ def synthesize_and_align(plan: dict) -> dict:
     chunks = [np.zeros(round(SAMPLE_RATE * 0.25), dtype=np.float32)]
     cursor = len(chunks[0])
     rows = []
+    chapter_rows_buf = []
     pause_ms = 360
     paragraph_file = ARTIFACTS / "paragraph-starts.json"
     paragraph_starts = set(json.loads(paragraph_file.read_text(encoding="utf-8"))["segment_ids"]) if paragraph_file.is_file() else set()
@@ -717,14 +897,23 @@ def synthesize_and_align(plan: dict) -> dict:
         segment_path = SEGMENTS_DIR / f"{segment['id']}.wav"
         sf.write(segment_path, samples, SAMPLE_RATE, subtype="PCM_16")
         guard = round(SAMPLE_RATE * 0.05)
+        start_sample = cursor + max(0, int(active[0]) - guard)
+        end_sample = cursor + min(len(samples), int(active[-1]) + guard)
         rows.append({"id": segment["id"], "text": segment["text"],
-                     "start_sample": cursor + max(0, int(active[0]) - guard),
-                     "end_sample": cursor + min(len(samples), int(active[-1]) + guard),
+                     "start_sample": start_sample,
+                     "end_sample": end_sample,
                      "utterance_start_sample": cursor, "utterance_end_sample": cursor + len(samples),
                      "speech_first_sample": int(active[0]), "speech_last_sample": int(active[-1]),
                      "sample_rate": SAMPLE_RATE, "voice": VOICE, "wav": str(segment_path.relative_to(PROJECT))})
+        if not use_qwen and emit_chapter is not None:
+            chapter_rows_buf.append({
+                "id": segment["id"], "text": segment["text"],
+                "start_ms": (start_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+                "end_ms": (end_sample * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE,
+            })
         chunks.append(samples)
         cursor += len(samples)
+        chapter_boundary = False
         if index < len(plan["segments"]) - 1:
             next_segment = plan["segments"][index + 1]
             chapter_boundary = segment.get("chapter_id") != next_segment.get("chapter_id")
@@ -737,6 +926,9 @@ def synthesize_and_align(plan: dict) -> dict:
             silence = np.zeros(round(SAMPLE_RATE * gap_ms / 1000), dtype=np.float32)
             chunks.append(silence)
             cursor += len(silence)
+        if not use_qwen and emit_chapter is not None and (chapter_boundary or index == len(plan["segments"]) - 1):
+            emit_chapter(segment.get("chapter_id"), chapter_rows_buf)
+            chapter_rows_buf = []
     audio = np.concatenate(chunks)
     total_frames = math.ceil(len(audio) / (SAMPLE_RATE // FPS))
     audio = np.pad(audio, (0, total_frames * (SAMPLE_RATE // FPS) - len(audio)))
@@ -748,6 +940,21 @@ def synthesize_and_align(plan: dict) -> dict:
     for row in rows:
         row["start_ms"] = (row.pop("start_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
         row["end_ms"] = (row.pop("end_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
+    if emit_chapter is not None:
+        rows_by_id = {row["id"]: row for row in rows}
+        ordered_chapters: list[tuple[str | None, list[dict]]] = []
+        for seg in plan["segments"]:
+            cid = seg.get("chapter_id")
+            if not ordered_chapters or ordered_chapters[-1][0] != cid:
+                ordered_chapters.append((cid, []))
+            row = rows_by_id[seg["id"]]
+            ordered_chapters[-1][1].append({
+                "id": row["id"], "text": row["text"],
+                "start_ms": row["start_ms"], "end_ms": row["end_ms"],
+            })
+        for cid, chapter_rows in ordered_chapters:
+            if cid not in emitted_chapters:
+                emit_chapter(cid, chapter_rows)
     alignment = {"provider": mlx["provider"] if use_qwen else "local_kokoro_onnx", "model": mlx["model"] if use_qwen else "Kokoro-82M-v1.0", "voice": VOICE,
                  "method": "separate real utterances with measured PCM activity bounds", "granularity": "phrase",
                  "sample_rate": SAMPLE_RATE, "duration_seconds": duration_seconds, "duration_ms": duration_ms,
@@ -952,7 +1159,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
-    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "CodeDemo.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
+    for name in ("Illustrated.tsx", "IllustratedOverlays.tsx", "VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "Framing.ts", "TextFit.ts", "RelationLayout.ts", "RelationIndex.tsx", "DirectedMaterials.tsx", "CodeDemo.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
         shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
@@ -986,10 +1193,12 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         raise G2Fault("RENDER_CONFIG_INVALID", str(exc)) from exc
     write_json(ARTIFACTS / "render-resources.json", resources)
     target = hybrid_segment['output'] if hybrid_segment else VIDEO_PATH
+    x264_preset = os.environ.get("AUTOVIDEO_G2_X264_PRESET", "veryfast")
     argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", target,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
-            f"--concurrency={resources['concurrency']}", "--crf=18", f"--browser-executable={CHROME}", "--overwrite=false",
+            f"--concurrency={resources['concurrency']}", "--crf=18", f"--x264-preset={x264_preset}",
+            "--hardware-acceleration=if-possible", f"--browser-executable={CHROME}", "--overwrite=false",
             RENDER_NO_CACHE]
     if hybrid_segment is not None:
         argv.extend([f"--frames={hybrid_segment['start_frame']}-{hybrid_segment['end_frame'] - 1}", '--muted', '--color-space=bt709'])
@@ -1025,11 +1234,10 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
     if frames != checked["total_frames"] or not duration_is_acceptable(seconds, expected_range):
         raise G2Fault("MEDIA_DURATION_MISMATCH",
                       f"{frames} frames / {seconds:.3f}s; expected {expected_range[0]}–{expected_range[1]}s")
-    _run_fixed_command("full-decode", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-i", VIDEO_PATH,
-                         "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"], PROJECT)
     decoded_path = ARTIFACTS / "decoded-audio.wav"
-    _run_fixed_command("decoded-audio", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", VIDEO_PATH,
-                         "-vn", "-ac", "1", "-ar", str(SAMPLE_RATE), decoded_path], PROJECT)
+    _run_fixed_command("full-decode", [FFMPEG, "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-y", "-i", VIDEO_PATH,
+                         "-map", "0:v:0", "-f", "null", "-",
+                         "-map", "0:a:0", "-ac", "1", "-ar", str(SAMPLE_RATE), decoded_path], PROJECT)
     original, _ = sf.read(ASSETS / "communications_noise.wav", dtype="float32")
     decoded, _ = sf.read(decoded_path, dtype="float32")
     n = min(len(original), len(decoded))
@@ -1111,24 +1319,35 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
             props = json.loads((ARTIFACTS / "render-props.json").read_text())
             if props["ir"].get("caption_cues") != captions:
                 raise G2Fault("CAPTION_RENDER_TRACK_MISMATCH", "实际渲染输入与短句字幕轨道不一致")
-            qa["captions"].update(alignment="local forced alignment; exact original text coverage",
-                                  cue_count=len(captions), render_track_checked=True)
+            align_meta = json.loads((ARTIFACTS / "caption-alignment.json").read_text()) if (ARTIFACTS / "caption-alignment.json").is_file() else {}
+            fallback_segs = sum(1 for item in align_meta.get("word_evidence", []) if isinstance(item, dict) and item.get("method") == "proportional_fallback")
+            method = align_meta.get("method") or ("proportional_fallback" if fallback_segs else "forced_alignment")
+            qa["captions"].update(
+                alignment="proportional fallback; exact original text coverage" if method == "proportional_fallback" else "local forced alignment; exact original text coverage",
+                method=method, fallback_segments=fallback_segs,
+                cue_count=len(captions), render_track_checked=True)
     write_json(ARTIFACTS / "qa.json", qa)
     print(f"MEDIA PASS: {seconds:.3f}s, {frames} frames, AAC/TTS correlation={correlation:.5f}", flush=True)
     return qa
 
 
 def write_call_summary() -> None:
+    # The cap is frozen at process startup, even if provider prices change.
     write_json(ARTIFACTS / "model-cost.json", {"provider": PROVIDER.label, "model": active_model(),
                "endpoint": PROVIDER.url, "prompt_version": PROMPT_VERSION, "calls": CALL_RECORDS,
                "peak_uncached_cost_upper_bound_usd": round(sum(c.get("peak_uncached_cost_upper_bound_usd", 0) for c in CALL_RECORDS), 8),
-               "configured_worst_case_budget_usd": round(MAX_PROJECTED_API_COST_USD, 6),
+               "configured_worst_case_budget_usd": MAX_PROJECTED_API_COST_USD,
                "per_call_max_tokens": MAX_TOKENS_PER_CALL, "max_calls_per_run": MAX_TOTAL_CALLS,
                "price_basis": "conservative upper bound at current peak rates assuming no prompt-cache hits",
                "pricing_source": PROVIDER.pricing_source or "configured in .env"})
 
 
+_DEFER_MANIFEST = False
+
+
 def write_manifest(*, renderer_root: Path | None = None) -> None:
+    if _DEFER_MANIFEST:
+        return
     files = []
     for base in (FIXTURE_ROOT, ARTIFACTS, LOGS, (renderer_root or ROOT / "renderer") / "src"):
         if not base.exists():
@@ -1165,13 +1384,18 @@ def run_step(label: str, fn, *args):
     return result
 
 
-def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False) -> tuple[dict, dict, dict]:
-    """Overlap ordinary planning, or await measured speech for visual assembly.
+def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False,
+                        pipelined_planner=None) -> tuple[dict, dict, dict]:
+    """Overlap ordinary planning, or pipeline measured speech chapter-by-chapter into visual assembly.
 
     Only one thread calls the LLM. Parallel tasks finish before compilation or error
     propagation, preserving their artifacts without leaving background work running.
     """
-    parallel = CONTENT_MODE and not measured_storyboard and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
+    import queue
+
+    allow_parallel = CONTENT_MODE and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
+    pipelined = allow_parallel and pipelined_planner is not None
+    parallel = allow_parallel and not measured_storyboard and not pipelined
     started = time.monotonic()
     timings = {}
 
@@ -1189,6 +1413,35 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
                               "duration_seconds": round(end - begin, 3), "status": status}
 
     try:
+        if pipelined:
+            chapter_queue: queue.Queue = queue.Queue()
+
+            def run_voice_stream(plan_arg: dict):
+                try:
+                    result = fit_voiceover_to_duration(
+                        plan_arg,
+                        on_chapter_ready=lambda cid, rows: chapter_queue.put((cid, rows)),
+                    )
+                except Exception as exc:
+                    chapter_queue.put(("__ERROR__", exc))
+                    raise
+                chapter_queue.put(("__DONE__", None))
+                return result
+
+            results, error = {}, None
+            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="video-planning") as executor:
+                tasks = {executor.submit(step, "tts-and-align", run_voice_stream, narration): "voice",
+                         executor.submit(step, "storyboard-plan", pipelined_planner, narration, chapter_queue): "storyboard"}
+                for future in as_completed(tasks):
+                    try:
+                        results[tasks[future]] = future.result()
+                    except Exception as exc:
+                        if error is None:
+                            error = exc
+            if error is not None:
+                raise error
+            narration, alignment = results["voice"]
+            return narration, alignment, results["storyboard"]
         if parallel:
             results, error = {}, None
             with ThreadPoolExecutor(max_workers=2, thread_name_prefix="video-planning") as executor:
@@ -1216,7 +1469,8 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
             overlap = max(0, min(voice["end_seconds"], board["end_seconds"])
                           - max(voice["start_seconds"], board["start_seconds"]))
         write_json(ARTIFACTS / "generation-schedule.json", {
-            "mode": "parallel" if parallel else "sequential", "content_mode": CONTENT_MODE,
+            "mode": "pipelined" if pipelined else ("parallel" if parallel else "sequential"),
+            "content_mode": CONTENT_MODE,
             "measured_storyboard": measured_storyboard,
             "wall_seconds": round(wall, 3), "overlap_seconds": round(overlap, 3), "steps": timings})
 
@@ -1319,7 +1573,9 @@ def run_all() -> dict:
     if explanation.enabled(saved_visuals, form):
         narration, alignment, plan = run_planning_stages(narration,
             lambda final, measured: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals, measured),
-            measured_storyboard=True)
+            measured_storyboard=True,
+            pipelined_planner=lambda final, chapter_queue: explanation.plan_storyboard_pipelined(
+                sys.modules[__name__], final, saved_visuals, chapter_queue))
         assets = []
         if saved_visuals.get("image_materials"):
             from g2.creative_forms import prepare_images
@@ -1346,10 +1602,19 @@ def run_all() -> dict:
         from g2 import creative_forms
         narration, alignment, board = run_planning_stages(narration,
             lambda final: creative_forms.plan_storyboard(sys.modules[__name__], final, form))
-        if form in {"image_slideshow", "object_showcase", "dynamic_collage"}:
+        saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
+        if form == "illustrated_explainer" and not saved_images.get("slideshow_images_resolved"):
+            from g2 import illustration
+            assets, extras = run_step("draw-things-backgrounds", illustration.generate, sys.modules[__name__], narration,
+                                      saved_images.get("illustration_style") or illustration.DEFAULT_STYLE)
+            board = creative_forms.attach_illustrations(board, assets, narration, extras)
+        elif form in {"image_slideshow", "object_showcase", "dynamic_collage", "illustrated_explainer"}:
             assets = run_step("draw-things-backgrounds", creative_forms.prepare_images, sys.modules[__name__], narration)
             if form == "image_slideshow":
                 board = creative_forms.attach_images(board, assets)
+            elif form == "illustrated_explainer":
+                board = creative_forms.attach_illustrations(board, assets, narration,
+                    creative_forms.chapter_extras(saved_images, len(narration.get("chapters") or [])))
             else:
                 saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
                 board = creative_forms.attach_materials(board, assets, saved_images)
@@ -1534,6 +1799,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in {"all", "scene-edit", "revision", "music-revision"}:
         raise SystemExit("usage: g2/run_g2.py {all|scene-edit}")
     started = time.monotonic()
+    _DEFER_MANIFEST = True
     try:
         if sys.argv[1] == "music-revision":
             from g2.music_mix import reuse_parent
@@ -1562,6 +1828,7 @@ if __name__ == "__main__":
         append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": "all",
                     "exit_code": 0, "elapsed_seconds": round(time.monotonic() - started, 3), "status": qa_result["status"]})
         private_renderer = RUN_ROOT / "renderer"
+        _DEFER_MANIFEST = False
         write_manifest(renderer_root=private_renderer if private_renderer.is_dir() else None)
         print("G2 PASS", flush=True)
     except Exception as exc:

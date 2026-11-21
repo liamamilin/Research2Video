@@ -1,0 +1,167 @@
+{
+  "title": "Gemini选题、Qwen筛文献、ChatGPT画图，只订一个够吗？",
+  "sections": [
+    {
+      "title": "一个人，五道工序，四个工具",
+      "paragraphs": [
+        {
+          "text": "写综述卡住的时候，很多人的第一反应是工具不够：Gemini、Qwen、ChatGPT，是不是得都订上才转得动？我先给判断——这篇被《食品科学》录用、已经网络首发的食品工科综述，作者一个人从头做到尾，几个工具各管一段；但真正让它跑通的，不是订了几个，而是每一步任务被切得有多细。大家好，我是洛洛，今天就把这篇综述的流程拆开，看看只订一个AI，你到底会缺哪一块。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先把分工摆出来。选题阶段，他用Gemini探索研究方向、比较选题、整理文章框架；文献阶段用Zotero收集管理，再让AI整理摘要；写作阶段用Qwen归纳已有资料、梳理章节逻辑和文字表达；作图阶段先用ChatGPT出构图参考，再用Keynote做成正式图；投稿前用WorkBuddy检查文档格式和参考文献。没有哪一步是让AI从开头写到结尾的。我注意到一个细节：他说作图是他写综述时最头疼的阶段，根本不知道从哪开始，也是先问Gemini，才渐渐有了思路。也就是说，Gemini在他手里不只是选题工具，还是卡住时第一个能对话的对象。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=%E6%88%91%E7%9A%84%E6%88%90%E6%9E%9C"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "筛文献：值钱的是那几条红线",
+      "paragraphs": [
+        {
+          "text": "真正让我觉得这套流程值得学的，是筛文献那一步。他把Zotero导出的文献报告直接投给Qwen，但开头先明确规定：本次任务仅限于文献初筛与摘要提取，请勿直接撰写综述正文。然后要一张表格，六列：原文献编号、作者与年份、研究对象与核心问题、关键研究方法、摘要报告的主要结果与结论、相关性评级高或中或低。表格下面，高相关文献还要单独列出两项：适合放进大纲哪一章，以及摘要里没给、必须读全文才能确认的盲区。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=%E7%AD%9B%E9%80%89%E6%91%98%E8%A6%81"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "更关键的是表后面那几条红线。原话是：必须严格保留原报告中的文献编号，切勿打乱顺序；严禁根据论文标题脑补实验结果，严禁补充摘要里没出现的数据；不同研究结论有差异，要如实分别记录；凡摘要表述含糊的地方，统一标注「需读全文核实」。投喂也别一次全塞进去，按子章节分批，一次15到20篇，免得输入太长、模型漏读细节。我的判断是：这一步的价值不在于Qwen有多强，而在于这几条红线。你换成任何对话模型，这段话照样得写。因为AI最容易做的事，就是看标题把实验结果补得特别顺；标上「需读全文核实」，是给自己留出核对余地。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=%E7%AD%9B%E9%80%89%E6%91%98%E8%A6%81"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "机理图：ChatGPT给的是抓手，不是成品",
+      "paragraphs": [
+        {
+          "text": "作图那一步，逻辑不一样。他给ChatGPT的指令是先别提笔画图，先用文字说清楚怎么分区：是从左到右的工艺流程，还是上下分层的宏观到微观；提取三到四个核心阶段，箭头标出物质转化方向。风格要求也写死了：扁平化2D、纯白背景、主色不超过三种，严禁3D渲染和科幻光效；画面里所有反应步骤、元素和箭头，必须严格基于正文，不得凭空捏造没提过的反应路径或实验设备。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=Step%205"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第一次生成，多半对不上。但他说，这一轮已经拿到了一个很重要的东西——模板。从原来的想象，变成了一个有抓手、能对照着挑错的东西。常见错误就四类：箭头方向不准，回原始文献重新调整；捏造了正文没有的元素，删掉；几个过程逻辑混在一起，重新分区；字体、名词不准，对照论文逐项改。改完，他用Keynote一笔一笔临摹，Windows就用PowerPoint。所以那张草图的价值，从来不是能直接用，而是给你一个可以挑错的对象。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=Step%205"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "只订一个，缺的是能力不是数量",
+      "paragraphs": [
+        {
+          "text": "回到只订一个够不够。我把这三个环节的任务要求摆一下：选题要的是多给几个方向、再帮你比较；筛文献要的是能吃下长输入、守得住红线、还能输出表格；出图要的是图像生成。这三样不是一回事。只订一个，你缺的是某一类能力，不是工具数量。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "如果预算只够一个，我先看自己最怕哪一步。多数人卡在“不知道从哪开始”和“怕AI编”，这两步任何对话模型换套提示词都能做；只有那张草图，是图像生成之外给不了的。但草图是抓手，不是成品——缺了它，你完全可以先让模型给文字分区方案，自己在PPT里排，损失的是对照物，不是整个流程。反过来说，如果你连从哪下手画都没概念，那张草图就值一份订阅。这个条件一变，选择就变。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=Step%205"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一句得说在前面：作者自己讲，他是食品领域的工科生，这篇是工科综述，这套流程不一定适合你的领域，提示词和数据库都得调。但不管订几个，那几条红线都得写进提示词——不许脑补实验结果、结论有差异分别记、含糊处标「需读全文核实」。这几句不写，订四个也一样跑偏。",
+          "citations": [
+            "https://sspai.com/post/118153#:~:text=%E7%AD%9B%E9%80%89%E6%91%98%E8%A6%81"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的建议是，先别急着续费或者加订。把你现在的综述题目切成子章节，挑15到20篇文献，用那张六列表格先跑一遍。跑完你会很清楚，自己缺的是想方向、防编造，还是那张图——缺哪块补哪块，比先订了再找活干划算。你现在写综述，最卡的是选题、筛文献，还是画机理图？我是洛洛，我们下期见。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1525,
+    "estimated_seconds": 340,
+    "segments": 61,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 1.132,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "一个人，五道工序，四个工具",
+        "spoken_length": 339,
+        "budget": 327
+      },
+      {
+        "title": "筛文献：值钱的是那几条红线",
+        "spoken_length": 391,
+        "budget": 326
+      },
+      {
+        "title": "机理图：ChatGPT给的是抓手，不是成品",
+        "spoken_length": 312,
+        "budget": 326
+      },
+      {
+        "title": "只订一个，缺的是能力不是数量",
+        "spoken_length": 483,
+        "budget": 326
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 4490,
+      "completion_tokens": 7436,
+      "total_tokens": 11926,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 5873,
+      "cost_usd": 0.0051351,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 90.861,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+    "trusted_urls": 7
+  }
+}

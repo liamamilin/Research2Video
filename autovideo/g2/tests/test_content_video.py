@@ -27,6 +27,31 @@ def test_source_units_preserve_original_spelling_and_whitespace():
     content.validate_outline(plan, context)
 
 
+def test_content_chapters_preserve_fixed_budget_after_zero_price_fallback(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    source, _, outline = outline_case()
+    pipeline = SimpleNamespace(
+        ARTIFACTS=tmp_path, MAX_TOTAL_CALLS=7, MAX_PROJECTED_API_COST_USD=20.0,
+        MAX_INPUT_TOKENS_PER_CALL=10000, MAX_TOKENS_PER_CALL=100000,
+        LLM_INPUT_PER_M=0.0, LLM_OUTPUT_PER_M=0.0,
+        write_json=lambda *args: None, write_fact_ledger=lambda *args: None,
+    )
+
+    def validated(pipeline, stage, builder, schema, check, context):
+        if stage == "content-outline":
+            return outline
+        return {"segments": [{"id": f"n{i}", "text": point["source_quotes"][0],
+                              "point_ids": [point["id"]], "source_quotes": point["source_quotes"]}
+                             for i, point in enumerate(context["chapter"]["points"], 1)]}
+
+    monkeypatch.setattr(content, "validated", validated)
+    result = content.plan_narration(pipeline, source)
+    assert len(result["chapters"]) == 2
+    assert pipeline.MAX_TOTAL_CALLS == 15
+    assert pipeline.MAX_PROJECTED_API_COST_USD == 20.0
+
+
 @pytest.mark.parametrize("change,code", [
     (lambda p: p["chapters"][1]["source_unit_ids"].pop(), "CONTENT_SOURCE_COVERAGE"),
     (lambda p: p["chapters"][1]["source_unit_ids"].append("u1"), "CONTENT_SOURCE_COVERAGE"),

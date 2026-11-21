@@ -1,0 +1,24 @@
+{
+  "svg": {
+    "same_report_material_and_author_system": true,
+    "author_user_message_diff": "removed one identical copy of the saved event summary",
+    "chars_before": 21065,
+    "chars_after": 20522,
+    "event_chars": 542,
+    "before_path": "original-feedback-final-r2/svg/candidate",
+    "candidate_path": "author-input-dedup/svg/candidate",
+    "frozen_event_pool": "1e88e2622d921308cb3dccba96c4f13e99042e6053324e3b3cd9af6d6a03b307",
+    "script_sha256": "607d65e20e0b6a8eb4b7cb720aee5b32259218122f6ca7f775d0d32db612263c"
+  },
+  "marked_t05": {
+    "same_report_material_and_author_system": true,
+    "author_user_message_diff": "removed one identical copy of the saved event summary",
+    "chars_before": 51931,
+    "chars_after": 43286,
+    "event_chars": 8644,
+    "before_path": "t05-kept-item/marked/candidate",
+    "candidate_path": "author-input-dedup/marked_t05/candidate",
+    "frozen_event_pool": "a71c7ca3ad7a45a8498743e9b36e21d02f82d36307aab4579256e2836e233540",
+    "script_sha256": "759a040eca28439d3f4e61506302279e35497fcf1a034d8a0db74afcfd33192f"
+  }
+}

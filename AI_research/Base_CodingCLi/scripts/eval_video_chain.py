@@ -28,6 +28,7 @@ from core.config import list_jobs, load_job, load_system_config
 from core.engine import ResearchEngine
 from core.fileio import file_lock
 from core.video import production, recipes, reports, store, topic_store
+from scripts.trial_storage import storage_root, trial_directory
 from web.settings import get_settings
 from web.services import video_executor, video_render, video_workflow
 
@@ -193,8 +194,8 @@ def media_case(out: Path, key: str, index: dict, provider: str, mode: str | None
     from g3.worker import G2ProcessRunner
     import threading
 
-    settings = Settings(data_dir=auto_root / "g3/data" / out.name)
-    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    data = trial_directory("autovideo", f"chain-{out.name}")
+    settings = Settings(data_dir=data)
     if provider == "research":
         cfg = load_system_config(str(ROOT / "config"))["ai"]
         save(settings.llm_settings_file, {"base_url": cfg["base_url"], "model": cfg["model"],
@@ -238,6 +239,12 @@ def validation_output(path: Path) -> Path:
     return resolved
 
 
+def external_validation_output(path: Path) -> Path:
+    """Use the existing validation alias on mounted storage before starting a run."""
+    storage_root("research")
+    return validation_output(path)
+
+
 def require_isolated_store(out: Path) -> None:
     """Programmatic callers must use the same isolated ledger as the CLI; never create samples in production."""
     expected = validation_output(out) / "isolated-state" / "video.db"
@@ -255,8 +262,8 @@ def main() -> int:
     parser.add_argument("--mode", choices=("standard", "fast"))
     args = parser.parse_args()
     try:
-        out = validation_output(args.output)
-    except ValueError as exc:
+        out = external_validation_output(args.output)
+    except (OSError, ValueError) as exc:
         parser.error(str(exc))
     out.mkdir(parents=True, exist_ok=True)
     get_settings()  # Load the existing .env without exposing it in artifacts.

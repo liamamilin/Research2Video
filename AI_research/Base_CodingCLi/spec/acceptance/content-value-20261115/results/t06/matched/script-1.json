@@ -1,0 +1,221 @@
+{
+  "title": "30 页的 PDF，免费版 ChatGPT 只吃下 12 页？",
+  "sections": [
+    {
+      "title": "开场：一份 30 页的 PDF",
+      "paragraphs": [
+        {
+          "text": "你把一份 30 页的 PDF 拖进输入框，进度条转完，回答只覆盖了前几页，后面那些它像没看见。这不是它突然变笨了——官方定价页上写着一个数：免费版单次输入上限大约 12 页文本。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "大家好，我是洛洛，今天聊免费版到底卡在哪。我不打算泛泛地说“免费版有限制”，我想给你三个能自己动手查的信号：27K、12 页，还有页面上反复出现的那个词 Limited。这三样对完，你大概就知道这份月费该不该掏。",
+          "citations": [
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "27K 是整段对话的额度，不只是输入框",
+      "paragraphs": [
+        {
+          "text": "先说 27K。这是免费版日常用的那个即时模型 GPT Instant 的总上下文窗口。注意“总”这个字：它并不是一个能装 27K 的输入框，你贴的、它答的、前面几轮聊过的，都从这一个额度里扣。所以 12 页不等于“一次贴 12 页，然后随便追问”。你贴十页合同让它逐条解释，它回几大段，再追问两轮，前面的条款就开始被挤出去。我猜很多人说的“聊久了它就把前面忘了”，不是记性问题，是这个额度被用满了。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "把几档的数值放在一起，你自己估起来方便：Go 和 Plus 的 GPT Instant 都是 54K、约 40 页，Pro 是 128K、约 250 页。从免费升到 Go，页数大约多出三倍，但它仍然是多出一些容量，并不是没有上限。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "转折：27K 不能套到推理模型上",
+      "paragraphs": [
+        {
+          "text": "但这里有个特别容易被说错的地方，我更看重它。模型那张表里，GPT Instant 和 GPT Reasoning 是分开的两栏。Instant 写 27K，Reasoning 那栏写的是 Varies，输入上限也是 Varies。所以“免费版只有 27K”这句话只对 Instant 成立，不能套到思考型模型上。免费版确实给了你一个 GPT-5 Thinking Mini，但它能吃多少，官方没写死。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这个区别很实用：下次贴长文被截断，先看屏幕上选的模型名。如果是 Instant，切到 GPT-5 Thinking Mini，同一份文件再跑一遍。既然那边写的是 Varies，很可能不是 12 页这道门槛。这一步不花钱，值得先做。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Limited 这一串词，其实分成两件事",
+      "paragraphs": [
+        {
+          "text": "剩下那个信号是 Limited，免费版那一页几乎每行都有一个。Codex 写的是 Limited trial access，试用级别的访问，你其实只能试，还不能真正拿来用。深度研究 Limited，记忆和上下文 Limited，图片生成不只 Limited，速度还更慢，消息和上传次数也是 Limited。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一行最容易被跳过：响应速度，免费版写的是 Limited on bandwidth & availability，也就是带宽和可用性受限。说成日常话就是，高峰期你可能得排队，或者等更久。这不是模型算得慢，是你排在后面。它跟 12 页那道输入限制是两件不一样的事，得分开算。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "要不要付费：Go 和 Plus 差在哪一行",
+      "paragraphs": [
+        {
+          "text": "到掏钱这一步了。付费是按人按月算的，不是一次性买断，Go、Plus、Business、Enterprise 都是这个算法。再看 Go 和 Plus：两边的 GPT Instant 都是 54K、约 40 页，容量完全一样。差别在速度那一行——Go 还是 Limited on bandwidth & availability，跟免费版同一条；Plus 才写成 Fast，Pro 是 Ultrafast。",
+          "citations": [
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F",
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我更看重一个取舍：你卡的是“文件贴不下”，Go 能缓解，12 页变 40 页；你卡的是“高峰时段等太久”“点发送之后转半天”，那 Go 这一档没碰到你的问题，得往上走。而且我得提醒一句，40 页也不是终点，你手里那份 60 页的报告，照样要拆成两半。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "真正差距最明显的是推理模型那一栏：免费写 Varies，Go 和 Plus 是 256K、约 320 页，Pro 是 400K、约 680 页。如果你主要靠思考型模型啃长文，这个跨度比 Instant 从 27K 到 54K 大得多。这也是我说先别急着升级的原因——先搞清楚你卡的是哪一栏。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "回到那份 30 页的 PDF",
+      "paragraphs": [
+        {
+          "text": "回到开头那份 30 页 PDF。三个信号你自己对一遍：我的活是不是经常超过 12 页、还要来回追问；我当时的模型是不是 Instant；我等的是“装不下”还是“转得慢”。装不下，从 Go 这一档起有意义；转得慢，Go 不解决。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的建议是先花五分钟做那件不花钱的事：把同一份文件切到 GPT-5 Thinking Mini 再跑一遍，看它还截不截。如果照样截，你的需求是真的，可以往上；如果它读完了，那你缺的是换个模型，还不用急着付费。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Models",
+            "https://chatgpt.com/pricing/#:~:text=Is%20ChatGPT%20free%20to%20use%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你最近一次被截断，是在贴什么文件？评论区说说，我也想看看大家的 12 页都花在哪了。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/codex/pricing#:~:text=Free"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1243,
+    "estimated_seconds": 281,
+    "segments": 52,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.936,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "开场：一份 30 页的 PDF",
+        "spoken_length": 159,
+        "budget": 218
+      },
+      {
+        "title": "27K 是整段对话的额度，不只是输入框",
+        "spoken_length": 234,
+        "budget": 218
+      },
+      {
+        "title": "转折：27K 不能套到推理模型上",
+        "spoken_length": 183,
+        "budget": 218
+      },
+      {
+        "title": "Limited 这一串词，其实分成两件事",
+        "spoken_length": 177,
+        "budget": 217
+      },
+      {
+        "title": "要不要付费：Go 和 Plus 差在哪一行",
+        "spoken_length": 287,
+        "budget": 217
+      },
+      {
+        "title": "回到那份 30 页的 PDF",
+        "spoken_length": 203,
+        "budget": 217
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3339,
+      "completion_tokens": 6014,
+      "total_tokens": 9353,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4165,
+      "cost_usd": 0.00410925,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 60.058,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 3
+  }
+}

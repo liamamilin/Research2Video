@@ -4,7 +4,8 @@
 
 name: 盘点
 description: 从这批变化里为{{audience}}选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。
-status: experimental
+status: blocked
+reason: 已归档：0 生产绑定且长期未使用，多条盘点请改用专题速览或报告速览。
 tags:
   domain:
     key: ai

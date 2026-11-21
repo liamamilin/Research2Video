@@ -1,0 +1,93 @@
+name: theme_research-m4_e3773196
+description: 主题讲解：通过 Google Play 订阅了 ChatGPT Plus，怎样关闭自动续费并确认到期时间？
+enabled: true
+keywords:
+  - 通过 Google Play 订阅了 ChatGPT Plus，怎样关闭自动续费并确认到期时间？
+  - ChatGPT 产品使用、应用价值与订阅决策
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：围绕已经确定的主题研究，准备后续作者可以展开讲述的材料。
+  主题：通过 Google Play 订阅了 ChatGPT Plus，怎样关闭自动续费并确认到期时间？
+  领域：ChatGPT 产品使用、应用价值与订阅决策
+  栏目：T07 · 订阅与支付
+  栏目交付目标：想订阅，怎么完成？
+  目标观众：安卓用户、ChatGPT Plus 订阅者
+  创作角度：从 Google Play 订阅页展示关闭续费路径，并说明如何核对到期状态。
+  用户补充材料：面向中文普通用户和职场新人，优先能展示具体输入、操作和成果的题目。九个栏目保持多样性；套餐和订阅围绕真实决策问题，不要求每类凑满。
+  发现时的线索（用于确定问题，继续阅读相关正文）：
+  - 2024年最新开通ChatGPT Plus教程！信用卡付款失败怎么办？如何使用信用卡升级ChatGPT - 哔哩哔哩: https://www.bilibili.com/read/cv31027039/
+    2024年最新开通ChatGPT Plus教程！信用卡付款失败怎么办？如何使用信用卡升级ChatGPT - 哔哩哔哩
+
+  # 2024年最新开通ChatGPT Plus教程！信用卡付款失败怎么办？如何使用信用卡升级ChatGPT 
+
+  2024年02月07日 16:17--浏览 · --点赞 · --评论
+
+  大家好，欢迎来到我的博客！ 众所周知的原因，目前 Openai 已经把资源更多投入到 GPT4 以及训练未来 GPT5 了，GPT3.5 已经被一定程度上降智，同时 ChatGPT 4 支持多模态、GPTS 等能力， ChatGPT Plus它不仅具备了前任ChatGPT 基础版本3.5的所有优点，更进一步，拥有了更强的学习能力，更好的理解力，更高的响应速度和更深入的人类交流模拟。它能理解你的问题，会与你进行有深度的对话，并能提供你需要的各种信息。
+
+  ChatGPT Plus可以成为你非常好的私人AI助手，能深入理解你的需求并给予你答案，无论你面临复杂问题、寻求专业建议，还是只想有个闲暇聊天的朋友，它都能轻松满足。
+
+  GPT4需要付费订阅，即便是大家愿意支付 20 USD，往往许多国内小伙伴还是卡在支付环节。
+
+  常常会见到这些报错：
+
+  - Your credit card was declined.Try paying with a debit card instead.
+  - 您的信用卡被拒绝了。请尝试用借记卡支付。
+  - 你的卡已被拒绝。
+  - 您的金融卡已被拒绝。
+  - 您拒絕了。請嘗試用簽帳卡支付。 我们未能验证您的支付方式。请选择另一支付方式并重试。
+
+  ChatGPT Plus注册及升级详细指南：https://chatgptzhanghao.github.io/how-to-register-a-chatgpt-account-in-china/
+
+  # 一、ChatGPT Plus信用卡付款被拒
+
+  为什么会出现 「银行卡被拒绝/card has been declined」呢？
+
+  主要以下几点原因：
+
+  - 卡的余额不足
+  - 尝试更换IP地址、支付卡或账单地址来绑定卡片成功的可能性较低
+  - 如果在登录账号时需要输入短信验证码，或在支付页面需要验证码，这可能意味着账号被视为高风险。
+  - OpenAI可能因为用户违反政策或从高风险IP地址访问服务而拒绝提供付费服务。
+  - 不仅需要国外 VISA、Master 等双币信用卡，还需要有干净的 IP （国外IP，梯子用的人少），CHATGPT 是使用 stripe 进行收款，stripe 会根据账单地址、IP 地址等进行风控，国内付款一般都会被拦截
+
+  # 二、如何解决？
+
+  最好的方式是新开一张虚拟信用卡，这样可以避开风控系统，最最彻底的是连 ChatGPT 账号都重新注册。
+
+  当然可以先尝试换虚拟卡，如果虚拟卡都无法
+  研究日期：{date}
+
+  先明确这个题目需要回答的几个子问题。阅读提供的相关来源，定向搜索并阅读能回答这些问题的页面。
+  有用的旧教程、现行规则和案例同样可以使用；页面是否今天新增不决定它是否与本主题有关。
+  围绕信息缺口继续补充；材料充分后形成判断，不预设必须购买、升级或支持某种结论。
+  “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
+  保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
+  优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+
+  输出一份 Markdown 主题研究底稿：
+  # 主题标题
+  ## 要回答的问题与主要判断
+  ## 观众场景与具体材料
+  ## 问题逐项展开（每个问题的具体资料、例子、机制和适用条件）
+  ## 可用于讲述的操作与结果
+  ## 画面材料（页面链接、展示区域、对应讲述内容、输入与输出的演示建议）
+  ## 原始材料中值得保留的细节
+  ## 来源清单
+  这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
+output: output/video/{datetime}_theme_research-m4_e3773196.md
+sources:
+  - source:cg_pricing
+  - source:cg_plus
+  - source:cg_multicurrency
+  - source:cg_billing
+  - source:cg_regions
+  - source:cg_cancel
+  - source:cg_payment_questions
+sources_limit: 6
+max_searches: 8

@@ -75,9 +75,18 @@ export function AutopilotCard({ currentItems = [] }: {
       .catch(() => undefined);
 
   useEffect(() => {
-    load();
-    const timer = window.setInterval(load, 20000);
-    return () => window.clearInterval(timer);
+    let alive = true;
+    let inFlight = false;
+    const run = () => {
+      if (!alive || inFlight) return;
+      inFlight = true;
+      void load().finally(() => { inFlight = false; });
+    };
+    const refresh = () => { if (!document.hidden) run(); };
+    run();
+    const timer = window.setInterval(refresh, 20000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { alive = false; window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, []);
 
   async function act(fn: () => Promise<unknown>) {

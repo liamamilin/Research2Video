@@ -1,0 +1,30 @@
+{
+  "key": "geometric",
+  "name": "极简几何",
+  "version": 2,
+  "for": [
+    "science",
+    "ai",
+    "education"
+  ],
+  "prefix": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white,",
+  "characters": "stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each,",
+  "suffix": "plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+  "negative": "text, letters, numbers, words, watermark, logo, photo, realistic, 3d render, complex background, clutter, painterly texture, deformed hands, extra fingers",
+  "params": {
+    "width": 1344,
+    "height": 768,
+    "steps": 4,
+    "guidance_scale": 1,
+    "sampler": "DDIM Trailing"
+  },
+  "seed": "per_video",
+  "palette": {
+    "background": "#f5f4f0",
+    "ink": "#1d2a4d",
+    "accent": "#e85d4a",
+    "secondary": "#5fa8d8"
+  },
+  "sample": "",
+  "note": "画风包：只管怎么画；画面内容来自分镜的画面描述。设计见 AREC spec/illustrated-explainer.md §2.2。"
+}

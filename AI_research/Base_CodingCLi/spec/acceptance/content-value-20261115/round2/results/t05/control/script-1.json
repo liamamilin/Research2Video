@@ -1,0 +1,186 @@
+{
+  "title": "豆包通义免费够用，Kimi Pro 99元一年该不该花？",
+  "sections": [
+    {
+      "title": "先看一个周五晚上的任务",
+      "paragraphs": [
+        {
+          "text": "99元一年，折下来一个月8块。这是我今年见过最容易被顺手买下的一档AI会员价。但如果你手机里已经装着豆包或者通义，我的建议是：先别付这笔钱。大家好，我是洛洛。今天不排什么最强榜，就拿一个具体任务走一遍：豆包、通义、DeepSeek、Kimi这四款国内直接能打开的AI，哪些活免费版就够，Kimi Pro这99元到底买的是什么。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "晚上十点，你电脑上放着一份八十页的PDF合同，合作方发来的，明天上午要回邮件指出哪几条有问题。旁边还压着两件小事：周报没写，一段英文摘要要翻成中文。三件事挤在一个晚上，这时候最容易干的事，就是去找那个“升级”按钮。我先给结论：周报和翻译，一分钱都不用花。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "豆包和通义免费版的对话额度，对比表里写的是“充足、几乎无限”；DeepSeek更直接，对话全免费。你把那段英文摘要粘进去，说一句“翻成中文，保留专业术语”，几百字几秒就出来。周报也一样，把这一周干的三件事列给它，让它整理成条目。这类活，四款的免费版都能干，差别只在你顺手用哪个。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026",
+            "https://www.aotuq.cn/archives/china-llm-comparison-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "八十页的合同，卡的不是文件大小",
+      "paragraphs": [
+        {
+          "text": "真正让人犹豫的是那份合同。你把PDF拖进对话框，打一句“帮我找出付款节点和违约金条款，标出页码”。豆包和通义免费版标的单文件上限都是约50MB，八十页的合同一般就几MB，塞得进去。所以卡人的不是文件大小。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "卡人的是它读到第六十页，还记不记得第三页说过什么。这就是上下文长度：豆包256K，通义在128K到1M之间分档，Kimi是256K。Kimi在长文档上的口碑，就是从这儿来的。这里我得说句实话，我翻到的那份四款对比是自动汇总生成的，不是拿同一份文档把四家各跑一遍，所以我不打算给它排一二三四。我更看重一个你自己就能做的判断：拿你最长的那份文件，问一个埋在第60页的细节，答对了，这活免费版就能干；答漏了，再谈升级。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026",
+            "https://www.aotuq.cn/archives/china-llm-comparison-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "Kimi Pro官网披露的价是99元一年，摊到每月8块。这个价的性质是：低到你不用做预算，也低到你很容易“反正不贵”就买了，然后一年打开三次。它解决的场景很窄，就是长文档。窄不是缺点，窄意味着你很容易判断自己到底需不需要。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "API那笔钱，跟你聊天没关系",
+      "paragraphs": [
+        {
+          "text": "还有一笔钱特别容易被搅进来：API。它不是会员，是按用量后付，只有写程序调用模型的人才碰。你在App里打字聊天，永远不花这笔钱。看到“API最便宜”就觉得自己该用，是把两件事弄混了。",
+          "citations": [
+            "https://www.aotuq.cn/archives/china-llm-comparison-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "价格表是这样的：DeepSeek V4 Flash输入1元每百万tokens，缓存命中0.02元，输出4元；豆包Seed 2.0 Lite输入0.6元，是表里最低的；Kimi K2.6输入8元，输出32到64元，是这几家里最贵的。换成好记的口径，一百万字输入，DeepSeek一块钱，命中缓存两分钱。所以“DeepSeek最便宜”这句话是对的，但它说的是对话免费加API单价低，不等于它在长文档上比Kimi强。",
+          "citations": [
+            "https://www.aotuq.cn/archives/china-llm-comparison-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的搭法：主用一款，长文档再花那8块",
+      "paragraphs": [
+        {
+          "text": "如果让我给一个普通人排：先主用一款就够，我选豆包，因为能实时联网、能发图，免费额度几乎无限，代价是高峰偶尔排队；写代码、做数学推理，用DeepSeek，对话免费；长文档真卡住了，再花那8块开Kimi。有份自动汇总的文章说这套组合能覆盖95%的场景，这个数我不信，但方向我认同：不是挑一个最强的，是按活分工。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026",
+            "https://www.aotuq.cn/archives/china-llm-comparison-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我不建议一上来就买豆包Pro或者通义的付费档。豆包Pro是月付，通常几十元一个月；通义分标准、进阶、旗舰三档，也是月付为主，具体金额都得看官网当时怎么写。这些钱买的是多模态、优先和更强的能力，但你得先被免费版排队卡过，或者天天要发图片视频，才轮得到它们。顺序反了，就是给还没用到的东西付钱。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "回到那个晚上。那份合同，先用免费版问一遍付款节点和违约金，答得对，你省下99；答漏了，第二天花8块钱开Kimi Pro，哪怕只用一个月，也不算亏。真正要防的不是这99元，是它悄悄变成每月几十块的订阅堆，而你每个都只打开过三次。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你上次被免费版卡住，是因为文件太长、高峰排队，还是它读漏了关键的那一条？留言说说，我下次可以照这个再拆一轮。我是洛洛，我们下期见。",
+          "citations": [
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1324,
+    "estimated_seconds": 297,
+    "segments": 54,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.99,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先看一个周五晚上的任务",
+        "spoken_length": 352,
+        "budget": 327
+      },
+      {
+        "title": "八十页的合同，卡的不是文件大小",
+        "spoken_length": 362,
+        "budget": 326
+      },
+      {
+        "title": "API那笔钱，跟你聊天没关系",
+        "spoken_length": 208,
+        "budget": 326
+      },
+      {
+        "title": "我的搭法：主用一款，长文档再花那8块",
+        "spoken_length": 402,
+        "budget": 326
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 4828,
+      "completion_tokens": 6578,
+      "total_tokens": 11406,
+      "cache_read_tokens": 1152,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4975,
+      "cost_usd": 0.00450166,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 79.629,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 2
+  }
+}

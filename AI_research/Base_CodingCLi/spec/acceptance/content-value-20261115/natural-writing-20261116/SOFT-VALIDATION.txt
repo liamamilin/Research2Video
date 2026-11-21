@@ -1,0 +1,33 @@
+验证状态：代码/配置检查完成；运行服务已通过现有维护入口重启，health=ok。
+
+完整项目检查已执行：Python 编译通过；pytest 4747 passed、2 skipped、2 failed。失败均为有意修改提示词后的旧断言/快照：固定“## 核心机制”小节、矩阵研究提示词哈希。没有运行时代码故障。
+已去掉固定小节断言并仅更新本轮在用 job 的18个既有哈希条目，归档快照不刷新；对应两个模块重跑35 passed。未再次重跑其余4747项，因为修正只涉及测试与快照。
+UI 单独完成 typecheck、lint、96文件/751项测试和生产构建，全部通过；配置验证通过；git diff --check通过。
+针对作者、材料传递、栏目、读改稿与补材先前完成182项专项检查。
+全量日志：state/acceptance-content-value-20261115/natural-writing-20261116/quota-soft/check-final.log
+失败修正复跑：quota-soft/regression-fixed.log
+配置验证：quota-soft/config-validation.log
+UI 构建日志：/tmp/soft-ui-build.log；测试汇总已由工具返回（751 passed / 96 files）。
+
+提示词绑定：57条最终组合，0解析错误。最终实际生产代码已从报告到稿服务隔离跑完科学、文化、软件三篇，全部DRAFT，全文已阅读；来源哈希见各 input-receipt.json。没有手工改稿、发布或渲染。
+研究到稿两例和仅改变补材组织的两例另有完整请求响应，边界与效果问题见 SOFT-REVIEW.txt。这些检查不等于内容质量已稳定，长任务仍继续优先改善输入。
+
+服务生效：启动前研究/文稿/渲染/发布/手动轮次均无在运行项。由项目既有维护辅助程序等待空闲并校验实例后重启，旧 PID 34461 → 新 PID 89595，health=ok。详情 soft-activation.json。未取消任务、未强制杀进程、未改调度。
+
+补材风格继承续查：只删除ADD提示对原文风格的继承要求，收据版本2→3；相关91项测试、编译和diff检查通过，没有UI或业务流程变更，不重复UI与全量测试。日志 input-style-free-rollout/tests.log。空闲维护入口已加载，PID89595→9442、health=ok；见input-style-free-activation.json。最终产业日报未调试题的完整两稿已阅读，见LATE-HOLDOUT-REVIEW.txt；不把固定数量减少等同于效果完美。
+
+研究初稿与整期章节补充复核
+42 个在用 job 删去研究正文的“说明观看动机、新意与实际收获”，保留栏目规则及字段。运行 load_job→matrices.for_run→ResearchEngine._build_prompt 核对每一个改动，31 个原有快照条目更新，生成器带来的其它新条目排除。本轮运行 tests/test_matrices.py、test_question_material.py、test_knowledge_job.py、test_audience_expansion.py，117 通过，配置校验通过。复核未归档矩阵、启用外部调度及在用矩阵辅助入口，74 job、15 矩阵、57 绑定仍一致。
+writer 版本 18 与 episodes 清理的是互相矛盾的章节要求：共有 30 条整期配置组合的实际系统提示或材料交接文字变化。独立开场与收尾按需要，章节角色、正文导航和教程实际步骤保留。复抓全部 57 条无绑定差异；相关 writer、manuscript 和 audience 回归 73 通过。另用真实同材料完整稿进行内容对照。
+
+本轮全量沙箱检查 4718 passed、3 skipped、22 failed、8 errors，失败/报错文件共六个，集中在本机服务监听、子进程和启动器。用允许本机测试端口和测试进程的同一环境复跑这六个文件全部通过：73 passed, 1 skipped in 44.90s。分两次验证覆盖失败范围；不称单次 check.sh 全通过或前端阶段已重跑。见 current-validation.json。
+
+教程、快讯合集和系列预告补完：196 项相关测试通过，配置校验和 git diff --check 通过。57 条绑定复抓，仅 T03/T07/T08/flash_daily 四条静态作者组合变化，另有 T05 动态 next_episode 预告。T03/flash_daily/T05 各两份完整隔离稿全读，真实请求比较见 wrap-runtime.json。已由空闲维护加载 writer 19，健康检查正常。T05 旧研究的比较对象被事件分包缩窄，不能拿保留预告证明比较完整。快讯研究软化已接入，旧研究材料的写稿对照与新研究端到端需分开。
+
+T05 输入交接：269 项测试通过，覆盖 audience_rollout、audience_expansion、story_pool、question_material 与 goal_first。两份保存的真实旧／新报告均在有效生产绑定上从报告到稿。范围重查 74 job、15 矩阵、57 绑定，43 个修改过的 job 全在当前范围。维护 PID19211→20525，health=ok。详见 t05-kept-item-runtime.json 和 t05-scope-recheck.json。
+
+作者输入去重：276 项相关测试通过，完整同原文/同事件的 SVG 及 T05 新稿各一。逐字比较证实系统与余下输入完全相同。常规成稿共享此去重，改编提示未更改。健康维护 PID20525→21824。范围绑定和 job 文件未改。
+
+快讯、T05、T06 研究补记：测试 tests/test_matrices.py、test_audience_rollout.py、test_audience_expansion.py、test_video_persona.py、test_weekly_review.py，共 139 项通过，配置校验通过。只更新三条既有提示词哈希，YAML 其余配置未变。9 条实际绑定见 research-field-soft-scope.json。最新快讯措辞同材料初次研究已运行并解析；T05、T06 本轮只验证实际渲染、绑定及相关回归。
+共享选题与在用主题辅助入口：328 项相关后端测试同次通过，覆盖 audience_rollout、audience_expansion、question_material、job_rollout_recovery、flash_joint_rollout、video_goal_first、tutorial_schedule_handoff、matrices 和主题库／工坊／排序等。使用 429 条实际来源索引、同一保存研究实跑 T05 三组双阶段选择，见 shared-selection-soft-runtime.json。对照条件和独立选题差异如实保存。此前未保留的结构充足时可由模型自行选择，也可遗漏已有的可选评语。最新代码通过相同样本回放验证，列表形材料缺口可通过，不需重新生成。配置校验与 diff 检查通过。
+T 选题原文交接：329 项相关用例同次通过，包含真实双轮入口模拟的原文全量传递、教程路由字段和示例保留，以及索引阶段的解释不向复读发送。配置校验与 diff 检查通过。调用退回、来源编号和报告到稿流程覆盖在同一组合中；模型成稿与上述测试分别记录，见 selection-input-trace.json。

@@ -1,0 +1,13 @@
+key: hot_trends
+name: 每日重要热点
+job: chains/hot_trends
+outputs:
+- hot_trends_each
+- hot_trends_daily
+owned:
+- jobs/chains/hot_trends.yaml
+- config/matrices/hot_trends.yaml
+- config/content_columns/hot_trends_episode.yaml
+imported: false
+schedule_armed: false
+created_at: 1795175400.0

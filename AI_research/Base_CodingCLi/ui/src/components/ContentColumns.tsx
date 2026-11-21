@@ -49,15 +49,27 @@ function PresentationRecipes() {
   </section>;
 }
 
-function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
+/** An A/B suggested change (spec/ab-testing.md §10): ``{"notes": …}``, ``{"presentation.strategy": …}`` or ``{"render.x": …}``. */
+export function withPrefill(value: ContentColumnInput, prefill: Record<string, unknown>): ContentColumnInput {
+  const next = { ...value, presentation: { ...value.presentation }, render: { ...value.render } };
+  for (const [path, v] of Object.entries(prefill)) {
+    if (path === "notes" && typeof v === "string") next.notes = v;
+    else if (path === "presentation.strategy" && typeof v === "string") next.presentation.strategy = v;
+    else if (path.startsWith("render.")) (next.render as Record<string, unknown>)[path.slice(7)] = v;
+  }
+  return next;
+}
+
+function ColumnEditor({ matrix, types, column, onSaved, onCancel, prefill, experiment }: {
   matrix: Matrix; types: ColumnType[]; column?: ContentColumn; onSaved: () => void; onCancel: () => void;
+  prefill?: Record<string, unknown> | null; experiment?: string | null;
 }) {
-  const [value, setValue] = useState<ContentColumnInput>(() => ({ name: column?.name || "", matrix: matrix.key,
+  const [value, setValue] = useState<ContentColumnInput>(() => withPrefill({ name: column?.name || "", matrix: matrix.key,
     content_mode: column?.content_mode || "episode",
     type: column?.type || types[0]?.key || "news", audience: column?.audience || matrix.content?.audience || "",
     promise: column?.promise || "", production_ids: column?.production_ids || [],
     render_inheritance: column?.render_inheritance || "content_matrix", render: column?.render || {},
-    presentation: column?.presentation || {}, status: column?.status || "planned", notes: column?.notes || "" }));
+    presentation: column?.presentation || {}, status: column?.status || "planned", notes: column?.notes || "" }, prefill || {}));
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [visualsInput, setVisualsInput] = useState(() => (column?.presentation.preferred_visuals || []).join("、"));
   const [recipes, setRecipes] = useState<PresentationRecipe[]>([]);
@@ -97,6 +109,8 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
     } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); }
   };
   return <section className="card p-4 space-y-4" aria-label={column ? "编辑栏目" : "新增栏目"}>
+    {prefill && Object.keys(prefill).length ? <p role="note" className="rounded border border-accent bg-accent/10 px-3 py-2 text-xs">
+      来自实验{experiment ? ` ${experiment}` : ""}的建议改动已预填：{Object.keys(prefill).join("、")}。检查无误后点保存，不保存就不会生效。</p> : null}
     <h2 className="font-medium text-sm">{column ? "编辑栏目" : "新增栏目"}</h2>
     <div className="grid gap-3 sm:grid-cols-2 text-xs">
       <label>栏目名称<input className="input mt-1" value={value.name} onChange={(e) => setValue({ ...value, name: e.target.value })} /></label>
@@ -158,6 +172,8 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
 export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: boolean }) {
   const [params, setParams] = useSearchParams();
   const requestedColumn = params.get("column");
+  const experiment = params.get("experiment");
+  const prefill = (() => { try { const raw = params.get("prefill"); return raw ? JSON.parse(raw) as Record<string, unknown> : null; } catch { return null; } })();
   const from = params.get("from");
   const [data, setData] = useState<{ types: ColumnType[]; columns: ContentColumn[] } | null>(null);
   const [error, setError] = useState("");
@@ -196,7 +212,8 @@ export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: b
         {canEdit ? <button className="btn btn-primary text-xs" onClick={() => setEditing("")}><Plus className="h-3.5 w-3.5" />新增栏目</button> : null}</div></div>
     {showRecipes ? <PresentationRecipes /> : null}
     {editor !== null ? <ColumnEditor key={editor || "new"} matrix={matrix} types={data.types} column={data.columns.find((c) => c.key === editor)}
-      onCancel={closeEditor} onSaved={() => { closeEditor(); refresh(); }} /> : null}
+      onCancel={closeEditor} onSaved={() => { closeEditor(); refresh(); }}
+      prefill={editor === requestedColumn ? prefill : null} experiment={editor === requestedColumn ? experiment : null} /> : null}
     <div className="grid gap-4 xl:grid-cols-2 items-start">{data.columns.map((c) => <article key={c.key} className="card overflow-hidden" aria-label={`栏目 ${c.name}`}>
       <div className="p-4 space-y-3"><div className="flex justify-between gap-3 items-start"><div><span className="text-xs text-accent">{names.get(c.type) || c.type}</span><h3 className="font-medium mt-1">{c.name}</h3></div>
         <span className="text-xs text-text-muted">{c.status === "planned" || !c.bindings.length ? "待配置" : c.auto_bindings ? "已接自动制作" : "手动制作"}</span></div>

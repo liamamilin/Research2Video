@@ -1,0 +1,193 @@
+Browser tab: 1070519781, Title: "研映 · Research2Video", URL: "http://127.0.0.1:8775/video-recipes/theme_research".
+1 AXWebArea 研映 · Research2Video, URL: 127.0.0.1:8775/video-recipes/theme_research
+	2 container root
+		3 container
+			4 heading 研映 · Research2Video, Value: 2
+				5 text 研映 · Research2Video
+			6 button admin · admin （账号设置）
+				7 text admin
+				8 text  · 
+				9 text admin
+				10 text （账号设置）
+			11 link Description: 矩阵, Value: 127.0.0.1:8775/matrices
+			12 link Description: 产出, Value: 127.0.0.1:8775/outputs
+			13 link Description: 视频看板, Value: 127.0.0.1:8775/
+			14 link Description: 文稿, Value: 127.0.0.1:8775/video
+			15 link Description: 成片与发布, Value: 127.0.0.1:8775/publish
+			16 link Description: 平台管理, Value: 127.0.0.1:8775/platforms
+			17 link Description: 助手, Value: 127.0.0.1:8775/ask
+			18 text 研究引擎
+			19 link Description: 研究总览, Value: 127.0.0.1:8775/engine
+			20 link Description: Jobs, Value: 127.0.0.1:8775/jobs
+			21 link Description: 情报轮次, Value: 127.0.0.1:8775/rounds
+			22 link Description: 报告, Value: 127.0.0.1:8775/reports
+			23 link Description: 周期调度, Value: 127.0.0.1:8775/scheduler
+			24 text 高级
+			25 link Description: 选题, Value: 127.0.0.1:8775/topics
+			26 link Description: 信息源, Value: 127.0.0.1:8775/sources
+			27 link Description: 文稿配方, Value: 127.0.0.1:8775/video-recipes
+			28 link Description: 设置, Value: 127.0.0.1:8775/settings
+			29 button 退出
+				30 image
+				31 text 退出
+		32 container
+			33 heading 文稿配方, Value: 1
+				34 text 文稿配方
+			35 text 根据素材，产出目标观众愿意看、听得懂、想继续看的视频。这里调整每类视频的创作方向和生成方式，保存后用于新稿。
+			36 container 配方列表
+				37 text field (settable) 搜索配方或部件
+				38 container
+					39 text 文稿配方（ 11 ）
+				40 button 深度解读 · 开发者 · B 站横屏长 已用 deep_dive · 一次写稿 · 6 分钟 · 20 篇
+					41 text 深度解读 · 开发者 · B 站横屏长
+					42 text 已用
+					43 container
+						44 text deep_dive  · 一次写稿  · 6 分钟  · 20 篇
+				45 button 快讯 · 开发者 · B 站横屏短 已用 flash · 一次写稿 · 1.25 分钟 · 14 篇
+					46 text 快讯 · 开发者 · B 站横屏短
+					47 text 已用
+					48 container
+						49 text flash  · 一次写稿  · 1.25 分钟  · 14 篇
+				50 button 一个知识点 · 开发者 · B 站横屏短 已用 point_short · 一次写稿 · 1.5 分钟 · 7 篇
+					51 text 一个知识点 · 开发者 · B 站横屏短
+					52 text 已用
+					53 container
+						54 text point_short  · 一次写稿  · 1.5 分钟  · 7 篇
+				55 button 行动清单 · 开发者 · B 站横屏短 试验 action_list · 一次写稿 · 2.5 分钟 · 4 篇
+					56 text 行动清单 · 开发者 · B 站横屏短
+					57 text 试验
+					58 container
+						59 text action_list  · 一次写稿  · 2.5 分钟  · 4 篇
+				60 button 对比 · 开发者 · B 站横屏长 试验 ai-developer-comparison-long · 一次写稿 · 4.5 分钟 · 1 篇
+					61 text 对比 · 开发者 · B 站横屏长
+					62 text 试验
+					63 container
+						64 text ai-developer-comparison-long  · 一次写稿  · 4.5 分钟  · 1 篇
+				65 button 盘点 · 开发者 · B 站横屏长 试验 ai-developer-roundup-long · 一次写稿 · 4 分钟 · 8 篇
+					66 text 盘点 · 开发者 · B 站横屏长
+					67 text 试验
+					68 container
+						69 text ai-developer-roundup-long  · 一次写稿  · 4 分钟  · 8 篇
+				70 button 实用讲解 · 大众观众 · B站横屏长 试验 chatgpt_acquisition · 一次写稿 · 3 分钟 · 0 篇
+					71 text 实用讲解 · 大众观众 · B站横屏长
+					72 text 试验
+					73 container
+						74 text chatgpt_acquisition  · 一次写稿  · 3 分钟  · 0 篇
+				75 button 报告速览 · 开发者 · B 站横屏长 试验 report_digest · 一次写稿 · 3 分钟 · 40 篇
+					76 text 报告速览 · 开发者 · B 站横屏长
+					77 text 试验
+					78 container
+						79 text report_digest  · 一次写稿  · 3 分钟  · 40 篇
+				80 button 主题讲解 · 大众观众 · B站横屏长 试验 theme_research · 一次写稿 · 4 分钟 · 0 篇
+					81 text 主题讲解 · 大众观众 · B站横屏长
+					82 text 试验
+					83 container
+						84 text theme_research  · 一次写稿  · 4 分钟  · 0 篇
+				85 button 本期头条 · 开发者 · B 站横屏短 试验 top_finding · 一次写稿 · 1.5 分钟 · 15 篇
+					86 text 本期头条 · 开发者 · B 站横屏短
+					87 text 试验
+					88 container
+						89 text top_finding  · 一次写稿  · 1.5 分钟  · 15 篇
+				90 button 专题速览 · 大众观众 · B 站横屏长 试验 topic_digest · 一次写稿 · 3 分钟 · 64 篇
+					91 text 专题速览 · 大众观众 · B 站横屏长
+					92 text 试验
+					93 container
+						94 text topic_digest  · 一次写稿  · 3 分钟  · 64 篇
+				95 text 共用部件（被多个配方引用，改一处一起变）
+				96 button 视频调研：对比 · 开发者 调研模板 · comparison_developer · 1 个配方在用
+					97 text 视频调研：对比 · 开发者
+					98 container
+						99 text 调研模板  ·  comparison_developer  ·  1 个配方在用
+				100 button 视频调研：深度解读 调研模板 · deep_dive · 1 个配方在用
+					101 text 视频调研：深度解读
+					102 container
+						103 text 调研模板  ·  deep_dive  ·  1 个配方在用
+				104 button 视频调研：一个知识点 调研模板 · one_point · 1 个配方在用
+					105 text 视频调研：一个知识点
+					106 container
+						107 text 调研模板  ·  one_point  ·  1 个配方在用
+				108 button 视频调研：快讯 调研模板 · quick_take · 1 个配方在用
+					109 text 视频调研：快讯
+					110 container
+						111 text 调研模板  ·  quick_take  ·  1 个配方在用
+				112 button auto_form 出片部件 · auto_form · 2 个配方在用
+					113 text auto_form
+					114 container
+						115 text 出片部件  ·  auto_form  ·  2 个配方在用
+				116 button fast_cards 出片部件 · fast_cards · 没有配方在用
+					117 text fast_cards
+					118 container
+						119 text 出片部件  ·  fast_cards  ·  没有配方在用
+				120 button motion 出片部件 · motion · 9 个配方在用
+					121 text motion
+					122 container
+						123 text 出片部件  ·  motion  ·  9 个配方在用
+				124 button 开发者 给谁看 · developer · 7 个配方在用
+					125 text 开发者
+					126 container
+						127 text 给谁看  ·  developer  ·  7 个配方在用
+				128 button 大众观众 给谁看 · general · 3 个配方在用
+					129 text 大众观众
+					130 container
+						131 text 给谁看  ·  general  ·  3 个配方在用
+				132 button 普通用户 给谁看 · non_tech · 7 个配方在用
+					133 text 普通用户
+					134 container
+						135 text 给谁看  ·  non_tech  ·  7 个配方在用
+				136 button common 包装方案 · common · 11 个配方在用
+					137 text common
+					138 container
+						139 text 包装方案  ·  common  ·  11 个配方在用
+			140 container 配方内容
+				141 heading 主题讲解 · 大众观众 · B站横屏长 theme_research.yaml, Value: 2
+					142 text 主题讲解 · 大众观众 · B站横屏长 theme_research .yaml
+				143 button 校验
+				144 button (disabled) 保存
+				145 button 复制为新配方
+				146 button 删除
+				147 container
+					148 text 引用： 给谁看
+					149 link Description: general, Value: 127.0.0.1:8775/video-recipes/parts/audience/general
+					150 text  ·  出片部件
+					151 link Description: auto_form, Value: 127.0.0.1:8775/video-recipes/parts/output/auto_form
+					152 text  ·  包装方案
+					153 link Description: common, Value: 127.0.0.1:8775/video-recipes/parts/packaging/common
+					154 text 。配方里自己写的字段优先于部件。
+				155 container
+					156 text 给谁看：
+					157 link Description: general, Value: 127.0.0.1:8775/video-recipes/parts/audience/general
+					158 text 。每个受众是一个栏目，文字里的  {{audience}}  由各自的档案填。
+				159 text entry area (settable) Description: 配方 YAML, Value: name: 主题讲解
+description: 围绕一个确定的观众问题，使用主题研究的场景、具体材料和原始资料组织完整讲述。
+status: enabled
+tags:
+  domain: {key: themes, name: 主题创作}
+  type: {key: explainer, name: 主题讲解}
+  format: {key: long, name: B站横屏长}
+audiences: [general]
+target_minutes: 4
+minutes_range: [2, 8]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众, 补充材料]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style: {depth: intro, tone: explainer}
+  style: |
+    让目标观众围绕开场的问题走向理解或可执行的选择。使用研究中的具体场景、输入、操作、结果和机制展开讲述。
+    同一组人物、任务或对象持续出现，让例子推动解释。观点来自研究材料，讲述顺序和节奏由作者选择。
+    涉及是否值得、怎样选择的题目，把差异放进观众任务里解释，并回到适用条件和下一步行动。
+output:
+  use: auto_form
+  packaging:
+    use: common
+    label: 主题讲解
+
+		160 button 让助手处理当前页面
+			161 image
+			162 text 让助手处理
+
+The focused UI element is 1 AXWebArea 研映 · Research2Video, URL: 127.0.0.1:8775/video-recipes/theme_research

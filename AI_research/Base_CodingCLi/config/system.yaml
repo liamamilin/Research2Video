@@ -117,6 +117,33 @@ budget:
   warn_ratio: 0.8            # warn at 80% of the limit
   block_pipeline: true       # refuse to start a round or single job when over budget
 
+
+# Declared-source page readers after HTTP/Chrome fail; OpenCode before Exa.
+page_readers:
+  opencode_cli:
+    enabled: true
+    binary: opencode
+    timeout_seconds: 90
+    workdir: ''
+
+# OpenCode CLI gather/organize worker. Report agent still writes the final Markdown.
+# Free OpenCode Go models are probed first; if all fail, paid_models are tried in order.
+gather:
+  opencode_cli:
+    enabled: true
+    binary: opencode
+    workdir: ''
+    model_provider: opencode-go
+    free_models: []          # empty → auto from `opencode models` (*-free)
+    paid_models:
+      - opencode-go/deepseek-v4.1-flash
+      - opencode-go/glm-5.3-flash
+      - opencode-go/minimax-m3
+    probe_timeout_seconds: 45
+    gather_timeout_seconds: 300
+    model_cache_seconds: 3600
+    apply_to: all            # all | fetch_only | flagged；Job 可写 opencode_gather: false 关闭
+
 # ---------------------------------------------------------------------------
 # Notifications: webhook / 企业微信 / 飞书 / email (any combination).
 # Events: failed | cancelled | success | round_finished

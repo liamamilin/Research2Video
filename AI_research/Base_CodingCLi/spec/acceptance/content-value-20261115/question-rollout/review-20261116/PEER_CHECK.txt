@@ -1,0 +1,30 @@
+后续状态：本文为修复前的检查记录；确认问题现已完成代码修复和回归，详见同目录FIXES.txt。生产服务未重启，旧任务/报告保留。
+
+2026-11-16 外部复查逐项核对
+
+本轮仅检查、隔离复现和保存证据，没有修改生产代码/配置/数据库，没有重启服务或发出实际邮件。
+
+1. 快讯合集与单条联合回归：确认。
+11-15 晚报告 output/flash/2026-11-15_ai_flash_discovery_1.md 的合集 d9228e36107240b6baf1e8266297e756 包含3个条目，已完成。3个单条 52d2fb85532e4379ae6aebee0d36c0bd、20fce5a4db384ac5a310b42e3cd70e05、ca2f6ebe955c4608b98abb38df571cf2 全部取消；story_decisions 的覆盖对象正是上述合集。此前11-14晚1289e131c3d74fcd8641c965f99bac5f和11-15早1a6f14cb0dd14233977a3f3bf451a6ec成功单条均有_material_reselection=true。
+audience_strategy候选schema最多4条；video_autopilot.py:266和:662两处均排除新策略的原始资料补选。共同候选被合集全部覆盖后，单条没有补选出口。历史合集抽样包含5/7/9条，也有4条；不能把5–11说成严格的历史上下界。
+
+2. 选题失败会使本次Job失败：确认。
+engine.py:328起保存初始研究稿后直接prepare_report，没有降级恢复。call_json最多3次；validate_sources在JSON重试外，source_roles不属于source_ids会直接失败。正式报告保存/发布在后面，因此不会发布。但原始研究稿已保存在audience-initial JSON中，不是底稿物理丢失，后续可据此恢复。
+
+3. 补材收据重复进入运行状态/历史：确认。
+engine.py:359把整个audience_detail放入usage，仅增加receipt路径并未移除question_material.retrieved_sources.text。state同步保存last_usage及JSONL历史。
+快讯最近3行历史大小为83436、107461、96026字节；最后一行audience_strategy约11789字节，source_supply约79927字节，该行尚无question_material。因此当前约96KB主要是原有source_supply，补材全文是进一步的增量问题。
+
+4. 多题报告统一标题、事件池多返回即报错：确认。
+render_report对非SINGLE任务统一写“本期选题与研究材料”；story_pool.py:223起对带新策略brief的结果要求恰好一个事件。修复不宜盲取首项，仍需保证对应选定的问题。
+
+5. REVIEW.txt已有问题仍成立：知识任务在unchanged/kept_original路径丢失完整写稿底稿；首个标题“选题说明”被用作历史题名；system.yaml为skip-worktree，本机启用未被普通Git交付；两条教程事件池缺字段尚未查清。换题成功不等于修复原错误。
+
+6. 用户近期修复的定向验证：已有研究测试175通过；AutoVideo失败报告4通过。尚不能称全部无问题：外发地址限制新增边界复现失败。
+web/services/assistant_tools/reports.py:161使用字符串子串判断。用户输入“把报告发给 notboss@example.com”，工具传入boss@example.com仍被接受。模拟email_report证实校验未抛出ValueError；没有真实外发。需按完整地址精确匹配。
+隔离复现文件及日志见同目录 test_recipient_match_repro.py、peer-fixes-edge.log；已有回归日志 peer-fixes-regression.log、autovideo-failure-regression.log。
+
+7. AutoVideo加载状态：确认仍需安全重启。
+8011进程PID7448于11-14 22:34:22启动，uvicorn未带--reload；worker.py修复文件mtime为11-15 13:28:13，晚于进程启动。服务健康不代表已加载新代码。本轮未重启。
+
+结论：此前仅验证单任务通过，漏掉了同一报告下合集消耗候选后单条补选的联合生产回归。以上发现均未在本轮实施修复。

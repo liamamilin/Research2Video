@@ -1,0 +1,372 @@
+{
+ "job_id": "e1febc36-cd76-4c81-9182-0f5ef6333113",
+ "title": "开完会谁写纪要：微信输入法免费，ChatGPT先别指望",
+ "status": "COMPLETED",
+ "active_stage": "COMPLETE",
+ "attempt_count": 1,
+ "cancel_requested": false,
+ "error_code": null,
+ "error_message": null,
+ "retryable": false,
+ "source_sha256": "932554d901d33f29253eb2798de5ef0a0609c2b8af83fc29e28a323647c2df7e",
+ "source_char_count": 1838,
+ "target_duration_sec": 60,
+ "theme": "minimal_dark",
+ "voice_id": "voxcpm_anchor",
+ "created_at": "2026-11-10T15:29:46.750+00:00",
+ "updated_at": "2026-11-10T16:07:53.021+00:00",
+ "version": 13,
+ "operation_type": "generate",
+ "parent_job_id": null,
+ "parent_attempt_no": null,
+ "scene_id": null,
+ "creative_intent": {
+  "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+  "purpose": "栏目：T05 · AI 产品横向选择。讲解目标：ChatGPT 和其他 AI 哪个好？。\n优先按段落组合并排输出对比、价格卡、对比表、产品真实截图、操作步骤，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+  "tone": "",
+  "focus": "会议记录单任务，不比谁更聪明，比谁更少动手、总结能不能直接发群。"
+ },
+ "revision_mode": null,
+ "input_mode": "narration",
+ "idempotency_key": null,
+ "background_music_resolved": null,
+ "background_music": {
+  "enabled": false
+ },
+ "production_recipe_resolved": null,
+ "production_plan": {
+  "schema_version": 1,
+  "settings": {
+   "brand": {
+    "enabled": true,
+    "profile": "linthesis"
+   },
+   "content_notices": [],
+   "creative_intent": {
+    "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+    "purpose": "栏目：T05 · AI 产品横向选择。讲解目标：ChatGPT 和其他 AI 哪个好？。\n优先按段落组合并排输出对比、价格卡、对比表、产品真实截图、操作步骤，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+    "tone": "",
+    "focus": "会议记录单任务，不比谁更聪明，比谁更少动手、总结能不能直接发群。"
+   },
+   "duration_mode": "content",
+   "music": null,
+   "packaging": {
+    "preset": "common",
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "recipe": "chatgpt_acquisition-m5",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "production_context": {
+    "content_recipe": {
+     "id": "research:chatgpt_acquisition-m5",
+     "settings": {
+      "video_form": "information_motion",
+      "creative_intent": {
+       "purpose": "知识讲解",
+       "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+       "focus": "会议记录单任务，不比谁更聪明，比谁更少动手、总结能不能直接发群。"
+      },
+      "packaging": {
+       "preset": "common",
+       "label": "ChatGPT 实用讲解",
+       "accent": "#1f7a4d",
+       "recipe": "chatgpt_acquisition-m5",
+       "intro": {
+        "title": "开完会谁写纪要"
+       }
+      },
+      "voice_id": "voxcpm_anchor"
+     }
+    },
+    "matrix": {
+     "id": "research-production:chatgpt_t05_comparison",
+     "settings": {
+      "video_speed": 1.25,
+      "packaging": {
+       "label": "AI 产品横向选择",
+       "preset": "common"
+      }
+     }
+    }
+   },
+   "production_mode": "standard",
+   "production_recipe": null,
+   "target_duration_sec": 60,
+   "video_form": "information_motion",
+   "video_speed": 1.25,
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+   "packaging.label": "matrix",
+   "packaging.accent": "content_recipe",
+   "packaging.enabled": "common",
+   "packaging.intro.component": "common",
+   "packaging.intro.enabled": "common",
+   "packaging.intro.seconds": "common",
+   "packaging.outro.component": "common",
+   "packaging.outro.enabled": "common",
+   "packaging.outro.seconds": "common",
+   "packaging.badge.component": "common",
+   "packaging.badge.enabled": "common",
+   "packaging.source_card.component": "common",
+   "packaging.source_card.enabled": "common",
+   "packaging.source_card.seconds": "common",
+   "packaging.sound.component": "common",
+   "packaging.sound.enabled": "common",
+   "video_form": "content_recipe",
+   "production_mode": "common",
+   "visual_style": "common",
+   "duration_mode": "request",
+   "target_duration_sec": "common",
+   "voice_id": "content_recipe",
+   "video_speed": "matrix",
+   "creative_intent": "common",
+   "creative_intent.purpose": "request",
+   "creative_intent.audience": "request",
+   "creative_intent.focus": "content_recipe",
+   "packaging.preset": "matrix",
+   "packaging.recipe": "content_recipe",
+   "packaging.intro.title": "content_recipe",
+   "enabled": "brand_default",
+   "profile": "brand_default"
+  },
+  "style": {
+   "id": "legacy",
+   "version": 1,
+   "description": "保留各既有形式的原始视觉定义"
+  },
+  "executor": {
+   "id": "remotion",
+   "version": 1
+  },
+  "output": {
+   "width": 1920,
+   "height": 1080,
+   "fps": 30
+  },
+  "packaging_sha256": "af29c36e062550702faa490eebf53058621d758be7f04246b9f26e3122f55e5d",
+  "packaging": {
+   "library": "autovideo-packaging",
+   "version": 2,
+   "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+   "selection": {
+    "preset": "common",
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "recipe": "chatgpt_acquisition-m5",
+    "intro": {
+     "enabled": false
+    },
+    "outro": {
+     "enabled": false
+    },
+    "badge": {
+     "enabled": false
+    },
+    "sound": {
+     "enabled": false
+    }
+   },
+   "components": {
+    "label": "AI 产品横向选择",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+     "component": "stinger",
+     "enabled": false,
+     "seconds": 1.5
+    },
+    "outro": {
+     "component": "end_card",
+     "enabled": false,
+     "seconds": 2.5
+    },
+    "badge": {
+     "component": "corner_badge",
+     "enabled": false
+    },
+    "source_card": {
+     "component": "source_card",
+     "enabled": true,
+     "seconds": 4.5
+    },
+    "sound": {
+     "component": "synth_sting",
+     "enabled": false
+    }
+   },
+   "package": {
+    "accent": "#1f7a4d"
+   },
+   "badge": {
+    "text": "",
+    "color": "#1f7a4d"
+   },
+   "source_card": null,
+   "source_card_state": "no_sources",
+   "component_versions": {
+    "intro": {
+     "id": "stinger",
+     "version": 1
+    },
+    "outro": {
+     "id": "end_card",
+     "version": 2
+    },
+    "badge": {
+     "id": "corner_badge",
+     "version": 1
+    },
+    "source_card": {
+     "id": "source_card",
+     "version": 2
+    },
+    "sound": {
+     "id": "synth_sting",
+     "version": 1
+    }
+   },
+   "sha256": "af29c36e062550702faa490eebf53058621d758be7f04246b9f26e3122f55e5d"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "932554d901d33f29253eb2798de5ef0a0609c2b8af83fc29e28a323647c2df7e",
+  "music": {
+   "selection": null,
+   "background_music_generated": false
+  },
+  "brand_record_sha256": "8e8e766277b1d8553a00a1b068971ad023a039e10575198167446fd6b97c9465",
+  "brand_layout": {
+   "version": 1,
+   "left": 140,
+   "right": 140,
+   "top": 54,
+   "width": 520,
+   "height": 76,
+   "gap": 40
+  },
+  "sha256": "342d20555db38408cb4550f674054437ec731185ca24cdab3a07a3fcc4be83cc"
+ },
+ "production_mode": "standard",
+ "visual_style": "legacy",
+ "video_speed": 1.25,
+ "video_form": "information_motion",
+ "duration_mode": "content",
+ "input_analysis": {
+  "requested_form": "information_motion",
+  "selected_form": "information_motion",
+  "recommended_form": "information_motion",
+  "selection_mode": "manual",
+  "status": "ready",
+  "reason": "按指定形式制作，定稿讲稿逐字配音。",
+  "issues": [],
+  "retained_units": 56,
+  "excluded_units": 0
+ },
+ "resolved_video_form": "information_motion",
+ "attempts": [
+  {
+   "attempt_no": 1,
+   "status": "COMPLETED",
+   "started_at": "2026-11-10T15:45:15.538+00:00",
+   "completed_at": "2026-11-10T16:07:53.021+00:00",
+   "error_code": null,
+   "error_message": null,
+   "stages": [
+    {
+     "stage": "PLAN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:45:15.538+00:00",
+     "completed_at": "2026-11-10T15:45:16.000+00:00",
+     "duration_seconds": 0.0,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "VOICE_ALIGN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:45:16.003+00:00",
+     "completed_at": "2026-11-10T15:53:19.925+00:00",
+     "duration_seconds": 484.1,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "STORYBOARD",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:53:19.932+00:00",
+     "completed_at": "2026-11-10T15:57:19.238+00:00",
+     "duration_seconds": 239.11,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "SCENE_IMAGES",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T15:57:19.245+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "BUILD_IR",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:57:19.604+00:00",
+     "completed_at": "2026-11-10T15:58:26.606+00:00",
+     "duration_seconds": 66.98,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "RENDER",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T15:58:26.612+00:00",
+     "completed_at": "2026-11-10T16:06:37.878+00:00",
+     "duration_seconds": 491.36,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "QUALITY_CHECK",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T16:06:37.902+00:00",
+     "completed_at": "2026-11-10T16:07:53.021+00:00",
+     "duration_seconds": 15.11,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "PACKAGE",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-10T16:06:58.952+00:00",
+     "completed_at": "2026-11-10T16:07:52.592+00:00",
+     "duration_seconds": 17.39,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "AUDIO_MIX",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-10T16:07:35.397+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    }
+   ]
+  }
+ ]
+}

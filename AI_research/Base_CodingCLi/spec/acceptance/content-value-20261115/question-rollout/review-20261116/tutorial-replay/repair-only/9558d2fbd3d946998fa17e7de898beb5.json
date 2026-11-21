@@ -1,0 +1,13 @@
+{
+  "script_id": "9558d2fbd3d946998fa17e7de898beb5",
+  "title": "ChatGPT 本地项目挂了多个文件夹，为什么新聊天和 Codex 还是从错目录开始",
+  "packets": 16,
+  "scope": "frozen automatic inputs; event registration only",
+  "status": "failed",
+  "error_type": "SelectionError",
+  "responses": [
+    "{\"events\":[{\"title\":\"ChatGPT 本地项目挂了多个文件夹，为什么新聊天和 Codex 还是从错目录开始\",\"subject\":\"ChatGPT 桌面端 Projects 本地项目：将某个附加文件夹设为 Make primary\",\"action\":\"set_primary_folder\",\"edition\":\"\",\"event_date\":\"\",\"summary\":\"多文件夹本地项目里，用户附加了多个文件夹，但新聊天和 Codex 仍从错目录开始。共同问题不是文件夹数量，而是没有把目标文件夹设为主文件夹：在项目菜单 Edit project 中添加文件夹后，指向目标文件夹选 Make primary；新聊天会从主文件夹开始，Codex 也把该文件夹作为 Git 操作和自动发现 AGENTS.md、skills、config.toml 的默认位置。次要文件夹仍可搜索、读取、编辑，但不会自动发现这些项目文件。远程项目目前只支持一个文件夹；跨设备继续用本地文件夹需 workspace 启用 local computer access、保持电脑在线并新建 cloud task。\",\"primary\":[\"S4\"],\"background\":[\"S1\",\"S3\",\"S6\"],\"same_as\":[],\"changes\":[]}]}",
+    "{\"events\":[{\"title\":\"ChatGPT 本地项目挂了多个文件夹，为什么新聊天和 Codex 还是从错目录开始\",\"subject\":\"ChatGPT 桌面端 Projects 本地项目：将某个附加文件夹设为 Make primary\",\"action\":\"tutorial\",\"edition\":\"\",\"event_date\":\"\",\"summary\":\"多文件夹本地项目里，用户附加了多个文件夹，但新聊天和 Codex 仍从错目录开始。共同问题不是文件夹数量，而是没有把目标文件夹设为主文件夹：在项目菜单 Edit project 中添加文件夹后，指向目标文件夹选 Make primary；新聊天会从主文件夹开始，Codex 也把该文件夹作为 Git 操作和自动发现 AGENTS.md、skills、config.toml 的默认位置。次要文件夹仍可搜索、读取、编辑，但不会自动发现这些项目文件。远程项目目前只支持一个文件夹；跨设备继续用本地文件夹需 workspace 启用 local computer access、保持电脑在线并新建 cloud task。\",\"primary\":[\"S4\"],\"background\":[\"S1\",\"S3\",\"S6\"],\"same_as\":[],\"changes\":[]}]}",
+    "{\"events\":[{\"title\":\"ChatGPT 本地项目挂了多个文件夹，为什么新聊天和 Codex 还是从错目录开始\",\"subject\":\"ChatGPT 桌面端 Projects 本地项目：将某个附加文件夹设为 Make primary\",\"action\":\"configure\",\"edition\":\"\",\"event_date\":\"\",\"summary\":\"多文件夹本地项目里，用户附加了多个文件夹，但新聊天和 Codex 仍从错目录开始。共同问题不是文件夹数量，而是没有把目标文件夹设为主文件夹：在项目菜单 Edit project 中添加文件夹后，指向目标文件夹选 Make primary；新聊天会从主文件夹开始，Codex 也把该文件夹作为 Git 操作和自动发现 AGENTS.md、skills、config.toml 的默认位置。次要文件夹仍可搜索、读取、编辑，但不会自动发现这些项目文件。远程项目目前只支持一个文件夹；跨设备继续用本地文件夹需 workspace 启用 local computer access、保持电脑在线并新建 cloud task。\",\"primary\":[\"S4\"],\"background\":[\"S1\",\"S3\",\"S6\"],\"same_as\":[],\"changes\":[]}]}"
+  ]
+}

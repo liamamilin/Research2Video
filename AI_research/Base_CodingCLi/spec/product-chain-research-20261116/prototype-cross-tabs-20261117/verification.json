@@ -1,0 +1,17 @@
+{
+  "prototype_sha256": "22825b29341e64f8771f011b9439199dd7029ff7cdd3d357f2e39513caf86e67",
+  "prototype_bytes": 136700,
+  "observations": 72,
+  "text_checks": 106,
+  "failed_checks": [],
+  "formal_files_checked": 17,
+  "formal_files_changed": [],
+  "browser_errors": [],
+  "scope": "prototype only; no real generation or publishing",
+  "narrow_layout": {
+    "viewport": 320,
+    "clientWidth": 286,
+    "scrollWidth": 286,
+    "controls_overflow": []
+  }
+}

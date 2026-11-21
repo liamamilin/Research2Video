@@ -217,7 +217,8 @@ it("shows completion, watch time and early exits once the creator centre has bee
     top: [video], findings: [], suggestions: [], videos: [video] });
   show("/analytics?tab=review");
   expect(await screen.findByText("完播率中位数")).toBeTruthy();
-  expect(screen.getByText("77.5%")).toBeTruthy();
+  // the summary card and the group's「封面点击超过同类」column both show it
+  expect(screen.getAllByText("77.5%").length).toBe(2);
   expect(screen.getAllByText("66.6%").length).toBe(3);
   expect(screen.getByTitle("看了全片的 66.3%").textContent).toBe("120 秒");
   expect(screen.queryByText(/这一周还没有读到/)).toBeNull();

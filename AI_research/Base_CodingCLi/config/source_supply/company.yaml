@@ -18,15 +18,17 @@ discovery_objective: 为「商业与公司研究」寻找可持续读取的机�
 jobs:
   company/company_daily:
     mode: context
-    direction: 公司的一次具体动作怎样改变用户、伙伴和竞争者的选择
+    direction: 公司的一次具体动作怎样改变用户、伙伴和竞争者的选择；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - company business strategy product launch investor relations newsroom RSS
     - 公司 商业 动作 产品 客户 投资者关系 官方 公告
     - business company strategy case studies corporate newsroom
+    - 公司 商业模式 用户体验 工作 消费者 案例 商业动态日报
   company/company_weekly:
     mode: context
-    direction: 一笔生意怎样运转：产品、付款方、交付方与竞争位置
+    direction: 一笔生意怎样运转：产品、付款方、交付方与竞争位置；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - business model company case study customers delivery strategy publication
     - company business model engineering customer case studies blog
     - 商业模式 公司 案例 客户 价值 交付 专题
+    - 公司 商业模式 用户体验 工作 消费者 案例 公司与商业模式周观察

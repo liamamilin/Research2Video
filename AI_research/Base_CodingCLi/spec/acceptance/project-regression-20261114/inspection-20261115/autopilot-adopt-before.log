@@ -1,0 +1,74 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_held_batch_adopts_a_manual_render_without_submitting_again[RUNNING-WORKING] _
+
+pilot_env = (['adcd5512de034e108d04e4e6260dd96f'], ['0c4e4857a069421f882d190b1b101c37'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x117e3b9d0>
+render_status = 'RUNNING', expected_state = 'WORKING'
+
+    @pytest.mark.parametrize("render_status, expected_state", [("RUNNING", "WORKING"), ("COMPLETED", "DONE")])
+    def test_held_batch_adopts_a_manual_render_without_submitting_again(pilot_env, monkeypatch, render_status, expected_state):
+        run = batch(monkeypatch, 1)
+        pilot.tick()
+        item = item_of(run["id"], 0)
+        draft(item["script_id"])
+        pilot.tick()
+        pilot.tick()
+        render = store.list_renders(item["script_id"])[0]
+        store.update_render(render["id"], status=render_status)
+        ap.update_item(item["id"], state="HELD", render_id=None, note="此前等待定稿")
+        ap.update_run(run["id"], status="DONE")
+
+        pilot.tick()
+
+        assert len(store.list_renders(item["script_id"])) == 1
+        current = item_of(run["id"], 0)
+>       assert current["state"] == expected_state
+E       AssertionError: assert 'HELD' == 'WORKING'
+E
+E         - WORKING
+E         + HELD
+
+tests/test_video_autopilot.py:673: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  ai_research.web.video:video_render.py:177 script adcd5512de034e108d04e4e6260dd96f: no readable report, so no source card
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-418/test_held_batch_adopts_a_manua0/config/system.yaml, using defaults
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-418/test_held_batch_adopts_a_manua0/config/system.yaml, using defaults
+_ test_held_batch_adopts_a_manual_render_without_submitting_again[COMPLETED-DONE] _
+
+pilot_env = (['0ba6097a98d5417987b189859b289397'], ['c2585285dc9143dbbaefba4d7dcdcf58'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x117ed79d0>
+render_status = 'COMPLETED', expected_state = 'DONE'
+
+    @pytest.mark.parametrize("render_status, expected_state", [("RUNNING", "WORKING"), ("COMPLETED", "DONE")])
+    def test_held_batch_adopts_a_manual_render_without_submitting_again(pilot_env, monkeypatch, render_status, expected_state):
+        run = batch(monkeypatch, 1)
+        pilot.tick()
+        item = item_of(run["id"], 0)
+        draft(item["script_id"])
+        pilot.tick()
+        pilot.tick()
+        render = store.list_renders(item["script_id"])[0]
+        store.update_render(render["id"], status=render_status)
+        ap.update_item(item["id"], state="HELD", render_id=None, note="此前等待定稿")
+        ap.update_run(run["id"], status="DONE")
+
+        pilot.tick()
+
+        assert len(store.list_renders(item["script_id"])) == 1
+        current = item_of(run["id"], 0)
+>       assert current["state"] == expected_state
+E       AssertionError: assert 'HELD' == 'DONE'
+E
+E         - DONE
+E         + HELD
+
+tests/test_video_autopilot.py:673: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  ai_research.web.video:video_render.py:177 script 0ba6097a98d5417987b189859b289397: no readable report, so no source card
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-418/test_held_batch_adopts_a_manua1/config/system.yaml, using defaults
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-418/test_held_batch_adopts_a_manua1/config/system.yaml, using defaults
+=========================== short test summary info ============================
+FAILED tests/test_video_autopilot.py::test_held_batch_adopts_a_manual_render_without_submitting_again[RUNNING-WORKING]
+FAILED tests/test_video_autopilot.py::test_held_batch_adopts_a_manual_render_without_submitting_again[COMPLETED-DONE]
+2 failed, 56 deselected in 1.84s

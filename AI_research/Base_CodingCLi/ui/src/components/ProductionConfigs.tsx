@@ -7,6 +7,7 @@ import {
   type PendingItem, type ProductionConfig, type WholeReport,
 } from "@/api/production";
 import { listVideoCells, type VideoCell } from "@/api/video";
+import { useChainScope } from "@/lib/use-chain-scope";
 import { errorMessage, useToast } from "@/lib/toast";
 
 /** 整份报告的配置：这个 Job 最近的几份报告，每份写成一期视频；写过的标出来。报告就是调研，不再搜索。 */
@@ -220,9 +221,11 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
  *  只给一个 Job 时就是那个 Job 自己的页面：不再问「给哪个 Job」，也不再重复写 Job 名。 */
 export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[]; canEdit: boolean }) {
   const toast = useToast();
+  const chainScope = useChainScope();
+  const scopedMembers = members.filter((m) => chainScope.job(m.job));
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
-  const only = members.length === 1 && members[0].exists ? members[0].job : ""; // 页面就是这一个 Job 的
+  const only = scopedMembers.length === 1 && scopedMembers[0].exists ? scopedMembers[0].job : ""; // 页面就是这一个 Job 的
   const [job, setJob] = useState(only);
   const [recipe, setRecipe] = useState(""); // 配方文件名
   const [audience, setAudience] = useState("");
@@ -235,15 +238,17 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
     if (canEdit) listVideoCells().then(setCells).catch(() => setCells([]));
   }, [canEdit]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => { if (only) setJob(only); }, [only]);
+  if (chainScope.key && (chainScope.loading || chainScope.error)) return <p role="status" className="text-xs text-text-muted">{chainScope.error || "正在读取链路范围…"}</p>;
   if (!configs) return null;
-  const jobs = new Set(members.map((m) => m.job));
+  const jobs = new Set(scopedMembers.map((m) => m.job));
   // 同一个 Job 下按名字排，快讯、盘点、一个知识点各自挨在一起
-  const mine = configs.filter((c) => jobs.has(c.job)).sort((a, b) => a.name.localeCompare(b.name, "zh"));
-  const whole = members.length - members.filter((m) => m.topics).length;
-  const sources = members.filter((m) => m.topics);
-  const single = members.length === 1;
+  const mine = configs.filter((c) => jobs.has(c.job) && chainScope.output(c.key)).sort((a, b) => a.name.localeCompare(b.name, "zh"));
+  const whole = scopedMembers.length - scopedMembers.filter((m) => m.topics).length;
+  const sources = scopedMembers.filter((m) => m.topics);
+  const single = scopedMembers.length === 1;
   // 报告不是条目清单的 Job（只有它自己的页面才挂）：每份新报告写成一期
-  const wholes = single ? members.filter((m) => !m.topics && m.exists) : [];
+  const wholes = single ? scopedMembers.filter((m) => !m.topics && m.exists) : [];
   const pickable = [...sources, ...wholes];
   const isWhole = wholes.some((m) => m.job === job);
   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
@@ -277,7 +282,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
               own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!m.schedule} onChange={load} />)
             ) : (
               <p className="text-xs text-text-muted">
-                {m.topics ? "这个 Job 还没配视频，报告只存着，不会写稿。" : "这个 Job 的报告是整份的，还没配视频：配一套，每份新报告就能写成一期。"}
+                {chainScope.key ? "本链路尚未配置视频输出，可在下方添加。" : m.topics ? "这个 Job 还没配视频，报告只存着，不会写稿。" : "这个 Job 的报告是整份的，还没配视频：配一套，每份新报告就能写成一期。"}
               </p>
             )}
           </div>
@@ -290,7 +295,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
         </p>
       ) : null}
       {mine.filter((c) => !pickable.some((m) => m.job === c.job)).map((c) => (
-        <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!members.find((m) => m.job === c.job)?.schedule} onChange={load} />
+        <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!scopedMembers.find((m) => m.job === c.job)?.schedule} onChange={load} />
       ))}
       {canEdit && pickable.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
@@ -355,7 +360,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             disabled={!job || !recipe}
             onClick={async () => {
               try {
-                await addProduction({ job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined, reverify: canSkip && !researchAgain ? false : undefined });
+                await addProduction({ ...(chainScope.key ? {chain_key: chainScope.key} : {}), job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined, reverify: canSkip && !researchAgain ? false : undefined });
                 setJob(only);
                 setRecipe("");
                 setAudience("");

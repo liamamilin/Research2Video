@@ -269,7 +269,11 @@ def test_prompt_renders_upstream_into_the_job_template(round_dir):
     assert upstream
     engine = ResearchEngine(config_dir="config", jobs_dir="jobs",
                             workspace_dir=".", prompt_vars={"upstream_reports": upstream})
-    job = load_job("jobs", "practical_ai_intelligence/07_product_content_opportunities")
+    from pathlib import Path
+    import yaml as _yaml
+    archived = Path("jobs/archive/practical_ai_intelligence/07_product_content_opportunities.yaml")
+    job = _yaml.safe_load(archived.read_text(encoding="utf-8"))
+    job["_file"] = "practical_ai_intelligence/07_product_content_opportunities"
     prompt = engine._build_prompt(job)
     assert "{upstream_reports}" not in prompt, "placeholder was not substituted"
     assert "01_model_and_pricing_radar.md" in prompt
@@ -284,11 +288,13 @@ def test_caller_vars_override_built_in_ones():
 
 def test_the_three_synthesis_jobs_declare_the_placeholder():
     """Otherwise the injection is collected and then thrown away."""
-    from core.config import load_job
+    from pathlib import Path
+    import yaml as _yaml
     for name in ("07_product_content_opportunities",
                  "08_risk_and_alternatives",
                  "09_executive_synthesis_and_actions"):
-        job = load_job("jobs", f"practical_ai_intelligence/{name}")
+        path = Path("jobs/archive/practical_ai_intelligence") / f"{name}.yaml"
+        job = _yaml.safe_load(path.read_text(encoding="utf-8"))
         assert "{upstream_reports}" in job["prompt"], name
 
 

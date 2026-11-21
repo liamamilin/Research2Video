@@ -11,9 +11,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-PROMPT_VERSION = 3
-#: "不是 A，而是 B" is a fine turn of phrase once or twice an episode; past this it becomes a tic.
-CONTRAST_ALLOWED = 2
+from . import persona
+from .narration_stance import LISTENING_DIRECTION, defects as stance_defects, launders, note, settle_sections
+
+PROMPT_VERSION = 8
 
 #: A production note to the video maker said as narration ("视频里应该说清楚", "素材只有一句描述").
 _PRODUCTION_NOTE = re.compile(
@@ -32,25 +33,37 @@ _STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价�
 _STOCK_BRIDGE = re.compile(r"如果说[^。！？]{2,40}?[，,]\s*那么|接下来(?:这|的这)(?:一)?条|下面这(?:一)?条")
 #: A hedge said like a disclaimer ("以你实际界面为准", "不是效果承诺", "我们不做猜测").
 _HEDGE = re.compile(r"以(?:你的?)?实际(?:界面|页面|情况|账单)?(?:显示)?为准|不是效果承诺|(?:我们)?不(?:做|作)(?:任何)?猜测")
-_CONTRAST = re.compile(r"不是[^。！？；\n]{1,30}?[，,]\s*(?:而)?是")
+#: A multi-word English phrase/sentence left verbatim in Chinese TTS narration (4+ English words).
+#: Matches natural prose/UI strings like "Claude far outpaced me near the finish line" or "Include your audio recordings",
+#: while skipping URLs, CLI flags/paths, and short proper nouns.
+_ENGLISH_PHRASE = re.compile(r"(?<![A-Za-z0-9_/.:-])(?:[A-Za-z]{2,}(?:'[A-Za-z]+)?(?:\s+[A-Za-z]{2,}(?:'[A-Za-z]+)?){3,})(?![A-Za-z0-9_/.:-])")
+#: Common English function words that indicate a natural sentence/UI clause rather than a pure brand/title stack.
+_ENGLISH_CLAUSE_WORDS = frozenset({
+    "the", "a", "an", "to", "of", "for", "in", "on", "with", "your", "my", "me", "we", "you", "it",
+    "is", "are", "was", "were", "be", "been", "have", "has", "had", "can", "will", "would", "should",
+    "and", "or", "but", "not", "no", "from", "by", "at", "as", "that", "this", "these", "those",
+    "when", "why", "how", "what", "near", "after", "before", "into", "out", "now", "all", "everyone",
+})
 #: The closing's goodbye; a rewrite of that paragraph must still say it.
 _SIGN_OFF = re.compile(r"[^。！？]*(?:下期见|感谢收看|感谢观看|再见)[^。！？]*[。！？]?")
 
 RULES = {
     "production_note": "制作说明混进了口播，观众听到的是写给剪辑的话",
     "stock_ending": "用固定句式收尾，各条听起来一个模子",
-    "contrast_overuse": "「不是……而是……」在本期用得太多，变成口头禅",
     "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
     "hedge": "像免责声明一样的套话，观众听着生硬",
+    "audience_stance": "把研究备忘或自我免责说给了观众；留下已经成立的事实，不要补范围套话",
+    "english_phrase": "中文口播里夹了整段英文短语或原句，中文配音听感割裂",
 }
 
 SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+""" + LISTENING_DIRECTION + """
 当前步骤：润色口播稿中被指出问题的段落。
-只改列出的段落，每段改成一段，意思、事实、数字、名称和条件保持不变，只换说法。
+只改列出的段落，留住听众用得上的事实、数字、名字和条件。重复或无关的细节可以收掉。
 制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成一句贴合本段内容的短判断；
 硬造的过渡句改成直接进入本条（比如“再说 Gemini。”），或用一句话说出两条真实的关系；免责套话删去，必要的前提用半句话自然带过；
-「不是……而是……」改为直接说出肯定的那一半，被否定的一半不必要就删去，不换成「……反而没那么重要」「……倒在其次」之类的新套话。
-保持段落与前后文的衔接，不加新内容，不打招呼；段落里原有的道别句原样保留。
+英文原句或英文界面长短语改写成自然流畅的中文口播（必要的产品名、模型名和极短专有词可以保留）；
+只处理指出的问题，保留作者作比较的对象、取舍和结论范围。保持段落与前后文的衔接，不加新内容；保留原有的开场钩子、问候、自我介绍和话题衔接，也保留原有的道别句。
 输出 JSON：{"paragraphs":[{"id":"S1P2","text":"改好的口播"}]}"""
 
 
@@ -73,7 +86,6 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
     The fixed greeting is the program's own line and is never flagged.
     """
     found = []
-    contrasts = 0
     for si, section in enumerate(sections):
         item = section.get("episode_role", "item") == "item"
         for pi, paragraph in enumerate(section.get("paragraphs", [])):
@@ -85,10 +97,11 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
                 hits += [("stock_ending", m.group()) for m in _STOCK_ENDING.finditer(text)]
                 hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
             hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
-            for match in _CONTRAST.finditer(text):
-                contrasts += 1
-                if contrasts > CONTRAST_ALLOWED:
-                    hits.append(("contrast_overuse", match.group()))
+            hits += [("audience_stance", item["quote"]) for item in stance_defects(text)]
+            for m in _ENGLISH_PHRASE.finditer(text):
+                words = m.group().split()
+                if len(words) >= 5 or any(w.lower() in _ENGLISH_CLAUSE_WORDS for w in words):
+                    hits.append(("english_phrase", m.group()))
             found += [{"id": pid(si, pi), "section": si, "paragraph": pi, "rule": rule, "quote": quote,
                        "problem": RULES[rule]} for rule, quote in hits]
     return found
@@ -107,10 +120,37 @@ def _script_text(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def _fallback(sections: list[dict], record: dict) -> list[dict]:
+    settled, stance = settle_sections(sections)
+    if stance.get("kept_original"):
+        record["unresolved"] = stance["unresolved"]
+        if stance.get("blocks_auto_approval"):
+            record["blocks_auto_approval"] = True
+        return sections
+    for change in stance["changes"]:
+        section = sections[change["section"]]
+        record["changes"].append({
+            "id": pid(change["section"], change["paragraph"]),
+            "where": f"{section['title']} · 第 {change['paragraph'] + 1} 段",
+            "rules": ["audience_stance"], "before": change["before"], "after": change["after"],
+            "fallback": True,
+        })
+    record["gaps"] = list(record.get("gaps") or []) + stance["gaps"]
+    record["unresolved"] = list(record.get("unresolved") or []) + stance["unresolved"]
+    if stance.get("blocks_auto_approval"):
+        record["blocks_auto_approval"] = True
+    return settled
+
+
 def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[dict], dict]:
-    """(sections, record). With nothing found no model call is made; any failure keeps the draft as it was."""
+    """(sections, record). With nothing found no model call is made.
+
+    Section-level number checks stay. A rewrite that still reads a memo, or that
+    leaves 「第二，而……」, is rejected and falls back to dropping the memo
+    without inventing a claim.
+    """
     found = findings(sections, greeting=greeting)
-    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": []}
+    record: dict = {"version": PROMPT_VERSION, "findings": found, "changes": [], "rejected": [], "gaps": []}
     if not found:
         return sections, record
     targets: dict[str, list[dict]] = {}
@@ -124,27 +164,53 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         reply = call_json(client, SYSTEM_PROMPT, request, _Reply, temperature=0.4)
     except Exception as exc:  # noqa: BLE001 - polishing is optional; a failed call never costs the draft
         record["error"] = f"{type(exc).__name__}: {exc}"[:500]
+        if any(item["rule"] == "audience_stance" for item in found):
+            settled = _fallback(sections, record)
+            record["remaining"] = findings(settled, greeting=greeting)
+            return settled, record
         return sections, record
     out = json.loads(json.dumps(sections))
+    narrator = persona.load()
+    opening = out[0]["paragraphs"]
+    preserve_intro = not persona.opening_needs_introduction(opening, narrator, fixed_greeting=greeting)
     where = {f["id"]: (f["section"], f["paragraph"]) for f in found}
+    section_numbers = [_numbers("\n".join(p["text"] for p in s["paragraphs"])) for s in sections]
     for rewrite in reply.paragraphs:
         if rewrite.id not in targets:
             continue
         si, pi = where[rewrite.id]
         before = out[si]["paragraphs"][pi]["text"]
         after = rewrite.text.strip()
+        if pi:
+            # A replacement can echo the preceding paragraph as context.
+            # Keep it in its existing place instead of reading it twice.
+            previous = out[si]["paragraphs"][pi - 1]["text"].strip()
+            if previous and after.startswith(previous) and not before.startswith(previous):
+                after = after[len(previous):].lstrip() or after
         goodbye = "".join(m.group() for m in _SIGN_OFF.finditer(before)).strip()
         if goodbye and not _SIGN_OFF.search(after):
             after = after.rstrip() + goodbye
         if after == before:
             continue
-        if _numbers(after) != _numbers(before):
+        stance = any(item["rule"] == "audience_stance" for item in targets[rewrite.id])
+        if _numbers(after) - section_numbers[si] and not (stance and _numbers(after) <= _numbers(before)):
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
             continue
+        reason = launders(before, after) if stance else ""
+        if reason or stance_defects(after):
+            record["rejected"].append({"id": rewrite.id, "reason": reason or "改写仍在念备忘或残句", "text": after})
+            continue
+        if si == 0 and preserve_intro:
+            candidate = [*opening[:pi], {**opening[pi], "text": after}, *opening[pi + 1:]]
+            if persona.opening_needs_introduction(candidate, narrator, fixed_greeting=greeting):
+                record["rejected"].append({"id": rewrite.id, "reason": "改写打断了开场自我介绍", "text": after})
+                continue
         out[si]["paragraphs"][pi]["text"] = after
         record["changes"].append({"id": rewrite.id, "where": f"{out[si]['title']} · 第 {pi + 1} 段",
                                   "rules": sorted({f["rule"] for f in targets[rewrite.id]}),
                                   "before": before, "after": after})
+    if any(item["rule"] == "audience_stance" for item in findings(out, greeting=greeting)):
+        out = _fallback(out, record)
     record["remaining"] = findings(out, greeting=greeting)
     return out, record
 
@@ -166,6 +232,7 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
             span["status"] = "failed"
     record["usage"] = dict(client.usage)
     written.meta["polish"] = record
+    note(written.meta, record)
     if not record["changes"]:
         return
     written.sections = sections

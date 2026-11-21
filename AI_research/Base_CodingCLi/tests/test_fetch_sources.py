@@ -123,7 +123,7 @@ def test_a_fetch_only_run_never_searches_and_credits_the_fetched_urls(monkeypatc
 
     monkeypatch.setattr(agent.llm, "chat", chat)
     out = agent.run_fetch_only("task https://in-prompt.test/x", fetched_urls=["https://a.test"], stats={"tldr:ai": 12})
-    assert out == "# report" and seen["tools"] is None and "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。" in seen["system"]
+    assert out == "# report" and seen["tools"] is None and "根据素材写研究报告" in seen["system"]
     assert {"https://a.test", "https://in-prompt.test/x"} <= agent.retrieved_urls
     assert agent.get_usage()["fetched"] == {"tldr:ai": 12} and agent.get_usage()["searches"] == 0
     with pytest.raises(RuntimeError, match="switched off"):

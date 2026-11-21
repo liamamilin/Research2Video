@@ -6,7 +6,7 @@ import json
 import pytest
 from starlette.responses import JSONResponse, Response, StreamingResponse
 
-from web.list_compression import ListCompressionMiddleware
+from web.list_compression import LIST_PATHS, ListCompressionMiddleware
 
 
 def exchange(path='/api/video/scripts', *, encoding='gzip', method='GET', headers=(), response=None):
@@ -30,7 +30,7 @@ def exchange(path='/api/video/scripts', *, encoding='gzip', method='GET', header
     return dict(start['headers']), b''.join(m.get('body', b'') for m in messages if m['type'] == 'http.response.body'), body, messages
 
 
-@pytest.mark.parametrize('path', ['/api/video/scripts', '/api/video/shipments', '/api/video/autopilot'])
+@pytest.mark.parametrize('path', sorted(LIST_PATHS))
 def test_lists_negotiate_gzip_without_dropping_rows_or_versions(path):
     headers, wire, original, _ = exchange(path)
     assert headers[b'content-encoding'] == b'gzip'

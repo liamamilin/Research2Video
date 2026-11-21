@@ -1,0 +1,11 @@
+{
+  "new_test_cases": 11,
+  "failure_reproductions_before_fix": 10,
+  "research_passed": 146,
+  "video_passed": 253,
+  "total_passed": 399,
+  "production_restarted": false,
+  "production_jobs_modified": false,
+  "deployment": "workspace; resident processes need a later safe restart",
+  "research_warnings": 2
+}

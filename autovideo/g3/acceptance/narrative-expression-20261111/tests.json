@@ -1,0 +1,7 @@
+{
+  "command": "python3 -m pytest tests g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q",
+  "passed": 1087,
+  "skipped": 1,
+  "seconds": 49.79,
+  "scope": "final comparison-only production change"
+}

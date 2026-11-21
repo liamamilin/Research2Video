@@ -1,3 +1,5 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Activity, ArrowUpRight, CheckCircle2, ChevronRight, ClipboardCheck, Layers, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
@@ -59,7 +61,8 @@ function VideoRow({ item }: { item: BoardItem }) {
 }
 
 export function HomeBoardPage() {
-  const [board, setBoard] = useState<VideoBoard | null>(null);
+  const chainScope=useChainScope();
+  const [board, setBoard] = useState<VideoBoard | null>(() => readPageSnapshot("video-board"));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [limit, setLimit] = useState(PAGE);
@@ -75,25 +78,30 @@ export function HomeBoardPage() {
   const load = useCallback(async () => {
     if (flight.current) return;
     const controller = new AbortController();
+    const revision = snapshotRevision();
     flight.current = controller;
     setLoading(true);
     try {
       const next = await getVideoBoard(controller.signal);
       if (!Array.isArray(next?.items)) throw new Error("看板数据尚未就绪，请稍后刷新");
-      if (!controller.signal.aborted) { setBoard(next); setError(""); }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { savePageSnapshot("video-board", next, revision); setBoard(next); setError(""); }
     } catch (e) {
-      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "读取失败");
+      if (!controller.signal.aborted && revision === snapshotRevision()) setError(e instanceof Error ? e.message : "读取失败");
     } finally {
-      if (flight.current === controller) { flight.current = null; setLoading(false); }
+      if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); }
     }
   }, []);
+  const hasWorking = Boolean(board?.items?.some((i) => i.group === "working"));
   useEffect(() => {
-    load();
-    const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, 15000);
-    document.addEventListener("visibilitychange", refresh);
-    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); flight.current?.abort(); flight.current = null; };
+    void load();
+    return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, hasWorking ? 15000 : 60000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, [load, hasWorking]);
   useEffect(() => setLimit(PAGE), [matrix, view, q, column, tier, range]);
 
   const set = (key: string, value: string) => setParams((previous) => {
@@ -120,7 +128,7 @@ export function HomeBoardPage() {
     return [...names].map(([key, name]) => ({ key, name, count: items.filter((i) => (i.matrix || INDEPENDENT) === key).length }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
   }, [board, items]);
-  const scope = items.filter((i) => !matrix || (i.matrix || INDEPENDENT) === matrix);
+  const scope = items.filter((i) => chainScope.script(i.script_id) && (!matrix || (i.matrix || INDEPENDENT) === matrix));
   const scopeName = matrix === INDEPENDENT ? "独立视频" : matrix ? matrices.find((m) => m.key === matrix)?.name ?? "该矩阵" : "全部矩阵";
   const counts = { todo: scope.filter((i) => i.group === "todo").length, publish: scope.filter((i) => i.group === "publish").length,
     working: scope.filter((i) => i.group === "working").length, all: scope.length };

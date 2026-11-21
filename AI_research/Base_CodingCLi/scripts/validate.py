@@ -57,6 +57,9 @@ def check_jobs(jobs_dir: str = "jobs") -> bool:
             if "keywords" in job and (not isinstance(job["keywords"], list) or
                                       any(not isinstance(word, str) for word in job["keywords"])):
                 issues.append("'keywords' must be a list of strings")
+            from core.knowledge_job import problem as knowledge_problem
+            if issue := knowledge_problem(job):
+                issues.append(issue)
 
             if issues:
                 errors.append(f"{name}: {', '.join(issues)}")

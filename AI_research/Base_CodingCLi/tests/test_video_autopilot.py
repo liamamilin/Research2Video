@@ -39,7 +39,7 @@ def topic(n: int) -> dict:
 
 def batch(monkeypatch, n=3, column="flash") -> dict:
     items = [{"column_key": column, "topic": topic(i)} for i in range(1, n + 1)]
-    monkeypatch.setattr(pilot, "pick_topics", lambda spec: items)
+    monkeypatch.setattr(pilot, "pick_topics", lambda spec, notes=None: items)
     return pilot.start_run({"picks": [{"column": column, "count": n, "source": "flash"}], "refresh": False})
 
 
@@ -611,6 +611,89 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
 
 
+def test_old_completed_video_does_not_block_a_new_approved_version(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    script_id = item["script_id"]
+    draft(script_id)
+    pilot.tick()
+    pilot.tick()
+    old = store.list_renders(script_id)[0]
+    store.update_render(old["id"], status="COMPLETED")
+    draft(script_id)
+    store.update_script(script_id, status="APPROVED", approved_version=2)
+    ap.update_item(item["id"], state="HELD", note="等待新版定稿")
+    ap.update_run(run["id"], status="DONE")
+
+    pilot.tick()
+
+    renders = store.list_renders(script_id)
+    assert {r["version"] for r in renders} == {1, 2}
+    assert store.get_render(old["id"])["status"] == "COMPLETED"
+    assert item_of(run["id"], 0)["state"] == "WORKING"
+
+
+def test_approved_hold_older_than_the_first_fifty_is_resumed(pilot_env):
+    run = ap.create_run({}, [{"column_key": "flash", "topic": topic(i)} for i in range(51)])
+    for item in run["items"]:
+        ap.update_item(item["id"], state="HELD", note="等待处理")
+    oldest = run["items"][0]
+    script = store.create_script("flash", oldest["topic"])
+    draft(script["id"])
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    ap.update_item(oldest["id"], script_id=script["id"])
+    with store.connect(write=True) as db:
+        db.execute("UPDATE autopilot_items SET updated_at=? WHERE id=?",
+                   ("2000-01-01T00:00:00+0800", oldest["id"]))
+    ap.update_run(run["id"], status="DONE")
+
+    assert pilot.reopen_approved() == 1
+    assert item_of(run["id"], 0)["state"] == "WORKING"
+    assert ap.get_run(run["id"])["status"] == "RUNNING"
+
+
+def test_failed_render_hold_is_left_to_retry_instead_of_reopened_every_tick(pilot_env, monkeypatch):
+    # 11-15: reopening an approved script held for failed renders re-held it on the next step, every tick.
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    draft(item["script_id"])
+    pilot.tick()
+    pilot.tick()
+    render = store.list_renders(item["script_id"])[0]
+    store.update_render(render["id"], status="FAILED", error_message="caption-forced-alignment exited 1")
+    ap.update_item(item["id"], state="HELD", note="出片失败 3 次：caption-forced-alignment exited 1")
+    ap.update_run(run["id"], status="DONE")
+
+    assert pilot.reopen_approved() == 0
+    assert item_of(run["id"], 0)["state"] == "HELD" and ap.get_run(run["id"])["status"] == "DONE"
+
+    store.update_render(render["id"], status="COMPLETED")  # rendered again by hand: adopt it
+    assert pilot.reopen_approved() == 1
+
+
+@pytest.mark.parametrize("render_status, expected_state", [("RUNNING", "WORKING"), ("COMPLETED", "DONE")])
+def test_held_batch_adopts_a_manual_render_without_submitting_again(pilot_env, monkeypatch, render_status, expected_state):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    draft(item["script_id"])
+    pilot.tick()
+    pilot.tick()
+    render = store.list_renders(item["script_id"])[0]
+    store.update_render(render["id"], status=render_status)
+    ap.update_item(item["id"], state="HELD", render_id=None, note="此前等待定稿")
+    ap.update_run(run["id"], status="DONE")
+
+    pilot.tick()
+
+    assert len(store.list_renders(item["script_id"])) == 1
+    current = item_of(run["id"], 0)
+    assert current["state"] == expected_state
+    assert current["render_id"] == render["id"]
+
+
 @pytest.mark.parametrize("code", ["SUBMIT_UNCONFIRMED", "DOWNLOAD_FAILED"])
 def test_uncertain_submissions_and_completed_copies_are_not_generated_again(pilot_env, monkeypatch, code):
     run = batch(monkeypatch, 1)
@@ -970,6 +1053,27 @@ def test_while_search_is_down_scripts_wait_instead_of_failing_and_keep_their_ret
     pilot.tick()
     assert spawned.count(script_id) == pilot.MAX_RETRIES + 3  # no try while it is still down
     assert item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+
+def test_report_backed_tutorial_can_write_and_retry_while_search_is_down(pilot_env, monkeypatch, search_health_dir):
+    spawned, _ = pilot_env
+    search_health_dir.record_failures({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    search_health_dir.record_outage({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    tutorial = {**topic(1), "from_report": "output/tutorial.md", "from_item": "tutorial-1"}
+    monkeypatch.setattr(pilot, "pick_topics", lambda *_: [
+        {"column_key": "flash", "topic": tutorial},
+        {"column_key": "flash", "topic": topic(2)},
+    ])
+    run = pilot.start_run({"picks": [{"column": "flash"}], "refresh": False})
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    assert script_id and spawned == [script_id]
+    assert item_of(run["id"], 1)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+    store.update_script(script_id, status="FAILED", error="模型返回格式错误")
+    pilot.tick()
+    assert spawned == [script_id, script_id]
+    assert item_of(run["id"], 0)["retries"]["script"] == 1
 
 
 def test_items_held_by_a_search_outage_can_be_released_once(pilot_env, monkeypatch, search_health_dir):

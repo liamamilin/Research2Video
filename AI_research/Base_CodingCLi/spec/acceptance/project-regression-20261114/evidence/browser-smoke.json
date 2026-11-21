@@ -1,0 +1,27 @@
+{
+  "method": "CUA browser, read-only",
+  "research": {
+    "url": "http://127.0.0.1:8775/login",
+    "login_form_rendered": true,
+    "authenticated_pages_checked": false,
+    "console_errors": []
+  },
+  "autovideo": {
+    "pages": [
+      "new",
+      "resources",
+      "jobs",
+      "job/5773e389-7929-48d2-b869-0c6a863dee61"
+    ],
+    "job_count_observed": 584,
+    "completed_count_observed": 519,
+    "console_errors": [],
+    "video": {
+      "readyState": 4,
+      "duration": 318.1,
+      "width": 1920,
+      "height": 1080,
+      "error": null
+    }
+  }
+}

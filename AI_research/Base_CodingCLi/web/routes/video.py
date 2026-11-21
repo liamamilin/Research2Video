@@ -596,7 +596,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer), compact: bool = False) -> list[dict]:
     published = store.published_versions_by_script()
     renders = store.render_statuses_by_script()
-    scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+    scripts = (store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+               if archived else store.list_scripts(limit=100000))
     paths = get_settings().paths
     owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, scripts)
     scripts = sorted((s for s in scripts if bool(s.get("archived") or owners[s["id"]]["matrix_archived"]) == archived),
@@ -655,6 +656,8 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
     column = _known_columns().get(script["column_key"])
     if current is not None and column is not None:
         current = {**current, "checks": video_workflow.rule_checks(current, column)}
+    renders = store.list_renders(script_id)
+    latest_version = current if shown == script["current_version"] else None
     return {
         **script,
         "selection_skip": topic_progress.selection_skips([script]).get(script_id),
@@ -664,13 +667,13 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "configuration": context(script, current, get_settings().paths.config_dir, get_settings().paths.jobs_dir),
         "version_shown": current,
         "versions": store.list_versions(script_id),
-        "renders": [_render_out(r) for r in store.list_renders(script_id)],
+        "renders": [_render_out(r) for r in renders],
         "publications": store.list_publications(script_id),
         "platform_uploads": platform_manager.script_uploads(script_id),
         "distributions": distributions.overview([script])[script_id],
         "rechecks": store.list_rechecks(script_id)[:5],
         # research → write → audit → approve → render, read off the records above; and who started what
-        "steps": video_executor.steps_of(script),
+        "steps": video_executor.steps_of(script, version=latest_version, renders=renders, column=column),
         "events": video_steps.events(script_id),
         # the plan waiting for the user, when the recipe pauses after the plan (writing.pause_after_plan)
         "pending_plan": _plan_out(video_plans.pending(script_id)) if script["status"] == "PLAN_READY" else None,

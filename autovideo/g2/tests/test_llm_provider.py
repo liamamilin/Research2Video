@@ -118,6 +118,8 @@ def test_deepseek_still_asks_for_thinking(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("status, suffix", [(401, "AUTH_FAILED"), (402, "HTTP_ERROR"), (429, "RATE_LIMIT")])
 def test_http_failures_are_named_after_the_provider_in_use(monkeypatch, tmp_path, status, suffix):
+    monkeypatch.setattr(g2.time, "sleep", lambda _: None)  # a 429 waits before giving up
+
     def urlopen(request, timeout=None):
         raise urllib.error.HTTPError(request.full_url, status, "x", {}, io.BytesIO(b"{}"))
 
@@ -282,6 +284,55 @@ def test_a_fallback_service_without_a_key_is_left_out_and_bad_entries_are_refuse
     assert loaded.fallback_providers == ("open-design:deepseek-v4.1-flash", "deepseek:deepseek-flash")
 
 
+@pytest.mark.parametrize("primary,secondary", [("opendesign", "opencode"), ("opencode", "opendesign")])
+def test_provider_switch_and_chapter_planning_keep_the_fixed_budget(monkeypatch, tmp_path, primary, secondary):
+    from g2 import authored_script
+
+    requests = []
+
+    def urlopen(request, timeout=None):
+        requests.append(request.full_url)
+        if len(requests) == 1:
+            raise urllib.error.HTTPError(request.full_url, 402, "Unavailable", {}, None)
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'}}],
+                                 "usage": {"prompt_tokens": 100, "completion_tokens": 50}}).encode())
+
+    provider = lp.replace(lp.PRESETS[primary], fallback_providers=(f"{secondary}:fallback",))
+    monkeypatch.setattr(g2, "MAX_PROJECTED_API_COST_USD", 20.0)
+    assert _call(monkeypatch, tmp_path, provider, urlopen,
+                 {"OPENDESIGN_API_KEY": "test", "OPENCODE_API_KEY": "test"}) == {"ok": True}
+    assert g2.PROVIDER.name == secondary
+    monkeypatch.setattr(g2, "ARTIFACTS", tmp_path / "artifacts")
+    monkeypatch.setattr(g2, "MAX_TOTAL_CALLS", g2.MAX_TOTAL_CALLS)
+    monkeypatch.setattr(g2, "write_fact_ledger", lambda *args: None)
+    source = "先说明目标，再解释具体步骤。"
+    monkeypatch.setattr(authored_script, "load_script", lambda *args: (
+        "步骤", [{"title": "步骤", "paragraphs": [source]}], "narration_create"))
+    authored_script.plan(g2, source)
+    assert g2.MAX_PROJECTED_API_COST_USD == 20.0
+    # A previous attempt's estimate may exceed any old per-video budget.
+    g2.CALL_RECORDS[0]["peak_uncached_cost_upper_bound_usd"] = 2.0
+    assert g2.deepseek_json_call("c1-explanation", [], {}, 1) == {"ok": True}
+    g2.write_call_summary()
+    summary = json.loads((g2.ARTIFACTS / "model-cost.json").read_text())
+    assert summary["configured_worst_case_budget_usd"] == 20.0
+    assert summary["peak_uncached_cost_upper_bound_usd"] >= 2.0
+    assert len(summary["calls"]) == 3
+
+
+def test_successful_response_still_enforces_the_fixed_cost_limit(monkeypatch, tmp_path):
+    monkeypatch.setattr(g2, "MAX_PROJECTED_API_COST_USD", 0.01)
+
+    def urlopen(request, timeout=None):
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'}}],
+                                 "usage": {"prompt_tokens": 1000000, "completion_tokens": 100}}).encode())
+
+    with pytest.raises(g2.G2Fault, match="per-video cap") as exc:
+        _call(monkeypatch, tmp_path, lp.PRESETS["deepseek"], urlopen)
+    assert exc.value.code == "MODEL_COST_BUDGET_EXCEEDED"
+    assert g2.CALL_RECORDS[-1]["peak_uncached_cost_upper_bound_usd"] > 0.01
+
+
 def test_transport_retries_respect_the_shared_call_budget(monkeypatch, tmp_path):
     delays = []
     monkeypatch.setattr(g2, "MAX_TOTAL_CALLS", 1)
@@ -295,7 +346,7 @@ def test_transport_retries_respect_the_shared_call_budget(monkeypatch, tmp_path)
     assert len(g2.CALL_RECORDS) == 1 and delays == []
 
 
-@pytest.mark.parametrize("status", [400, 401, 402, 403, 429])
+@pytest.mark.parametrize("status", [400, 401, 402, 403])
 def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypatch, tmp_path, status):
     sent = []
     monkeypatch.setattr(g2.time, "sleep", lambda _: pytest.fail("client errors must not wait and retry"))
@@ -307,6 +358,38 @@ def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypat
     with pytest.raises(g2.G2Fault):
         _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
     assert len(sent) == len(g2.CALL_RECORDS) == 1
+
+
+def test_rate_limit_waits_and_retries_the_same_model(monkeypatch, tmp_path):
+    # 11-11: opencode answered 429 "inference service is overloaded" between successful calls; nine renders failed.
+    calls, delays = [], []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        calls.append(request)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(request.full_url, 429, "x", {}, None)
+        if len(calls) == 2:
+            raise urllib.error.HTTPError(request.full_url, 429, "x", {"Retry-After": "600"}, None)
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'},
+                                               "finish_reason": "stop"}], "usage": {}}).encode())
+
+    assert _call(monkeypatch, tmp_path, lp.PRESETS["opencode"], urlopen) == {"ok": True}
+    assert delays == [g2.RATE_LIMIT_RETRY_DELAYS[0], g2.RATE_LIMIT_MAX_WAIT]  # Retry-After, capped
+    assert len(g2.CALL_RECORDS) == 3
+
+
+def test_rate_limit_that_persists_still_fails_as_rate_limit(monkeypatch, tmp_path):
+    delays = []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        raise urllib.error.HTTPError(request.full_url, 429, "x", {"Retry-After": "2"}, None)
+
+    with pytest.raises(g2.G2Fault, match="LLM_RATE_LIMIT"):
+        _call(monkeypatch, tmp_path, lp.PRESETS["opencode"], urlopen)
+    assert delays == [2.0] * len(g2.RATE_LIMIT_RETRY_DELAYS)
+    assert len(g2.CALL_RECORDS) == len(g2.RATE_LIMIT_RETRY_DELAYS) + 1
 
 
 @pytest.mark.parametrize("failure", [http.client.RemoteDisconnected("secret provider message"),

@@ -22,6 +22,18 @@ afterEach(() => {
 });
 
 describe("Publish queue", () => {
+  it("keeps another chain out when both chains share the selected matrix", async () => {
+    const records = ROWS.map(row => ({ ...row, matrix: 'ai_media', matrix_name: 'AI矩阵' }));
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({ ok: true, status: 200,
+      text: async () => JSON.stringify(String(url).includes('/api/chains/science/scope')
+        ? { key: 'science', name: '科研', job: 'research/science', outputs: ['science_each'], script_ids: ['s1'] }
+        : records) }) as Response));
+    render(<MemoryRouter initialEntries={['/publish?chain=science&matrix=ai_media']}><PublishQueuePage/></MemoryRouter>);
+    await screen.findByText('Gemini 4 Argon 上线');
+    expect(screen.queryByText('已发的一期')).toBeNull();
+    fireEvent.change(screen.getByLabelText('成片矩阵'), { target: { value: '' } });
+    expect(screen.queryByText('已发的一期')).toBeNull();
+  });
   it("bounds initial cards, reveals the rest, and searches the entire list", async () => {
     const many = Array.from({ length: 53 }, (_, index) => ({ ...ROWS[1], script_id: `s${index}`, title: `成片第${index}期` }));
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(many) }) as Response));

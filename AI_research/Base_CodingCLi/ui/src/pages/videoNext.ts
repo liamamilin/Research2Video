@@ -22,7 +22,8 @@ const ACTIVE = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
 export function renderPhase(stage: string | null | undefined): string {
   const labels: Record<string, string> = { PLAN: "整理讲稿", VOICE_ALIGN: "生成旁白与对齐", STORYBOARD: "规划分镜",
     SCENE_IMAGES: "准备场景图片", BUILD_IR: "编排画面与时间轴", RENDER: "渲染画面", QUALITY_CHECK: "检查成片",
-    PACKAGE: "制作片头片尾", AUDIO_MIX: "混合音频", COMPLETE: "制作完成" };
+    PACKAGE: "制作片头片尾", AUDIO_MIX: "混合音频", COMPLETE: "制作完成",
+    WAITING_DRAW_THINGS: "等待 Draw Things 打开（插画讲解需要）" };
   return stage ? labels[stage] ?? "后台处理中" : "";
 }
 
@@ -50,6 +51,8 @@ export function nextStep(detail: VideoScriptDetail): NextStep {
       return { tab: "draft", text: "正在研究和写稿，完成后会出现草稿。可以离开此页。", tone: "wait" };
     case "PLAN_READY":
       return { tab: "draft", text: "讲述方案定好了：读一下，可以改字、带意见重做或放弃；确认后才开始写稿。", tone: "todo" };
+    case "SKIPPED":
+      return { tab: "draft", text: "重复选题已跳过，无需处理。", tone: "done" };
     case "FAILED":
       return { tab: "draft", text: "这篇没有完成，原因见下面。", tone: "bad" };
     case "DRAFT": {

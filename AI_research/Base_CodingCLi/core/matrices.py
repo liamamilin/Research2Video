@@ -1,24 +1,25 @@
-"""Matrices: a named set of research Jobs sharing a domain and keywords (spec/product-redesign.md §2.1, spec/matrices.md).
+"""Matrices: a named set of research Jobs for grouping and ops (spec/product-redesign.md §2.1, spec/matrices.md).
 
 One file per matrix, ``config/matrices/<key>.yaml``::
 
     name: 医疗矩阵
-    domain: 医疗健康            # the prompt's {domain}
-    keywords: [新药审批, 医保政策] # every member Job's {keywords} starts with these, then its own
+    domain: 医疗健康            # display / seed when copying; not injected into member prompts
+    keywords: [新药审批, 医保政策] # seed for new Jobs on copy; not merged at run time
     jobs:
       - medical/flash_discovery
       - job: monitoring/ai_flash_discovery
         copy_as: _flash_discovery   # copying the matrix makes this Job from that template instead (its prompt says AI)
 
-Membership lives here only, so a Job file never changes when it joins or leaves a matrix. A Job belongs to at most one
-matrix. The engine applies the matrix when it runs a member (``for_run``); the web layer reads Jobs without it, so the
-Job editor never saves the matrix's keywords into the Job file.
+Membership lives here only. Report ``domain`` / ``keywords`` live on each Job file. ``for_run`` marks ``_matrix``
+and fills ``_domain`` from the Job (falling back to the matrix domain only when the Job omits it).
 """
 
 from __future__ import annotations
 
+from core.config_transaction import remove as remove_config_file
 import os
 import re
+import threading
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -90,11 +91,11 @@ def content_metadata(value: dict | None) -> dict:
     """Business presentation only; research domain, keywords and schedules stay unchanged."""
     if value is None:
         return {}
-    allowed = {"name", "audience", "description", "role", "parent", "status", "visual_focus"}
+    allowed = {"name", "audience", "description", "role", "parent", "status", "visual_focus", "premise"}
     if not isinstance(value, dict) or set(value) - allowed:
-        raise ValueError("content 仅支持领域名称、受众、介绍、角色、主领域、状态和画面重点")
+        raise ValueError("content 仅支持领域名称、受众、介绍、角色、主领域、状态、画面重点和观众前提")
     out = dict(value)
-    for key in ("name", "audience", "description", "parent"):
+    for key in ("name", "audience", "description", "parent", "premise"):
         if key in out and (not isinstance(out[key], str) or len(out[key]) > 1000):
             raise ValueError(f"content.{key} 应为文字")
     if not isinstance(out.get("role", "domain"), str) or out.get("role", "domain") not in {"domain", "source", "operations"}:
@@ -151,16 +152,37 @@ def _read(path: str, key: str) -> Matrix:
                   archived=data.get("archived") is True, render=render, content=content)
 
 
+_LOAD_ALL_CACHE: dict[str, tuple[tuple, dict[str, Matrix]]] = {}
+_LOAD_ALL_LOCK = threading.Lock()
+
+
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
     """Every matrix, by key, in file-name order. A Job claimed by an earlier matrix is an error in the later one."""
     folder = directory(config_dir)
+    sig_items: list[tuple[str, int, int]] = []
     try:
-        names = sorted(f for f in os.listdir(folder) if f.endswith(".yaml") and not f.startswith("."))
+        with os.scandir(folder) as it:
+            for entry in it:
+                name = entry.name
+                if not name.endswith(".yaml") or name.startswith("."):
+                    continue
+                try:
+                    st = entry.stat()
+                except OSError:
+                    continue
+                sig_items.append((name, st.st_mtime_ns, st.st_size))
     except OSError:
         return {}
+    sig_items.sort()
+    sig = tuple(sig_items)
+    cache_key = os.path.abspath(folder)
+    with _LOAD_ALL_LOCK:
+        cached = _LOAD_ALL_CACHE.get(cache_key)
+        if cached is not None and cached[0] == sig:
+            return dict(cached[1])
     out: dict[str, Matrix] = {}
     owner: dict[str, str] = {}
-    for filename in names:
+    for filename, _, _ in sig_items:
         key = filename[:-len(".yaml")]
         if not KEY.fullmatch(key):
             continue
@@ -173,7 +195,9 @@ def load_all(config_dir: str = "config") -> dict[str, Matrix]:
             owner[member.job] = key
             kept.append(member)
         out[key] = Matrix(**{**matrix.__dict__, "members": tuple(kept), "errors": tuple(errors)})
-    return out
+    with _LOAD_ALL_LOCK:
+        _LOAD_ALL_CACHE[cache_key] = (sig, out)
+    return dict(out)
 
 
 def of_job(job_name: str, config_dir: str = "config") -> Optional[Matrix]:
@@ -181,15 +205,12 @@ def of_job(job_name: str, config_dir: str = "config") -> Optional[Matrix]:
 
 
 def merged_keywords(matrix: Optional[Matrix], own) -> list:
-    """The matrix's keywords first, then the Job's own that are not already there (spec decision 4)."""
-    own = list(own or [])
-    if matrix is None or not matrix.keywords:
-        return own
-    return list(matrix.keywords) + [k for k in own if k not in matrix.keywords]
+    """Deprecated helper: Job keywords are authoritative; matrix keywords are not merged at run time."""
+    return list(own or [])
 
 
 def for_run(job: dict, config_dir: str = "config") -> dict:
-    """The Job as a run sees it: matrix keywords merged in, ``_domain`` and ``_matrix`` set. Not a member: unchanged."""
+    """Mark matrix membership for a run. Keywords stay on the Job; domain prefers the Job, else matrix."""
     try:
         matrix = of_job(job.get("_file", ""), config_dir)
     except Exception:  # noqa: BLE001 - a broken matrix file must not stop a run
@@ -197,10 +218,10 @@ def for_run(job: dict, config_dir: str = "config") -> dict:
     if matrix is None:
         return job
     out = dict(job)
-    out["keywords"] = merged_keywords(matrix, job.get("keywords"))
     out["_matrix"] = matrix.key
-    if matrix.domain:
-        out["_domain"] = matrix.domain
+    domain = str(job.get("domain") or "").strip() or (matrix.domain or "")
+    if domain:
+        out["_domain"] = domain
     return out
 
 
@@ -249,8 +270,8 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
         data["render"] = render
     if content:
         data["content"] = content
-    text = ("# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，\n"
-            "# 再放 Job 自己的；{domain} 是这里的 domain。\n"
+    text = ("# 矩阵：一组研究 Job 的分组与运维（spec/matrices.md）。domain/keywords 仅作展示与复制种子；\n"
+            "# 报告写法以各 Job 文件为准，运行时不再合并矩阵关键词。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
     os.makedirs(directory(config_dir), exist_ok=True)
     atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"), text)
@@ -258,7 +279,7 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
 
 def remove(config_dir: str, key: str) -> bool:
     try:
-        os.remove(os.path.join(directory(config_dir), f"{key}.yaml"))
+        remove_config_file(os.path.join(directory(config_dir), f"{key}.yaml"))
         return True
     except FileNotFoundError:
         return False

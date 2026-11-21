@@ -1,0 +1,456 @@
+[
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "name": "AI Flash Discovery",
+    "channel": "flash",
+    "mode": "candidates",
+    "newly_enabled": false,
+    "productions": [
+      "flash_each",
+      "flash_daily"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t01_product",
+    "name": "T01 · 产品与能力认知",
+    "channel": "t01",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t01_product"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t02_scenarios",
+    "name": "T02 · 应用场景与成果",
+    "channel": "t02",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t02_scenarios"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t03_tutorials",
+    "name": "T03 · 使用方法与教程",
+    "channel": "t03",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t03_tutorials"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t04_testing",
+    "name": "T04 · 实测与能力验证",
+    "channel": "t04",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t04_testing"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t05_comparison",
+    "name": "T05 · AI 产品横向选择",
+    "channel": "t05",
+    "mode": "candidates",
+    "newly_enabled": false,
+    "productions": [
+      "chatgpt_t05_comparison"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t06_value",
+    "name": "T06 · 套餐与付费价值",
+    "channel": "t06",
+    "mode": "candidates",
+    "newly_enabled": false,
+    "productions": [
+      "chatgpt_t06_value"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t07_subscription",
+    "name": "T07 · 订阅与支付",
+    "channel": "t07",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t07_subscription"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t08_troubleshooting",
+    "name": "T08 · 使用问题与避坑",
+    "channel": "t08",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t08_troubleshooting"
+    ]
+  },
+  {
+    "job": "chatgpt_acquisition/t09_updates",
+    "name": "T09 · 产品动态与热点",
+    "channel": "t09",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "chatgpt_t09_updates",
+      "chatgpt_t09_updates_each"
+    ]
+  },
+  {
+    "job": "ai_media/ai_tool_tutorials",
+    "name": "AI 工具教程",
+    "channel": "ai_tutorial",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "ai_tool_tutorials"
+    ]
+  },
+  {
+    "job": "ai_media/daily_opensource_radar",
+    "name": "AI 开源雷达",
+    "channel": "ai_opensource",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "ai_media_opensource_digest"
+    ]
+  },
+  {
+    "job": "ai_media/weekly_model_arena",
+    "name": "AI 模型竞技场",
+    "channel": "ai_arena",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "ai_media_arena_digest"
+    ]
+  },
+  {
+    "job": "ai_media/weekly_business_watch",
+    "name": "AI 商业观察",
+    "channel": "ai_business",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "ai_media_business_digest"
+    ]
+  },
+  {
+    "job": "ai_media/weekly_deep_research",
+    "name": "AI 深度研究",
+    "channel": "ai_deep",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "ai_media_deep_dive"
+    ]
+  },
+  {
+    "job": "science/science_daily",
+    "name": "科学新发现日报",
+    "channel": "science_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "science_daily"
+    ]
+  },
+  {
+    "job": "science/science_weekly",
+    "name": "科学深度周读",
+    "channel": "science_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "science_weekly"
+    ]
+  },
+  {
+    "job": "science/science_illustrated",
+    "name": "科学插画讲解",
+    "channel": "science_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "science_illustrated"
+    ]
+  },
+  {
+    "job": "company/company_daily",
+    "name": "商业动态日报",
+    "channel": "company_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "company_daily"
+    ]
+  },
+  {
+    "job": "company/company_weekly",
+    "name": "公司与商业模式周观察",
+    "channel": "company_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "company_weekly"
+    ]
+  },
+  {
+    "job": "company/company_illustrated",
+    "name": "商业插画讲解",
+    "channel": "company_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "company_illustrated"
+    ]
+  },
+  {
+    "job": "economy/economy_daily",
+    "name": "全球经济日报",
+    "channel": "economy_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "economy_daily",
+      "ai-non_tech-deep_dive-long-2"
+    ]
+  },
+  {
+    "job": "economy/economy_weekly",
+    "name": "宏观与数据周解读",
+    "channel": "economy_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "economy_weekly"
+    ]
+  },
+  {
+    "job": "economy/economy_illustrated",
+    "name": "财经插画讲解",
+    "channel": "economy_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "economy_illustrated"
+    ]
+  },
+  {
+    "job": "industry/industry_daily",
+    "name": "产业动态日报",
+    "channel": "industry_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "industry_daily"
+    ]
+  },
+  {
+    "job": "industry/industry_weekly",
+    "name": "产业链周观察",
+    "channel": "industry_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "industry_weekly"
+    ]
+  },
+  {
+    "job": "industry/industry_illustrated",
+    "name": "产业插画讲解",
+    "channel": "industry_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "industry_illustrated"
+    ]
+  },
+  {
+    "job": "consumer/consumer_daily",
+    "name": "新品与评测日报",
+    "channel": "consumer_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "consumer_daily"
+    ]
+  },
+  {
+    "job": "consumer/consumer_weekly",
+    "name": "数码选购周观察",
+    "channel": "consumer_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "consumer_weekly"
+    ]
+  },
+  {
+    "job": "consumer/consumer_illustrated",
+    "name": "消费科技插画讲解",
+    "channel": "consumer_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "consumer_illustrated"
+    ]
+  },
+  {
+    "job": "history/history_daily",
+    "name": "历史与考古动态",
+    "channel": "history_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "history_daily"
+    ]
+  },
+  {
+    "job": "history/history_weekly",
+    "name": "历史专题周读",
+    "channel": "history_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "history_weekly"
+    ]
+  },
+  {
+    "job": "history/history_illustrated",
+    "name": "历史插画讲解",
+    "channel": "history_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "history_illustrated"
+    ]
+  },
+  {
+    "job": "geography/geography_daily",
+    "name": "世界与地球动态",
+    "channel": "geography_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "geography_daily"
+    ]
+  },
+  {
+    "job": "geography/geography_weekly",
+    "name": "地理专题周读",
+    "channel": "geography_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "geography_weekly"
+    ]
+  },
+  {
+    "job": "geography/geography_illustrated",
+    "name": "地理插画讲解",
+    "channel": "geography_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "geography_illustrated"
+    ]
+  },
+  {
+    "job": "culture/culture_daily",
+    "name": "文化艺术动态",
+    "channel": "culture_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "culture_daily"
+    ]
+  },
+  {
+    "job": "culture/culture_weekly",
+    "name": "文化艺术周观察",
+    "channel": "culture_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "culture_weekly"
+    ]
+  },
+  {
+    "job": "culture/culture_illustrated",
+    "name": "文化插画讲解",
+    "channel": "culture_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "culture_illustrated"
+    ]
+  },
+  {
+    "job": "software/software_daily",
+    "name": "每日软件发现",
+    "channel": "software_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "software_daily"
+    ]
+  },
+  {
+    "job": "software/software_weekly",
+    "name": "软件与工具周观察",
+    "channel": "software_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "software_weekly"
+    ]
+  },
+  {
+    "job": "software/software_illustrated",
+    "name": "软件插画讲解",
+    "channel": "software_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "software_illustrated"
+    ]
+  },
+  {
+    "job": "tech/tech_daily",
+    "name": "科技前沿日报",
+    "channel": "tech_daily",
+    "mode": "candidates",
+    "newly_enabled": true,
+    "productions": [
+      "tech_daily",
+      "ai-non_tech-headline-short"
+    ]
+  },
+  {
+    "job": "tech/tech_weekly",
+    "name": "科技周观察",
+    "channel": "tech_weekly",
+    "mode": "single_question",
+    "newly_enabled": true,
+    "productions": [
+      "tech_weekly"
+    ]
+  },
+  {
+    "job": "tech/tech_illustrated",
+    "name": "科技插画讲解",
+    "channel": "tech_illustrated",
+    "mode": "knowledge",
+    "newly_enabled": true,
+    "productions": [
+      "tech_illustrated"
+    ]
+  }
+]

@@ -9,13 +9,14 @@ import re
 from web.services.assistant_context import dumps
 
 
-SOFT_LIMIT = 64000
+SOFT_LIMIT = 36000
 KEEP_ROUNDS = 2
 READ_LISTS = {
     'list_jobs': {''}, 'query_assistant_tasks': {''}, 'query_operations_overview': {''},
     'query_sources': {'', 'list'}, 'query_schedules': {'', 'list', 'runs'},
     'query_video': {'', 'board', 'list', 'find', 'cells', 'topics', 'quality', 'references'},
     'query_reports': {'', 'list', 'search'}, 'query_publishing': {'catalog', 'candidates'},
+    'application_actions': {''},
 }
 LIST_FIELDS = {
     'list_jobs': ('items',), 'query_assistant_tasks': ('items',),
@@ -23,16 +24,19 @@ LIST_FIELDS = {
     'query_schedules': ('jobs', 'runs'), 'query_video': ('items', 'scripts', 'cells', 'topics'),
     'query_reports': ('items',), 'query_publishing': ('platforms', 'items'),
     'query_matrices': ('matrices',), 'query_templates': ('templates',),
+    'application_actions': ('actions',),
 }
 METADATA = frozenset(('ok', 'status', 'total', 'count', 'total_requests', 'total_in_scope',
     'total_indexed', 'page', 'limit', 'offset', 'end_offset', 'next_offset', 'has_more',
     'complete', 'scope', 'scope_basis', 'coverage', 'unavailable', 'warnings', 'failed',
     'stages', 'counts', '_model_view', 'account_uid', 'platform', 'timezone',
     'attention', 'failures', 'references', 'at', 'date', 'summary', 'availability',
-    'active', 'problems', 'revision', 'account'))
+    'active', 'problems', 'revision', 'account', 'domains', 'action_id'))
 
 
-def _list_read(tool: str, arguments: dict) -> bool:
+def _list_read(tool: str, arguments: dict, result: dict | None = None) -> bool:
+    if tool == 'read_application':
+        return isinstance(result, dict) and isinstance(result.get('_model_view'), dict)
     if tool == 'query_sources':
         return not arguments.get('id')
     if tool == 'query_matrices':
@@ -64,11 +68,11 @@ class PromptContext:
 
     def remember(self, message: dict, tool: str, arguments: dict, result: dict,
                  operation_id: str | None, round_index: int, *, ok: bool) -> None:
-        if (self.comparison or not ok or not operation_id or not _list_read(tool, arguments)
+        if (self.comparison or not ok or not operation_id or not _list_read(tool, arguments, result)
                 or not isinstance(result, dict) or result.get('error') or result.get('authentication_required')
                 or result.get('input_card') or len(message.get('content', '')) < 2400):
             return
-        if not any(isinstance(result.get(field), list) for field in LIST_FIELDS.get(tool, ())):
+        if tool != 'read_application' and not any(isinstance(result.get(field), list) for field in LIST_FIELDS.get(tool, ())):
             return
         summary = {'_context_receipt': {
             'operation_id': operation_id, 'tool': tool, 'summary_only': True,

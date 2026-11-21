@@ -1,0 +1,166 @@
+{
+  "status": "production_entry_verified",
+  "goal": "减少关系画面的编号查找负担，让观众直接看懂谁与谁发生什么关系，并随旁白跟上重点",
+  "baseline_job": "a17f8bc5-e207-45ba-9c16-4898c50b886e",
+  "baseline_seconds": [
+    27.43,
+    62.2
+  ],
+  "baseline_problem": "募资分配、多方认购退回编号索引，名称和关系分离，屏幕利用不足",
+  "production": "video_autopilot.start_run -> original writer/approval -> video_render -> G3/G2 -> download",
+  "automatic_inputs": "真实日报、来源附属数据、原覆盖历史、热度缓存；无手工图片",
+  "candidates": [
+    "原编号索引",
+    "全名关系行",
+    "共享同一端点及关系条件时合并的全名关系行"
+  ],
+  "stop": "每种表达最多两轮无明确收益即放弃；不扩展图布局算法、素材采集或新的模型规划服务",
+  "acceptance": "同稿原声实验仅支持取舍；最终从日常入口与实际配置完整出片，另含不同结构真实选题；全片检查与媒体/回传验证",
+  "manual_interventions": [
+    "选择真实成片观察区间和原日常批次；实验中替换隔离渲染器，不修改讲稿音轨分镜数据",
+    "迁移隔离目录中的自动原文材料引用，实际读取文本与原生产一致；仅改路径不改内容",
+    "观察脚本达到两小时上限后，仅接续同一批次观察；没有重提引擎任务或调整普通队列"
+  ],
+  "rejected": [
+    "按时间逐条轮播：多个关系在同一语句同时出现，不另造播放节奏",
+    "不合并的全名关系行：七方相同关系重复，超出可读区域"
+  ],
+  "selected_for_holdout": "共享同一端点及关系条件时合并的全名关系行；固定可读字号容纳不下则保持现状，本轮不继续拟合",
+  "production_changes": [
+    "ObjectFlow chooses full-name rows only when prior fallback was an index and full labels fit at fixed readable size",
+    "RelationIndex includes direct named rows; group only an identical endpoint, relation label and relation type",
+    "Existing graph and fallback remain for other structures; no extra planner, timer, script, graph layout or asset change"
+  ],
+  "verification_input_correction": "Relocate content-addressed material file AND metadata reference; prove identical text through production report_material.read before running",
+  "external_service_authorization": "User explicitly approved this round 2026-11-12 report, automatic research material and derived contexts",
+  "final_runs": [
+    "daily-final",
+    "each-final"
+  ],
+  "integration_correction": "Reserve measured footer height inside the existing shared picture area; re-render all three original-audio comparisons, no smaller fonts or larger frame",
+  "progress": {
+    "daily_job": "9fc7f436-650a-49f1-9ede-98cc5c078092",
+    "daily_stage": "COMPLETED",
+    "voice_seconds": 1215.7,
+    "voice_segments": 189,
+    "chapters": 9,
+    "each_job_queued": "b4307748-478a-4ed2-a608-700689b9edb8",
+    "last_check": "2026-11-12T13:42:00+08:00",
+    "storyboard_seconds": 908.14,
+    "daily_named_scenes": 10,
+    "daily_relation_scenes": 14,
+    "untuned_chapter_baseline_ready": true,
+    "handles_to_repoll": {},
+    "observer_deadline_note": "Workflow harnesses observe for 7200 seconds from 10:40; if an observer actually exits before completion, resume its same output directory/run_id, never resubmit or restart the engine job merely because observation expires.",
+    "next_checks": [],
+    "daily_content_seconds": 972.6,
+    "daily_delivered_seconds": 978.6,
+    "daily_download_verified": true,
+    "daily_whole_pages_reviewed": 31,
+    "untuned_chapter_comparison_reviewed": true,
+    "each_stage": "COMPLETED",
+    "each_completed_reviewed_jobs": [
+      "b4307748-478a-4ed2-a608-700689b9edb8",
+      "6801d649-cf0d-401a-8304-d8e132b196e7",
+      "80a78a63-09d5-4b18-b203-3a24c3a4d56d"
+    ],
+    "each_current_job": "80a78a63-09d5-4b18-b203-3a24c3a4d56d",
+    "each_current_render": "53d5fb18a8ac44d8966b4f4d0a3310bb",
+    "queue_note": "All required validation jobs and normal downloads completed. Ordinary unrelated queue was preserved.",
+    "observer_resume": "Initial observer session 58371 exited 1 with explicit two-hour observation TimeoutError. Resumed same output directory/run e60a39a078314cce9a71a89c8d4ea27b; existing engine job 6801d649-cf0d-401a-8304-d8e132b196e7 continues without resubmission. New observer session 48739, log run-resume-1.log."
+  },
+  "completed_at": "2026-11-12T13:42:00+08:00",
+  "outputs": [
+    {
+      "mode": "daily-final",
+      "job": "9fc7f436-650a-49f1-9ede-98cc5c078092",
+      "render": "f43aeb982977458d96f83eba2804b70f",
+      "download": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-effects-20261112/daily-final/state/video_renders/f43aeb982977458d96f83eba2804b70f/video.mp4",
+      "sha256": "5f4f5e5d21667682fde6987078e28233aa07fe5fe846756d69e911efa9c2daae",
+      "delivered_seconds": 978.6,
+      "content_seconds": 972.6,
+      "reviewed_pages": 31,
+      "named_scenes": 10,
+      "relation_scenes": 14
+    },
+    {
+      "mode": "each-final",
+      "job": "b4307748-478a-4ed2-a608-700689b9edb8",
+      "render": "b9ee777a429d432a8bc1ce360235dbb8",
+      "download": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-effects-20261112/each-final/state/video_renders/b9ee777a429d432a8bc1ce360235dbb8/video.mp4",
+      "sha256": "19f71f52f891820a20af94b7ed25365275b3eb77a01d6f1dd488e74c0d0e4c46",
+      "delivered_seconds": 142.9,
+      "content_seconds": 136.917,
+      "reviewed_pages": 5,
+      "named_scenes": 2,
+      "relation_scenes": 5
+    },
+    {
+      "mode": "each-final",
+      "job": "6801d649-cf0d-401a-8304-d8e132b196e7",
+      "render": "7cadce5da8624a6591618f9404f8be82",
+      "download": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-effects-20261112/each-final/state/video_renders/7cadce5da8624a6591618f9404f8be82/video.mp4",
+      "sha256": "071dffb00ec8640fd02bd27bd7e78b9ccee6d8875804b65062e12ecb59a236a6",
+      "delivered_seconds": 179.566667,
+      "content_seconds": 173.568,
+      "reviewed_pages": 6,
+      "named_scenes": 2,
+      "relation_scenes": 5
+    },
+    {
+      "mode": "each-final",
+      "job": "80a78a63-09d5-4b18-b203-3a24c3a4d56d",
+      "render": "53d5fb18a8ac44d8966b4f4d0a3310bb",
+      "download": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-effects-20261112/each-final/state/video_renders/53d5fb18a8ac44d8966b4f4d0a3310bb/video.mp4",
+      "sha256": "d1950fdb10c4094cb463b8a968af617a176a5e13ec8b6e62edd429f8d065fae1",
+      "delivered_seconds": 154.2,
+      "content_seconds": 148.203,
+      "reviewed_pages": 5,
+      "named_scenes": 1,
+      "relation_scenes": 2
+    }
+  ],
+  "completion_audit": [
+    {
+      "requirement": "先从真实日常视频选择观看问题",
+      "result": "verified",
+      "evidence": "initial-sample.json; baseline_job/seconds/problem in this task; report: IPO 27.43–62.20 秒编号查找负担"
+    },
+    {
+      "requirement": "同稿同旁白比较表达并停止低收益路线",
+      "result": "verified",
+      "evidence": "experiments/plain preserved as rejected; grouped-final and two holdout-final verification.json, same props/frames, audio correlation 1.0; no further WGSL fitting"
+    },
+    {
+      "requirement": "正常入口、实际启用配置、自动可得输入",
+      "result": "verified",
+      "evidence": "daily_effects_run.py uses video_autopilot.start_run and normal production stages; production-input-check.json records config parity except isolation and identical actual loaded automatic material; both final receipts and normal downloads"
+    },
+    {
+      "requirement": "未参与调试、结构不同的真实选题",
+      "result": "verified",
+      "evidence": "New complete daily plan generated after renderer frozen; actual PDF/shared inputs/coordinator/return chapter compared with identical old control. AMD final single is separate number/comparison/processing-chain topic and uses named chain at 55.3–70.33 s without any later code tuning"
+    },
+    {
+      "requirement": "完整成片、全片检查、媒体及回传证据",
+      "result": "verified_with_explicit_method",
+      "evidence": "completion-media-audit.json: four full movies, 47 chronological two-second sheets reviewed, complete decode, current trusted source hashes, all normal download SHA256 match; denser 67.6 s one-second paired sequence. Not continuous human listening or audience testing"
+    },
+    {
+      "requirement": "保留失败、人工介入及剩余问题，不以局部改善代替整片质量",
+      "result": "verified",
+      "evidence": "REPORT.md; failed ungrouped trial, capacity failures and comparison-helper 25fps attempt preserved; visual-review files list numeric delays, static agenda, repeated cards and coarse group emphasis"
+    },
+    {
+      "requirement": "不手工补图、改稿、写分镜；不发布或新增内容审核",
+      "result": "verified",
+      "evidence": "normal input/receipt records manual_materials=[] and manual_script_or_storyboard=false, publishing=false; production diff limited to shared relation presentation"
+    },
+    {
+      "requirement": "回归、真实MP4、解码、日志和视觉证据",
+      "result": "verified",
+      "evidence": "tests.log 1094 passed/1 skipped; final targeted tests-relations-footer.log 16 passed; complete movies and source checks; git diff --check passed"
+    }
+  ],
+  "conclusion": "本轮关系阅读负担改善已由正常整期和单条入口自动成片验证；其他数字页时机、静态导读和重复文字卡问题仍未解决，不宣称整体留存/涨粉或全部节奏问题完成。"
+}

@@ -29,6 +29,10 @@ For the web UI: Node.js 18+ is required for the frontend build (optional — pre
 
 ### System config (`config/system.yaml`)
 
+The project enables accepted job-specific writing workflows in `config/manuscript.yaml`.
+An explicit `video.manuscript_jobs` in `system.yaml` replaces that list for the installation.
+Set it to `[]` to disable all job-specific writing workflows locally.
+
 ```yaml
 ai:                                   # LLM API (OpenAI-compatible)
   model: "deepseek-v4-flash"          # any OpenAI-compatible model id
@@ -54,6 +58,17 @@ research:                             # Agent loop
   mode: "auto"                        # auto | agent | pipeline
   max_rounds: 12
   max_searches: 12
+
+network:                              # local proxy for overseas sources
+  proxy:
+    enabled: true
+    host: "127.0.0.1"
+    port: 7897                        # use Clash Verge when already running
+    sidecar_port: 17897               # else start headless verge-mihomo (no GUI)
+    auto_start: true
+    startup_timeout_seconds: 45
+    required: true                    # CLI/scheduler fail if proxy never comes up
+    no_proxy: "localhost,127.0.0.1,::1"
 
 notifications:                        # optional alerts (any combination)
   enabled: false
@@ -158,7 +173,12 @@ python scripts/export_round_artifacts.py --all        # every round
 ```bash
 bash scripts/build_launcher.sh              # 构建到仓库根目录
 bash scripts/build_launcher.sh ~/Applications  # 构建并安装到「应用程序」
+# 更新保留旧名称的已有入口（不用新建另一个图标）：
+bash scripts/build_launcher.sh .. 'AI Research Console.app'
 ```
+
+启动地址在构建时从 `config/web.yaml` 的 `server.port` 读取；端口改变后需重建已有 App。
+启动器检查 `/api/live` 的成功响应，HTTP 错误或普通网页不算服务就绪。
 
 `build_launcher.sh` 用 `osacompile -s`（stay-open）编译：不带 `-s` 的
 applet 在 `run` 返回后立即退出，`on idle` 看门狗永远不会执行。

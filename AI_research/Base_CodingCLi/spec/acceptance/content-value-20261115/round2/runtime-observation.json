@@ -1,0 +1,8 @@
+{
+  "read_only_process_check": true,
+  "research_pid": 18187,
+  "uvicorn_pid": 7448,
+  "reload_flags": false,
+  "restart_or_signal_sent": false,
+  "note": "只输出入口、PID与reload开关；未获取或保存完整进程参数。"
+}

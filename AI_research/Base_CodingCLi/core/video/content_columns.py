@@ -163,7 +163,9 @@ def snapshot(config_dir: str, production_id: str, job: str) -> dict:
     if column is None:
         return {}
     source = matrices.of_job(job, config_dir)
-    return {"column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
+    owner = matrices.load_all(config_dir).get(column.matrix) if column.matrix else None
+    premise = str(((owner.content if owner else {}) or {}).get("premise") or "").strip()
+    return {**({"premise": premise} if premise else {}), "column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
             "audience": column.audience, "promise": column.promise, "notes": column.notes,
             "content_mode": column.content_mode, "greeting": column.greeting,
@@ -187,10 +189,13 @@ def apply_script_context(recipe, context: dict):
         direction += "\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。"
     elif context.get("type") == "tutorial":
         direction += f"\n{scope}围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。"
+    premise = (context.get("premise") or "").strip()
+    if premise:  # what the matrix's viewers live with (matrix content.premise), before any column direction
+        direction += f"\n观众前提：{premise}"
     notes = (context.get("notes") or "").strip()
     if notes:
         if programme:
-            direction += "\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。"
+            direction += "\n以下是可参考的创作方向。各项独立内容可采用适合自己的例子与讲法；同一问题的章节以连贯、好理解为目标，安排由作者结合材料决定。"
         direction += f"\n{'单项内容创作方向' if programme else '栏目创作方向'}：{notes}"
     # A concrete business-column brief owns the creative goal. The reused
     # recipe continues to own its input mode, writer and output contract.

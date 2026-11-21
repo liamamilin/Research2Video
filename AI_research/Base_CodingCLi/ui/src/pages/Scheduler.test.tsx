@@ -1,3 +1,4 @@
+import {MemoryRouter} from "react-router-dom";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -64,7 +65,7 @@ afterEach(() => {
 describe("Scheduler job picker", () => {
   it("creates a durable job plan with an automatic ID and no shell command input", async () => {
     const calls = mockFetch();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(screen.getByText(/新建调度/));
 
     await waitFor(() => {
@@ -86,7 +87,7 @@ describe("Scheduler job picker", () => {
   });
 
   it("filters the job list by query", async () => {
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(screen.getByText(/新建调度/));
 
     await waitFor(() => {
@@ -102,7 +103,7 @@ describe("Scheduler job picker", () => {
   });
 
   it("marks disabled jobs", async () => {
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(screen.getByText(/新建调度/));
     await waitFor(() => {
       expect(screen.getByText("已停用")).toBeTruthy();
@@ -148,7 +149,7 @@ describe("Scheduler missed-run banners", () => {
       overdue: 1,
       paused: 0,
     });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("存在漏跑记录")).toBeTruthy();
     expect(screen.getByText(/上次应运行 09-24 06:00/)).toBeTruthy();
   });
@@ -164,7 +165,7 @@ describe("Scheduler missed-run banners", () => {
       overdue: 0,
       paused: 1,
     });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("已暂停", { selector: "p" })).toBeTruthy();
     expect(screen.queryByText(/漏跑/)).toBeNull();
   });
@@ -175,7 +176,7 @@ describe("Scheduler missed-run banners", () => {
       overdue: 0,
       paused: 0,
     });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     await waitFor(() => {
       expect(screen.getByText("practical_ai_intelligence")).toBeTruthy();
     });
@@ -188,7 +189,7 @@ describe("Scheduler missed-run banners", () => {
 describe("Schedule editing and previews", () => {
   it("switches selected jobs and refuses disabled ones", async () => {
     const calls = mockFetch({ ...JOBS, jobs: [...JOBS.jobs, {...JOBS.jobs[0], name: 'research/中文任务', label: '中文任务'}] });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(screen.getByText(/新建调度/));
     fireEvent.click(await screen.findByText("Model and Pricing Radar"));
     expect((screen.getByText('Daily AI Agents').closest('button') as HTMLButtonElement).disabled).toBe(true);
@@ -205,7 +206,7 @@ describe("Schedule editing and previews", () => {
       id: "com.arec.pipeline.daily", title: "情报矩阵 · 每日运行", backend: "launchd", editable: false,
       enabled: true, schedule_label: "每天 06:00", next_runs: ["2026-09-26T06:00:00+08:00"], command: "ensure_round.py",
     }], timezone: "Asia/Shanghai (UTC+0800)" })));
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("情报矩阵 · 每日运行")).toBeTruthy();
     expect(screen.getByText("2026-09-26 06:00")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /暂停 com.arec/ })).toBeNull();
@@ -222,7 +223,7 @@ describe("Schedule editing and previews", () => {
         next_run: null, where: "launchd；本页只读", link: null, cost: "",
         last_run: { status: "ok", note: "", started_at: "2026-10-20T04:30:00+0800" } },
     ] })));
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("每周二早上一批")).toBeTruthy();
     expect(screen.getByText("上次空跑")).toBeTruthy();
     expect(screen.getByText("没有可写的新选题")).toBeTruthy();
@@ -239,7 +240,7 @@ describe("Schedule editing and previews", () => {
       if (init?.method === "PUT") return jsonResponse({ ok: true });
       return jsonResponse({ jobs: [{ id: "report", minute: "0", hour: "8", day_of_month: "*", month: "*", day_of_week: "*", command: "echo report", enabled: false }] });
     }));
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: "编辑 report" }));
     fireEvent.change(screen.getByLabelText("执行时间"), { target: { value: "09:00" } });
     await screen.findByText("2026-09-26 09:00");
@@ -285,7 +286,7 @@ describe("managed plan status honesty", () => {
     // that has never produced a run has no evidence at all.
     mockManaged({ id: MANAGED.id, status: "unverified", schedule: "0 3 * * *",
                    detail: "计划已保存，尚未执行过；第一次执行后才能确认模型与网络真的可用" });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("待验证")).toBeTruthy();
     expect(screen.queryByText("正常")).toBeNull();
     expect(screen.getByText(/尚未执行过/)).toBeTruthy();
@@ -296,7 +297,7 @@ describe("managed plan status honesty", () => {
   it("shows healthy only after a run actually succeeded", async () => {
     mockManaged({ id: MANAGED.id, status: "ok", schedule: "0 3 * * *",
                    detail: "最近一次执行成功，报告已生成", last_ran_at: "2026-09-25T03:01:00+08:00" });
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("正常")).toBeTruthy();
     expect(screen.getByText(/最近一次执行成功/)).toBeTruthy();
   });
@@ -345,7 +346,7 @@ describe("write failures stay visible", () => {
       init?.method === "POST" && url.includes("/api/scheduler")
         ? errorResponse(409, "schedule_conflict", "这个 job 已有周期计划，请编辑现有计划")
         : null);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(screen.getByText(/新建调度/));
     // The card and the picker both carry the name; the picker button is the one
     // inside the form dialog.
@@ -363,7 +364,7 @@ describe("write failures stay visible", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     mockWithFailure((_url, init) =>
       init?.method === "DELETE" ? errorResponse(500, "internal", "删除失败，请重试") : null);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /删除 research\/夜间巡检/ }));
     expect((await screen.findByRole("alert")).textContent).toContain("删除失败");
   });
@@ -372,7 +373,7 @@ describe("write failures stay visible", () => {
     mockWithFailure((url, init) =>
       init?.method === "PUT" && url.includes("/toggle")
         ? errorResponse(503, "host_offline", "执行器离线") : null);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
     expect((await screen.findByRole("alert")).textContent).toContain("执行器离线");
   });
@@ -381,7 +382,7 @@ describe("write failures stay visible", () => {
     mockWithFailure((url, init) =>
       init?.method === "PUT" && url.includes("/toggle")
         ? errorResponse(409, "conflict", "计划正在执行中") : null);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
     expect((await screen.findByRole("alert")).textContent).toContain("计划正在执行中");
     expect(screen.getByText("夜间巡检")).toBeTruthy();
@@ -431,7 +432,7 @@ describe("Scheduler matrix system tasks", () => {
 
   it("offers edit, pause and delete on the system tasks", async () => {
     mockSystem();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByRole("button", { name: `编辑 ${DAILY}` })).toBeTruthy();
     expect(screen.getByRole("button", { name: `暂停 ${DAILY}` })).toBeTruthy();
     expect(screen.getByRole("button", { name: `删除 ${DAILY}` })).toBeTruthy();
@@ -442,7 +443,7 @@ describe("Scheduler matrix system tasks", () => {
 
   it("opens the editor on the real cron expression, not undefined fields", async () => {
     mockSystem();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
     expect(await screen.findByText(/这是情报矩阵的系统任务/)).toBeTruthy();
     // "0 6 * * *" must decode to 每天 06:00. Before the fix the card carried no
@@ -457,7 +458,7 @@ describe("Scheduler matrix system tasks", () => {
 
   it("saves only the trigger for a system task", async () => {
     const calls = mockSystem();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
     const save = (await screen.findByRole("button", { name: /保存修改/ })) as HTMLButtonElement;
     await waitFor(() => expect(save.disabled).toBe(false));
@@ -470,7 +471,7 @@ describe("Scheduler matrix system tasks", () => {
   it("warns that deleting stops the matrix and can be undone", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     const calls = mockSystem();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: `删除 ${DAILY}` }));
     expect(confirm).toHaveBeenCalled();
     expect(String(confirm.mock.calls[0][0])).toContain("不再自动运行");
@@ -480,7 +481,7 @@ describe("Scheduler matrix system tasks", () => {
 
   it("pauses a system task through the toggle endpoint", async () => {
     const calls = mockSystem();
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: `暂停 ${DAILY}` }));
     await waitFor(() => expect(calls.some(c => c.url.includes("/toggle"))).toBe(true));
     expect(calls.find(c => c.url.includes("/toggle"))!.init!.body).toBe(JSON.stringify({ enabled: false }));
@@ -489,7 +490,7 @@ describe("Scheduler matrix system tasks", () => {
   it("restores a deleted system task", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const calls = mockSystem([{ label: DAILY, kind: "daily", deleted_at: "20260926_101500", schedule: "0 6 * * *" }]);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("已删除的系统任务")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: `恢复 ${DAILY}` }));
     await waitFor(() => expect(calls.some(c => c.url.includes(`${DAILY}/restore`) && c.init?.method === "POST")).toBe(true));
@@ -497,7 +498,7 @@ describe("Scheduler matrix system tasks", () => {
 
   it("does not offer restore for a plan that was never a system task", async () => {
     mockSystem([]);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     await screen.findByRole("button", { name: `编辑 ${DAILY}` });
     expect(screen.queryByText("已删除的系统任务")).toBeNull();
   });
@@ -511,7 +512,7 @@ describe("Scheduler matrix system tasks", () => {
       [{ label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false }],
       [],
     );
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
 
     // The empty state must not claim nothing was ever configured.
     expect(await screen.findByText("情报矩阵的系统任务已全部删除")).toBeTruthy();
@@ -528,7 +529,7 @@ describe("Scheduler matrix system tasks", () => {
       { label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false },
       { label: CATCHUP, kind: "interval", deleted_at: "20260926_213039", schedule: "*/30 * * * *", installed: false },
     ], []);
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
 
     fireEvent.click(await screen.findByRole("button", { name: "全部恢复" }));
     await waitFor(() => {
@@ -545,7 +546,7 @@ describe("independent scheduler reads", () => {
       if (String(url).includes("scope=system")) return new Promise<Response>(resolve => { resolveSystem = resolve; });
       return jsonResponse({ jobs: [] });
     }));
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     await screen.findByText(/正在检查系统任务/);
     expect(screen.queryByText("暂无周期调度任务")).toBeNull();
     await act(async () => resolveSystem(jsonResponse({ jobs: [{
@@ -567,7 +568,7 @@ describe("independent scheduler reads", () => {
       }], dispatcher: { online: true, detail: "心跳正常" } });
       return jsonResponse({});
     }));
-    const view = render(<SchedulerPage />);
+    const view = render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("无需等待系统检查的计划")).toBeTruthy();
     expect(screen.getByRole("button", { name: "编辑 fast" })).toBeTruthy();
     expect(screen.getByText(/正在检查系统任务/)).toBeTruthy();
@@ -583,7 +584,7 @@ describe("independent scheduler reads", () => {
       }] });
       return jsonResponse({});
     }));
-    render(<SchedulerPage />);
+    render(<MemoryRouter><SchedulerPage /></MemoryRouter>);
     expect(await screen.findByText("正常读取的计划")).toBeTruthy();
     expect((await screen.findByRole("alert")).textContent).toContain("系统任务读取失败");
   });

@@ -1,0 +1,70 @@
+{
+  "first_request_lines_changed": [
+    6,
+    8
+  ],
+  "scope": "frozen full initial supply, actual first research call only",
+  "variants": {
+    "control": {
+      "script_stage": "initial_research_only",
+      "topic_titles": [
+        "AI 先撞上年轻人的第一份工作：澳洲央行看到的“入门级岗位收缩”",
+        "每月 500 美元的 ChatGPT Pro 新档：多付的 300 美元买到什么",
+        "Claude 不生成像素，改“写代码画画”：70 万笔刷出的停车场",
+        "一句“帮我重编号”，Claude 删掉教授一年讲义：AI 文件操作的风险长什么样",
+        "GPT-6 Astra 帮物理学家写证明：AI 参与“标准模型格点定义”的 50 年难题",
+        "国会要收紧 AI 芯片出口：从 Nvidia 丑闻到你的 AI 账单，中间隔着什么（后置：传导链长）"
+      ],
+      "research_chars": 14589,
+      "research_sha256": "4c029b8efc5824158d9fb3fa4c5ca13c54c85cd3e1412e25181e38cdf3bef043",
+      "all_six_remarks": 6,
+      "count": 6,
+      "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91"
+    },
+    "candidate": {
+      "script_stage": "initial_research_only",
+      "topic_titles": [
+        "让 AI 画画，它不是生成像素，而是写了 70 万笔代码",
+        "澳大利亚央行：AI 先冲击的是 22 岁左右的入门岗位",
+        "ChatGPT Pro 多了 500 美元/月的一档：AI 订阅开始按“用量”分层",
+        "让 Claude 重新编号页面，它删掉了教授一年的讲义",
+        "AI 编程工具周更：Claude Code 的 Code Mode、Cursor Projects 多人协作",
+        "Ripple-65B Preview：美国开源权重模型，主打 Agentic Coding",
+        "英伟达芯片出口可能更严：国会两党在推，但还不是法律"
+      ],
+      "research_chars": 20304,
+      "research_sha256": "27b34eb27ada7e15f44b263c8f5d36ae00e64c4c92ba367485dacab310113346",
+      "all_six_remarks": 7,
+      "count": 7,
+      "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91"
+    },
+    "flexible_fields": {
+      "script_stage": "initial_research_only",
+      "topic_titles": [
+        "Claude Fable 5.2：不生成像素，而是用代码一笔一笔“画”出来",
+        "ChatGPT Pro 帮助页出现 500 美元/月档：贵在“Ultrafast”和 Work/Codex 额度",
+        "澳洲央行：AI 高暴露的入门岗位，年轻人先感到冷",
+        "AI 编程工具周报：Claude Code Code Mode、Cursor Projects 多人协作等，但需要补官方细节",
+        "Qwen Code nightly：agent 框架在补“企业接入、外部工作区、可观测性和开关”",
+        "OpenAI 科学博客首篇：GPT-6 Astra 把标准模型格点定义的想法推进成详细证明",
+        "背景型候选：美国国会想收紧 AI 芯片出口，但传导到普通用户还隔着好几层"
+      ],
+      "research_chars": 15524,
+      "research_sha256": "f7edc4b3243fde8c3e958c0683348962b40d2f7a89cd0b16bf5c15f807a14b62",
+      "all_six_remarks": 0,
+      "any_of_six_remarks": 0,
+      "count": 7,
+      "all_have_summary_date_and_sources": true,
+      "recurring_prose_headings": {
+        "这次改变了什么": 4,
+        "为什么值得讲": 2,
+        "适用条件与注意": 3
+      },
+      "source_sha256": "1f8cce0216760563e2145c90a415385a1387b15ec30cbc0271e7e59f77911b91"
+    }
+  },
+  "optional_field_request_lines_changed": [
+    26,
+    28
+  ]
+}

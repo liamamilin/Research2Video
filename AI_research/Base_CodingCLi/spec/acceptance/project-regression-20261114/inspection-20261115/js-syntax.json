@@ -1,0 +1,47 @@
+[
+  {
+    "path": "AI_research/Base_CodingCLi/core/video/page_regions.js",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/ui/eslint.config.js",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/ui/postcss.config.js",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "AI_research/Base_CodingCLi/ui/tailwind.config.js",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "autovideo/g2/layout/compile.cjs",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "autovideo/g3/acceptance/frontend-refresh-20261015/browser-validation.cjs",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "autovideo/g3/acceptance/tool-tutorial-20261101/capture_demo.cjs",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "autovideo/g3/web/static/app.js",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "music_workshop/web/app.js",
+    "returncode": 0,
+    "error": ""
+  }
+]

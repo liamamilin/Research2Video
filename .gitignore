@@ -14,6 +14,7 @@
 !/docs/images/episode-programme.png
 !/autovideo/
 !/AI_research/
+!/music_workshop/
 /AI_research/*
 !/AI_research/Base_CodingCLi/
 
@@ -106,17 +107,18 @@
 !/autovideo/g2/voice_assets/voxcpm2_anchor.wav
 
 # Generated run trees contain copied renderers and request/response snapshots too.
-/autovideo/g0/artifacts/
-/autovideo/g0/logs/
-/autovideo/g1/artifacts/
-/autovideo/g1/logs/
-/autovideo/g2/runs/
-/autovideo/g4/runs/
+/autovideo/g0/artifacts
+/autovideo/g0/logs
+/autovideo/g1/artifacts
+/autovideo/g1/logs
+/autovideo/g2/runs
+/autovideo/g4/runs
 /autovideo/g4/clean_install/*
 !/autovideo/g4/clean_install/README.md
-/autovideo/h1/runs/
+/autovideo/h1/runs
 
 # Keep compact acceptance reports and reviewed images; raw run records stay local.
 /autovideo/g3/acceptance/**/*.txt
+/AI_research/Base_CodingCLi/spec/acceptance/illustrated-explainer-20261108/matrices-20261109/videos
 **/acceptance/**/activation*.json
 **/acceptance/**/backend-activation*.json
