@@ -56,13 +56,32 @@ def _schedule(key: str) -> dict | None:
 
 
 def _with_production(items: list[dict]) -> list[dict]:
+    script_ids = list(dict.fromkeys(item["script_id"] for item in items if item.get("script_id")))
+    if not script_ids:
+        return items
+    scripts: dict[str, dict] = {}
+    renders_by_script: dict[str, list[dict]] = {}
+    with video_store.connect() as conn:
+        for start_idx in range(0, len(script_ids), 500):
+            batch = script_ids[start_idx:start_idx + 500]
+            marks = ",".join("?" for _ in batch)
+            for row in conn.execute(
+                f"SELECT id, status, stage, error, report_path, current_version FROM scripts WHERE id IN ({marks})",
+                batch,
+            ):
+                scripts[row["id"]] = dict(row)
+            for row in conn.execute(
+                f"SELECT id, script_id, status FROM renders WHERE script_id IN ({marks}) ORDER BY created_at DESC, id DESC",
+                batch,
+            ):
+                renders_by_script.setdefault(row["script_id"], []).append({"id": row["id"], "status": row["status"]})
     for item in items:
-        script = video_store.get_script(item["script_id"]) if item["script_id"] else None
+        sid = item.get("script_id")
+        script = scripts.get(sid) if sid else None
         if script:
-            renders = video_store.list_renders(script["id"])
             item.update(script_status=script["status"], stage=script.get("stage"), error=script.get("error"),
                         report_path=script.get("report_path"), version=script["current_version"],
-                        renders=[{"id": r["id"], "status": r["status"]} for r in renders])
+                        renders=renders_by_script.get(sid, []))
     return items
 
 

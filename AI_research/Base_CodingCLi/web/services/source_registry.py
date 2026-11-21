@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
+import threading
 import uuid
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -42,15 +44,53 @@ def validate_entry(key: str, fields: dict) -> None:
         raise ValueError('tags 需要非空字符串列表')
 
 
+_USAGES_CACHE: dict[tuple[str, str], tuple[tuple, dict[str, list[dict]]]] = {}
+_USAGES_LOCK = threading.Lock()
+
+
+def _yaml_dir_sig(root_dir: str) -> tuple[tuple[str, int, int], ...]:
+    items: list[tuple[str, int, int]] = []
+    if not os.path.isdir(root_dir):
+        return ()
+    for dirpath, _dirnames, filenames in os.walk(root_dir):
+        for fname in filenames:
+            if not fname.endswith(".yaml"):
+                continue
+            full = os.path.join(dirpath, fname)
+            try:
+                st = os.stat(full)
+                items.append((full, st.st_mtime_ns, st.st_size))
+            except OSError:
+                continue
+    items.sort()
+    return tuple(items)
+
+
 def usages_map(registry: dict, keys: list[str] | None = None) -> dict[str, list[dict]]:
-    """Compute source usage across all Jobs in a single scan (instead of O(sources * jobs))."""
+    """Compute source usage across all Jobs in a single scan, cached by mtime/size."""
     wanted = [k for k in (keys if keys is not None else list(registry)) if k in registry]
-    result: dict[str, list[dict]] = {k: [] for k in wanted}
     if not wanted:
-        return result
+        return {}
     paths = get_settings().paths
+    cache_key = (os.path.abspath(paths.jobs_dir), os.path.abspath(paths.config_dir))
+    reg_sig = tuple(
+        (k, str(v.get("spec") or ""), tuple(v.get("tags") or ()))
+        for k, v in sorted(registry.items())
+    )
+    sig = (
+        _yaml_dir_sig(paths.jobs_dir),
+        _yaml_dir_sig(os.path.join(paths.config_dir, "source_supply")),
+        reg_sig,
+    )
+    with _USAGES_LOCK:
+        cached = _USAGES_CACHE.get(cache_key)
+        if cached is not None and cached[0] == sig:
+            full = cached[1]
+            return {k: [dict(item) for item in full.get(k, ())] for k in wanted}
+
     from core import source_supply, source_coverage
 
+    full_result: dict[str, list[dict]] = {k: [] for k in registry}
     profiles = source_supply.profiles(paths.config_dir)
     profile_by_job = {
         job_name: prof
@@ -59,8 +99,7 @@ def usages_map(registry: dict, keys: list[str] | None = None) -> dict[str, list[
     }
     tag_to_keys: dict[str, list[str]] = {}
     spec_to_keys: dict[str, list[str]] = {}
-    for k in wanted:
-        entry = registry[k]
+    for k, entry in registry.items():
         for tag in entry.get("tags", []):
             tag_to_keys.setdefault(tag, []).append(k)
         if entry.get("spec"):
@@ -74,7 +113,7 @@ def usages_map(registry: dict, keys: list[str] | None = None) -> dict[str, list[
             text = str(s)
             if text.startswith("source:"):
                 k = text[7:]
-                if k in result:
+                if k in full_result:
                     per_key.setdefault(k, []).append(text)
             elif text.startswith("tag:"):
                 for k in tag_to_keys.get(text[4:], ()):
@@ -88,8 +127,10 @@ def usages_map(registry: dict, keys: list[str] | None = None) -> dict[str, list[
                     per_key.setdefault(k, []).append(target["spec"])
         job_name = data.get("name") or job
         for k, refs in per_key.items():
-            result[k].append({"job": job, "name": job_name, "references": refs})
-    return result
+            full_result[k].append({"job": job, "name": job_name, "references": refs})
+    with _USAGES_LOCK:
+        _USAGES_CACHE[cache_key] = (sig, full_result)
+    return {k: [dict(item) for item in full_result.get(k, ())] for k in wanted}
 
 
 def usages(registry: dict, key: str) -> list[dict]:

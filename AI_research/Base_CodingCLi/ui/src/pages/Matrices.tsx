@@ -536,7 +536,7 @@ export function MatrixDetailPage() {
   useEffect(() => {
     if (business && tab === "columns") return;
     const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, anyRunning ? 5000 : 30000);
+    const timer = window.setInterval(refresh, anyRunning ? 15000 : 45000);
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [anyRunning, load, business, tab]);

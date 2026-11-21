@@ -204,6 +204,12 @@ class ResearchEngine:
 
                 gather_cfg = opencode_cli.gather_settings(self.config_dir)
                 use_topic_pipeline = opencode_pipeline.enabled(job, gather_cfg)
+                use_single_topic_pipeline = (
+                    not use_topic_pipeline
+                    and opencode_pipeline.single_topic_enabled(job, gather_cfg)
+                    and opencode_cli.available({**gather_cfg, "enabled": True})
+                )
+                use_any_opencode_pipeline = use_topic_pipeline or use_single_topic_pipeline
 
                 def _load_sources(*, skip_teaser_details: bool = False):
                     """Always ``(source_block, fetched_or_None)``."""
@@ -226,16 +232,16 @@ class ResearchEngine:
 
                 self._opencode_gather_receipt = {}
                 self._source_fallback_error = ""
-                if use_topic_pipeline:
-                    # Four-stage OpenCode pipeline: fetch lightweight source index first,
-                    # skip full-page teaser expansion (Stage 3 reads deep pages per selected topic).
+                if use_any_opencode_pipeline:
+                    # OpenCode pipeline (4-stage or single-topic): fetch lightweight source index first,
+                    # skip full-page teaser expansion (per-topic gather reads deep pages directly).
                     try:
                         source_block, fetched = _load_sources(skip_teaser_details=True)
                     except CancelledError:
                         raise
-                    except Exception as exc:  # noqa: BLE001 - OpenCode Stage 1 can still discover via websearch
+                    except Exception as exc:  # noqa: BLE001 - OpenCode can still research via websearch
                         self._source_fallback_error = str(exc)[:300]
-                        logger.warning("Declared sources unavailable; continuing with OpenCode topic pipeline: %s",
+                        logger.warning("Declared sources unavailable; continuing with OpenCode pipeline: %s",
                                        self._source_fallback_error)
                         source_block = ""
                         fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
@@ -282,7 +288,7 @@ class ResearchEngine:
                                 logger.info("OpenCode gather attached: %s", self._opencode_gather_receipt)
                     else:
                         source_block, fetched = _load_sources()
-                if source_block and not use_topic_pipeline:
+                if source_block and not use_any_opencode_pipeline:
                     prompt = f"{prompt}\n\n{source_block}"
                 logger.debug("Prompt built: %d chars", len(prompt))
                 if verbose:
@@ -293,7 +299,7 @@ class ResearchEngine:
 
                 from .video import audience_strategy, question_material
                 audience_direct = (
-                    not use_topic_pipeline
+                    not use_any_opencode_pipeline
                     and fetch_only
                     and bool(source_block)
                     and audience_strategy.direct_from_materials(job, self.sys)
@@ -326,12 +332,19 @@ class ResearchEngine:
                 dossier_detail = {}
                 pipeline_material = ""
                 pipeline_receipt = {}
-                if use_topic_pipeline:
-                    logger.info("Job '%s' using 4-stage OpenCode topic pipeline (%s)", job_name, opencode_pipeline.MODE_NAME)
-                    print(f"  [{job_name}] Running 4-stage OpenCode topic pipeline...")
-                    raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run(
-                        self, job, source_block, knowledge=knowledge_job.enabled(job)
-                    )
+                if use_any_opencode_pipeline:
+                    if use_single_topic_pipeline:
+                        logger.info("Job '%s' using single-topic OpenCode pipeline (%s)", job_name, opencode_pipeline.SINGLE_MODE_NAME)
+                        print(f"  [{job_name}] Running single-topic OpenCode deep research...")
+                        raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run_single_topic(
+                            self, job, source_block
+                        )
+                    else:
+                        logger.info("Job '%s' using 4-stage OpenCode topic pipeline (%s)", job_name, opencode_pipeline.MODE_NAME)
+                        print(f"  [{job_name}] Running 4-stage OpenCode topic pipeline...")
+                        raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run(
+                            self, job, source_block, knowledge=knowledge_job.enabled(job)
+                        )
                     self._prompt_urls.update(_urls_in(source_block))
                     for item in (fetched[0] if fetched else []):
                         if getattr(item, "url", None):
@@ -465,14 +478,14 @@ class ResearchEngine:
                                  fields={"job": job_name, "status": "failed"})
                     return None
 
-                cleaned = (raw_content if use_topic_pipeline
+                cleaned = (raw_content if use_any_opencode_pipeline
                            else "" if audience_direct
                            else extract_report(raw_content, self.sys, cancel_token=self._cancel))
-                if use_topic_pipeline and self._supply_pending:
+                if use_any_opencode_pipeline and self._supply_pending:
                     cleaned = cleaned.rstrip() + "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
                 audience_detail = {}
                 supplement_material = ""
-                if not use_topic_pipeline and audience_strategy.job_channel(job):
+                if not use_any_opencode_pipeline and audience_strategy.job_channel(job):
                     self._progress({"type": "phase", "phase": "organizing_topics"})
                     initial_report = cleaned
                     import hashlib

@@ -51,6 +51,7 @@ channels:
   tech_daily: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
   tech_weekly: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
   tech_illustrated: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+  hot_trends: 每日重要热点：近48小时跨领域重要事件（宏观经济、财经商业、科技产业与民生消费），排除敏感时政军事与娱乐八卦；重磅1–3条拆独立单条，其余有价值变化进合集。
 # Job → channel 映射仅作兼容回退；新配置请在 Job 上写 audience_channel。
 jobs:
   monitoring/ai_flash_discovery: flash
@@ -69,6 +70,7 @@ jobs:
   ai_media/weekly_business_watch: ai_business
   ai_media/weekly_deep_research: ai_deep
   chains/ai_science_updates: ai_science
+  chains/hot_trends: hot_trends
   science/science_daily: science_daily
   science/science_weekly: science_weekly
   science/science_illustrated: science_illustrated
@@ -148,6 +150,8 @@ productions:
   ai_media_business_digest: ai_business
   ai_media_deep_dive: ai_deep
   ai_science_updates_each: ai_science
+  hot_trends_each: hot_trends
+  hot_trends_daily: hot_trends
 single_question:
 - ai_arena
 - ai_business
@@ -174,7 +178,8 @@ knowledge:
 - software_illustrated
 - tech_illustrated
 candidate_limits:
-  # 快讯的候选数量由本期材料决定，供合集和单条共同使用。
+  # 快讯与每日重要热点的候选数量由本期材料决定，供合集和单条共同使用。
   flash: null
+  hot_trends: null
   default: 4
   ai_tutorial: 3

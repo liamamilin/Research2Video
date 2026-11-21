@@ -37,6 +37,7 @@ from .provenance import extract_urls, normalize_url
 logger = logging.getLogger(__name__)
 
 MODE_NAME = "opencode_topic_v1"
+SINGLE_MODE_NAME = "opencode_single_topic"
 VERSION = 1
 
 
@@ -170,12 +171,23 @@ PER_TOPIC_GATHER_PROMPT = """你正在执行单个选题的【定向深挖调研
 # Mode & settings helpers
 # ---------------------------------------------------------------------------
 
+def single_topic_enabled(job: dict, config: dict | None = None) -> bool:
+    """Whether this Job should run single-topic OpenCode deep research directly."""
+    if job.get("opencode_gather") is False:
+        return False
+    mode = str(job.get("research_mode") or "").strip().lower()
+    if mode != SINGLE_MODE_NAME:
+        return False
+    cfg = config or {}
+    return bool(cfg.get("enabled", True))
+
+
 def enabled(job: dict, config: dict | None = None) -> bool:
     """Whether this Job should run the 4-stage OpenCode topic pipeline."""
     if job.get("opencode_gather") is False:
         return False
     mode = str(job.get("research_mode") or "").strip().lower()
-    if mode in {"legacy", "default", "off", "false"}:
+    if mode in {"legacy", "default", "off", "false", SINGLE_MODE_NAME}:
         return False
     if mode == MODE_NAME:
         return True
@@ -960,4 +972,102 @@ def run(engine, job: dict, source_block: str = "", *, knowledge: bool = False) -
     except OSError as exc:
         logger.debug("Pipeline audit artifact skipped: %s", exc)
 
+    return report_md, raw_material, receipt
+
+
+def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, str, dict]:
+    """Run focused single-topic OpenCode deep research for a pre-selected/custom theme.
+
+    Skips Stage 1 (multi-topic discovery) and Stage 2 (soft filter) and feeds the
+    selected theme directly into ``gather_single_topic`` + ``assemble_report``.
+    """
+    cancel = getattr(engine, "_cancel", None)
+    progress = getattr(engine, "_progress", None)
+    config = opencode_cli.gather_settings(engine.config_dir)
+    if not opencode_cli.available({**config, "enabled": True}):
+        raise RuntimeError("OpenCode CLI 不可用，无法执行单题深挖管线")
+
+    today = engine._now().strftime("%Y-%m-%d") if hasattr(engine, "_now") else time.strftime("%Y-%m-%d")
+    meta = job.get("theme_topic") if isinstance(job.get("theme_topic"), dict) else {}
+    title = str(meta.get("title") or job.get("name") or "主题研究").strip()
+    angle = str(meta.get("angle") or "").strip()
+    audience = str(meta.get("audience") or job.get("audience_channel") or "").strip()
+    promise = str(meta.get("promise") or angle or title).strip()
+    reason = str(meta.get("reason") or "").strip()
+    notes = str(meta.get("notes") or "").strip()
+    domain = str(meta.get("domain") or job.get("domain") or "").strip()
+
+    source_index = build_source_index(source_block, max_items=12)
+    seed_urls = _valid_urls(
+        list(meta.get("seed_urls") or [])
+        + list(extract_urls(notes))
+        + [item["url"] for item in source_index if item.get("url")]
+    )[:12]
+
+    questions = [str(q).strip() for q in (meta.get("research_questions") or []) if str(q).strip()][:5]
+    if not questions:
+        questions = [
+            f"针对「{title}」，有哪些可验证的一手事实、官方规则、关键数字或具体案例？",
+            f"目标观众（{audience or '普通观众'}）最关心的实际操作、选择依据、对比差异与适用边界是什么？",
+        ]
+        if angle:
+            questions.append(f"围绕角度「{angle}」，需要补齐哪些具象演示、输入输出过程或反例？")
+
+    topic = TopicCandidate(
+        title=title,
+        why_now=reason or angle,
+        audience=audience,
+        promise=promise,
+        seed_urls=seed_urls,
+        research_questions=questions,
+        topic_kind=str(meta.get("category_name") or "").strip(),
+    )
+
+    extra_reqs: list[str] = []
+    if str(job.get("gather_requirements") or "").strip():
+        extra_reqs.append(str(job["gather_requirements"]).strip())
+    elif str(job.get("prompt") or "").strip():
+        extra_reqs.append(str(job["prompt"]).strip()[:4000])
+    if notes:
+        extra_reqs.append("用户补充材料与限定背景（务必纳入正文并与查证结果结合）：\n" + notes[:6000])
+    if source_index:
+        preview_lines = [
+            f"- [{item['title']}]({item['url']}): {item['excerpt'][:200]}"
+            for item in source_index[:8] if item.get("url")
+        ]
+        if preview_lines:
+            extra_reqs.append("已预抓取的声明源参考：\n" + "\n".join(preview_lines))
+
+    single_job = {
+        **job,
+        "domain": domain or job.get("domain") or "",
+        "gather_requirements": "\n\n".join(extra_reqs),
+    }
+
+    if progress:
+        progress({"type": "phase", "phase": "gathering_topics", "detail": title, "topic": 1, "topics": 1})
+    cache_dir = Path(engine.workspace_dir) / "output" / "_opencode_gather" / "topic_cache"
+    dossier = gather_single_topic(
+        single_job, topic, config=config, cache_dir=cache_dir,
+        today=today, workspace_dir=engine.workspace_dir, cancel_token=cancel,
+    )
+    if progress:
+        progress({"type": "phase", "phase": "assembling_report", "topics": 1})
+    report_md, raw_material = assemble_report(single_job, [dossier], channel=str(job.get("audience_channel") or "").strip())
+    all_urls = _valid_urls(list(seed_urls) + list(dossier.get("urls") or []))
+    opencode_usage: dict[str, Any] = {"opencode_calls": 0 if dossier.get("cached") else 1}
+    if not dossier.get("cached"):
+        for k, v in ((dossier.get("meta") or {}).get("usage") or {}).items():
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                opencode_usage[k] = round(opencode_usage.get(k, 0) + v, 6) if isinstance(v, float) else opencode_usage.get(k, 0) + v
+    receipt = {
+        "mode": SINGLE_MODE_NAME,
+        "version": VERSION,
+        "source_index_count": len(source_index),
+        "topic_count": 1,
+        "cached": bool(dossier.get("cached")),
+        "seconds": dossier.get("seconds"),
+        "usage": opencode_usage,
+        "urls": all_urls,
+    }
     return report_md, raw_material, receipt

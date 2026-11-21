@@ -62,9 +62,32 @@ def research_spec(theme: dict, category: dict, matrix, *, sources: list[str]) ->
 有适合展示的页面或演示时，把链接和相关输入、过程、结果与对应解释放在一起。末尾保留来源清单。
 这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
 """
-    return {"prompt": prompt, "keywords": [theme["title"], matrix.domain or matrix.name], "language": "zh",
-            "sources": list(dict.fromkeys(sources)), "sources_limit": 6, "max_searches": 8,
-            "runtime": {"timeout_seconds": 2400, "skip_if_running": True}}
+    seed_urls = list(dict.fromkeys(
+        str(s["url"]).strip() for s in theme.get("signals", [])
+        if isinstance(s, dict) and str(s.get("url") or "").strip().startswith(("http://", "https://"))
+    ))
+    audience = theme["audience"] or category["audience"] or matrix.content.get("audience", "")
+    return {
+        "prompt": prompt,
+        "keywords": [theme["title"], matrix.domain or matrix.name],
+        "language": "zh",
+        "sources": list(dict.fromkeys(sources)),
+        "sources_limit": 6,
+        "max_searches": 8,
+        "research_mode": "opencode_single_topic",
+        "theme_topic": {
+            "title": theme["title"],
+            "angle": theme.get("angle", ""),
+            "audience": audience,
+            "promise": category.get("promise", ""),
+            "category_name": category.get("name", ""),
+            "domain": matrix.domain or matrix.name,
+            "reason": theme.get("reason", ""),
+            "notes": theme.get("notes", ""),
+            "seed_urls": seed_urls,
+        },
+        "runtime": {"timeout_seconds": 2400, "skip_if_running": True},
+    }
 
 
 def source_specs(category: dict, config_dir: str, jobs_dir: str, matrix) -> list[str]:

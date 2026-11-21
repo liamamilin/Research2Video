@@ -59,6 +59,7 @@ prompt: |
   - **证据来源**：链接
   正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。
 output: output/chains/hot_trends/{date}.md
+audience_channel: hot_trends
 topics:
   alias: hot_trends
   format: flash
