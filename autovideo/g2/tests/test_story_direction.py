@@ -47,6 +47,22 @@ def test_object_identity_keeps_meaningful_punctuation_and_version_numbers():
     assert story_direction.canonical('v1.2') != story_direction.canonical('v12')
 
 
+def test_long_model_entity_names_are_clamped_for_video_ir(tmp_path):
+    long_name = 'Anthropic Enterprise Admin Console'
+    assert len(long_name) > story_direction.NAME_MAX
+    picture = scene('a', 'object_showcase', {
+        'images': [{'caption': long_name, 'image_asset_id': 'i1'}]})
+    pages = [{'entities': [{'name': long_name, 'targets': ['image:0']}]}]
+    story = apply(tmp_path, [picture], pages)[0]
+    entity = story['entities'][0]
+    assert entity['name'] == long_name[:story_direction.NAME_MAX]
+    assert len(entity['name']) <= story_direction.NAME_MAX
+    # Same full name still shares identity after clamping.
+    again = apply(tmp_path, [picture], pages, seeds=[entity])[0]
+    assert again['entities'][0]['id'] == entity['id']
+    assert again['entities'][0]['name'] == entity['name']
+
+
 def test_model_entities_connect_material_to_native_chart_and_revisions_use_existing_palette(tmp_path):
     picture = scene('a', 'object_showcase', {'images': [{'caption': '产品页面', 'image_asset_id': 'i1'}]})
     plot = scene('b', 'scatter_chart', {'points': [{'name': '方案 A'}, {'name': '方案 B'}]})
