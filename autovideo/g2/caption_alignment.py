@@ -222,6 +222,31 @@ def srt_text(cues: list[dict]) -> str:
     return "\n\n".join(f"{i+1}\n{stamp(c['start_ms'])} --> {stamp(c['end_ms'])}\n{c['text']}" for i, c in enumerate(cues)) + "\n"
 
 
+def fallback_plan(ir: dict, reason: str) -> dict:
+    """Build a verified proportional-timing caption plan when forced alignment fails or times out."""
+    audio_id = ir["narration"].get("audio_asset_id")
+    audio = next((a for a in ir.get("assets", []) if a["id"] == audio_id), None) if audio_id else None
+    cues: list[dict] = []
+    evidence: list[dict] = []
+    for segment in ir["narration"]["segments"]:
+        seg_cues = proportional_cues(segment)
+        cues.extend(seg_cues)
+        evidence.append({"segment_id": segment["id"], "items": [], "method": "proportional_fallback",
+                         "fallback_reason": reason[:300]})
+    plan = {
+        "version": 2,
+        "method": "proportional_fallback",
+        "fallback_segments": len(ir["narration"]["segments"]),
+        "fallback_reason": reason[:300],
+        "narration_sha256": narration_hash(ir),
+        "audio_sha256": audio["sha256"] if audio else None,
+        "cues": cues,
+        "word_evidence": evidence,
+    }
+    verify_plan(ir, plan)
+    return plan
+
+
 def prepare(pipeline, ir: dict) -> dict:
     from g2.voices import qwen_paths
     target = pipeline.ARTIFACTS / "caption-alignment.json"
@@ -229,10 +254,19 @@ def prepare(pipeline, ir: dict) -> dict:
     model = pipeline.PROJECT / "g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit/model.safetensors"
     if not python.is_file() or not model.is_file():
         raise pipeline.G2Fault("CAPTION_ALIGNER_NOT_CONFIGURED", "短句字幕需要本机字幕对齐运行时和固定模型，请完成模型配置")
-    pipeline._run_fixed_command("caption-forced-alignment", [python, pipeline.PROJECT / "g2/align_captions.py",
-        "--ir", pipeline.IR_PATH, "--output", target], pipeline.PROJECT, timeout=900)
-    plan = json.loads(target.read_text())
-    verify_plan(ir, plan)
+    timeout = max(900, min(1800, len(ir["narration"]["segments"]) * 8))
+    try:
+        pipeline._run_fixed_command("caption-forced-alignment", [python, pipeline.PROJECT / "g2/align_captions.py",
+            "--ir", pipeline.IR_PATH, "--output", target], pipeline.PROJECT, timeout=timeout)
+        plan = json.loads(target.read_text())
+        verify_plan(ir, plan)
+    except (pipeline.G2Fault, OSError, ValueError, KeyError, TypeError) as exc:
+        if isinstance(exc, pipeline.G2Fault) and exc.code not in {"COMMAND_TIMEOUT", "COMMAND_FAILED"}:
+            raise
+        reason = f"{getattr(exc, 'code', type(exc).__name__)}: {exc}"
+        plan = fallback_plan(ir, reason)
+        pipeline.write_json(target, plan)
+        print(f"CAPTION FALLBACK: forced alignment degraded to proportional timing ({reason[:200]})", flush=True)
     (pipeline.ARTIFACTS / "captions.srt").write_text(srt_text(plan["cues"]), encoding="utf-8")
     return plan
 

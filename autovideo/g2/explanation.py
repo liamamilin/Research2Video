@@ -63,6 +63,12 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               'lines逐行填写text、对应讲稿短语phrase，以及可选的简短annotation；'
               '修改前后用change=remove/add标记，其他行省略change。配置、端口、版本号的代码修改也用code_demo，不用价格变化卡。保留代码原文、缩进和标点；'
               'phrase只给本段正在讲解的行；保留为上下文的代码行可省略phrase。沿用讲述顺序。没有代码输入时使用现有截图或图解，不为装饰编写新代码。'
+              '视觉多样性与反读屏规则：底部字幕已经完整显示旁白，画面负责提供结构、对比与锚点，不要把旁白原句整句搬上卡片。'
+              'concept_reveal每条lines和comparison要点只提炼4到16字视觉锚点短语（优先“关键词：核心结论/数字”）。'
+              '避免连续3页及以上都用concept_reveal纯文字卡：只要段落包含两方对照、前后变化或利弊权衡，优先用comparison；'
+              '包含单个醒目数字、倍数、比例或阈值，优先用big_number；包含因果链、架构或步骤流转，优先用flow_diagram；'
+              '包含多对象数值对比或趋势，优先用bar_chart/data_chart/scatter_chart。'
+              '开场首组内容优先用有视觉冲击力的组件（big_number、price_change、comparison或反差感强的title_card）建立重心。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
     system += ('明确的传递过程可以用flow_diagram：2到8个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。复杂关系可按讲述阶段分成多页，保留各阶段的必要上下文。' + visual_language.GUIDANCE)
     from g2.story_direction import GUIDANCE

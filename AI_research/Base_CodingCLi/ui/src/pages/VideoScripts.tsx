@@ -163,7 +163,7 @@ export function VideoScriptsPage() {
   const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (!["FAILED", "SKIPPED"].includes(s.status) && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, inFlight ? 5000 : 30000);
+    const timer = window.setInterval(refresh, inFlight ? 15000 : 45000);
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [inFlight, load]);

@@ -91,7 +91,7 @@ export function HomeBoardPage() {
       if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); }
     }
   }, []);
-  const hasWorking = Boolean(board?.items.some((i) => i.group === "working"));
+  const hasWorking = Boolean(board?.items?.some((i) => i.group === "working"));
   useEffect(() => {
     void load();
     return () => { flight.current?.abort(); flight.current = null; };

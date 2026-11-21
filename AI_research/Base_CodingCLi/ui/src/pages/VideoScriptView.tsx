@@ -836,11 +836,48 @@ function RenderPanel({
         </div>
       ) : null}
 
-      {!detail.topic.local_video && latest?.status === "COMPLETED" && latest.timings?.elapsed_seconds != null ? (
-        <p className="text-xs text-text-muted">
-          总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
-          {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
-        </p>
+      {!detail.topic.local_video && (latest?.status === "COMPLETED" || latest?.status === "FAILED") && (latest.timings?.elapsed_seconds != null || latest.timings?.diagnostics?.steps?.length) ? (
+        <div className="text-xs text-text-muted space-y-1.5">
+          {latest.timings?.elapsed_seconds != null ? (
+            <p>
+              总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
+              {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
+              {latest.timings.diagnostics?.executor ? ` · 引擎 ${latest.timings.diagnostics.executor}` : ""}
+              {latest.timings.diagnostics?.llm?.calls != null
+                ? ` · 分镜 LLM ${latest.timings.diagnostics.llm.calls} 次${latest.timings.diagnostics.llm.cost_usd ? `（估算上界 $${latest.timings.diagnostics.llm.cost_usd.toFixed(3)}）` : ""}`
+                : ""}
+            </p>
+          ) : null}
+          {latest.timings?.diagnostics?.steps?.length ? (
+            <p className="flex flex-wrap gap-x-2.5 gap-y-1">
+              {latest.timings.diagnostics.steps.map((s) => (
+                <span key={s.name} className={s.status === "failed" ? "text-danger" : undefined}>
+                  {s.label} {s.seconds == null ? "失败" : s.seconds >= 60 ? `${(s.seconds / 60).toFixed(1)}m` : `${Math.round(s.seconds)}s`}
+                </span>
+              ))}
+            </p>
+          ) : null}
+          {latest.timings.diagnostics?.components ? (
+            <p className="flex flex-wrap gap-1.5 items-center">
+              <span>画面组件：</span>
+              {Object.entries(latest.timings.diagnostics.components).map(([comp, count]) => (
+                <span key={comp} className="badge border border-border font-mono">{comp}×{count}</span>
+              ))}
+              {latest.timings.diagnostics.text_card_ratio != null ? (
+                <span className={cn("badge border", latest.timings.diagnostics.text_card_ratio > 0.7 ? "border-warning/40 text-warning" : "border-border")}>
+                  纯文字卡 {Math.round(latest.timings.diagnostics.text_card_ratio * 100)}%
+                </span>
+              ) : null}
+              {latest.timings.diagnostics.captions?.fallback_segments ? (
+                <span className="badge border border-warning/40 text-warning">
+                  字幕比例回退 {latest.timings.diagnostics.captions.fallback_segments} 段
+                </span>
+              ) : latest.timings.diagnostics.captions?.cue_count ? (
+                <span className="badge border border-border">字幕 {latest.timings.diagnostics.captions.cue_count} 条</span>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {latest && active ? (

@@ -214,7 +214,16 @@ class G2ProcessRunner:
         failed_stage = None
         pending_log = b""
         started = time.monotonic()
-        timeout_seconds = self.settings.runner_timeout_seconds + (300 if input_payload.get("package") else 0)
+        base_timeout_seconds = self.settings.runner_timeout_seconds + (300 if input_payload.get("package") else 0)
+        timeout_seconds = base_timeout_seconds
+        if job.get("duration_mode") == "content":
+            try:
+                source_chars = len(Path(job["source_abs_path"]).read_text(encoding="utf-8").strip())
+            except OSError:
+                source_chars = len(str(input_payload.get("source_text") or ""))
+            if source_chars > 2500:
+                # Long scripts can spend >45m in local MLX TTS before alignment.json is written.
+                timeout_seconds += min(3600, round((source_chars - 2500) / 4.2 * 3))
         workload_timeout_loaded = False
         input_analysis_loaded = False
         error_code = None
@@ -257,7 +266,8 @@ class G2ProcessRunner:
                         try:
                             measured = json.loads((run_dir / "artifacts/alignment.json").read_text())
                             # Preserve the startup/model allowance and add time for measured render work.
-                            timeout_seconds += max(0, float(measured["duration_seconds"])) * 6
+                            measured_budget = base_timeout_seconds + max(0, float(measured["duration_seconds"])) * 6
+                            timeout_seconds = max(timeout_seconds, measured_budget)
                             workload_timeout_loaded = True
                         except (OSError, ValueError, KeyError, TypeError):
                             pass
@@ -320,7 +330,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING", "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "RENDER_CONFIG_INVALID", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"} | PACKAGE_FINAL_ERRORS:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING", "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "RENDER_CONFIG_INVALID", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH", "MODEL_COST_BUDGET_EXCEEDED"} | PACKAGE_FINAL_ERRORS:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)

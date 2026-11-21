@@ -85,7 +85,11 @@ def script_owners(config_dir: str, jobs_dir: str, scripts: list[dict]) -> tuple[
     sources = topic_store.sources(jobs_dir)
     configs = production.load_all(config_dir, jobs_dir)
     ids = {s["id"] for s in scripts}
-    every = scripts + [s for s in store.list_scripts(limit=100000, archived=True) if s["id"] not in ids]
+    needs_archived = any(
+        (s.get("topic") or {}).get("parent_script") and (s.get("topic") or {}).get("parent_script") not in ids
+        for s in scripts
+    )
+    every = scripts + ([s for s in store.list_scripts(limit=100000, archived=True) if s["id"] not in ids] if needs_archived else [])
     names: dict[str, str] = {s.job: s.label for s in sources.values()}
     out = {}
     for attributed in _attribute(config_dir, jobs_dir, configs, sources, owner, scripts=every):

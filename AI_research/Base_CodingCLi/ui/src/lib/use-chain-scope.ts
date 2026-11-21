@@ -20,7 +20,7 @@ function useLocalChainScope(enabled=true){
     .finally(()=>{pending=false});
   };
   const refresh=()=>{if(!document.hidden)load()};
-  load();const timer=window.setInterval(refresh,15000);
+  load();const timer=window.setInterval(refresh,45000);
   document.addEventListener('visibilitychange',refresh);
   return()=>{alive=false;controller.abort();clearInterval(timer);document.removeEventListener('visibilitychange',refresh)};
  },[key]);

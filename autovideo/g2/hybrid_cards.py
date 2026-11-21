@@ -1,6 +1,7 @@
 """Speech-led fast cards with trusted Remotion clips only where motion helps."""
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 import sys
 import time
@@ -65,7 +66,7 @@ def normalize_clip(pipeline, source: Path, output: Path, label: str) -> None:
     pipeline._run_fixed_command(label, [pipeline.FFMPEG, '-nostdin', '-v', 'warning', '-n',
         '-i', source, '-map', '0:v:0', '-an', '-vf',
         'scale=in_range=auto:out_range=tv:out_color_matrix=bt709,format=yuv420p',
-        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-profile:v', 'high',
+        '-c:v', 'libx264', '-preset', 'superfast', '-crf', '18', '-profile:v', 'high',
         '-color_range', 'tv', '-colorspace', 'bt709', '-color_trc', 'bt709', '-color_primaries', 'bt709',
         '-video_track_timescale', '90000', output], pipeline.PROJECT, timeout=1200)
 
@@ -73,11 +74,17 @@ def normalize_clip(pipeline, source: Path, output: Path, label: str) -> None:
 def join_clips(pipeline, compiled: dict, ir: dict, clips: list[dict], root: Path) -> tuple[str, list]:
     from g2.caption_alignment import verify_plan
 
-    normalized = []
-    for index, clip in enumerate(clips):
+    def _norm(item):
+        index, clip = item
         output = root / f'clip-{index:03d}-normalized.mp4'
         normalize_clip(pipeline, clip['path'], output, f'hybrid-normalize-{index:03d}')
-        normalized.append({'path': output})
+        return {'path': output}
+
+    if len(clips) > 1:
+        with ThreadPoolExecutor(max_workers=2, thread_name_prefix='hybrid-norm') as pool:
+            normalized = list(pool.map(_norm, enumerate(clips)))
+    else:
+        normalized = [_norm((0, clips[0]))] if clips else []
     clips = normalized
     concat = root / 'clips.ffconcat'
     _concat(concat, clips)
@@ -166,7 +173,7 @@ def render(pipeline, compiled: dict, *, renderer_root: Path | None = None) -> No
             pipeline._run_fixed_command(f'hybrid-cards-{index:03d}', [pipeline.FFMPEG,
                 '-nostdin', '-v', 'warning', '-n', '-safe', '0', '-f', 'concat', '-i', concat,
                 '-vf', 'fps=30,format=yuv420p', '-frames:v', str(frames), '-an',
-                '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-profile:v', 'high',
+                '-c:v', 'libx264', '-preset', 'superfast', '-crf', '18', '-profile:v', 'high',
                 '-video_track_timescale', '90000', output], pipeline.PROJECT, timeout=max(1200, frames//5))
         block['render_seconds'] = round(time.monotonic()-clip_started, 3)
         # Accurate clip lengths prevent a still stream's repeated closing image

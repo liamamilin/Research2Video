@@ -587,6 +587,24 @@ def list_rechecks(script_id: str) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def rechecks_by_script(script_ids: list[str]) -> dict[str, list[dict]]:
+    """Batch recheck rows for list/board views without N+1 queries."""
+    ids = list(dict.fromkeys(script_ids))
+    out: dict[str, list[dict]] = {}
+    if not ids:
+        return out
+    with connect() as conn:
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            marks = ",".join("?" for _ in batch)
+            for row in conn.execute(
+                f"SELECT * FROM rechecks WHERE script_id IN ({marks}) ORDER BY created_at DESC, id DESC",
+                batch,
+            ):
+                out.setdefault(row["script_id"], []).append(dict(row))
+    return out
+
+
 def update_recheck(recheck_id: str, **fields: Any) -> None:
     if not fields:
         return

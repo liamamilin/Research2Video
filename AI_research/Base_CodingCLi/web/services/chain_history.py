@@ -19,17 +19,21 @@ def outcome(native_status: str, states: set[str]) -> str:
 
 def rows(chain: dict) -> list[dict]:
     outputs = set(chain.get("outputs", []) + chain.get("retired_outputs", []))
-    with store.connect() as db:
-        batches = db.execute(
-            "SELECT id,spec,status,note,started_at,started_by FROM autopilot_runs ORDER BY started_at DESC"
-        ).fetchall()
-        states = {}
-        if outputs:
+    batches = []
+    states = {}
+    if outputs:
+        sorted_outputs = sorted(outputs)
+        like_clause = " OR ".join("spec LIKE ?" for _ in sorted_outputs)
+        with store.connect() as db:
+            batches = db.execute(
+                f"SELECT id,spec,status,note,started_at,started_by FROM autopilot_runs WHERE {like_clause} ORDER BY started_at DESC",
+                [f'%"{o}"%' for o in sorted_outputs],
+            ).fetchall()
             for run_id, state in db.execute(
                 "SELECT run_id,state FROM autopilot_items WHERE production IN ("
-                + ",".join("?" for _ in outputs)
+                + ",".join("?" for _ in sorted_outputs)
                 + ")",
-                sorted(outputs),
+                sorted_outputs,
             ):
                 states.setdefault(run_id, set()).add(state)
     result = []

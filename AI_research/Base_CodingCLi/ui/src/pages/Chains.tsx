@@ -27,7 +27,7 @@ function SourcePicker({catalog,values,onChange}:{catalog:Catalog;values:string[]
 
 export function ChainsPage(){
   const {key}=useParams();const navigate=useNavigate();const role=useAuthStore(s=>s.user?.role);const [access,setAccess]=useState<{mode:string;can_create:boolean;writable_chains:string[]}>({mode:'read_only',can_create:false,writable_chains:[]});
-  const [items,setItems]=useState<Chain[]>(() => readPageSnapshot<{items:Chain[]}>("chains")?.items ?? []);const [archived,setArchived]=useState<Chain[]>([]);const [data,setData]=useState<Chain|null>(null);const [catalog,setCatalog]=useState<Catalog|null>(null);
+  const [items,setItems]=useState<Chain[]>(() => readPageSnapshot<{items:Chain[]}>("chains")?.items ?? []);const [archived,setArchived]=useState<Chain[]>([]);const [data,setData]=useState<Chain|null>(() => (key && key !== 'new' ? readPageSnapshot<Chain>(`chain:${key}`) : null));const [catalog,setCatalog]=useState<Catalog|null>(null);
   const canEdit=role!=='viewer'&&access.mode==='enabled'&&(key==='new'?access.can_create:!key?access.can_create:access.writable_chains.includes('*')||access.writable_chains.includes(key)||!!data?.access?.can_write);
   const [error,setError]=useState('');const [loadError,setLoadError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false);const [query,setQuery]=useState('');const [tab,setTab]=useState('overview');
   const [edit,setEdit]=useState(false);const [draft,setDraft]=useState<{name:string;prompt:string;sources:string[];schedule:string;outputs:Output[];apply_shared:boolean;source_supply_enabled:boolean;window_days:number;window_mode:string}|null>(null);
@@ -41,31 +41,38 @@ export function ChainsPage(){
   const load=useCallback(async()=>{
     const requested=key;const revision=snapshotRevision();
     const requests:Promise<unknown>[]=[api<Catalog>('/api/chains/catalog').then(cat=>{if(route.current===requested&&revision===snapshotRevision()){setCatalog(cat);if('access' in cat)setAccess(cat.access as typeof access)}})];
-    if(key&&key!=='new')requests.push(api<Chain>('/api/chains/'+key).then(detail=>{if(route.current===requested&&revision===snapshotRevision())setData(detail)}));
+    if(key&&key!=='new')requests.push(api<Chain>('/api/chains/'+key).then(detail=>{if(route.current===requested&&revision===snapshotRevision()){savePageSnapshot(`chain:${key}`,detail,revision);setData(detail)}}));
     else if(!key)requests.push(api<{items:Chain[];archived:Chain[]}>('/api/chains').then(list=>{if(route.current===requested&&revision===snapshotRevision()){savePageSnapshot("chains",list,revision);setItems(list.items);setArchived(list.archived)}}));
     await Promise.all(requests);if(route.current===requested&&revision===snapshotRevision())setLoadError('');
   },[key]);
-  useEffect(()=>{setData(null);setRun(null);setNotice('');setError('');setLoadError('');setBusy(false);setEdit(false);setConfirmDelete(null);setTab('overview');void load().catch(e=>{if(route.current===key)setLoadError(msg(e))});},[key,load]);
+  useEffect(()=>{setData(key&&key!=='new'?readPageSnapshot<Chain>(`chain:${key}`):null);setRun(null);setNotice('');setError('');setLoadError('');setBusy(false);setEdit(false);setConfirmDelete(null);setTab('overview');void load().catch(e=>{if(route.current===key)setLoadError(msg(e))});},[key,load]);
   useEffect(()=>{if(key==='new'&&step===2)void api<{voices:{id:string;label:string}[]}>('/api/video/autovideo').then(x=>setVoices(x.voices)).catch(()=>{});},[key,step]);
   useEffect(()=>{localStorage.setItem('chain-wizard-v1',JSON.stringify(wizard));},[wizard]);
   const sharedKey=catalog?.chains.find(c=>c.job===wizard.existing_job)?.key;
   useEffect(()=>{let alive=true;setSharedResearch(null);if(key==='new'&&sharedKey)void api<Chain>('/api/chains/'+sharedKey).then(d=>{if(alive)setSharedResearch(d)}).catch(e=>{if(alive)setError(msg(e))});return()=>{alive=false}},[key,sharedKey]);
 
   const runId=run?.id;
+  const activeRun=Boolean(runId&&(!run||['RUNNING','CANCELLING'].includes(run.status)))||Boolean(data?.runs?.some(r=>['RUNNING','CANCELLING'].includes(r.status)));
+  const pollMs=loadError?6000:activeRun?8000:30000;
   useEffect(()=>{
     if(!key||key==='new'||edit)return;
     let stopped=false;let timer:number|undefined;
     async function poll(){
       if(stopped)return;
-      await Promise.allSettled([
-        loadError?load():api<Chain>('/api/chains/'+key).then(d=>{if(!stopped&&route.current===key)setData(d)}),
-        ...(runId?[api<Run>('/api/chains/runs/'+runId).then(r=>{if(!stopped&&route.current===key)setRun(r)})]:[]),
-      ]);
-      if(!stopped)timer=window.setTimeout(()=>void poll(),6000);
+      if(!document.hidden){
+        const revision=snapshotRevision();
+        await Promise.allSettled([
+          loadError?load():api<Chain>('/api/chains/'+key).then(d=>{if(!stopped&&route.current===key&&revision===snapshotRevision()){savePageSnapshot(`chain:${key}`,d,revision);setData(d)}}),
+          ...(runId?[api<Run>('/api/chains/runs/'+runId).then(r=>{if(!stopped&&route.current===key)setRun(r)})]:[]),
+        ]);
+      }
+      if(!stopped)timer=window.setTimeout(()=>void poll(),pollMs);
     }
-    timer=window.setTimeout(()=>void poll(),6000);
-    return()=>{stopped=true;clearTimeout(timer)};
-  },[key,edit,runId,load,loadError]);
+    const onVisible=()=>{if(!document.hidden&&!stopped){clearTimeout(timer);void poll();}};
+    document.addEventListener('visibilitychange',onVisible);
+    timer=window.setTimeout(()=>void poll(),pollMs);
+    return()=>{stopped=true;clearTimeout(timer);document.removeEventListener('visibilitychange',onVisible)};
+  },[key,edit,runId,load,loadError,pollMs]);
   async function act(fn:()=>Promise<unknown>,success='已保存，关联页面将读取同一配置'){const requested=route.current;setBusy(true);setError('');setNotice('');try{await fn();await load();if(route.current===requested)setNotice(success);}catch(e){if(route.current===requested)setError(msg(e));}finally{if(route.current===requested)setBusy(false);}}
   const link=(path:string)=>path+(path.includes('?')?'&':'?')+'chain='+encodeURIComponent(key||'');
   function beginEdit(){if(!data)return;void api<{voices:{id:string;label:string}[]}>('/api/video/autovideo').then(x=>setVoices(x.voices)).catch(()=>{});setDraft({name:data.name,prompt:data.research.prompt,sources:[...data.research.sources],schedule:data.schedules[0]?.schedule||'',outputs:data.outputs_detail.map(x=>({...x,render:{...x.render}})),apply_shared:false,source_supply_enabled:data.source_supply?.enabled??true,window_days:data.window_days||7,window_mode:data.window_mode||'rolling'});setEdit(true);}

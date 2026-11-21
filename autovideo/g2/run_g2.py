@@ -526,12 +526,23 @@ def strip_schema_echo(result, schema: dict):
             and "type" not in (schema.get("properties") or {}):
         result = {key: value for key, value in result.items() if key != "type"}
     if isinstance(result, dict) and isinstance(result.get("pages"), list):
-        role_enum = ((((schema.get("properties") or {}).get("pages") or {}).get("items") or {})
-                     .get("properties") or {}).get("story_role", {}).get("enum")
-        if isinstance(role_enum, list) and "support" not in role_enum and "explain" in role_enum:
-            for page in result["pages"]:
-                if isinstance(page, dict) and page.get("story_role") == "support":
+        page_props = ((((schema.get("properties") or {}).get("pages") or {}).get("items") or {})
+                      .get("properties") or {})
+        role_enum = (page_props.get("story_role") or {}).get("enum")
+        entity_name_max = (((((page_props.get("entities") or {}).get("items") or {}).get("properties") or {})
+                            .get("name") or {}).get("maxLength"))
+        for page in result["pages"]:
+            if not isinstance(page, dict):
+                continue
+            if isinstance(role_enum, list) and "support" not in role_enum and "explain" in role_enum:
+                if page.get("story_role") == "support":
                     page["story_role"] = "explain"
+            if isinstance(entity_name_max, int) and entity_name_max > 0 and isinstance(page.get("entities"), list):
+                for entity in page["entities"]:
+                    if isinstance(entity, dict) and isinstance(entity.get("name"), str):
+                        cleaned = re.sub(r"\s+", " ", entity["name"].strip())
+                        if len(cleaned) > entity_name_max:
+                            entity["name"] = cleaned[:entity_name_max]
     return result
 
 
@@ -790,7 +801,8 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict, *, on_chapter
         work_path = ARTIFACTS / "voice-work-input.json"
         write_json(work_path, {**full, "segments": missing})
         try:
-            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
+            voice_timeout = max(3600, min(7200, len(missing) * 45))
+            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=voice_timeout)
         finally:
             if watcher is not None:
                 watcher_stop.set()
@@ -1181,10 +1193,12 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         raise G2Fault("RENDER_CONFIG_INVALID", str(exc)) from exc
     write_json(ARTIFACTS / "render-resources.json", resources)
     target = hybrid_segment['output'] if hybrid_segment else VIDEO_PATH
+    x264_preset = os.environ.get("AUTOVIDEO_G2_X264_PRESET", "veryfast")
     argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", target,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
-            f"--concurrency={resources['concurrency']}", "--crf=18", f"--browser-executable={CHROME}", "--overwrite=false",
+            f"--concurrency={resources['concurrency']}", "--crf=18", f"--x264-preset={x264_preset}",
+            "--hardware-acceleration=if-possible", f"--browser-executable={CHROME}", "--overwrite=false",
             RENDER_NO_CACHE]
     if hybrid_segment is not None:
         argv.extend([f"--frames={hybrid_segment['start_frame']}-{hybrid_segment['end_frame'] - 1}", '--muted', '--color-space=bt709'])
@@ -1305,8 +1319,13 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
             props = json.loads((ARTIFACTS / "render-props.json").read_text())
             if props["ir"].get("caption_cues") != captions:
                 raise G2Fault("CAPTION_RENDER_TRACK_MISMATCH", "实际渲染输入与短句字幕轨道不一致")
-            qa["captions"].update(alignment="local forced alignment; exact original text coverage",
-                                  cue_count=len(captions), render_track_checked=True)
+            align_meta = json.loads((ARTIFACTS / "caption-alignment.json").read_text()) if (ARTIFACTS / "caption-alignment.json").is_file() else {}
+            fallback_segs = sum(1 for item in align_meta.get("word_evidence", []) if isinstance(item, dict) and item.get("method") == "proportional_fallback")
+            method = align_meta.get("method") or ("proportional_fallback" if fallback_segs else "forced_alignment")
+            qa["captions"].update(
+                alignment="proportional fallback; exact original text coverage" if method == "proportional_fallback" else "local forced alignment; exact original text coverage",
+                method=method, fallback_segments=fallback_segs,
+                cue_count=len(captions), render_track_checked=True)
     write_json(ARTIFACTS / "qa.json", qa)
     print(f"MEDIA PASS: {seconds:.3f}s, {frames} frames, AAC/TTS correlation={correlation:.5f}", flush=True)
     return qa

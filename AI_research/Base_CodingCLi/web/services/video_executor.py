@@ -36,6 +36,13 @@ logger = logging.getLogger("ai_research.web.video_executor")
 MAX_RETRIES = 2
 #: A render AutoVideo failed is submitted again this many times (a render is 15-30 minutes of its time).
 RENDER_RETRIES = 1
+#: Deterministic render errors that will fail identically on retry — hold immediately instead of burning 20+ minutes.
+NON_RETRYABLE_RENDER_CODES = frozenset({
+    "MODEL_COST_BUDGET_EXCEEDED", "MODEL_SCHEMA_REJECTED", "NARRATION_TEXT_MISMATCH",
+    "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "RENDER_CONFIG_INVALID",
+    "DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING",
+    "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "DISK_OFFLINE", "STORAGE_UNAVAILABLE",
+})
 #: A script that failed only because no search provider could answer is retried once search recovers, this many times
 #: (core.search_health spaces the tries by its 10-30 minute cooldowns), without using up MAX_RETRIES.
 SEARCH_RETRIES = 24
@@ -374,6 +381,9 @@ def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optio
     if latest and latest["status"] == "FAILED" and latest.get("error_code") in {"SUBMIT_UNCONFIRMED", "DOWNLOAD_FAILED"}:
         out["hold"] = ("提交结果尚未确认，请先在 AutoVideo 作品库核对任务" if latest["error_code"] == "SUBMIT_UNCONFIRMED"
                        else "成片已生成但复制失败，点击重跑可继续复制，无需重新生成")
+        return out
+    if latest and latest["status"] == "FAILED" and latest.get("error_code") in NON_RETRYABLE_RENDER_CODES:
+        out["hold"] = f"出片失败（{latest['error_code']}，确定性错误不自动重试）：{latest.get('error_message') or '请检查配置或日志'}"
         return out
     if len(failed) > RENDER_RETRIES:
         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"

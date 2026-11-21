@@ -5,6 +5,7 @@ from core.config_transaction import remove as remove_config_file
 import copy
 import hashlib
 import json
+import os
 import re
 import threading
 import time
@@ -75,14 +76,19 @@ _YAML_DIGEST_LOCK = threading.Lock()
 def _yaml_tree_digest(config_dir: str, jobs_dir: str) -> bytes:
     """Hash every YAML file under config/ and jobs/, cached by (path, mtime_ns, size)."""
     key = (config_dir, jobs_dir)
-    files = sorted([*Path(config_dir).rglob("*.yaml"), *Path(jobs_dir).rglob("*.yaml")])
-    sig = []
-    for f in files:
-        try:
-            st = f.stat()
-            sig.append((str(f), st.st_mtime_ns, st.st_size))
-        except OSError:
-            continue
+    sig: list[tuple[str, int, int]] = []
+    for root_dir in (config_dir, jobs_dir):
+        for dirpath, _dirnames, filenames in os.walk(root_dir):
+            for fname in filenames:
+                if not fname.endswith(".yaml"):
+                    continue
+                full = os.path.join(dirpath, fname)
+                try:
+                    st = os.stat(full)
+                    sig.append((full, st.st_mtime_ns, st.st_size))
+                except OSError:
+                    continue
+    sig.sort()
     sig_tuple = tuple(sig)
     with _YAML_DIGEST_LOCK:
         cached = _YAML_DIGEST_CACHE.get(key)

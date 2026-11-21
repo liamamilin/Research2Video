@@ -19,6 +19,7 @@ from __future__ import annotations
 from core.config_transaction import remove as remove_config_file
 import os
 import re
+import threading
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -151,16 +152,37 @@ def _read(path: str, key: str) -> Matrix:
                   archived=data.get("archived") is True, render=render, content=content)
 
 
+_LOAD_ALL_CACHE: dict[str, tuple[tuple, dict[str, Matrix]]] = {}
+_LOAD_ALL_LOCK = threading.Lock()
+
+
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
     """Every matrix, by key, in file-name order. A Job claimed by an earlier matrix is an error in the later one."""
     folder = directory(config_dir)
+    sig_items: list[tuple[str, int, int]] = []
     try:
-        names = sorted(f for f in os.listdir(folder) if f.endswith(".yaml") and not f.startswith("."))
+        with os.scandir(folder) as it:
+            for entry in it:
+                name = entry.name
+                if not name.endswith(".yaml") or name.startswith("."):
+                    continue
+                try:
+                    st = entry.stat()
+                except OSError:
+                    continue
+                sig_items.append((name, st.st_mtime_ns, st.st_size))
     except OSError:
         return {}
+    sig_items.sort()
+    sig = tuple(sig_items)
+    cache_key = os.path.abspath(folder)
+    with _LOAD_ALL_LOCK:
+        cached = _LOAD_ALL_CACHE.get(cache_key)
+        if cached is not None and cached[0] == sig:
+            return dict(cached[1])
     out: dict[str, Matrix] = {}
     owner: dict[str, str] = {}
-    for filename in names:
+    for filename, _, _ in sig_items:
         key = filename[:-len(".yaml")]
         if not KEY.fullmatch(key):
             continue
@@ -173,7 +195,9 @@ def load_all(config_dir: str = "config") -> dict[str, Matrix]:
             owner[member.job] = key
             kept.append(member)
         out[key] = Matrix(**{**matrix.__dict__, "members": tuple(kept), "errors": tuple(errors)})
-    return out
+    with _LOAD_ALL_LOCK:
+        _LOAD_ALL_CACHE[cache_key] = (sig, out)
+    return dict(out)
 
 
 def of_job(job_name: str, config_dir: str = "config") -> Optional[Matrix]:

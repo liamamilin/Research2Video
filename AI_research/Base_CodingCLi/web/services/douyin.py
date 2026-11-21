@@ -258,12 +258,13 @@ def candidates() -> list[dict]:
                             "(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version AND p.platform='douyin' AND (p.account_uid=? OR p.account_uid='')) "
                             "ORDER BY r.completed_at DESC,r.created_at DESC", (owner,)).fetchall()
     seen, result = set(), []
+    has_video = video_render.file_checker("video.mp4")
     for row in rows:
         key = (row["script_id"], row["version"])
         if key in queued or key in seen:
             continue
         render = {"id": row["render_id"], "artifacts": json.loads(row["artifacts"])}
-        if video_render.safe_file(render, "video.mp4") is None:
+        if not has_video(render):
             continue
         seen.add(key)
         result.append({k: row[k] for k in row.keys() if k != "artifacts"})

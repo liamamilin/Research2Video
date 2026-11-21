@@ -468,12 +468,13 @@ def candidate_catalog() -> tuple[list[dict], dict]:
              "queued_versions": 0, "unavailable_versions": 0, "ready_versions": 0}
     all_versions = {(row["script_id"], row["version"]) for row in rows}
     available = set()
+    has_video = video_render.file_checker("video.mp4")
     for row in rows:
         key = (row["script_id"], row["version"])
         if key in available:
             continue
         render = {"id": row["render_id"], "artifacts": json.loads(row["artifacts"])}
-        if video_render.safe_file(render, "video.mp4") is None:
+        if not has_video(render):
             continue
         available.add(key)
         stats["available_versions"] += 1

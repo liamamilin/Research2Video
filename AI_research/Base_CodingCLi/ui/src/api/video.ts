@@ -277,6 +277,18 @@ export interface ScriptVersion {
   created_at: string;
 }
 
+export interface RenderDiagnostics {
+  steps?: { name: string; label: string; seconds: number | null; status: "ok" | "failed" }[];
+  duration_seconds?: number;
+  scene_count?: number;
+  components?: Record<string, number>;
+  text_card_ratio?: number;
+  captions?: { method?: string; cue_count?: number; fallback_segments?: number };
+  llm?: { model?: string; calls?: number; cost_usd?: number };
+  executor?: string;
+  encoder?: string;
+}
+
 export interface VideoRender {
   id: string;
   script_id: string;
@@ -296,7 +308,7 @@ export interface VideoRender {
   completed_at: string | null;
   created_at: string;
   updated_at?: string;
-  timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number };
+  timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number; diagnostics?: RenderDiagnostics };
   visuals?: import("./screenshots").AutomaticVisuals | null;
 }
 
