@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Loader2, MessageSquareText, Plus, Send, Square, History, PanelRight, ListTodo, LayoutDashboard, X } from "lucide-react";
+import { Loader2, MessageSquareText, Plus, Send, Square, History, PanelRight, ListTodo, LayoutDashboard, X, Copy, Check } from "lucide-react";
 import {
   chatWithAssistant, getAssistantConversation, newAssistantConversation, stopAssistantResponse,
   type AssistantMaterial, type AssistantConversation, type AssistantMessage,
@@ -18,6 +18,50 @@ import { useAssistantDraft, moveAssistantDraft, clearAssistantDraft, setAssistan
 
 const EXAMPLES = ["查看各矩阵的任务与运行安排", "帮我创建一个研究矩阵", "看看有哪些文稿等我审", "看看有哪些视频可以发布", "我想把本地视频发布到指定平台", "检查发布队列里需要处理的问题", "检查今天有哪些任务失败了"];
 const READ_EXAMPLES = ["看看有哪些文稿等我审", "今天的快讯里有哪些选题还没写", "查看现有 Jobs", "查看发布进度"];
+const CONTINUE_PROMPT = '继续上一条尚未完成的请求。先核验已有回执，从保存的读取位置和剩余工作继续；已成功的操作不要重复执行。';
+
+const AssistantMessageItem = memo(function AssistantMessageItem({
+  message, disabled, onContinue,
+}: {
+  message: AssistantMessage;
+  disabled: boolean;
+  onContinue: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copyText = () => {
+    if (!message.content || !navigator.clipboard?.writeText) return;
+    void navigator.clipboard.writeText(message.content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  };
+  return <div className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
+    <div className="flex items-center justify-between gap-2 text-xs text-text-muted mb-2">
+      <span>{message.role === "user" ? "你" : "助手"}</span>
+      {message.role === "assistant" && !!message.content && <button type="button" className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-text" aria-label="复制回答" onClick={copyText}>
+        {copied ? <><Check className="w-3 h-3 text-success" />已复制</> : <><Copy className="w-3 h-3" />复制</>}
+      </button>}
+    </div>
+    <div className={message.role === "user" ? "rounded-lg bg-bg-hover border border-border px-4 py-3" : "card px-4 py-4 sm:px-5"}>
+      {message.role === "user" ? <><p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+        {!!message.materials?.length && <ul className="mt-2 text-xs space-y-1" aria-label="已提供的材料">{message.materials.map(m => <li key={m.id}><a className="text-accent" href={m.file_url} target="_blank" rel="noreferrer">{m.kind === 'image' ? '图片' : m.kind === 'url' ? '链接' : '正文 / 文档'} · {m.name}</a></li>)}</ul>}</> : <>
+        <div className="md-body"><AssistantMarkdown content={message.content} /></div>
+        {message.continuation && <div className="mt-3 rounded border border-border p-3 text-xs space-y-2">
+          <p>{message.continuation.reason === 'service_maintenance' ? '维护已提交，后续步骤需恢复访问后继续。' : `原请求尚未完成，进度已保存。已完整读取 ${message.continuation.reports_complete} 份报告，${message.continuation.remaining_report_count} 份候选待展开。`}</p>
+          <button type="button" className="btn text-xs" disabled={disabled} onClick={onContinue}>继续处理</button>
+        </div>}
+        {!!message.actions?.length && <ul className="mt-4 pt-3 border-t border-border space-y-3" aria-label="操作结果">{message.actions.map((action, i) => <AssistantAction key={action.operation_id || i} action={action} />)}</ul>}
+        {message.error && message.error !== message.content && <p role="alert" className="text-xs text-danger mt-3">{message.error}</p>}
+        {message.usage && typeof message.usage.total_tokens === 'number' && <p className="text-[11px] text-text-muted mt-3" aria-label="本次模型用量">
+          本次{message.usage.estimated || message.usage.estimated_requests ? '约 ' : ' '}{message.usage.total_tokens.toLocaleString('zh-CN')} Token
+          {typeof message.usage.requests === 'number' && ` · ${message.usage.requests} 次模型调用`}
+          {typeof message.usage.cache_read_tokens === 'number' && ` · 缓存读取 ${message.usage.cache_read_tokens.toLocaleString('zh-CN')}`}
+        </p>}
+      </>}
+    </div>
+  </div>;
+});
+
 interface PendingConversation {
   messages: AssistantMessage[];
   status: string;
@@ -57,18 +101,37 @@ function submitConversation(key: string, text: string, history: AssistantMessage
     requestId: crypto.randomUUID().replace(/-/g, ""), listeners: new Set(), promise: Promise.resolve([]),
     conversationId,
   };
-  const publish = () => {
-    saveConversation(key, pending.messages);
+  let frameId: number | null = null;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+  let lastSavedAt = 0;
+  const cancelScheduled = () => {
+    if (frameId !== null && typeof cancelAnimationFrame === "function") { cancelAnimationFrame(frameId); frameId = null; }
+    if (timerId !== null) { clearTimeout(timerId); timerId = null; }
+  };
+  const flush = (forcePersist: boolean) => {
+    cancelScheduled();
+    const now = Date.now();
+    if (forcePersist || now - lastSavedAt >= 1000) {
+      saveConversation(key, pending.messages);
+      lastSavedAt = now;
+    }
     pending.listeners.forEach((listener) => listener(pending.messages, pending.status));
+  };
+  const scheduleDeltaPublish = () => {
+    if (frameId !== null || timerId !== null) return;
+    if (typeof requestAnimationFrame === "function") {
+      frameId = requestAnimationFrame(() => { frameId = null; flush(false); });
+    } else {
+      timerId = setTimeout(() => { timerId = null; flush(false); }, 50);
+    }
   };
   pendingConversations.set(key, pending);
   pending.promise = chatWithAssistant(text, history, (event) => {
     const reply = pending.messages[pending.messages.length - 1];
-    if (event.type === "reset") pending.messages = [...prefix, { ...reply, content: "" }];
-    if (event.type === "delta") { pending.messages = [...prefix, { ...reply, content: reply.content + event.text }]; pending.status = "正在回复…"; }
-    if (event.type === "action") pending.messages = [...prefix, { ...reply, actions: [...(reply.actions || []), event.action] }];
-    if (event.type === "status") pending.status = event.message;
-    publish();
+    if (event.type === "reset") { pending.messages = [...prefix, { ...reply, content: "" }]; flush(true); return; }
+    if (event.type === "delta") { pending.messages = [...prefix, { ...reply, content: reply.content + event.text }]; pending.status = "正在回复…"; scheduleDeltaPublish(); return; }
+    if (event.type === "action") { pending.messages = [...prefix, { ...reply, actions: [...(reply.actions || []), event.action] }]; flush(true); return; }
+    if (event.type === "status") { pending.status = event.message; flush(false); }
   }, { conversation_id: conversationId, request_id: pending.requestId, context, material_ids: materials.map(m => m.id) }).then((result) => {
     pending.conversationId = result.conversation_id || conversationId;
     saveConversationId(key, pending.conversationId);
@@ -77,15 +140,15 @@ function submitConversation(key: string, text: string, history: AssistantMessage
     const reply = pending.messages[pending.messages.length - 1];
     pending.messages = [...prefix, { ...reply, content: reply.content || "请求未完成。",
       error: (error instanceof Error ? error.message : "请求失败") + "。请点顶部“核验结果”读取实际回执，再继续。" }];
-  }).then(() => { pending.status = ""; publish(); pendingConversations.delete(key); return pending.messages; });
-  publish();
+  }).then(() => { pending.status = ""; flush(true); pendingConversations.delete(key); return pending.messages; });
+  flush(true);
   return pending;
 }
 export function AskPage() {
   const user = useAuthStore((s) => s.user);
   return <ApplicationAssistant key={user?.username} username={user?.username || ""} readOnly={user?.role === "viewer"} />;
 }
-export function ApplicationAssistant({ username, readOnly, embedded = false }: { username: string; readOnly: boolean; embedded?: boolean }) {
+export function ApplicationAssistant({ username, readOnly, embedded = false, visible = true }: { username: string; readOnly: boolean; embedded?: boolean; visible?: boolean }) {
   const storageKey = `jobs-assistant:${username}`;
   const location = useLocation();
   const navigate = useNavigate();
@@ -93,15 +156,21 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   const [savingContext, setSavingContext] = useState(false);
   const routeKey = location.pathname + location.search;
   const hasRouteContext = !!assistantContext(location.pathname, location.search);
+  const hasRouteContextRef = useRef(hasRouteContext);
+  hasRouteContextRef.current = hasRouteContext;
   const [selectedContext, setSelectedContext] = useState<AssistantContext | null>(() => assistantContext(location.pathname, location.search));
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyItems, setHistoryItems] = useState<ConversationSummary[]>([]);
+  const [historySearch, setHistorySearch] = useState("");
   const [historyError, setHistoryError] = useState("");
   const [historyLoading, setHistoryLoading] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(!embedded && window.innerWidth >= 1024 && new URLSearchParams(location.search).get('tasks') !== '1');
   const [taskCenterOpen, setTaskCenterOpen] = useState(new URLSearchParams(location.search).get('tasks') === '1');
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(new URLSearchParams(location.search).get('capabilities') === '1');
   const [overviewOpen, setOverviewOpen] = useState(!embedded && new URLSearchParams(location.search).get('overview') === '1');
+  const [overviewMounted, setOverviewMounted] = useState(overviewOpen);
+  const [workspaceMounted, setWorkspaceMounted] = useState(workspaceOpen);
+  const [taskCenterMounted, setTaskCenterMounted] = useState(taskCenterOpen);
   const [revision, setRevision] = useState(0);
   const [messages, setMessages] = useState<AssistantMessage[]>(() => pendingConversations.get(storageKey)?.messages || readConversation(storageKey));
   const [historyLimit, setHistoryLimit] = useState(20);
@@ -131,6 +200,9 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   const composer = useRef<HTMLTextAreaElement>(null);
   const follow = useRef(true);
   const previousRoute = useRef(routeKey);
+  useEffect(() => { if (overviewOpen) setOverviewMounted(true); }, [overviewOpen]);
+  useEffect(() => { if (workspaceOpen) setWorkspaceMounted(true); }, [workspaceOpen]);
+  useEffect(() => { if (taskCenterOpen) setTaskCenterMounted(true); }, [taskCenterOpen]);
   useEffect(() => {
     if (previousRoute.current !== routeKey) {
       previousRoute.current = routeKey;
@@ -193,17 +265,20 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     }
     const recover = async () => {
       try {
-        const data = await getAssistantConversation(conversationId.current);
+        const requestedId = conversationId.current;
+        const data = await getAssistantConversation(requestedId);
         if (!active) return;
         bindConversation(data.id);
-        if (historySelected.current || !hasRouteContext) setSelectedContext(data.context || null);
+        if (historySelected.current || !hasRouteContextRef.current) setSelectedContext(data.context || null);
         const restored = messagesFromServer(data);
         setMessages(restored); saveConversation(storageKey, restored);
         const running = data.requests.find((item) => item.status === "running");
         runningId.current = running?.id;
         setBusy(!!running); setRestoring(false); setRestoreError("");
         setStatus(running ? "正在恢复本次请求的操作结果…" : "");
-        setRevision((n) => n + 1);
+        if (!requestedId || requestedId !== data.id || !!running || recoverVersion > 0) {
+          setRevision((n) => n + 1);
+        }
         if (running) timer = setTimeout(() => void recover(), 1200);
       } catch (error) {
         if (active) { setRestoring(false); setRestoreError(error instanceof Error ? error.message : "对话恢复失败"); }
@@ -211,7 +286,7 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     };
     void recover();
     return () => { active = false; clearTimeout(timer); };
-  }, [storageKey, recoverVersion, bindConversation, location.pathname, hasRouteContext]);
+  }, [storageKey, recoverVersion, bindConversation]);
   const addMaterials = async (values: (File | string)[]) => {
     if (readOnly || busy) return;
     setMaterialError('');
@@ -231,6 +306,9 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     try { setMessages(await pending.promise); }
     finally { bindConversation(pending.conversationId); setRevision((n) => n + 1); pending.listeners.delete(update); submitting.current = false; setBusy(false); runningId.current = undefined; }
   };
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  const continueRequest = useCallback(() => { void sendRef.current(CONTINUE_PROMPT); }, []);
   const fresh = async () => {
     setRestoring(true); setRestoreError(""); historySelected.current = false;
     try { const data = await newAssistantConversation(); clearAssistantDraft(username, data.id); bindConversation(data.id); saveConversation(storageKey, []); setMessages([]); setMaterialError(''); setSelectedContext(assistantContext(location.pathname, location.search)); setRevision((n) => n + 1);
@@ -255,6 +333,8 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     if (!embedded) navigate('/ask?conversation=' + id, { replace: true });
   };
   const disabled = busy || restoring || uploading || !!restoreError;
+  const asideOpen = workspaceOpen || taskCenterOpen;
+  const asideMounted = workspaceMounted || taskCenterMounted;
   return <div className={`${embedded ? "h-full" : "h-[calc(100dvh-3rem)]"} min-h-[420px] max-w-[1500px] mx-auto flex flex-col gap-4`}>
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex-1 min-w-[14rem]"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
@@ -274,16 +354,20 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
       <button className="ml-auto shrink-0 text-text-muted hover:text-text" aria-label="移除当前对象" disabled={busy || restoring || savingContext} onClick={() => void removeContext()}><X className="w-4 h-4" /></button>
     </div>}
     {contextError && <p className="text-xs text-danger">{contextError}</p>}
-    {historyOpen && <div className="card p-4 max-h-64 overflow-auto space-y-2" aria-label="历史对话">
-      <div className="flex items-center justify-between"><h2 className="text-sm font-medium">历史对话</h2><button className="btn text-xs" onClick={() => setHistoryOpen(false)}>收起</button></div>
+    {historyOpen && <div className="card p-4 max-h-72 overflow-auto space-y-2" aria-label="历史对话">
+      <div className="flex items-center justify-between gap-2"><h2 className="text-sm font-medium">历史对话</h2><button className="btn text-xs" onClick={() => setHistoryOpen(false)}>收起</button></div>
+      <input className="input text-xs" aria-label="筛选历史对话" placeholder="按标题关键词筛选历史对话" value={historySearch} onChange={(e) => setHistorySearch(e.target.value)} />
       {historyLoading && <p className="text-xs text-text-muted">正在读取…</p>}
       {historyError && <p className="text-xs text-danger">{historyError}<button className="btn text-xs ml-2" onClick={() => void openHistory()}>重试</button></p>}
-      {historyItems.map((item) => <button key={item.id} disabled={busy} className={`block w-full text-left rounded p-2 text-sm hover:bg-bg-hover ${activeConversationId === item.id ? 'text-accent bg-bg-hover' : ''}`}
+      {historyItems.filter((item) => !historySearch.trim() || item.title.toLowerCase().includes(historySearch.trim().toLowerCase())).map((item) => <button key={item.id} disabled={busy} className={`block w-full text-left rounded p-2 text-sm hover:bg-bg-hover ${activeConversationId === item.id ? 'text-accent bg-bg-hover' : ''}`}
         onClick={() => openConversation(item.id)}>
         {item.title}<span className="block text-xs text-text-muted mt-1">{new Date(item.updated * 1000).toLocaleString('zh-CN')} · {item.request_count} 次请求</span>
       </button>)}
     </div>}
-    {overviewOpen ? <AssistantOverview onPrompt={overviewPrompt} disabled={disabled} readOnly={readOnly} /> : <div className="flex flex-1 min-h-0 gap-5 relative">
+    {overviewMounted && <div className={overviewOpen ? "flex flex-1 min-h-0" : "hidden"} hidden={!overviewOpen}>
+      <AssistantOverview visible={visible && overviewOpen} onPrompt={overviewPrompt} disabled={disabled} readOnly={readOnly} />
+    </div>}
+    <div className={overviewOpen ? "hidden" : "flex flex-1 min-h-0 gap-5 relative"} hidden={overviewOpen}>
     <section className="flex flex-1 flex-col min-w-0 min-h-0 gap-4">
     {restoring && <p className="text-xs text-text-muted">正在恢复对话与操作回执…</p>}
     {restoreError && <div className="card p-3 text-xs text-danger" role="alert">{restoreError}<button className="btn text-xs ml-3" onClick={() => { setRestoring(true); setRecoverVersion((n) => n+1); }}>重新读取对话</button></div>}
@@ -295,26 +379,14 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
       {messages.length > historyLimit && <button className="btn text-xs" onClick={() => { follow.current = false; setHistoryLimit(n => n + 20); }}>
         显示更早的对话（{messages.length - historyLimit} 条）
       </button>}
-      {messages.slice(-historyLimit).map((message, index) => <div key={Math.max(0, messages.length - historyLimit) + index} className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
-        <div className="text-xs text-text-muted mb-2">{message.role === "user" ? "你" : "助手"}</div>
-        <div className={message.role === "user" ? "rounded-lg bg-bg-hover border border-border px-4 py-3" : "card px-4 py-4 sm:px-5"}>
-          {message.role === "user" ? <><p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-            {!!message.materials?.length && <ul className="mt-2 text-xs space-y-1" aria-label="已提供的材料">{message.materials.map(m => <li key={m.id}><a className="text-accent" href={m.file_url} target="_blank" rel="noreferrer">{m.kind === 'image' ? '图片' : m.kind === 'url' ? '链接' : '正文 / 文档'} · {m.name}</a></li>)}</ul>}</> : <>
-            <div className="md-body"><AssistantMarkdown content={message.content} /></div>
-            {message.continuation && <div className="mt-3 rounded border border-border p-3 text-xs space-y-2">
-              <p>{message.continuation.reason === 'service_maintenance' ? '维护已提交，后续步骤需恢复访问后继续。' : `原请求尚未完成，进度已保存。已完整读取 ${message.continuation.reports_complete} 份报告，${message.continuation.remaining_report_count} 份候选待展开。`}</p>
-              <button type="button" className="btn text-xs" disabled={disabled} onClick={() => void send('继续上一条尚未完成的请求。先核验已有回执，从保存的读取位置和剩余工作继续；已成功的操作不要重复执行。')}>继续处理</button>
-            </div>}
-            {!!message.actions?.length && <ul className="mt-4 pt-3 border-t border-border space-y-3" aria-label="操作结果">{message.actions.map((action, i) => <AssistantAction key={action.operation_id || i} action={action} />)}</ul>}
-            {message.error && message.error !== message.content && <p role="alert" className="text-xs text-danger mt-3">{message.error}</p>}
-            {message.usage && typeof message.usage.total_tokens === 'number' && <p className="text-[11px] text-text-muted mt-3" aria-label="本次模型用量">
-              本次{message.usage.estimated || message.usage.estimated_requests ? '约 ' : ' '}{message.usage.total_tokens.toLocaleString('zh-CN')} Token
-              {typeof message.usage.requests === 'number' && ` · ${message.usage.requests} 次模型调用`}
-              {typeof message.usage.cache_read_tokens === 'number' && ` · 缓存读取 ${message.usage.cache_read_tokens.toLocaleString('zh-CN')}`}
-            </p>}
-          </>}
-        </div>
-      </div>)}
+      {messages.slice(-historyLimit).map((message, index) => (
+        <AssistantMessageItem
+          key={Math.max(0, messages.length - historyLimit) + index}
+          message={message}
+          disabled={disabled}
+          onContinue={continueRequest}
+        />
+      ))}
       {busy && <div className="flex items-center gap-2 text-sm text-text-muted" role="status"><Loader2 className="w-4 h-4 animate-spin text-accent" />{status || "正在处理…"}</div>}
       {messages.length > 0 && <div ref={bottom} />}
     </div>
@@ -342,12 +414,17 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     </form>
     <p className="text-[11px] text-text-muted">{readOnly ? '' : '可直接粘贴链接、正文、截图，或拖入图片和文档。'}Enter 发送 · Shift + Enter 换行</p>
     </section>
-    {(workspaceOpen || taskCenterOpen) && <aside className={`${embedded ? 'absolute inset-0 z-10 bg-bg-card p-4 rounded-xl' : 'absolute inset-0 z-10 bg-bg-card p-4 lg:p-0 lg:static lg:w-96 lg:shrink-0'} overflow-y-auto border-l border-border lg:pl-5`}>
+    {asideMounted && <aside className={`${asideOpen ? '' : 'hidden '}${embedded ? 'absolute inset-0 z-10 bg-bg-card p-4 rounded-xl' : 'absolute inset-0 z-10 bg-bg-card p-4 lg:p-0 lg:static lg:w-96 lg:shrink-0'} overflow-y-auto border-l border-border lg:pl-5`} hidden={!asideOpen}>
       <button className={`${embedded ? '' : 'lg:hidden'} btn text-xs mb-4`} onClick={() => { setWorkspaceOpen(false); setTaskCenterOpen(false); }}>返回对话</button>
-      {restoring && revision === 0 ? <p role="status" className="text-xs text-text-muted">正在恢复工作区…</p>
-        : taskCenterOpen ? <AssistantTaskCenter revision={revision} busy={busy || restoring} onOpenConversation={openConversation} />
-        : <AssistantWorkspacePanel conversationId={activeConversationId} context={selectedContext} revision={revision} onPrompt={(text) => { fill(text); if (embedded || window.innerWidth < 1024) setWorkspaceOpen(false); }} />}
+      {restoring && revision === 0 && !activeConversationId ? <p role="status" className="text-xs text-text-muted">正在恢复工作区…</p> : <>
+        {taskCenterMounted && <div className={taskCenterOpen ? undefined : "hidden"} hidden={!taskCenterOpen}>
+          <AssistantTaskCenter visible={visible && !overviewOpen && taskCenterOpen} revision={revision} busy={busy || restoring} onOpenConversation={openConversation} />
+        </div>}
+        {workspaceMounted && <div className={workspaceOpen ? undefined : "hidden"} hidden={!workspaceOpen}>
+          <AssistantWorkspacePanel visible={visible && !overviewOpen && workspaceOpen} conversationId={activeConversationId} context={selectedContext} revision={revision} onPrompt={(text) => { fill(text); if (embedded || window.innerWidth < 1024) setWorkspaceOpen(false); }} />
+        </div>}
+      </>}
     </aside>}
-    </div>}
+    </div>
   </div>;
 }

@@ -47,3 +47,25 @@ def test_history_batches_receipts_and_recovers_interrupted_operations(web_env, m
     assert result['requests'][-1]['status'] == 'interrupted'
     assert all(len(row['result']['actions']) == 1 for row in result['requests'])
     assert all(row['result']['actions'][0]['ok'] for row in result['requests'])
+
+
+def test_existing_delete_mode_database_recovers_after_process_restart(web_env):
+    from pathlib import Path
+    from web.settings import get_settings
+    from web.services import assistant_store
+
+    path = Path(get_settings().paths.state_dir) / 'assistant.db'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(path) as db:
+        db.execute("PRAGMA journal_mode=DELETE")
+        db.execute("CREATE TABLE conversations(id TEXT PRIMARY KEY, user_id TEXT NOT NULL, updated REAL NOT NULL, refs TEXT NOT NULL DEFAULT '[]')")
+        db.execute("INSERT INTO conversations VALUES('preserved','owner',1,'[]')")
+    assistant_store._INITIALIZED.clear()
+    store = AssistantStore()
+    assert store.conversation({'id': 'owner'}, 'preserved')['id'] == 'preserved'
+    with sqlite3.connect(path) as db:
+        assert db.execute('PRAGMA journal_mode').fetchone()[0] == 'wal'
+        assert 'context' in {r[1] for r in db.execute('PRAGMA table_info(conversations)')}
+        assert 'materials' in {r[1] for r in db.execute('PRAGMA table_info(requests)')}
+    assistant_store._INITIALIZED.clear()
+    assert AssistantStore().conversation({'id': 'owner'}, 'preserved')['id'] == 'preserved'

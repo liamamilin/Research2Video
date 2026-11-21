@@ -438,8 +438,9 @@ def detail(key: str) -> dict:
     return result
 
 
-def summary() -> list[dict]:
-    configs = production.load_all(paths().config_dir, paths().jobs_dir)
+def summary(*, configs: dict | None = None) -> list[dict]:
+    if configs is None:
+        configs = production.load_all(paths().config_dir, paths().jobs_dir)
     plans = {p["job_name"]: p for p in schedule_store().list()}
     owners = {
         job: m.key
@@ -453,7 +454,7 @@ def summary() -> list[dict]:
         ):
             latest.setdefault(row["chain_id"], json.loads(row["data"]))
     out = []
-    for m in all_chains():
+    for m in all_chains(configs=configs):
         ps = [configs[p] for p in m.get("outputs", []) if p in configs]
         out.append(
             {
@@ -1198,7 +1199,8 @@ def mutation(fn):
 
 
 def scope(key: str) -> dict:
-    m = find(key, True)
+    configs = production.load_all(paths().config_dir, paths().jobs_dir)
+    m = find(key, True, configs=configs)
     ids = set(m.get("outputs", []) + m.get("retired_outputs", []))
     with store.connect() as d:
         script_ids = (
@@ -1215,7 +1217,6 @@ def scope(key: str) -> dict:
             else []
         )
     owner = matrices.of_job(m["job"], paths().config_dir)
-    configs = production.load_all(paths().config_dir, paths().jobs_dir)
     return {
         "key": key,
         "name": m["name"],

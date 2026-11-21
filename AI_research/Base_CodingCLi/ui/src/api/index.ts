@@ -26,7 +26,7 @@ export async function getMe(): Promise<User> {
 // --- Jobs ---
 
 export async function listJobs(signal?: AbortSignal): Promise<JobSummary[]> {
-  return api("/api/jobs", { signal });
+  return api("/api/jobs", { signal, query: { compact: "true" } });
 }
 
 export async function getJob(name: string, signal?: AbortSignal): Promise<JobDetail> {
@@ -389,7 +389,7 @@ export async function chatWithAssistant(
       ...('context' in options ? { context: options.context } : {}),
       ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
       ...(options.request_id ? { request_id: options.request_id } : {}),
-      history: history.slice(-20).map((item) => ({
+      history: options.conversation_id ? [] : history.slice(-20).map((item) => ({
         role: item.role,
         content: (item.content + (item.actions?.length
           ? "\n操作结果：\n" + item.actions.map((a) => `${a.ok ? "成功" : "失败"}：${a.message}`).join("\n")

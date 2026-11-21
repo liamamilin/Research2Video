@@ -102,7 +102,7 @@ describe("TemplateLibrary", () => {
       vi.fn(async (url: string, init?: RequestInit) => {
         const method = init?.method || "GET";
         calls.push(`${method} ${url}`);
-        const path = String(url);
+        const path = String(url).split("?")[0];
         if (path.includes("/api/jobs/templates")) {
           return jsonResponse({ templates: [template(), template({ key: "mine", filename: "mine.yaml", label: "我的模板", builtin: false })] });
         }

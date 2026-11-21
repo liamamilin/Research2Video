@@ -219,7 +219,8 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
             check_cancel()
             streamed_text = ''
             emit({'type': 'reset'})
-            emit({'type': 'status', 'message': '正在思考…'})
+            step_prefix = f'第 {round_index + 1} 步：' if round_index > 0 else ''
+            emit({'type': 'status', 'message': f'{step_prefix}正在思考…'})
             options = {'stream': True, 'on_delta': delta} if on_event else {}
             rounds.settle(messages)
             context_savings = {}
@@ -265,7 +266,7 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
                 captured_run = None
                 auth_expired = False
                 try:
-                    emit({'type': 'status', 'message': f'正在{label}…'})
+                    emit({'type': 'status', 'message': f'{step_prefix}正在{label}…'})
                     from web.deps import current_user
                     user = current_user(request)
                     if call.name == LOADER:
@@ -401,12 +402,21 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
     except Exception as exc:
         from core.errors import LLMUnsupportedError, CancelledError
         logger.warning('Assistant generation stopped: %s', type(exc).__name__)
+        detail_text = str(exc)
         if isinstance(exc, CancelledError) or (cancel_token and cancel_token.is_set()):
             error = '助手响应已停止，已启动的后台任务需单独取消。'
         elif isinstance(exc, LLMUnsupportedError):
             error = '当前模型或接口不支持工具调用，请在设置中更换支持工具调用的模型。'
-        elif re.search(r'\b(401|403)\b', str(exc)):
+        elif re.search(r'\b(401|403)\b', detail_text):
             error = '模型服务认证失败，请在设置中检查服务商和 API 密钥。'
+        elif re.search(r'\b402\b|insufficient|balance|quota', detail_text, re.I):
+            error = '模型服务额度或余额不足（402），请在设置中检查账号余额或更换模型。'
+        elif re.search(r'\b429\b|rate.?limit|too many requests', detail_text, re.I):
+            error = '模型服务触发限流（429），请稍后重试。'
+        elif re.search(r'context_length|maximum context|too many tokens|context window', detail_text, re.I):
+            error = '当前对话上下文超出模型长度限制，请点“新对话”后继续。'
+        elif isinstance(exc, TimeoutError) or re.search(r'timed?\s*out|timeout', detail_text, re.I):
+            error = '模型服务响应超时，请稍后重试；已执行的操作见下方结果。'
         else:
             error = '助手模型调用失败，请检查模型设置或稍后重试。'
         answer = streamed_text.strip() or ('回复未完成，已执行的操作见下方结果；请先查看结果再继续。' if actions else error)

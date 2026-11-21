@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -85,7 +86,7 @@ export function OutputsPage() {
   const archived = ["1", "true"].includes(filters.values.archived);
   const view = params.get("view") === "time" ? "time" : "owner";
   const newest = params.get("order") !== "asc";
-  const [result, setResult] = useState<{ archived: boolean; body: Outputs } | null>(null);
+  const [result, setResult] = useState<{ archived: boolean; body: Outputs } | null>(() => readPageSnapshot(`outputs:${archived}`));
   const data = result?.archived === archived ? result.body : null;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,13 +95,14 @@ export function OutputsPage() {
   const flight = useRef<AbortController | null>(null);
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller; setLoading(true); setError("");
     try {
       const next = await listOutputs(archived, controller.signal);
       if (!Array.isArray(next?.scripts) || !Array.isArray(next?.jobs) || !Array.isArray(next?.matrices)) throw new Error("产出数据格式异常，请重试");
-      if (!controller.signal.aborted) setResult({ archived, body: next });
-    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e)); }
-    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { const result = { archived, body: next }; savePageSnapshot(`outputs:${archived}`, result, revision); setResult(result); }
+    } catch (e) { if (!controller.signal.aborted && revision === snapshotRevision()) setError(errorMessage(e)); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, [archived]);
   useEffect(() => {
     void load();

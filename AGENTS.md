@@ -15,12 +15,19 @@ Install dependencies using project READMEs; run commands in these directories:
 
 | Directory | Command | Purpose |
 | --- | --- | --- |
-| `autovideo/` | `python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011` | Start the local application. |
+| repo root | `bash scripts/restart_local_services.sh` | Idle-safe restart of AutoVideo + Research (default for loading new code). |
+| repo root | `bash scripts/restart_local_services.sh --autovideo-only` / `--research-only` | Restart one side only. |
+| repo root | `bash scripts/restart_local_services.sh --force` | Skip idle checks (only when sure nothing is producing). |
+| `autovideo/` | `bash scripts/restart_service.sh` | Idle-safe restart of AutoVideo (`127.0.0.1:8011`). |
+| `autovideo/` | `python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011` | Start AutoVideo when nothing is listening. |
 | `autovideo/` | `python3 -m pytest tests g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q` | Run contract and offline regression tests. |
-| `AI_research/Base_CodingCLi/` | `python run_web.py serve --reload` | Start the backend with reload. |
+| `AI_research/Base_CodingCLi/` | `bash scripts/restart_service.sh` | Idle-safe restart of Research app (gateway keeps `8775`; app is `8766`). |
+| `AI_research/Base_CodingCLi/` | `python run_web.py serve --reload` | Start the backend with reload (dev). |
 | `AI_research/Base_CodingCLi/` | `bash scripts/check.sh` | Compile, test, validate configuration, and check/build the installed UI. |
 | `AI_research/Base_CodingCLi/ui/` | `npm run dev` | Start Vite. |
 | `AI_research/Base_CodingCLi/ui/` | `npm run build` | Type-check and build production assets. |
+
+**本机服务重启约定：** 需要加载新代码或回收进程时，一律走上述 `restart_*.sh`，不要手写 `kill`/`uvicorn`/`run_web.py` 拼装。脚本默认先确认无进行中出片/渲染；Cursor 沙箱若无法发信号，在本机 Terminal 执行同一命令。Research 有网关时只重启应用进程，保留 `8775` 网关。
 
 Build AutoVideo's frontend with vendored esbuild (see `autovideo/g3/README.md`); commit rebuilt `web/static/app.js` and `app.css`.
 

@@ -1,12 +1,37 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {Link,useLocation} from 'react-router-dom';
 import {api} from '@/api/client';
 import {useChainScope} from '@/lib/use-chain-scope';
 type Row={key:string;name:string;job:string;matrix_key:string;archived?:boolean};
+const CHAIN_LIST_TTL_MS=30000;
+let cachedRows:Row[]|null=null;
+let cachedAt=0;
+let inFlight:Promise<Row[]>|null=null;
+function fetchChainRows(force=false):Promise<Row[]>{
+ if(!force&&cachedRows!==null&&Date.now()-cachedAt<CHAIN_LIST_TTL_MS)return Promise.resolve(cachedRows);
+ if(!inFlight){
+  inFlight=api<{items:Row[];archived?:Row[]}>('/api/chains')
+   .then(x=>{
+    const next=[...x.items,...(x.archived||[]).map(row=>({...row,archived:true}))];
+    cachedRows=next;cachedAt=Date.now();return next;
+   })
+   .finally(()=>{inFlight=null;});
+ }
+ return inFlight;
+}
 export function ChainContext(){
  const scope=useChainScope();
- const location=useLocation();const explicit=new URLSearchParams(location.search).get('chain');const [rows,setRows]=useState<Row[]>([]);
- useEffect(()=>{if(location.pathname.startsWith('/chains'))return;void api<{items:Row[];archived?:Row[]}>('/api/chains').then(x=>setRows([...x.items,...(x.archived||[]).map(row=>({...row,archived:true}))])).catch(()=>{});},[location.pathname]);
+ const location=useLocation();const explicit=new URLSearchParams(location.search).get('chain');const [rows,setRows]=useState<Row[]>(()=>cachedRows??[]);
+ const wasOnChains=useRef(location.pathname.startsWith('/chains'));
+ useEffect(()=>{
+  const onChains=location.pathname.startsWith('/chains');
+  if(onChains){wasOnChains.current=true;return;}
+  const force=wasOnChains.current;
+  wasOnChains.current=false;
+  let alive=true;
+  void fetchChainRows(force).then(next=>{if(alive)setRows(next);}).catch(()=>{});
+  return()=>{alive=false;};
+ },[location.pathname]);
  const exitQuery=new URLSearchParams(location.search);exitQuery.delete('chain');const exitPath=location.pathname+(exitQuery.size?'?'+exitQuery.toString():'');
  if(location.pathname.startsWith('/chains'))return null;
  const relevant=rows.filter(x=>explicit?x.key===explicit:location.pathname==='/jobs/'+encodeURIComponent(x.job)||location.pathname==='/matrices/'+x.matrix_key);

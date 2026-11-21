@@ -40,7 +40,9 @@ class AssistantStore:
             ident = _db_identity(self.path)
             if ident is not None and ident in _INITIALIZED:
                 return
-            with self.db() as db:
+            # journal_mode must change before BEGIN IMMEDIATE. An existing
+            # database may still use DELETE mode after a restore or upgrade.
+            with self.db(write=False) as db:
                 db.execute('PRAGMA journal_mode=WAL')
                 db.executescript('''
                     CREATE TABLE IF NOT EXISTS conversations (
@@ -71,6 +73,7 @@ class AssistantStore:
                     db.execute("ALTER TABLE conversations ADD COLUMN context TEXT NOT NULL DEFAULT 'null'")
                 if 'materials' not in {row[1] for row in db.execute('PRAGMA table_info(requests)')}:
                     db.execute("ALTER TABLE requests ADD COLUMN materials TEXT NOT NULL DEFAULT '[]'")
+                db.commit()
             ident = _db_identity(self.path)
             if ident is not None:
                 _INITIALIZED.add(ident)
@@ -94,59 +97,75 @@ class AssistantStore:
             db.close()
 
     def conversation(self, user: dict, conversation_id: str | None = None) -> dict:
-        with self.db() as db:
+        uid = identity(user)
+        with self.db(write=False) as db:
             if conversation_id:
                 row = db.execute('SELECT * FROM conversations WHERE id=? AND user_id=?',
-                                 (conversation_id, identity(user))).fetchone()
+                                 (conversation_id, uid)).fetchone()
                 if not row:
                     raise ValueError('对话不存在或无权访问')
             else:
                 row = db.execute('SELECT * FROM conversations WHERE user_id=? ORDER BY updated DESC LIMIT 1',
-                                 (identity(user),)).fetchone()
-                if not row:
+                                 (uid,)).fetchone()
+            records = []
+            operations_by_request: dict[str, list] = {}
+            if row:
+                records = list(reversed(db.execute(
+                    'SELECT * FROM requests WHERE conversation_id=? ORDER BY created DESC LIMIT 60', (row['id'],)
+                ).fetchall()))
+                # Recover receipts in one indexed read, rather than one query per message.
+                if records:
+                    ids = [record['id'] for record in records]
+                    for operation in db.execute(
+                        f"SELECT * FROM operations WHERE request_id IN ({','.join('?' for _ in ids)}) ORDER BY created", ids
+                    ):
+                        operations_by_request.setdefault(operation['request_id'], []).append(dict(operation))
+                row = dict(row)
+                records = [dict(record) for record in records]
+        if not row:
+            with self.db(write=True) as db:
+                existing = db.execute('SELECT * FROM conversations WHERE user_id=? ORDER BY updated DESC LIMIT 1',
+                                      (uid,)).fetchone()
+                if not existing:
                     key = uuid.uuid4().hex
                     db.execute('INSERT INTO conversations(id,user_id,updated) VALUES (?,?,?)',
-                               (key, identity(user), time.time()))
-                    row = db.execute('SELECT * FROM conversations WHERE id=?', (key,)).fetchone()
-            result = dict(row)
-            result['refs'] = json.loads(result['refs'])
-            result['context'] = json.loads(result['context'])
-            records = list(reversed(db.execute('SELECT * FROM requests WHERE conversation_id=? ORDER BY created DESC LIMIT 60', (row['id'],)).fetchall()))
-            # Recover receipts in one indexed read, rather than one query per message.
-            operations_by_request: dict[str, list] = {}
-            if records:
-                ids = [record['id'] for record in records]
-                for operation in db.execute(
-                    f"SELECT * FROM operations WHERE request_id IN ({','.join('?' for _ in ids)}) ORDER BY created", ids
-                ):
-                    operations_by_request.setdefault(operation['request_id'], []).append(operation)
-            result['requests'] = []
-            for record in records:
-                item = dict(record)
-                item['materials'] = json.loads(item['materials'])
-                item['result'] = json.loads(item['result'])
-                if item['status'] == 'running' and item['owner'] != OWNER:
-                    item['status'] = 'interrupted'
-                    item['result']['error'] = '服务已重启，回复中断；请先核验已记录操作和实际业务状态。'
-                    db.execute("UPDATE requests SET status='interrupted',result=? WHERE id=?",
-                               (json.dumps(item['result'], ensure_ascii=False), item['id']))
-                known = {action.get('operation_id') for action in item['result'].get('actions', [])}
-                for operation in operations_by_request.get(item['id'], []):
-                    if operation['id'] in known or item['status'] == 'running':
-                        continue
-                    operation_result = json.loads(operation['result']) if operation['result'] else {}
-                    complete = operation['status'] == 'completed'
-                    item['result'].setdefault('actions', []).append({
-                        'operation_id': operation['id'], 'tool': operation['tool'], 'ok': complete,
-                        'job_name': operation_result.get('job_name'),
-                        'message': f"{operation['tool']}：" + ('已记录完成' if complete else '结果待核验，请先查询业务状态，勿重放整条请求')})
-                item.pop('owner')
-                from web.services.assistant_delivery import canonical_links
-                links = result['refs'] + [ref for action in item['result'].get('actions', [])
-                                          for ref in action.get('references', [])]
-                item['result']['answer'] = canonical_links(item['result'].get('answer') or '', links)
-                result['requests'].append(item)
-            return result
+                               (key, uid, time.time()))
+                    existing = db.execute('SELECT * FROM conversations WHERE id=?', (key,)).fetchone()
+                row = dict(existing)
+        result = dict(row)
+        result['refs'] = json.loads(result['refs'])
+        result['context'] = json.loads(result['context'])
+        result['requests'] = []
+        interrupted_updates: list[tuple[str, str]] = []
+        from web.services.assistant_delivery import canonical_links
+        for item in records:
+            item['materials'] = json.loads(item['materials'])
+            item['result'] = json.loads(item['result'])
+            if item['status'] == 'running' and item['owner'] != OWNER:
+                item['status'] = 'interrupted'
+                item['result']['error'] = '服务已重启，回复中断；请先核验已记录操作和实际业务状态。'
+                interrupted_updates.append((json.dumps(item['result'], ensure_ascii=False), item['id']))
+            known = {action.get('operation_id') for action in item['result'].get('actions', [])}
+            for operation in operations_by_request.get(item['id'], []):
+                if operation['id'] in known or item['status'] == 'running':
+                    continue
+                operation_result = json.loads(operation['result']) if operation['result'] else {}
+                complete = operation['status'] == 'completed'
+                item['result'].setdefault('actions', []).append({
+                    'operation_id': operation['id'], 'tool': operation['tool'], 'ok': complete,
+                    'job_name': operation_result.get('job_name'),
+                    'message': f"{operation['tool']}：" + ('已记录完成' if complete else '结果待核验，请先查询业务状态，勿重放整条请求')})
+            item.pop('owner')
+            links = result['refs'] + [ref for action in item['result'].get('actions', [])
+                                      for ref in action.get('references', [])]
+            item['result']['answer'] = canonical_links(item['result'].get('answer') or '', links)
+            result['requests'].append(item)
+        if interrupted_updates:
+            with self.db(write=True) as db:
+                for payload, req_id in interrupted_updates:
+                    db.execute("UPDATE requests SET status='interrupted',result=? WHERE id=? AND status='running' AND owner!=?",
+                               (payload, req_id, OWNER))
+        return result
 
     def begin(self, user: dict, request_id: str, conversation_id: str, message: str,
               materials: list[dict] | None = None) -> tuple[bool, dict]:

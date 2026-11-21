@@ -30,13 +30,33 @@ function read(key: string, seed = ''): Draft {
   }
 }
 
-function write(key: string, value: Draft) {
+const persistTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function flushStorage(key: string, value: Draft) {
+  const timer = persistTimers.get(key);
+  if (timer) { clearTimeout(timer); persistTimers.delete(key); }
   const raw = JSON.stringify(value);
   try { sessionStorage.setItem(key, raw); } catch { /* Retain the complete draft in this page's memory. */ }
-  cache.set(key, { raw: (() => { try { return sessionStorage.getItem(key); } catch { return null; } })(), value });
+  cache.set(key, { raw, value });
+}
+
+function write(key: string, value: Draft, debounce = false) {
+  if (debounce) {
+    const prior = cache.get(key);
+    cache.set(key, { raw: prior ? prior.raw : null, value });
+    const existing = persistTimers.get(key);
+    if (existing) clearTimeout(existing);
+    persistTimers.set(key, setTimeout(() => {
+      persistTimers.delete(key);
+      const latest = cache.get(key)?.value;
+      if (latest) flushStorage(key, latest);
+    }, 300));
+  } else {
+    flushStorage(key, value);
+  }
   listeners.get(key)?.forEach(listener => listener());
 }
-function change(key: string, transform: (draft: Draft) => Draft) { write(key, transform(read(key))); }
+function change(key: string, transform: (draft: Draft) => Draft, debounce = false) { write(key, transform(read(key)), debounce); }
 
 async function fileOperation(key: string, value?: File, remove = false): Promise<File | undefined> {
   if (value) files.set(key, value);
@@ -110,7 +130,7 @@ export function useAssistantDraft(user: string, conversation?: string, seed = ''
   }, [key]);
   const snapshot = useCallback(() => read(key, seed), [key, seed]);
   const draft = useSyncExternalStore(subscribe, snapshot);
-  const setText = (text: string) => change(key, value => ({ ...value, text }));
+  const setText = (text: string) => change(key, value => ({ ...value, text }), true);
   return { text: draft.text, entries: draft.entries, setText,
     materials: draft.entries.flatMap(entry => entry.material ? [entry.material] : []),
     busy: draft.entries.some(entry => entry.state === 'uploading'),

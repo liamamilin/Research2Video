@@ -2,6 +2,19 @@
 from __future__ import annotations
 
 
+def job_state(state: dict | None) -> dict | None:
+    """List views need usage totals, not per-source/per-call research records."""
+    if state is None:
+        return None
+    result = dict(state)
+    if isinstance(state.get("last_usage"), dict):
+        result["last_usage"] = {k: v for k, v in state["last_usage"].items() if k in {
+            "model", "prompt_tokens", "completion_tokens", "total_tokens", "searches",
+            "cost", "cost_usd", "llm_calls", "cached_tokens",
+        }}
+    return result
+
+
 def publication(row: dict) -> dict:
     # In particular, exclude publish_pack/description snapshots and attempt logs.
     return {key: value for key, value in row.items() if key in {

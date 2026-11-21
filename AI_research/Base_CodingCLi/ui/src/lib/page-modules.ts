@@ -1,5 +1,6 @@
 /** Load only the destination's code when a user points at or focuses a link. */
 export const pageLoaders = {
+  ChainsPage: () => import("@/pages/Chains").then(m => ({ default: m.ChainsPage })),
   DashboardPage: () => import("@/pages/Dashboard").then(m => ({ default: m.DashboardPage })),
   HomeBoardPage: () => import("@/pages/HomeBoard").then(m => ({ default: m.HomeBoardPage })),
   TopicsPage: () => import("@/pages/Topics").then(m => ({ default: m.TopicsPage })),
@@ -26,6 +27,7 @@ export const pageLoaders = {
 };
 
 export function pageLoader(path: string) {
+  if (/^\/chains(?:\/[^/]+)?$/.test(path)) return pageLoaders.ChainsPage;
   if (path === "/") return pageLoaders.HomeBoardPage;
   if (path === "/engine") return pageLoaders.DashboardPage;
   if (path === "/matrices") return pageLoaders.MatricesPage;
@@ -56,4 +58,10 @@ export function preloadPage(path: string) {
   if (!load || warmed.has(load)) return;
   warmed.add(load);
   void load().catch(() => warmed.delete(load));
+}
+
+export const PRIMARY_PRELOAD_PATHS = ["/chains", "/matrices", "/video", "/publish", "/reports", "/jobs", "/ask"] as const;
+
+export function preloadPrimaryPages() {
+  for (const path of PRIMARY_PRELOAD_PATHS) preloadPage(path);
 }

@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -61,7 +62,7 @@ function VideoRow({ item }: { item: BoardItem }) {
 
 export function HomeBoardPage() {
   const chainScope=useChainScope();
-  const [board, setBoard] = useState<VideoBoard | null>(null);
+  const [board, setBoard] = useState<VideoBoard | null>(() => readPageSnapshot("video-board"));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [limit, setLimit] = useState(PAGE);
@@ -77,16 +78,17 @@ export function HomeBoardPage() {
   const load = useCallback(async () => {
     if (flight.current) return;
     const controller = new AbortController();
+    const revision = snapshotRevision();
     flight.current = controller;
     setLoading(true);
     try {
       const next = await getVideoBoard(controller.signal);
       if (!Array.isArray(next?.items)) throw new Error("看板数据尚未就绪，请稍后刷新");
-      if (!controller.signal.aborted) { setBoard(next); setError(""); }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { savePageSnapshot("video-board", next, revision); setBoard(next); setError(""); }
     } catch (e) {
-      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "读取失败");
+      if (!controller.signal.aborted && revision === snapshotRevision()) setError(e instanceof Error ? e.message : "读取失败");
     } finally {
-      if (flight.current === controller) { flight.current = null; setLoading(false); }
+      if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); }
     }
   }, []);
   useEffect(() => {

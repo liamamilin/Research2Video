@@ -77,7 +77,7 @@ function status(theme: Theme) {
   return theme.origin === "manual" ? "自己命题" : "推荐主题";
 }
 
-export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: boolean }) {
+export function ThemeWorkbench({ matrix, canEdit, visible = true }: { matrix: string; canEdit: boolean; visible?: boolean }) {
   const toast = useToast();
   const [data, setData] = useState<ThemeWorkbenchData | null>(null);
   const [error, setError] = useState("");
@@ -116,8 +116,9 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
     } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e)); }
     finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
   }, [matrix]);
-  useEffect(() => { void load(); const timer = window.setInterval(() => { if (!document.hidden) void load(); }, 15000);
-    return () => { clearInterval(timer); flight.current?.abort(); flight.current = null; }; }, [load]);
+  useEffect(() => { void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
+  useEffect(() => { if (!visible) return; const timer = window.setInterval(() => { if (!document.hidden) void load(); }, 15000);
+    return () => { clearInterval(timer); }; }, [load, visible]);
   const action = async (key: string, operation: () => Promise<unknown>) => {
     if (busy) return;
     setBusy(key);
@@ -148,7 +149,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
     setHistory(result.themes); setNextHistory(result.next_offset); setView("history");
   });
   useEffect(() => {
-    if (view !== "history") return;
+    if (view !== "history" || !visible) return;
     let live = true;
     const timer = window.setInterval(() => {
       if (!document.hidden) void getThemeHistory(matrix).then((result) => {
@@ -159,7 +160,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
       }).catch(() => { /* Keep the last readable production records. */ });
     }, 15000);
     return () => { live = false; clearInterval(timer); };
-  }, [matrix, view]);
+  }, [matrix, view, visible]);
   const selectedDay = day ?? data?.today ?? "";
   const supportsFeedback = data?.feedback != null;
   const allCategories = [...(data?.categories || []), ...(data?.legacy_categories || [])];

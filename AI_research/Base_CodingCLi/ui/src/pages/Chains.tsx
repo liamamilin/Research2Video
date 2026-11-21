@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '@/api/client';
@@ -26,7 +27,7 @@ function SourcePicker({catalog,values,onChange}:{catalog:Catalog;values:string[]
 
 export function ChainsPage(){
   const {key}=useParams();const navigate=useNavigate();const role=useAuthStore(s=>s.user?.role);const [access,setAccess]=useState<{mode:string;can_create:boolean;writable_chains:string[]}>({mode:'read_only',can_create:false,writable_chains:[]});
-  const [items,setItems]=useState<Chain[]>([]);const [archived,setArchived]=useState<Chain[]>([]);const [data,setData]=useState<Chain|null>(null);const [catalog,setCatalog]=useState<Catalog|null>(null);
+  const [items,setItems]=useState<Chain[]>(() => readPageSnapshot<{items:Chain[]}>("chains")?.items ?? []);const [archived,setArchived]=useState<Chain[]>([]);const [data,setData]=useState<Chain|null>(null);const [catalog,setCatalog]=useState<Catalog|null>(null);
   const canEdit=role!=='viewer'&&access.mode==='enabled'&&(key==='new'?access.can_create:!key?access.can_create:access.writable_chains.includes('*')||access.writable_chains.includes(key)||!!data?.access?.can_write);
   const [error,setError]=useState('');const [loadError,setLoadError]=useState('');const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false);const [query,setQuery]=useState('');const [tab,setTab]=useState('overview');
   const [edit,setEdit]=useState(false);const [draft,setDraft]=useState<{name:string;prompt:string;sources:string[];schedule:string;outputs:Output[];apply_shared:boolean;source_supply_enabled:boolean;window_days:number;window_mode:string}|null>(null);
@@ -38,11 +39,11 @@ export function ChainsPage(){
   const [addOutput,setAddOutput]=useState(false);const [outputName,setOutputName]=useState('');const [outputMode,setOutputMode]=useState('individual');const [removeOutput,setRemoveOutput]=useState<Output|null>(null);
   const route=useRef(key);route.current=key;
   const load=useCallback(async()=>{
-    const requested=key;
-    const requests:Promise<unknown>[]=[api<Catalog>('/api/chains/catalog').then(cat=>{if(route.current===requested){setCatalog(cat);if('access' in cat)setAccess(cat.access as typeof access)}})];
-    if(key&&key!=='new')requests.push(api<Chain>('/api/chains/'+key).then(detail=>{if(route.current===requested)setData(detail)}));
-    else if(!key)requests.push(api<{items:Chain[];archived:Chain[]}>('/api/chains').then(list=>{if(route.current===requested){setItems(list.items);setArchived(list.archived)}}));
-    await Promise.all(requests);if(route.current===requested)setLoadError('');
+    const requested=key;const revision=snapshotRevision();
+    const requests:Promise<unknown>[]=[api<Catalog>('/api/chains/catalog').then(cat=>{if(route.current===requested&&revision===snapshotRevision()){setCatalog(cat);if('access' in cat)setAccess(cat.access as typeof access)}})];
+    if(key&&key!=='new')requests.push(api<Chain>('/api/chains/'+key).then(detail=>{if(route.current===requested&&revision===snapshotRevision())setData(detail)}));
+    else if(!key)requests.push(api<{items:Chain[];archived:Chain[]}>('/api/chains').then(list=>{if(route.current===requested&&revision===snapshotRevision()){savePageSnapshot("chains",list,revision);setItems(list.items);setArchived(list.archived)}}));
+    await Promise.all(requests);if(route.current===requested&&revision===snapshotRevision())setLoadError('');
   },[key]);
   useEffect(()=>{setData(null);setRun(null);setNotice('');setError('');setLoadError('');setBusy(false);setEdit(false);setConfirmDelete(null);setTab('overview');void load().catch(e=>{if(route.current===key)setLoadError(msg(e))});},[key,load]);
   useEffect(()=>{if(key==='new'&&step===2)void api<{voices:{id:string;label:string}[]}>('/api/video/autovideo').then(x=>setVoices(x.voices)).catch(()=>{});},[key,step]);

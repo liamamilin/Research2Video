@@ -68,7 +68,7 @@ def _summary(job: dict) -> JobSummary:
 
 
 @router.get("", response_model=list[JobSummary])
-def list_all(user=Depends(require_viewer)):
+def list_all(user=Depends(require_viewer), compact: bool = False):
     settings = get_settings()
     names = list_jobs(settings.paths.jobs_dir, enabled_only=False)
     result: list[JobSummary] = []
@@ -76,7 +76,11 @@ def list_all(user=Depends(require_viewer)):
         job = load_job(settings.paths.jobs_dir, name)
         if not job:
             continue
-        result.append(_summary(job))
+        summary = _summary(job)
+        if compact and summary.state:
+            from web.services.video_list_payload import job_state
+            summary.state = JobState(**job_state(summary.state.model_dump()))
+        result.append(summary)
     return result
 
 

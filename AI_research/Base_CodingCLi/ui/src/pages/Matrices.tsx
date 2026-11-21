@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import { useChainScope } from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -157,7 +158,7 @@ export function MatricesPage() {
   const chainScope=useChainScope();
   const navigate = useNavigate();
   const canEdit = useCanEdit();
-  const [data, setData] = useState<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] } | null>(null);
+  const [data, setData] = useState<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] } | null>(() => readPageSnapshot("matrices"));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [maintenance, setMaintenance] = useState(false);
@@ -167,13 +168,14 @@ export function MatricesPage() {
   const { q, status, archived } = filters.values;
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller; setLoading(true);
     try {
       const next = await listMatrices(controller.signal);
       if (!Array.isArray(next?.matrices) || !Array.isArray(next?.ungrouped)) throw new Error("矩阵数据格式异常，请重试");
-      if (!controller.signal.aborted) { setData(next); setError(""); }
-    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e)); }
-    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { savePageSnapshot("matrices", next, revision); setData(next); setError(""); }
+    } catch (e) { if (!controller.signal.aborted && revision === snapshotRevision()) setError(errorMessage(e)); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, []);
   useEffect(() => {
     void load();
@@ -477,15 +479,21 @@ export function MatrixDetailPage() {
   const [adding, setAdding] = useState("");
   const [copying, setCopying] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [mountedTabs, setMountedTabs] = useState<string[]>([tab]);
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [configError, setConfigError] = useState("");
   const [configRetry, setConfigRetry] = useState(0);
   const [ungrouped, setUngrouped] = useState<{ job: string; name: string }[]>([]);
+  const [ungroupedLoadedKey, setUngroupedLoadedKey] = useState("");
   const [memberError, setMemberError] = useState("");
   const [memberRetry, setMemberRetry] = useState(0);
   const flight = useRef<AbortController | null>(null);
+  const jobsLoadedKey = useRef("");
   const includeReports = useRef(false);
   includeReports.current = tab === "jobs" && matrix?.key === key;
+  useEffect(() => {
+    setMountedTabs((prev) => (prev.includes(tab) ? prev : [...prev, tab]));
+  }, [tab]);
   const load = useCallback(async () => {
     if (flight.current) return;
     const controller = new AbortController(); flight.current = controller; setLoading(true);
@@ -497,14 +505,18 @@ export function MatrixDetailPage() {
     finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
   }, [key]);
   useEffect(() => {
-    setMatrix(null); setConfigs(null); setError(""); setConfigError(""); setMemberError(""); setEditing(false); setCopying(false); setAdding(""); setUngrouped([]);
+    jobsLoadedKey.current = "";
+    setMountedTabs([tab]);
+    setMatrix(null); setConfigs(null); setError(""); setConfigError(""); setMemberError(""); setEditing(false); setCopying(false); setAdding(""); setUngrouped([]); setUngroupedLoadedKey("");
     void load();
     return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
   useEffect(() => {
     if (tab !== "jobs" || matrix?.key !== key) return;
+    const cacheKey = `${key}:${configRetry}`;
+    if (jobsLoadedKey.current === cacheKey) return;
     const controller = new AbortController();
-    listProduction(undefined, controller.signal).then((rows) => { if (!controller.signal.aborted) { if (!Array.isArray(rows)) throw new Error("视频配置数据异常"); setConfigs(rows); setConfigError(""); } })
+    listProduction(undefined, controller.signal).then((rows) => { if (!controller.signal.aborted) { if (!Array.isArray(rows)) throw new Error("视频配置数据异常"); jobsLoadedKey.current = cacheKey; setConfigs(rows); setConfigError(""); } })
       .catch((e) => { if (!controller.signal.aborted) setConfigError(errorMessage(e)); });
     getMatrix(key, controller.signal).then((next) => {
       if (!controller.signal.aborted && next.key === key) setMatrix(next);
@@ -513,11 +525,13 @@ export function MatrixDetailPage() {
   }, [key, tab, matrix?.key, configRetry]);
   useEffect(() => {
     if (tab !== "settings" || !canEdit) return;
+    const cacheKey = `${key}:${memberRetry}`;
+    if (ungroupedLoadedKey === cacheKey) return;
     const controller = new AbortController();
-    listMatrices(controller.signal).then((body) => { if (!controller.signal.aborted) { if (!Array.isArray(body?.ungrouped)) throw new Error("未分组任务数据异常，请重试"); setUngrouped(body.ungrouped); setMemberError(""); } })
+    listMatrices(controller.signal).then((body) => { if (!controller.signal.aborted) { if (!Array.isArray(body?.ungrouped)) throw new Error("未分组任务数据异常，请重试"); setUngrouped(body.ungrouped); setUngroupedLoadedKey(cacheKey); setMemberError(""); } })
       .catch((e) => { if (!controller.signal.aborted) setMemberError(errorMessage(e)); });
     return () => { controller.abort(); };
-  }, [key, tab, canEdit, memberRetry]);
+  }, [key, tab, canEdit, memberRetry, ungroupedLoadedKey]);
   const anyRunning = !!matrix?.members.some((m) => m.is_running);
   useEffect(() => {
     if (business && tab === "columns") return;
@@ -604,17 +618,17 @@ export function MatrixDetailPage() {
     <div role="tablist" aria-label="矩阵工作区" className="flex flex-wrap gap-2 border-b border-border text-sm">
       {([["columns", "栏目"], ["themes", "主题推荐"], ["jobs", business ? "研究来源" : "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
     </div>
-    {tab === "columns" ? <ContentColumns key={matrix.key} matrix={matrix} canEdit={canEdit} /> : null}
-    {tab === "themes" ? <ThemeWorkbench key={matrix.key} matrix={matrix.key} canEdit={canEdit} /> : null}
-    {tab === "runs" ? <MatrixRuns key={matrix.key} matrix={matrix} initialJob={params.get("job") ?? ""} /> : null}
-    {tab === "week" ? <MatrixWeek matrix={matrix} onChanged={setMatrix} /> : null}
-    {tab === "jobs" ? <section aria-label="矩阵里的 Job" className="space-y-3">
+    {mountedTabs.includes("columns") ? <div hidden={tab !== "columns"}><ContentColumns key={matrix.key} matrix={matrix} canEdit={canEdit} /></div> : null}
+    {mountedTabs.includes("themes") ? <div hidden={tab !== "themes"}><ThemeWorkbench key={matrix.key} matrix={matrix.key} canEdit={canEdit} visible={tab === "themes"} /></div> : null}
+    {mountedTabs.includes("runs") ? <div hidden={tab !== "runs"}><MatrixRuns key={matrix.key} matrix={matrix} initialJob={params.get("job") ?? ""} /></div> : null}
+    {mountedTabs.includes("week") ? <div hidden={tab !== "week"}><MatrixWeek matrix={matrix} onChanged={setMatrix} /></div> : null}
+    {mountedTabs.includes("jobs") ? <section hidden={tab !== "jobs"} aria-label="矩阵里的 Job" className="space-y-3">
       <p className="text-xs text-text-muted">先运行研究任务，再从报告进入视频制作；任务提示词可在任务详情中编辑。</p>
       {configError ? <div className="card p-3 text-xs text-warning flex flex-wrap gap-2"><span>视频配置数量暂未同步：{configError}</span><button className="text-accent hover:underline" onClick={() => setConfigRetry((n) => n + 1)}>重试视频配置</button></div> : null}
       {matrix.members.map((m) => <MemberCard key={m.job} member={m} matrixKey={matrix.key} canEdit={canEdit} isAdmin={isAdmin} configs={configs ? { count: configs.filter((c) => c.job === m.job).length, auto: configs.filter((c) => c.job === m.job && c.auto > 0).length } : null} onChanged={(next) => { if (next) setMatrix(next); else void load(); }} />)}
       {!matrix.members.length ? <div className="card p-8 text-center space-y-3"><p className="text-sm">还没有研究任务</p><p className="text-xs text-text-muted">把已有任务加入这个矩阵，即可跟进报告和视频。</p>{canEdit ? <button className="btn text-xs" onClick={() => selectTab("settings")}>添加研究任务</button> : null}</div> : null}
     </section> : null}
-    {tab === "settings" ? <div className="space-y-4">
+    {mountedTabs.includes("settings") ? <div hidden={tab !== "settings"} className="space-y-4">
       <MatrixContentSettings key={`content-${matrix.key}`} matrix={matrix} canEdit={canEdit} onSaved={setMatrix} />
       <section className="card p-4 space-y-3 text-sm" aria-label="领域和关键词"><h2 className="font-medium">研究范围</h2>{editing ? <>
         <label className="block space-y-1 text-xs">领域<input className="input" aria-label="领域" value={domain} onChange={(e) => setDomain(e.target.value)} /></label><label className="block space-y-1 text-xs">共用关键词<input className="input" aria-label="关键词" value={words} onChange={(e) => setWords(e.target.value)} /></label><p className="text-xs text-text-muted">各任务运行时会先使用这里的关键词，再追加自己的关键词。保存后，下次运行生效。</p>

@@ -10,7 +10,7 @@ import { ToastProvider } from "@/lib/toast";
 import { pageLoaders } from "@/lib/page-modules";
 import { PageLoading } from "@/components/PageLoading";
 
-const ChainsPage = lazy(() => import("@/pages/Chains").then(m => ({ default: m.ChainsPage })));
+const ChainsPage = lazy(pageLoaders.ChainsPage);
 const DashboardPage = lazy(pageLoaders.DashboardPage);
 const HomeBoardPage = lazy(pageLoaders.HomeBoardPage);
 const TopicsPage = lazy(pageLoaders.TopicsPage);

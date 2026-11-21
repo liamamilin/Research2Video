@@ -7,7 +7,8 @@ import { Sidebar } from "./Sidebar";
 import { useAppStore } from "@/lib/app-store";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
-import { preloadPage } from "@/lib/page-modules";
+import { preloadPage, preloadPrimaryPages } from "@/lib/page-modules";
+import { ChainScopeProvider } from "@/lib/use-chain-scope";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
@@ -23,6 +24,10 @@ function preloadDestination(event: SyntheticEvent) {
 }
 
 export function Layout() {
+  return <ChainScopeProvider><LayoutContent /></ChainScopeProvider>;
+}
+
+function LayoutContent() {
   const { sidebarOpen, toggleSidebar, closeSidebar, setSidebar } = useAppStore();
   const main = useRef<HTMLElement>(null);
   const location = useLocation();
@@ -49,6 +54,16 @@ export function Layout() {
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [setSidebar]);
+
+  useEffect(() => {
+    const win = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+    if (typeof win.requestIdleCallback === "function") {
+      const id = win.requestIdleCallback(() => preloadPrimaryPages(), { timeout: 2500 });
+      return () => win.cancelIdleCallback?.(id);
+    }
+    const timer = window.setTimeout(preloadPrimaryPages, 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // Navigating only closes the drawer on mobile; on desktop the sidebar
   // stays visible (there is no hamburger to bring it back).

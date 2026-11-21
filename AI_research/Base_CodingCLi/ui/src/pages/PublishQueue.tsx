@@ -21,9 +21,6 @@ const RENDER_NOTE: Record<string, string> = {
   COMPLETED: "成片完成", FAILED: "出片失败", CANCELLED: "已取消",
 };
 
-// Reuse this login's last list on return; always fetch fresh statuses in the background.
-// A different login gets a different user object, so its data is never reused.
-const previousShipments = new WeakMap<object, Map<string, Shipment[]>>();
 const PAGE_SIZE = 24;
 
 function state(s: Shipment): { label: string; cls: string } {
@@ -60,12 +57,10 @@ export function PublishQueuePage() {
   const canEdit = role === "editor" || role === "admin";
   const filters = useFilters(["stage", "tier", "column", "source", "range", "matrix", "platform", "distribution", "scope", "todo"]);
   const load = useCallback(async (signal: AbortSignal) => {
-    const fresh = await listShipments(signal, filters.values.scope === "history");
-    if (!signal.aborted && user) { const cache = previousShipments.get(user) ?? new Map<string, Shipment[]>(); cache.set(filters.values.scope, fresh); previousShipments.set(user, cache); }
-    return fresh;
-  }, [user, filters.values.scope]);
-  const { data, error, loading, reload } = usePageResource(load, 20000);
-  const rows = data ?? (user ? previousShipments.get(user)?.get(filters.values.scope) : undefined) ?? null;
+    return listShipments(signal, filters.values.scope === "history");
+  }, [filters.values.scope]);
+  const { data: rows, error, loading, reload } = usePageResource(load, 20000, false,
+    `shipments:${user?.username ?? ""}:${filters.values.scope}`);
   useTopicPosition(root, Boolean(rows));
   const [advanced, setAdvanced] = useState(false);
   const columnNames = new Map(rows?.map(r => [r.column_key, r.column_label || r.column_key]));

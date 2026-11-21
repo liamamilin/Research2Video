@@ -117,6 +117,9 @@ export function VideoScriptViewPage() {
   const [catalog, setCatalog] = useState<StyleCatalog | null>(null);
   const [facts, setFacts] = useState<Record<string, Fact>>({});
   const [publishVersion, setPublishVersion] = useState<number | null>(null);
+  const [screenshotsMountedFor, setScreenshotsMountedFor] = useState("");
+  const factsCacheKey = useRef("");
+  const autovideoCache = useRef<{ id: string; tick: number; at: number } | null>(null);
 
   const flight = useRef<AbortController | null>(null);
   const activePage = useRef(id);
@@ -133,7 +136,9 @@ export function VideoScriptViewPage() {
 
   useEffect(() => {
     activePage.current = id;
-    setDetail(null); setError(null); setPublishVersion(null); setVoice(""); setProductionMode(""); setOperationError(""); void load();
+    factsCacheKey.current = "";
+    autovideoCache.current = null;
+    setDetail(null); setError(null); setFacts({}); setAutovideo(null); setRenderStatusError(false); setScreenshotsMountedFor(""); setPublishVersion(null); setVoice(""); setProductionMode(""); setOperationError(""); void load();
     return () => { activePage.current = ""; flight.current?.abort(); flight.current = null; };
   }, [load, id]);
 
@@ -173,14 +178,29 @@ export function VideoScriptViewPage() {
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
   const shownVersion = detail?.version_shown?.version;
+  const screenshotsKey = detail && shownVersion ? `${detail.id}-${shownVersion}` : "";
   useEffect(() => {
-    if (tab !== "draft" || !sheetId) {
+    if (!localVideo && screenshotsKey && !editing && (tab === "draft" || tab === "video")) {
+      setScreenshotsMountedFor(screenshotsKey);
+    }
+  }, [localVideo, screenshotsKey, editing, tab]);
+  useEffect(() => {
+    if (!sheetId) {
+      factsCacheKey.current = "";
       setFacts({});
       return;
     }
-    const controller = new AbortController(); setFacts({});
+    if (tab !== "draft") return;
+    const nextKey = `${id}:${shownVersion ?? ""}:${sheetId}`;
+    if (factsCacheKey.current === nextKey) return;
+    const controller = new AbortController();
     getVideoFacts(id, shownVersion, controller.signal)
-      .then((sheet) => { if (!controller.signal.aborted) setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f]))); })
+      .then((sheet) => {
+        if (!controller.signal.aborted) {
+          factsCacheKey.current = nextKey;
+          setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f])));
+        }
+      })
       .catch(() => { if (!controller.signal.aborted) setFacts({}); });
     return () => controller.abort();
   }, [tab, id, sheetId, shownVersion]);
@@ -188,9 +208,17 @@ export function VideoScriptViewPage() {
   const needsRenderStatus = detail?.status === "APPROVED" && tab === "video" && !localVideo;
   useEffect(() => {
     if (!canEdit || !needsRenderStatus) return;
+    const cached = autovideoCache.current;
+    if (cached && cached.id === id && cached.tick === statusTick && Date.now() - cached.at < 15000) return;
     const controller = new AbortController();
-    setAutovideo(null); setRenderStatusError(false);
-    getAutoVideoStatus(controller.signal).then((value) => { if (!controller.signal.aborted) setAutovideo(value); })
+    if (!cached || cached.tick !== statusTick) setAutovideo(null);
+    setRenderStatusError(false);
+    getAutoVideoStatus(controller.signal).then((value) => {
+      if (!controller.signal.aborted) {
+        autovideoCache.current = { id, tick: statusTick, at: Date.now() };
+        setAutovideo(value);
+      }
+    })
       .catch(() => { if (!controller.signal.aborted) setRenderStatusError(true); });
     return () => controller.abort();
   }, [canEdit, needsRenderStatus, id, statusTick]);
@@ -560,7 +588,7 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {shown && !editing && tab === "draft" ? <ScriptPolish polish={shown.meta?.polish} /> : null}
-      {!localVideo && shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
+      {!localVideo && shown && screenshotsMountedFor === screenshotsKey ? <div hidden={editing || (tab !== "draft" && tab !== "video")}><ScriptScreenshots key={`${detail.id}-${shown.version}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} visible={!editing && (tab === "draft" || tab === "video")} refreshKey={renderForVersion(detail, shown.version)?.id ?? ""} /></div> : null}
       {detail.topic.article && tab === "draft" ? <ArticleSource key={detail.id} id={detail.id} mode={detail.topic.article.mode} /> : null}
       {detail.report_id && tab === "draft" ? (
         <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>

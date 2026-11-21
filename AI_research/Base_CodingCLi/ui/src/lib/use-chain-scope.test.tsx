@@ -16,3 +16,31 @@ it('关联范围未返回时不展示其他链路内容',()=>{
  vi.mocked(api).mockReturnValue(new Promise(()=>{}));render(<MemoryRouter initialEntries={['/outputs?chain=science']}><List/></MemoryRouter>);
  expect(screen.queryByText('视频 a')).toBeNull();expect(screen.queryByText('视频 b')).toBeNull();
 });
+it('shares one scope across the header and page without blanking it on navigation',async()=>{
+ const {ChainScopeProvider}=await import('./use-chain-scope');
+ vi.mocked(api).mockResolvedValue({key:'science',name:'科研',job:'jobs/science',outputs:[],script_ids:['a']});
+ function Header(){const scope=useChainScope();return <span>{scope.data?.name}</span>}
+ function Page(){const scope=useChainScope();return <><Link to="/video?chain=science">文稿</Link><p>{scope.data?.job}</p></>}
+ render(<MemoryRouter initialEntries={['/outputs?chain=science']}><ChainScopeProvider><Header/><Page/></ChainScopeProvider></MemoryRouter>);
+ await waitFor(()=>expect(screen.getByText('jobs/science')).toBeTruthy());
+ expect(vi.mocked(api)).toHaveBeenCalledTimes(1);
+ fireEvent.click(screen.getByText('文稿'));
+ expect(screen.getByText('jobs/science')).toBeTruthy();
+ expect(vi.mocked(api)).toHaveBeenCalledTimes(1);
+});
+it('cancels a pending chain read and never exposes it after switching to another chain',async()=>{
+ const {ChainScopeProvider}=await import('./use-chain-scope');
+ let finish!:(scope:unknown)=>void;
+ vi.mocked(api).mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve}))
+  .mockResolvedValueOnce({key:'other',name:'另一链路',job:'jobs/other',outputs:[],script_ids:['b']});
+ render(<MemoryRouter initialEntries={['/outputs?chain=science']}><ChainScopeProvider>
+  <Link to="/video?chain=other">切换链路</Link><List/>
+ </ChainScopeProvider></MemoryRouter>);
+ const signal=vi.mocked(api).mock.calls[0][1]?.signal;
+ fireEvent.click(screen.getByText('切换链路'));
+ await waitFor(()=>expect(screen.getByText('视频 b')).toBeTruthy());
+ expect(signal?.aborted).toBe(true);
+ await import('@testing-library/react').then(({act})=>act(async()=>finish({key:'science',name:'科研',job:'jobs/science',outputs:[],script_ids:['a']})));
+ expect(screen.queryByText('视频 a')).toBeNull();expect(screen.getByText('视频 b')).toBeTruthy();
+ expect(vi.mocked(api)).toHaveBeenCalledTimes(2);
+});

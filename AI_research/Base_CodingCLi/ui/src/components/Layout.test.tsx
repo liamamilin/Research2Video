@@ -8,7 +8,7 @@ import { useAppStore } from "@/lib/app-store";
 import { useAuthStore } from "@/lib/auth-store";
 import { preloadPage } from "@/lib/page-modules";
 
-vi.mock("@/lib/page-modules", () => ({ preloadPage: vi.fn() }));
+vi.mock("@/lib/page-modules", () => ({ preloadPage: vi.fn(), preloadPrimaryPages: vi.fn() }));
 
 function stubMatchMedia(matches: boolean) {
   vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({

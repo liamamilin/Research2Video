@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, api, setAuthErrorHandler } from "./client";
 import { announceSessionChange } from "@/lib/session-events";
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 
 function fakeResponse(status: number, body?: unknown): Response {
   return {
@@ -28,6 +29,19 @@ afterEach(() => {
 });
 
 describe("api()", () => {
+  it.each([true, false])("invalidates snapshots both before and after a write (network failure=%s)", async (failed) => {
+    savePageSnapshot("list", ["before"], snapshotRevision());
+    let finish!: () => void;
+    fetchMock.mockImplementationOnce(() => new Promise((resolve, reject) => {
+      finish = () => failed ? reject(new TypeError("offline")) : resolve(fakeResponse(204));
+    }));
+    const saving = api("/api/jobs/example", { method: "PUT", body: {} }).catch(() => undefined);
+    expect(readPageSnapshot("list")).toBeNull();
+    savePageSnapshot("list", ["read during save"], snapshotRevision());
+    finish(); await saving;
+    expect(readPageSnapshot("list")).toBeNull();
+  });
+
   it("does not refresh or expire a remembered session for a rejected login", async () => {
     const expired = vi.fn();
     setAuthErrorHandler(expired);

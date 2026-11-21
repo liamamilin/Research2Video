@@ -21,9 +21,10 @@ def run_admission():
 
 @router.get("")
 def listing(user=Depends(require_viewer)):
+    configs = chains.production.load_all(chains.paths().config_dir, chains.paths().jobs_dir)
     return {
-        "items": chains.summary(),
-        "archived": chains.all_chains(True),
+        "items": chains.summary(configs=configs),
+        "archived": chains.all_chains(True, configs=configs),
         "role": user["role"],
         "access": chain_access.snapshot(),
     }

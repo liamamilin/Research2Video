@@ -1,0 +1,408 @@
+{
+  "method": "In-process TestClient, GET only, no app lifespan/workers, normal local configs and existing data. HEAD source loaded in memory for baseline, 3 calls per endpoint, median includes serialization/compression but excludes gateway/auth/network/browser. Telemetry remains uninitialized in this benchmark; use live page verification for analytics.",
+  "before_commit": "e433c7ea",
+  "before": [
+    {
+      "tab": "链路管理",
+      "path": "/api/chains",
+      "status": 200,
+      "first_ms": 277.9,
+      "median_ms": 23.6,
+      "decoded_bytes": 44456,
+      "wire_bytes": 44456,
+      "encoding": "identity"
+    },
+    {
+      "tab": "链路目录",
+      "path": "/api/chains/catalog",
+      "status": 200,
+      "first_ms": 60.3,
+      "median_ms": 13.5,
+      "decoded_bytes": 49844,
+      "wire_bytes": 49844,
+      "encoding": "identity"
+    },
+    {
+      "tab": "链路范围",
+      "path": "/api/chains/job-3dbaee773d34/scope",
+      "status": 200,
+      "first_ms": 12.3,
+      "median_ms": 12.5,
+      "decoded_bytes": 511,
+      "wire_bytes": 511,
+      "encoding": "identity"
+    },
+    {
+      "tab": "矩阵",
+      "path": "/api/matrices",
+      "status": 200,
+      "first_ms": 394.9,
+      "median_ms": 282.6,
+      "decoded_bytes": 1588808,
+      "wire_bytes": 1588808,
+      "encoding": "identity"
+    },
+    {
+      "tab": "产出",
+      "path": "/api/outputs",
+      "status": 200,
+      "first_ms": 180.1,
+      "median_ms": 169.0,
+      "decoded_bytes": 574509,
+      "wire_bytes": 574509,
+      "encoding": "identity"
+    },
+    {
+      "tab": "视频看板",
+      "path": "/api/video/board",
+      "status": 200,
+      "first_ms": 208.1,
+      "median_ms": 183.4,
+      "decoded_bytes": 519040,
+      "wire_bytes": 519040,
+      "encoding": "identity"
+    },
+    {
+      "tab": "文稿",
+      "path": "/api/video/scripts?compact=true",
+      "status": 200,
+      "first_ms": 201.0,
+      "median_ms": 198.8,
+      "decoded_bytes": 1271209,
+      "wire_bytes": 165551,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "成片与发布",
+      "path": "/api/video/shipments?compact=true",
+      "status": 200,
+      "first_ms": 215.5,
+      "median_ms": 215.5,
+      "decoded_bytes": 1219445,
+      "wire_bytes": 146108,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "平台管理",
+      "path": "/api/platforms/bilibili",
+      "status": 200,
+      "first_ms": 80.9,
+      "median_ms": 33.1,
+      "decoded_bytes": 612026,
+      "wire_bytes": 612026,
+      "encoding": "identity"
+    },
+    {
+      "tab": "Jobs/研究总览",
+      "path": "/api/jobs",
+      "status": 200,
+      "first_ms": 22.3,
+      "median_ms": 17.6,
+      "decoded_bytes": 1579781,
+      "wire_bytes": 1579781,
+      "encoding": "identity"
+    },
+    {
+      "tab": "研究总览用量",
+      "path": "/api/usage?days=30&by_job=false",
+      "status": 200,
+      "first_ms": 141.4,
+      "median_ms": 82.1,
+      "decoded_bytes": 16037,
+      "wire_bytes": 16037,
+      "encoding": "identity"
+    },
+    {
+      "tab": "情报轮次",
+      "path": "/api/pipeline/rounds?limit=30",
+      "status": 200,
+      "first_ms": 27.6,
+      "median_ms": 16.5,
+      "decoded_bytes": 73674,
+      "wire_bytes": 73674,
+      "encoding": "identity"
+    },
+    {
+      "tab": "报告列表",
+      "path": "/api/reports",
+      "status": 200,
+      "first_ms": 5.3,
+      "median_ms": 4.2,
+      "decoded_bytes": 57268,
+      "wire_bytes": 57268,
+      "encoding": "identity"
+    },
+    {
+      "tab": "报告树",
+      "path": "/api/reports/tree",
+      "status": 200,
+      "first_ms": 9.6,
+      "median_ms": 9.0,
+      "decoded_bytes": 131218,
+      "wire_bytes": 131218,
+      "encoding": "identity"
+    },
+    {
+      "tab": "周期调度",
+      "path": "/api/scheduler?scope=managed",
+      "status": 200,
+      "first_ms": 117.5,
+      "median_ms": 113.9,
+      "decoded_bytes": 181212,
+      "wire_bytes": 181212,
+      "encoding": "identity"
+    },
+    {
+      "tab": "选题",
+      "path": "/api/video/topics/browser",
+      "status": 200,
+      "first_ms": 58.6,
+      "median_ms": 51.8,
+      "decoded_bytes": 50748,
+      "wire_bytes": 50748,
+      "encoding": "identity"
+    },
+    {
+      "tab": "信息源",
+      "path": "/api/sources",
+      "status": 200,
+      "first_ms": 170.6,
+      "median_ms": 170.6,
+      "decoded_bytes": 151835,
+      "wire_bytes": 151835,
+      "encoding": "identity"
+    },
+    {
+      "tab": "文稿配方",
+      "path": "/api/video/recipes",
+      "status": 200,
+      "first_ms": 11.1,
+      "median_ms": 11.0,
+      "decoded_bytes": 11980,
+      "wire_bytes": 11980,
+      "encoding": "identity"
+    },
+    {
+      "tab": "数据分析",
+      "path": "/api/telemetry/summary",
+      "status": 200,
+      "first_ms": 5.1,
+      "median_ms": 4.3,
+      "decoded_bytes": 33,
+      "wire_bytes": 33,
+      "encoding": "identity"
+    },
+    {
+      "tab": "设置",
+      "path": "/api/config/system",
+      "status": 200,
+      "first_ms": 34.8,
+      "median_ms": 5.8,
+      "decoded_bytes": 26835,
+      "wire_bytes": 26835,
+      "encoding": "identity"
+    }
+  ],
+  "after": [
+    {
+      "tab": "链路管理",
+      "path": "/api/chains",
+      "status": 200,
+      "first_ms": 242.7,
+      "median_ms": 13.8,
+      "decoded_bytes": 44456,
+      "wire_bytes": 10228,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "链路目录",
+      "path": "/api/chains/catalog",
+      "status": 200,
+      "first_ms": 56.3,
+      "median_ms": 10.7,
+      "decoded_bytes": 49844,
+      "wire_bytes": 14718,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "链路范围",
+      "path": "/api/chains/job-3dbaee773d34/scope",
+      "status": 200,
+      "first_ms": 7.6,
+      "median_ms": 7.0,
+      "decoded_bytes": 511,
+      "wire_bytes": 511,
+      "encoding": "identity"
+    },
+    {
+      "tab": "矩阵",
+      "path": "/api/matrices?compact=true",
+      "status": 200,
+      "first_ms": 65.7,
+      "median_ms": 50.7,
+      "decoded_bytes": 59202,
+      "wire_bytes": 12333,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "产出",
+      "path": "/api/outputs",
+      "status": 200,
+      "first_ms": 318.3,
+      "median_ms": 186.5,
+      "decoded_bytes": 574509,
+      "wire_bytes": 101059,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "视频看板",
+      "path": "/api/video/board",
+      "status": 200,
+      "first_ms": 245.3,
+      "median_ms": 212.0,
+      "decoded_bytes": 519040,
+      "wire_bytes": 78804,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "文稿",
+      "path": "/api/video/scripts?compact=true",
+      "status": 200,
+      "first_ms": 211.8,
+      "median_ms": 205.6,
+      "decoded_bytes": 1271209,
+      "wire_bytes": 165551,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "成片与发布",
+      "path": "/api/video/shipments?compact=true",
+      "status": 200,
+      "first_ms": 243.9,
+      "median_ms": 216.6,
+      "decoded_bytes": 1219445,
+      "wire_bytes": 146108,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "平台管理",
+      "path": "/api/platforms/bilibili",
+      "status": 200,
+      "first_ms": 110.8,
+      "median_ms": 38.5,
+      "decoded_bytes": 612026,
+      "wire_bytes": 178727,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "Jobs/研究总览",
+      "path": "/api/jobs?compact=true",
+      "status": 200,
+      "first_ms": 17.8,
+      "median_ms": 15.5,
+      "decoded_bytes": 49816,
+      "wire_bytes": 9373,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "研究总览用量",
+      "path": "/api/usage?days=30&by_job=false",
+      "status": 200,
+      "first_ms": 83.8,
+      "median_ms": 83.7,
+      "decoded_bytes": 16037,
+      "wire_bytes": 16037,
+      "encoding": "identity"
+    },
+    {
+      "tab": "情报轮次",
+      "path": "/api/pipeline/rounds?limit=30",
+      "status": 200,
+      "first_ms": 22.1,
+      "median_ms": 16.4,
+      "decoded_bytes": 73674,
+      "wire_bytes": 7871,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "报告列表",
+      "path": "/api/reports",
+      "status": 200,
+      "first_ms": 6.2,
+      "median_ms": 4.6,
+      "decoded_bytes": 57268,
+      "wire_bytes": 12367,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "报告树",
+      "path": "/api/reports/tree",
+      "status": 200,
+      "first_ms": 10.2,
+      "median_ms": 10.1,
+      "decoded_bytes": 131218,
+      "wire_bytes": 27447,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "周期调度",
+      "path": "/api/scheduler?scope=managed",
+      "status": 200,
+      "first_ms": 118.3,
+      "median_ms": 122.4,
+      "decoded_bytes": 181213,
+      "wire_bytes": 34382,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "选题",
+      "path": "/api/video/topics/browser",
+      "status": 200,
+      "first_ms": 59.5,
+      "median_ms": 55.2,
+      "decoded_bytes": 50748,
+      "wire_bytes": 9241,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "信息源",
+      "path": "/api/sources",
+      "status": 200,
+      "first_ms": 162.8,
+      "median_ms": 160.1,
+      "decoded_bytes": 151835,
+      "wire_bytes": 27784,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "文稿配方",
+      "path": "/api/video/recipes",
+      "status": 200,
+      "first_ms": 11.7,
+      "median_ms": 10.5,
+      "decoded_bytes": 11980,
+      "wire_bytes": 2435,
+      "encoding": "gzip"
+    },
+    {
+      "tab": "数据分析",
+      "path": "/api/telemetry/summary",
+      "status": 200,
+      "first_ms": 5.0,
+      "median_ms": 4.3,
+      "decoded_bytes": 33,
+      "wire_bytes": 33,
+      "encoding": "identity"
+    },
+    {
+      "tab": "设置",
+      "path": "/api/config/system",
+      "status": 200,
+      "first_ms": 32.7,
+      "median_ms": 6.7,
+      "decoded_bytes": 26835,
+      "wire_bytes": 26835,
+      "encoding": "identity"
+    }
+  ]
+}

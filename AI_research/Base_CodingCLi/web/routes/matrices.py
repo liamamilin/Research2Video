@@ -89,12 +89,16 @@ def _plans() -> dict[str, dict]:
     """Each Job's schedule plan, if it has one (the schedule page owns them; read here only)."""
     try:
         from web.services import managed_scheduler as managed
+        from core.schedule_store import zone
 
         out = {}
-        for shown in managed.describe_all(managed.store()):
-            plan = shown
+        # Matrix cards do not use execution history, job labels or research-window
+        # previews. Avoid rebuilding the full scheduler page for every matrix list.
+        for plan in managed.store().list():
+            next_runs = cron.fire_times(cron.parse_schedule(plan["schedule"]),
+                                        datetime.now(zone(plan["timezone"])), count=1) if plan["enabled"] else []
             out[plan["job_name"]] = {"id": plan["id"], "schedule": plan["schedule"], "timezone": plan["timezone"],
-                                     "enabled": shown["enabled"], "next_runs": shown["next_runs"][:1],
+                                     "enabled": bool(plan["enabled"]), "next_runs": [r.isoformat(timespec="seconds") for r in next_runs],
                                      "period": periods.from_cron(plan["schedule"]),
                                      "runs_per_month": periods.runs_per_month(plan["schedule"], datetime.now().astimezone())}
         return out
@@ -161,7 +165,7 @@ def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict, reports: bool = 
 
 
 @router.get("")
-def list_matrices(user=Depends(require_viewer)):
+def list_matrices(user=Depends(require_viewer), compact: bool = False):
     config_dir, jobs_dir = _dirs()
     every = matrices.load_all(config_dir)
     plans = _plans()
@@ -179,9 +183,16 @@ def list_matrices(user=Depends(require_viewer)):
         row = counts.setdefault(c.matrix, {"columns": 0, "configured": 0, "planned": 0})
         row["columns"] += 1
         row["planned" if c.status == "planned" else "configured"] += 1
-    return {"matrices": [{**_shown(m, jobs_dir, plans),
+    result = {"matrices": [{**_shown(m, jobs_dir, plans),
                            **({"content_summary": counts.get(m.key, {"columns": 0, "configured": 0, "planned": 0})}
                               if m.content else {})} for m in every.values()], "ungrouped": ungrouped}
+    if compact:
+        from web.services.video_list_payload import job_state
+        for matrix in result["matrices"]:
+            for member in matrix["members"]:
+                if "state" in member:
+                    member["state"] = job_state(member["state"])
+    return result
 
 
 def _get(key: str) -> matrices.Matrix:

@@ -4,7 +4,13 @@ from starlette.middleware.gzip import GZipMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 
-LIST_PATHS = frozenset(('/api/video/scripts', '/api/video/shipments', '/api/video/autopilot'))
+LIST_PATHS = frozenset((
+    '/api/video/scripts', '/api/video/shipments', '/api/video/autopilot',
+    '/api/chains', '/api/chains/catalog', '/api/matrices', '/api/jobs', '/api/outputs',
+    '/api/video/board', '/api/video/topics/browser', '/api/sources',
+    '/api/reports', '/api/reports/tree', '/api/video/recipes', '/api/pipeline/rounds',
+    '/api/platforms/bilibili', '/api/scheduler',
+))
 
 
 def accepts_gzip(value: str) -> bool:

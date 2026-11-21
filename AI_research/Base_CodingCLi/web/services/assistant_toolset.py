@@ -28,7 +28,7 @@ GROUPS = {
     'batches': ('prepare_application_batch', 'query_application_batch', 'manage_application_batch'),
 }
 KEYWORDS = {
-    'research': r'研究|任务|运行记录|\bjobs?\b|research',
+    'research': r'研究|(?<!发布)(?<!投稿)(?<!定时)(?<!视频)任务|运行记录|\bjobs?\b|research',
     'reports': r'报告|研究底稿|report',
     'intelligence': r'轮次|情报|行动项|round|intelligence',
     'video': r'视频|文稿|讲稿|出片|配方|旁白|材料|截图|链接|正文|video|script|render|recipe|https?://',
@@ -58,10 +58,10 @@ class ToolSet:
         self._catalogs: dict[str, list[dict]] = {}
         self.loaded = set(CORE)
         groups = [group for group, pattern in KEYWORDS.items() if re.search(pattern, message, re.I)]
-        if not groups and len(message) <= 40 and refs:
-            group = REFERENCE_GROUP.get(refs[-1].get('type'))
-            if group:
-                groups.append(group)
+        if len(message) <= 40 and refs:
+            ref_group = REFERENCE_GROUP.get(refs[-1].get('type'))
+            if ref_group and (not groups or (groups == ['schedules'] and ref_group in ('video', 'publishing'))):
+                groups.append(ref_group)
         for group in groups:
             self.loaded.update(GROUPS[group])
 

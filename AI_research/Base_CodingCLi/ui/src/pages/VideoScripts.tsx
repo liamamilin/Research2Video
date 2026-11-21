@@ -1,3 +1,4 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
 import {useChainScope} from '@/lib/use-chain-scope';
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -104,7 +105,9 @@ export function VideoScriptsPage() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [result, setResult] = useState<{ archived: boolean; scripts: VideoScriptSummary[] } | null>(null);
+  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived", "platform", "distribution"]);
+  const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
+  const [result, setResult] = useState<{ archived: boolean; scripts: VideoScriptSummary[] } | null>(() => readPageSnapshot(`scripts:${showArchived}`));
   const [loading, setLoading] = useState(false);
   const flight = useRef<AbortController | null>(null);
   const [advanced, setAdvanced] = useState(false);
@@ -121,7 +124,6 @@ export function VideoScriptsPage() {
   // 生产配置派生出来的栏目（如 flash-nr）不在格子目录里：用配置的名字，不显示内部的键
   const [configNames, setConfigNames] = useState<Record<string, string>>({});
   const [params, setParams] = useSearchParams();
-  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived", "platform", "distribution"]);
   const requestedStatus = params.get("status") ?? "all";
   const statusFilter = ["archived", "all"].includes(requestedStatus) ? "" : requestedStatus;
   const highlight = params.get("topic");
@@ -143,17 +145,17 @@ export function VideoScriptsPage() {
   const [articleOpen, setArticleOpen] = useState(false);
   const [articleMounted, setArticleMounted] = useState(false);
 
-  const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
   const scripts = result?.archived === showArchived ? result.scripts : null;
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller; setLoading(true);
     try {
       const rows = await listVideoScripts(showArchived, controller.signal);
       if (!Array.isArray(rows)) throw new Error("文稿数据格式异常，请重试");
-      if (!controller.signal.aborted) { setResult({ archived: showArchived, scripts: rows }); setError(null); }
-    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e, "加载视频文稿失败")); }
-    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { const result = { archived: showArchived, scripts: rows }; savePageSnapshot(`scripts:${showArchived}`, result, revision); setResult(result); setError(null); }
+    } catch (e) { if (!controller.signal.aborted && revision === snapshotRevision()) setError(errorMessage(e, "加载视频文稿失败")); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, [showArchived]);
   useEffect(() => { setError(null); void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
   const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (s.status !== "FAILED" && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;

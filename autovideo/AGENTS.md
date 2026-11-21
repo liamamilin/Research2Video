@@ -15,12 +15,14 @@ AutoVideo generates Chinese narrated knowledge videos. Read `RELEASE_STATUS.md` 
 Set up dependencies using `g0/README.md` and `g3/README.md`. Run from the repository root unless indicated.
 
 ```sh
-python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011
+bash scripts/restart_service.sh          # idle-safe reload of 127.0.0.1:8011 (preferred)
+bash ../scripts/restart_local_services.sh --autovideo-only
+python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011   # cold start only
 python3 -m pytest g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q
 python3 g0/verify_design_snapshot.py
 ```
 
-These start the local app, run offline regressions, and verify the document package in an isolated snapshot. Build the UI from `g3/web/`:
+Restart the running service with `scripts/restart_service.sh` (or the repo-root combined script); do not hand-roll `kill`/`uvicorn`. Cold-start with uvicorn only when nothing is listening. The pytest and snapshot commands run offline regressions and verify the document package. Build the UI from `g3/web/`:
 
 ```sh
 NODE_PATH="../../g0/vendor/remotion-audiogram/node_modules" \

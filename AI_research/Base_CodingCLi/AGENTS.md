@@ -14,8 +14,16 @@ python run.py --validate          # Check configs
 
 # Web UI
 python run_web.py create-admin <username> <password>
-python run_web.py serve           # http://localhost:8765
+python run_web.py serve           # cold start / dev; production local stack uses gateway :8775 → app :8766
+
+# Restart running local services (preferred; idle-safe)
+bash scripts/restart_service.sh                      # Research app only
+bash ../../scripts/restart_local_services.sh         # AutoVideo + Research
+bash ../../scripts/restart_local_services.sh --research-only
 ```
+
+Need to load new code or recycle the app process: always use `scripts/restart_service.sh` (or the repo-root combined script). Do not hand-roll `kill`/`run_web.py`. With the gateway up, the script restarts the app on `:8766` and leaves `:8775` alone.
+
 
 ## How It Works (CLI)
 
@@ -70,6 +78,15 @@ switch can expose it to a phone. The app then always listens on
 - **Config**: YAML only, no Python config files
 - **LLM access**: OpenAI-compatible HTTP API only — never shell out to CLI agents
 - **Frontend**: React 18 + Vite + TypeScript + TailwindCSS
+- **Console performance**: after changing list reads, SQL, polling, shared page data or route loading, run
+  `python scripts/check_console_performance.py` (also part of `scripts/check.sh`). See
+  [spec/console-performance.md](spec/console-performance.md) for the fixed workload, evidence and baseline updates.
+  Keep list responses to summaries; load detail/editing data on demand. Batch per-row database reads and share
+  common page context. Initialize schemas outside normal reads. Bound initial DOM rows while searching all records.
+  Hidden pages pause polling and overlapping reads coalesce. Cache changes must cover save/reload, account and filter
+  changes, cancellation and late responses; a pre-save read must not replace saved state or return to the cache.
+  Attach before/after measurements for relevant changes. Do not refresh the baseline merely to make a regression pass;
+  an intentional increase needs its page, cause and tradeoff recorded with the change.
 - **Model output is untrusted**: sanitize HTML before serving it
   (`core/render.py`), and validate a report before saving it
   (`core/research.py:report_problem`) — a refusal or an error string must fail
