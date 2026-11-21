@@ -1,0 +1,66 @@
+name: 每日重要热点
+domain: 每日重要热点
+enabled: true
+language: zh
+keywords:
+- 宏观经济与政策变化
+- 财经市场与财报异动
+- 头部商业公司重大动作
+- 科技与消费产品发布
+- 产业与供应链拐点
+- 民生消费与行业新规
+search: false
+sources:
+- source:ft_home
+- source:economist_world
+- source:fed_press
+- source:stats_cn_release
+- source:pbc_news
+- source:bls_latest
+- source:techmeme
+- source:techcrunch
+- source:the_verge
+- source:hn_front
+- source:ithome
+- source:cg_ifanr
+- source:supply_chain_dive
+- source:electrek
+- source:nature
+- source:science_news
+sources_limit: 10
+runtime:
+  timeout_seconds: 3600
+  skip_if_running: true
+research_mode: opencode_topic_v1
+topic_criteria: |
+  聚焦近 48 小时内真正重要的跨领域热点，不限单一行业，覆盖：宏观经济、财经市场、商业公司、科技产品、产业与供应链、能源与汽车、重要科学进展及影响大众的消费/行业新规。
+  入选必须同时满足 3 条硬标准：
+  1. 影响面广：会影响普通人钱包、工作、消费选择，或改变行业格局与市场预期；
+  2. 可核验：必须有一手官方公告、监管/统计数据、公司财报或权威主流媒体报道，不采信自媒体二手传闻；
+  3. 有时效增量：近 48 小时内有明确新节点，不翻炒旧闻。
+  明确排除：敏感时政与军事冲突、明星娱乐八卦、饭圈与电竞/体育口水战、纯情绪化争议和空洞公关稿。
+  同一事件的多方跟进请使用相同 cluster_key 合并为一个综合选题。
+  Stage 1 除了阅读声明源轻量索引，请主动执行 2–3 次中文 websearch 补齐当天国内热议的重要财经、商业、科技与民生消费热点。
+gather_requirements: |
+  每道题必须拿到一手公告、财报、统计发布或权威报道原文链接，并围绕以下 4 块补齐硬信息：
+  1. 核心事实与时间节点：到底发生了什么，触发原因是什么；
+  2. 关键数字与对照：具体金额、涨跌幅、覆盖人群、前后变化或同业对比；
+  3. 背后的商业/经济/产业逻辑：为什么现在发生，核心矛盾是什么；
+  4. 对普通人、消费者或行业的实际影响及适用边界。
+  明确区分官方已证实事实、市场分析预测与尚未核实项；保持事实中立，不做情绪化立场输出。
+prompt: |
+  面向普通中文观众，发掘并深挖近 48 小时内最值得关注的跨领域重要热点（经济、财经、商业、科技、产业、消费与民生政策等，排除敏感时政军事与娱乐八卦）。
+  日期：{date}。根据取得的材料形成可供视频作者使用的研究底稿。
+  优先将最重磅、最适合独立做 1.5–3 分钟单条快评的 1–3 个大事件排在最前面，其余有价值的当日重要热点按重要性依次排列（用于组成合集节目）。
+  保留具体变化、数据对照、例子、背景逻辑及原始链接，使用条目格式：
+  ### 1.1 选题标题
+  - **一句话**：内容
+  - **发布日期**：日期
+  - **证据来源**：链接
+  正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。
+output: output/chains/hot_trends/{date}.md
+topics:
+  alias: hot_trends
+  format: flash
+  prefix: HOT
+  refresh: true

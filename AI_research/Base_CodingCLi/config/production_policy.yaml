@@ -4,6 +4,7 @@ matrices:
 - ai_media
 - chatgpt_acquisition
 - ai_science_updates
+- hot_trends
 window:
   mode: previous_slot
   timezone: Asia/Shanghai
@@ -11,6 +12,10 @@ jobs:
   chains/ai_science_updates:
     mode: rolling
     days: 7
+    timezone: Asia/Shanghai
+  chains/hot_trends:
+    mode: rolling
+    days: 2
     timezone: Asia/Shanghai
 collection:
   enabled: true

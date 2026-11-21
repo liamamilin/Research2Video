@@ -96,11 +96,34 @@ def gather_settings(config_dir: str | None = None) -> dict:
 
 
 def resolve_binary(cfg: dict) -> str:
-    binary = str(cfg.get("binary") or "opencode")
-    resolved = shutil.which(binary) or str(Path(binary).expanduser())
-    if not (shutil.which(binary) or Path(resolved).is_file()):
-        raise RuntimeError(f"未找到 OpenCode CLI：{binary}")
-    return shutil.which(binary) or resolved
+    """Resolve the OpenCode CLI path.
+
+    Launchd / gateway processes often have a minimal ``PATH`` (``/usr/bin:/bin``),
+    while interactive shells include ``~/.opencode/bin``. Accept an absolute or
+    ``~``-prefixed config path, then fall back to the standard install location.
+    """
+    binary = str(cfg.get("binary") or "opencode").strip() or "opencode"
+    which = shutil.which(binary)
+    if which:
+        return which
+    candidates: list[str] = []
+    expanded = Path(binary).expanduser()
+    if expanded.is_file():
+        candidates.append(str(expanded.resolve()))
+    # Bare name under a starved PATH: default user install from `opencode` installer.
+    if not expanded.is_absolute() or Path(binary).name == "opencode":
+        home_bin = Path.home() / ".opencode" / "bin" / "opencode"
+        if home_bin.is_file():
+            candidates.append(str(home_bin.resolve()))
+    seen: set[str] = set()
+    for path in candidates:
+        if path in seen:
+            continue
+        seen.add(path)
+        target = Path(path)
+        if target.is_file() and os.access(target, os.X_OK):
+            return str(target)
+    raise RuntimeError(f"未找到 OpenCode CLI：{binary}")
 
 
 def available(config: dict | None = None) -> bool:

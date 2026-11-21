@@ -1,0 +1,8 @@
+name: 每日重要热点 · 单条
+job: chains/hot_trends
+recipe: chain_hot_trends
+reverify: false
+auto: 1
+render:
+  video_speed: 1.25
+  voice_id: voxcpm_anchor

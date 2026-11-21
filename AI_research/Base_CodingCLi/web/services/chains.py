@@ -408,6 +408,9 @@ def detail(key: str) -> dict:
             "topics": job.get("topics", {}),
             "enabled": job.get("enabled", True),
             "search": job.get("search", False),
+            "research_mode": str(job.get("research_mode") or "legacy"),
+            "topic_criteria": str(job.get("topic_criteria") or ""),
+            "gather_requirements": str(job.get("gather_requirements") or ""),
         },
         "source_supply": supply,
         "window_days": window.get("days", 7),
@@ -575,6 +578,15 @@ def create(body: dict, user: dict) -> dict:
                     "refresh": True,
                 },
             }
+            rmode = str(body.get("research_mode") or "").strip()
+            if rmode and rmode not in ("opencode_topic_v1", "legacy"):
+                error("研究模式仅支持 opencode_topic_v1 或 legacy", 422)
+            if rmode == "opencode_topic_v1":
+                job["research_mode"] = rmode
+            if str(body.get("topic_criteria") or "").strip():
+                job["topic_criteria"] = str(body["topic_criteria"]).strip()
+            if str(body.get("gather_requirements") or "").strip():
+                job["gather_requirements"] = str(body["gather_requirements"]).strip()
             job_path = Path(paths().jobs_dir) / (job_id + ".yaml")
             write(job_path, job)
             owned.append(str(job_path.relative_to(Path(paths().jobs_dir).parent)))
@@ -702,6 +714,9 @@ def update(key: str, body: dict, user: dict) -> dict:
                 "source_supply_enabled",
                 "window_days",
                 "window_mode",
+                "research_mode",
+                "topic_criteria",
+                "gather_requirements",
             )
         ):
             shared = [
@@ -720,6 +735,26 @@ def update(key: str, body: dict, user: dict) -> dict:
             job["prompt"] = body["prompt"]
         if "source_supply_enabled" in body:
             job["source_supply_enabled"] = bool(body["source_supply_enabled"])
+        if "research_mode" in body:
+            rmode = str(body["research_mode"] or "").strip()
+            if rmode not in ("", "opencode_topic_v1", "legacy"):
+                error("研究模式仅支持 opencode_topic_v1 或 legacy", 422)
+            if rmode == "opencode_topic_v1":
+                job["research_mode"] = rmode
+            else:
+                job.pop("research_mode", None)
+        if "topic_criteria" in body:
+            val = str(body["topic_criteria"] or "").strip()
+            if val:
+                job["topic_criteria"] = val
+            else:
+                job.pop("topic_criteria", None)
+        if "gather_requirements" in body:
+            val = str(body["gather_requirements"] or "").strip()
+            if val:
+                job["gather_requirements"] = val
+            else:
+                job.pop("gather_requirements", None)
         if "window_days" in body or "window_mode" in body:
             days = int(body.get("window_days", 7))
             if not 1 <= days <= 90:
@@ -734,7 +769,17 @@ def update(key: str, body: dict, user: dict) -> dict:
                 **({"days": days} if mode == "rolling" else {}),
             }
             write(cfg() / "production_policy.yaml", policy)
-        if any(k in body for k in ("sources", "prompt", "source_supply_enabled")):
+        if any(
+            k in body
+            for k in (
+                "sources",
+                "prompt",
+                "source_supply_enabled",
+                "research_mode",
+                "topic_criteria",
+                "gather_requirements",
+            )
+        ):
             write(jpath, job)
         for o in body.get("outputs", []):
             if o["key"] not in m["outputs"]:

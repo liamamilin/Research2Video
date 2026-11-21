@@ -19,7 +19,7 @@ Install dependencies using project READMEs; run commands in these directories:
 | repo root | `bash scripts/restart_local_services.sh --autovideo-only` / `--research-only` | Restart one side only. |
 | repo root | `bash scripts/restart_local_services.sh --force` | Skip idle checks (only when sure nothing is producing). |
 | `autovideo/` | `bash scripts/restart_service.sh` | Idle-safe restart of AutoVideo (`127.0.0.1:8011`). |
-| `autovideo/` | `python3 -m uvicorn g3.app:app --host 127.0.0.1 --port 8011` | Start AutoVideo when nothing is listening. |
+| `autovideo/` | （勿在 Cursor Agent shell 里手写 `uvicorn`） | 冷启动也走 `restart_service.sh` / AutoVideo.app；脚本已 `start_new_session`。 |
 | `autovideo/` | `python3 -m pytest tests g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q` | Run contract and offline regression tests. |
 | `AI_research/Base_CodingCLi/` | `bash scripts/restart_service.sh` | Idle-safe restart of Research app (gateway keeps `8775`; app is `8766`). |
 | `AI_research/Base_CodingCLi/` | `python run_web.py serve --reload` | Start the backend with reload (dev). |
@@ -28,6 +28,8 @@ Install dependencies using project READMEs; run commands in these directories:
 | `AI_research/Base_CodingCLi/ui/` | `npm run build` | Type-check and build production assets. |
 
 **本机服务重启约定：** 需要加载新代码或回收进程时，一律走上述 `restart_*.sh`，不要手写 `kill`/`uvicorn`/`run_web.py` 拼装。脚本默认先确认无进行中出片/渲染；Cursor 沙箱若无法发信号，在本机 Terminal 执行同一命令。Research 有网关时只重启应用进程，保留 `8775` 网关。
+
+**Cursor / Agent 踩坑（2026-11-21）：** 在 Agent shell 里用普通 `nohup … &` / 前台 `uvicorn` 拉起的 AutoVideo 会挂在该 shell 的进程组上；命令结束后进程常被一并清掉，表现为「刚重启成功 → 几秒后 Research 又报连不上 `127.0.0.1:8011`」。必须用已改过的 `autovideo/scripts/restart_service.sh`（`subprocess.Popen(..., start_new_session=True)`，与 `g3/launcher/launch.py` 一致），或打开 AutoVideo.app。重启后应用 `curl -sS http://127.0.0.1:8011/api/health` 确认，并等几秒再查一次，避免误报就绪。若出片因服务中断失败，在文稿页重跑，不要连续裸启多个 uvicorn。
 
 Build AutoVideo's frontend with vendored esbuild (see `autovideo/g3/README.md`); commit rebuilt `web/static/app.js` and `app.css`.
 

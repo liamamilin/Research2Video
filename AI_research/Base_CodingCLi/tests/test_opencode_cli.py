@@ -11,6 +11,25 @@ from core.search import SearchResult
 from core.video import audience_strategy
 
 
+def test_resolve_binary_falls_back_to_home_install_when_path_is_starved(monkeypatch, tmp_path):
+    installed = tmp_path / ".opencode" / "bin" / "opencode"
+    installed.parent.mkdir(parents=True)
+    installed.write_text("#!/bin/sh\n", encoding="utf-8")
+    installed.chmod(0o755)
+    monkeypatch.setattr(opencode_cli.shutil, "which", lambda binary: None)
+    monkeypatch.setattr(opencode_cli.Path, "home", lambda: tmp_path)
+    assert opencode_cli.resolve_binary({"binary": "opencode"}) == str(installed.resolve())
+
+
+def test_resolve_binary_expands_tilde_config(monkeypatch, tmp_path):
+    installed = tmp_path / "bin" / "opencode"
+    installed.parent.mkdir(parents=True)
+    installed.write_text("#!/bin/sh\n", encoding="utf-8")
+    installed.chmod(0o755)
+    monkeypatch.setattr(opencode_cli.shutil, "which", lambda binary: None)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert opencode_cli.resolve_binary({"binary": "~/bin/opencode"}) == str(installed.resolve())
+
 def test_parse_run_jsonl_prefers_webfetch_tool_output():
     stdout = "\n".join([
         '{"type":"tool_use","part":{"tool":"webfetch","state":{"status":"completed","output":"正文段落甲"}}}',

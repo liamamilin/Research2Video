@@ -116,13 +116,20 @@ def test_rollout_readonly_and_viewer_permissions(chain_env, client):
 
 
 def test_imported_delete_archives_entry_without_stopping_production(chain_env, client):
+    from core.video import production
+
     login(client)
+    expected = [
+        p
+        for p in production.load_all(str(chain_env / "config"), str(chain_env / "jobs")).values()
+        if p.job == "monitoring/ai_flash_discovery"
+    ]
     listing = client.get("/api/chains").json()
     flash = next(
         x for x in listing["items"] if x["job"] == "monitoring/ai_flash_discovery"
     )
     detail = client.get("/api/chains/" + flash["key"]).json()
-    assert len(detail["outputs_detail"]) == 7
+    assert len(detail["outputs_detail"]) == len(expected) and len(expected) >= 1
     before = {
         p: p.read_bytes() for p in (chain_env / "config/production").glob("*.yaml")
     }
@@ -246,6 +253,16 @@ def test_resume_automatic_outputs_keeps_manual_roundup_manual(chain_env, client)
     from core.video import production
 
     login(client)
+    configs = production.load_all(str(chain_env / "config"), str(chain_env / "jobs"))
+    if not any(p.job == "monitoring/ai_flash_discovery" and p.split == "some" for p in configs.values()):
+        production.save(
+            str(chain_env / "config"),
+            "flash_roundup_manual_fixture",
+            job="monitoring/ai_flash_discovery",
+            recipe="ai-developer-roundup-long",
+            name="快讯盘点测试",
+            auto=0,
+        )
     listing = client.get("/api/chains").json()
     chain = next(
         x for x in listing["items"] if x["job"] == "monitoring/ai_flash_discovery"

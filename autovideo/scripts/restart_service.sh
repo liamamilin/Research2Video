@@ -107,10 +107,29 @@ while IFS='=' read -r key _; do
 done < <(env)
 
 cd "$ROOT"
-nohup "$PY" -m uvicorn g3.app:app --host 127.0.0.1 --port "$PORT" \
-  >>"$LOG_FILE" 2>&1 < /dev/null &
-SPAWNED=$!
-disown "$SPAWNED" 2>/dev/null || true
+# Detach into a new session so Cursor/agent shell cleanup cannot reap the server
+# with the parent process group. Same idea as g3/launcher/launch.py.
+export AV_ROOT="$ROOT" AV_LOG_FILE="$LOG_FILE" AV_PORT="$PORT"
+SPAWNED="$("$PY" - <<'PY'
+import os, subprocess, sys
+from pathlib import Path
+log = Path(os.environ["AV_LOG_FILE"])
+log.parent.mkdir(parents=True, exist_ok=True)
+with log.open("ab") as stream:
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "g3.app:app",
+         "--host", "127.0.0.1", "--port", os.environ["AV_PORT"]],
+        cwd=os.environ["AV_ROOT"],
+        env=os.environ.copy(),
+        stdin=subprocess.DEVNULL,
+        stdout=stream,
+        stderr=subprocess.STDOUT,
+        start_new_session=True,
+        close_fds=True,
+    )
+print(proc.pid)
+PY
+)"
 echo "spawned ${SPAWNED}"
 
 export AV_BASE="$BASE" AV_PORT="$PORT" AV_META="$META_FILE"

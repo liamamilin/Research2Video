@@ -56,9 +56,21 @@ def get(rid: str) -> dict:
                 store.get_render(item["render_id"]) if item.get("render_id") else None
             )
             if render:
+                from web.services import video_render
+
+                timings = video_render.render_timings(render)
+                diag = timings.get("diagnostics") or {}
                 item["render_progress"] = {
-                    k: render.get(k)
-                    for k in ("status", "active_stage", "error_message", "created_at")
+                    **{
+                        k: render.get(k)
+                        for k in ("status", "active_stage", "error_message", "created_at")
+                    },
+                    **(
+                        {"elapsed_seconds": timings["elapsed_seconds"]}
+                        if timings.get("elapsed_seconds") is not None
+                        else {}
+                    ),
+                    **({"diagnostics": diag} if diag else {}),
                 }
     if row.get("task_id"):
         from web.runner.log_store import read_events
@@ -71,11 +83,25 @@ def get(rid: str) -> dict:
             "organizing_topics": "整理选题",
             "supplementing_materials": "补充选题材料",
             "saving_output": "保存研究报告",
+            "discovering_topics": "发现候选选题",
+            "filtering_topics": "软筛选与归并选题",
+            "gathering_topics": "逐题深挖材料",
+            "assembling_report": "组装研究报告",
         }
         for event in events:
             payload = event["event"]
             if payload.get("phase"):
-                payload["message"] = phases.get(payload["phase"], payload["phase"]) + (
+                label = phases.get(payload["phase"], payload["phase"])
+                if payload.get("topic") and payload.get("topics"):
+                    label = f"{label}（{payload['topic']}/{payload['topics']}）"
+                elif payload.get("topics") is not None and payload["phase"] in (
+                    "gathering_topics",
+                    "assembling_report",
+                ):
+                    label = f"{label}（共 {payload['topics']} 题）"
+                elif payload.get("candidates") is not None and payload["phase"] == "filtering_topics":
+                    label = f"{label}（{payload['candidates']} 条候选）"
+                payload["message"] = label + (
                     "：" + str(payload["detail"]) if payload.get("detail") else ""
                 )
         row["progress"] = events

@@ -1,0 +1,54 @@
+name: 每日重要热点讲稿
+description: 让{{audience}}在 1.5–3 分钟内抓清一件跨领域重要热点的来龙去脉、关键数据和现实影响。
+status: enabled
+tags:
+  domain:
+    key: chain_hot_trends
+    name: 每日重要热点
+  type:
+    key: quick_take
+    name: 快讯
+  format:
+    key: short
+    name: B 站横屏短
+audiences:
+- non_tech
+- developer
+target_minutes: 2.25
+minutes_range:
+- 1.5
+- 3
+topic:
+  kind: single
+  sources:
+  - hot_trends
+  fields:
+  - 核心角度
+  - 目标受众
+  - 条目数
+  - 条目
+  - 对比对象
+  - 对比维度
+research:
+  template: quick_take
+  optional: true
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: news
+  style: |
+    面向普通中文观众，快速讲清这件热点：先说发生了什么和为什么值得关心，再用具体数字和对照讲清背后的商业或经济逻辑，最后点明对普通人或行业的实际影响。保持事实中立，不煽动情绪。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 热点速评
+    intro:
+      subtitle: '{date}'
+      seconds: 1.5
+    outro:
+      lines:
+      - 面向{{audience}}的 每日重要热点
+      seconds: 3
+  recheck: true
