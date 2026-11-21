@@ -58,8 +58,16 @@ function UploadRow({ row, canEdit, run, busy, template }: { row: DouyinJob; canE
 }
 
 export function FocusedUpload({ id, canEdit, run, busy, template }: { id: string; canEdit: boolean; run: Run; busy: boolean; template?: FirstComment }) {
-  const load = useCallback((signal: AbortSignal) => api<DouyinJob>(`${DOUYIN_API}/uploads/${encodeURIComponent(id)}`, { signal }), [id]);
-  const { data, error, reload } = usePageResource(load, 4000);
+  const [active, setActive] = useState(true);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const row = await api<DouyinJob>(`${DOUYIN_API}/uploads/${encodeURIComponent(id)}`, { signal });
+    if (!signal.aborted) {
+      const busyRow = ["QUEUED", "RUNNING", "SUBMITTED"].includes(row.status) || Boolean(row.verification?.automatic) || Boolean(row.first_comment && ["WAITING", "QUEUED", "RUNNING"].includes(row.first_comment.status));
+      setActive(busyRow);
+    }
+    return row;
+  }, [id]);
+  const { data, error, reload } = usePageResource(load, active ? 4000 : 0);
   return <section aria-label="当前抖音投稿任务" className="space-y-2"><h2 className="text-sm font-medium">当前抖音投稿任务</h2>{error ? <ErrorState error={error} onRetry={reload} compact /> : data ? <ul><UploadRow row={data} template={template} canEdit={canEdit} run={async action => { await run(action); await reload(); }} busy={busy} /></ul> : <p className="text-xs text-text-muted">正在读取投稿回执…</p>}</section>;
 }
 
@@ -75,7 +83,16 @@ export function DouyinPlatform() {
   const taskId = params.get("task") || "";
   const sourceScript = params.get("from_script") || "";
   const sourceVersion = Number(params.get("version"));
-  const { data, error, loading, reload } = usePageResource(loadDouyin, 4000);
+  const [pollingActive, setPollingActive] = useState(false);
+  const loadOverview = useCallback(async (signal: AbortSignal) => {
+    const next = await loadDouyin(signal);
+    if (!signal.aborted) {
+      const hasActive = Boolean(next.login_id) || next.uploads.some(r => ["QUEUED", "RUNNING", "SUBMITTED"].includes(r.status) || Boolean(r.verification?.automatic) || Boolean(r.first_comment && ["WAITING", "QUEUED", "RUNNING"].includes(r.first_comment.status))) || next.checks.some(c => ["QUEUED", "RUNNING"].includes(c.status));
+      setPollingActive(hasActive);
+    }
+    return next;
+  }, []);
+  const { data, error, loading, reload } = usePageResource(loadOverview, pollingActive ? 4000 : 30000);
   const role = useAuthStore(s => s.user?.role);
   const admin = role === "admin", canEdit = admin || role === "editor";
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState("");

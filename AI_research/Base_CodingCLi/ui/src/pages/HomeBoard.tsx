@@ -91,13 +91,17 @@ export function HomeBoardPage() {
       if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); }
     }
   }, []);
+  const hasWorking = Boolean(board?.items.some((i) => i.group === "working"));
   useEffect(() => {
-    load();
-    const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, 15000);
-    document.addEventListener("visibilitychange", refresh);
-    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); flight.current?.abort(); flight.current = null; };
+    void load();
+    return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, hasWorking ? 15000 : 60000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, [load, hasWorking]);
   useEffect(() => setLimit(PAGE), [matrix, view, q, column, tier, range]);
 
   const set = (key: string, value: string) => setParams((previous) => {

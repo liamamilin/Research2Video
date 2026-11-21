@@ -86,18 +86,31 @@ class DouyinStore:
                                      (*fields.values(), key, *((expected,) if expected else ()))).rowcount)
 
     def list(self, *, uid: str | None = None, kind: str | None = None, parent_id: str | None = None,
-             statuses: tuple[str, ...] = ()) -> list[dict]:
+             parent_ids: list[str] | tuple[str, ...] | None = None,
+             kinds: tuple[str, ...] = (), statuses: tuple[str, ...] = (),
+             limit: int | None = None) -> list[dict]:
         terms, params = [], []
         for key, value in (("uid", uid), ("kind", kind), ("parent_id", parent_id)):
             if value is not None:
                 terms.append(f"{key}=?")
                 params.append(value)
+        if parent_ids is not None:
+            if not parent_ids:
+                return []
+            terms.append("parent_id IN (" + ",".join("?" for _ in parent_ids) + ")")
+            params.extend(parent_ids)
+        if kinds:
+            terms.append("kind IN (" + ",".join("?" for _ in kinds) + ")")
+            params.extend(kinds)
         if statuses:
             terms.append("status IN (" + ",".join("?" for _ in statuses) + ")")
             params.extend(statuses)
+        sql = ("SELECT * FROM jobs" + (" WHERE " + " AND ".join(terms) if terms else "") +
+               " ORDER BY created_at DESC" + (" LIMIT ?" if limit is not None else ""))
+        if limit is not None:
+            params.append(limit)
         with self.connect() as conn:
-            rows = conn.execute("SELECT * FROM jobs" + (" WHERE " + " AND ".join(terms) if terms else "") +
-                                " ORDER BY created_at DESC", params).fetchall()
+            rows = conn.execute(sql, params).fetchall()
         return [self.decode(row) for row in rows]
 
     def claim(self) -> dict | None:

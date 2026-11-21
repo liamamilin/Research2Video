@@ -43,8 +43,10 @@ def _uploads(platform: str, owner: str) -> list[dict]:
                     for row in db.execute('SELECT * FROM uploads WHERE uid=? ORDER BY created_at DESC', (owner,))]
     if platform == 'douyin':
         db = douyin.store()
-        checks = douyin.verification_checks(db.list(uid=owner, kind='RECONCILE'))
-        return [douyin.public_job(row, comments={}, checks=checks) for row in db.list(uid=owner, kind='UPLOAD')]
+        uploads = db.list(uid=owner, kind='UPLOAD')
+        pending_ids = [row['id'] for row in uploads if row['status'] in ('SUBMITTED', 'UNKNOWN')]
+        checks = douyin.verification_checks(db.list(uid=owner, kind='RECONCILE', parent_ids=pending_ids)) if pending_ids else {}
+        return [douyin.public_job(row, comments={}, checks=checks) for row in uploads]
     return [social_publishing.public_job(platform, row, comments={})
             for row in social_publishing.store(platform).list(uid=owner, kind='UPLOAD')]
 

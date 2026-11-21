@@ -132,14 +132,15 @@ def _organize(candidates: list[dict], packets: list[dict], previous: list[dict],
     from core.video.adapt.common import parse_json, AdaptError
 
     client = LLMClient(config)
+    # Place invariant channel/scope/previous prefix before per-report candidates/materials for Prompt Cache.
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": json.dumps({
         "column": audience_strategy.CHANNELS[channel],
         "scope": ("本期是 AI 快讯，原始采集材料中的一般消费电子、航天和社会新闻，若没有具体 AI 能力、使用或成本变化则不选。"
                   if channel == "flash" else f"本期栏目：{programme}。严格围绕本栏目的研究对象，不扩成其他品牌或泛科技合集。"),
+        "previous": previous,
         "candidates": candidates,
         "materials": [{**p, "text": p["text"][:4000]} for p in packets],
-        "previous": previous,
-    }, ensure_ascii=False)}]
+    }, ensure_ascii=False, separators=(",", ":"))}]
     try:
         for attempt in range(3):
             with telemetry.track("joint-planning"):
@@ -192,9 +193,19 @@ def history_context(peers: list[dict]) -> list[dict]:
     Actual event/angle protection still runs with complete history at writing.
     """
     from core.video import story_pool
-    return [{"title": row["title"], "summary": row.get("summary", "")[:400],
-             "angle": row.get("story", {}).get("angle", ""), "sources": row["sources"]}
-            for row in story_pool.context(peers)]
+    result = []
+    for row in story_pool.context(peers):
+        entry: dict = {"title": row["title"]}
+        summary = row.get("summary", "")[:400]
+        if summary:
+            entry["summary"] = summary
+        angle = row.get("story", {}).get("angle", "")
+        if angle:
+            entry["angle"] = angle
+        if row.get("sources"):
+            entry["sources"] = row["sources"]
+        result.append(entry)
+    return result
 
 
 def _episode_key(production: str, topic: dict) -> tuple | None:

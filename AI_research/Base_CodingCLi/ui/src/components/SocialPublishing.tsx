@@ -144,15 +144,30 @@ function CommentTemplate({initial,platform,name,run,busy}:{initial:FirstComment;
 }
 
 function FocusedTask({platform,id,spec,accountUid,canEdit,run,busy}:{platform:string;id:string;spec:SocialDefinition;accountUid?:string;canEdit:boolean;run:Run;busy:boolean}) {
-  const load=useCallback((signal:AbortSignal) => api<SocialJob>(`${socialBase(platform)}/uploads/${encodeURIComponent(id)}`,{signal}),[platform,id]);
-  const {data,error,reload}=usePageResource(load,4000);
+  const [active,setActive]=useState(true);
+  const load=useCallback(async (signal:AbortSignal) => {
+    const row=await api<SocialJob>(`${socialBase(platform)}/uploads/${encodeURIComponent(id)}`,{signal});
+    if(!signal.aborted) {
+      setActive(["QUEUED","RUNNING","SUBMITTED"].includes(row.status) || Boolean(row.verification?.automatic) || Boolean(row.first_comment && ["WAITING","QUEUED","RUNNING"].includes(row.first_comment.status)));
+    }
+    return row;
+  },[platform,id]);
+  const {data,error,reload}=usePageResource(load,active ? 4000 : 0);
   return <section aria-label="当前平台投稿任务" className="space-y-2"><h2 className="text-sm font-medium">当前投稿任务</h2>{error ? <ErrorState error={error} onRetry={reload} compact /> : data ? <ul><UploadRow row={data} spec={spec} accountUid={accountUid} canEdit={canEdit} run={async action => {await run(action);await reload();}} busy={busy} /></ul> : <p className="text-xs text-text-muted">正在读取投稿任务…</p>}</section>;
 }
 
 export function SocialPlatform({platform}:{platform:string}) {
   const [params,setParams]=useSearchParams();
-  const load=useCallback((signal:AbortSignal) => api<SocialOverview>(socialBase(platform),{signal}),[platform]);
-  const {data,error,loading,reload}=usePageResource(load,4000);
+  const [pollingActive,setPollingActive]=useState(false);
+  const load=useCallback(async (signal:AbortSignal) => {
+    const next=await api<SocialOverview>(socialBase(platform),{signal});
+    if(!signal.aborted) {
+      const hasActive=Boolean(next.login_id) || next.uploads.some(r => ["QUEUED","RUNNING","SUBMITTED"].includes(r.status) || Boolean(r.verification?.automatic) || Boolean(r.first_comment && ["WAITING","QUEUED","RUNNING"].includes(r.first_comment.status))) || next.checks.some(c => ["QUEUED","RUNNING"].includes(c.status));
+      setPollingActive(hasActive);
+    }
+    return next;
+  },[platform]);
+  const {data,error,loading,reload}=usePageResource(load,pollingActive ? 4000 : 30000);
   const role=useAuthStore(s => s.user?.role), admin=role==="admin", canEdit=admin || role==="editor";
   const [busy,setBusy]=useState(false), [actionError,setActionError]=useState("");
   const [query,setQuery]=useState(""),[scope,setScope]=useState("current");

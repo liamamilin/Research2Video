@@ -111,7 +111,17 @@ function FirstCommentProgress({ task, canEdit, run, busy }: { task: UploadTask; 
 }
 
 export function FocusedUpload({ taskId, canEdit, run, busy }: { taskId: string; canEdit: boolean; run: Run; busy: boolean }) {
-  const load = useCallback((signal: AbortSignal) => api<UploadTask>(`${PLATFORM_API}/uploads/${encodeURIComponent(taskId)}`, { signal }), [taskId]);
-  const { data, error, reload } = usePageResource(load, 6000);
+  const [active, setActive] = useState(true);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const task = await api<UploadTask>(`${PLATFORM_API}/uploads/${encodeURIComponent(taskId)}`, { signal });
+    if (!signal.aborted) {
+      const busyTask = ["QUEUED", "UPLOADING", "SUBMITTED", "UNKNOWN"].includes(task.status)
+        || (Boolean(task.payload.first_comment?.enabled) && ["WAITING", "SENDING"].includes(task.first_comment_status || "WAITING"))
+        || (Boolean(task.payload.first_comment?.pin) && ["WAITING", "PINNING"].includes(task.first_comment_pin_status || "WAITING"));
+      setActive(busyTask);
+    }
+    return task;
+  }, [taskId]);
+  const { data, error, reload } = usePageResource(load, active ? 6000 : 0);
   return <section className="space-y-2" aria-label="当前文稿投稿任务"><h2 className="text-sm font-medium">当前投稿任务</h2>{error ? <ErrorState error={error} onRetry={reload} compact /> : null}{data ? <ul><UploadRow task={data} canEdit={canEdit} run={async action => { await run(action); await reload(); }} busy={busy} /></ul> : !error ? <p className="text-xs text-text-muted">正在读取投稿进度…</p> : null}</section>;
 }

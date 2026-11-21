@@ -211,13 +211,25 @@ primary 填支撑关键动作的 S 编号，background 填辅助材料。这里�
     if audience_brief:
         system += ("\n本期选题已由上游完成。只把这一个观看问题登记为一个事件以便沿用排重，不另选题、"
                    "不缩成一个案例、不拆开比较对象。title保持已选标题，summary解释共同问题。"
-                   "已有覆盖仍按same_as/changes表达。已选题：" + json.dumps(audience_brief, ensure_ascii=False))
-    request = {"report": report,
+                   "已有覆盖仍按same_as/changes表达。已选题见请求中的 audience_brief。")
+    story_fields = ("subject", "action", "edition", "event_date", "changes", "angle", "tutorial")
+    covered = []
+    for p in previous:
+        entry = {k: v for k, v in p.items() if k not in ("script_id", "story") and v not in ("", [], None)}
+        raw_story = p.get("story")
+        if isinstance(raw_story, dict) and raw_story:
+            compact_story = {k: raw_story[k] for k in story_fields if raw_story.get(k) not in ("", [], None, False)}
+            if compact_story:
+                entry["story"] = compact_story
+        covered.append(entry)
+    # Place invariant historical coverage first so back-to-back calls in the same matrix hit Prompt Cache.
+    request = {"covered": covered,
+               "report": report,
                "materials": [{**p, "text": p["text"][:2400]} for p in source_packets],
-               "covered": [{k: v for k, v in p.items() if k != "script_id"} for p in previous]}
+               **({"audience_brief": audience_brief} if audience_brief else {})}
     client = LLMClient(llm_config)
     messages = [{"role": "system", "content": system},
-                {"role": "user", "content": json.dumps(request, ensure_ascii=False)}]
+                {"role": "user", "content": json.dumps(request, ensure_ascii=False, separators=(",", ":"))}]
     attempts = []
     try:
         for attempt in range(3):

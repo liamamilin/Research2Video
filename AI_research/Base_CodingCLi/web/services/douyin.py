@@ -109,8 +109,11 @@ def verification_checks(rows: list[dict]) -> dict:
 
 def settle_verification(db: DouyinStore) -> None:
     """Retain failed checks, back off, and stop a persistent unresolved lookup."""
-    checks = verification_checks(db.list(kind='RECONCILE'))
-    for parent in db.list(kind='UPLOAD', statuses=('SUBMITTED', 'UNKNOWN')):
+    parents = db.list(kind='UPLOAD', statuses=('SUBMITTED', 'UNKNOWN'))
+    if not parents:
+        return
+    checks = verification_checks(db.list(kind='RECONCILE', parent_ids=[p['id'] for p in parents]))
+    for parent in parents:
         latest = checks.get(parent['id'])
         previous = parent['result'].get('verification', {})
         if (not latest or latest['status'] in ACTIVE or previous.get('last_check_id') == latest['id']
@@ -355,13 +358,16 @@ def overview() -> dict:
     owner = account().get("uid", "")
     login_path = directory() / "login.json"
     active_login = json.loads(login_path.read_text()).get("id") if login_path.is_file() else None
-    jobs = store().list(uid=owner) if owner else []
-    comments = {c['parent_id']: c for c in jobs if c['kind'] == 'FIRST_COMMENT'}
-    checks = verification_checks([c for c in jobs if c['kind'] == 'RECONCILE'])
+    db = store()
+    uploads = db.list(uid=owner, kind="UPLOAD") if owner else []
+    comments = db.comments(owner) if owner else {}
+    pending_ids = [u["id"] for u in uploads if u["status"] in ("SUBMITTED", "UNKNOWN")]
+    checks = verification_checks(db.list(uid=owner, kind="RECONCILE", parent_ids=pending_ids)) if (owner and pending_ids) else {}
+    recent_checks = db.list(uid=owner, kinds=("VERIFY", "RECONCILE"), limit=10) if owner else []
     return {"account": account(), "runtime_ready": runtime()["ready"], "login_id": active_login,
-            "settings": {"first_comment": store().comment_settings(owner)}, "capabilities": {"first_comment": True, "pin_comment": False},
-            "uploads": [public_job(r, comments=comments, checks=checks) for r in jobs if r["kind"] == "UPLOAD"],
-            "checks": [public_job(r) for r in jobs if r["kind"] in ("VERIFY", "RECONCILE")][:10],
+            "settings": {"first_comment": db.comment_settings(owner)}, "capabilities": {"first_comment": True, "pin_comment": False},
+            "uploads": [public_job(r, comments=comments, checks=checks) for r in uploads],
+            "checks": [public_job(r) for r in recent_checks],
             "candidates": candidates() if owner else []}
 
 
@@ -450,7 +456,7 @@ def tick() -> None:
             active = db.list(statuses=ACTIVE)
         if not active and current:
             pending = db.list(uid=current, kind="UPLOAD", statuses=("SUBMITTED",))
-            latest_checks = verification_checks(db.list(kind='RECONCILE'))
+            latest_checks = verification_checks(db.list(uid=current, kind='RECONCILE', parent_ids=[r['id'] for r in pending])) if pending else {}
             for row in pending:
                 tracking = row['result'].get('verification', {})
                 latest = latest_checks.get(row['id'])

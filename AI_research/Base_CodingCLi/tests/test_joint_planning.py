@@ -142,7 +142,8 @@ def test_joint_episode_then_independent_single_keeps_external_history(batch, vid
     assert version['meta']['joint_plan'] == items[1]['topic']['joint_plan']
     assert 'install product0' in llm.calls[-1][1]['content']
     assert 'install product1' not in llm.calls[-1][1]['content']
-    assert '已选题：' in llm.calls[-2][0]['content']
+    assert '已选题见请求中的 audience_brief' in llm.calls[-2][0]['content']
+    assert '"audience_brief"' in llm.calls[-2][1]['content']
     author_request = llm.calls[-1][1]['content']
     assert '本条只回答：怎样把表格变成可编辑文件' in author_request
     assert '观众能带走：跟着入口、输入和导出步骤完成一个文件' in author_request

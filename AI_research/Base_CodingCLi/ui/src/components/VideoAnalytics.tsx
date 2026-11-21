@@ -47,7 +47,7 @@ function VideoDetails({ bvid, onClose }: { bvid: string; onClose: () => void }) 
   const [days, setDays] = useState(30);
   const [metric, setMetric] = useState<Metric>("view");
   const load = useCallback((signal: AbortSignal) => loadVideoData(bvid, days, signal), [bvid, days]);
-  const { data, error, reload } = usePageResource(load, 15000);
+  const { data, error, reload } = usePageResource(load);
   const ready = !!data;
   useEffect(() => { if (ready) panel.current?.scrollIntoView?.({ behavior: "smooth", block: "start" }); }, [bvid, ready]);
   const video = data?.video, history = data?.history;
@@ -77,8 +77,15 @@ export function VideoAnalytics({ isAdmin, canEdit }: { isAdmin: boolean; canEdit
   const [matrix, setMatrix] = useState("");
   const [selected, setSelected] = useState(""), [busy, setBusy] = useState(false), [actionError, setActionError] = useState("");
   useEffect(() => { const timer = setTimeout(() => { setSearch(query.trim()); setPage(1); }, 300); return () => clearTimeout(timer); }, [query]);
-  const load = useCallback((signal: AbortSignal) => loadAnalytics({ period, q: search, scope, matrix, sort, page, size: 25 }, signal), [period, search, scope, matrix, sort, page]);
-  const { data, error, loading, reload } = usePageResource(load, 15000, true);
+  const [pollingActive, setPollingActive] = useState(false);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const next = await loadAnalytics({ period, q: search, scope, matrix, sort, page, size: 25 }, signal);
+    if (!signal.aborted) {
+      setPollingActive(next.collector.status === "QUEUED" || next.collector.status === "RUNNING");
+    }
+    return next;
+  }, [period, search, scope, matrix, sort, page]);
+  const { data, error, loading, reload } = usePageResource(load, pollingActive ? 15000 : 0, true);
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true); setActionError("");
     try { await action(); await reload(); } catch (e) { setActionError(errorMessage(e, "操作失败")); } finally { setBusy(false); }
