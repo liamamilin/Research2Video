@@ -4,7 +4,8 @@
 
 name: 行动清单
 description: 帮助{{audience}}把材料中的启发变成自己能用的做法，听着有收获，也知道接下来可以怎样尝试。
-status: experimental
+status: blocked
+reason: 已归档：0 生产绑定且长期未使用，实操建议请改用专题速览或深度单点。
 tags:
   domain:
     key: ai

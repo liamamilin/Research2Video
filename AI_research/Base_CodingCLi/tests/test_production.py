@@ -139,8 +139,8 @@ def test_api_config_and_direct_entries_share_event_memory(client, prod_env, rese
     first = _wait(client, direct.json()["id"], {"DRAFT", "FAILED"})
     made = client.post("/api/production/flash/write", json={"topic_ids": ["2026-10-19/F1"]}, headers=_csrf(client))
     assert made.status_code == 202, made.text
-    second = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED"})
-    assert first["status"] == "DRAFT" and second["status"] == "FAILED"
+    second = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED", "SKIPPED"})
+    assert first["status"] == "DRAFT" and second["status"] == "SKIPPED"
     assert first["id"] in second["topic"]["content_archive"]["duplicate_of"]
     assert second["current_version"] == 0
 
@@ -158,6 +158,11 @@ def test_api_config_and_direct_entries_share_event_memory(client, prod_env, rese
 
 
 def test_api_a_roundup_config_writes_the_picked_items_as_one_script_without_research(client, prod_env, research, llm, autovideo):
+    # Shipped roundup recipe is archived (blocked); re-enable the temp copy to exercise roundup writing.
+    roundup_recipe = prod_env / "config" / "video_recipes" / "ai-developer-roundup-long.yaml"
+    roundup_recipe.write_text(
+        roundup_recipe.read_text(encoding="utf-8").replace("status: blocked", "status: experimental", 1),
+        encoding="utf-8")
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "ai-developer-roundup-long").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]})]
     _login(client)

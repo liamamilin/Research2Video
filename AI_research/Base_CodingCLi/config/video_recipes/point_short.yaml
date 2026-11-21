@@ -4,7 +4,8 @@
 
 name: 一个知识点
 description: 带{{audience}}弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。
-status: enabled
+status: blocked
+reason: 已归档：0 生产绑定且长期未使用，短知识点请改用快讯或深度单点。
 tags:
   domain:
     key: ai

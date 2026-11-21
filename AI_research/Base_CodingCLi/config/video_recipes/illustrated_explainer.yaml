@@ -4,7 +4,7 @@
 
 name: 插画讲解
 description: 围绕一个知识问题，用几个能画出来的生活情境，把原理一步步讲明白。
-status: experimental
+status: enabled
 tags:
   domain: {key: themes, name: 主题创作}
   type: {key: illustrated_explainer, name: 插画讲解}

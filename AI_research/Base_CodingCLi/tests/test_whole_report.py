@@ -39,9 +39,12 @@ def _load(env):
 def test_a_recipe_says_it_can_be_written_from_a_whole_report():
     every = recipes.expanded(str(ROOT / "config"))
     assert {k for k, r in every.items() if r.whole_report} == {
-        "deep_dive", "ai-non_tech-deep_dive-long", "report_digest", "ai-non_tech-digest-long", "top_finding",
-        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest", "theme_research",
-        "illustrated_explainer"}
+        "deep_dive", "ai-non_tech-deep_dive-long", "deep_dive_focus", "ai-non_tech-deep_dive_focus-long",
+        "ai-developer-comparison-long",
+        "report_digest", "ai-non_tech-digest-long", "top_finding",
+        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short",
+        "topic_digest", "topics-developer-digest-long", "topics-non_tech-digest-long",
+        "theme_research", "illustrated_explainer"}
     assert not every["flash"].whole_report and not every["ai-developer-roundup-long"].whole_report
 
 
@@ -55,7 +58,7 @@ def test_a_whole_report_config_is_one_video_per_report_and_never_researches(whol
 
 @pytest.mark.parametrize("body, message", [
     ("recipe: flash\n", "不是条目列表"),                          # a quick take is made from one item
-    ("recipe: ai-developer-roundup-long\n", "不是条目列表"),      # a roundup needs items to pick
+    ("recipe: ai-developer-roundup-long\n", "已停用"),           # archived roundup recipe is blocked
     ("recipe: deep_dive\nreverify: false\n", "调研不能关"),   # a knowledge video is not told without research
 ])
 def test_a_whole_report_config_that_cannot_be_is_listed_with_why(whole_env, body, message):
@@ -198,8 +201,8 @@ def pilot_env_whole(video_env, monkeypatch):
 
 
 @pytest.mark.parametrize("recipe, audience, minutes", [
-    ("report_digest", "", 4), ("report_digest", "non_tech", 5), ("top_finding", "", None),
-    ("top_finding", "non_tech", None), ("action_list", "", 3), ("action_list", "non_tech", None)])
+    ("topic_digest", "developer", 4), ("topic_digest", "non_tech", 5),
+    ("deep_dive_focus", "", 5), ("deep_dive_focus", "non_tech", 6)])
 def test_each_shipped_whole_report_recipe_is_a_usable_config_on_a_job_without_items(whole_env, recipe, audience, minutes):
     lines = [f"job: {JOB}", f"recipe: {recipe}"] + ([f"audience: {audience}"] if audience else []) \
         + ([f"minutes: {minutes}"] if minutes else [])
@@ -211,10 +214,10 @@ def test_each_shipped_whole_report_recipe_is_a_usable_config_on_a_job_without_it
 
 
 def test_the_topics_grid_leaves_out_a_recipe_that_only_writes_from_a_whole_report(whole_env):
-    # no items to pick: deep_dive stays (it also reads the opportunities source), the sourceless ones go
+    # no items to pick: deep_dive stays (it also reads the opportunities source), the sourceless/archived ones go
     rows = {r["cell"] for r in pilot.coverage()}
-    assert {"deep_dive", "flash", "point_short"} <= rows
-    assert not rows & {"report_digest", "top_finding", "action_list", "ai-non_tech-digest-long"}
+    assert {"deep_dive", "flash"} <= rows
+    assert not rows & {"report_digest", "top_finding", "action_list", "ai-non_tech-digest-long", "point_short"}
 
 
 def test_a_knowledge_jobs_report_skips_the_news_event_pool_but_keeps_its_matrix(whole_env, monkeypatch):

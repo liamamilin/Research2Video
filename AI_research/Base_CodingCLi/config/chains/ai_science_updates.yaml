@@ -6,7 +6,6 @@ outputs:
 owned:
 - jobs/chains/ai_science_updates.yaml
 - config/matrices/ai_science_updates.yaml
-- config/video_recipes/chain_ai_science_updates.yaml
 imported: false
 schedule_armed: false
 created_at: 1794985272.215283

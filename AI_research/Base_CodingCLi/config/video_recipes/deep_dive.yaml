@@ -2,8 +2,8 @@
 # research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
-name: 深度解读
-description: 陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+name: 深度解读（全景）
+description: 面向{{audience}}完整拆解整份深度报告的全部核心板块，一篇文稿讲透关键案例、数据口径与决策边界，做一个完整长视频。
 status: enabled
 tags:
   domain:
@@ -11,7 +11,7 @@ tags:
     name: AI 与软件
   type:
     key: deep_dive
-    name: 深度解读
+    name: 深度解读（全景）
   format:
     key: long
     name: B 站横屏长
@@ -31,7 +31,9 @@ writing:
     depth: '{{audience.depth}}'
     tone: explainer
   style: |
-    陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+    面向{{audience}}做整份报告的全景深度拆解，篇幅由内容决定，不为了压时长而砍掉主干板块。
+    按报告的核心维度逐章讲透：每个重要板块都要落到具体工程、科研或产品案例、关键数字的实际含义以及评测口径与适用边界，不要把多个重磅发现揉成一句话带过。
+    用一条清晰的主线把各板块串起来，结尾把全篇证据收束成{{audience}}能直接用上的判断或行动建议。
 output:
   use: auto_form
   packaging:

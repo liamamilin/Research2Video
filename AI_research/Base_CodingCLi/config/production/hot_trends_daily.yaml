@@ -1,6 +1,7 @@
 name: 每日重要热点 · 合集
 job: chains/hot_trends
-recipe: chain_hot_trends
+recipe: flash
+audience: non_tech
 reverify: false
 auto: 1
 render:

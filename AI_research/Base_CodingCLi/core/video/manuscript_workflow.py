@@ -51,6 +51,8 @@ class JobPrompts:
     episode_prompt: str | None = None
     production_id: str | None = None
     single_paragraph: bool = False
+    panoramic: bool = False
+    content_driven: bool = False
 
 
 JOB_PROMPTS = {
@@ -551,6 +553,72 @@ JOB_PROMPTS["ai_media/ai_tool_tutorials"] = replace(
 )
 
 
+PANORAMIC_PLAN = LISTENING_DIRECTION + """
+你是全景深度解读的策划编辑。你的任务是把整份研究报告拆成一份不漏主干的章节提纲，交给作者写一篇完整的深度长视频口播。
+先通读整份报告，列出报告里全部有独立价值的核心板块（例如：产品/模型架构与分层、编码与工程实战案例、多模态/知识/行业应用、科研与数学突破、安全攻防与评测、性能/延迟/价格权衡、竞品格局与争议边界等，按报告实际内容决定，不要硬凑报告没有的板块）。
+不要为了缩短时长而只挑一个窄切口扔掉其他核心板块；只有纯重复、纯目录或无实质内容的附录才放进 omitted。
+每个板块写清：本节要回答的核心问题、必须讲透的具体案例/数据/对照条件。
+返回 JSON：{"thesis":"贯通全篇的核心主线判断","sections":[{"title":"板块短标题","core_question":"本节要讲透的核心问题","must_cover":["必须讲到的具体案例、数据或边界条件"]}],"omitted":["确属重复或无实质内容可略去的部分"]}"""
+
+RECIPE_PROMPTS: dict[str, JobPrompts] = {
+    "deep_dive": JobPrompts(
+        version="deep-dive-panoramic-v1",
+        draft=(
+            "这是一篇全景深度解读长稿，目标是把整份报告的全部核心板块讲透，让观众看完这一期就完整掌握报告里的硬核信息。"
+            "按提纲逐章展开，每个核心板块都要落到具体工程/科研/业务案例、关键数据及其实际含义，以及评测口径或适用边界。"
+            "不要为了压缩时长而跳过提纲里的核心板块，也不要把多个重磅板块揉成一句话带过。"
+            "各节之间保持清晰推进，结尾把全篇的证据收束成观众能直接用上的选型或行动判断。"
+        ),
+        episode_lead="",
+        read=(
+            "你是冲着完整吃透这份深度报告而来的目标观众，第一次听这篇全景深度解读。"
+            "先复述全篇最值得记住的核心判断和最打动你的具体案例，引用最值得保留的一句原话。"
+            "重点检查两类问题：一是报告里最有分量的核心板块或关键案例有没有被一句话草草带过、甚至关键因果跳步；二是哪一段从数据直接跳到判断、或者对比口径没说清让听众误解。"
+            "选一处最影响深度和理解质量的问题，标出解决它所需的至多三段编号并说明还想听透什么。全篇各板块都已经讲透且顺畅时，targets 留空。"
+            '输出 JSON：{"takeaway":"听完掌握的核心判断与关键案例","keep_quote":"最值得保留的原话","issue_quote":"最影响深度或理解的原话，可空","revision":"希望补充讲透的具体内容，可空","targets":["段落编号"]}'
+        ),
+        revise=(
+            "只改 targets 所列段落。对照研究底稿和读者反馈，把被带过或跳步的关键案例、数据口径、机制因果或适用边界补充讲透。"
+            "保留全篇已有主线、作者判断和自然的主持人介绍；补写内容必须严格来自底稿事实，不编造底稿没有的数字，改完自然接回前后段。"
+            '输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}'
+        ),
+        panoramic=True,
+        content_driven=True,
+    ),
+    "deep_dive_focus": JobPrompts(
+        version="deep-dive-focus-v1",
+        draft=(
+            "这是一篇深度单点解读，只围绕一个最值得追问的核心问题或子角度深挖讲透，不贪大求全。"
+            "从真实实验、工程动作或反直觉现象切入，层层拆解原因、对照条件、适用边界与实际影响。"
+            "同一份大报告里与本期单点无关的其他板块不必硬塞进来，留给其他独立视频；结尾落回一个可执行判断。"
+        ),
+        episode_lead="",
+        read=(
+            "你是带着一个具体问题第一次听这篇深度单点解读的观众。复述作者给出的核心判断、哪项证据支撑它、听完会改变哪个决定，引用最值得留的一句。"
+            "找一处从观察直接跳到判断、口径没对齐，或偏题塞进无关信息打断主线的地方，只标解决这一处所需的一至两段，说明还想听懂什么。已经讲透就让 targets 留空。"
+            '输出 JSON：{"takeaway":"可转述的判断与后果","keep_quote":"值得留的原话","issue_quote":"断点原话，可空","revision":"需要补清的解释，可空","targets":["段落编号"]}'
+        ),
+        revise=(
+            "只改 targets 所列段落。围绕本期单点主线，用底稿里已有的实验条件、动作或结果把断点讲通。"
+            "保留作者判断和自然的主持人介绍，不引入无关板块，不编造底稿没有的数字，改完自然接回前后段。"
+            '输出 JSON：{"paragraphs":[{"id":"原段落编号","text":"修订口播"}]}'
+        ),
+    ),
+}
+
+
+def _recipe_base(column_key: str, config_dir: str) -> str:
+    """Resolve the recipe file key for a column (e.g. ai-non_tech-deep_dive-long -> deep_dive)."""
+    if not column_key:
+        return ""
+    from . import recipes
+
+    found = recipes.find(config_dir, column_key)
+    if found is not None:
+        return found.base or found.key
+    return column_key
+
+
 def _with_direction(prompt: str) -> str:
     """Attach the shared narration priority once, including to a Job override."""
     if prompt.startswith(LISTENING_DIRECTION):
@@ -592,12 +660,10 @@ def bound_job(script: dict, config_dir: str, jobs_dir: str) -> str:
 
 
 def profile_for(script: dict, config_dir: str, jobs_dir: str, video_config: dict) -> JobPrompts | None:
-    """Select the enabled Job's prompts for this production binding."""
+    """Select the enabled Job's prompts, or fall back to recipe-level prompts when focused mode is active."""
     jobs = enabled_jobs(config_dir, video_config)
-    if not jobs:
-        return None
-    job = bound_job(script, config_dir, jobs_dir)
-    profile = JOB_PROMPTS.get(job) if job in jobs else None
+    job = bound_job(script, config_dir, jobs_dir) if jobs else ""
+    profile = JOB_PROMPTS.get(job) if job and job in jobs else None
     if profile and profile.production_id and profile.production_id != script.get("production"):
         from . import production
 
@@ -605,11 +671,17 @@ def profile_for(script: dict, config_dir: str, jobs_dir: str, video_config: dict
         # explicit binding. Whole-programme and other recipes stay separate.
         topic = script.get("topic") or {}
         if script.get("production") or topic.get("content_mode") == "episode" or not topic.get("from_report"):
-            return None
-        binding = production.get(config_dir, jobs_dir, profile.production_id)
-        if not binding or not binding.usable or binding.recipe != script.get("column_key"):
-            return None
-    return profile
+            profile = None
+        else:
+            binding = production.get(config_dir, jobs_dir, profile.production_id)
+            if not binding or not binding.usable or binding.recipe != script.get("column_key"):
+                profile = None
+    if profile is not None:
+        return profile
+    if video_config.get("manuscript_workflow") == "focused":
+        base = _recipe_base(script.get("column_key") or "", config_dir)
+        return RECIPE_PROMPTS.get(base)
+    return None
 
 
 class Direction(BaseModel):
@@ -618,6 +690,18 @@ class Direction(BaseModel):
     viewer_value: str = Field(min_length=1)
     details: list[str]
     leave_out: list[str]
+
+
+class PanoramicSection(BaseModel):
+    title: str = Field(min_length=1)
+    core_question: str = Field(min_length=1)
+    must_cover: list[str] = Field(min_length=1)
+
+
+class PanoramicOutline(BaseModel):
+    thesis: str = Field(min_length=1)
+    sections: list[PanoramicSection] = Field(min_length=1)
+    omitted: list[str] = Field(default_factory=list)
 
 
 class Reading(BaseModel):
@@ -678,20 +762,64 @@ def rank(client: LLMClient, audience: str, drafts: dict[str, writer.WrittenScrip
     raise AdaptError(f"盲读编号错误：期望 {labels}，排序 {ranked}，读稿 {list(result.readings)}")
 
 
+def _panoramic_brief(outline: PanoramicOutline) -> str:
+    lines = [
+        "## 全景深度解读章节提纲（必须覆盖以下全部核心板块）",
+        f"核心主线：{outline.thesis}",
+        "",
+    ]
+    for idx, sec in enumerate(outline.sections, 1):
+        lines.append(f"{idx}. {sec.title} — 核心问题：{sec.core_question}")
+        for item in sec.must_cover:
+            lines.append(f"   - 必讲细节：{item}")
+    lines.append(
+        "\n写作要求：请按以上板块顺序逐章充分展开（每个板块至少 1 个独立 section，每节用报告中的具体案例、数据和适用条件讲透），"
+        "不要合并跳过核心板块，也不要为了缩短篇幅而一句带过。"
+    )
+    return "\n".join(lines)
+
+
 def focused_author(
     *, on_stage: Callable[[str, dict], None] | None = None, profile: JobPrompts | None = None, **inputs,
 ) -> writer.WrittenScript:
     """Write one manuscript and address a concrete reader problem when present."""
+    outline_receipt: dict | None = None
     if profile:
         inputs = {
             **inputs,
             "episode_lead": profile.episode_lead,
             "episode_prompt": profile.episode_prompt,
         }
+        if profile.content_driven:
+            inputs["content_driven"] = True
+        if profile.panoramic:
+            client = LLMClient(inputs["llm_config"], cancel_token=inputs.get("cancel_token"))
+            topic = inputs["topic"]
+            column = inputs["column"]
+            plan_input = writer._request(
+                inputs["report"], topic, inputs.get("column_style") or column.script_style,
+                column.target_minutes, 0, original_material=inputs.get("original_material"),
+                content_driven=True,
+            )
+            try:
+                outline = call_json(client, PANORAMIC_PLAN, plan_input, PanoramicOutline, temperature=0.3)
+                outline_receipt = outline.model_dump()
+                if on_stage:
+                    on_stage("outline", outline_receipt)
+                existing_ctx = inputs.get("editorial_context") or ""
+                brief = _panoramic_brief(outline)
+                inputs["editorial_context"] = (existing_ctx + "\n\n" + brief).strip()
+            except (AdaptError, LLMError) as exc:
+                outline_receipt = {"error": type(exc).__name__}
     draft = writer.write_for_column(**inputs)
     if on_stage:
         on_stage("direct", asdict(draft))
-    return revise_passage(draft, on_stage=on_stage, profile=profile, **inputs)
+    written = revise_passage(draft, on_stage=on_stage, profile=profile, **inputs)
+    if outline_receipt is not None:
+        mw = written.meta.get("manuscript_workflow")
+        if isinstance(mw, dict):
+            mw["outline"] = outline_receipt
+    return written
 
 
 def write(*, mode: str | None, profile: JobPrompts | None, **inputs) -> writer.WrittenScript:

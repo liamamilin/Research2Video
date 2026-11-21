@@ -225,7 +225,7 @@ def production_input(key: str, value: dict, minutes: float = 4, *, automatic: bo
         raise ValueError("主题所属栏目已移除，请调整栏目后再研究")
     configs = production.load_all(paths().config_dir, paths().jobs_dir)
     binding = next((configs[pid] for pid in found["production_ids"] if pid in configs and not configs[pid].errors and (not automatic or configs[pid].auto)), None)
-    recipe_key = "theme_research"
+    recipe_key = "deep_dive"
     recipe = recipes.find(paths().config_dir, recipe_key)
     if recipe and recipe.minutes_range and recipe.minutes_range[0] <= minutes <= recipe.minutes_range[1]:
         recipe_key = recipes.variant_column_key(recipe_key, minutes=minutes)

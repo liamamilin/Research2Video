@@ -2,7 +2,7 @@
 # 这一份给「专题速览」这类和领域无关的配方：观众对这个领域没有基础，但愿意听。
 
 name: 大众观众
-status: experimental
+status: enabled
 depth: intro
 creative_intent:
   purpose: 知识讲解

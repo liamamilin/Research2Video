@@ -1,6 +1,7 @@
 name: AI 科研进展讲稿
 description: 让{{audience}}听清一项 AI 科研进展：研究问题、AI 帮到哪一步、证据到哪里、还能不能推广。
-status: enabled
+status: blocked
+reason: 已归档：已合并至通用「快讯」(flash) 配方，不再按链克隆配方文件。
 tags:
   domain:
     key: chain_ai_science_updates

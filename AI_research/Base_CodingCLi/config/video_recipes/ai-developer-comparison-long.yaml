@@ -2,9 +2,9 @@
 # research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
-name: 对比
-description: 陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
-status: experimental
+name: 横向对比
+description: 陪开发者弄明白多个模型、工具或方案各自适合什么场景，沿着真正影响选择的差别展开，听完能作出自己的判断。
+status: enabled
 tags:
   domain:
     key: ai
@@ -14,15 +14,17 @@ tags:
     name: 开发者
   type:
     key: comparison
-    name: 对比
+    name: 横向对比
   format:
     key: long
     name: B 站横屏长
 audience: 开发者
 target_minutes: 4.5
+minutes_range: [4, 8]
 topic:
   kind: comparison
   sources: []
+  whole_report: true
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
   template: comparison_developer
@@ -32,7 +34,9 @@ writing:
     depth: intermediate
     tone: explainer
   style: |
-    陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
+    陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开。
+    先把要解决的具体任务说清，再用同口径的数据、实测案例、延迟与成本边界逐项对照，避免把不同评测条件混为一谈。
+    结尾给出明确的选型建议：什么场景先选哪个、什么条件下该换。
 output:
   use: motion
   packaging:

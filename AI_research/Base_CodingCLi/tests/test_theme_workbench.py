@@ -65,7 +65,7 @@ def theme_env(video_env, monkeypatch):
     # Membership is unique; the other matrix is only used to test isolation.
     (root / "config/matrices/other.yaml").write_text("name: Other\ndomain: Other\njobs: []\n")
     (root / "jobs/demo/source.yaml").write_text("name: 素材研究\nprompt: 保持原有素材流程\noutput: output/demo/{date}.md\nsources: [source:official]\n")
-    (root / "config/production/demo_value.yaml").write_text("job: demo/source\nrecipe: theme_research\nauto: 0\n")
+    (root / "config/production/demo_value.yaml").write_text("job: demo/source\nrecipe: deep_dive\nauto: 0\n")
     (root / "config/content_columns/demo_value.yaml").write_text(yaml.safe_dump({"name": "T06 套餐价值", "matrix": "demo",
         "type": "comparison", "promise": "我是否有必要付费？", "production_ids": ["demo_value"], "audience": "用了一个月免费版的人"}, allow_unicode=True))
     from web.services import managed_scheduler

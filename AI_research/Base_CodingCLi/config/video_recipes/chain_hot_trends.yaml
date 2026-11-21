@@ -1,6 +1,7 @@
 name: 每日重要热点讲稿
 description: 让{{audience}}在 1.5–3 分钟内抓清一件跨领域重要热点的来龙去脉、关键数据和现实影响。
-status: enabled
+status: blocked
+reason: 已归档：已合并至通用「快讯」(flash) 配方，不再按链克隆配方文件。
 tags:
   domain:
     key: chain_hot_trends

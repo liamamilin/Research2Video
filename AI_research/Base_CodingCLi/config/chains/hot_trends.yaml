@@ -7,7 +7,6 @@ outputs:
 owned:
 - jobs/chains/hot_trends.yaml
 - config/matrices/hot_trends.yaml
-- config/video_recipes/chain_hot_trends.yaml
 - config/content_columns/hot_trends_episode.yaml
 imported: false
 schedule_armed: false

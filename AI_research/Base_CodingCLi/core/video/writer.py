@@ -216,7 +216,7 @@ TOPIC_FIELDS = ("核心角度", "目标受众", "条目数", "条目", "对比�
 
 def _request(report: str, topic: dict, column_style: str, target_minutes: float, budget: int,
              paragraph_units: Optional[tuple] = None, topic_fields: Optional[tuple] = None,
-             original_material: Optional[str] = None) -> str:
+             original_material: Optional[str] = None, content_driven: bool = False) -> str:
     report = report_material.for_narration(report_body(report), research_report=original_material is not None)
     if original_material:
         original_material = report_material.for_narration(original_material)
@@ -228,13 +228,19 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
         from core.video.story_pool import brief
 
         direction += "## 已选主事件\n" + brief(topic["story"]) + "\n\n"
-    material = f"## 素材\n{report}"
-    if original_material is not None:
-        programme = topic.get("content_mode") == "episode"
+    programme = topic.get("content_mode") == "episode"
+    if content_driven and not programme:
+        pacing = "整期篇幅由内容决定，把报告中的核心板块、关键案例与成立条件讲透，不注水，也不要为了压时长而跳过重要维度。"
+        material = f"## 讲述节奏\n{pacing}\n\n## 本期研究底稿\n{report}"
+        if original_material:
+            material += f"\n\n## 对应原始材料\n{original_material}"
+    elif original_material is not None:
         pacing = "整期篇幅由内容决定。" if programme else f"配方参考片长约 {target_minutes:g} 分钟。"
         material = f"## 讲述节奏\n{pacing}\n\n## 本期研究底稿\n{report}"
         if original_material:
             material += f"\n\n## 对应原始材料\n{original_material}"
+    else:
+        material = f"## 素材\n{report}"
     return (
         f"## 目标观众\n{fields.get('目标受众') or '普通观众'}\n\n"
         f"{direction}"
@@ -541,6 +547,7 @@ def write(
     scoped_lead: bool = False,
     episode_lead: Optional[str] = None,
     episode_prompt: Optional[str] = None,
+    content_driven: bool = False,
 ) -> WrittenScript:
     """Write a complete first draft; validate only its transport shape.
 
@@ -552,12 +559,14 @@ def write(
     client = LLMClient(llm_config, cancel_token=cancel_token)
     report = report_body(report)
     programme = topic.get("content_mode") == "episode"
+    by_content = programme or content_driven
     persona = narrator.load()
     column_style, scrubbed_markers = author_input_gates.scrub(column_style)
     system = author_system_prompt(topic, persona, greeting=greeting, tutorial=tutorial,
                                   episode_prompt=episode_prompt, episode_lead=episode_lead)
     request = _request(report, topic, column_style, target_minutes, 0,
-                       topic_fields=topic_fields, original_material=original_material)
+                       topic_fields=topic_fields, original_material=original_material,
+                       content_driven=content_driven)
     if editorial_context:
         request += "\n\n" + editorial_context
     messages = [
@@ -584,13 +593,13 @@ def write(
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))
     sections, check = _finalize(script, allowed, target_minutes, voice)
-    if programme:
+    if by_content:
         check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
     sections, stance = settle_sections(sections)
     if stance["changes"] and not stance.get("kept_original"):
-        check = {**length.measure(sections, None if programme else target_minutes, voice=voice),
+        check = {**length.measure(sections, None if by_content else target_minutes, voice=voice),
                  "dropped_citations": check.get("dropped_citations", 0),
-                 **({"duration_policy": "content"} if programme else {})}
+                 **({"duration_policy": "content"} if by_content else {})}
     from core.video import episodes
     title = episodes.publication_title(topic, script.title.strip())
     lint_source = report + ("\n" + original_material if original_material else "")
