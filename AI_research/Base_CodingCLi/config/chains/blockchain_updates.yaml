@@ -1,0 +1,13 @@
+key: blockchain_updates
+name: 区块链动态
+job: chains/blockchain_updates
+outputs:
+- blockchain_each
+- blockchain_daily
+owned:
+- jobs/chains/blockchain_updates.yaml
+- config/matrices/blockchain.yaml
+- config/content_columns/blockchain_episode.yaml
+imported: false
+schedule_armed: true
+created_at: 1795344000.0

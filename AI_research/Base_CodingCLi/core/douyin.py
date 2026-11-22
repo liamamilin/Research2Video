@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import html
 import re
+import unicodedata
 from urllib.parse import parse_qs, urlsplit
 
 WORK_ID = re.compile(r"^[0-9]{15,25}$")
@@ -167,3 +169,62 @@ def creator_diagnostics(row: dict) -> dict:
         elif name == 'status' and isinstance(value, dict):
             out[name] = {k: v for k, v in value.items() if k in names and type(v) in (int, bool)}
     return out
+
+
+DEFAULT_PUBLISH_WINDOW = {"enabled": True, "start": 8, "end": 23, "spacing": 30}
+
+
+def clean_publish_window(value: dict | None) -> dict:
+    """Validate Douyin daytime spacing window settings."""
+    raw = value if isinstance(value, dict) else {}
+    enabled = bool(raw.get("enabled", DEFAULT_PUBLISH_WINDOW["enabled"]))
+    try:
+        start = int(raw.get("start", DEFAULT_PUBLISH_WINDOW["start"]))
+        end = int(raw.get("end", DEFAULT_PUBLISH_WINDOW["end"]))
+        spacing = int(raw.get("spacing", DEFAULT_PUBLISH_WINDOW["spacing"]))
+    except (TypeError, ValueError) as exc:
+        raise DouyinError("发布时段与间隔设置格式不正确。") from exc
+    if not (0 <= start <= 23 and 1 <= end <= 24 and start < end):
+        raise DouyinError("发布时段需在 0–24 点之间且开始时间早于结束时间。")
+    if not (5 <= spacing <= 180):
+        raise DouyinError("发布间隔需在 5–180 分钟之间。")
+    return {"enabled": enabled, "start": start, "end": end, "spacing": spacing}
+
+
+def _norm_title(value: str) -> str:
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", html.unescape(value))).strip()
+
+
+def matching_creator_items(task: dict, rows: list[dict]) -> list[dict]:
+    """Conservatively match an UNKNOWN upload against creator item list by normalized title and time window."""
+    title = _norm_title(str((task.get("payload") or {}).get("title", "")))
+    if not title:
+        return []
+    start = float((task.get("result") or {}).get("started_at") or task.get("created_at") or 0)
+    matches = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        wid = str(row.get("item_id_plain") or row.get("aweme_id") or "")
+        if not WORK_ID.fullmatch(wid):
+            continue
+        row_title = _norm_title(str(row.get("title") or ""))
+        row_desc = _norm_title(str(row.get("desc") or row.get("item_title") or ""))
+        title_hit = (row_title == title) or (row_desc == title) or (bool(row_desc) and row_desc.startswith(title))
+        if not title_hit:
+            continue
+        created = row.get("create_time")
+        if isinstance(created, str) and created.isdigit():
+            created = int(created)
+        if not isinstance(created, (int, float)) or isinstance(created, bool):
+            continue
+        if start and not (start - 300 <= float(created) <= start + 10800):
+            continue
+        matches[wid] = {
+            "work_id": wid,
+            "provider_item_id": str(row.get("item_id") or ""),
+            "title": row_title or row_desc[:100],
+            "create_time": int(created),
+            "creator_state": creator_diagnostics(row),
+        }
+    return list(matches.values())

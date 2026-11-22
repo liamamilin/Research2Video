@@ -110,7 +110,11 @@ def test_topic_research_reuses_production_context_and_is_idempotent(client, them
     spec = video_workflow.job_spec(video_workflow.video_columns.get(str(theme_env / "config"), script["column_key"]), script["topic"], script["id"])
     assert "用户自己的使用经历" in spec["prompt"] and "不再生成多个候选选题" in spec["prompt"]
     assert spec["sources"] == ["source:official"] and "source_history" not in spec
-    assert client.patch(f"{url}/{theme['id']}", json={"title": "不能在启动后改题", "angle": "", "audience": "", "notes": ""}, headers=_csrf(client)).status_code == 409
+    edited = client.patch(f"{url}/{theme['id']}", json={"title": "启动后也可维护主题信息", "angle": "", "audience": "", "notes": ""}, headers=_csrf(client))
+    assert edited.status_code == 200 and edited.json()["title"] == "启动后也可维护主题信息" and edited.json()["script_id"] == started[0]
+    reused = client.post(f"{url}/{theme['id']}/reuse", headers=_csrf(client))
+    assert reused.status_code == 201 and reused.json()["id"] != theme["id"] and not reused.json()["script_id"]
+    assert client.delete(f"{url}/{reused.json()['id']}", headers=_csrf(client)).status_code == 200
 
 
 def test_theme_without_binding_uses_generic_recipe_and_matrix_identity(client, theme_env, monkeypatch):

@@ -352,3 +352,13 @@ def reply(bvid: str, rpid: str, body: ReplyIn, user=Depends(require_editor)) -> 
     result = call(manager.send_reply, bvid, rpid, body.text.strip())
     audit.log("platform_reply", user=user["username"], target=f"{bvid}/{rpid}", result=result["reply_rpid"])
     return result
+
+
+@router.post("/restrictions/{bvid}/dismiss")
+def dismiss_restriction(bvid: str, user=Depends(require_editor)) -> dict:
+    if not bilibili.BV.fullmatch(bvid):
+        raise HTTPException(422, detail=ApiError.make("invalid_video", "请使用有效的 BV 号。"))
+    from web.services import comment_restrictions
+    result = call(comment_restrictions.dismiss, call(manager.uid), bvid)
+    audit.log("platform_restriction_dismiss", user=user["username"], target=bvid)
+    return result

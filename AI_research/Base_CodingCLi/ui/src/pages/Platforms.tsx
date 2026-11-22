@@ -121,14 +121,17 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
 
 const RESTRICTION_STATES: Record<string, string> = { DETECTED: "待处理", CLEANING: "正在删除推广评论", CLEANED: "推广评论已删", POSTING: "正在发引导评论", SWAPPED: "已换成引导评论", CLOSED: "评论区已关闭", FAILED: "处理失败", UNKNOWN: "结果待核对" };
 
-function Restrictions({ rows }: { rows: CommentRestriction[] }) {
-  const active = rows.filter(row => row.active);
+function Restrictions({ rows, canEdit, run, busy }: { rows: CommentRestriction[]; canEdit: boolean; run: Run; busy: boolean }) {
+  const active = rows.filter(row => row.active && !row.dismissed);
   if (!active.length) return null;
   return <section className="card p-4 space-y-3 border-warning/40">
-    <h2 className="text-sm font-medium text-warning">流量受影响 · 评论区商业推广（{active.length}）</h2>
+    <div className="flex items-center justify-between gap-2">
+      <h2 className="text-sm font-medium text-warning">流量受影响 · 评论区商业推广（{active.length}）</h2>
+      {canEdit && active.length > 1 ? <button className="text-xs text-text-muted hover:text-text underline" disabled={busy} onClick={() => void run(async () => { for (const row of active) await platformAction(`/restrictions/${row.bvid}/dismiss`); })}>全部关闭</button> : null}
+    </div>
     <p className="text-xs text-text-muted">换评不会自动解除限流：请在 72 小时内到创作中心对这些稿件点【稿件申诉】，说明推广评论已删除。</p>
     <ul className="space-y-2 text-xs">{active.map(row => <li key={row.bvid} className="space-y-1">
-      <div className="flex flex-wrap gap-2 items-center"><PlatformLink bvid={row.bvid}>{row.title || row.bvid}</PlatformLink><span>{RESTRICTION_STATES[row.status] || row.status}</span>{row.deleted.length ? <span className="text-text-muted">已删 {row.deleted.length} 条推广评论</span> : null}{row.guide_rpid ? <PlatformLink bvid={row.bvid} rpid={row.guide_rpid}>查看引导评论</PlatformLink> : null}<a className="text-accent hover:underline" href="https://member.bilibili.com/platform/upload-manager/article" target="_blank" rel="noreferrer">去申诉</a></div>
+      <div className="flex flex-wrap gap-2 items-center"><PlatformLink bvid={row.bvid}>{row.title || row.bvid}</PlatformLink><span>{RESTRICTION_STATES[row.status] || row.status}</span>{row.deleted.length ? <span className="text-text-muted">已删 {row.deleted.length} 条推广评论</span> : null}{row.guide_rpid ? <PlatformLink bvid={row.bvid} rpid={row.guide_rpid}>查看引导评论</PlatformLink> : null}<a className="text-accent hover:underline" href="https://member.bilibili.com/platform/upload-manager/article" target="_blank" rel="noreferrer">去申诉</a>{canEdit ? <button className="text-text-muted hover:text-text underline ml-auto" disabled={busy} onClick={() => void run(() => platformAction(`/restrictions/${row.bvid}/dismiss`))}>关闭提醒</button> : null}</div>
       {row.error ? <p className="text-warning">{row.error}</p> : null}
     </li>)}</ul>
   </section>;
@@ -185,7 +188,7 @@ function BilibiliPlatformsPage() {
       <div role="tablist" className="flex gap-1 border-b border-border">{[{ id: "uploads", label: "视频投稿", icon: UploadCloud }, { id: "comments", label: `评论收件箱${pending ? ` · ${pending}` : ""}`, icon: MessageSquareText }, { id: "settings", label: "账号与策略", icon: Settings }].map(item => <button key={item.id} role="tab" aria-selected={tab === item.id} className={cn("px-3 py-2 text-sm flex gap-2 items-center border-b-2", tab === item.id ? "text-accent border-accent" : "text-text-muted border-transparent")} onClick={() => changeTab(item.id)}><item.icon className="w-4 h-4" />{item.label}</button>)}</div>
       {!data.account.connected && tab !== "settings" ? <section className="card p-8 text-center space-y-3"><p className="text-sm text-text-muted">先连接哔哩哔哩账号，再开始投稿和管理评论。</p><button className="btn btn-primary text-xs" onClick={() => changeTab("settings")}>前往账号连接</button></section> : null}
       {tab === "uploads" ? <div className="space-y-4">
-        <Restrictions rows={data.restrictions || []} />
+        <Restrictions rows={data.restrictions || []} canEdit={canEdit} run={run} busy={busy} />
         {canEdit && data.account.connected ? <CandidatePicker data={data} selected={selected} onSelect={value => { setSelected(value); setParams(previous => { const next = new URLSearchParams(previous); next.delete("task"); if (value) next.set("render", value); else next.delete("render"); return next; }); }} /> : null}
         {taskId && data.account.connected ? <FocusedUpload key={taskId} taskId={taskId} canEdit={canEdit} run={run} busy={busy} /> : null}
         {selected && !taskId && canEdit && data.account.connected ? <UploadForm key={selected} renderId={selected} run={run} busy={busy || !data.biliup_ready} onDone={task => { setSelected(""); setParams(previous => { const next = new URLSearchParams(previous); next.delete("render"); if (task.id && data.publication_flow) next.set("task", task.id); return next; }); }} /> : null}

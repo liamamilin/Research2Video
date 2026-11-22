@@ -287,8 +287,8 @@ export function VideoScriptsPage() {
               value={cellId}
               onChange={(e) => setCellId(e.target.value)}
             >
-              {cells.map((c) => (
-                <option key={c.id} value={c.id} disabled={!c.usable}>
+              {cells.filter((c) => c.usable).map((c) => (
+                <option key={c.id} value={c.id}>
                   {c.label}
                   {STATUS_NOTE[c.status] ? `（${STATUS_NOTE[c.status]}）` : ""}
                 </option>

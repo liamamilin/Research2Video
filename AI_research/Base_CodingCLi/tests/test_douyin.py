@@ -405,3 +405,79 @@ def test_missing_worker_dependency_leaves_a_durable_failure(tmp_path):
     assert result.returncode == 0 and not result.stderr
     row = db.get(job["id"])
     assert row["status"] == "FAILED" and "ModuleNotFoundError" in row["error"]
+
+
+def test_matching_creator_items_matches_title_and_window():
+    from core.douyin import matching_creator_items
+    now = 1792454400
+    task = {"payload": {"title": "抖音测试标题"}, "created_at": now, "result": {}}
+    rows = [
+        {"item_id_plain": WORK, "item_id": "enc-1", "title": "抖音测试标题", "create_time": now + 60},
+        {"item_id_plain": "7559876543210123457", "title": "抖音测试标题", "create_time": now - 7200},
+        {"item_id_plain": "7559876543210123458", "title": "其他标题", "create_time": now + 30},
+    ]
+    matched = matching_creator_items(task, rows)
+    assert len(matched) == 1 and matched[0]["work_id"] == WORK
+
+
+def test_douyin_policy_settings_and_api(douyin_env, client):
+    _login(client, "admin", "admin-pass-123")
+    res = client.put(
+        "/api/platforms/douyin/settings",
+        json={
+            "auto_upload": True,
+            "headless": False,
+            "publish_window": {"enabled": True, "start": 9, "end": 22, "spacing": 45},
+            "first_comment": {"enabled": True, "text": "欢迎讨论", "pin": False},
+        },
+        headers=_csrf(client),
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["auto_upload"] is True and body["auto_since"] > 0
+    assert body["headless"] is False
+    assert body["publish_window"] == {"enabled": True, "start": 9, "end": 22, "spacing": 45}
+    assert body["first_comment"]["text"] == "欢迎讨论"
+
+
+def test_unknown_lookup_promotes_to_submitted_and_removed_can_reupload(douyin_env):
+    row = render()
+    job = manager.enqueue(row["id"], PAYLOAD)
+    db = manager.store()
+    db.update(job["id"], status="UNKNOWN", work_id="", result={"submission_started": True})
+    check = manager.lookup_upload(job["id"])
+    assert check["kind"] == "LOOKUP"
+    db.update(check["id"], status="DONE", result={"matched": True, "work_id": WORK, "uid": OWNER["uid"], "pages": 1, "count": 5})
+    manager._settle(db)
+    updated = db.get(job["id"])
+    assert updated["status"] == "SUBMITTED" and updated["work_id"] == WORK
+
+    removed = manager.mark_removed(job["id"])
+    assert removed["status"] == "REMOVED"
+    requeued = manager.reupload(job["id"])
+    assert requeued["status"] == "QUEUED" and requeued["work_id"] == ""
+
+
+def test_daytime_window_holds_automatic_uploads_but_allows_manual(douyin_env):
+    r1 = render()
+    db = manager.store()
+    auto_job = manager.enqueue(r1["id"], PAYLOAD, automatic=True)
+    # Force a recent published timestamp so spacing (30 min) blocks automatic dispatch right now.
+    now = time.time()
+    policy = {"auto_upload": True, "headless": True, "publish_window": {"enabled": True, "start": 0, "end": 24, "spacing": 60}}
+    assert manager.window_allows(now, policy["publish_window"], [now - 120]) is False
+    assert manager.window_allows(now, policy["publish_window"], [now - 7200]) is True
+    assert db.get(auto_job["id"])["payload"]["automatic"] is True
+
+
+def test_fit_douyin_auto_pack_shortens_long_title_and_keeps_full_title_in_description():
+    long_title = "Claude、Gemini、WorkBuddy 都能点电脑了：先别比谁点得准，先看这三项差别"
+    fitted = manager._fit_douyin_auto_pack({
+        "title": long_title,
+        "description": "这是视频简介。",
+        "tags": ["#AI 工具", "效率", "模型", "办公", "对比", "多余标签"],
+    })
+    assert 8 <= len(fitted["title"]) <= 30
+    assert fitted["description"].startswith(long_title)
+    assert len(fitted["tags"]) == 5 and all(" " not in t for t in fitted["tags"])
+

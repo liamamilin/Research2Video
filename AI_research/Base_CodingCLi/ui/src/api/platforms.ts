@@ -8,9 +8,9 @@ export const loadBilibiliCategories = (signal: AbortSignal) => api<BilibiliCateg
 export type FirstComment = { enabled: boolean; text: string; pin: boolean };
 export const EMPTY_FIRST_COMMENT: FirstComment = { enabled: false, text: "", pin: false };
 export type PublishWindow = { enabled: boolean; start: number; end: number; spacing: number };
-export const DEFAULT_PUBLISH_WINDOW: PublishWindow = { enabled: true, start: 8, end: 23, spacing: 20 };
+export const DEFAULT_PUBLISH_WINDOW: PublishWindow = { enabled: true, start: 8, end: 23, spacing: 30 };
 export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; first_comment?: FirstComment; publish_window?: PublishWindow; restricted_comment?: FirstComment };
-export type CommentRestriction = { bvid: string; title: string; reason: string; status: string; active: boolean; deleted: { rpid: string; message: string }[]; guide_rpid: string; error: string; detected_at: number; updated_at: number };
+export type CommentRestriction = { bvid: string; title: string; reason: string; status: string; active: boolean; dismissed?: boolean; deleted: { rpid: string; message: string }[]; guide_rpid: string; error: string; detected_at: number; updated_at: number };
 export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment; dtime?: number };
 export type UploadPreview = UploadPayload & { adaptation?: PublishAdaptationResult; account_uid?: string; draft?: { payload: Partial<UploadPayload>; render_id: string } | null; warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
 export type UploadTask = { id: string; uid?: string; render_id: string; script_id: string; version: number; status: string; bvid: string; error: string; created_at: number; payload: UploadPayload;

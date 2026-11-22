@@ -7,3 +7,5 @@ pairs:
     single_production: chatgpt_t09_updates_each
   - episode_production: hot_trends_daily
     single_production: hot_trends_each
+  - episode_production: blockchain_daily
+    single_production: blockchain_each

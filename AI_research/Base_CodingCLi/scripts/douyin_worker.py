@@ -23,7 +23,7 @@ if __name__ == "__main__":
     package.__path__ = [str(Path(__file__).resolve().parents[1] / "core")]
     sys.modules["core"] = package
 
-from core.douyin import CREATE_PATHS, DouyinError, accepted_receipt, profile, public_receipt, creator_diagnostics, comment_receipt, comment_text_matches
+from core.douyin import CREATE_PATHS, DouyinError, accepted_receipt, profile, public_receipt, creator_diagnostics, comment_receipt, comment_text_matches, matching_creator_items
 from core.douyin import DouyinLookupError
 from core.douyin_store import DouyinStore
 
@@ -47,8 +47,17 @@ async def identity(context) -> dict:
 
 async def launch(playwright, **kwargs):
     # Each worker owns its own browser. Never connect to or close the user's ordinary Chrome session.
-    return await asyncio.wait_for(playwright.chromium.launch(headless=kwargs.get("headless", True),
-                                  args=["--no-first-run", "--no-default-browser-check"], timeout=45000), 50)
+    # Use channel="chromium" so headless=True runs full Chromium (--headless=new) instead of headless_shell,
+    # matching upstream cookie_auth and avoiding blank pages on creator.douyin.com.
+    return await asyncio.wait_for(
+        playwright.chromium.launch(
+            headless=kwargs.get("headless", True),
+            channel="chromium",
+            args=["--no-first-run", "--no-default-browser-check", "--disable-blink-features=AutomationControlled"],
+            timeout=45000,
+        ),
+        50,
+    )
 
 
 async def login(db: DouyinStore, job: dict, folder: Path) -> None:
@@ -100,7 +109,7 @@ async def login(db: DouyinStore, job: dict, folder: Path) -> None:
     db.update(job["id"], status="DONE", phase="账号已验证", result=owner)
 
 
-async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
+async def upload(db: DouyinStore, job: dict, storage: Path, folder: Path | None = None) -> None:
     from patchright.async_api import async_playwright
     from uploader.douyin_uploader import main as upstream
     from loguru import logger
@@ -108,9 +117,11 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
     logger.remove()
 
     payload = job["payload"]
+    headless = bool(payload.get("headless", False))
     future = asyncio.get_running_loop().create_future()
     attempted = False
     browsers = []
+    contexts = []
 
     async def guarded_submit(route):
         nonlocal attempted
@@ -145,14 +156,16 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
                 future.set_exception(exc)
 
     async def guarded_launch(**kwargs):
-        browser = await launch(pw, headless=False)
+        browser = await launch(pw, headless=headless)
         browsers.append(browser)
 
         async def new_context(**options):
             # Force the captured account snapshot, rather than any global upstream cookie file.
             options["storage_state"] = str(storage)
+            options["bypass_csp"] = True
             options.pop("permissions", None)
             context = await browser.new_context(**options)
+            contexts.append(context)
             owner = await identity(context)
             if owner["uid"] != job["uid"]:
                 raise DouyinError("登录账号已改变，已停止投稿，请重新连接。")
@@ -172,7 +185,7 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
         publish_date=0, account_file=str(storage), desc=payload["description"],
         thumbnail_landscape_path=payload.get("cover") or None,
         thumbnail_portrait_path=payload.get("cover_portrait") or None,
-        declaration="内容由AI生成", headless=False, debug=False,
+        declaration="内容由AI生成", headless=headless, debug=False,
     )
     if payload.get('cover_portrait'):
         from core.social.douyin_cover import set_portrait_cover
@@ -190,6 +203,10 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
                     db.update(job["id"], status="FAILED", phase="平台拒绝投稿",
                               error=f"抖音拒绝了本次投稿（错误码 {receipt['code']}），未自动重试。")
                     return
+                if contexts and storage.parent.is_dir():
+                    with suppress(Exception):
+                        await contexts[-1].storage_state(path=str(storage))
+                        storage.chmod(0o600)
                 db.update(job["id"], status="SUBMITTED", phase="已投稿，待核对平台审核与公开状态", error="")
             elif task in done:
                 task.result()
@@ -197,11 +214,20 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
             else:
                 raise DouyinError("上传等待超时，请到创作中心核对；系统不会自动重投。")
         except Exception as exc:
+            diag_info = {"error_type": type(exc).__name__, "error_detail": str(exc)[:240]}
+            if folder is not None and contexts:
+                with suppress(Exception):
+                    pages = getattr(contexts[-1], "pages", None) or []
+                    if pages:
+                        diag_info["page_url"] = str(getattr(pages[-1], "url", ""))[:240]
+                        diag_path = folder / "error.png"
+                        await pages[-1].screenshot(path=str(diag_path), full_page=False, timeout=5000)
+                        diag_path.chmod(0o600)
             row = db.get(job["id"])
             status = "SUBMITTED" if row["work_id"] else "UNKNOWN" if attempted else "FAILED"
-            message = str(exc) if isinstance(exc, DouyinError) else "抖音上传未完成，请检查登录、素材或创作中心中的结果。"
+            message = str(exc) if isinstance(exc, DouyinError) else f"抖音上传未完成（{type(exc).__name__}：{str(exc)[:120]}），请检查登录、素材或创作中心中的结果。"
             db.update(job["id"], status=status, error=message,
-                      result=row["result"] if attempted else {"confirmed_not_submitted": True})
+                      result={**(row["result"] if attempted else {"confirmed_not_submitted": True}), "diagnostic": diag_info})
         finally:
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
@@ -212,6 +238,50 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
             for browser in browsers:
                 with suppress(Exception):
                     await browser.close()
+
+
+async def lookup_work(pw, storage: Path, owner_id: str, parent: dict) -> dict:
+    """Read-only recovery for UNKNOWN uploads by normalized title and submission time window."""
+    browser = await launch(pw, headless=True)
+    try:
+        context = await browser.new_context(storage_state=str(storage))
+        owner = await identity(context)
+        if owner["uid"] != owner_id:
+            raise DouyinError("核对账号与原投稿账号不一致，请重新连接原账号。")
+        cursor = "0"
+        collected = []
+        pages = 0
+        for _ in range(3):
+            response = await context.request.get(
+                "https://creator.douyin.com/aweme/v1/creator/item/list/",
+                params={"cursor": cursor, "count": "50"},
+                timeout=20000,
+            )
+            if response.status != 200:
+                raise DouyinLookupError(f"抖音作品列表返回 HTTP {response.status}，暂未能完成自动回查。", "list_http_error")
+            data = await response.json()
+            if not isinstance(data, dict) or type(data.get("status_code")) is not int or data["status_code"] != 0:
+                raise DouyinLookupError("抖音作品列表接口未成功，请检查登录状态。", "list_api_error")
+            rows = data.get("item_info_list")
+            if not isinstance(rows, list):
+                raise DouyinLookupError("抖音作品列表格式已变化，暂未能完成自动回查。", "list_schema_error")
+            pages += 1
+            collected.extend(r for r in rows if isinstance(r, dict))
+            if not data.get("has_more"):
+                break
+            next_cursor = str(data.get("cursor") or data.get("max_cursor") or "")
+            if not next_cursor or next_cursor == cursor:
+                break
+            cursor = next_cursor
+        with suppress(Exception):
+            await context.storage_state(path=str(storage))
+            storage.chmod(0o600)
+        matches = matching_creator_items(parent, collected)
+        if len(matches) == 1:
+            return {"matched": True, **matches[0], "uid": owner_id, "pages": pages, "count": len(collected)}
+        return {"matched": False, "candidates": len(matches), "pages": pages, "count": len(collected)}
+    finally:
+        await browser.close()
 
 
 async def owned_record(context, target: str) -> dict | None:
@@ -564,7 +634,7 @@ async def run(state: Path, key: str) -> None:
             if not storage.is_file():
                 raise DouyinError("抖音登录凭证不可用，请重新连接账号。")
             if job["kind"] == "UPLOAD":
-                await upload(db, job, storage)
+                await upload(db, job, storage, folder)
             else:
                 async with async_playwright() as pw:
                     if job["kind"] == "VERIFY":
@@ -574,6 +644,9 @@ async def run(state: Path, key: str) -> None:
                             owner = await identity(context)
                             if owner["uid"] != job["uid"]:
                                 raise DouyinError("抖音账号已改变，请重新连接。")
+                            with suppress(Exception):
+                                await context.storage_state(path=str(storage))
+                                storage.chmod(0o600)
                             db.update(key, status="DONE", result=owner, phase="登录有效")
                         finally:
                             await browser.close()
@@ -581,6 +654,12 @@ async def run(state: Path, key: str) -> None:
                         await send_first_comment(db, job, pw, storage)
                     elif job["kind"] == "COMMENT_CHECK":
                         await check_first_comment(db, job, pw, storage)
+                    elif job["kind"] == "LOOKUP":
+                        parent = db.get(job["parent_id"])
+                        if not parent or parent["kind"] != "UPLOAD" or parent["uid"] != job["uid"]:
+                            raise DouyinError("找不到需要回查的抖音投稿任务。")
+                        receipt = await lookup_work(pw, storage, job["uid"], parent)
+                        db.update(key, status="DONE", result=receipt, phase="已回查创作中心作品列表")
                     elif job["kind"] == "RECONCILE":
                         receipt = await inspect_work(pw, storage, job["uid"], job["payload"]["work_id"])
                         db.update(key, status="DONE", result=receipt, phase="已核对作品")

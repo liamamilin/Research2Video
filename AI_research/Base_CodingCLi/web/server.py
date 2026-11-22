@@ -198,18 +198,22 @@ async def lifespan(app: FastAPI):
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
-    from core.video import archive as video_archive
+    from core.video import archive as video_archive, cleanup as video_cleanup
 
     def archive_loop() -> None:
-        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py)."""
+        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py).
+        External-storage retention cleanup runs on the same background loop (core/video/cleanup.py)."""
         paths = get_settings().paths
         while not sweep_stop.wait(600):
             try:
                 if video_archive.due(paths.state_dir):
                     result = video_archive.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
                     logger.info("video archive pass: %s", result)
+                if video_cleanup.due(paths.config_dir, paths.state_dir):
+                    result = video_cleanup.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
+                    logger.info("video cleanup pass: %s", result)
             except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
-                logger.exception("video archive pass failed")
+                logger.exception("video archive/cleanup pass failed")
 
     def hot_trigger_loop() -> None:
         """B站热搜 AI words start an extra flash run (web/services/hot_trigger.py); it throttles itself."""

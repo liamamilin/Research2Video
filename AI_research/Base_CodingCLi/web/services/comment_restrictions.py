@@ -60,8 +60,12 @@ def _db():
         conn.execute("""CREATE TABLE IF NOT EXISTS restrictions (
             uid TEXT NOT NULL, bvid TEXT NOT NULL, title TEXT NOT NULL DEFAULT '',
             reason TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1,
+            dismissed INTEGER NOT NULL DEFAULT 0,
             deleted TEXT NOT NULL DEFAULT '[]', guide_rpid TEXT NOT NULL DEFAULT '', error TEXT NOT NULL DEFAULT '',
             detected_at REAL NOT NULL, updated_at REAL NOT NULL, PRIMARY KEY(uid, bvid))""")
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(restrictions)").fetchall()}
+        if "dismissed" not in cols:
+            conn.execute("ALTER TABLE restrictions ADD COLUMN dismissed INTEGER NOT NULL DEFAULT 0")
     return db
 
 
@@ -70,7 +74,18 @@ def restrictions(uid: str) -> list[dict]:
         return []
     with _db().connect() as conn:
         rows = conn.execute("SELECT * FROM restrictions WHERE uid=? ORDER BY detected_at DESC", (uid,)).fetchall()
-    return [{**dict(r), "deleted": json.loads(r["deleted"]), "active": bool(r["active"])} for r in rows]
+    return [{**dict(r), "deleted": json.loads(r["deleted"]), "active": bool(r["active"]), "dismissed": bool(r["dismissed"])} for r in rows]
+
+
+def dismiss(uid: str, bvid: str) -> dict:
+    if not uid:
+        raise pm.Error("请先连接哔哩哔哩账号。")
+    with _db().connect(write=True) as conn:
+        changed = conn.execute("UPDATE restrictions SET dismissed=1,updated_at=? WHERE uid=? AND bvid=?",
+                               (time.time(), uid, bvid)).rowcount
+    if not changed:
+        raise pm.Error("找不到这条限流提醒记录。")
+    return {"bvid": bvid, "dismissed": True}
 
 
 def record(uid: str, archives: list[dict], *, complete: bool) -> list[str]:
@@ -87,7 +102,7 @@ def record(uid: str, archives: list[dict], *, complete: bool) -> list[str]:
             else:
                 # Limited again after it was lifted: a new link comment caused it, so handle it once more. A video
                 # still limited from before keeps its state (no repeated deleting).
-                if conn.execute("UPDATE restrictions SET active=1,status='DETECTED',error='',reason=?,updated_at=? "
+                if conn.execute("UPDATE restrictions SET active=1,dismissed=0,status='DETECTED',error='',reason=?,updated_at=? "
                                 "WHERE uid=? AND bvid=? AND active=0 AND status NOT IN ('CLEANING','POSTING','UNKNOWN')",
                                 (reason, now, uid, bvid)).rowcount:
                     new.append(bvid)

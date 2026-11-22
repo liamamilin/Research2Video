@@ -19,7 +19,7 @@ audiences: [developer, non_tech]
 target_minutes: 1.25
 topic:
   kind: single
-  sources: [flash, ai_science_updates, hot_trends]
+  sources: [flash, ai_science_updates, hot_trends, blockchain_updates]
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
   template: quick_take

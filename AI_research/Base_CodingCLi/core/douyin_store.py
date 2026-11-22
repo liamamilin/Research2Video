@@ -35,8 +35,11 @@ class DouyinStore:
                 CREATE INDEX IF NOT EXISTS jobs_parent ON jobs(uid,kind,parent_id);
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_author_comment ON jobs(uid,parent_id) WHERE kind='FIRST_COMMENT';
                 CREATE UNIQUE INDEX IF NOT EXISTS once_per_comment_work ON jobs(uid,work_id) WHERE kind='FIRST_COMMENT' AND work_id<>'';
-                CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL,policy TEXT NOT NULL DEFAULT '{}');
             """)
+            cols = {row[1] for row in conn.execute("PRAGMA table_info(settings)").fetchall()}
+            if "policy" not in cols:
+                conn.execute("ALTER TABLE settings ADD COLUMN policy TEXT NOT NULL DEFAULT '{}'")
 
     def connect(self, write: bool = False):
         return sqlite_util.connect(self.path, write=write)
@@ -113,11 +116,14 @@ class DouyinStore:
             rows = conn.execute(sql, params).fetchall()
         return [self.decode(row) for row in rows]
 
-    def claim(self) -> dict | None:
+    def claim(self, key: str | None = None) -> dict | None:
         with self.connect(write=True) as conn:
             if conn.execute("SELECT 1 FROM jobs WHERE status='RUNNING' LIMIT 1").fetchone():
                 return None
-            row = conn.execute("SELECT * FROM jobs WHERE status='QUEUED' ORDER BY created_at LIMIT 1").fetchone()
+            if key is not None:
+                row = conn.execute("SELECT * FROM jobs WHERE id=? AND status='QUEUED'", (key,)).fetchone()
+            else:
+                row = conn.execute("SELECT * FROM jobs WHERE status='QUEUED' ORDER BY created_at LIMIT 1").fetchone()
             if row is None:
                 return None
             now = time.time()
@@ -151,9 +157,75 @@ class DouyinStore:
 
     def save_comment_settings(self, uid: str, value: dict) -> dict:
         with self.connect(write=True) as conn:
-            conn.execute("INSERT INTO settings VALUES (?,?) ON CONFLICT(uid) DO UPDATE SET first_comment=excluded.first_comment",
-                         (uid, json.dumps(value, ensure_ascii=False)))
+            conn.execute(
+                "INSERT INTO settings (uid, first_comment) VALUES (?,?) "
+                "ON CONFLICT(uid) DO UPDATE SET first_comment=excluded.first_comment",
+                (uid, json.dumps(value, ensure_ascii=False)),
+            )
         return value
+
+    def policy_settings(self, uid: str) -> dict:
+        from core.douyin import DEFAULT_PUBLISH_WINDOW
+        defaults = {
+            "auto_upload": False,
+            "auto_since": 0.0,
+            "headless": True,
+            "publish_window": dict(DEFAULT_PUBLISH_WINDOW),
+        }
+        if not uid:
+            return defaults
+        with self.connect() as conn:
+            row = conn.execute("SELECT policy FROM settings WHERE uid=?", (uid,)).fetchone()
+        stored = json.loads(row[0]) if row and row[0] else {}
+        merged = {**defaults, **stored}
+        merged["publish_window"] = {**DEFAULT_PUBLISH_WINDOW, **(stored.get("publish_window") or {})}
+        return merged
+
+    def save_policy_settings(self, uid: str, patch: dict) -> dict:
+        current = self.policy_settings(uid)
+        merged = {**current, **patch}
+        if "publish_window" in patch:
+            merged["publish_window"] = {**current["publish_window"], **patch["publish_window"]}
+        first_comment = json.dumps(self.comment_settings(uid), ensure_ascii=False)
+        with self.connect(write=True) as conn:
+            conn.execute(
+                "INSERT INTO settings (uid, first_comment, policy) VALUES (?,?,?) "
+                "ON CONFLICT(uid) DO UPDATE SET policy=excluded.policy",
+                (uid, first_comment, json.dumps(merged, ensure_ascii=False)),
+            )
+        return merged
+
+    def reserved_publish_times(self, uid: str, exclude_id: str = "") -> list[float]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                "SELECT id, updated_at, created_at FROM jobs WHERE uid=? AND kind='UPLOAD' "
+                "AND status IN ('RUNNING','SUBMITTED','PUBLISHED')",
+                (uid,),
+            ).fetchall()
+        return [float(r["updated_at"] or r["created_at"]) for r in rows if r["id"] != exclude_id]
+
+    def mark_removed(self, key: str, uid: str, note: str) -> bool:
+        row = self.get(key)
+        if not row or row["uid"] != uid or row["kind"] != "UPLOAD" or row["status"] not in ("SUBMITTED", "PUBLISHED"):
+            return False
+        removed = list(row["payload"].get("removed_work_ids") or [])
+        if row["work_id"] and row["work_id"] not in removed:
+            removed.append(row["work_id"])
+        payload = {**row["payload"], "removed_work_ids": removed}
+        return self.update(
+            key, expected=row["status"], status="REMOVED", phase="已在抖音删除",
+            error=note, payload=payload,
+        )
+
+    def requeue_removed(self, key: str, uid: str, video_path: str) -> bool:
+        row = self.get(key)
+        if not row or row["uid"] != uid or row["kind"] != "UPLOAD" or row["status"] != "REMOVED":
+            return False
+        payload = {**row["payload"], "video_path": video_path, "automatic": False}
+        return self.update(
+            key, expected="REMOVED", status="QUEUED", phase="等待重新投稿",
+            error="", work_id="", result={}, payload=payload,
+        )
 
     def comments(self, uid: str) -> dict[str, dict]:
         return {r['parent_id']: r for r in self.list(uid=uid, kind='FIRST_COMMENT')}

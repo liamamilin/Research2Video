@@ -1,0 +1,7 @@
+name: 区块链动态合集
+matrix: blockchain
+type: news
+promise: 串联当日除重磅单条外的区块链技术演进、稳定币/RWA、合规进展与链上安全动态，客观拆解事实与机制。
+production_ids:
+- blockchain_daily
+content_mode: episode

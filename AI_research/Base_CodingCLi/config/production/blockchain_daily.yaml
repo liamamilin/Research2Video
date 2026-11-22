@@ -1,0 +1,9 @@
+name: 区块链动态 · 合集
+job: chains/blockchain_updates
+recipe: flash
+audience: non_tech
+reverify: false
+auto: 1
+render:
+  video_speed: 1.25
+  voice_id: voxcpm_anchor

@@ -9,5 +9,5 @@ owned:
 - config/matrices/hot_trends.yaml
 - config/content_columns/hot_trends_episode.yaml
 imported: false
-schedule_armed: false
+schedule_armed: true
 created_at: 1795175400.0

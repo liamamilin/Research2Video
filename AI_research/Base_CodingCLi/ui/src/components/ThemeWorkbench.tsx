@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarClock, ExternalLink, Lightbulb, Plus, RefreshCw } from "lucide-react";
 
-import { createTheme, discoverThemes, dismissTheme, generateThemes, getThemeHistory, getThemeWorkbench, markThemeUsed, sendThemeFeedback, setThemeSchedule, startTheme, updateTheme,
+import { createTheme, deleteTheme, discoverThemes, dismissTheme, generateThemes, getThemeHistory, getThemeWorkbench, markThemeUsed, reuseTheme, sendThemeFeedback, setThemeSchedule, startTheme, updateTheme,
   type Theme, type ThemeCategory, type ThemeInput, type ThemeWorkbenchData } from "@/api/themes";
 import { ErrorState } from "@/components/ErrorState";
 import { TimeStamp } from "@/components/TimeStamp";
@@ -47,9 +47,9 @@ function ThemeForm({ categories, value, saving, onSave, onClose }: {
     <label className="block text-xs space-y-1">主题标题<input required minLength={4} maxLength={180} className="input" value={fields.title}
       placeholder="例如：ChatGPT 免费版用了一个月，应该升级 Plus 吗？" onChange={(e) => field("title", e.target.value)} /></label>
     <div className="grid sm:grid-cols-2 gap-3">
-      <label className="text-xs space-y-1">所属栏目<select className="input" value={fields.category} disabled={!!value}
+      <label className="text-xs space-y-1">所属栏目<select className="input" value={fields.category}
         onChange={(e) => { const c = categories.find((row) => row.key === e.target.value); setFields((old) => ({ ...old, category: e.target.value, audience: c?.audience || old.audience })); }}>
-        {categories.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}
+        {categories.map((c) => <option key={c.key} value={c.key}>{c.name}{c.legacy ? " · 早期分类" : ""}</option>)}
       </select></label>
       <label className="text-xs space-y-1">目标观众<input className="input" maxLength={1000} value={fields.audience} onChange={(e) => field("audience", e.target.value)} /></label>
     </div>
@@ -128,11 +128,31 @@ export function ThemeWorkbench({ matrix, canEdit, visible = true }: { matrix: st
   };
   const save = async (body: ThemeInput) => {
     await action("save", async () => {
-      if (editing) { const { category: unused, ...fields } = body; void unused; await updateTheme(matrix, editing.id, fields); }
-      else await createTheme(matrix, body);
+      if (editing) {
+        const updated = await updateTheme(matrix, editing.id, body);
+        setHistory((old) => old.map((row) => row.id === updated.id ? { ...row, ...updated } : row));
+      } else {
+        await createTheme(matrix, body);
+      }
       setEditing(undefined);
     });
   };
+  const removeTheme = (theme: Theme) => {
+    if (!window.confirm(`确定删除主题「${theme.title}」吗？（不会删除已生成的文稿与视频）`)) return;
+    void action(`delete:${theme.id}`, async () => {
+      await deleteTheme(matrix, theme.id);
+      setHistory((old) => old.filter((row) => row.id !== theme.id));
+      if (editing?.id === theme.id) setEditing(undefined);
+      toast.success("主题已删除");
+    });
+  };
+  const cloneTheme = (theme: Theme) => action(`reuse:${theme.id}`, async () => {
+    const created = await reuseTheme(matrix, theme.id);
+    setView("recommendations");
+    setDay(null);
+    setEditing(created);
+    toast.success("已复用为新主题，可直接修改或开始研究");
+  });
   const loadHistory = async (offset = 0) => {
     await action("history", async () => {
       const result = await getThemeHistory(matrix, offset);
@@ -203,7 +223,7 @@ export function ThemeWorkbench({ matrix, canEdit, visible = true }: { matrix: st
         {!!data.feedback?.topics && <p className="text-text-muted">后续出题会参考已记录的 {data.feedback.topics} 个主题选择，仍保持栏目多样性。</p>}
         <label className="block space-y-1">补充出题方向（选填）<textarea className="input min-h-20" maxLength={4000} value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="例如：面向用了免费版一段时间的职场用户，多讲办公任务和升级决策。" /></label>
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="space-y-1">出题栏目<select className="input" value={ideaCategory} onChange={(e) => { setIdeaCategory(e.target.value); setPatternId(""); }}><option value="">各栏目分别推荐</option>{(patternId ? allCategories : data.categories).map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}</select></label>
+          <label className="space-y-1">出题栏目<select className="input" value={ideaCategory} onChange={(e) => { setIdeaCategory(e.target.value); setPatternId(""); }}><option value="">各栏目分别推荐</option>{(ideaCategory && !data.categories.some((c) => c.key === ideaCategory) ? [...data.categories, ...allCategories.filter((c) => c.key === ideaCategory)] : data.categories).map((c) => <option key={c.key} value={c.key}>{c.name}{c.legacy ? " · 早期分类" : ""}</option>)}</select></label>
           <label className="space-y-1">参考题型<select className="input" value={patternId} onChange={(e) => {
             setPatternId(e.target.value); const found = data.library?.patterns.find((p) => p.id === e.target.value);
             if (found) setIdeaCategory(found.category);
@@ -253,7 +273,7 @@ export function ThemeWorkbench({ matrix, canEdit, visible = true }: { matrix: st
           await setThemeSchedule(matrix, false, at, platforms, supportsFeedback ? mode : undefined, supportsFeedback ? direction : undefined); setScheduleOpen(false);
         })}>暂停推荐</button>}</div>
       </div>}
-      {editing !== undefined && canEdit && <ThemeForm key={editing?.id || "new"} categories={editing ? allCategories : data.categories} value={editing} saving={busy === "save"} onSave={save} onClose={() => setEditing(undefined)} />}
+      {editing !== undefined && canEdit && <ThemeForm key={editing?.id || "new"} categories={editing && !data.categories.some((c) => c.key === editing.category) ? [...data.categories, ...allCategories.filter((c) => c.key === editing.category)] : data.categories} value={editing} saving={busy === "save"} onSave={save} onClose={() => setEditing(undefined)} />}
       <div className="flex flex-wrap gap-2 items-center text-xs">
         <select className="input w-auto" aria-label="筛选主题栏目" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">全部栏目</option>{allCategories.map((c) => <option key={c.key} value={c.key}>{c.name}{c.legacy ? " · 早期分类" : ""}</option>)}</select>
         {view !== "history" && <><select className="input w-auto" aria-label="推荐日期" value={selectedDay} onChange={(e) => setDay(e.target.value)}>
@@ -292,17 +312,23 @@ export function ThemeWorkbench({ matrix, canEdit, visible = true }: { matrix: st
         {theme.feedback?.action === "interested" && <p className="text-xs text-accent">已标记感兴趣</p>}
         {theme.feedback?.action === "dismissed" && <p className="text-xs text-text-muted">忽略原因：{FEEDBACK_REASONS[theme.feedback.reason || "not_now"]}{theme.feedback.note ? ` · ${theme.feedback.note}` : ""}</p>}
         {supportsFeedback && (theme.origin === "generated" || theme.script_id) && <ThemeUsage matrix={matrix} id={theme.id} />}
-        <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
           {theme.status === "queued" && !theme.script_id ? <span className="text-xs text-accent">等待制作 · 不重复选题依次处理</span> : theme.script_id ? <Link className="btn btn-primary text-xs" to={`/video/${theme.script_id}`}>查看文稿与视频</Link> : canEdit && !theme.used_at && <>
             <button className="btn btn-primary text-xs" disabled={!!busy} onClick={() => beginTheme(theme, true)}>{busy === theme.id ? "正在启动…" : "研究并制作视频"}</button>
             <button className="btn text-xs" disabled={!!busy} onClick={() => beginTheme(theme, false)}>先研究写稿</button>
-            <button className="text-xs text-accent px-1" onClick={() => setEditing(theme)}>改角度</button>
+            <button className="text-xs text-accent px-1" onClick={() => setEditing(theme)}>编辑</button>
             <button className="text-xs text-text-muted px-1" disabled={!!busy} onClick={() => action("used", () => markThemeUsed(matrix, theme.id))}>标记已用</button>
             {supportsFeedback && <button className="text-xs text-accent" disabled={!!busy} onClick={() => action("feedback", () => sendThemeFeedback(matrix, theme.id, theme.feedback?.action === "interested" ? "clear" : "interested"))}>{theme.feedback?.action === "interested" ? "取消感兴趣" : "感兴趣"}</button>}
             {theme.status === "dismissed" ? supportsFeedback && <button className="text-xs text-accent" disabled={!!busy} onClick={() => action("feedback", () => sendThemeFeedback(matrix, theme.id, "clear"))}>恢复待选</button> : <button className="text-xs text-text-muted ml-auto" disabled={!!busy} onClick={() => {
               if (!supportsFeedback) { void action(theme.id, () => dismissTheme(matrix, theme.id)); return; }
               setFeedbackId(theme.id); setFeedbackReason("not_now"); setFeedbackNote("");
             }}>暂不感兴趣</button>}
+            <button className="text-xs text-danger px-1" disabled={!!busy} onClick={() => removeTheme(theme)}>删除</button>
+          </>}
+          {canEdit && (!!theme.used_at || !!theme.script_id) && <>
+            <button className="btn text-xs" disabled={!!busy} onClick={() => cloneTheme(theme)}>{theme.script_status === "FAILED" || theme.status === "attention" ? "复用重跑" : "复用为新题"}</button>
+            <button className="text-xs text-accent px-1" disabled={!!busy} onClick={() => setEditing(theme)}>编辑</button>
+            <button className="text-xs text-danger px-1 ml-auto" disabled={!!busy} onClick={() => removeTheme(theme)}>删除</button>
           </>}
           {canEdit && theme.inspiration?.pattern_id && <button className="text-xs text-accent" onClick={() => selectPattern(theme.inspiration!.pattern_id, theme.category)}>沿用题型出新题</button>}
           {canEdit && !!theme.used_at && !theme.inspiration?.pattern_id && <button className="text-xs text-accent" onClick={() => {

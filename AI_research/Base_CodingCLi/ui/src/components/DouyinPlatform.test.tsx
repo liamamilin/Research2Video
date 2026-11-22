@@ -63,11 +63,11 @@ describe("Douyin platform", () => {
     vi.mocked(api).mockResolvedValue(preview);
     show();
     expect(await screen.findByRole("option", { name: "当前成片 · v2" })).toBeTruthy();
-    expect(screen.queryByRole("option", { name: "历史成片 · v1" })).toBeNull();
+    expect(screen.queryByRole("option", { name: "历史成片 · v1 · 历史版本，当前 v2" })).toBeNull();
     fireEvent.change(screen.getByLabelText("抖音成片范围"), { target: { value: "all" } });
-    expect(screen.getByRole("option", { name: "历史成片 · v1" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "历史成片 · v1 · 历史版本，当前 v2" })).toBeTruthy();
     fireEvent.change(screen.getByLabelText("搜索抖音成片"), { target: { value: "当前" } });
-    expect(screen.queryByRole("option", { name: "历史成片 · v1" })).toBeNull();
+    expect(screen.queryByRole("option", { name: "历史成片 · v1 · 历史版本，当前 v2" })).toBeNull();
     fireEvent.change(screen.getByLabelText("抖音投稿成片"), { target: { value: "r1" } });
     expect(await screen.findByText("抖音发布包 · 文稿 v2")).toBeTruthy();
     expect(douyinAction).not.toHaveBeenCalled();
@@ -135,12 +135,29 @@ it("offers read-only verification for a receipt that has not been read back", as
   await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/uploads/job1/first-comment/check"));
 });
 
-it("saves an account template explicitly without enqueueing old works", async () => {
+it("saves account policy and comment template explicitly without enqueueing old works", async () => {
   connect(); show();
-  fireEvent.click(await screen.findByText("常用作者评论设置"));
-  fireEvent.click(screen.getByLabelText("新投稿默认添加作者评论"));
+  fireEvent.click(await screen.findByRole("tab", { name: "账号与策略" }));
+  fireEvent.click(await screen.findByLabelText("新投稿默认添加作者评论"));
   fireEvent.change(screen.getByLabelText("常用作者评论内容"), { target: { value: "默认评论" } });
-  fireEvent.click(screen.getByRole("button", { name: "保存抖音常用评论" }));
-  await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/first-comment-template", { enabled: true, text: "默认评论", pin: false }, "PUT"));
+  fireEvent.click(screen.getByRole("button", { name: "保存抖音策略" }));
+  await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/settings", expect.objectContaining({
+    auto_upload: false,
+    headless: true,
+    first_comment: { enabled: true, text: "默认评论", pin: false },
+  }), "PUT"));
   expect(douyinAction).toHaveBeenCalledTimes(1);
+});
+
+it("offers automatic lookup for UNKNOWN jobs and reupload for REMOVED jobs", async () => {
+  connect();
+  data.uploads = [
+    job,
+    { ...job, id: "job2", status: "REMOVED", phase: "已在抖音删除", work_id: "7559876543210123456", payload: { title: "已删作品" } },
+  ];
+  show();
+  fireEvent.click(await screen.findByRole("button", { name: "自动回查一次" }));
+  await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/uploads/job1/lookup"));
+  fireEvent.click(screen.getByRole("button", { name: "重新投稿" }));
+  await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/uploads/job2/reupload"));
 });

@@ -1,6 +1,7 @@
 """Douyin operations use the console's existing roles and CSRF protection."""
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from core.douyin import DouyinError
@@ -29,6 +30,20 @@ class FirstCommentIn(Input):
     pin: bool = False
 
 
+class PublishWindowIn(Input):
+    enabled: bool = True
+    start: int = Field(default=8, ge=0, le=23)
+    end: int = Field(default=23, ge=1, le=24)
+    spacing: int = Field(default=30, ge=5, le=180)
+
+
+class SettingsIn(Input):
+    auto_upload: bool | None = None
+    headless: bool | None = None
+    publish_window: PublishWindowIn | None = None
+    first_comment: FirstCommentIn | None = None
+
+
 class UploadIn(Input):
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
     account_uid: str = Field(default="", max_length=64)
@@ -45,6 +60,15 @@ class ReconcileIn(Input):
 @router.get("")
 def overview(user=Depends(require_viewer)):
     return call(douyin.overview)
+
+
+@router.put("/settings")
+def save_settings(body: SettingsIn, user=Depends(require_admin)):
+    payload = body.model_dump(exclude_unset=True)
+    result = call(douyin.save_settings, payload)
+    audit.log("platform_settings", user=user["username"], target="douyin",
+              result="auto_on" if result.get("auto_upload") else "auto_off")
+    return result
 
 
 @router.post("/login", status_code=202)
@@ -76,6 +100,12 @@ def preview(render_id: str, user=Depends(require_editor)):
     return call(douyin.preview, render_id)
 
 
+@router.get("/covers/{render_id}/{orientation}")
+def cover(render_id: str, orientation: str, title: str = "", user=Depends(require_viewer)):
+    path = call(douyin.cover_file, render_id, orientation, title)
+    return FileResponse(path)
+
+
 @router.post("/uploads", status_code=202)
 def enqueue(body: UploadIn, user=Depends(require_editor)):
     payload = body.model_dump(exclude={"render_id", "first_comment"})
@@ -91,10 +121,37 @@ def task(key: str, user=Depends(require_viewer)):
     return douyin.public_job(call(douyin.upload_task, key))
 
 
+@router.get("/uploads/{key}/diagnostic")
+def diagnostic(key: str, user=Depends(require_viewer)):
+    path = call(douyin.diagnostic_file, key)
+    return FileResponse(path, media_type="image/png")
+
+
+@router.post("/uploads/{key}/lookup", status_code=202)
+def lookup(key: str, user=Depends(require_editor)):
+    result = call(douyin.lookup_upload, key)
+    audit.log("platform_lookup", user=user["username"], target="douyin", result=key)
+    return result
+
+
 @router.post("/uploads/{key}/reconcile", status_code=202)
 def reconcile(key: str, body: ReconcileIn, user=Depends(require_editor)):
     result = call(douyin.reconcile, key, body.video)
     audit.log("platform_reconcile", user=user["username"], target="douyin", result=key)
+    return result
+
+
+@router.post("/uploads/{key}/removed")
+def mark_removed(key: str, user=Depends(require_editor)):
+    result = call(douyin.mark_removed, key)
+    audit.log("platform_removed", user=user["username"], target="douyin", result=key)
+    return result
+
+
+@router.post("/uploads/{key}/reupload", status_code=202)
+def reupload(key: str, user=Depends(require_editor)):
+    result = call(douyin.reupload, key)
+    audit.log("platform_reupload", user=user["username"], target="douyin", result=key)
     return result
 
 

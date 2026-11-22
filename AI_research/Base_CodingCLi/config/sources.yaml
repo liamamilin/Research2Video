@@ -1201,3 +1201,33 @@ chain_source_mwlrtqz9:
   note: 通过链路创建向导添加；2026-11-20 归档：openai.com/news/science 长期 HTTP 403；科研链路改用 cg_openai_news
   spec: catalog:https://openai.com/news/science/
   enabled: false
+coindesk:
+  name: CoinDesk
+  spec: rss:https://www.coindesk.com/arc/outboundfeeds/rss/
+  tags: [blockchain, web3]
+  note: 国际主流区块链与数字资产媒体；覆盖监管政策、机构动态、稳定币与基础设施进展
+the_block:
+  name: The Block
+  spec: rss:https://www.theblock.co/rss.xml
+  tags: [blockchain, web3]
+  note: 机构级区块链研究与快讯媒体；偏重基础设施、合规、ETF 与数据统计
+decrypt:
+  name: Decrypt
+  spec: rss:https://decrypt.co/feed
+  tags: [blockchain, web3]
+  note: Web3 与区块链技术媒体；覆盖协议升级、安全事件与应用落地
+blockworks:
+  name: Blockworks
+  spec: rss:https://blockworks.co/feed
+  tags: [blockchain, web3]
+  note: 侧重机构金融、RWA、稳定币与宏观合规视角的区块链媒体
+ethereum_blog:
+  name: Ethereum Foundation Blog
+  spec: rss:https://blog.ethereum.org/feed.xml
+  tags: [blockchain, protocol]
+  note: 以太坊基金会官方博客；一手协议升级、扩容路线图与客户端动态
+vitalik_blog:
+  name: Vitalik Buterin's Blog
+  spec: rss:https://vitalik.eth.limo/feed.xml
+  tags: [blockchain, protocol]
+  note: Vitalik 个人博客；公链架构、密码学、零知识证明与协议设计一手长文

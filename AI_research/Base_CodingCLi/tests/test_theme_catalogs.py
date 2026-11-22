@@ -54,7 +54,7 @@ def test_domain_catalog_has_distinct_questions_and_real_reusable_references(tmp_
 def test_every_active_matrix_defaults_to_reference_generation_and_keeps_platforms():
     config = str(ROOT / 'config')
     active = [m for m in matrices.load_all(config).values() if not m.archived and m.content.get('role', 'domain') == 'domain']
-    assert len(active) == 12
+    assert len(active) == 13
     for matrix in active:
         cfg = theme_discovery.configuration(config, matrix.key)
         assert cfg['mode'] == 'ideas'
