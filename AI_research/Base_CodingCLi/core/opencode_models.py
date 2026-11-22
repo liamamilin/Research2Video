@@ -92,9 +92,12 @@ def probe_model(binary: str, model: str, *, timeout: int = 45, cancel_token=None
         "--model", model,
         "Reply with exactly OK",
     ]
+    from .opencode_cli import subprocess_env
+
     try:
         completed = subprocess.run(
-            command, capture_output=True, text=True, timeout=max(20, timeout), check=False,
+            command, capture_output=True, text=True, timeout=max(20, timeout),
+            env=subprocess_env(), check=False,
         )
     except subprocess.TimeoutExpired:
         logger.info("OpenCode model probe timeout: %s", model)

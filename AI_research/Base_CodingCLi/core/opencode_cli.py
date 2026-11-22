@@ -282,6 +282,49 @@ def _run_subprocess(command: list[str], *, limit: int, workdir: str | None, env:
         raise
 
 
+_DEFAULT_DISABLED_MCPS = ("browse",)
+
+
+def subprocess_env(cfg: dict | None = None, *, base_env: dict[str, str] | None = None) -> dict[str, str]:
+    """Build subprocess env for unattended OpenCode CLI runs.
+
+    Disables user-global browser MCP servers (``mcp.servers.browse`` in OpenCode
+    v2) via ``OPENCODE_CONFIG_CONTENT`` so background research stays on built-in
+    ``websearch``/``webfetch`` and never attaches to the user's Chrome browser.
+    """
+    env = dict(base_env if base_env is not None else os.environ)
+    env["NO_COLOR"] = "1"
+    raw = (cfg or {}).get("disabled_mcps")
+    if isinstance(raw, (list, tuple)):
+        disabled = [str(x).strip() for x in raw if str(x).strip()]
+    else:
+        disabled = list(_DEFAULT_DISABLED_MCPS)
+    if not disabled:
+        return env
+    override: dict = {}
+    existing = env.get("OPENCODE_CONFIG_CONTENT", "").strip()
+    if existing:
+        try:
+            parsed = json.loads(existing)
+            if isinstance(parsed, dict):
+                override = parsed
+        except json.JSONDecodeError:
+            override = {}
+    mcp = override.get("mcp")
+    if not isinstance(mcp, dict):
+        mcp = {}
+        override["mcp"] = mcp
+    servers = mcp.get("servers")
+    if not isinstance(servers, dict):
+        servers = {}
+        mcp["servers"] = servers
+    for name in disabled:
+        entry = servers.get(name)
+        servers[name] = {**entry, "disabled": True} if isinstance(entry, dict) else {"disabled": True}
+    env["OPENCODE_CONFIG_CONTENT"] = json.dumps(override, ensure_ascii=False)
+    return env
+
+
 def run(prompt: str, *, config: dict | None = None, model: str | None = None,
         timeout: int | None = None, cancel_token=None) -> tuple[str, dict]:
     """Run ``opencode run`` and return ``(final_text, meta)``."""
@@ -303,7 +346,7 @@ def run(prompt: str, *, config: dict | None = None, model: str | None = None,
     workdir = str(cfg.get("workdir") or "").strip() or None
     logger.info("OpenCode CLI run model=%s timeout=%s", chosen, limit)
     returncode, stdout, stderr = _run_subprocess(
-        command, limit=limit, workdir=workdir, env={**os.environ, "NO_COLOR": "1"},
+        command, limit=limit, workdir=workdir, env=subprocess_env(cfg),
         chosen=chosen, cancel_token=cancel_token,
     )
     if cancel_token is not None and cancel_token.is_set():
@@ -348,7 +391,7 @@ def webfetch_markdown(url: str, *, config: dict | None = None, cancel_token=None
     try:
         completed = subprocess.run(
             command, capture_output=True, text=True, timeout=timeout, cwd=workdir,
-            env={**os.environ, "NO_COLOR": "1"}, check=False,
+            env=subprocess_env(cfg), check=False,
         )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"OpenCode CLI 读页超时（{timeout}s）") from exc

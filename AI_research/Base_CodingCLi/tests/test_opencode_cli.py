@@ -44,7 +44,25 @@ def test_parse_run_jsonl_rejects_short_failure_messages():
             '{"type":"text","part":{"text":"webfetch 请求失败，返回 HTTP 403，未能获取到正文内容。"}}')
 
 
+def test_subprocess_env_disables_browse_mcp_by_default():
+    import json
+
+    env = opencode_cli.subprocess_env(base_env={"PATH": "/usr/bin"})
+    assert env["NO_COLOR"] == "1"
+    cfg = json.loads(env["OPENCODE_CONFIG_CONTENT"])
+    assert cfg["mcp"]["servers"]["browse"]["disabled"] is True
+
+    merged = opencode_cli.subprocess_env(
+        base_env={"OPENCODE_CONFIG_CONTENT": '{"mcp":{"servers":{"other":{"disabled":false}}}}'},
+    )
+    merged_cfg = json.loads(merged["OPENCODE_CONFIG_CONTENT"])
+    assert merged_cfg["mcp"]["servers"]["browse"]["disabled"] is True
+    assert merged_cfg["mcp"]["servers"]["other"]["disabled"] is False
+
+
 def test_webfetch_markdown_invokes_cli(monkeypatch):
+    import json
+
     calls = []
 
     def fake_run(command, **kwargs):
@@ -52,6 +70,8 @@ def test_webfetch_markdown_invokes_cli(monkeypatch):
         assert "--auto" in command and "--model" in command
         assert "opencode-go/beam-free" in command
         assert any("https://example.com/x" in part for part in command)
+        cfg = json.loads(kwargs["env"]["OPENCODE_CONFIG_CONTENT"])
+        assert cfg["mcp"]["servers"]["browse"]["disabled"] is True
         return SimpleNamespace(returncode=0, stdout=(
             '{"type":"tool_use","part":{"tool":"webfetch","state":'
             '{"status":"completed","output":"Hello from page"}}}\n'

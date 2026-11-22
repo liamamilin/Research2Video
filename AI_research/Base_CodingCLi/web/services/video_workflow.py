@@ -576,6 +576,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         greeting = episodes.greeting(topic, script.get("content_context") or {})
         written = manuscript_workflow.write(
             mode=video_config.get("manuscript_workflow"), profile=profile,
+            headline_polish=bool(video_config.get("headline_polish", True)),
             column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,

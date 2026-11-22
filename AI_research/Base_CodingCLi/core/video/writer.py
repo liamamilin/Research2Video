@@ -65,9 +65,13 @@ class _EpisodeEntrance(BaseModel):
     entry_start: int = Field(ge=0)
 
 
-PROMPT_VERSION = 28
+PROMPT_VERSION = 29
 # The material decides what is worth naming.
-TITLE_RULE = "标题点出本期最有意思的具体事，核心看点前置，尽量控制在 18 到 28 字左右，数字有助于理解看点时再用。"
+TITLE_RULE = (
+    "标题直接点出本期最值得看的具体变化或反差，前 12 字尽量带出核心产品、人物或熟悉场景，"
+    "优先带入正文里真实的关键数字（价格、比例、额度、日期等），主标题控制在 32 到 44 字左右；"
+    "不要把选题里的具体产品/事件锚点洗丢，不要写成菜单操作说明书，也不要用没有信息量的泛问句。"
+)
 #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
 OPENING_RULE = '从本期最值得理解的内容进入，第一句短促抛出反差、变化或核心结论（尽量控制在 25 到 35 字以内），细节和背景放到下一句再展开；切入点由材料和目标观众决定。'
 ENDING_RULE = "结尾留一个值得带走的判断、发现或下一步。有值得聊的实际体验，再问观众。"
@@ -103,7 +107,7 @@ EXPLAINER_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解研究底稿中的科学问题。可以从具体现象建立疑问，用实验、观察、模型或不同尺度的例子解释因果。建议保留研究者做了什么、看到了什么，以及这些材料怎样支持解释。相关背景与例子按理解需要展开。
 """ + EPISODE_LEAD + """
 解释章节用 section 组织，标题体现具体内容；讲述顺序与收束方式可随本题的推理安排。
-""" + ENDING_RULE + """
+""" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
@@ -113,7 +117,7 @@ BUSINESS_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解一门生意怎样运转。具体交易可用来说明客户需求、付款、交付和协作；成本、收益、风险及参与者关系值得展开。可以按实际材料选择业务过程、对比或其它清楚的讲法。
 """ + EPISODE_LEAD + """
 业务章节用 section 组织，标题体现具体内容；收束可落在本题有依据的经营认识上。
-""" + ENDING_RULE + """
+""" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
@@ -123,7 +127,7 @@ ARTWORK_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众读懂作品的表达。构图、材质、声音、创作动作和观看感受可以成为理解的入口；历史背景或相邻作品有助于解释时也可展开。建议让评论与可以辨认的细节相连。
 """ + EPISODE_LEAD + """
 讲述章节用 section 组织，标题体现具体作品或值得理解的内容；切入和收束可由材料决定。
-""" + ENDING_RULE + """
+""" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
@@ -133,7 +137,7 @@ CULTURE_CHANGE_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期围绕选定的文化问题解释它的来路。代表作品、创作者行动、展示或传播处境可以帮助观众理解现象怎样形成或改变；相关作品之间的联系与差别按本题需要展开。建议把文化认识落在具体细节与背景上。
 """ + EPISODE_LEAD + """
 讲述章节用 section 组织，标题体现具体内容；可以按本题的因果、时间或作品关系展开。
-""" + ENDING_RULE + """
+""" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
@@ -143,7 +147,7 @@ MANUFACTURING_EPISODE_PROMPT = AUTHORING_PROMPT + """
 这期帮助观众理解产品或部件怎样制造和交付。可以沿实际工序解释工具的作用、材料或结构的变化以及前后依赖；规格、伙伴、对照工艺与交付条件有助于理解时展开。建议保留能说明制造难点的具体过程与结果。
 """ + EPISODE_LEAD + """
 制造章节用 section 组织，标题体现具体内容；可以按理解需要选择切入点和收束。
-""" + ENDING_RULE + """
+""" + ENDING_RULE + "\n" + TITLE_RULE + """
 正文章节用 item，有独立开场或收尾时分别用 opening 或 closing。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}
@@ -157,6 +161,7 @@ TUTORIAL_PROMPT = AUTHORING_PROMPT + """
 旁白用自然中文讲清截图里看得到的内容；命令可以保留原文，图片中的 Markdown 标题、列表和表格用口语解释。
 不要把代码围栏、整块 Markdown 原文或表格分隔线写成口播正文，这些内容由实际截图呈现。
 可以用实际输入、操作或可见结果让观众理解教程任务，开场和收束随本次材料安排。
+""" + TITLE_RULE + """
 episode_role 使用 opening、item、closing。保留实际步骤顺序，不把所有步骤塞进同一个项目章节。
 引用了具体事实、数字或原话的段落填写对应素材链接，纯过渡段可留空数组。
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""

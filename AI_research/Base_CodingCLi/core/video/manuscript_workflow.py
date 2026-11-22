@@ -779,8 +779,41 @@ def _panoramic_brief(outline: PanoramicOutline) -> str:
     return "\n".join(lines)
 
 
+def _polish_headline(
+    written: writer.WrittenScript,
+    *,
+    topic: dict,
+    column,
+    column_style: str | None = None,
+    llm_config=None,
+    cancel_token=None,
+    on_stage: Callable[[str, dict], None] | None = None,
+) -> writer.WrittenScript:
+    """Run dedicated multi-platform title polishing on the settled narration."""
+    from . import episodes, headline
+
+    client = LLMClient(llm_config, cancel_token=cancel_token)
+    result = headline.finish(
+        client,
+        title=written.title,
+        sections=written.sections,
+        column_style=column_style or getattr(column, "script_style", "") or "",
+        topic_title=str((topic or {}).get("title") or "").strip(),
+        is_episode=episodes.enabled(topic or {}),
+        column_key=str(getattr(column, "key", "") or ""),
+    )
+    usage = getattr(client, "usage", None)
+    if isinstance(usage, dict) and usage:
+        result["usage"] = dict(usage)
+    if on_stage:
+        on_stage("headline", result)
+    meta = {**written.meta, "headline": result}
+    return replace(written, title=result["title"], meta=meta)
+
+
 def focused_author(
-    *, on_stage: Callable[[str, dict], None] | None = None, profile: JobPrompts | None = None, **inputs,
+    *, on_stage: Callable[[str, dict], None] | None = None, profile: JobPrompts | None = None,
+    headline_polish: bool = False, **inputs,
 ) -> writer.WrittenScript:
     """Write one manuscript and address a concrete reader problem when present."""
     outline_receipt: dict | None = None
@@ -819,16 +852,35 @@ def focused_author(
         mw = written.meta.get("manuscript_workflow")
         if isinstance(mw, dict):
             mw["outline"] = outline_receipt
+    if headline_polish:
+        written = _polish_headline(
+            written,
+            topic=inputs.get("topic") or {},
+            column=inputs.get("column"),
+            column_style=inputs.get("column_style"),
+            llm_config=inputs.get("llm_config"),
+            cancel_token=inputs.get("cancel_token"),
+            on_stage=on_stage,
+        )
     return written
 
 
-def write(*, mode: str | None, profile: JobPrompts | None, **inputs) -> writer.WrittenScript:
+def write(*, mode: str | None, profile: JobPrompts | None, headline_polish: bool = False, **inputs) -> writer.WrittenScript:
     """Run the configured manuscript workflow on the prepared author inputs."""
     if profile or mode == "focused":
-        return focused_author(profile=profile, **inputs)
-    if mode == "scoped_lead":
-        return writer.write_for_column(scoped_lead=True, **inputs)
-    return writer.write_for_column(**inputs)
+        return focused_author(profile=profile, headline_polish=headline_polish, **inputs)
+    written = (writer.write_for_column(scoped_lead=True, **inputs) if mode == "scoped_lead"
+               else writer.write_for_column(**inputs))
+    if headline_polish:
+        written = _polish_headline(
+            written,
+            topic=inputs.get("topic") or {},
+            column=inputs.get("column"),
+            column_style=inputs.get("column_style"),
+            llm_config=inputs.get("llm_config"),
+            cancel_token=inputs.get("cancel_token"),
+        )
+    return written
 
 
 def revise_passage(

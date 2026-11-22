@@ -17,9 +17,30 @@ def publish_cover(render: dict, title: str) -> str:
     return publish_covers(render, title)['cover']
 
 
+def _cover_headline_for(render: dict, requested_title: str = '') -> str:
+    """Return the version's polished short cover headline unless the user typed a custom title."""
+    script_id, version_no = render.get('script_id'), render.get('version')
+    if not script_id or not version_no:
+        return ''
+    try:
+        from core.video import store
+        version = store.get_version(str(script_id), int(version_no)) or {}
+        headline = (version.get('meta') or {}).get('headline') or {}
+        cover = ' '.join(str(headline.get('cover_headline') or '').split()).strip()
+        if not 2 <= len(cover) <= 16:
+            return ''
+        req = ' '.join((requested_title or '').split()).strip()
+        known = {' '.join(str(v or '').split()).strip()
+                 for v in (version.get('title'), render.get('title'), headline.get('douyin_title'), cover) if v}
+        return cover if (not req or req in known) else ''
+    except Exception:  # noqa: BLE001 - fall back to the caller's title
+        return ''
+
+
 def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[str, str]:
     """Resolve orientation-specific assets and sample once when either one needs generating."""
-    key = hashlib.sha256(' '.join(title.split()).encode()).hexdigest()[:10]
+    display_title = _cover_headline_for(render, title) or title
+    key = hashlib.sha256(' '.join(display_title.split()).encode()).hexdigest()[:10]
     folder = Path(get_settings().paths.state_dir) / 'platforms' / 'covers'
     # v2: number-led covers; covers made earlier in the title layout are not reused
     destinations = ({'douyin_landscape': folder / f"{render['id']}-{key}-douyin-landscape-v2.jpg"} if portrait else
@@ -40,8 +61,8 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
     if missing and video is not None:
         # the script's frozen cover style (default: number-led); "title" keeps the title layout and asks no model
         copy = None if cover_style(render) != 'number' else \
-            cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
-        result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy,
+            cover_copy.for_render(render, display_title, folder / f"{render['id']}-{key}-copy.json")
+        result.update(make_covers(video, display_title, missing, bilibili.ffmpeg_binary(), copy,
                                   video_render.safe_file(render, 'cover-frame.png')))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
             for k in destinations}

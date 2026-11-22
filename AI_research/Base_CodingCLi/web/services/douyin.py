@@ -412,7 +412,9 @@ def preview(render_id: str) -> dict:
         "landscape_url": f"/api/platforms/douyin/covers/{quote(render['id'], safe='')}/landscape?title={cover_title}",
     }
     return {**preview_draft(render, "douyin"), "render_id": render["id"], "script_id": script["id"], "version": render["version"],
-            **adaptation["payload"], "adaptation": adaptation, "warnings": warnings,
+            **adaptation["payload"],
+            **({"douyin_title": pack["douyin_title"]} if pack.get("douyin_title") else {}),
+            "adaptation": adaptation, "warnings": warnings,
             "freshness_warnings": freshness_warnings, "credibility": credibility.label(version),
             "covers": covers, "existing_upload": existing,
             "first_comment": default_comment(store().comment_settings(owner))}
@@ -663,7 +665,11 @@ def _fit_douyin_auto_pack(pack: dict) -> dict:
     from core.social.publish_text import combined_text
 
     original_title = str(pack.get("title") or "").strip()
-    title = _shorten_douyin_title(original_title, 30)
+    polished_douyin = str(pack.get("douyin_title") or "").strip()
+    if 1 <= len(polished_douyin) <= 30:
+        title = polished_douyin
+    else:
+        title = _shorten_douyin_title(original_title, 30)
     description = str(pack.get("description") or "").strip()
     if original_title and title != original_title and not description.startswith(original_title):
         description = f"{original_title}\n\n{description}" if description else original_title
