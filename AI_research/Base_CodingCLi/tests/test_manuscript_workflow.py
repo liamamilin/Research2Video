@@ -234,3 +234,20 @@ def test_manuscript_yaml_enables_all_job_prompts():
     assert "science/science_illustrated" in enabled
     assert "economy/economy_illustrated" in enabled
     assert set(workflow.JOB_PROMPTS).issubset(enabled)
+
+
+def test_comparison_profiles_enforce_opinionated_decision_framework_and_recipe_resolution():
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    jobs_dir = Path(__file__).resolve().parents[1] / "jobs"
+    for job in ("chatgpt_acquisition/t05_comparison", "chatgpt_acquisition/t06_value",
+                "chatgpt_acquisition/t04_testing", "ai_media/weekly_model_arena"):
+        profile = workflow.JOB_PROMPTS[job]
+        assert any(w in profile.draft for w in ("一碗水端平", "端水"))
+        assert any(w in profile.draft for w in ("坑", "翻车"))
+        assert "端水" in profile.read and "坑" in profile.read
+    recipe_profile = workflow.profile_for(
+        {"column_key": "ai-developer-comparison-long", "topic": {}},
+        str(config_dir), str(jobs_dir), {"manuscript_workflow": "focused"},
+    )
+    assert recipe_profile is workflow.RECIPE_PROMPTS["ai-developer-comparison-long"]
+    assert "隐蔽的坑" in recipe_profile.draft and "报菜名" in recipe_profile.read

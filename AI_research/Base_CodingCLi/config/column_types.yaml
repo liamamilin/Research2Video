@@ -12,8 +12,8 @@ types:
     preferred_visuals: [图表, 流程, 截图, 解释卡]
   comparison:
     name: 横评
-    promise: 理解多个对象的差异与适用条件
-    structure: [对象, 比较维度, 关键差异, 适用情形]
+    promise: 讲清什么人选谁、各自最隐蔽的坑在哪，让观众直接做决定
+    structure: [核心分水岭, 什么人选各自选项, 各自最隐蔽的坑, 拍板结论]
     preferred_visuals: [对比图, 价格卡, 真实画面, 原理图]
   tutorial:
     name: 教程

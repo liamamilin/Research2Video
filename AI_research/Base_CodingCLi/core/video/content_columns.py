@@ -186,7 +186,12 @@ def apply_script_context(recipe, context: dict):
     if structure:
         direction += f"\n{scope}可围绕 {structure} 组织讲述，按素材自然展开。"
     if context.get("type") == "comparison":
-        direction += "\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。"
+        direction += (
+            "\n不要写一碗水端平的优缺点列表，也不要按对象逐个报菜名式念参数。"
+            "按「核心分水岭 → 什么人直接选各自选项（用具体任务、用量或门槛画人群，不用新手/专业人士等空标签）"
+            " → 各自最隐蔽的坑（只挖材料里已有、第一眼看不出的隐藏成本、限额、静默限制或翻车条件，不强求对称、不编造）」组织讲述；"
+            "对象数量沿用材料，不限定为两个；小节标题贴合本期具体问题来起，不要照抄框架模板词。"
+        )
     elif context.get("type") == "tutorial":
         direction += f"\n{scope}围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。"
     premise = (context.get("premise") or "").strip()
