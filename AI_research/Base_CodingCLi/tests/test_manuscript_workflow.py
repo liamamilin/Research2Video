@@ -244,10 +244,46 @@ def test_comparison_profiles_enforce_opinionated_decision_framework_and_recipe_r
         profile = workflow.JOB_PROMPTS[job]
         assert any(w in profile.draft for w in ("一碗水端平", "端水"))
         assert any(w in profile.draft for w in ("坑", "翻车"))
+        assert "车轱辘" in profile.draft
+        if job != "chatgpt_acquisition/t04_testing":
+            assert "合并" in profile.draft
         assert "端水" in profile.read and "坑" in profile.read
+        assert "保留" in profile.revise
     recipe_profile = workflow.profile_for(
         {"column_key": "ai-developer-comparison-long", "topic": {}},
         str(config_dir), str(jobs_dir), {"manuscript_workflow": "focused"},
     )
     assert recipe_profile is workflow.RECIPE_PROMPTS["ai-developer-comparison-long"]
     assert "隐蔽的坑" in recipe_profile.draft and "报菜名" in recipe_profile.read
+    assert "保留原段涵盖的所有核心档位" in recipe_profile.revise
+
+
+def test_news_profiles_enforce_anti_bulletin_and_lead_first_rules():
+    from core.video import columns as video_columns
+    from core.video import content_columns
+
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    jobs_dir = Path(__file__).resolve().parents[1] / "jobs"
+    flash_profile = workflow.profile_for(
+        {"column_key": "ai-non_tech-quick_take-short-nr", "topic": {}},
+        str(config_dir), str(jobs_dir), {"manuscript_workflow": "focused"},
+    )
+    assert flash_profile is workflow.RECIPE_PROMPTS["flash"]
+    assert flash_profile.draft == ""
+    assert "主菜" in flash_profile.read and "电稿" in flash_profile.read
+    assert "复述" in flash_profile.episode_lead
+    assert "小数" in flash_profile.revise
+    assert "通稿" in workflow.JOB_PROMPTS["monitoring/ai_flash_discovery"].draft
+    assert "第一节" in workflow.JOB_PROMPTS["chatgpt_acquisition/t09_updates"].draft
+
+    cols = content_columns.load_all(str(config_dir))
+    for fast_col in ("ai_flash", "hot_trends_episode", "blockchain_episode",
+                     "chatgpt_t09_updates", "ai_software_daily", "ai_tech_daily"):
+        assert cols[fast_col].notes.strip(), f"{fast_col} should have explicit fast-news notes"
+        assert "第一个 item" in cols[fast_col].notes or "第一节" in cols[fast_col].notes
+
+    base_recipe = video_columns.get(str(config_dir), "topic_digest")
+    history_ctx = content_columns.snapshot(str(config_dir), "history_daily", "history/history_daily")
+    history_applied = content_columns.apply_script_context(base_recipe, history_ctx)
+    assert "人物身份、当时处境" in history_applied.script_style
+    assert "第一个 item" in history_applied.script_style

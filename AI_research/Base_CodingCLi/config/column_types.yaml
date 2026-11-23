@@ -2,8 +2,8 @@ schema_version: 1
 types:
   news:
     name: 快讯
-    promise: 迅速知道发生了什么，以及为什么重要
-    structure: [变化, 影响, 重点]
+    promise: 直击最值得关心的变化或现场，讲透实质影响与关键看点
+    structure: [核心切口, 变化实质与边界, 现实影响或带走判断]
     preferred_visuals: [重点卡, 真实截图, 关键数字]
   explainer:
     name: 解读
