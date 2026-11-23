@@ -7,8 +7,8 @@ types:
     preferred_visuals: [重点卡, 真实截图, 关键数字]
   explainer:
     name: 解读
-    promise: 理解事件或概念背后的原因
-    structure: [问题, 机制, 例子, 结论]
+    promise: 从反常识现象或真实卡点切入，讲透背后真正起作用的一条因果机制与现实判断标尺
+    structure: [反常识切口与真问题, 核心因果机制与具体例子, 现实边界与带走标尺]
     preferred_visuals: [图表, 流程, 截图, 解释卡]
   comparison:
     name: 横评

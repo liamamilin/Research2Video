@@ -287,3 +287,35 @@ def test_news_profiles_enforce_anti_bulletin_and_lead_first_rules():
     history_applied = content_columns.apply_script_context(base_recipe, history_ctx)
     assert "人物身份、当时处境" in history_applied.script_style
     assert "第一个 item" in history_applied.script_style
+
+
+def test_explainer_profiles_enforce_single_causal_chain_and_anti_jargon_rules():
+    from core.video import columns as video_columns
+    from core.video import content_columns
+
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    jobs_dir = Path(__file__).resolve().parents[1] / "jobs"
+    for job in ("economy/economy_illustrated", "science/science_illustrated",
+                "chatgpt_acquisition/t01_product", "chatgpt_acquisition/t02_scenarios",
+                "ai_media/weekly_business_watch", "software/software_weekly", "tech/tech_weekly"):
+        profile = workflow.JOB_PROMPTS[job]
+        assert "车轱辘" in profile.draft or "不提前" in profile.draft
+        assert "车轱辘" in profile.read
+    for recipe_key in ("topic_digest", "illustrated_explainer"):
+        recipe_profile = workflow.profile_for(
+            {"column_key": recipe_key, "topic": {}},
+            str(config_dir), str(jobs_dir), {"manuscript_workflow": "focused"},
+        )
+        assert recipe_profile is workflow.RECIPE_PROMPTS[recipe_key]
+        assert recipe_profile.draft == ""
+        assert "堆砌" in recipe_profile.read and "判断标尺" in recipe_profile.read
+
+    cols = content_columns.load_all(str(config_dir))
+    for col_key, col in cols.items():
+        if col.type == "explainer":
+            assert col.notes.strip(), f"{col_key} should have non-empty notes"
+    base_recipe = video_columns.get(str(config_dir), "topic_digest")
+    econ_ctx = content_columns.snapshot(str(config_dir), "economy_weekly", "economy/economy_weekly")
+    econ_applied = content_columns.apply_script_context(base_recipe, econ_ctx)
+    assert "不要写成教科书词条" in econ_applied.script_style
+    assert "判断标尺" in econ_applied.script_style
