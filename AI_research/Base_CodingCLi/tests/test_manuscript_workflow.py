@@ -343,3 +343,26 @@ def test_tutorial_profiles_enforce_clean_main_path_and_branching_signals():
     t08_applied = content_columns.apply_script_context(base_recipe, t08_ctx)
     assert "红绿灯分岔" in t08_applied.script_style
     assert "边缘例外条款" in t08_applied.script_style
+
+
+def test_deep_research_profiles_prevent_benchmark_table_recitation_and_bloat():
+    from core.video import columns as video_columns
+    from core.video import content_columns
+
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    jobs_dir = Path(__file__).resolve().parents[1] / "jobs"
+    for prof in (workflow.JOB_PROMPTS["ai_media/weekly_deep_research"],
+                 workflow.RECIPE_PROMPTS["deep_dive"],
+                 workflow.RECIPE_PROMPTS["deep_dive_focus"]):
+        assert "跑分表" in prof.draft and "拐点数字" in prof.draft
+        assert "跑分表" in prof.read and "不要返回空文本" in prof.revise
+
+    resolved = workflow.profile_for(
+        {"column_key": "deep_dive", "topic": {}},
+        str(config_dir), str(jobs_dir), {"manuscript_workflow": "focused"},
+    )
+    assert resolved is workflow.RECIPE_PROMPTS["deep_dive"]
+    base_recipe = video_columns.get(str(config_dir), "deep_dive")
+    dr_ctx = content_columns.snapshot(str(config_dir), "ai_media_deep_dive", "ai_media/weekly_deep_research")
+    dr_applied = content_columns.apply_script_context(base_recipe, dr_ctx)
+    assert "跑分表" in dr_applied.script_style and "3 到 5 段" in dr_applied.script_style

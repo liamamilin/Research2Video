@@ -22,8 +22,8 @@ types:
     preferred_visuals: [操作截图, 步骤演示, 局部聚焦, 流程]
   deep_research:
     name: 深度研究
-    promise: 理解完整问题、材料、争议与结论
-    structure: [问题, 多章节展开, 比较, 收束]
+    promise: 从反直觉实验或硬核矛盾切入，讲透完整因果机制、口径边界与可执行决策
+    structure: [核心矛盾与主线, 分层证据与机制拆解, 口径边界与选型取舍, 决策收束]
     preferred_visuals: [多章节混合画面, 图表, 真实素材, 视觉回顾]
   series:
     name: 专题系列
