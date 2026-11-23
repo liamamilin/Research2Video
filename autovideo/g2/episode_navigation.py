@@ -30,20 +30,19 @@ def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
 
 #: The picture area the agenda and item cards cover; two-line captions start below it, the header sits above it.
 STAGE = (0, 140, 1920, 870)
-CARD_FRAMES = 54           # an item card shows for 1.8 s, never longer than a third of its item
-FADE_MS = 220
+CARD_FRAMES = 30           # an item card shows for 1.0 s, never longer than a third of its item
+FADE_MS = 160
 MAX_AGENDA_ITEMS = 12  # Six legible rows per column in the available picture area.
 PAPER = {'background': '#F7F8F5', 'text': '#202D28', 'muted': '#69756E', 'accent': '#17784B',
          'line': '#E1E8E1', 'surface': '#FFFFFF'}
 
 
 def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph_starts: list[str]) -> dict | None:
-    """When the opening agenda shows and, where the briefing gives each item its own paragraph, when each lights up.
+    """When the opening agenda shows and each item lights up as its briefing line starts.
 
-    The opening is everything before the first item. A briefing is an overview, optionally after the greeting, then
-    one line per item; when the opening has exactly that many paragraphs, its last paragraphs are the items' lines and
-    an item lights up as its line starts. Any other shape stays unlit: a highlight that may sit on an item other than
-    the one being said is worse than none.
+    The opening is everything before the first item. Only a structured briefing (one greeting/intro
+    paragraph, optionally a lead-in, then one paragraph per item) draws the full-stage agenda; a
+    story/hook opening keeps its own planned visuals visible while the footer still tracks progress.
     """
     first = items[0]['start_frame'] if items else 0
     if first <= 0 or len(items) > MAX_AGENDA_ITEMS:
@@ -55,11 +54,11 @@ def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph
     starts_ms = {s['id']: s['start_ms'] for s in compiled.get('narration', {}).get('segments', [])}
     to_frame = lambda ms: (ms * 30 + 500) // 1000
     paragraphs = [sid for sid in paragraph_starts if sid in opening and sid in starts_ms]
+    if len(paragraphs) - len(items) not in (1, 2):
+        return None
+    highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
     start = to_frame(starts_ms[paragraphs[1]]) if len(paragraphs) > 1 else 0
-    highlights = None
-    if len(paragraphs) - len(items) in (1, 2):
-        highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
-        start = min(start, highlights[0])
+    start = min(start, highlights[0])
     start = max(0, min(start, first - 1))
     return {'start_frame': start, 'end_frame': first, 'highlights': highlights}
 
@@ -240,7 +239,8 @@ def apply(pipeline, compiled: dict) -> dict | None:
         [c['start_frame'], c['end_frame']] for c in item_cards]
     report = {'mode': 'episode', 'items': items, 'total_frames': compiled['total_frames'],
               'agenda': opening, 'item_cards': item_cards, 'covered_frames': covered,
-              'agenda_highlight': 'per item paragraph' if opening and opening['highlights'] else 'static list',
+              'agenda_highlight': ('per item paragraph' if opening and opening['highlights']
+                                   else 'none' if opening is None else 'static list'),
               'fps': 30, 'timing': 'measured narration chapters', 'footer': [0, 1024, 1920, 56],
               'audio': 'stream copy', 'source_preserved': str(source), 'video_sha256': digest(pipeline.VIDEO_PATH)}
     pipeline.write_json(report_path, report)

@@ -365,8 +365,13 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
           const fit=comparisonFit!, fitted=fit.sides[side],color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
+          const hasFocus=Boolean(comparison?.target);
           const active=comparison?.target===`side:${side}`;
-          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:fit.height,padding:fit.padding,boxSizing:'border-box',background:p.story?`${color}${active?'12':'08'}`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${active?color:paper.line}`}}>
+          const inactive=hasFocus && !active;
+          const baseMotion=motion(`side:${side}`);
+          const panelOpacity=(typeof baseMotion.opacity==='number'?baseMotion.opacity:1)*(inactive?0.56:1);
+          const panelTransform=active?'scale(1.012)':baseMotion.transform;
+          return <div key={side} style={{...panelStyle,...baseMotion,opacity:panelOpacity,transform:panelTransform,height:fit.height,padding:fit.padding,boxSizing:'border-box',background:active?(p.story?`${color}16`:'#EDF6EF'):inactive?'#FFFFFF':(p.story?`${color}0A`:side==='right'?'#EDF6EF':'#FFFFFF'),borderTop:`${active?5:2}px solid ${active?color:paper.line}`,boxShadow:active?'0 18px 40px rgba(26,50,35,.10)':panelStyle.boxShadow}}>
             <div style={{display:'flex',alignItems:'center',gap:20,height:fitted.headerHeight,marginBottom:fit.headerGap}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={fit.icon} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:fit.label,lineHeight:fit.lineHeight,fontWeight:650}}>{fitted.labels.map((line:string,i:number)=><div key={i}><Tech text={line}/></div>)}</div></div>
             <div data-comparison-fits={fit.fits} style={{display:'flex',flexDirection:'column',gap:fit.gap}}>{fitted.items.map((lines:string[],i:number)=><div key={i} style={{display:'flex',gap:15,fontSize:fit.body,lineHeight:fit.lineHeight}}><span style={{color:paper.green,width:15,flex:'none'}}>·</span><div style={{...textStyle,minWidth:0}}>{lines.map((line:string,j:number)=><div key={j} style={{whiteSpace:'nowrap'}}><Tech text={line}/></div>)}</div></div>)}</div>
           </div>;
@@ -375,12 +380,23 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'flow_diagram' && <ObjectFlow scene={scene} frame={frame}/>}
       {scene.component === 'scatter_chart' && <ScatterChart scene={scene} frame={frame}/>}
       {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
-      {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
-        {/* The value and its unit form one reading context; a later repeated narration cue must not leave the subject blank. */}
-        <div style={{opacity:ease((frame-scene.start_frame)/12),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
-        <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
-        {p.note && <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
-      </div>}
+      {scene.component === 'big_number' && (() => {
+        const entry=ease((frame-scene.start_frame)/12);
+        const valBeat=reveals.find((b)=>b.target_id==='line:0');
+        const lblBeat=reveals.find((b)=>b.target_id==='line:1');
+        const noteBeat=reveals.find((b)=>b.target_id==='line:2');
+        const popT=valBeat?Math.max(0,Math.min(1,(frame-valBeat.frame)/16)):0;
+        const valScale=1+0.045*Math.sin(popT*Math.PI);
+        const lblFocus=lblBeat?ease((frame-lblBeat.frame)/12):entry;
+        const noteT=noteBeat?ease((frame-noteBeat.frame)/12):ease((frame-scene.start_frame-18)/12);
+        return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`4px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',textAlign:'center'}}>
+          {/* Keep the number legible from entry while speech beats accentuate value, label and note. */}
+          <div style={{opacity:entry,transform:`scale(${valScale})`,...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
+          <div style={{width:96,height:5,borderRadius:3,background:paper.green,opacity:0.25+0.75*lblFocus,marginTop:14}}/>
+          <div style={{...textStyle,opacity:entry*(0.76+0.24*lblFocus),fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:18,maxWidth:1496}}><Tech text={p.label}/></div>
+          {p.note && <div style={{...textStyle,opacity:Math.max(entry*0.35,noteT),transform:`translateY(${(1-noteT)*10}px)`,fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:18,maxWidth:1496}}><Tech text={p.note}/></div>}
+        </div>;
+      })()}
       {scene.component === 'price_change' && (() => {
         // Compiler and planner use the same measured geometry. It is derived
         // from the unchanged strings rather than requested from the model.
@@ -428,17 +444,21 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       </div>}
       {scene.component === 'bar_chart' && (() => {
         const top = Math.max(...p.values, 0) || 1, count = p.categories.length;
-        // Even an explanation can read multiple bars in one sentence. Keep
-        // the full frame of reference visible and let beats select emphasis.
+        // Keep the full frame of reference visible while speech beats spotlight the active bar.
+        const grow = ease((frame - scene.start_frame) / 16);
         const focus = reveals.filter(b => b.target_id.startsWith('bar:') && visualStart(scene,b.frame)<=frame).at(-1)?.target_id;
         const shownValue = (value: number) => `${value.toLocaleString('en-US', {maximumFractionDigits: 3})} ${p.unit}`;
         return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:count > 4 ? 22 : 34}}>
           {p.categories.map((category: string, i: number) => {
-            return <div key={i} style={{display:'flex',alignItems:'center',gap:32}}>
-              <div style={{...textStyle,width:large ? 440 : 360,flex:'none',fontSize:S(count > 4 ? 30 : 34),fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
+            const barId = `bar:${i}`;
+            const isFocus = focus === barId;
+            const dimmed = Boolean(focus) && !isFocus;
+            const barColor = objectColor(scene, barId, paper.green);
+            return <div key={i} style={{display:'flex',alignItems:'center',gap:32,opacity:dimmed?0.42:1}}>
+              <div style={{...textStyle,width:large ? 440 : 360,flex:'none',fontSize:S(count > 4 ? 30 : 34),fontWeight:isFocus?750:600,lineHeight:1.3,color:isFocus?paper.ink:paper.muted}}><Tech text={category}/></div>
               <div style={{flex:1,display:'flex',alignItems:'center',gap:20,minWidth:0}}>
-                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:objectColor(scene,`bar:${i}`,paper.green),width:`${Math.max(1.2, p.values[i]/top*72)}%`,flex:'none'}}/>
-                <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:focus===`bar:${i}`?750:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
+                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:barColor,width:`${Math.max(1.2, p.values[i]/top*72*grow)}%`,flex:'none',boxShadow:isFocus?`0 8px 22px ${barColor}44`:undefined}}/>
+                <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:isFocus?750:650,whiteSpace:'nowrap',color:isFocus?barColor:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
               </div>
             </div>;
           })}

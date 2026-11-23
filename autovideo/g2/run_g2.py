@@ -932,6 +932,8 @@ def synthesize_and_align(plan: dict, *, on_chapter_ready=None) -> dict:
     audio = np.concatenate(chunks)
     total_frames = math.ceil(len(audio) / (SAMPLE_RATE // FPS))
     audio = np.pad(audio, (0, total_frames * (SAMPLE_RATE // FPS) - len(audio)))
+    from g2.audio_level import configured_target_db, normalize_speech_level
+    audio, audio_level = normalize_speech_level(audio, SAMPLE_RATE, target_db=configured_target_db())
     duration_seconds = len(audio) / SAMPLE_RATE
 
     duration_ms = (total_frames * 1000 + FPS // 2) // FPS
@@ -969,6 +971,7 @@ def synthesize_and_align(plan: dict, *, on_chapter_ready=None) -> dict:
                "cloud_api_cost": 0, "local_compute_cost": "not measured",
                "model_sha256": (cache_metrics or {}).get("model_sha256") or (digest(mlx["weights"]) if use_qwen else digest(KOKORO_MODEL)), "voice_file_sha256": None if use_qwen else digest(KOKORO_VOICES),
                "cache": cache_metrics,
+               "audio_level": audio_level,
                "audio_sha256": digest(audio_path)})
     def stamp(ms: int) -> str:
         return f"{ms//3600000:02}:{ms//60000%60:02}:{ms//1000%60:02},{ms%1000:03}"
@@ -1385,7 +1388,7 @@ def run_step(label: str, fn, *args):
 
 
 def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False,
-                        pipelined_planner=None) -> tuple[dict, dict, dict]:
+                        pipelined_planner=None, prealign_captions: bool = False) -> tuple[dict, dict, dict]:
     """Overlap ordinary planning, or pipeline measured speech chapter-by-chapter into visual assembly.
 
     Only one thread calls the LLM. Parallel tasks finish before compilation or error
@@ -1412,6 +1415,12 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
                               "end_seconds": round(end - started, 3),
                               "duration_seconds": round(end - begin, 3), "status": status}
 
+    def maybe_prealign(alignment_result: dict) -> None:
+        if not prealign_captions or os.environ.get("AUTOVIDEO_G2_PREALIGN_CAPTIONS", "1") == "0":
+            return
+        from g2.caption_alignment import prealign
+        prealign(sys.modules[__name__], alignment_result, OUTPUT_SPEED)
+
     try:
         if pipelined:
             chapter_queue: queue.Queue = queue.Queue()
@@ -1429,15 +1438,27 @@ def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool =
                 return result
 
             results, error = {}, None
-            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="video-planning") as executor:
-                tasks = {executor.submit(step, "tts-and-align", run_voice_stream, narration): "voice",
-                         executor.submit(step, "storyboard-plan", pipelined_planner, narration, chapter_queue): "storyboard"}
-                for future in as_completed(tasks):
+            with ThreadPoolExecutor(max_workers=3, thread_name_prefix="video-planning") as executor:
+                voice_fut = executor.submit(step, "tts-and-align", run_voice_stream, narration)
+                board_fut = executor.submit(step, "storyboard-plan", pipelined_planner, narration, chapter_queue)
+                pending = {voice_fut: "voice", board_fut: "storyboard"}
+                prealign_fut = None
+                while pending:
+                    for future in as_completed(list(pending)):
+                        key = pending.pop(future)
+                        try:
+                            results[key] = future.result()
+                            if key == "voice" and prealign_captions and board_fut in pending:
+                                prealign_fut = executor.submit(maybe_prealign, results["voice"][1])
+                        except Exception as exc:
+                            if error is None:
+                                error = exc
+                        break
+                if prealign_fut is not None:
                     try:
-                        results[tasks[future]] = future.result()
-                    except Exception as exc:
-                        if error is None:
-                            error = exc
+                        prealign_fut.result()
+                    except Exception:
+                        pass
             if error is not None:
                 raise error
             narration, alignment = results["voice"]
@@ -1575,7 +1596,8 @@ def run_all() -> dict:
             lambda final, measured: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals, measured),
             measured_storyboard=True,
             pipelined_planner=lambda final, chapter_queue: explanation.plan_storyboard_pipelined(
-                sys.modules[__name__], final, saved_visuals, chapter_queue))
+                sys.modules[__name__], final, saved_visuals, chapter_queue),
+            prealign_captions=True)
         assets = []
         if saved_visuals.get("image_materials"):
             from g2.creative_forms import prepare_images

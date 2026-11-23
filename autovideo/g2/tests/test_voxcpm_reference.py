@@ -75,7 +75,7 @@ def test_production_synthesis_passes_stable_default_and_honors_explicit_override
 
     captured = {}
 
-    def capture(engine, plan, settings):
+    def capture(engine, plan, settings, **_kwargs):
         captured.update(settings)
         raise Captured
 

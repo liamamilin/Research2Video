@@ -112,7 +112,7 @@ def test_over_capacity_agenda_leaves_opening_picture_and_item_navigation():
 
 
 def test_a_long_opening_is_not_read_as_a_briefing():
-    """Seven opening paragraphs for two items: the last two are not necessarily the items' lines."""
+    """Seven opening paragraphs for two items: keep the opening story visuals uncovered."""
     ids = [f'n{i}' for i in range(10)]
     ir = {'content_structure': {'chapters': [{'narration_segment_ids': ids[:7]}, {'narration_segment_ids': ['n7']},
                                              {'narration_segment_ids': ['n8']}, {'narration_segment_ids': ['n9']}]}}
@@ -123,21 +123,27 @@ def test_a_long_opening_is_not_read_as_a_briefing():
     program = request().episode.model_dump()
     items = timeline(program, ir, compiled)
     opening = agenda(program, ir, compiled, items, ids[:7])
-    assert opening['highlights'] is None and opening['start_frame'] == 30
+    assert opening is None
 
 
 @pytest.mark.parametrize('paragraphs', [['n0'], ['n0', 'n2']])
-def test_agenda_stays_unlit_when_items_and_briefing_lines_do_not_match(paragraphs):
+def test_non_briefing_opening_skips_full_screen_agenda_and_keeps_footer(paragraphs):
     opening, items = _programme(paragraphs)
-    assert opening['highlights'] is None and opening['end_frame'] == 120
+    assert opening is None
     text = ass(items, 690, opening=opening)
+    assert '本期导读' in text and text.count('内容甲') == 1  # footer label only; no full-screen agenda cover
+
+
+def test_explicit_static_agenda_caller_still_renders_unlit_rows():
+    _, items = _programme(['n0'])
+    text = ass(items, 690, opening={'start_frame': 0, 'end_frame': 120, 'highlights': None})
     assert '本期导读' in text and text.count('内容甲') == 2  # one unlit row plus the footer label
 
 
 def test_item_cards_number_items_and_stay_within_a_third_of_a_short_item():
     items = [{'index': 1, 'title': '甲', 'start_frame': 100, 'end_frame': 400},
              {'index': 2, 'title': '乙', 'start_frame': 400, 'end_frame': 460}]
-    assert [(c['start_frame'], c['end_frame']) for c in cards(items)] == [(100, 154), (400, 420)]
+    assert [(c['start_frame'], c['end_frame']) for c in cards(items)] == [(100, 130), (400, 420)]
     text = ass(items, 500, item_cards=cards(items))
     assert '01 / 02' in text and '02 / 02' in text
 

@@ -31,6 +31,20 @@ def test_card_reveals_follow_compiled_speech_and_keep_every_frame():
     assert sum(w['end_frame']-w['start_frame'] for w in windows) == 180
 
 
+def test_single_point_focus_card_is_visible_from_entry_even_with_late_beat():
+    single = {'id': 'card_8_p2', 'component': 'concept_reveal',
+              'props': {'title': '填写 PDF 表单', 'lines': ['把作答说明交给它，让它填']},
+              'start_frame': 3315, 'end_frame': 3423,
+              'beats': [{'action': 'reveal', 'target_id': 'line:0', 'frame': 3422}]}
+    page = still_page(single)
+    assert page['layout'] == 'focus'
+    assert windows_for(page, single) == [dict(start_frame=3315, end_frame=3423, visible=[0])]
+    title_only = {'id': 'card_t', 'component': 'title_card', 'props': {'title': '开场'},
+                  'start_frame': 0, 'end_frame': 90, 'beats': [{'action': 'reveal', 'target_id': 'title', 'frame': 0}]}
+    assert still_page(title_only)['targets'] == ['title']
+    assert windows_for(still_page(title_only), title_only) == [dict(start_frame=0, end_frame=90, visible=[0])]
+
+
 @pytest.mark.parametrize('props', [{'visuals': [{'icon': 'file'}]}, {'actions': [{}]},
                                   {'story': {'importance': 'key'}}, {'story': {'role': 'recap'}}])
 def test_visual_objects_key_concepts_and_recaps_keep_motion(props):

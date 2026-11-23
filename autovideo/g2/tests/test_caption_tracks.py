@@ -154,7 +154,7 @@ def track(tmp_path):
     return SimpleNamespace(ARTIFACTS=tmp_path), ir, cues
 
 
-@pytest.mark.parametrize('preset', [None, 'information_motion', 'information_cards'])
+@pytest.mark.parametrize('preset', [None, 'information_motion', 'explanation', 'information_cards', 'illustrated_explainer'])
 def test_existing_video_executors_use_the_same_short_track(preset, tmp_path):
     pipeline, ir, cues = track(tmp_path)
     if preset:
@@ -163,6 +163,15 @@ def test_existing_video_executors_use_the_same_short_track(preset, tmp_path):
     assert supports_short_captions(ir)
     assert render_cues(pipeline, ir) == cues
     assert ir == original
+
+
+def test_mixed_english_and_chinese_caption_splits_within_readable_visual_width():
+    text = '英国有一家慈善机构，叫 Bloomsbury Football Foundation，从卡片到官网都在用 SmartphoneAISettlement.com。'
+    spans = chunks(text)
+    pieces = [text[a:b] for a, b, _, _ in spans]
+    assert ''.join(pieces) == text
+    assert len(pieces) >= 2
+    assert max(len(p) for p in pieces) <= 48
 
 
 @pytest.mark.parametrize('change', ['timing', 'text', 'srt'])

@@ -36,7 +36,7 @@ function pushTransform(frame: number, span: Span): string {
 
 function Picture({span, frame, opacity}: {span: Span; frame: number; opacity: number}) {
   const diagram = span.scenes[0].props.layout === 'diagram' && span.scenes[0].props.overlay;
-  if (diagram) return <div style={{position: 'absolute', right: 90, top: 370, width: 360, height: 310, overflow: 'hidden', borderRadius: 24, opacity}}>
+  if (diagram) return <div style={{position: 'absolute', right: 80, top: 310, width: 520, height: 440, overflow: 'hidden', borderRadius: 26, opacity, border: '3px solid rgba(22,50,79,.12)', boxShadow: '0 16px 40px rgba(22,50,79,.12)'}}>
     <Img src={staticFile(span.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '75% 50%'}}/>
   </div>;
   return <AbsoluteFill style={{opacity}}>

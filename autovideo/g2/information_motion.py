@@ -699,6 +699,32 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                         break
                     at -= len(row['text'])
     placed = visual_language.align_object_cues(scene, result, speech)
+    if scene.get('reveal_phrases') and scene['component'] in {'concept_reveal', 'comparison'}:
+        text = ''.join(row['text'] for row in speech)
+        page_targets = (
+            [f'line:{i}' for i in range(len(scene['props'].get('lines', [])))]
+            if scene['component'] == 'concept_reveal'
+            else ['side:left', 'side:right']
+        )
+        cursor = 0
+        for target_id, phrase in zip(page_targets, scene['reveal_phrases']):
+            if target_id in placed or not isinstance(phrase, str) or not phrase.strip():
+                continue
+            cue = next((c for c in result if c['target_id'] == target_id), None)
+            if cue is None:
+                continue
+            at = visual_language.phrase_at(text, phrase, cursor)
+            if at < 0:
+                at = visual_language.phrase_at(text, phrase)
+            if at >= 0:
+                cursor = at + len(phrase)
+                pos = at
+                for row in speech:
+                    if pos < len(row['text']):
+                        cue.update(segment_id=row['id'], quote=row['text'][pos:pos + 1], character_index=pos)
+                        placed.add(target_id)
+                        break
+                    pos -= len(row['text'])
     visual_language.align_label_cues(scene, result, speech, placed)
     return result
 

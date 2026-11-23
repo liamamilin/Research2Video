@@ -31,6 +31,15 @@ def test_bars_follow_their_categories_and_unspoken_labels_keep_the_even_split():
     assert at(cues, 'bar:2') == len(text) * 2 // 3  # not said: as before
 
 
+def test_bar_falls_back_to_its_spoken_value_when_category_wording_is_condensed():
+    text = '截至11时，681个进出亚特兰大航班延误，其中591班属于达美。'
+    scene = {'id': 's', 'component': 'bar_chart', 'narration_segment_ids': ['n1'],
+             'props': {'categories': ['亚特兰大总延误', '达美延误'], 'values': [681, 591], 'unit': '班'}}
+    cues = motion.automatic_cues(scene, rows(text))
+    assert at(cues, 'bar:0') == text.index('681')
+    assert at(cues, 'bar:1') == text.index('591')
+
+
 def test_a_phrase_with_other_spacing_still_anchors_and_a_vague_short_label_does_not():
     text = '再说结果。官方写的是：在同一账号的 Billing 页面能看到今天的花费。'
     scene = {'id': 's', 'component': 'concept_reveal', 'narration_segment_ids': ['n1'],

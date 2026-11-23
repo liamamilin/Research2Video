@@ -46,8 +46,7 @@ def active_seconds(audio, rate: int) -> float:
     return (active[-1] - active[0] + 1) / rate if active.size else len(audio) / rate
 
 
-def generate(plan_path: Path, output_dir: Path, voice: str):
-    started = time.monotonic()
+def _validate_request(plan_path: Path, output_dir: Path, voice: str):
     if voice not in VOXCPM_VOICES:
         raise ValueError('Unsupported local voice')
     from g2.workspace import project_path
@@ -70,26 +69,36 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     for segment in plan['segments']:
         if not isinstance(segment['id'], str) or not re.fullmatch(r'[a-z][a-z0-9_]{0,47}', segment['id']):
             raise ValueError('Invalid segment id')
+    return plan_path, output_dir, plan, steps, chain, options
+
+
+def generate_in_process(plan_path: Path, output_dir: Path, voice: str, *, cache=None, emit=None):
+    started = time.monotonic()
+    plan_path, output_dir, plan, steps, chain, options = _validate_request(plan_path, output_dir, voice)
     output_dir.mkdir(parents=True, exist_ok=True)
     import mlx.core as mx
     import numpy as np
     import soundfile as sf
     from math import gcd
-    from mlx_audio.tts.utils import load_model
     from scipy.signal import resample_poly
     _, model_dir, anchor_path = voxcpm_paths(ROOT)
-    load_started = time.monotonic()
-    model = load_model(str(model_dir))
-    load_seconds = time.monotonic() - load_started
-    if options['compile']:
-        model.compile_model()
-    anchor, anchor_rate = sf.read(str(anchor_path), dtype='float32')
-    if anchor_rate != model.sample_rate:
-        raise ValueError('Anchor clip must be recorded at the model sample rate')
+    if cache is not None:
+        model, anchor, anchor_rate, reference_cache, load_seconds = cache.get_voxcpm(
+            model_dir, anchor_path, options['compile'], options['reference_cache'])
+    else:
+        from mlx_audio.tts.utils import load_model
+        load_started = time.monotonic()
+        model = load_model(str(model_dir))
+        load_seconds = time.monotonic() - load_started
+        if options['compile']:
+            model.compile_model()
+        anchor, anchor_sr = sf.read(str(anchor_path), dtype='float32')
+        if anchor_sr != model.sample_rate:
+            raise ValueError('Anchor clip must be recorded at the model sample rate')
+        from g2.voice_performance import ReferenceEncoderCache
+        reference_cache = ReferenceEncoderCache(model, anchor, mx.eval) if options['reference_cache'] else None
+        anchor_rate = units(VOXCPM_ANCHOR_TEXT) / active_seconds(anchor, model.sample_rate)
     anchor_prompt = (anchor, VOXCPM_ANCHOR_TEXT)
-    from g2.voice_performance import ReferenceEncoderCache
-    reference_cache = ReferenceEncoderCache(model, anchor, mx.eval) if options['reference_cache'] else None
-    anchor_rate = units(VOXCPM_ANCHOR_TEXT) / active_seconds(anchor, model.sample_rate)
     previous, previous_rate, chapter, report = anchor_prompt, None, None, []
     for segment in plan['segments']:
         segment_started = time.monotonic()
@@ -135,10 +144,24 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
         temporary.write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
                                                                   'segments': report,
                                                                   'performance': {'compiled': options['compile'], 'load_seconds': round(load_seconds, 3),
+                                                                      'warm_daemon': cache is not None,
                                                                       'total_seconds': round(time.monotonic() - started, 3),
                                                                       'reference_cache': reference_cache.report() if reference_cache else None}}, ensure_ascii=False, indent=2))
         temporary.replace(receipt)
-        print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
+        line = f'VOICE {sid} {len(out) / OUTPUT_RATE}'
+        if emit is not None:
+            emit(line)
+        else:
+            print(line, flush=True)
+
+
+def generate(plan_path: Path, output_dir: Path, voice: str):
+    checked_plan, checked_out, _, _, _, _ = _validate_request(plan_path, output_dir, voice)
+    if ROOT == Path(__file__).resolve().parents[1]:
+        from g2.mlx_daemon import call_daemon
+        if call_daemon({'op': 'voxcpm', 'plan_path': str(checked_plan), 'output_dir': str(checked_out), 'voice': voice}, root=ROOT):
+            return
+    generate_in_process(checked_plan, checked_out, voice)
 
 
 if __name__ == '__main__':

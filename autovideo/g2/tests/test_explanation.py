@@ -232,3 +232,37 @@ def test_comparison_title_alias_uses_existing_scene_heading(tmp_path):
     page['props']['unregistered_field'] = '仍然拒绝未知组件字段'
     with pytest.raises(ValidationError, match='Additional properties'):
         explanation.validate(plan, {'title': '预算', 'groups': [group]})
+
+
+def test_no_image_prompt_omits_material_cues_instructions():
+    no_img = explanation.messages({'title': '展示', 'groups': [{'id': 'c1', 'text': '讲一段内容。'}]})[0]['content']
+    with_img = explanation.messages({'title': '展示', 'groups': [
+        {'id': 'c1', 'text': '看截图。', 'image_materials': [{'image_index': 0, 'regions': []}]}]})[0]['content']
+    assert 'material_cues' not in no_img and '未提供外部截图素材' in no_img
+    assert 'material_cues' in with_img
+
+
+def test_page_reveal_phrases_align_condensed_cards_and_enable_boundary_reconcile(tmp_path):
+    from g2.scene_boundaries import phrases as boundary_phrases
+
+    speech = [
+        {'id': 'n1', 'text': '先讲背景铺垫一段话，前面还没提到重点。', 'start_ms': 0, 'end_ms': 4000},
+        {'id': 'n2', 'text': '真正省钱靠缓存命中，后面才会聊并发。', 'start_ms': 4200, 'end_ms': 8200},
+    ]
+    group = {'id': 'card_1', 'title': '机制', 'text': ''.join(r['text'] for r in speech),
+             'segment_ids': ['n1', 'n2'], 'image_indices': []}
+    page = {
+        'id': 'card_1', 'component': 'comparison', 'headline': '两种思路',
+        'reveal_phrases': ['缓存命中', '聊并发'],
+        'props': {'left': {'label': '复用路径', 'items': ['减少重复计算']},
+                  'right': {'label': '吞吐路径', 'items': ['多路同时处理']}},
+    }
+    explanation.validate({'pages': [page]}, {'title': '机制', 'groups': [group]})
+    assert boundary_phrases(page) == ['缓存命中', '聊并发']
+    board = explanation.compile_storyboard(
+        SimpleNamespace(ARTIFACTS=tmp_path, write_json=lambda *a: None),
+        {'pages': [page], 'groups': [group]}, {'rows': speech}, {}, [],
+    )
+    beats = {b['target_id']: b['trigger'] for b in board['scenes'][0]['beats']}
+    assert beats['side:left']['segment_id'] == 'n2' and beats['side:right']['segment_id'] == 'n2'
+    assert beats['side:left']['offset_ms'] < beats['side:right']['offset_ms']

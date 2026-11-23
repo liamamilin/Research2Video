@@ -209,7 +209,17 @@ def target_label(scene: dict, target: str) -> list[str]:
         line = str(props['lines'][int(index)])
         return [line, re.split(r'[、，,：:（(；;—]', line)[0].strip()]
     if component == 'bar_chart' and kind == 'bar':
-        return [str(props['categories'][int(index)])]
+        idx = int(index)
+        candidates = [str(props['categories'][idx])]
+        values = props.get('values') or []
+        if idx < len(values) and values[idx] is not None:
+            raw = values[idx]
+            num = str(int(raw)) if isinstance(raw, (int, float)) and float(raw).is_integer() else str(raw)
+            unit = str(props.get('unit') or '').strip()
+            if unit:
+                candidates.append(f'{num}{unit}')
+            candidates.append(num)
+        return candidates
     if component == 'big_number' and kind == 'line':
         field = {'0': 'value', '1': 'label', '2': 'note'}.get(index, '')
         value = str(props.get(field) or '')

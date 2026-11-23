@@ -18,7 +18,8 @@ def still_page(scene: dict) -> dict | None:
         return None
     if scene['component'] == 'title_card':
         text = props.get('subtitle') or props['title']
-        return {'layout': 'focus', 'points': [{'text': text}], 'targets': ['subtitle']}
+        target = 'subtitle' if props.get('subtitle') else 'title'
+        return {'layout': 'focus', 'points': [{'text': text}], 'targets': [target]}
     if scene['component'] == 'concept_reveal' and story.get('importance') != 'key':
         return {'layout': 'focus' if len(props['lines']) == 1 else 'notes',
                 'points': [{'text': line} for line in props['lines']],
@@ -28,6 +29,10 @@ def still_page(scene: dict) -> dict | None:
 
 def windows_for(page: dict, scene: dict) -> list[dict]:
     start, end = scene['start_frame'], scene['end_frame']
+    # A single-point focus card carries the whole scene's sole visual anchor; keep it legible from entry
+    # rather than dimming it gray until a late word beat.
+    if page.get('layout') == 'focus' and len(page.get('points', [])) == 1:
+        return [{'start_frame': start, 'end_frame': end, 'visible': [0]}]
     beats = {beat['target_id']: beat['frame'] for beat in scene['beats'] if beat['action'] == 'reveal'}
     onsets = [max(start, min(end-1, beats.get(target, start))) for target in page['targets']]
     boundaries = sorted({start, end, *onsets})

@@ -32,18 +32,37 @@ def word_spans(text: str) -> list[tuple[str, int, int]]:
     return result
 
 
+def _word_weight(word: str) -> float:
+    """Visual width in CJK-character equivalents so long Latin tokens do not create wide cues."""
+    if len(word) == 1 and ("\u3400" <= word <= "\u9fff" or "\uf900" <= word <= "\ufaff"):
+        return 1.0
+    return max(1.0, len(word) * 0.55)
+
+
 def chunks(text: str) -> list[tuple[int, int, int, int]]:
-    """Prefer semantic punctuation; keep words and numerals indivisible."""
+    """Prefer semantic punctuation; keep words and numerals indivisible within readable visual width."""
     words = word_spans(text)
+    weights = [_word_weight(w[0]) for w in words]
+    max_visual_width = 24.0
     result, first, cursor = [], 0, 0
     while first < len(words):
-        limit = min(first + 22, len(words))
-        minimum = 8
-        if 0 < len(words) - limit < 8:
+        max_end = min(first + 22, len(words))
+        limit = first
+        width = 0.0
+        while limit < max_end:
+            next_w = weights[limit]
+            if limit > first and width + next_w > max_visual_width:
+                break
+            width += next_w
+            limit += 1
+        minimum = min(8, max(2, (limit - first) // 2)) if limit - first < 8 else 8
+        remaining_words = len(words) - limit
+        remaining_width = sum(weights[limit:]) if remaining_words else 0.0
+        if 0 < remaining_words < 8 and remaining_width < 8.0:
             # Do not strand one or two characters (e.g. split 交易 into 交 / 易).
             # Leave a readable final phrase; allow an earlier punctuation boundary.
-            limit = len(words) - 8
-            minimum = 4
+            limit = max(first + 1, len(words) - 8)
+            minimum = min(4, max(1, limit - first))
         if limit == len(words):
             last = limit
         else:
@@ -247,9 +266,51 @@ def fallback_plan(ir: dict, reason: str) -> dict:
     return plan
 
 
+def prealign(pipeline, alignment: dict, speed: float) -> dict | None:
+    """Run forced alignment right after TTS finishes so it overlaps with STORYBOARD tail work."""
+    from g2.media_settings import prepare_retimed_audio
+    from g2.voices import qwen_paths
+
+    python = qwen_paths(pipeline.PROJECT)[0]
+    model = pipeline.PROJECT / "g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit/model.safetensors"
+    if not python.is_file() or not model.is_file():
+        return None
+    target = pipeline.ARTIFACTS / "caption-alignment.json"
+    early_ir_path = pipeline.FIXTURE_ROOT / "early-caption-ir.json"
+    try:
+        retimed = prepare_retimed_audio(pipeline, alignment, speed)
+        rel_audio = retimed["audio_path"].relative_to(pipeline.FIXTURE_ROOT).as_posix()
+        early_ir = {
+            "assets": [{"id": "communication_voice", "type": "audio", "path": rel_audio, "sha256": retimed["audio_sha256"]}],
+            "narration": {"audio_asset_id": "communication_voice", "segments": retimed["segments"]},
+        }
+        pipeline.write_json(early_ir_path, early_ir)
+        timeout = max(900, min(1800, len(retimed["segments"]) * 8))
+        pipeline._run_fixed_command("caption-forced-alignment", [python, pipeline.PROJECT / "g2/align_captions.py",
+            "--ir", early_ir_path, "--output", target], pipeline.PROJECT, timeout=timeout)
+        plan = json.loads(target.read_text())
+        verify_plan(early_ir, plan)
+        return plan
+    except Exception as exc:  # noqa: BLE001 - BUILD_IR will cleanly run prepare() if early alignment failed
+        print(f"CAPTION PREALIGN SKIPPED: {type(exc).__name__}: {str(exc)[:180]}", flush=True)
+        return None
+    finally:
+        if early_ir_path.is_file():
+            early_ir_path.unlink()
+
+
 def prepare(pipeline, ir: dict) -> dict:
     from g2.voices import qwen_paths
     target = pipeline.ARTIFACTS / "caption-alignment.json"
+    if target.is_file():
+        try:
+            existing = json.loads(target.read_text())
+            verify_plan(ir, existing)
+            (pipeline.ARTIFACTS / "captions.srt").write_text(srt_text(existing["cues"]), encoding="utf-8")
+            print("CAPTION ALIGNMENT: reused pre-aligned forced-alignment track", flush=True)
+            return existing
+        except (OSError, ValueError, KeyError, TypeError):
+            pass
     python = qwen_paths(pipeline.PROJECT)[0]
     model = pipeline.PROJECT / "g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit/model.safetensors"
     if not python.is_file() or not model.is_file():
@@ -272,8 +333,10 @@ def prepare(pipeline, ir: dict) -> dict:
 
 
 def supports_short_captions(ir: dict) -> bool:
-    """Both current narrated-video executors share the same caption track."""
-    return ir.get("presentation", {}).get("preset") in (None, "information_motion", "explanation", "information_cards")
+    """Narrated-video executors share the same forced-aligned short caption track."""
+    return ir.get("presentation", {}).get("preset") in (
+        None, "information_motion", "explanation", "information_cards", "illustrated_explainer",
+    )
 
 
 def render_cues(pipeline, ir: dict) -> list[dict] | None:

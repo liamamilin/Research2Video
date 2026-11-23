@@ -13,6 +13,7 @@ def phrases(page: dict) -> list[str]:
     """Only authored timing anchors, never inferred labels or topic keywords."""
     props = page['props']
     result = [v.get(k, '') for v in props.get('visuals', []) for k in ('reveal_phrase', 'phrase')]
+    result += page.get('reveal_phrases', [])
     result += props.get('reveal_phrases', [])
     result += [v.get('phrase', '') for v in props.get('focus_steps', [])]
     result += [props.get('takeaway_phrase', '')]
