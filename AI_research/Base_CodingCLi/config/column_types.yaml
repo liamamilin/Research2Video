@@ -17,8 +17,8 @@ types:
     preferred_visuals: [对比图, 价格卡, 真实画面, 原理图]
   tutorial:
     name: 教程
-    promise: 按照步骤完成一个具体任务
-    structure: [目标, 准备, 操作, 结果]
+    promise: 沿一条干净主路径按步完成任务或定位排障，每步给清可见验证信号与红绿灯分岔
+    structure: [目标或症状切口, 干净主路径与可见验证, 红绿灯分岔与避坑, 动作口诀收尾]
     preferred_visuals: [操作截图, 步骤演示, 局部聚焦, 流程]
   deep_research:
     name: 深度研究

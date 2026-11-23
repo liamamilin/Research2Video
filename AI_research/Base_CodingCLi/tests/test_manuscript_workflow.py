@@ -319,3 +319,27 @@ def test_explainer_profiles_enforce_single_causal_chain_and_anti_jargon_rules():
     econ_applied = content_columns.apply_script_context(base_recipe, econ_ctx)
     assert "不要写成教科书词条" in econ_applied.script_style
     assert "判断标尺" in econ_applied.script_style
+
+
+def test_tutorial_profiles_enforce_clean_main_path_and_branching_signals():
+    from core.video import columns as video_columns
+    from core.video import content_columns
+
+    config_dir = Path(__file__).resolve().parents[1] / "config"
+    for job in ("ai_media/ai_tool_tutorials", "chatgpt_acquisition/t03_tutorials",
+                "chatgpt_acquisition/t07_subscription", "chatgpt_acquisition/t08_troubleshooting"):
+        profile = workflow.JOB_PROMPTS[job]
+        assert "英文菜单路径" in profile.draft and "车轱辘" in profile.draft
+        assert "车轱辘" in profile.read
+    assert "红绿灯分岔" in workflow.JOB_PROMPTS["chatgpt_acquisition/t08_troubleshooting"].draft
+    assert "红绿灯分岔" in workflow.JOB_PROMPTS["chatgpt_acquisition/t07_subscription"].draft
+
+    cols = content_columns.load_all(str(config_dir))
+    for col_key, col in cols.items():
+        if col.type == "tutorial":
+            assert col.notes.strip(), f"{col_key} should have non-empty notes"
+    base_recipe = video_columns.get(str(config_dir), "chatgpt_acquisition")
+    t08_ctx = content_columns.snapshot(str(config_dir), "chatgpt_t08_troubleshooting", "chatgpt_acquisition/t08_troubleshooting")
+    t08_applied = content_columns.apply_script_context(base_recipe, t08_ctx)
+    assert "红绿灯分岔" in t08_applied.script_style
+    assert "边缘例外条款" in t08_applied.script_style
