@@ -49,6 +49,8 @@ class SettingsIn(Input):
     tid: int = Field(ge=0, le=65535)
     tid_by_matrix: dict[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,23}$")], Annotated[int, Field(ge=1, le=65535)]] | None = Field(
         default=None, description="按矩阵指定投稿分区；未列出的矩阵用默认分区 tid。省略时保留原设置。")
+    creation_statement: int | None = Field(
+        default=None, description="默认创作声明：0=不标注，1=包含 AI 生成内容，3=内容含营销信息。省略时保留原设置。")
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
     publish_window: PublishWindowIn | None = Field(
         default=None, description="自动投稿的公开时段；时段外完成的成片定时到下一个时段公开。省略时保留原设置。")
@@ -63,6 +65,7 @@ class UploadIn(Input):
     description: str = Field(max_length=2000)
     tags: list[str] = Field(min_length=1, max_length=10)
     tid: int = Field(ge=1, le=65535)
+    creation_statement: int | None = Field(default=None, description="创作声明：0=不标注，1=包含 AI 生成内容，3=内容含营销信息；省略时继承账号默认。")
     first_comment: FirstCommentIn | None = Field(default=None, description="省略或为 null 时继承账号默认首评；enabled=false 明确关闭本次首评。")
 
 
@@ -230,6 +233,10 @@ def settings(body: SettingsIn, user=Depends(require_admin)) -> dict:
         if body.tid < 1 or not bilibili.biliup_binary():
             raise HTTPException(409, detail=ApiError.make("platform_not_ready", "自动投稿需要连接账号、安装 biliup 并选择默认投稿分区。"))
     patch = body.model_dump(exclude_unset=True)
+    if patch.get("creation_statement") is None:
+        patch.pop("creation_statement", None)
+    else:
+        patch["creation_statement"] = call(bilibili.clean_creation_statement, body.creation_statement)
     if patch.get("publish_window", 0) is None:
         del patch["publish_window"]
     elif body.publish_window and body.publish_window.start >= body.publish_window.end:

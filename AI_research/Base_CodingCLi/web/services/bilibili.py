@@ -37,6 +37,50 @@ class BilibiliError(ValueError):
     pass
 
 
+CREATION_STATEMENTS: dict[int, str] = {
+    0: "不标注",
+    1: "包含 AI 生成内容",
+    3: "内容含营销信息",
+}
+
+
+def clean_creation_statement(value: object) -> int:
+    """Validate Bilibili creation_statement ID: 0 (none), 1 (AI generated), 3 (marketing)."""
+    if value is None or value == "":
+        return 0
+    if isinstance(value, dict):
+        value = value.get("id")
+    if isinstance(value, bool):
+        raise BilibiliError("创作声明仅支持 0（不标注）、1（包含 AI 生成内容）或 3（内容含营销信息）。")
+    try:
+        stmt_id = int(value)
+    except (TypeError, ValueError) as exc:
+        raise BilibiliError("创作声明仅支持 0（不标注）、1（包含 AI 生成内容）或 3（内容含营销信息）。") from exc
+    if stmt_id not in CREATION_STATEMENTS:
+        raise BilibiliError("创作声明仅支持 0（不标注）、1（包含 AI 生成内容）或 3（内容含营销信息）。")
+    return stmt_id
+
+
+def verify_creation_statement(credentials: dict, bvid: str, expected_id: int) -> dict:
+    """Read-only post-submit check of archive.creation_statement; never raises or re-submits."""
+    if not expected_id:
+        return {"requested": 0, "actual": 0, "status": "not_requested"}
+    try:
+        snapshot = BilibiliClient(credentials).archive_for_edit(bvid)
+        archive = snapshot.get("archive") or {}
+        raw = archive.get("creation_statement")
+        if isinstance(raw, dict) and raw.get("id") is not None:
+            actual = int(raw["id"])
+        elif archive.get("creation_statement_id") is not None:
+            actual = int(archive["creation_statement_id"])
+        else:
+            return {"requested": expected_id, "actual": None, "status": "unverified"}
+        status = "confirmed" if actual == expected_id else "mismatch"
+        return {"requested": expected_id, "actual": actual, "status": status}
+    except Exception as exc:
+        return {"requested": expected_id, "actual": None, "status": "unverified", "error": str(exc)[:200]}
+
+
 class BilibiliRejected(BilibiliError):
     """The API returned an explicit rejection, rather than an uncertain network outcome."""
 
@@ -537,8 +581,11 @@ def upload(credentials: dict, video_path: Path, payload: dict, work_dir: Path) -
                 "--tag", ",".join(payload["tags"])]
         args += ["--cover", str(cover)]
         extra_fields = {}
-        if payload.get("ai_generated"):
-            extra_fields["creation_statement"] = {"id": 1}
+        stmt_id = clean_creation_statement(payload.get("creation_statement"))
+        if not stmt_id and payload.get("ai_generated"):
+            stmt_id = 1
+        if stmt_id:
+            extra_fields["creation_statement"] = {"id": stmt_id}
         if payload.get('cover43'):
             try:
                 from web.services.bilibili_covers import image_data

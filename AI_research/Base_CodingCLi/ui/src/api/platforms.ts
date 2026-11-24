@@ -9,12 +9,18 @@ export type FirstComment = { enabled: boolean; text: string; pin: boolean };
 export const EMPTY_FIRST_COMMENT: FirstComment = { enabled: false, text: "", pin: false };
 export type PublishWindow = { enabled: boolean; start: number; end: number; spacing: number };
 export const DEFAULT_PUBLISH_WINDOW: PublishWindow = { enabled: true, start: 8, end: 23, spacing: 30 };
-export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; first_comment?: FirstComment; publish_window?: PublishWindow; restricted_comment?: FirstComment };
+export const CREATION_STATEMENT_OPTIONS: { id: number; label: string }[] = [
+  { id: 0, label: "不标注" },
+  { id: 1, label: "包含 AI 生成内容" },
+  { id: 3, label: "内容含营销信息" },
+];
+export type DeclarationVerification = { requested: number; actual: number | null; status: "confirmed" | "mismatch" | "unverified" | "not_requested"; error?: string };
+export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; creation_statement?: number; first_comment?: FirstComment; publish_window?: PublishWindow; restricted_comment?: FirstComment };
 export type CommentRestriction = { bvid: string; title: string; reason: string; status: string; active: boolean; dismissed?: boolean; deleted: { rpid: string; message: string }[]; guide_rpid: string; error: string; detected_at: number; updated_at: number };
-export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment; dtime?: number };
+export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; creation_statement?: number; first_comment?: FirstComment; dtime?: number };
 export type UploadPreview = UploadPayload & { adaptation?: PublishAdaptationResult; account_uid?: string; draft?: { payload: Partial<UploadPayload>; render_id: string } | null; warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
 export type UploadTask = { id: string; uid?: string; render_id: string; script_id: string; version: number; status: string; bvid: string; error: string; created_at: number; payload: UploadPayload;
-  recovery?: { phase?: string; attempt?: number; note?: string; lookup_count?: number; last_checked_at?: number; next_lookup_at?: number };
+  recovery?: { phase?: string; attempt?: number; note?: string; lookup_count?: number; last_checked_at?: number; next_lookup_at?: number; declaration_verification?: DeclarationVerification };
   first_comment_status?: string; first_comment_rpid?: string; first_comment_error?: string; first_comment_pin_status?: string; first_comment_pin_error?: string };
 export type PlatformComment = { bvid: string; rpid: string; root: string; author: string; message: string; ctime: number; likes: number; status: string; draft: string; reply: string; reply_rpid: string; error: string };
 export type UploadCandidate = { render_id: string; script_id: string; title: string; version: number; completed_at: string; archived?: number; current_version?: number; approved_version?: number; script_status?: string };

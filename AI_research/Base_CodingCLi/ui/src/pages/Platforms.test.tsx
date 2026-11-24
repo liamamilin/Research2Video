@@ -328,4 +328,22 @@ describe("Platform management", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ first_comment: { enabled: true, text: "固定说明", pin: true } }), "PUT"));
   });
+
+  it("lets admins save default creation_statement", async () => {
+    useAuthStore.setState({ user: { username: "admin", role: "admin" } as never });
+    vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
+    show("/platforms?tab=settings");
+    fireEvent.change(await screen.findByLabelText("默认创作声明"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ creation_statement: 3 }), "PUT"));
+  });
+
+  it("lets editors override creation_statement per upload", async () => {
+    vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
+    vi.mocked(api).mockResolvedValue({ ...preview, creation_statement: 0 });
+    show("/platforms?tab=uploads&render=r1");
+    fireEvent.change(await screen.findByLabelText("创作声明"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ creation_statement: 1 })));
+  });
 });

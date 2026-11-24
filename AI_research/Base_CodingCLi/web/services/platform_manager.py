@@ -312,6 +312,7 @@ def preview(render_id: str) -> dict:
         warnings.append(f"本次投稿使用 v{render['version']} 成片；文稿当前为 v{script['current_version']}，请确认选中了需要的版本。")
     return {**preview_draft(render, "bilibili"), "render_id": render["id"], **adaptation["payload"],
             "adaptation": adaptation, "tid": category_for(script), "warnings": warnings,
+            "creation_statement": int(store().settings().get("creation_statement") or 0),
             "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
             "credibility": credibility.label(version), "covers": bilibili_covers.preview(render),
@@ -419,10 +420,17 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     first_comment = payload.get("first_comment")
     if first_comment is None:
         first_comment = store().settings()["first_comment"]
+    raw_stmt = payload.get("creation_statement")
+    if raw_stmt is None:
+        stmt_id = int(store().settings().get("creation_statement") or 0)
+    else:
+        stmt_id = bilibili.clean_creation_statement(raw_stmt)
     from web.services.bilibili_covers import for_upload
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
              **for_upload(render, title), "automatic": automatic,
              "first_comment": clean_first_comment(first_comment)}
+    if stmt_id:
+        clean["creation_statement"] = stmt_id
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)
     with identity_lock():
@@ -921,9 +929,21 @@ def tick() -> None:
             credential = credentials()
             try:
                 payload = {**task["payload"], "cover": str(cover)}
-                if (topics.get(task["script_id"]) or {}).get("tutorial"):
+                if not payload.get("creation_statement") and (topics.get(task["script_id"]) or {}).get("tutorial"):
                     payload["ai_generated"] = True
+                requested_stmt = bilibili.clean_creation_statement(payload.get("creation_statement")) or (
+                    1 if payload.get("ai_generated") else 0
+                )
                 bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), payload, work_dir)
+                if requested_stmt:
+                    verification = bilibili.verify_creation_statement(credential, bvid, requested_stmt)
+                    try:
+                        diag_path = work_dir / "diagnostic.json"
+                        diag = json.loads(diag_path.read_text()) if diag_path.is_file() else {}
+                        diag["declaration_verification"] = verification
+                        bilibili.upload_diagnostic(work_dir, diag)
+                    except (OSError, ValueError):
+                        pass
                 dtime = task["payload"].get("dtime")
                 db.update_upload(task["id"], status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime else "")
             except bilibili.UploadFailed as exc:

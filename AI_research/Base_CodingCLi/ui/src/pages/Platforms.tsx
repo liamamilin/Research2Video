@@ -3,7 +3,7 @@ import { VISIBLE_PLATFORM_NAMES, SOCIAL_PLATFORM_KEYS } from "@/lib/distribution
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ExternalLink, MessageSquareText, RefreshCw, Settings, UploadCloud } from "lucide-react";
-import { DEFAULT_PUBLISH_WINDOW, EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type CommentRestriction, type FirstComment, type PlatformOverview, type PlatformComment, type PlatformSettings, type PublishWindow, type UploadCandidate } from "@/api/platforms";
+import { CREATION_STATEMENT_OPTIONS, DEFAULT_PUBLISH_WINDOW, EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type CommentRestriction, type FirstComment, type PlatformOverview, type PlatformComment, type PlatformSettings, type PublishWindow, type UploadCandidate } from "@/api/platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
 import { errorMessage } from "@/lib/toast";
@@ -101,9 +101,10 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
   const setWindow = (patch: Partial<PublishWindow>) => setConfig({ ...config, publish_window: { ...hours, ...patch } });
   const guide = config.restricted_comment || { enabled: false, text: "", pin: true };
   const setGuide = (patch: Partial<FirstComment>) => setConfig({ ...config, restricted_comment: { ...guide, ...patch } });
-  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); void run(() => platformAction("/settings", { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment, publish_window: hours, restricted_comment: guide }, "PUT")); }}>
+  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); const body: Record<string, unknown> = { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment, publish_window: hours, restricted_comment: guide }; if (config.creation_statement !== undefined) body.creation_statement = config.creation_statement; void run(() => platformAction("/settings", body, "PUT")); }}>
     <h2 className="text-sm font-medium">自动化策略</h2>
     <BilibiliCategorySelect label="默认投稿分区" required={config.auto_upload} value={config.tid} onChange={tid => setConfig({ ...config, tid })} resource={categoryResource} />
+    <label className="block text-xs">默认创作声明<select aria-label="默认创作声明" className="input w-full mt-1" value={config.creation_statement ?? 0} onChange={e => setConfig({ ...config, creation_statement: Number(e.target.value) })}>{CREATION_STATEMENT_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}</select></label>
     <label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={config.auto_upload} disabled={!ready && !config.auto_upload} onChange={e => setConfig({ ...config, auto_upload: e.target.checked })} />出片后自动投稿</label>
     <p className="text-xs text-text-muted">保存启用后，只处理此后完成的当前定稿成片。沿用发布包和封面，使用自制投稿；未审计、有待核实、严重事实问题或时效复核提醒会保留在成片列表供人工处理。旧成片可在投稿页单独选择。</p>
     <div className="space-y-2"><label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={hours.enabled} onChange={e => setWindow({ enabled: e.target.checked })} />只在白天时段公开自动投稿</label>
