@@ -89,6 +89,22 @@ class VideoHandoffs:
         return bool(script_id and script_id in self.pending and script_id in self.observed)
 
     def record(self, name: str, arguments: dict, result: dict) -> None:
+        if name == 'continue_video' and arguments.get('action') == 'cancel':
+            script_id = arguments.get('script_id') or result.get('script_id')
+            if script_id:
+                self.pending.pop(script_id, None)
+                self.observed.discard(script_id)
+            return
+        if name == 'operate_application':
+            action_id = str(arguments.get('action_id') or '')
+            body = result.get('result') if isinstance(result.get('result'), dict) else {}
+            if 'cancel' in action_id or body.get('status') == 'CANCELLED':
+                run_id = (arguments.get('path') or {}).get('run_id') or body.get('id')
+                for sid, item in list(self.pending.items()):
+                    if run_id and item.get('batch_id') == run_id:
+                        self.pending.pop(sid, None)
+                        self.observed.discard(sid)
+                return
         if name in {'continue_video', 'create_video', 'update_video_materials'} and result.get('status') == 'started' and result.get('batch_id'):
             script_id = result['script_id']
             self.pending.setdefault(script_id, {k: result[k] for k in ('script_id', 'batch_id', 'href')})

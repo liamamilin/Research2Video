@@ -128,3 +128,40 @@ def test_historical_link_projection_does_not_rewrite_original_receipt(client, we
     replay = client.post('/api/assistant', headers=login(client), json={'message': '历史链接',
         'conversation_id': write['conversation_id'], 'request_id': write['request_id']}).json()
     assert replay['answer'] == '[文稿](/video/one)'
+
+
+
+def test_handoff_clears_pending_on_cancel_without_overwriting_reply():
+    from web.services.assistant_delivery import VideoHandoffs
+    handoffs = VideoHandoffs()
+    handoffs.record('continue_video', {'script_id': 's1'}, {'status': 'started', 'script_id': 's1', 'batch_id': 'b1', 'href': '/video/s1'})
+    assert 's1' in handoffs.pending
+    handoffs.record('operate_application', {'action_id': 'POST /api/video/autopilot/runs/{run_id}/cancel', 'path': {'run_id': 'b1'}}, {'result': {'id': 'b1', 'status': 'CANCELLED'}})
+    assert 's1' not in handoffs.pending
+
+    handoffs.record('continue_video', {'script_id': 's2'}, {'status': 'started', 'script_id': 's2', 'batch_id': 'b2', 'href': '/video/s2'})
+    handoffs.record('continue_video', {'script_id': 's2', 'action': 'cancel'}, {'status': 'cancelled', 'script_id': 's2'})
+    assert 's2' not in handoffs.pending
+
+
+def test_read_dedup_key_matches_discovery_reads_and_ignores_writes():
+    from web.services.assistant_runtime import _read_dedup_key
+    assert _read_dedup_key('list_jobs', {'query': ''}) == _read_dedup_key('list_jobs', {'query': ''})
+    assert _read_dedup_key('application_actions', {'domain': 'video'}) is not None
+    assert _read_dedup_key('query_video', {'action': 'cells'}) is not None
+    assert _read_dedup_key('query_video', {'action': 'get', 'script_id': 's1'}) is None
+    assert _read_dedup_key('operate_application', {'action_id': 'POST /x'}) is None
+
+
+def test_continue_video_cancel_stops_open_autopilot_batch(web_env):
+    from core.video import autopilot_store, store
+    from web.services.assistant_tools.video import ContinueVideo, continue_video
+    store.init_db()
+    script = store.create_script('deep_dive', {'title': '测试中断'}, created_by='admin')
+    run = autopilot_store.adopt_script(script, started_by='admin')
+    assert run['status'] == 'RUNNING'
+    res = continue_video(ContinueVideo(script_id=script['id'], action='cancel'), None, {'username': 'admin'})
+    assert res['status'] == 'cancelled'
+    assert res['cancelled_items'] >= 1
+    updated_run = autopilot_store.get_run(run['id'])
+    assert updated_run['status'] == 'CANCELLED'
