@@ -48,6 +48,7 @@ _GAP_TAIL = re.compile(
 )
 _ORDINAL = re.compile(r"^第[一二三四五六七八九十百零0-9]+$")
 _CONJUNCTION = ("而", "但", "但是", "所以", "不过", "并且")
+_LEADING_CONTRAST = re.compile(r"^而\s*")
 _BROKEN_JOIN = re.compile(r"第[一二三四五六七八九十百零0-9]+[，,]\s*而")
 
 #: "材料点了四个名字" / "公开材料说脚本未执行" — production sourcing said aloud.
@@ -249,22 +250,42 @@ def repair(text: str) -> tuple[str, list[dict]]:
         clauses = _clauses(raw)
         memo = [_gap(clause) or _aside(clause) or _performance(clause) for clause in clauses]
         retracts = any("所以" in clause and (_WITHDRAWAL.search(clause) or "不能下结论" in clause) for clause in clauses)
+        lead_ordinal = ""
+        dropped_memo = False
         facts = []
         dropped_join = False
         for clause, is_memo in zip(clauses, memo):
             if is_memo or (any(memo) and _tail(clause)):
+                dropped_memo = True
                 continue
             bare = clause.strip("。！？ ")
-            # Only drop a dangling ordinal / bare conjunction left after a memo, not a full "所以不能说…".
-            if _ordinal(clause) or bare in _CONJUNCTION:
+            # Keep a leading ordinal to re-attach when a usable fact survives after dropping a memo.
+            if _ordinal(clause):
+                if not facts and not lead_ordinal:
+                    lead_ordinal = bare
+                else:
+                    dropped_join = True
+                continue
+            if bare in _CONJUNCTION:
                 dropped_join = True
                 continue
             if retracts or (_COMPLETENESS.search(clause) and not _NEGATED_SCOPE.search(clause) and any(_gap(item) for item in clauses)):
                 continue
-            facts.append(_restore(clause, quotes).strip("。"))
+            restored = _restore(clause, quotes).strip("。")
+            if not facts and dropped_memo:
+                stripped = _LEADING_CONTRAST.sub("", restored).strip("，, ")
+                if stripped:
+                    restored = stripped
+            facts.append(restored)
         spoken = ""
         if facts:
-            spoken = "，".join(part for part in facts if part)
+            parts = [part for part in facts if part]
+            if lead_ordinal and parts:
+                if _BROKEN_JOIN.match(f"{lead_ordinal}，{parts[0]}"):
+                    dropped_join = True
+                else:
+                    parts = [lead_ordinal, *parts]
+            spoken = "，".join(parts)
             if not spoken.endswith(("。", "！", "？")):
                 spoken += "。"
         consequential = any(_consequential_gap(clause) for clause in clauses)

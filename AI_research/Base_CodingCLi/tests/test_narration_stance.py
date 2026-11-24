@@ -41,16 +41,23 @@ def test_essay_memo_is_removed_and_the_score_limit_stays():
     assert not broken_join(spoken)
 
 
-def test_subscription_gap_is_not_spoken_as_a_dangling_conjunction():
+def test_subscription_gap_keeps_ordinal_and_fact_without_dangling_conjunction():
     spoken, notes = repair(GEMINI + SAMPLE)
-    assert spoken == SAMPLE
-    assert "第二，而" not in spoken
-    assert "Gemini 4 Hydrogen 在免费版里就有入口" not in spoken
-    assert notes[0]["needs_attention"] and not notes[0]["consequential"]
+    assert spoken == "第二，Gemini 4 Hydrogen 在免费版里就有入口。" + SAMPLE
+    assert "第二，而" not in spoken and "材料没有写明" not in spoken
+    assert not notes[0]["needs_attention"] and not notes[0]["consequential"]
     assert "官方" not in spoken and "不支持" not in spoken
     bare, bare_notes = repair(GEMINI)
-    assert bare == "" and bare_notes[0]["spoken_instead"] == ""
-    assert "第二，而 Gemini 4 Hydrogen 在免费版里就有入口。" != bare
+    assert bare == "第二，Gemini 4 Hydrogen 在免费版里就有入口。"
+    assert bare_notes[0]["spoken_instead"] == bare and not bare_notes[0]["needs_attention"]
+
+    # Ordinal + memo with no surviving fact is still cleared and held for attention.
+    empty, empty_notes = repair("第二，材料没有写明订阅档位。")
+    assert empty == "" and empty_notes[0]["needs_attention"]
+
+    # Already-broken "第二，而…" with no memo clause is still rejected and held.
+    broken, broken_notes = repair("第二，而 Gemini 4 Hydrogen 在免费版里就有入口。")
+    assert broken == "" and broken_notes[0]["needs_attention"]
 
 
 def test_existing_limits_and_real_placement_stay_verbatim():
@@ -172,12 +179,13 @@ def test_revision_is_narrowed_before_it_is_stored(monkeypatch):
     monkeypatch.setattr(workflow, "call_json", chat)
     monkeypatch.setattr(workflow, "LLMClient", lambda *args, **kwargs: object())
     revised = workflow.revise_passage(
-        draft, report="免费版有入口。", topic={"title": "比较", "fields": {}},
+        draft, report="Gemini 4 Hydrogen 免费版有入口。", topic={"title": "比较", "fields": {}},
         llm_config=object(), column=column)
     text = revised.sections[0]["paragraphs"][0]["text"]
     assert "第二，而" not in text and "材料没有写明" not in text
+    assert "第二，Gemini 4 Hydrogen 在免费版里就有入口。" in text
     assert SAMPLE in text
-    assert revised.meta["narration_unresolved"]
+    assert not revised.meta.get("narration_unresolved")
 
 NEGATIVES = [
     "Gemini、Mistral、Grok 的地区清单，这批材料里没有，所以我不能替它们下结论。你自己去官网查一下，比听我说更靠谱。",
