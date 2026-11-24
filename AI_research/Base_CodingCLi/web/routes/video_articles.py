@@ -33,8 +33,8 @@ class CreateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=1, max_length=articles.MAX_CHARS)
     title: str = Field(default="", max_length=80)
-    mode: Literal["read", "adapt"]
-    kind: Literal["literary", "information"]
+    mode: Literal["read", "adapt"] = "adapt"
+    kind: Literal["literary", "information"] = "information"
     import_id: str | None = None
     column: str = "topic_digest"
     production: str = ""
@@ -42,6 +42,7 @@ class CreateIn(BaseModel):
     source_url: str = Field(default="", max_length=300)
     published_on: str = ""
     origin: Literal["original", "copied", "ai"] = "copied"
+    auto_render: bool = False
 
 
 @router.post("/articles/scripts", status_code=202)
@@ -60,7 +61,7 @@ def create_article(body: CreateIn, user=Depends(require_editor)):
     except articles.ArticleError as exc:
         raise invalid(exc) from exc
     topic = {"title": source["title"], "fields": {"目标受众": chosen.audience or "普通观众"},
-             "article": {"source": source, "mode": body.mode, "kind": body.kind},
+             "article": {"source": source, "mode": body.mode, "kind": body.kind, "auto_render": body.auto_render},
              **({"article_production": config.key} if config else {})}
     script = video_executor.create(chosen.key, topic, user["username"])
     audit.log("video_article_create", user=user["username"], target=script["id"], result=body.mode)

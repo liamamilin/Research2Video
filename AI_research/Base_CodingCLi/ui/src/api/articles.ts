@@ -11,7 +11,7 @@ export interface ArticleSource extends ArticleImport {
 export interface ArticleCreate {
   title: string; text: string; mode: "read" | "adapt"; kind: "literary" | "information";
   column: string; production: string; import_id?: string; author: string; source_url: string;
-  published_on: string; origin: "original" | "copied" | "ai";
+  published_on: string; origin: "original" | "copied" | "ai"; auto_render?: boolean;
 }
 export function importArticle(file: File) {
   const body = new FormData(); body.append("file", file);

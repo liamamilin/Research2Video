@@ -172,48 +172,101 @@ def test_scan_pdf_is_explicitly_rejected_without_importing_partial_text():
         articles.extract("扫描.pdf", buffer.getvalue())
 
 
-def test_adaptation_audits_against_original_without_claiming_external_verification(client, video_env, monkeypatch):
+def test_adaptation_skips_blocking_audit_and_supports_on_demand_audit(client, video_env, monkeypatch):
     monkeypatch.setattr("core.llm.LLMClient", Model)
     script = create(client, title="续航测试", text=INFO, mode="adapt", kind="information", origin="ai")
     assert script["status"] == "DRAFT"
     version = store.get_version(script["id"], 1)
     assert version["meta"]["checks"]["summary"]["passed"]
+    assert len(Model.calls) == 1
+    assert "未做外部事实核验" in "".join(credibility.label(version)["reasons"])
+    from web.services.video_articles import audit
+    audit(store.get_script(script["id"]))
     assert len(Model.calls) == 2
     assert INFO in Model.calls[-1][1]["content"]
-    assert "未做外部事实核验" in "".join(credibility.label(version)["reasons"])
 
 
-def test_unfounded_numbers_and_lost_conditions_block_approval(client, video_env, monkeypatch):
+def test_local_issues_and_on_demand_audit_report_problems_without_blocking_approval(client, video_env, monkeypatch):
     monkeypatch.setattr("core.llm.LLMClient", Model)
     Model.result = {"faithful": False, "summary": "删掉了测试条件", "issues": [{
         "section": 0, "paragraph": 0, "quote": "样机连续运行 10 小时", "severity": "must",
         "problem": "结论适用范围丢失", "suggestion": "保留测试条件"}]}
     script = create(client, text=INFO, mode="adapt", kind="information")
-    with pytest.raises(video_executor.StepError, match="忠实度问题"):
-        video_executor.approve(script["id"], 1, "test")
+    from web.services.video_articles import audit
+    audit(store.get_script(script["id"]))
+    audited = store.get_version(script["id"], 1)
+    assert audited["meta"]["checks"]["issues"]
+    # Approval is intentionally non-blocking for article scripts.
+    video_executor.approve(script["id"], 1, "test")
     assert article_writer.local_issues([{"paragraphs": [{"text": "续航 99 小时。"}]}], {"text": INFO}, "adapt", "information")
 
 
-def test_invalid_audit_never_looks_like_pass(client, video_env, monkeypatch):
+def test_invalid_on_demand_audit_raises_error(client, video_env, monkeypatch):
+    from core.video import writer
     monkeypatch.setattr("core.llm.LLMClient", Model)
     Model.result = {"faithful": True, "summary": "通过", "issues": [{"section": 0, "paragraph": 0,
         "quote": "不存在的引文", "severity": "warn", "problem": "建议", "suggestion": ""}]}
     script = create(client, text=INFO, mode="adapt", kind="information")
-    assert script["error"] and not script["stage"]
-    with pytest.raises(video_executor.StepError, match="尚未完成"):
-        video_executor.approve(script["id"], 1, "test")
+    from web.services.video_articles import audit
+    with pytest.raises(writer.ScriptError, match="有效结果"):
+        audit(store.get_script(script["id"]))
 
 
-def test_edit_invalidates_checks_and_rerun_checks_current_version(client, video_env):
+def test_edit_does_not_block_approval_and_rerun_audit_checks_current_version(client, video_env):
     script = create(client)
     old = store.get_version(script["id"], 1)
     n = video_workflow.save_edit(script["id"], title=old["title"], sections=old["sections"], edited_by="test")
-    with pytest.raises(video_executor.StepError, match="尚未完成"):
-        video_executor.approve(script["id"], n, "test")
+    video_executor.approve(script["id"], n, "test")
     from web.services.video_articles import audit
     audit(store.get_script(script["id"]))
-    video_executor.approve(script["id"], n, "test")
     assert store.get_version(script["id"], 1) == old
+
+
+def test_read_mode_splits_markdown_headings_into_sections(client, video_env, monkeypatch):
+    monkeypatch.setattr("core.llm.LLMClient", lambda *args, **kwargs: pytest.fail("原文朗读不应调用模型"))
+    md = "# 引子\n\n雨停以后，窗台留着水光。\n\n## 第二段\n\n风走进来，翻动了书页。"
+    script = create(client, title="雨停以后", text=md, mode="read", kind="information")
+    version = store.get_version(script["id"], 1)
+    assert [s["title"] for s in version["sections"]] == ["引子", "第二段"]
+    assert all("#" not in p["text"] for s in version["sections"] for p in s["paragraphs"])
+    assert version["meta"]["checks"]["summary"]["passed"]
+
+
+def test_adapt_mode_runs_focused_manuscript_workflow_when_configured(client, video_env, monkeypatch):
+    (video_env / "config" / "system.yaml").write_text("video:\n  manuscript_workflow: focused\n  headline_polish: false\n", encoding="utf-8")
+
+    class FocusedModel(Model):
+        def chat(self, messages, **kwargs):
+            self.calls.append(messages)
+            self.usage["requests"] += 1
+            sys_msg = messages[0]["content"]
+            if "独立读者" in sys_msg or "首遍听众" in sys_msg or "读者" in sys_msg:
+                return ChatResponse(content="整体顺畅，无需大改。")
+            return ChatResponse(content=json.dumps({"title": "样机续航十小时，只限这次测试", "sections": [{
+                "title": "测试与边界", "paragraphs": [{"text": INFO, "citations": []}]}]}, ensure_ascii=False))
+
+    monkeypatch.setattr("core.llm.LLMClient", FocusedModel)
+    monkeypatch.setattr("core.video.manuscript_workflow.LLMClient", FocusedModel)
+    script = create(client, title="续航测试", text=INFO, mode="adapt", kind="information")
+    assert script["status"] == "DRAFT"
+    version = store.get_version(script["id"], 1)
+    assert version["meta"].get("manuscript_workflow")
+    assert len(FocusedModel.calls) >= 2
+
+
+def test_auto_render_approves_and_starts_render_automatically(client, video_env, monkeypatch):
+    started = []
+    monkeypatch.setattr(video_render, "start", lambda render_id, **kwargs: started.append(render_id))
+    _login(client)
+    response = client.post("/api/video/articles/scripts", headers=_csrf(client), json={
+        "title": "雨停以后", "text": PROSE, "mode": "read", "kind": "information", "column": "deep_dive", "auto_render": True})
+    assert response.status_code == 202, response.text
+    script_id = response.json()["id"]
+    _wait(client, script_id, {"APPROVED", "FAILED"})
+    script = store.get_script(script_id)
+    assert script["status"] == "APPROVED"
+    assert len(started) == 1
+    assert store.list_renders(script_id=script_id)
 
 
 def test_article_uses_shared_render_with_literary_intent_and_no_fake_sources(client, video_env, autovideo):
