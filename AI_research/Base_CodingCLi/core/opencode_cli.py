@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import shutil
+import signal
 import subprocess
 import time
 from pathlib import Path
@@ -71,6 +72,9 @@ def settings(config_dir: str | None = None) -> dict:
     section = ((_load_system(config_dir).get("page_readers") or {}).get("opencode_cli") or {})
     if isinstance(section, dict):
         value.update({k: section[k] for k in DEFAULTS if k in section})
+        for key in ("disabled_mcps", "allowed_mcps"):
+            if isinstance(section.get(key), list):
+                value[key] = [str(x) for x in section[key]]
     return value
 
 
@@ -86,12 +90,18 @@ def gather_settings(config_dir: str | None = None) -> dict:
                 value[key] = [str(x) for x in section[key]] if isinstance(section[key], list) else list(default)
             else:
                 value[key] = section[key]
+        for key in ("disabled_mcps", "allowed_mcps"):
+            if isinstance(section.get(key), list):
+                value[key] = [str(x) for x in section[key]]
     # Reuse binary/workdir from page_readers when gather omits them.
     page = settings(config_dir)
     if not value.get("binary"):
         value["binary"] = page.get("binary") or "opencode"
     if not value.get("workdir") and page.get("workdir"):
         value["workdir"] = page["workdir"]
+    for key in ("disabled_mcps", "allowed_mcps"):
+        if key not in value and key in page:
+            value[key] = list(page[key])
     return value
 
 
@@ -199,6 +209,7 @@ def parse_usage(stdout: str) -> dict:
         "cost_usd": 0.0,
         "opencode_steps": 0,
     }
+    tool_calls: dict[str, int] = {}
     for line in (stdout or "").splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -226,46 +237,95 @@ def parse_usage(stdout: str) -> dict:
         cost = part.get("cost")
         if isinstance(cost, (int, float)) and not isinstance(cost, bool):
             totals["cost_usd"] += float(cost)
+        if event.get("type") == "tool_use" and isinstance(part.get("tool"), str):
+            tool_calls[part["tool"]] = tool_calls.get(part["tool"], 0) + 1
     totals["cost_usd"] = round(totals["cost_usd"], 6)
-    return {k: v for k, v in totals.items() if v}
+    usage = {k: v for k, v in totals.items() if v}
+    if tool_calls:
+        usage["tool_calls"] = tool_calls
+    return usage
+
+
+def _terminate_process_group(proc: subprocess.Popen, *, pgid: int | None = None,
+                             grace_seconds: float = 2.0) -> None:
+    """Terminate ``proc`` and any descendants in its process group (TERM → KILL).
+
+    OpenCode runs with ``start_new_session=True`` so spawned MCP servers
+    (e.g. ``browse``) share ``pgid`` and are reaped together on timeout/cancel.
+    """
+    target_pgid = pgid if pgid is not None else proc.pid
+    use_pg = hasattr(os, "killpg") and target_pgid is not None and target_pgid > 0
+
+    def _send(sig: int) -> None:
+        if use_pg:
+            try:
+                os.killpg(target_pgid, sig)
+                return
+            except ProcessLookupError:
+                return
+            except PermissionError:
+                pass
+        if proc.poll() is None:
+            try:
+                proc.send_signal(sig)
+            except ProcessLookupError:
+                pass
+
+    _send(signal.SIGTERM)
+    if proc.poll() is None:
+        try:
+            proc.wait(timeout=max(0.1, grace_seconds))
+        except subprocess.TimeoutExpired:
+            _send(signal.SIGKILL)
+            try:
+                proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                pass
+    if use_pg:
+        # Even after parent exits, grandchildren in the process group may linger.
+        deadline = time.monotonic() + min(0.5, max(0.0, grace_seconds))
+        while time.monotonic() < deadline:
+            try:
+                os.killpg(target_pgid, 0)
+            except ProcessLookupError:
+                return
+            except PermissionError:
+                return
+            time.sleep(0.05)
+        _send(signal.SIGKILL)
 
 
 def _run_subprocess(command: list[str], *, limit: int, workdir: str | None, env: dict,
                     chosen: str, cancel_token=None) -> tuple[int, str, str]:
-    """Run command; poll ``cancel_token`` via Popen so cancellation terminates active child processes."""
-    if cancel_token is None:
-        try:
-            completed = subprocess.run(
-                command, capture_output=True, text=True, timeout=limit,
-                cwd=workdir, env=env, check=False,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）") from exc
-        return completed.returncode, completed.stdout or "", completed.stderr or ""
-
-    proc = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, cwd=workdir, env=env,
-    )
+    """Run command in its own process group so timeout/cancel reaps child processes too."""
+    popen_kwargs: dict = {
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.PIPE,
+        "text": True,
+        "cwd": workdir,
+        "env": env,
+    }
+    if os.name != "nt":
+        popen_kwargs["start_new_session"] = True
+    proc = subprocess.Popen(command, **popen_kwargs)
+    pgid = proc.pid
     deadline = time.monotonic() + limit
     try:
+        if cancel_token is None:
+            try:
+                stdout, stderr = proc.communicate(timeout=limit)
+                return proc.returncode, stdout or "", stderr or ""
+            except subprocess.TimeoutExpired as exc:
+                _terminate_process_group(proc, pgid=pgid)
+                raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）") from exc
+
         while True:
             if cancel_token.is_set():
-                proc.terminate()
-                try:
-                    proc.wait(timeout=3)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                    proc.wait(timeout=2)
+                _terminate_process_group(proc, pgid=pgid)
                 raise CancelledError("OpenCode 运行已取消")
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                proc.terminate()
-                try:
-                    proc.wait(timeout=3)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                    proc.wait(timeout=2)
+                _terminate_process_group(proc, pgid=pgid)
                 raise RuntimeError(f"OpenCode CLI 超时（{limit}s，model={chosen}）")
             try:
                 stdout, stderr = proc.communicate(timeout=min(0.5, remaining))
@@ -274,31 +334,112 @@ def _run_subprocess(command: list[str], *, limit: int, workdir: str | None, env:
                 continue
     except BaseException:
         if proc.poll() is None:
-            proc.kill()
-            try:
-                proc.wait(timeout=2)
-            except Exception:
-                pass
+            _terminate_process_group(proc, pgid=pgid, grace_seconds=0.5)
         raise
 
 
-_DEFAULT_DISABLED_MCPS = ("browse",)
+# User-global MCP servers that stay available to research runs. ``browse`` is kept
+# for pages webfetch cannot read and for screenshots / page visuals; information
+# search itself goes through websearch (see TOOL_POLICY). Every other user MCP
+# (blender, godot-ai, ...) is disabled: unrelated to research and slow to connect.
+_DEFAULT_ALLOWED_MCPS = ("browse",)
+_JSONC_LINE_COMMENT = re.compile(r'(?m)(^|\s)//[^\n]*')
+
+
+def _user_opencode_config_dir(env: dict[str, str], *, use_home_fallback: bool) -> Path | None:
+    xdg = (env.get("XDG_CONFIG_HOME") or "").strip()
+    if xdg:
+        return Path(xdg) / "opencode"
+    home = (env.get("HOME") or "").strip()
+    if home:
+        return Path(home) / ".config" / "opencode"
+    if use_home_fallback:
+        return Path.home() / ".config" / "opencode"
+    return None
+
+
+def _discover_user_mcp_names(env: dict[str, str], *, use_home_fallback: bool) -> list[str]:
+    """Read user-global OpenCode config files and return configured MCP server names.
+
+    Names not in the allowed list (``blender``, ``godot-ai``, ...) get disabled for
+    research runs, avoiding 40-55s MCP connect timeouts on unrelated desktop tools.
+    """
+    cfg_dir = _user_opencode_config_dir(env, use_home_fallback=use_home_fallback)
+    if cfg_dir is None:
+        return []
+    names: list[str] = []
+    for filename in ("opencode.json", "opencode.jsonc"):
+        path = cfg_dir / filename
+        try:
+            if not path.is_file():
+                continue
+            raw = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        parsed = None
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            if filename.endswith(".jsonc"):
+                try:
+                    parsed = json.loads(_JSONC_LINE_COMMENT.sub(r"\1", raw))
+                except json.JSONDecodeError:
+                    parsed = None
+        if not isinstance(parsed, dict):
+            continue
+        mcp = parsed.get("mcp")
+        if not isinstance(mcp, dict):
+            continue
+        servers = mcp.get("servers")
+        if isinstance(servers, dict):
+            for name in servers:
+                if isinstance(name, str) and name.strip() and name.strip() not in names:
+                    names.append(name.strip())
+        for name, val in mcp.items():
+            if name == "servers" or not isinstance(val, dict):
+                continue
+            if isinstance(name, str) and name.strip() and name.strip() not in names:
+                names.append(name.strip())
+    return names
+
+
+def _disabled_mcp_entry(existing: object) -> dict:
+    """Return an OpenCode v2 schema-valid disabled ``mcp.servers.<name>`` entry.
+
+    OpenCode v2 validates each config document before merging and skips entries
+    missing ``type``/``command`` (e.g. a bare ``{"disabled": True}``), which
+    would silently leave global MCP servers enabled.
+    """
+    entry = dict(existing) if isinstance(existing, dict) else {}
+    entry["disabled"] = True
+    if not entry.get("type"):
+        entry["type"] = "local"
+    if entry.get("type") == "local" and not entry.get("command"):
+        entry["command"] = ["true"]
+    elif entry.get("type") == "remote" and not entry.get("url"):
+        entry["url"] = "http://127.0.0.1:0"
+    return entry
 
 
 def subprocess_env(cfg: dict | None = None, *, base_env: dict[str, str] | None = None) -> dict[str, str]:
     """Build subprocess env for unattended OpenCode CLI runs.
 
-    Disables user-global browser MCP servers (``mcp.servers.browse`` in OpenCode
-    v2) via ``OPENCODE_CONFIG_CONTENT`` so background research stays on built-in
-    ``websearch``/``webfetch`` and never attaches to the user's Chrome browser.
+    Disables user-global MCP servers outside ``allowed_mcps`` (default: only
+    ``browse`` stays) via ``OPENCODE_CONFIG_CONTENT`` using schema-valid
+    OpenCode v2 entries. ``disabled_mcps`` (explicit list) overrides discovery.
     """
     env = dict(base_env if base_env is not None else os.environ)
     env["NO_COLOR"] = "1"
     raw = (cfg or {}).get("disabled_mcps")
-    if isinstance(raw, (list, tuple)):
+    explicit = isinstance(raw, (list, tuple))
+    if explicit:
         disabled = [str(x).strip() for x in raw if str(x).strip()]
     else:
-        disabled = list(_DEFAULT_DISABLED_MCPS)
+        allowed_raw = (cfg or {}).get("allowed_mcps")
+        allowed = ({str(x).strip() for x in allowed_raw} if isinstance(allowed_raw, (list, tuple))
+                   else set(_DEFAULT_ALLOWED_MCPS))
+        disabled = [name for name in _discover_user_mcp_names(env, use_home_fallback=(base_env is None))
+                    if name not in allowed]
     if not disabled:
         return env
     override: dict = {}
@@ -320,9 +461,24 @@ def subprocess_env(cfg: dict | None = None, *, base_env: dict[str, str] | None =
         mcp["servers"] = servers
     for name in disabled:
         entry = servers.get(name)
-        servers[name] = {**entry, "disabled": True} if isinstance(entry, dict) else {"disabled": True}
+        # Keep an explicit caller opt-in (disabled: False) for auto-discovered MCPs.
+        if not explicit and isinstance(entry, dict) and entry.get("disabled") is False:
+            continue
+        servers[name] = _disabled_mcp_entry(entry)
     env["OPENCODE_CONFIG_CONTENT"] = json.dumps(override, ensure_ascii=False)
     return env
+
+
+# Appended to every research ``run`` prompt: search through search tools, browser
+# only for what search/webfetch cannot do.
+TOOL_POLICY = (
+    "\n\n## 工具使用规则\n"
+    "- 查找信息（找新闻、资料、链接、数字、说法出处）一律用 websearch；读取已知网址用 webfetch。"
+    "不要用浏览器打开搜索引擎、站内搜索页或信息流去搜。\n"
+    "- 浏览器（browse 工具）只用于：webfetch 读不到正文、需要执行脚本才显示内容的已知网址；"
+    "或任务明确需要网页截图、查看页面画面与布局。\n"
+    "- 使用浏览器时只操作自己新开的标签页，用完关闭；不要动已有标签页，不要登录、下单或提交表单。\n"
+)
 
 
 def run(prompt: str, *, config: dict | None = None, model: str | None = None,
@@ -341,7 +497,7 @@ def run(prompt: str, *, config: dict | None = None, model: str | None = None,
     command = [
         binary, "run", "--auto", "--format", "json", "--standalone",
         "--model", chosen,
-        prompt,
+        prompt + TOOL_POLICY,
     ]
     workdir = str(cfg.get("workdir") or "").strip() or None
     logger.info("OpenCode CLI run model=%s timeout=%s", chosen, limit)
@@ -356,6 +512,10 @@ def run(prompt: str, *, config: dict | None = None, model: str | None = None,
         raise RuntimeError(err)
     text = parse_final_text(stdout)
     usage = parse_usage(stdout)
+    logger.info(
+        "OpenCode CLI done model=%s rc=%s steps=%s tools=%s",
+        chosen, returncode, usage.get("opencode_steps", 0), usage.get("tool_calls") or {},
+    )
     meta = {"model": chosen, "model_select": model_receipt, "returncode": returncode}
     if usage:
         meta["usage"] = usage
@@ -391,7 +551,8 @@ def webfetch_markdown(url: str, *, config: dict | None = None, cancel_token=None
     try:
         completed = subprocess.run(
             command, capture_output=True, text=True, timeout=timeout, cwd=workdir,
-            env=subprocess_env(cfg), check=False,
+            # Thin webfetch reader: no MCP needed, skip connecting any.
+            env=subprocess_env({**cfg, "allowed_mcps": []}), check=False,
         )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"OpenCode CLI 读页超时（{timeout}s）") from exc

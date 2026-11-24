@@ -44,25 +44,79 @@ def test_parse_run_jsonl_rejects_short_failure_messages():
             '{"type":"text","part":{"text":"webfetch 请求失败，返回 HTTP 403，未能获取到正文内容。"}}')
 
 
-def test_subprocess_env_disables_browse_mcp_by_default():
+def test_subprocess_env_keeps_browse_and_disables_other_user_mcps(tmp_path):
     import json
 
     env = opencode_cli.subprocess_env(base_env={"PATH": "/usr/bin"})
     assert env["NO_COLOR"] == "1"
-    cfg = json.loads(env["OPENCODE_CONFIG_CONTENT"])
-    assert cfg["mcp"]["servers"]["browse"]["disabled"] is True
+    assert "OPENCODE_CONFIG_CONTENT" not in env  # nothing discovered, nothing to disable
+
+    # Auto-discovers v1 (`mcp.<name>`) and v2 (`mcp.servers.<name>`) user MCPs.
+    cfg_dir = tmp_path / ".config" / "opencode"
+    cfg_dir.mkdir(parents=True)
+    (cfg_dir / "opencode.json").write_text(json.dumps({
+        "mcp": {
+            "godot-ai": {"type": "local", "command": ["godot-ai"], "enabled": True},
+            "blender": {"type": "local", "command": ["blender"], "enabled": True},
+            "servers": {
+                "browse": {"type": "local", "command": ["browse", "mcp"]},
+            },
+        },
+    }), encoding="utf-8")
+    env_home = opencode_cli.subprocess_env(base_env={"HOME": str(tmp_path)})
+    servers = json.loads(env_home["OPENCODE_CONFIG_CONTENT"])["mcp"]["servers"]
+    assert "browse" not in servers  # browser stays available
+    for name in ("godot-ai", "blender"):
+        assert servers[name] == {"type": "local", "command": ["true"], "disabled": True}
+
+    # allowed_mcps: [] turns every user MCP off (model probes, thin page reader).
+    none_allowed = opencode_cli.subprocess_env(
+        cfg={"allowed_mcps": []}, base_env={"HOME": str(tmp_path)},
+    )
+    servers = json.loads(none_allowed["OPENCODE_CONFIG_CONTENT"])["mcp"]["servers"]
+    assert servers["browse"] == {"type": "local", "command": ["true"], "disabled": True}
+
+    # Explicit disabled_mcps overrides discovery; [] opts out cleanly.
+    opt_out = opencode_cli.subprocess_env(
+        cfg={"disabled_mcps": []}, base_env={"HOME": str(tmp_path)},
+    )
+    assert "OPENCODE_CONFIG_CONTENT" not in opt_out
 
     merged = opencode_cli.subprocess_env(
-        base_env={"OPENCODE_CONFIG_CONTENT": '{"mcp":{"servers":{"other":{"disabled":false}}}}'},
+        cfg={"disabled_mcps": ["browse"]},
+        base_env={"OPENCODE_CONFIG_CONTENT": '{"mcp":{"servers":{"other":{"type":"local","command":["x"],"disabled":false}}}}'},
     )
     merged_cfg = json.loads(merged["OPENCODE_CONFIG_CONTENT"])
-    assert merged_cfg["mcp"]["servers"]["browse"]["disabled"] is True
+    assert merged_cfg["mcp"]["servers"]["browse"] == {
+        "type": "local", "command": ["true"], "disabled": True,
+    }
     assert merged_cfg["mcp"]["servers"]["other"]["disabled"] is False
 
 
-def test_webfetch_markdown_invokes_cli(monkeypatch):
+def test_run_appends_tool_policy(monkeypatch):
+    seen = {}
+
+    def fake_sub(command, **kwargs):
+        seen["prompt"] = command[-1]
+        return 0, '{"type":"text","part":{"text":"done"}}\n', ""
+
+    monkeypatch.setattr(opencode_cli.shutil, "which", lambda binary: "/bin/opencode")
+    monkeypatch.setattr(opencode_cli, "_run_subprocess", fake_sub)
+    text, _ = opencode_cli.run("调研任务", config={"binary": "opencode"}, model="m")
+    assert text == "done"
+    assert seen["prompt"].startswith("调研任务")
+    assert "一律用 websearch" in seen["prompt"] and "截图" in seen["prompt"]
+
+
+def test_webfetch_markdown_invokes_cli(monkeypatch, tmp_path):
     import json
 
+    cfg_dir = tmp_path / ".config" / "opencode"
+    cfg_dir.mkdir(parents=True)
+    (cfg_dir / "opencode.json").write_text(
+        '{"mcp":{"servers":{"browse":{"type":"local","command":["browse","mcp"]}}}}', encoding="utf-8")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
     calls = []
 
     def fake_run(command, **kwargs):
@@ -71,7 +125,7 @@ def test_webfetch_markdown_invokes_cli(monkeypatch):
         assert "opencode-go/beam-free" in command
         assert any("https://example.com/x" in part for part in command)
         cfg = json.loads(kwargs["env"]["OPENCODE_CONFIG_CONTENT"])
-        assert cfg["mcp"]["servers"]["browse"]["disabled"] is True
+        assert cfg["mcp"]["servers"]["browse"]["disabled"] is True  # thin reader skips MCPs
         return SimpleNamespace(returncode=0, stdout=(
             '{"type":"tool_use","part":{"tool":"webfetch","state":'
             '{"status":"completed","output":"Hello from page"}}}\n'
@@ -327,8 +381,12 @@ def test_parse_usage_aggregates_opencode_jsonl_tokens():
     stdout = "\n".join([
         '{"type":"step_finish","part":{"tokens":{"input":100,"output":40,"reasoning":10,"cache":{"read":20}},"cost":0.001}}',
         '{"type":"step_finish","part":{"tokens":{"input":50,"output":25},"cost":0.0005}}',
+        '{"type":"tool_use","part":{"tool":"websearch","state":{"status":"completed"}}}',
+        '{"type":"tool_use","part":{"tool":"websearch","state":{"status":"completed"}}}',
+        '{"type":"tool_use","part":{"tool":"browse_screenshot","state":{"status":"completed"}}}',
     ])
     usage = opencode_cli.parse_usage(stdout)
+    assert usage["tool_calls"] == {"websearch": 2, "browse_screenshot": 1}
     assert usage["prompt_tokens"] == 150
     assert usage["completion_tokens"] == 65
     assert usage["reasoning_tokens"] == 10
@@ -412,8 +470,20 @@ def test_opencode_pipeline_end_to_end_usage_and_cache(tmp_path, monkeypatch):
     def fake_run(_prompt, **_kwargs):
         calls["n"] += 1
         if calls["n"] == 1:
-            return disc_json, {"model": "mock", "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150}}
-        return dossier_md, {"model": "mock", "usage": {"prompt_tokens": 200, "completion_tokens": 80, "total_tokens": 280}}
+            return disc_json, {
+                "model": "mock",
+                "usage": {
+                    "prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150,
+                    "tool_calls": {"websearch": 2},
+                },
+            }
+        return dossier_md, {
+            "model": "mock",
+            "usage": {
+                "prompt_tokens": 200, "completion_tokens": 80, "total_tokens": 280,
+                "tool_calls": {"websearch": 3, "webfetch": 4},
+            },
+        }
 
     monkeypatch.setattr(opencode_cli, "gather_settings", lambda _d=None: {
         "enabled": True, "soft_filter_llm": False, "max_concurrency": 2,
@@ -433,6 +503,68 @@ def test_opencode_pipeline_end_to_end_usage_and_cache(tmp_path, monkeypatch):
     assert receipt["topic_count"] == 1
     assert receipt["usage"]["opencode_calls"] == 2
     assert receipt["usage"]["total_tokens"] == 430
+    assert receipt["usage"]["tool_calls"] == {"websearch": 5, "webfetch": 4}
     assert "### 1.1 新模型发布" in report_md and "### 来源清单" in report_md
     assert "https://example.com/pricing" in receipt["urls"]
     assert raw_mat.strip()
+
+
+def test_run_subprocess_reaps_descendant_process_group_on_timeout_and_cancel(tmp_path):
+    import os
+    import sys
+    import threading
+    import time
+    from core.errors import CancelledError
+
+    if os.name == "nt":
+        pytest.skip("POSIX process groups only")
+
+    def _spawn_cmd(pid_file):
+        code = (
+            "import subprocess, sys, time\n"
+            "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)'])\n"
+            f"open({str(pid_file)!r}, 'w').write(str(child.pid))\n"
+            "time.sleep(30)\n"
+        )
+        return [sys.executable, "-c", code]
+
+    def _wait_dead(pid: int, timeout: float = 3.0) -> bool:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return True
+            time.sleep(0.05)
+        return False
+
+    # 1. Timeout reaps descendant process in the session group.
+    pid_file_t = tmp_path / "child_timeout.pid"
+    with pytest.raises(RuntimeError, match="超时"):
+        opencode_cli._run_subprocess(
+            _spawn_cmd(pid_file_t), limit=1, workdir=str(tmp_path),
+            env=dict(os.environ), chosen="test-model", cancel_token=None,
+        )
+    assert pid_file_t.is_file()
+    assert _wait_dead(int(pid_file_t.read_text().strip()))
+
+    # 2. Cancellation reaps descendant process in the session group.
+    pid_file_c = tmp_path / "child_cancel.pid"
+    cancel = threading.Event()
+
+    def _trigger_cancel():
+        deadline = time.monotonic() + 3.0
+        while not pid_file_c.is_file() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        cancel.set()
+
+    t = threading.Thread(target=_trigger_cancel, daemon=True)
+    t.start()
+    with pytest.raises(CancelledError):
+        opencode_cli._run_subprocess(
+            _spawn_cmd(pid_file_c), limit=10, workdir=str(tmp_path),
+            env=dict(os.environ), chosen="test-model", cancel_token=cancel,
+        )
+    t.join(timeout=2)
+    assert pid_file_c.is_file()
+    assert _wait_dead(int(pid_file_c.read_text().strip()))

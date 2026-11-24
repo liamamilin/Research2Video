@@ -41,12 +41,15 @@ def looks_free(model_id: str) -> bool:
 
 def list_models(binary: str) -> list[str]:
     """Return ``provider/model`` ids from ``opencode models``."""
+    from .opencode_cli import subprocess_env
+
     resolved = binary
     completed = subprocess.run(
         [resolved, "models"],
         capture_output=True,
         text=True,
         timeout=60,
+        env=subprocess_env({"allowed_mcps": []}),
         check=False,
     )
     if completed.returncode != 0:
@@ -97,7 +100,7 @@ def probe_model(binary: str, model: str, *, timeout: int = 45, cancel_token=None
     try:
         completed = subprocess.run(
             command, capture_output=True, text=True, timeout=max(20, timeout),
-            env=subprocess_env(), check=False,
+            env=subprocess_env({"allowed_mcps": []}), check=False,
         )
     except subprocess.TimeoutExpired:
         logger.info("OpenCode model probe timeout: %s", model)

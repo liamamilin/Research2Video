@@ -771,9 +771,7 @@ def gather_topics(job: dict, topics: list[TopicCandidate], *, config: dict, work
     for d in dossiers:
         if d.get("cached"):
             continue
-        for k, v in ((d.get("meta") or {}).get("usage") or {}).items():
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                stage_usage[k] = round(stage_usage.get(k, 0) + v, 6) if isinstance(v, float) else stage_usage.get(k, 0) + v
+        _merge_usage(stage_usage, (d.get("meta") or {}).get("usage"))
     receipt = {
         "total": len(topics),
         "succeeded": len(dossiers),
@@ -791,6 +789,18 @@ def gather_topics(job: dict, topics: list[TopicCandidate], *, config: dict, work
 # ---------------------------------------------------------------------------
 # Stage 4: Report Assembly (downstream-compatible Markdown)
 # ---------------------------------------------------------------------------
+
+def _merge_usage(target: dict[str, Any], source: dict[str, Any] | None) -> None:
+    """Accumulate numeric usage counters and nested ``tool_calls`` counts."""
+    for k, v in (source or {}).items():
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            target[k] = round(target.get(k, 0) + v, 6) if isinstance(v, float) else target.get(k, 0) + v
+        elif k == "tool_calls" and isinstance(v, dict):
+            dst = target.setdefault("tool_calls", {})
+            for tool_name, count in v.items():
+                if isinstance(count, int) and not isinstance(count, bool):
+                    dst[tool_name] = dst.get(tool_name, 0) + count
+
 
 def _demote_dossier_headings(markdown: str) -> tuple[str, list[tuple[str, str]]]:
     """Keep dossier prose clean under ``### 1.N`` without creating stray top-level items."""
@@ -948,9 +958,7 @@ def run(engine, job: dict, source_block: str = "", *, knowledge: bool = False) -
     )
     opencode_usage: dict[str, Any] = {"opencode_calls": 1}
     for src_usage in (disc_receipt.get("usage") or {}, gather_receipt.get("usage") or {}):
-        for k, v in src_usage.items():
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                opencode_usage[k] = round(opencode_usage.get(k, 0) + v, 6) if isinstance(v, float) else opencode_usage.get(k, 0) + v
+        _merge_usage(opencode_usage, src_usage)
     receipt = {
         "mode": MODE_NAME,
         "version": VERSION,
@@ -1057,9 +1065,7 @@ def run_single_topic(engine, job: dict, source_block: str = "") -> tuple[str, st
     all_urls = _valid_urls(list(seed_urls) + list(dossier.get("urls") or []))
     opencode_usage: dict[str, Any] = {"opencode_calls": 0 if dossier.get("cached") else 1}
     if not dossier.get("cached"):
-        for k, v in ((dossier.get("meta") or {}).get("usage") or {}).items():
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                opencode_usage[k] = round(opencode_usage.get(k, 0) + v, 6) if isinstance(v, float) else opencode_usage.get(k, 0) + v
+        _merge_usage(opencode_usage, (dossier.get("meta") or {}).get("usage"))
     receipt = {
         "mode": SINGLE_MODE_NAME,
         "version": VERSION,
