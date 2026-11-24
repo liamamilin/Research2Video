@@ -6,7 +6,7 @@ server:
 
 auth:
   secret_key: "dev-only-change-me-in-production-aaaaaaaaaaaaaaaaaa"
-  access_token_minutes: 15
+  access_token_minutes: 240
   refresh_token_days: 7
   # 登录页勾选「记住我」后的会话天数
   remember_token_days: 30

@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { api, ensureFreshSession } from "./client";
 import type { TokenResponse, User, JobSummary, JobDetail } from "./types";
 
 // --- Auth ---
@@ -379,6 +379,7 @@ export async function chatWithAssistant(
   message: string, history: AssistantMessage[], onEvent: (event: AssistantEvent) => void,
   options: { conversation_id?: string; request_id?: string; signal?: AbortSignal; context?: import('./assistant-workspace').AssistantContext | null; material_ids?: string[] } = {},
 ): Promise<AssistantReply> {
+  await ensureFreshSession();
   const response = await api<Response>("/api/assistant/stream", {
     method: "POST",
     responseType: "stream",

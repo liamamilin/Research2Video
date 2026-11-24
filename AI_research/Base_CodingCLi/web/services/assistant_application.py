@@ -143,6 +143,7 @@ async def native(request: Request, method: str, path: str, *, query: dict | None
     headers = {k: request.headers[k] for k in ('cookie', 'authorization', 'x-csrf-token') if k in request.headers}
     async def authenticated_app(scope, receive, send):
         deps.inherit_background(request.scope, scope)
+        deps.inherit_stream(request.scope, scope)
         scope['console_internal_request'] = True
         await request.app(scope, receive, send)
     transport = httpx.ASGITransport(app=authenticated_app, client=(request.client.host if request.client else '127.0.0.1', 0))

@@ -113,6 +113,12 @@ async function tryRefresh(): Promise<RefreshResult> {
   }
 }
 
+/** Proactively refresh the access cookie before opening a long-running SSE stream. */
+export async function ensureFreshSession(): Promise<void> {
+  if (!getCookie("ai_research_csrf")) return;
+  await tryRefresh();
+}
+
 // --- Main api function ---
 
 export async function api<T = unknown>(
