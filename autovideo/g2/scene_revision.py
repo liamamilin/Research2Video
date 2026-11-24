@@ -107,7 +107,24 @@ def run_revision(p):
     if saved['operation_type']=='media_revision':
         p.write_json(p.ARTIFACTS/'media-revision.json',{'parent_job_id':saved['parent_job_id'],'voice_id':p.VOICE,'video_speed':p.OUTPUT_SPEED,'voice_resynthesized':voice_changed,'narration_unchanged':True,'screen_content_unchanged':all(a['props']==b['props'] for a,b in zip(before['scenes'],ir['scenes']))})
     renderer=p.RUN_ROOT/'renderer'
-    p.run_step('render',lambda:p.render(compiled,renderer_root=renderer))
+    incremental={'used':False,'reason':'not_visual_revision'}
+    def _render_revision():
+        nonlocal incremental
+        if saved['operation_type']=='visual_revision' and not voice_changed:
+            from g2.incremental_render import try_incremental_render
+            incremental=try_incremental_render(
+                p,parent_dir=parent,parent_ir=before,ir=ir,compiled=compiled,
+                target_scene_id=saved['scene_id'],renderer_root=renderer,
+            )
+            if incremental.get('used'):
+                return
+        p.render(compiled,renderer_root=renderer)
+    p.run_step('render',_render_revision)
+    if saved['operation_type']=='visual_revision' and (p.ARTIFACTS/'scene-revision.json').is_file():
+        rev_meta=json.loads((p.ARTIFACTS/'scene-revision.json').read_text())
+        rev_meta['render_mode']='incremental' if incremental.get('used') else 'full'
+        rev_meta['incremental_render']=incremental
+        p.write_json(p.ARTIFACTS/'scene-revision.json',rev_meta)
     qa=p.run_step('verify-media',p.verify_media,compiled,alignment)
     qa.update(gate='REVISION',operation=saved['operation_type'],real_tts=voice_changed,real_llm=bool(p.CALL_RECORDS),reused_narration=True,video_form=saved['video_form'],voice_id=p.VOICE,video_speed=p.OUTPUT_SPEED)
     p.write_json(p.ARTIFACTS/'qa.json',qa);p.write_call_summary();p.write_manifest(renderer_root=renderer)

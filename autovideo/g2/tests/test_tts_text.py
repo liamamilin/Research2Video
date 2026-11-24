@@ -65,10 +65,18 @@ def test_percentages_ranges_and_unit_slashes_are_spoken_naturally(text, spoken):
 
 
 @pytest.mark.parametrize("text", [
-    "2026-11-23", "案件号 2026-117348", "GPT-6", "ACE/USDT", "Megaspeed/Alice", "11/11", "0.28.4",
+    "2026-11-23", "案件号 2026-117348", "GPT-6", "ACE/USDT", "Megaspeed/Alice", "11/11", "0.28.4", "H2O2",
 ])
 def test_dates_ids_and_non_rate_slashes_are_not_altered(text):
     assert for_voice(text) == text
+
+
+@pytest.mark.parametrize("text, spoken", [
+    ("减少 CO2 排放，释放 O2 和 H2O。", "减少 二氧化碳 排放，释放 氧气 和 水。"),
+    ("CO₂ 浓度上升，企业转向 SaaS 订阅。", "二氧化碳 浓度上升，企业转向 萨斯 订阅。"),
+])
+def test_spoken_lexicon_normalizes_unambiguous_formulas_and_terms(text, spoken):
+    assert for_voice(text) == spoken
 
 
 def test_unit_count_matches_the_length_estimate_rule():

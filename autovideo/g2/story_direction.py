@@ -16,7 +16,7 @@ GUIDANCE = ('同时为每页填写story_role和importance：提出本期问题�
     f'name不超过{NAME_MAX}个字符，过长时保留可辨认的简称，'
     'targets可指向本页node:id、side:left/right、series:N、category:N、point:N、bar:N、line:N。'
     '网页或图片说明即使选了concept_reveal，也用image:N或region:N:J关联已有素材。'
-    '同一个对象跨截图、图表和流程图保持相同name，不按页面重新起名。只安排呈现，不改变旁白。')
+    '同一个对象跨截图、图表和流程图保持相同name，不按页面重新起名；讲同一对象的状态演进或前后对比时保留统一对象参照，不随意换名或拆散为无关卡片。只安排呈现，不改变旁白。')
 
 
 def canonical(name: str) -> str:

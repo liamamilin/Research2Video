@@ -345,8 +345,9 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
 
 def messages(context: dict, correction: str | None = None) -> list[dict]:
     system = ('根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n'
-              '当前步骤：为讲述设计信息动效。让观众看见数字的大小、对象的差别或事物间的关系，画面随着讲述帮助理解。'
-              '底部字幕已显示完整旁白，卡片要点只提炼4到16字视觉锚点短语，不要整句复述旁白；避免连续多页纯文字concept_reveal，'
+              '当前步骤：为讲述设计信息动效。先明确「谁在什么条件下发生什么变化」，再选择画面，让观众看见数字的大小、对象的差别或事物间的关系。'
+              '底部字幕已显示完整旁白，卡片要点只提炼4到16字视觉锚点短语，不要整句复述旁白；'
+              '讲同一对象的状态变化、前后对比或指标累计时保持对象名称与位置/颜色参照连续，避免把连续变化拆成多页等权白卡（concept_reveal）；'
               '有数字优先用big_number/price_change/bar_chart，有对照优先用comparison。'
               '接口输出 JSON，使用 component_props_schemas 中的受控组件。场景连续覆盖旁白，场景 id 为 s1、s2…；headline 与有 title 字段的 props.title 一致。结构见 required_schema。')
     from g2.audience_copy import GUIDANCE

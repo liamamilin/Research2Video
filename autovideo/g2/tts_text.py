@@ -31,6 +31,13 @@ _RATE_SLASHS = (
     (re.compile(r"(?<=[\d\s])t/s(?![A-Za-z/])", re.IGNORECASE), "每秒 token"),
 )
 _PER_UNIT_CN = re.compile(r"(美元|美分|欧元|英镑|元|块)/([台个克杯次月年天时度人户家条份])")
+# High-confidence, unambiguous Chinese spoken lexicon (script & captions stay verbatim).
+_SPOKEN_LEXICON = (
+    (re.compile(r"(?<![A-Za-z0-9])CO(?:2|₂)(?![A-Za-z0-9])"), "二氧化碳"),
+    (re.compile(r"(?<![A-Za-z0-9])H(?:2|₂)O(?![A-Za-z0-9])"), "水"),
+    (re.compile(r"(?<![A-Za-z0-9])O(?:2|₂)(?![A-Za-z0-9])"), "氧气"),
+    (re.compile(r"(?<![A-Za-z0-9])SaaS(?![A-Za-z0-9])"), "萨斯"),
+)
 
 
 def _integer(value: int) -> str:
@@ -92,6 +99,8 @@ def for_voice(text: str) -> str:
     text = _RANGE_DASH.sub(r"\1到\2", text)
     text = _RANGE_HYPHEN.sub(r"\1到\2", text)
     for pattern, spoken in _RATE_SLASHS:
+        text = pattern.sub(spoken, text)
+    for pattern, spoken in _SPOKEN_LEXICON:
         text = pattern.sub(spoken, text)
     text = _PER_UNIT_CN.sub(r"\1每\2", text)
     text = _DECIMAL.sub(_decimal, text)

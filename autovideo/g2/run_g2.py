@@ -1174,7 +1174,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
                 if (ARTIFACTS / "caption-alignment.json").is_file() else None)
     if captions is not None:
         props["ir"]["caption_cues"] = captions
-    if hybrid_segment is not None:
+    if hybrid_segment is not None and hybrid_segment.get('backgrounds') is not None:
         props['fastCardBackgrounds'] = hybrid_segment['backgrounds']
     style = (PACKAGING_INPUT or {}).get("production_plan", {}).get("style", {})
     if style.get("palette_source") == "brand":
