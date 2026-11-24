@@ -153,6 +153,12 @@ async def lifespan(app: FastAPI):
         interrupted = video_store.fail_interrupted()
         if interrupted:
             logger.info("Settled %d interrupted video script(s)", interrupted)
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            try:
+                from web.routes import video as video_routes
+                video_routes.home_board(user={"id": 0, "username": "system", "role": "admin"})
+            except Exception:
+                pass
         resumed = video_render.resume_active()
         if resumed:
             logger.info("Resumed %d in-flight video render(s)", resumed)

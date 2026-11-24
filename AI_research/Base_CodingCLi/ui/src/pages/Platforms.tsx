@@ -151,7 +151,7 @@ export function PlatformsPage() {
 }
 
 function BilibiliPlatformsPage() {
-  const { data, error, loading, reload } = usePageResource(loadPlatforms, 6000);
+  const { data, error, loading, reload } = usePageResource(loadPlatforms, 15000);
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") || "uploads";
   const [busy, setBusy] = useState(false);

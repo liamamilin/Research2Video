@@ -166,33 +166,40 @@ def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict, reports: bool = 
 
 @router.get("")
 def list_matrices(user=Depends(require_viewer), compact: bool = False):
+    from web.services import read_cache
+
     config_dir, jobs_dir = _dirs()
-    every = matrices.load_all(config_dir)
-    plans = _plans()
-    grouped = {j for m in every.values() for j in m.jobs}
-    ungrouped = []
-    for name in list_jobs(jobs_dir):
-        if name in grouped or name.startswith(("video/", "vod/")):
-            continue
-        job = load_job(jobs_dir, name) or {}
-        ungrouped.append({"job": name, "name": job.get("name") or name})
-    from core.video import content_columns
-    columns = content_columns.load_all(config_dir, matrix_map=every)
-    counts = {}
-    for c in columns.values():
-        row = counts.setdefault(c.matrix, {"columns": 0, "configured": 0, "planned": 0})
-        row["columns"] += 1
-        row["planned" if c.status == "planned" else "configured"] += 1
-    result = {"matrices": [{**_shown(m, jobs_dir, plans),
-                           **({"content_summary": counts.get(m.key, {"columns": 0, "configured": 0, "planned": 0})}
-                              if m.content else {})} for m in every.values()], "ungrouped": ungrouped}
-    if compact:
-        from web.services.video_list_payload import job_state
-        for matrix in result["matrices"]:
-            for member in matrix["members"]:
-                if "state" in member:
-                    member["state"] = job_state(member["state"])
-    return result
+    key = (config_dir, jobs_dir, compact)
+
+    def _compute():
+        every = matrices.load_all(config_dir)
+        plans = _plans()
+        grouped = {j for m in every.values() for j in m.jobs}
+        ungrouped = []
+        for name in list_jobs(jobs_dir):
+            if name in grouped or name.startswith(("video/", "vod/")):
+                continue
+            job = load_job(jobs_dir, name) or {}
+            ungrouped.append({"job": name, "name": job.get("name") or name})
+        from core.video import content_columns
+        columns = content_columns.load_all(config_dir, matrix_map=every)
+        counts = {}
+        for c in columns.values():
+            row = counts.setdefault(c.matrix, {"columns": 0, "configured": 0, "planned": 0})
+            row["columns"] += 1
+            row["planned" if c.status == "planned" else "configured"] += 1
+        result = {"matrices": [{**_shown(m, jobs_dir, plans),
+                               **({"content_summary": counts.get(m.key, {"columns": 0, "configured": 0, "planned": 0})}
+                                  if m.content else {})} for m in every.values()], "ungrouped": ungrouped}
+        if compact:
+            from web.services.video_list_payload import job_state
+            for matrix in result["matrices"]:
+                for member in matrix["members"]:
+                    if "state" in member:
+                        member["state"] = job_state(member["state"])
+        return result
+
+    return read_cache.cached("matrices_list", key, 10.0, _compute)
 
 
 def _get(key: str) -> matrices.Matrix:

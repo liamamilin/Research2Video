@@ -1244,6 +1244,8 @@ def mutation(fn):
                     "这项修改会使关联视频输出失效："
                     + "；".join(f"{p}：{e}" for p, e in sorted(introduced))
                 )
+            from web.services import read_cache
+            read_cache.invalidate()
             return result
 
     return wrapped

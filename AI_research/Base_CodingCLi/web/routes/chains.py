@@ -21,13 +21,21 @@ def run_admission():
 
 @router.get("")
 def listing(user=Depends(require_viewer)):
-    configs = chains.production.load_all(chains.paths().config_dir, chains.paths().jobs_dir)
-    return {
-        "items": chains.summary(configs=configs),
-        "archived": chains.all_chains(True, configs=configs),
-        "role": user["role"],
-        "access": chain_access.snapshot(),
-    }
+    from web.services import read_cache
+
+    p = chains.paths()
+    key = (p.config_dir, p.jobs_dir, p.state_dir, user["role"])
+
+    def _compute():
+        configs = chains.production.load_all(p.config_dir, p.jobs_dir)
+        return {
+            "items": chains.summary(configs=configs),
+            "archived": chains.all_chains(True, configs=configs),
+            "role": user["role"],
+            "access": chain_access.snapshot(),
+        }
+
+    return read_cache.cached("chains_list", key, 10.0, _compute)
 
 
 @router.get("/catalog")

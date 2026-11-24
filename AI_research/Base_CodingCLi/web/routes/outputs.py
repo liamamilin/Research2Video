@@ -13,5 +13,11 @@ router = APIRouter(prefix="/api/outputs", tags=["outputs"])
 
 @router.get("")
 def list_outputs(archived: bool = False, user=Depends(require_viewer)) -> dict:
+    from web.services import read_cache
+
     paths = get_settings().paths
-    return outputs.collect(paths.config_dir, paths.jobs_dir, archived=archived)
+    key = (archived, paths.config_dir, paths.jobs_dir, read_cache.state_revision(paths.state_dir))
+    return read_cache.cached(
+        "outputs", key, 15.0,
+        lambda: outputs.collect(paths.config_dir, paths.jobs_dir, archived=archived),
+    )

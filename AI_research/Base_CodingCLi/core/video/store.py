@@ -40,6 +40,10 @@ STALE_AFTER_SECONDS = 120
 
 _DB_PATH_OVERRIDE: Optional[str] = None
 _lock = threading.Lock()
+_write_seq = 0
+_cv_lock = threading.Lock()
+_cv_revision: Optional[tuple] = None
+_cv_rows: dict[str, dict] = {}
 
 _SCRIPT_JSON = ("topic", "content_context")
 _VERSION_JSON = ("sections", "length_check", "meta")
@@ -50,9 +54,24 @@ def db_path() -> str:
     return _DB_PATH_OVERRIDE or DB_FILE
 
 
+def _stat_sig(path: str) -> tuple[int, int]:
+    try:
+        st = os.stat(path)
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return (0, 0)
+
+
+def db_revision() -> tuple:
+    """Fast (~0.01 ms) write/file revision that invalidates on both in-process and external DB writes."""
+    path = db_path()
+    return (path, _write_seq, _stat_sig(path), _stat_sig(path + "-wal"))
+
+
 def set_db_path(path: Optional[str]) -> None:
-    global _DB_PATH_OVERRIDE
+    global _DB_PATH_OVERRIDE, _write_seq
     _DB_PATH_OVERRIDE = path
+    _write_seq += 1
 
 
 def use_state_dir(state_dir: str) -> None:
@@ -61,9 +80,14 @@ def use_state_dir(state_dir: str) -> None:
 
 @contextmanager
 def connect(write: bool = False) -> Iterator[sqlite3.Connection]:
+    global _write_seq
     with sqlite_util.connect(db_path(), write=write) as conn:
         conn.row_factory = sqlite3.Row
-        yield conn
+        try:
+            yield conn
+        finally:
+            if write:
+                _write_seq += 1
 
 
 def _now() -> str:
@@ -725,21 +749,37 @@ def get_version(script_id: str, version: int) -> dict | None:
 
 
 def current_versions(script_ids: list[str]) -> dict[str, dict]:
-    """Current versions for a page, in batches instead of one database connection per row."""
+    """Current versions for a page, cached per db_revision instead of re-decoding all JSON on every request."""
+    global _cv_revision, _cv_rows
     ids = list(dict.fromkeys(script_ids))
-    out: dict[str, dict] = {}
     if not ids:
-        return out
+        return {}
+    rev = db_revision()
+    with _cv_lock:
+        if _cv_revision == rev:
+            missing = [sid for sid in ids if sid not in _cv_rows]
+            if not missing:
+                return {sid: _cv_rows[sid] for sid in ids if _cv_rows[sid] is not None}
+        else:
+            _cv_revision = rev
+            _cv_rows = {}
+            missing = ids
+    fetched: dict[str, Optional[dict]] = {sid: None for sid in missing}
     with connect() as conn:
-        for start in range(0, len(ids), 500):
-            batch = ids[start:start + 500]
+        for start in range(0, len(missing), 500):
+            batch = missing[start:start + 500]
             rows = conn.execute(
                 "SELECT v.* FROM script_versions v JOIN scripts s"
                 " ON v.script_id = s.id AND v.version = s.current_version"
                 f" WHERE s.id IN ({','.join('?' for _ in batch)})", batch,
             )
-            out.update((r["script_id"], _decode(r, _VERSION_JSON)) for r in rows)
-    return out
+            for r in rows:
+                fetched[r["script_id"]] = _decode(r, _VERSION_JSON)
+    with _cv_lock:
+        if _cv_revision == rev:
+            _cv_rows.update(fetched)
+            return {sid: _cv_rows[sid] for sid in ids if _cv_rows.get(sid) is not None}
+    return {sid: row for sid, row in fetched.items() if row is not None}
 
 
 def versions_of(pairs: list[tuple[str, int]]) -> dict[tuple[str, int], dict]:
