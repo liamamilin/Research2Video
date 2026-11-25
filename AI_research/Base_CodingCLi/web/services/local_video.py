@@ -25,6 +25,7 @@ class LocalVideoFields(BaseModel):
     description: str | None = Field(default=None, max_length=20000)
     tags: list[str] | None = Field(default=None, max_length=30)
     tid: int | None = Field(default=None, ge=1, le=65535)
+    creation_statement: int | None = Field(default=None, description='B站创作声明：0=不标注，1=包含 AI 生成内容，3=内容含营销信息')
     first_comment: dict | None = None
 
 
@@ -157,13 +158,24 @@ def execute(a: LocalVideoRequest, request, user: dict) -> dict:
     render, script = store.get_render(rid), store.get_script(sid)
     preview = management._native(request, 'GET', management.platform_path(a.platform) + '/preview/' + rid)
     saved = (preview.get('draft') or {}).get('payload') or {}
-    fields = {key: saved.get(key, preview.get(key)) for key in ('title', 'description', 'tags', 'tid', 'first_comment')
+    allowed_keys = ('title', 'description', 'tags', 'tid', 'first_comment') + (('creation_statement',) if a.platform == 'bilibili' else ())
+    fields = {key: saved.get(key, preview.get(key)) for key in allowed_keys
               if key in saved or key in preview}
     if asset['imported'] and 'title' not in saved:
         fields['title'] = ''  # The filename identifies the asset; ask for its publication title.
-    fields.update(a.fields.model_dump(exclude_none=True))
+    incoming = a.fields.model_dump(exclude_none=True)
+    if a.platform != 'bilibili' and 'creation_statement' in incoming:
+        raise ValueError('创作声明目前仅支持 B 站（bilibili）平台。')
+    fields.update(incoming)
     from core.video.platform_publish import inspect
     check = inspect(a.platform, fields)
+    if a.platform == 'bilibili' and 'creation_statement' in fields:
+        from web.services import bilibili
+        try:
+            fields['creation_statement'] = bilibili.clean_creation_statement(fields['creation_statement'])
+        except bilibili.BilibiliError as exc:
+            check['issues'].append(str(exc))
+            check['valid'] = False
     if a.platform == 'bilibili' and not 1 <= (fields.get('tid') or 0) <= 65535:
         check['issues'].append('B站需要选择投稿分区 tid；可以沿用平台设置中的默认分区。')
         check['valid'] = False

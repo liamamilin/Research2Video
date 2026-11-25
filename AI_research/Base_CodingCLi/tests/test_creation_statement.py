@@ -111,3 +111,55 @@ def test_upload_passes_selected_creation_statement_extra_fields(tmp_path, monkey
     upload_cmd = seen_args[-1]
     idx = upload_cmd.index("--extra-fields")
     assert json.loads(upload_cmd[idx + 1]) == {"creation_statement": {"id": 3}}
+
+
+def test_local_video_fields_accepts_creation_statement():
+    from web.services.local_video import LocalVideoFields
+
+    parsed = LocalVideoFields(title="标题", tid=231, creation_statement=3)
+    assert parsed.creation_statement == 3
+
+
+def test_submitted_reconcile_does_not_head_of_line_block_newer_videos(tmp_path, monkeypatch):
+    import time as time_mod
+    from web.services import comment_restrictions, platform_manager
+
+    db = PlatformStore(str(tmp_path))
+    uid = "12345"
+    old_render = {"id": "r-old", "script_id": "s-old", "version": 1}
+    new_render = {"id": "r-new", "script_id": "s-new", "version": 1}
+    t_old = db.enqueue(uid, old_render, {"title": "旧视频", "tags": ["科技"], "tid": 231, "first_comment": {"enabled": True, "text": "首评", "pin": True}})
+    t_new = db.enqueue(uid, new_render, {"title": "新视频", "tags": ["科技"], "tid": 231, "first_comment": {"enabled": True, "text": "首评", "pin": True}})
+    db.update_upload(t_old["id"], status="SUBMITTED", bvid="BV1old0000001")
+    db.update_upload(t_new["id"], status="SUBMITTED", bvid="BV1new0000002")
+    # Age both tasks past the 60s poll threshold.
+    past = time_mod.time() - 300
+    with db.connect(write=True) as conn:
+        conn.execute("UPDATE uploads SET updated_at=? WHERE id IN (?, ?)", (past, t_old["id"], t_new["id"]))
+
+    reconciled: list[str] = []
+
+    def fake_reconcile(task_id: str, bvid: str):
+        reconciled.append(bvid)
+        if bvid == "BV1old0000001":
+            raise bilibili.BilibiliError("稿件不可见")
+        db.update_upload(task_id, status="PUBLISHED", bvid=bvid)
+        return db.get_upload(task_id)
+
+    commented: list[str] = []
+    monkeypatch.setattr(platform_manager, "store", lambda: db)
+    monkeypatch.setattr(platform_manager, "directory", lambda: tmp_path)
+    monkeypatch.setattr(platform_manager, "account", lambda: {"connected": True, "uid": uid})
+    monkeypatch.setattr(platform_manager, "_recover_unknown_uploads", lambda _owner: None)
+    monkeypatch.setattr(platform_manager, "reconcile", fake_reconcile)
+    monkeypatch.setattr(platform_manager, "process_first_comment", lambda task: commented.append(task["bvid"]))
+    monkeypatch.setattr(platform_manager, "process_collection", lambda _task: None)
+    monkeypatch.setattr(comment_restrictions, "tick", lambda _owner: None)
+
+    platform_manager.tick()
+
+    assert "BV1old0000001" in reconciled
+    assert "BV1new0000002" in reconciled
+    assert db.get_upload(t_new["id"])["status"] == "PUBLISHED"
+    assert db.get_upload(t_old["id"])["recovery"].get("last_checked_at", 0) > past
+    assert commented == ["BV1new0000002"]

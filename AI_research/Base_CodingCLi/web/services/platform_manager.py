@@ -963,15 +963,20 @@ def tick() -> None:
                     bilibili.private_json(folder / "credentials.json", credential)
         _recover_unknown_uploads(owner)
         # Submission acceptance isn't publication. Keep polling until the owned video becomes public.
-        for task in db.pending_uploads(owner):
-            if float(task["payload"].get("dtime") or 0) > time.time():
-                continue  # scheduled: the platform keeps it private until then
-            if task["status"] == "SUBMITTED" and task["updated_at"] < time.time() - 60:
-                try:
-                    reconcile(task["id"], task["bvid"])
-                except Error:
-                    pass
-                break
+        # Round-robin by last check time so one rejected/deleted submission never starves newer videos.
+        now = time.time()
+        submitted = [
+            task for task in db.pending_uploads(owner)
+            if task["status"] == "SUBMITTED"
+            and float(task["payload"].get("dtime") or 0) <= now
+            and max(float(task["updated_at"] or 0), float((task.get("recovery") or {}).get("last_checked_at") or 0)) < now - 60
+        ]
+        submitted.sort(key=lambda task: max(float(task["updated_at"] or 0), float((task.get("recovery") or {}).get("last_checked_at") or 0)))
+        for task in submitted[:3]:
+            try:
+                reconcile(task["id"], task["bvid"])
+            except Error as exc:
+                db.update_recovery(task["id"], {"last_checked_at": time.time(), "note": str(exc)[:200]}, expected="SUBMITTED")
         comment_tasks = db.first_comment_tasks(owner)
         if comment_tasks:
             process_first_comment(comment_tasks[0])

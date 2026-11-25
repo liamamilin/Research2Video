@@ -145,7 +145,7 @@ def save_publishing_draft(a, request, user):
         raise ValueError('平台账号未连接或已变化，请核对账号后再修改发布草稿')
     preview = _native(request, 'GET', base + '/preview/' + quote(a.render_id, safe=''))
     draft = ((preview.get('draft') or {}).get('payload') or {})
-    keys = ('title', 'description', 'tags', 'first_comment') + (('tid',) if a.platform == 'bilibili' else ())
+    keys = ('title', 'description', 'tags', 'first_comment') + (('tid', 'creation_statement') if a.platform == 'bilibili' else ())
     payload = {key: draft.get(key, preview.get(key)) for key in keys if key in draft or key in preview}
     payload.update(a.fields)
     result = application.execute(SimpleNamespace(action_id='PUT /api/video/distributions/{platform}/draft',
@@ -242,7 +242,7 @@ def publishing_query(a, request, user):
             'note': '候选针对当前平台账号排除已投稿或已发布的版本；默认仅当前定稿，不会自动提交。'}
 
 
-PREPARED = ('title', 'description', 'tags', 'tid', 'first_comment')
+PREPARED = ('title', 'description', 'tags', 'tid', 'creation_statement', 'first_comment')
 
 
 def _prepared(preview: dict) -> dict:
