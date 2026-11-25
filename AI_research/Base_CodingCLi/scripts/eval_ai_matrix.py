@@ -23,7 +23,8 @@ sys.path.insert(0, str(ROOT))
 
 import yaml
 
-from scripts.eval_video_chain import attempt, record, report_case, save, validation_output
+from scripts.eval_video_chain import attempt, external_validation_output, record, report_case, save
+from scripts.trial_storage import mounted_directory, trial_directory
 
 BINDINGS = {
     "flash": ("flash_daily", "monitoring/ai_flash_discovery", "flash"),
@@ -165,13 +166,17 @@ def media_case(out: Path, key: str, index: dict) -> dict:
     from g3.app import create_app
     from g3.config import Settings
 
-    engine_root = (auto_root / "g3/data/ai-matrix-productization-20261027").resolve()
+    engine_root = trial_directory("autovideo", "ai-matrix-productization").resolve()
     failed = index.get("media", {}).get(key, {})
     retrying = failed.get("status") == "FAILED" and bool(failed.get("engine_job_id"))
     if retrying:
         data = Path(failed["engine_data"]).resolve()
+        legacy_root = auto_root / "g3/data/ai-matrix-productization-20261027"
+        allowed_roots = {engine_root}
+        if legacy_root.is_symlink() and legacy_root.is_dir():
+            allowed_roots.add(mounted_directory(legacy_root))
         render = store.get_render(failed["render_id"])
-        if (data.parent != engine_root or not Path(failed["work"]).resolve().is_relative_to(out.resolve())
+        if (data.parent not in allowed_roots or not Path(failed["work"]).resolve().is_relative_to(out.resolve())
                 or not render or render["script_id"] != script["id"] or render["status"] != "FAILED"
                 or render["autovideo_job_id"] != failed["engine_job_id"]):
             raise ValueError("Retry must belong to this isolated sample and its failed engine job")
@@ -334,7 +339,10 @@ def main() -> int:
     parser.add_argument("--skip-completed", action="store_true")
     parser.add_argument("--watch", action="store_true", help="For review, collect completed media until the finite batch ends")
     args = parser.parse_args()
-    out = validation_output(args.output)
+    try:
+        out = external_validation_output(args.output)
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
     out.mkdir(parents=True, exist_ok=True)
     isolate(out)
     index_path = out / "validation-index.json"

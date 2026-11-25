@@ -77,6 +77,20 @@ def decode_token_diagnostic(token: str) -> tuple[Optional[dict], str]:
         return None, "invalid_token"
 
 
+def decode_expired_token(token: str) -> Optional[dict]:
+    """Verify signature and decode an access JWT ignoring exp (for active in-process streams)."""
+    settings = get_settings()
+    try:
+        return jwt.decode(
+            token,
+            settings.auth.secret_key,
+            algorithms=[_ALG],
+            options={"verify_exp": False},
+        )
+    except jwt.PyJWTError:
+        return None
+
+
 def matches_browser_session(payload: dict, csrf_token: str | None) -> bool:
     binding = payload.get("csrf")
     # Existing sessions remain usable; their next refresh adds the binding.

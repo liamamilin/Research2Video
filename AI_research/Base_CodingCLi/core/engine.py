@@ -47,6 +47,12 @@ class ResearchEngine:
         self._progress = progress_cb or (lambda _: None)
         self.workspace_dir = os.path.abspath(workspace_dir or os.getcwd())
         self.state_dir = os.path.abspath(state_dir or os.path.join(self.workspace_dir, 'state'))
+        try:
+            from . import search_health
+            if search_health._path() is None:
+                search_health.use_state_dir(self.state_dir)
+        except Exception:
+            pass
         self._date_override = date_override
         # An explicit limit from the caller (run.py --timeout) outranks both
         # the job's runtime.timeout_seconds and system.yaml. Mutating self.sys
@@ -142,8 +148,7 @@ class ResearchEngine:
             from .theme_discovery import run as discover_themes
             return discover_themes(self, job)
 
-        # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
-        # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
+        # Mark matrix membership / event isolation (spec/matrices.md). Domain and keywords stay on the Job file.
         from . import matrices
         if not context.get('job'):
             job = matrices.for_run(job, self.config_dir)
@@ -156,7 +161,8 @@ class ResearchEngine:
                  '_production_policy':context.get('policy', {})}
         else:
             job = freeze(job, self._now())
-        self._events_exclude = matrices.jobs_of_other_matrices(job.get("_file", job_name), self.config_dir)
+        self._current_job_key = job.get("_file", job_name)
+        self._events_exclude = matrices.jobs_of_other_matrices(self._current_job_key, self.config_dir)
 
         logger.info("Running job: %s", job_name)
         desc = job.get("description", "")
@@ -180,8 +186,9 @@ class ResearchEngine:
         self._supply_pending = None
         self._supply_receipt = None
 
+        from . import source_pages
         try:
-            with LockManager(job.get("_file", job_name), stale_after=stale_after):
+            with LockManager(job.get("_file", job_name), stale_after=stale_after), source_pages.page_cache_scope() as page_cache:
 
                 if self._cancel.is_set():
                     raise CancelledError("Job cancelled before start")
@@ -190,13 +197,102 @@ class ResearchEngine:
                 print(f"  [{job_name}] Building prompt...")
                 output_path = self._resolve_output_path(job)
                 prompt = base_prompt = self._build_prompt(job)
-                fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
+                fetch_only = job.get("search") is False  # Initial research reads declared sources; optional enrichment runs later.
                 fetched = None
-                if fetch_only:
-                    source_block, fetched = self._fetch_sources_strict(job)
+                source_block = ""
+                from . import knowledge_job, opencode_gather, opencode_cli, opencode_pipeline
+
+                gather_cfg = opencode_cli.gather_settings(self.config_dir)
+                use_topic_pipeline = opencode_pipeline.enabled(job, gather_cfg)
+                use_single_topic_pipeline = (
+                    not use_topic_pipeline
+                    and opencode_pipeline.single_topic_enabled(job, gather_cfg)
+                    and opencode_cli.available({**gather_cfg, "enabled": True})
+                )
+                use_any_opencode_pipeline = use_topic_pipeline or use_single_topic_pipeline
+
+                def _load_sources(*, skip_teaser_details: bool = False):
+                    """Always ``(source_block, fetched_or_None)``."""
+                    if knowledge_job.enabled(job):
+                        # Declared knowledge Job: no sources by design; it sees only what it already covered.
+                        if issue := knowledge_job.problem(job):
+                            raise ValueError(issue)
+                        block = knowledge_job.block(knowledge_job.past_titles(job, self.workspace_dir))
+                        if job.get("sources"):
+                            from .sources import fetch_all, resolve
+                            specs = resolve(list(job["sources"]), self.config_dir)
+                            ideas = fetch_all(specs, limit_per_source=int(job.get("sources_limit", 8)))
+                            logger.info("Knowledge job topic ideas: %d items from %d source(s)", len(ideas), len(specs))
+                            block += "\n\n" + knowledge_job.topic_block(ideas)
+                        return block, ([], {})
+                    target_job = {**job, "source_detail_pages": 0} if skip_teaser_details else job
+                    if fetch_only:
+                        return self._fetch_sources_strict(target_job)
+                    return self._fetch_sources_block(target_job), None
+
+                self._opencode_gather_receipt = {}
+                self._source_fallback_error = ""
+                if use_single_topic_pipeline:
+                    # Single-topic theme research must stay strictly focused on the chosen theme;
+                    # do not pre-fetch broad column RSS/leaderboard feeds that pollute seed URLs or report_material.
+                    source_block, fetched = "", None
+                elif use_topic_pipeline:
+                    # Four-stage OpenCode pipeline: fetch lightweight source index first,
+                    # skip full-page teaser expansion (Stage 3 reads deep pages per selected topic).
+                    try:
+                        source_block, fetched = _load_sources(skip_teaser_details=True)
+                    except CancelledError:
+                        raise
+                    except Exception as exc:  # noqa: BLE001 - OpenCode can still research via websearch
+                        self._source_fallback_error = str(exc)[:300]
+                        logger.warning("Declared sources unavailable; continuing with OpenCode pipeline: %s",
+                                       self._source_fallback_error)
+                        source_block = ""
+                        fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
                 else:
-                    source_block = self._fetch_sources_block(job)
-                if source_block:
+                    # Declared sources and OpenCode gather run in parallel; both feed the report agent.
+                    try:
+                        run_gather = opencode_gather.wanted(job, gather_cfg)
+                    except Exception:
+                        run_gather = False
+                    if run_gather:
+                        from concurrent.futures import ThreadPoolExecutor
+                        def _load_sources_scoped():
+                            with source_pages.page_cache_scope(page_cache):
+                                return _load_sources()
+                        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="research-gather") as pool:
+                            src_fut = pool.submit(_load_sources_scoped)
+                            gather_fut = pool.submit(opencode_gather.gather, self, job)
+                            src_error: BaseException | None = None
+                            gather_block = ""
+                            try:
+                                source_block, fetched = src_fut.result()
+                            except BaseException as exc:  # noqa: BLE001 - always wait for gather below
+                                src_error = exc
+                            try:
+                                gather_block, self._opencode_gather_receipt = gather_fut.result()
+                            except CancelledError:
+                                raise
+                            except Exception as exc:  # noqa: BLE001 - gather is additive
+                                logger.warning("OpenCode gather skipped: %s", exc)
+                                self._opencode_gather_receipt = {"error": str(exc)[:300]}
+                            if isinstance(src_error, CancelledError):
+                                raise src_error
+                            if src_error is not None:
+                                if gather_block:
+                                    self._source_fallback_error = str(src_error)[:300]
+                                    logger.warning("Declared sources unavailable; continuing with OpenCode gather only: %s",
+                                                   self._source_fallback_error)
+                                    source_block = gather_block
+                                    fetched = ([], {"declared_sources": "跳过：" + self._source_fallback_error[:160]})
+                                else:
+                                    raise src_error
+                            elif gather_block:
+                                source_block = (source_block + "\n\n---\n\n" + gather_block) if source_block else gather_block
+                                logger.info("OpenCode gather attached: %s", self._opencode_gather_receipt)
+                    else:
+                        source_block, fetched = _load_sources()
+                if source_block and not use_any_opencode_pipeline:
                     prompt = f"{prompt}\n\n{source_block}"
                 logger.debug("Prompt built: %d chars", len(prompt))
                 if verbose:
@@ -205,86 +301,166 @@ class ResearchEngine:
                 if self._cancel.is_set():
                     raise CancelledError("Job cancelled before research")
 
-                print(f"  [{job_name}] Researching (LLM + web search)...")
+                from .video import audience_strategy, question_material
+                audience_direct = (
+                    not use_any_opencode_pipeline
+                    and fetch_only
+                    and bool(source_block)
+                    and audience_strategy.direct_from_materials(job, self.sys)
+                )
 
-                # Keep completed reports readable while the next run researches.
-                # _save_output allocates a new filename; a failed run leaves all
-                # earlier reports and their bound video inputs untouched.
-                research_cfg = ResearchConfig.from_system(self.sys)
-                if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
-                    research_cfg.max_searches = int(job["max_searches"])
-                agent = ResearchAgent(
-                    llm_config=LLMConfig.from_system(self.sys, "ai"),
-                    search_config=SearchConfig.from_system(self.sys),
-                    research_config=research_cfg,
-                    workspace_dir=self.workspace_dir,
-                    cancel_token=self._cancel,
-                    progress_cb=self._progress,
-                    timeout_seconds=timeout,
-                )
-                objective = " - ".join(
-                    part for part in (job.get("name", ""), desc) if part
-                )
-                from .research_window import instruction
-                objective += instruction(job.get('_collection_window'))
-                if fetch_only:
-                    raw_content = agent.run_fetch_only(
-                        base_prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1],
-                        sources=source_block or "")
-                else:
-                    from .research_batches import MAX_PROMPT_CHARS
-                    if source_block and len(prompt) > MAX_PROMPT_CHARS:
-                        # The searching agent keeps its first message for the whole run: collected material too large
-                        # for the window is first researched in batches, and the agent continues from that draft.
-                        agent._remember_urls_in(source_block)
-                        digest = agent.write_from(base_prompt, source_block)
-                        prompt = (f"{base_prompt}\n\n## 本期采集材料的分批整理稿\n本期采集材料超过单次处理上限，"
-                                  f"已分 {agent.batches} 批整理如下，原始链接保留在条目中。\n\n{digest}")
-                    raw_content = agent.run(
-                        prompt,
-                        objective=objective,
-                        fallback_queries=job.get("keywords", []),
+                def _run_fetch_agent() -> tuple[str, dict]:
+                    nonlocal agent
+                    research_cfg = ResearchConfig.from_system(self.sys)
+                    if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
+                        research_cfg.max_searches = int(job["max_searches"])
+                    agent = ResearchAgent(
+                        llm_config=LLMConfig.from_system(self.sys, "ai"),
+                        search_config=SearchConfig.from_system(self.sys),
+                        research_config=research_cfg,
+                        workspace_dir=self.workspace_dir,
+                        cancel_token=self._cancel,
+                        progress_cb=self._progress,
+                        timeout_seconds=timeout,
                     )
-                # Migrated columns deepen the researcher's chosen candidates by
-                # reading existing links, before the ordinary report is saved.
-                from .ai_dossier_sources import enrich, wanted
+                    gather_urls = [u for u in (self._opencode_gather_receipt or {}).get("urls") or [] if u]
+                    source_urls = [r.url for r in (fetched[0] if fetched else []) if getattr(r, "url", None)]
+                    stats = dict((fetched[1] if fetched else {}) or {})
+                    for url in gather_urls:
+                        stats.setdefault("opencode_gather:" + url, 1)
+                    text = agent.run_fetch_only(
+                        base_prompt, fetched_urls=source_urls + gather_urls, stats=stats,
+                        sources=source_block or "")
+                    return text, agent.get_usage()
+
                 dossier_detail = {}
-                if wanted(job) and raw_content:
-                    from .search import SearchClient
-                    reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
-                                          progress_cb=self._progress)
-                    extra, dossier_detail = enrich(
-                        job, raw_content, "\n\n".join([source_block, *agent.materials]),
-                        search_client=reader, cancel_token=self._cancel, progress_cb=self._progress)
-                    if extra:
-                        import hashlib
-                        import json
-                        initial = output_path + ".dossier-initial-" + hashlib.sha256(raw_content.encode()).hexdigest()[:16] + ".json"
-                        atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
-                        dossier_detail["initial_report"] = initial
-                        try:
-                            from .research_batches import joined_receipt, strip_receipts
-                            initial_report = raw_content
-                            raw_content = agent.expand_dossier(base_prompt, raw_content, extra,
-                                                               sources=source_block or "")
-                            # The rewrite may drop the material receipt; the supply commit reads it, so carry it over.
-                            if strip_receipts(initial_report)[1] != strip_receipts("")[1] and "material-use" not in raw_content:
-                                raw_content = raw_content.rstrip() + "\n\n" + joined_receipt([initial_report])
-                            dossier_detail["expanded"] = True
-                        except (CancelledError, LLMError):
-                            raise  # the model API is out or refused: stop the run rather than keep a thinner report
-                        except Exception as exc:
-                            dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
-                            logger.warning("Dossier expansion kept the initial report: %s", exc)
-                usage = agent.get_usage()
+                pipeline_material = ""
+                pipeline_receipt = {}
+                if use_any_opencode_pipeline:
+                    if use_single_topic_pipeline:
+                        logger.info("Job '%s' using single-topic OpenCode pipeline (%s)", job_name, opencode_pipeline.SINGLE_MODE_NAME)
+                        print(f"  [{job_name}] Running single-topic OpenCode deep research...")
+                        raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run_single_topic(
+                            self, job, source_block
+                        )
+                    else:
+                        logger.info("Job '%s' using 4-stage OpenCode topic pipeline (%s)", job_name, opencode_pipeline.MODE_NAME)
+                        print(f"  [{job_name}] Running 4-stage OpenCode topic pipeline...")
+                        raw_content, pipeline_material, pipeline_receipt = opencode_pipeline.run(
+                            self, job, source_block, knowledge=knowledge_job.enabled(job)
+                        )
+                    self._prompt_urls.update(_urls_in(source_block))
+                    for item in (fetched[0] if fetched else []):
+                        if getattr(item, "url", None):
+                            self._prompt_urls.add(item.url)
+                    for url in pipeline_receipt.get("urls") or []:
+                        if url:
+                            self._prompt_urls.add(url)
+                    usage = {
+                        "searches": 0,
+                        "opencode_pipeline": {
+                            k: v for k, v in pipeline_receipt.items() if k != "urls"
+                        },
+                    }
+                    for src_usage in (
+                        pipeline_receipt.get("usage") or {},
+                        (pipeline_receipt.get("soft_filter") or {}).get("usage") or {},
+                        (pipeline_receipt.get("discovery") or {}).get("fallback_usage") or {},
+                    ):
+                        for name, value in src_usage.items():
+                            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                                usage[name] = usage.get(name, 0) + value
+                elif audience_direct:
+                    logger.info("Job '%s' using audience-direct mode (skipping redundant R7/R8 drafting)", job_name)
+                    self._prompt_urls.update(_urls_in(source_block))
+                    for item in (fetched[0] if fetched else []):
+                        if getattr(item, "url", None):
+                            self._prompt_urls.add(item.url)
+                    for url in (self._opencode_gather_receipt or {}).get("urls") or []:
+                        if url:
+                            self._prompt_urls.add(url)
+                    raw_content = ""
+                    usage = {"searches": 0, "audience_direct": True}
+                else:
+                    print(f"  [{job_name}] Researching (LLM + web search)...")
+                    if fetch_only:
+                        raw_content, usage = _run_fetch_agent()
+                    else:
+                        research_cfg = ResearchConfig.from_system(self.sys)
+                        if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
+                            research_cfg.max_searches = int(job["max_searches"])
+                        agent = ResearchAgent(
+                            llm_config=LLMConfig.from_system(self.sys, "ai"),
+                            search_config=SearchConfig.from_system(self.sys),
+                            research_config=research_cfg,
+                            workspace_dir=self.workspace_dir,
+                            cancel_token=self._cancel,
+                            progress_cb=self._progress,
+                            timeout_seconds=timeout,
+                        )
+                        objective = " - ".join(
+                            part for part in (job.get("name", ""), desc) if part
+                        )
+                        from .research_window import instruction
+                        objective += instruction(job.get('_collection_window'))
+                        from .research_batches import MAX_PROMPT_CHARS
+                        if source_block and len(prompt) > MAX_PROMPT_CHARS:
+                            # The searching agent keeps its first message for the whole run: collected material too large
+                            # for the window is first researched in batches, and the agent continues from that draft.
+                            agent._remember_urls_in(source_block)
+                            digest = agent.write_from(base_prompt, source_block)
+                            prompt = (f"{base_prompt}\n\n## 本期采集材料的分批整理稿\n本期采集材料超过单次处理上限，"
+                                      f"已分 {agent.batches} 批整理如下，原始链接保留在条目中。\n\n{digest}")
+                        raw_content = agent.run(
+                            prompt,
+                            objective=objective,
+                            fallback_queries=job.get("keywords", []),
+                        )
+                        usage = agent.get_usage()
+                    # Migrated columns deepen the researcher's chosen candidates by
+                    # reading existing links, before the ordinary report is saved.
+                    from .ai_dossier_sources import enrich, wanted
+                    if wanted(job) and raw_content:
+                        from .search import SearchClient
+                        reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
+                                              progress_cb=self._progress)
+                        extra, dossier_detail = enrich(
+                            job, raw_content, "\n\n".join([source_block, *agent.materials]),
+                            search_client=reader, cancel_token=self._cancel, progress_cb=self._progress)
+                        if extra:
+                            import hashlib
+                            import json
+                            initial = output_path + ".dossier-initial-" + hashlib.sha256(raw_content.encode()).hexdigest()[:16] + ".json"
+                            atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
+                            dossier_detail["initial_report"] = initial
+                            try:
+                                from .research_batches import joined_receipt, strip_receipts
+                                initial_report = raw_content
+                                raw_content = agent.expand_dossier(base_prompt, raw_content, extra,
+                                                                   sources=source_block or "")
+                                # The rewrite may drop the material receipt; the supply commit reads it, so carry it over.
+                                if strip_receipts(initial_report)[1] != strip_receipts("")[1] and "material-use" not in raw_content:
+                                    raw_content = raw_content.rstrip() + "\n\n" + joined_receipt([initial_report])
+                                dossier_detail["expanded"] = True
+                            except (CancelledError, LLMError):
+                                raise  # the model API is out or refused: stop the run rather than keep a thinner report
+                            except Exception as exc:
+                                dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
+                                logger.warning("Dossier expansion kept the initial report: %s", exc)
+                            usage = agent.get_usage()
                 if job.get('_collection_window'):
                     usage['collection_window'] = job['_collection_window']
                 if context.get('issue_id'):
                     usage['production_issue'] = {k:context[k] for k in ('issue_id','policy_revision','research_window')}
                 if self._supply_receipt is not None:
                     usage["source_supply"] = self._supply_receipt
+                if self._source_fallback_error:
+                    usage["declared_sources_skipped"] = self._source_fallback_error
                 if self._source_search_client is not None:
                     usage["searches"] = int(usage.get("searches") or 0) + self._source_search_client.calls
+                cache_stats = page_cache.stats()
+                if cache_stats["entries"] or cache_stats["hits"] or cache_stats["negative_hits"] or cache_stats["host_fast_fails"]:
+                    usage["page_cache"] = cache_stats
 
                 if self._cancel.is_set():
                     raise CancelledError("Job cancelled after research")
@@ -292,7 +468,7 @@ class ResearchEngine:
                 self._progress({"type": "phase", "phase": "saving_output"})
                 print(f"  [{job_name}] Saving output...")
 
-                if not raw_content or not raw_content.strip():
+                if not audience_direct and (not raw_content or not raw_content.strip()):
                     logger.error("No output content for job '%s'", job_name)
                     print(f"  [{job_name}] FAILED: model returned no content")
                     StateManager.update(job_name, "failed",
@@ -306,8 +482,66 @@ class ResearchEngine:
                                  fields={"job": job_name, "status": "failed"})
                     return None
 
-                cleaned = extract_report(raw_content, self.sys,
-                                         cancel_token=self._cancel)
+                cleaned = (raw_content if use_any_opencode_pipeline
+                           else "" if audience_direct
+                           else extract_report(raw_content, self.sys, cancel_token=self._cancel))
+                if use_any_opencode_pipeline and self._supply_pending:
+                    cleaned = cleaned.rstrip() + "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
+                audience_detail = {}
+                supplement_material = ""
+                if not use_any_opencode_pipeline and audience_strategy.job_channel(job):
+                    self._progress({"type": "phase", "phase": "organizing_topics"})
+                    initial_report = cleaned
+                    import hashlib
+                    import json
+                    initial_path = output_path + ".audience-initial-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+                    atomic_write(initial_path, json.dumps({"report": initial_report}, ensure_ascii=False) + "\n")
+                    cleaned, audience_detail = audience_strategy.prepare_report(
+                        job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+                        LLMConfig.from_system(self.sys, "ai"), cancel_token=self._cancel)
+                    if audience_direct and (audience_detail.get("status") == "kept_original" or not cleaned.strip()):
+                        logger.warning("Audience-direct failed for '%s'; falling back to ResearchAgent", job_name)
+                        raw_content, fallback_usage = _run_fetch_agent()
+                        usage.update(fallback_usage)
+                        usage["audience_direct_fallback"] = True
+                        cleaned = extract_report(raw_content, self.sys, cancel_token=self._cancel)
+                    opencode_gathered = bool((self._opencode_gather_receipt or {}).get("packet_count"))
+                    cleaned, supplement_material, supplement_detail = question_material.enhance(
+                        job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+                        {**audience_detail, "initial_report": initial_report}, self.sys,
+                        cancel_token=self._cancel, progress_cb=self._progress,
+                        opencode_gathered=opencode_gathered)
+                    if supplement_detail:
+                        audience_detail["question_material"] = supplement_detail
+                        # These URLs were actually read by the supplemental stage.
+                        # Keep the existing citation display consistent with its inputs.
+                        self._prompt_urls.update(
+                            source["url"] for topic in supplement_detail.get("topics", [])
+                            for source in topic.get("retrieved_sources", []) if source.get("text"))
+                        for name, value in supplement_detail.get("usage", {}).items():
+                            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                                usage[name] = usage.get(name, 0) + value
+                    if self._supply_pending:
+                        cleaned += "\n" + audience_strategy.supply_receipt(cleaned, self._supply_pending) + "\n"
+                    if self._cancel.is_set():
+                        raise CancelledError("Job cancelled after topic organization")
+                    audience_detail["initial_report_path"] = initial_path
+                    receipt_path = output_path + ".audience-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+                    atomic_write(receipt_path, json.dumps({"initial_report": initial_report, **audience_detail}, ensure_ascii=False) + "\n")
+                    usage["audience_strategy"] = {
+                        **{key: audience_detail[key] for key in
+                           ("strategy", "version", "channel", "status", "candidate_count", "selection_mode", "error")
+                           if key in audience_detail},
+                        "receipt": receipt_path,
+                        **({"question_material_status": audience_detail["question_material"].get("status")}
+                           if audience_detail.get("question_material") else {}),
+                    }
+                    for name, value in audience_detail.get("usage", {}).items():
+                        if isinstance(value, (int, float)) and not isinstance(value, bool):
+                            usage[name] = usage.get(name, 0) + value
+                    cache_stats = page_cache.stats()
+                    if cache_stats["entries"] or cache_stats["hits"] or cache_stats["negative_hits"] or cache_stats["host_fast_fails"]:
+                        usage["page_cache"] = cache_stats
                 actual_path = self._save_output(cleaned, output_path)
                 from .report_identity import publish
                 publish(os.path.abspath(actual_path), self.workspace_dir)
@@ -333,7 +567,7 @@ class ResearchEngine:
                     from .report_material import save as save_material
 
                     material = save_material(actual_path, cleaned,
-                                             [source_block, *getattr(agent, "materials", [])])
+                                             [source_block, *getattr(agent, "materials", []), supplement_material, pipeline_material])
                 except OSError as exc:
                     logger.warning("Original material snapshot skipped: %s", exc)
 
@@ -346,6 +580,9 @@ class ResearchEngine:
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation, "material": material,
+                                         **({"chain_run_id": context["chain_run_id"]} if context.get("chain_run_id") else {}),
+                                         **({"opencode_pipeline": {"mode": pipeline_receipt.get("mode"), "version": pipeline_receipt.get("version"), "topic_count": pipeline_receipt.get("topic_count"), "artifact_path": pipeline_receipt.get("artifact_path")}} if pipeline_receipt else {}),
+                                         **({"audience_strategy": {"strategy": audience_detail["strategy"], "channel": audience_detail["channel"], "candidate_count": audience_detail.get("candidate_count"), "receipt": receipt_path, **({"question_material": question_material.MARKER} if audience_detail.get("question_material", {}).get("status") == "enriched" else {})}} if audience_detail and audience_detail.get("status") != "kept_original" else {}),
                                          **({'production_issue':usage['production_issue']} if (usage or {}).get('production_issue') else {}),
                                          **({"research_dossier": dossier_detail} if dossier_detail else {})})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
@@ -463,12 +700,13 @@ class ResearchEngine:
             options['collection_window'] = job['_collection_window']
         items, stats = fetch_all_strict(specs, limit_per_source=int(job.get("sources_limit", 8)),
                                         **options)
+        items, detail_note = self._follow_teaser_details(job, items, options.get("search_client"))
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
         note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
-        return f"{header}{note}\n\n{self._source_material(job, items)}", (items, stats)
+        return f"{header}{note}{detail_note}\n\n{self._source_material(job, items)}", (items, stats)
 
     def _fetch_supply(self, job: dict):
         from .source_supply import collect, for_job, material_block
@@ -478,14 +716,50 @@ class ResearchEngine:
         items, stats, self._supply_pending, self._supply_receipt = collect(self, job, profile)
         return material_block(items, self._supply_receipt), (items, stats)
 
-    def _source_options(self, specs: list[str]) -> dict:
-        if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
-            return {}
+    def _source_search(self):
         if getattr(self, "_source_search_client", None) is None:
             from .search import SearchClient
             self._source_search_client = SearchClient(SearchConfig.from_system(self.sys),
                                                       cancel_token=self._cancel, progress_cb=self._progress)
-        return {"search_client": self._source_search_client}
+        return self._source_search_client
+
+    def _source_options(self, specs: list[str]) -> dict:
+        if not any(spec.startswith(("page:", "catalog:", "search:", "bili_hot:")) for spec in specs):
+            return {}
+        return {"search_client": self._source_search()}
+
+    def _follow_teaser_details(self, job: dict, items: list, search_client) -> tuple[list, str]:
+        """Fetch-only Jobs without source_supply: turn RSS/catalog teasers into article bodies."""
+        if job.get("search") is not False or not items:
+            return items, ""
+        from .source_pages import DEFAULT_DETAIL_PAGES, follow_teaser_articles
+
+        pages = int(job.get("source_detail_pages", DEFAULT_DETAIL_PAGES) or 0)
+        if pages <= 0:
+            return items, ""
+        client = search_client
+        if client is None and any(getattr(item, "provider", "") in
+                                  {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"}
+                                  for item in items):
+            try:
+                client = self._source_search()
+            except Exception as exc:  # noqa: BLE001 - detail follow can proceed with browser only
+                logger.warning("Source detail paid reader unavailable: %s", str(exc)[:160])
+                client = None
+        extended, receipt = follow_teaser_articles(
+            items, search_client=client, cancel_token=self._cancel, progress_cb=self._progress,
+            detail_pages=pages)
+        if not receipt.get("attempted"):
+            return items, ""
+        lines = [f"- {row['url']}: {row['status']}"
+                 + (f"（{row['error']}）" if row.get("error") else "")
+                 for row in receipt.get("details") or []]
+        note = (f"\n\n正文补读：成功 {receipt.get('successful', 0)} / 尝试 {receipt.get('attempted', 0)}\n"
+                + "\n".join(lines))
+        if receipt.get("paid_error"):
+            note += f"\n付费读页已跳过：{receipt['paid_error']}"
+        logger.info("Source detail follow: %s", receipt)
+        return extended, note
 
     def _source_material(self, job: dict, items: list) -> str:
         from .search import SearchClient
@@ -495,10 +769,10 @@ class ResearchEngine:
             return SearchClient.format_results(items)
         from pathlib import Path
         from .source_history import prepare
-        block, self._source_pending = prepare(Path(self.workspace_dir) / "state/source_history",
-                                             job.get("_file") or job["name"], items)
-        if job["source_history"] == "context":
-            block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
+        block, self._source_pending = prepare(
+            Path(self.workspace_dir) / "state/source_history", job.get("_file") or job["name"], items,
+            include_current=job["source_history"] == "context",
+        )
         return block
 
     def _fetch_sources_block(self, job: dict) -> str:
@@ -544,8 +818,8 @@ class ResearchEngine:
         now = self._now()
         variables = {
             "name": job.get("name", job.get("_file", "")),
-            # the matrix's domain; a Job in no matrix has none, so {domain} reads as its name
-            "domain": job.get("_domain") or job.get("name", job.get("_file", "")),
+            # Job domain (or matrix fallback via for_run); otherwise {domain} reads as the Job name
+            "domain": job.get("_domain") or job.get("domain") or job.get("name", job.get("_file", "")),
             "keywords": keyword_str,
             "language": job.get("language", "zh"),
             "date": now.strftime("%Y-%m-%d"),
@@ -589,7 +863,7 @@ class ResearchEngine:
         return urls
 
 
-    def _reported_events(self) -> str:
+    def _reported_events(self, job_name: Optional[str] = None) -> str:
         """Sources already reported in recent rounds (suppress duplicates)."""
         try:
             sys_cfg = getattr(self, "sys", None) or {}
@@ -605,6 +879,7 @@ class ResearchEngine:
                 limit=int(cfg.get("limit", 15)),
                 # other matrices' sources: a medical round must not make AI skip its news, nor the other way round
                 exclude_jobs=getattr(self, "_events_exclude", None),
+                prefer_job=job_name or getattr(self, "_current_job_key", None),
             )
         except Exception as exc:  # noqa: BLE001 - never break a run over memory
             # Degrading to no memory is the right behaviour, but it is silent:

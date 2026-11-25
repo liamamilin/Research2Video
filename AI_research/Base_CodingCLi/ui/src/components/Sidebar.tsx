@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss, PanelsTopLeft, BarChart3 } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { AccountModal } from "./AccountModal";
 
 // 矩阵是入口：Job 跑出报告，报告按视频配置写成文稿；产出按 矩阵 › Job › 报告 看（spec/product-redesign.md）
 const mainItems = [
+  { to: "/chains", label: "链路管理", icon: Layers },
   { to: "/matrices", label: "矩阵", icon: Boxes },
   { to: "/outputs", label: "产出", icon: Layers },
   { to: "/", label: "视频看板", icon: LayoutDashboard },
@@ -35,6 +36,8 @@ const adminEngineItems = [{ to: "/scheduler", label: "周期调度", icon: Clock
 const adminItems = [{ to: "/settings", label: "设置", icon: Settings }];
 
 export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () => void }) {
+  const location=useLocation();
+  const chain = new URLSearchParams(location.search).get("chain") || (/^\/chains\/(?!new$)([^/]+)$/.exec(location.pathname)?.[1]);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -73,7 +76,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () =
             {group.items.map((item) => (
               <NavLink
                 key={item.to}
-                to={item.to}
+                to={item.to + (chain && !item.to.startsWith("/chains") ? "?chain="+encodeURIComponent(chain) : "")}
                 end={item.to === "/"}
                 onClick={onNavigate}
                 className={({ isActive }) =>

@@ -1,0 +1,18 @@
+{
+  "flags": {
+    "monitoring/ai_flash_discovery": "flash",
+    "chatgpt_acquisition/t05_comparison": "t05",
+    "chatgpt_acquisition/t06_value": "t06"
+  },
+  "file_checksums": "17/17 match",
+  "health": {
+    "8766": {
+      "status": "ok",
+      "instance_id": "ce367fb7911048a8af81bdfe71bfdacd"
+    },
+    "8011": {
+      "status": "ok"
+    }
+  },
+  "busy_after": []
+}

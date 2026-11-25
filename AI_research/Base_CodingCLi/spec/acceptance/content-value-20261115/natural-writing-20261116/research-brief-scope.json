@@ -1,0 +1,348 @@
+{
+  "jobs": 74,
+  "matrices": 15,
+  "production_bindings": 57,
+  "archived_changes": [],
+  "changed_job_count": 42,
+  "rendered": {
+    "ai_media/ai_tool_tutorials": {
+      "rendered_initial_prompt_sha256": "19f0bd6eb7c44d9487b0dbd6006afacc15f811a395883f47a0af32e74402751c",
+      "job_sha256": "bd4a7e0f97dc668e78c528d468d787bc0e95daf8ec863b266ba0206133297a89",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai_tool_tutorials"
+      ]
+    },
+    "ai_media/daily_opensource_radar": {
+      "rendered_initial_prompt_sha256": "0be8c40d0f164873b072e3b8a815ba58f432848416b507e36bff48ee6a6163ed",
+      "job_sha256": "aca8b80b33698560420c0f6e0bf59e60cc923f8557c4b1002486df013998b2dd",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai_media_opensource_digest"
+      ]
+    },
+    "ai_media/weekly_business_watch": {
+      "rendered_initial_prompt_sha256": "f7c3a94f5fcbafb2e74f4a178475479eb9866522ef0ab88a736c5e605cca0c6e",
+      "job_sha256": "707a0ee1325aada22dd0aa7b370bc82f69f4a1420944a7812b604f7f633b665c",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai_media_business_digest"
+      ]
+    },
+    "ai_media/weekly_deep_research": {
+      "rendered_initial_prompt_sha256": "05022917ba0ca10a6887f068db5671c5718f9d5123dca2816891a74a8f7fa9da",
+      "job_sha256": "a243de5dca8d5227fcdd3b3233f441662f167325f8dbc7bbd70ca1e45fb97e3e",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai_media_deep_dive"
+      ]
+    },
+    "ai_media/weekly_model_arena": {
+      "rendered_initial_prompt_sha256": "06eef3cffb4ac909afcbc1b46212127807c6945703c6b7e36b763ebdca0751c5",
+      "job_sha256": "76eb3c69c3e0d51edbf51cbfd212aaf9db47de4a4837f09677874fe042d51dba",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai_media_arena_digest"
+      ]
+    },
+    "chatgpt_acquisition/t01_product": {
+      "rendered_initial_prompt_sha256": "3003f9016ffae661f174bfc452def6b558716dca30a9d8fa6ea6faf3b427a9f6",
+      "job_sha256": "644b719915036767b8d6f3a539bf7569794a4b2c7240b35ac508f45635a4b25e",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t01_product"
+      ]
+    },
+    "chatgpt_acquisition/t02_scenarios": {
+      "rendered_initial_prompt_sha256": "9466abba891a8222e7c267419530e0cf5b9884d1893de9430e4d5e77a49eeaa1",
+      "job_sha256": "b933af66f4594ec6ae4d5070175e41e33c57857dabad5b617d7e0a38e0819090",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t02_scenarios"
+      ]
+    },
+    "chatgpt_acquisition/t03_tutorials": {
+      "rendered_initial_prompt_sha256": "8850b48e36de2836952336cf4ae8138789ec8b620118a19a6ea2b6a4d54925a0",
+      "job_sha256": "bc5d5fec6b479dce70fa20dc0d5b4d2925deb5cbba081468acc2a0dcae38019a",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t03_tutorials"
+      ]
+    },
+    "chatgpt_acquisition/t04_testing": {
+      "rendered_initial_prompt_sha256": "a22926315402696961cac42ee758f40afcb80ecf79aace203785368a76e8e66d",
+      "job_sha256": "7bd1bc9fad9f7569661fe0fd4b84c81d9ce21dfea8e21c23333a30cd94da8819",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t04_testing"
+      ]
+    },
+    "chatgpt_acquisition/t07_subscription": {
+      "rendered_initial_prompt_sha256": "ccdd370fa5836d9b8d08dc66088fb4257f9f998913a306264b79a5d5b297eb54",
+      "job_sha256": "35c33072ae3b655735ebcee0e2cc1e0e1f2e55bc37970d4f59f2f4db6f4a3b4e",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t07_subscription"
+      ]
+    },
+    "chatgpt_acquisition/t08_troubleshooting": {
+      "rendered_initial_prompt_sha256": "ed2be5db1eb935a6a7b1684c504c8ce804830e0fe5dd2c30cd86b7b1a007f84b",
+      "job_sha256": "2e30f62678baabce0501d11b90b5a9a57ec4487a570c54301c93b145833c87d8",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t08_troubleshooting"
+      ]
+    },
+    "chatgpt_acquisition/t09_updates": {
+      "rendered_initial_prompt_sha256": "395ad9fb0f868fb6990d20b1e8726170a00b21c146fb7ee98fee5f7c6130de0a",
+      "job_sha256": "48902114dad6bc3660545338f817fa12e1d2e9c95d3d6936ba8bd42bbb34b0b9",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "chatgpt_t09_updates",
+        "chatgpt_t09_updates_each"
+      ]
+    },
+    "company/company_daily": {
+      "rendered_initial_prompt_sha256": "27a4c4ea776b8ac0dbca74ed4084a88e03a70c44a5a2894e59276d92a029c8a4",
+      "job_sha256": "b03254411b51920c74b13841c19b0d1e85313bfdc978a98748bf3f08f30ae5d7",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "company_daily"
+      ]
+    },
+    "company/company_illustrated": {
+      "rendered_initial_prompt_sha256": "94a3403d60990e0a8f74222e446da05bf3486c2ac2158ea1a0eddd0a3ff1810a",
+      "job_sha256": "6b28fafd094173d47802464d04d24fdc5e9c69454fdf878059c7ff55b4a20879",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "company_illustrated"
+      ]
+    },
+    "company/company_weekly": {
+      "rendered_initial_prompt_sha256": "3419871dc546c7ee0c50321f287651987ecdc3f946f1f53baa7f6aa22775165d",
+      "job_sha256": "e18f0e74c70b36358d69ad472a1dfd91b16bd0caecbc0885e8e5c176a71fc86b",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "company_weekly"
+      ]
+    },
+    "consumer/consumer_daily": {
+      "rendered_initial_prompt_sha256": "4d4e8070cf14428846301a5a97a9e64608482ed9e547de64c23ab15f829475b9",
+      "job_sha256": "978345b3475c77d2b2fe8c0650727e20d0eac51e7eff3c2c11ff1a323dd3491c",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "consumer_daily"
+      ]
+    },
+    "consumer/consumer_illustrated": {
+      "rendered_initial_prompt_sha256": "4de1e095451e13cd914afc3851730dd3cefa2e2a3b7461b3b6d7053337915e53",
+      "job_sha256": "1637ddeb7b0aac21eb1405f7681aa39878bd548221c64aa398b99166a0448192",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "consumer_illustrated"
+      ]
+    },
+    "consumer/consumer_weekly": {
+      "rendered_initial_prompt_sha256": "6b25b1f586e735d5bb2adb91ad7df2d820a355096d5665a5682884c08369cc2c",
+      "job_sha256": "0edf82bd355293faeb64be08fb04c48babd48a23489a88e2f7d1892b18fdf05c",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "consumer_weekly"
+      ]
+    },
+    "culture/culture_daily": {
+      "rendered_initial_prompt_sha256": "77003336c4504c9c49a104841357f1c0d8c94902ecb0a8b59a521b3f3a085ea7",
+      "job_sha256": "59b0324a423dad7174faea8d627ebd5ad182057dbb1858b390d1727beedec647",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "culture_daily"
+      ]
+    },
+    "culture/culture_illustrated": {
+      "rendered_initial_prompt_sha256": "7814dad549d2cea4329ed6c4d7b9622cccfba27251172c004e680a9ed690cd66",
+      "job_sha256": "3006f84b01297776dcbbe447ac54f380d9388bd12667aa03fd60d000f8ff2959",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "culture_illustrated"
+      ]
+    },
+    "culture/culture_weekly": {
+      "rendered_initial_prompt_sha256": "384c4d4b7d294ff2cb7a478ce36cd321eed6004a3a4789bd35f5853c8fcc07bd",
+      "job_sha256": "6e3ec8ae5cc766ece9e1fbe7c0023688f23dbb1f6285753c5b47b82599b92b5d",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "culture_weekly"
+      ]
+    },
+    "economy/economy_daily": {
+      "rendered_initial_prompt_sha256": "854d9554c0f8a8d798461f4534683df3a18871e45aba5c7c6f6f07c399d8b8a2",
+      "job_sha256": "915a314cbc58d55658d247286e729382471689d537c3f61c40d0c5b983290ee1",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai-non_tech-deep_dive-long-2",
+        "economy_daily"
+      ]
+    },
+    "economy/economy_illustrated": {
+      "rendered_initial_prompt_sha256": "550d08342fd01ce1146ff4b319f48aeec3b74474db998268065c333316cbff16",
+      "job_sha256": "07f38165aa535a1c56e54d8f76378f86944c520d929e9545cffc10c6e0590dbd",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "economy_illustrated"
+      ]
+    },
+    "economy/economy_weekly": {
+      "rendered_initial_prompt_sha256": "0553a1b6771c208713af2fcd76507b8b0b45dc9aafe3afe80385ff417b01010c",
+      "job_sha256": "b8d5186fd677c1f83a9ede449b55822bf30051ffeaba8319fd39b431259fc0e3",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "economy_weekly"
+      ]
+    },
+    "geography/geography_daily": {
+      "rendered_initial_prompt_sha256": "b5128a1b275a7226b2ef51ea58d27fbad1c39ff6af4d28faae638da424e8e9d2",
+      "job_sha256": "3aed74aac11c98fdb3ef177559a71b00da5ac6d37926a444b7251e3da54a70ce",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "geography_daily"
+      ]
+    },
+    "geography/geography_illustrated": {
+      "rendered_initial_prompt_sha256": "bab20e8431c546522a7ef17766378df356ba68fa21e7bba67787b0d004124906",
+      "job_sha256": "6fb8b1d25471e54faaebc0400749a7c2b9ab1c9f3c5aab3a9fc532f7655cb017",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "geography_illustrated"
+      ]
+    },
+    "geography/geography_weekly": {
+      "rendered_initial_prompt_sha256": "fc56cdb6aae82154ee8011f3bb8f3a755cc2e841d4862d3e6e59b47c1fb1f073",
+      "job_sha256": "3558ba9ac296acb4e86e4cf09dba6408bbfa216d32966b872a802907163d11f3",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "geography_weekly"
+      ]
+    },
+    "history/history_daily": {
+      "rendered_initial_prompt_sha256": "ab6306a24f62ba39ab32aaf1cb03c48a11c5584302755cee3e5b22095ac5018b",
+      "job_sha256": "f7a91dd0d5c8d04348538aa23f391fac408035216eef3078fbc17c324d1d3b04",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "history_daily"
+      ]
+    },
+    "history/history_illustrated": {
+      "rendered_initial_prompt_sha256": "62ff1379c9bc3b039ce764e47a9f28d52e967852667bdf178ee57a6c578ba02b",
+      "job_sha256": "dfbe79c4d27f3650277cff19c49166462ed7900cf2097aa8d9d8258a0d24ab69",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "history_illustrated"
+      ]
+    },
+    "history/history_weekly": {
+      "rendered_initial_prompt_sha256": "1db23b32b92ada8f18f104b86f42fdcc057f7ca7ec8f51b0a65d9a33242a17ac",
+      "job_sha256": "472a035b4fcaf4834a04d44cdeeef8fae969cd28f6ebf77c60deb655464756cc",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "history_weekly"
+      ]
+    },
+    "industry/industry_daily": {
+      "rendered_initial_prompt_sha256": "c538e8d11c0c469c352a8e629f9cf18789eaea4565cd374ca6da34daeb250044",
+      "job_sha256": "69a52b86b3d0f2fc2dec6799a43da9f181d1a37ff516fb93bb9f0208e29a92c8",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "industry_daily"
+      ]
+    },
+    "industry/industry_illustrated": {
+      "rendered_initial_prompt_sha256": "87cd893d4adb5e6a9cd698193c4bc321bcdf7dd090f824c87efdace70b9495ff",
+      "job_sha256": "00886edb32fd067c3601103892f47bb59b837976b6757e559faff48f4d575f61",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "industry_illustrated"
+      ]
+    },
+    "industry/industry_weekly": {
+      "rendered_initial_prompt_sha256": "f3d568e948edac05fda7d60a3d6df0975347ebb677eb35e7c4e4ae901f1b4359",
+      "job_sha256": "950344d76b2716062b8869f7e60276566fd9481e4975886a4cd3e545a06b2c0b",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "industry_weekly"
+      ]
+    },
+    "science/science_daily": {
+      "rendered_initial_prompt_sha256": "a61f839ca3ffefd57c3b602f634eb6c8c1aced9b3eb62766e577533be4c737af",
+      "job_sha256": "52f6696d5dcfcc0b87cf6ed2ca5b988f3db5961a5c724de79dd69776dabbd04e",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "science_daily"
+      ]
+    },
+    "science/science_illustrated": {
+      "rendered_initial_prompt_sha256": "a243e6cdbe93198b6a80a9c0356ade47b6ba7bb2bebd447138b576d5adab409e",
+      "job_sha256": "ace4d4931d8b94a6b3b5041fcbea9de14f36a89085f508c8acced9bdcd4d55c2",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "science_illustrated"
+      ]
+    },
+    "science/science_weekly": {
+      "rendered_initial_prompt_sha256": "db1855d54d06f21bd13161ea170a595c33fb16c10eb9d4a35d1cf93ec36a567d",
+      "job_sha256": "72d43ca6c2dfad415a943f79b708bbc0e2aa1ed5f4cf0298d5bed8dd56e082d3",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "science_weekly"
+      ]
+    },
+    "software/software_daily": {
+      "rendered_initial_prompt_sha256": "ac288b4f57d6574f6c18fb955a5b5793cabe1d142be0d8c73f44bb2bf9c0574c",
+      "job_sha256": "2610e56f97dbb97fba4915951d0f9d656cb7b63176e55c6e1a412d43135c9b6a",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "software_daily"
+      ]
+    },
+    "software/software_illustrated": {
+      "rendered_initial_prompt_sha256": "4c04c6d23b106a66bd56f6a2ac65ecd753ead44efd549cfe7889d99d5c71fd38",
+      "job_sha256": "6fdbc34f84dac26d8749d657555ba08753a71385fe7283abb7f6b3d988de87cd",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "software_illustrated"
+      ]
+    },
+    "software/software_weekly": {
+      "rendered_initial_prompt_sha256": "3c411f3fffa1fdbcea4c86af5c3ada4ae1b2a3327f93056ff9dd055e85299cd6",
+      "job_sha256": "513df5a70fcea2d561f64cd87a3bd98fcc53f67393c00a3573416f140584438b",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "software_weekly"
+      ]
+    },
+    "tech/tech_daily": {
+      "rendered_initial_prompt_sha256": "82bf228bae51a416024526cd9c6ccca2efed5cd94503d689ee70ab2e897f9c68",
+      "job_sha256": "e8e0de96cb1be20958a3970727c967f2387613ba8357688d9a008dc5af213da4",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "ai-non_tech-headline-short",
+        "tech_daily"
+      ]
+    },
+    "tech/tech_illustrated": {
+      "rendered_initial_prompt_sha256": "f82d46b668e65dc53c5770d19f37de662523d599107b9f1a5ad12381466501b1",
+      "job_sha256": "acef790061253c8b1b172e1f049da1d46e3fac90b9da70418d4f3ce4244e2b98",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "tech_illustrated"
+      ]
+    },
+    "tech/tech_weekly": {
+      "rendered_initial_prompt_sha256": "6cc9d9e9029ad13709681f73c066bc839dbc0089939406502657084ed2d2dbe7",
+      "job_sha256": "6d27f57a35cd908e05209795cd752d26da6a9d85ef6d7cc71ec33af957b10a9b",
+      "pipeline": "normal ResearchEngine._build_prompt with date/event placeholders; no provider call",
+      "usable_bindings": [
+        "tech_weekly"
+      ]
+    }
+  }
+}

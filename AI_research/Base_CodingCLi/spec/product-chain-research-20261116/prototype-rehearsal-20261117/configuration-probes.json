@@ -1,0 +1,17 @@
+{
+  "type": "read-only pure configuration probe; no job created",
+  "original_source_profile": "ai_media",
+  "new_id_source_profile": null,
+  "original_audience_channel": "flash",
+  "new_id_audience_channel": null,
+  "openai_rss_coverage_references": [
+    {
+      "key": "openai_product",
+      "jobs": [
+        "monitoring/ai_flash_discovery",
+        "ai_media/weekly_model_arena",
+        "ai_media/weekly_business_watch"
+      ]
+    }
+  ]
+}

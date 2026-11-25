@@ -1,5 +1,6 @@
 """Independent business columns and their existing production bindings."""
 from __future__ import annotations
+from web.services.chains import mutation
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
@@ -166,10 +167,12 @@ def _save(key: str, body: ColumnIn, user, *, creating: bool):
 
 
 @router.post("/api/content-columns", status_code=201)
+@mutation
 def create_column(body: ColumnIn, user=Depends(require_editor)):
     return _save(body.key, body, user, creating=True)
 
 
 @router.put("/api/content-columns/{key}")
+@mutation
 def update_column(key: str, body: ColumnIn, user=Depends(require_editor)):
     return _save(key, body, user, creating=False)

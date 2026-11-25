@@ -11,7 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from g2.fast_cards import _ass_text, _stamp
+from g2.fast_cards import _ass_text, _stamp, font, lines
 
 
 def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
@@ -30,22 +30,22 @@ def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
 
 #: The picture area the agenda and item cards cover; two-line captions start below it, the header sits above it.
 STAGE = (0, 140, 1920, 870)
-CARD_FRAMES = 54           # an item card shows for 1.8 s, never longer than a third of its item
-FADE_MS = 220
+CARD_FRAMES = 30           # an item card shows for 1.0 s, never longer than a third of its item
+FADE_MS = 160
+MAX_AGENDA_ITEMS = 12  # Six legible rows per column in the available picture area.
 PAPER = {'background': '#F7F8F5', 'text': '#202D28', 'muted': '#69756E', 'accent': '#17784B',
          'line': '#E1E8E1', 'surface': '#FFFFFF'}
 
 
 def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph_starts: list[str]) -> dict | None:
-    """When the opening agenda shows and, where the briefing gives each item its own paragraph, when each lights up.
+    """When the opening agenda shows and each item lights up as its briefing line starts.
 
-    The opening is everything before the first item. A briefing is an overview, optionally after the greeting, then
-    one line per item; when the opening has exactly that many paragraphs, its last paragraphs are the items' lines and
-    an item lights up as its line starts. Any other shape stays unlit: a highlight that may sit on an item other than
-    the one being said is worse than none.
+    The opening is everything before the first item. Only a structured briefing (one greeting/intro
+    paragraph, optionally a lead-in, then one paragraph per item) draws the full-stage agenda; a
+    story/hook opening keeps its own planned visuals visible while the footer still tracks progress.
     """
     first = items[0]['start_frame'] if items else 0
-    if first <= 0:
+    if first <= 0 or len(items) > MAX_AGENDA_ITEMS:
         return None
     chapters = ir['content_structure']['chapters']
     covered = {ci for item in program['items'] for ci in item['chapter_indexes']}
@@ -54,11 +54,11 @@ def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph
     starts_ms = {s['id']: s['start_ms'] for s in compiled.get('narration', {}).get('segments', [])}
     to_frame = lambda ms: (ms * 30 + 500) // 1000
     paragraphs = [sid for sid in paragraph_starts if sid in opening and sid in starts_ms]
+    if len(paragraphs) - len(items) not in (1, 2):
+        return None
+    highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
     start = to_frame(starts_ms[paragraphs[1]]) if len(paragraphs) > 1 else 0
-    highlights = None
-    if len(paragraphs) - len(items) in (1, 2):
-        highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
-        start = min(start, highlights[0])
+    start = min(start, highlights[0])
     start = max(0, min(start, first - 1))
     return {'start_frame': start, 'end_frame': first, 'highlights': highlights}
 
@@ -122,7 +122,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         rect(4, start, end, x0, y0, x1 - x0, y1 - y0, _bgr(paper['background']), f'\\fad({FADE_MS},{FADE_MS})')
     def text(start, end, x, y, size, fill, value, align=4, bold=True):
         event(8, start, end, '{' + f'\\an{align}\\pos({x},{y})\\fs{size}\\c{fill}\\b{int(bold)}\\fad({FADE_MS},{FADE_MS})' + '}' + _ass_text(value))
-    if opening:
+    if opening and 0 < len(items) <= MAX_AGENDA_ITEMS:
         start, end = opening['start_frame'], opening['end_frame']
         cover(start, end)
         text(start, end, 140, 205, 44, _bgr(paper['text']), '操作步骤' if tutorial else '本期导读')
@@ -130,13 +130,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         columns = 1 if len(items) <= 5 else 2
         rows = -(-len(items) // columns)
         width = (x1 - 280 - 40 * (columns - 1)) // columns
-        height = min(96, (y1 - 290 - 20 * (rows - 1)) // rows)
+        gap = 10
+        height = min(100, (y1 - 280 - gap * (rows - 1)) // rows)
         lights = opening.get('highlights')
-        top = 280 + max(0, (y1 - 300 - (rows * height + 20 * (rows - 1))) // 2)
+        top = 280 + (y1 - 280 - (rows * height + gap * (rows - 1))) // 2
+        size = 36 if rows == 6 else 40
+        face = font(size)
         for i, item in enumerate(items):
             column, row = divmod(i, rows)
-            x, y = 140 + column * (width + 40), top + row * (height + 20)
-            size = _fit(item['title'], width - 150, 38 if columns == 1 else 32)
+            x, y = 140 + column * (width + 40), top + row * (height + gap)
+            title = r'\N'.join(_ass_text(line) for line in lines(item['title'], face, width - 136))
             windows = [(start, end, 'idle')] if lights is None else [
                 (start, lights[i], 'next'), (lights[i], lights[i + 1] if i + 1 < len(items) else end, 'now'),
                 (lights[i + 1] if i + 1 < len(items) else end, end, 'done')]
@@ -153,7 +156,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 ink = _bgr(accent) if state == 'now' else _bgr(paper['muted']) if state == 'done' else _bgr(paper['text'])
                 number = _bgr(accent) if state != 'done' else _bgr(paper['muted'])
                 event(8, begin, until, '{' + f'\\an4\\pos({x + 36},{y + height // 2})\\fs30\\c{number}\\b1' + fade + '}' + f"{item['index']:02d}")
-                event(8, begin, until, '{' + f'\\an4\\pos({x + 110},{y + height // 2})\\fs{size}\\c{ink}\\b{int(state == "now")}' + fade + '}' + _ass_text(item['title']))
+                event(8, begin, until, '{' + f'\\an4\\pos({x + 110},{y + height // 2})\\fs{size}\\c{ink}\\b{int(state == "now")}' + fade + '}' + title)
     for card in item_cards or []:
         start, end = card['start_frame'], card['end_frame']
         item = items[card['index'] - 1]
@@ -236,7 +239,8 @@ def apply(pipeline, compiled: dict) -> dict | None:
         [c['start_frame'], c['end_frame']] for c in item_cards]
     report = {'mode': 'episode', 'items': items, 'total_frames': compiled['total_frames'],
               'agenda': opening, 'item_cards': item_cards, 'covered_frames': covered,
-              'agenda_highlight': 'per item paragraph' if opening and opening['highlights'] else 'static list',
+              'agenda_highlight': ('per item paragraph' if opening and opening['highlights']
+                                   else 'none' if opening is None else 'static list'),
               'fps': 30, 'timing': 'measured narration chapters', 'footer': [0, 1024, 1920, 56],
               'audio': 'stream copy', 'source_preserved': str(source), 'video_sha256': digest(pipeline.VIDEO_PATH)}
     pipeline.write_json(report_path, report)

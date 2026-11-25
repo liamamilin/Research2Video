@@ -1,0 +1,158 @@
+{
+  "style": {
+    "key": "flat",
+    "name": "扁平插画",
+    "version": 2
+  },
+  "cast": {
+    "A": "二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤",
+    "B": "二十多岁的男性，棕色短卷发，浅蓝色连帽卫衣，灰色运动裤"
+  },
+  "seed": 1240219562,
+  "images": [
+    {
+      "chapter": 1,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 stands behind a narrow counter in a tiny shop, pressing a row of five small colored stickers onto a paper cup sleeve, a stack of plain cups beside her hand., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "店长在窄柜台后把五张彩色贴纸依次贴在杯套上，对应一杯奶茶的几笔开支。"
+    },
+    {
+      "chapter": 2,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 stands at the counter ladling chunks of fresh fruit into a cup, an open bag of tea leaves and a carton of milk within reach, shelves of cups behind her., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "店长把鲜果舀进杯子，对应便宜那几个月果茶上新多的原料这一笔。"
+    },
+    {
+      "chapter": 3,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 presses a thick stack of yellow and blue stickers onto a cup sleeve at the counter, the stack rising higher than the sleeve, a rainy window behind her., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "雨天客人少，店长把黄蓝贴纸叠得比杯套还高，白色那张只好撕掉一半。"
+    },
+    {
+      "chapter": 4,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 tips a scoop of ice into a cup until it overflows, a small pitcher of milk tea beside her hand, a blank plain-colored board on the wall behind., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "店长往杯里多加冰，对应小料、奶盖那些不写在牌子上的变化。"
+    },
+    {
+      "chapter": 5,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 on the left hands a paper bag with a cup across the counter to 二十多岁的男性，棕色短卷发，浅蓝色连帽卫衣，灰色运动裤 on the right, a queue barrier and a window of a small airport shop behind them., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "机场小店里，店长把装袋的奶茶递给顾客，同一款在不同渠道是不同的账单。"
+    },
+    {
+      "chapter": 6,
+      "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, 二十多岁的男性，棕色短卷发，浅蓝色连帽卫衣，灰色运动裤 stands facing the counter holding a cup up at eye level, 二十七八岁的女性，黑色短发波波头配齐刘海，芥末黄色短袖衬衫，深藏青色长裤 leaning on the counter to the left, a blank plain-colored sign above them., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+      "seed": 1240219562,
+      "note": "顾客端起杯子端详，店长在柜台另一侧，把“觉得贵”换成三个具体问题。"
+    }
+  ],
+  "chapters": [
+    {
+      "keywords": [
+        "五张贴纸",
+        "一杯的价格"
+      ],
+      "overlay": {
+        "kind": "composition",
+        "items": [
+          "原料",
+          "房租",
+          "人工",
+          "包装",
+          "利润"
+        ],
+        "total": "一杯奶茶的售价"
+      }
+    },
+    {
+      "keywords": [
+        "按杯走",
+        "按月走"
+      ],
+      "overlay": {
+        "kind": "steps",
+        "style": "number",
+        "items": [
+          "原料按杯走",
+          "房租按月走",
+          "人工按月走"
+        ]
+      }
+    },
+    {
+      "keywords": [
+        "固定开支",
+        "卖出的杯数"
+      ],
+      "overlay": {
+        "kind": "formula",
+        "terms": [
+          "固定开支",
+          "卖出杯数"
+        ],
+        "operators": [
+          "÷"
+        ],
+        "result": "每杯摊多少",
+        "bars": [
+          {
+            "label": "一天三百杯",
+            "value": 300
+          },
+          {
+            "label": "一天八十杯",
+            "value": 80
+          }
+        ]
+      }
+    },
+    {
+      "keywords": [
+        "暗着变",
+        "三种做法"
+      ],
+      "overlay": {
+        "kind": "steps",
+        "style": "number",
+        "items": [
+          "明着改数字",
+          "暗着减料",
+          "先扛着"
+        ]
+      }
+    },
+    {
+      "keywords": [
+        "四份账单",
+        "渠道"
+      ],
+      "overlay": {
+        "kind": "steps",
+        "style": "number",
+        "items": [
+          "机场店",
+          "商场店",
+          "社区店",
+          "外卖"
+        ]
+      }
+    },
+    {
+      "keywords": [
+        "三件事",
+        "账单的结构"
+      ],
+      "overlay": {
+        "kind": "steps",
+        "style": "question",
+        "items": [
+          "哪笔成本在动",
+          "一天卖多少杯",
+          "从哪个渠道买"
+        ]
+      }
+    }
+  ],
+  "overlays_dropped": []
+}

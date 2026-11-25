@@ -1,10 +1,11 @@
 import { usePublishDraft } from "@/lib/use-publish-draft";
+import { BilibiliCovers } from "./BilibiliCovers";
 import { PublishDraftStatus } from "./PublishDraftStatus";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, Send } from "lucide-react";
 import { api } from "@/api/client";
-import { EMPTY_FIRST_COMMENT, PLATFORM_API, loadBilibiliCategories, platformAction, type UploadPreview, type UploadTask } from "@/api/platforms";
+import { CREATION_STATEMENT_OPTIONS, EMPTY_FIRST_COMMENT, PLATFORM_API, loadBilibiliCategories, platformAction, type UploadPreview, type UploadTask } from "@/api/platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
 import { ErrorState } from "@/components/ErrorState";
@@ -35,14 +36,16 @@ function UploadEditor({ initial, onDone, run, busy }: { initial: UploadPreview; 
     tags: (initial.draft?.payload.tags ?? initial.tags).join("，"),
     firstComment: initial.draft?.payload.first_comment ?? initial.first_comment ?? EMPTY_FIRST_COMMENT,
     tid: initial.draft?.payload.tid ?? initial.tid ?? 0,
+    creationStatement: initial.draft?.payload.creation_statement ?? initial.creation_statement,
   }, Boolean(initial.draft));
-  const { title, description, tags, firstComment, tid = 0 } = draft.value;
+  const { title, description, tags, firstComment, tid = 0, creationStatement } = draft.value;
   const setTitle = (value: string) => draft.field("title", value);
   const setDescription = (value: string) => draft.field("description", value);
   const setTags = (value: string) => draft.field("tags", value);
   const setFirstComment = (value: typeof firstComment) => draft.field("firstComment", value);
   const setTid = (value: number) => draft.field("tid", value);
-  const content = { title, description, tid: Number(tid), tags: tags.split(/[,，]/).map(t => t.trim()).filter(Boolean), first_comment: firstComment };
+  const setCreationStatement = (value: number) => draft.field("creationStatement", value);
+  const content = { title, description, tid: Number(tid), tags: tags.split(/[,，]/).map(t => t.trim()).filter(Boolean), first_comment: firstComment, ...(creationStatement !== undefined ? { creation_statement: Number(creationStatement) } : {}) };
   const textCheck = publishCheck("bilibili",content,initial.adaptation?.check.limits);
   const validComment = validFirstComment("bilibili",firstComment);
   const [templateSaved, setTemplateSaved] = useState(false);
@@ -61,11 +64,13 @@ function UploadEditor({ initial, onDone, run, busy }: { initial: UploadPreview; 
     <label className="block text-xs">标题（{textCount(title.trim())}/80）<input aria-label="标题" required className="input w-full mt-1" value={title} onChange={e => {setTitle(e.target.value);}} /></label>
     <label className="block text-xs">简介（{textCount(description)}/2000）<textarea aria-label="简介" rows={5} className="input w-full mt-1" value={description} onChange={e => {setDescription(e.target.value);}} /></label>
     <div className="grid sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)] gap-3"><label className="block text-xs">标签（用逗号分隔）<input required className="input w-full mt-1" value={tags} onChange={e => setTags(e.target.value)} /></label><BilibiliCategorySelect label="投稿分区" required value={tid} onChange={setTid} resource={categoryResource} content={{ title, description, tags: tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean) }} /></div>
+    <label className="block text-xs">创作声明<select aria-label="创作声明" className="input w-full mt-1" value={creationStatement ?? 0} onChange={e => setCreationStatement(Number(e.target.value))}>{CREATION_STATEMENT_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}</select></label>
+    <BilibiliCovers renderId={initial.render_id} accountUid={initial.account_uid ?? ""} busy={busy} run={run} />
     <FirstCommentOptions value={firstComment} onChange={value => { setFirstComment(value); setTemplateSaved(false); }} />
     <PublishAdaptation platform="bilibili" renderId={initial.render_id} accountUid={initial.account_uid} value={content} initial={initial.adaptation} run={run} busy={busy} onApply={next => draft.applySaved({ title: next.title, description: next.description, tags: next.tags.join("，"), firstComment: next.first_comment ?? firstComment, tid: next.tid ?? tid })} />
     {textCheck.issues.length ? <div role="alert" className="text-xs text-warning">{textCheck.issues.map(issue => <p key={issue}>{issue}</p>)}</div> : null}
     {role === "admin" ? <details><summary className="text-xs cursor-pointer">后续投稿默认评论设置</summary><div className="flex flex-wrap items-center gap-3"><button type="button" className="btn text-xs" disabled={busy || (firstComment.enabled && !firstComment.text.trim())} onClick={() => void run(async () => { await platformAction("/first-comment-template", firstComment, "PUT"); setTemplateSaved(true); })}>保存为常用评论</button><span className="text-xs text-text-muted">{templateSaved ? "已保存，后续投稿默认使用；当前还未发送。" : "可将内容和置顶选项保存为后续投稿的默认设置。"}</span></div></details> : null}
-    <p className="text-xs text-text-muted">使用这次成片及已有封面；没有封面时自动截取视频画面。加入队列后会自动开始上传，B 站审核通过并公开后回写发布记录。</p>
+    <p className="text-xs text-text-muted">4:3 与 16:9 封面分别保存并随投稿提交；没有另选封面时沿用成片已有封面。加入队列后会自动开始上传，B 站审核通过并公开后回写发布记录。</p>
     <div className="flex flex-wrap gap-3 items-center"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api("/api/video/distributions/bilibili/draft", { method: "PUT", body: { render_id: initial.render_id, account_uid: initial.account_uid, payload: content } }); draft.markSaved(); })}>保存草稿</button><PublishDraftStatus draft={draft} /></div>
     <button className="btn btn-primary text-xs" disabled={busy || !validCategory || !textCheck.valid || !validComment}><Send className="w-3.5 h-3.5" />提交到 B 站</button>
     </fieldset>
@@ -76,12 +81,13 @@ export function UploadRow({ task, canEdit, run, busy }: { task: UploadTask; canE
   const [bvid, setBvid] = useState(task.bvid);
   return <li className="card p-4 space-y-2">
     <div className="flex flex-wrap justify-between gap-2"><Link className="text-sm font-medium hover:underline" to={documentPublishLink(task.script_id, task.version, task.render_id)}>{task.payload.title}</Link><span className={cn("badge border border-border", task.status === "UNKNOWN" && "text-warning")}>{UPLOAD_STATES[task.status] || task.status}</span></div>
-    <div className="flex flex-wrap gap-3 text-xs text-text-muted"><span>文稿 v{task.version}</span><span>{new Date(task.created_at * 1000).toLocaleString("zh-CN")}</span>{task.bvid ? <PlatformLink bvid={task.bvid}>{task.bvid}</PlatformLink> : null}<Link className="text-accent hover:underline" to={documentPublishLink(task.script_id, task.version, task.render_id)}>查看文稿发布记录 →</Link></div>
+    <div className="flex flex-wrap gap-3 text-xs text-text-muted"><span>文稿 v{task.version}</span><span>{new Date(task.created_at * 1000).toLocaleString("zh-CN")}</span>{task.payload.creation_statement ? <span>创作声明：{CREATION_STATEMENT_OPTIONS.find(o => o.id === task.payload.creation_statement)?.label ?? `ID ${task.payload.creation_statement}`}{task.recovery?.declaration_verification ? `（${task.recovery.declaration_verification.status === "confirmed" ? "平台资料已确认" : task.recovery.declaration_verification.status === "mismatch" ? "声明不符" : "尚未确认"}）` : ""}</span> : null}{task.bvid ? <PlatformLink bvid={task.bvid}>{task.bvid}</PlatformLink> : null}<Link className="text-accent hover:underline" to={documentPublishLink(task.script_id, task.version, task.render_id)}>查看文稿发布记录 →</Link></div>
     {task.status === "PUBLISHED" ? <p className="text-xs text-success">已自动回填文稿的发布链接、日期和已发布状态。</p> : ["QUEUED", "UPLOADING", "SUBMITTED"].includes(task.status) ? <p className="text-xs text-text-muted">确认视频公开后自动回填文稿发布记录。</p> : null}
     {task.error ? <p className={cn("text-xs", task.error.startsWith("定时发布") || task.error.startsWith("等待白天时段") ? "text-text-muted" : "text-warning")}>{task.error}</p> : task.status === "QUEUED" && task.payload.dtime ? <p className="text-xs text-text-muted">定时发布：将于 {new Date(task.payload.dtime * 1000).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })} 公开。</p> : null}
     {task.recovery?.note ? <p className="text-xs text-text-muted" role="status">{task.recovery.note}</p> : task.status === "UNKNOWN" ? <p className="text-xs text-text-muted">系统会自动核对 B 站稿件，确认结果前保留原任务。</p> : null}
     <details className="rounded border border-border p-3 text-xs"><summary className="cursor-pointer text-text-muted">投稿时发布包</summary><div className="mt-2 space-y-2"><p className="whitespace-pre-wrap break-words">{task.payload.description}</p><p className="text-text-muted">{task.payload.tags?.join(" · ")}</p></div></details>
     <FirstCommentProgress task={task} canEdit={canEdit} run={run} busy={busy} />
+    {canEdit && task.bvid && ["PUBLISHED", "SUBMITTED"].includes(task.status) ? <details><summary className="text-xs cursor-pointer">修改双比例封面</summary><BilibiliCovers renderId={task.render_id} accountUid={task.uid ?? ""} taskId={task.id} busy={busy} run={run} /></details> : null}
     {canEdit && task.status === "QUEUED" ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/cancel`))}>取消排队</button> : null}
     {canEdit && ["FAILED", "CANCELLED"].includes(task.status) ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/retry`))}>重新检查并排队</button> : null}
     {canEdit && task.status === "REMOVED" ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/reupload`))}>重新投稿</button> : null}
@@ -108,7 +114,17 @@ function FirstCommentProgress({ task, canEdit, run, busy }: { task: UploadTask; 
 }
 
 export function FocusedUpload({ taskId, canEdit, run, busy }: { taskId: string; canEdit: boolean; run: Run; busy: boolean }) {
-  const load = useCallback((signal: AbortSignal) => api<UploadTask>(`${PLATFORM_API}/uploads/${encodeURIComponent(taskId)}`, { signal }), [taskId]);
-  const { data, error, reload } = usePageResource(load, 6000);
+  const [active, setActive] = useState(true);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const task = await api<UploadTask>(`${PLATFORM_API}/uploads/${encodeURIComponent(taskId)}`, { signal });
+    if (!signal.aborted) {
+      const busyTask = ["QUEUED", "UPLOADING", "SUBMITTED", "UNKNOWN"].includes(task.status)
+        || (Boolean(task.payload.first_comment?.enabled) && ["WAITING", "SENDING"].includes(task.first_comment_status || "WAITING"))
+        || (Boolean(task.payload.first_comment?.pin) && ["WAITING", "PINNING"].includes(task.first_comment_pin_status || "WAITING"));
+      setActive(busyTask);
+    }
+    return task;
+  }, [taskId]);
+  const { data, error, reload } = usePageResource(load, active ? 6000 : 0);
   return <section className="space-y-2" aria-label="当前文稿投稿任务"><h2 className="text-sm font-medium">当前投稿任务</h2>{error ? <ErrorState error={error} onRetry={reload} compact /> : null}{data ? <ul><UploadRow task={data} canEdit={canEdit} run={async action => { await run(action); await reload(); }} busy={busy} /></ul> : !error ? <p className="text-xs text-text-muted">正在读取投稿进度…</p> : null}</section>;
 }

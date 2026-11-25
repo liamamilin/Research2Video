@@ -1,0 +1,189 @@
+[
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "path": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+    "ts": "2026-11-16T19:41:35+0800",
+    "duration_seconds": 2088.9,
+    "searches": 15,
+    "audience_strategy": {
+      "strategy": "audience-v1",
+      "channel": "flash",
+      "candidate_count": 6,
+      "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md.audience-97aa1e1b2ecc64b4.json",
+      "question_material": "question-v1"
+    },
+    "production_issue": {
+      "issue_id": "bd11592bb1b95e8d8528fdc7ea92de68dfa6ca44911ce09e6aeba6eef80cc990",
+      "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+      "research_window": {
+        "mode": "previous_slot",
+        "days": 1,
+        "start": "2026-11-16T07:30:00+08:00",
+        "end": "2026-11-16T18:30:00+08:00",
+        "timezone": "Asia/Shanghai"
+      }
+    },
+    "question_material": {
+      "status": "enriched",
+      "search_calls": 12
+    },
+    "topic_enrichment": [
+      {
+        "title": "腾讯 Hy4 flash 实测：同一个 3D 网页任务约 0.23 元，DeepSeek 约 1.21 元",
+        "status": "enriched"
+      },
+      {
+        "title": "同一天两种 AI 钱包：ChatGPT 能替你买单，Gemini 只能读账，边界差在哪",
+        "status": "enriched"
+      },
+      {
+        "title": "豆包 App 上线“找店”：地图上直接看团购、下单、导航，对话里把本地生活走完",
+        "status": "enriched"
+      },
+      {
+        "title": "Cursor 安全事件：攻击者借 Fireworks 密钥复制编程 Agent 记录，不到 0.05% 用户受影响",
+        "status": "enriched"
+      },
+      {
+        "title": "Gemini 独立 App 进 CarPlay：开车时语音查 Gmail 和日历，需要先满足哪些条件",
+        "status": "enriched"
+      },
+      {
+        "title": "一个 prompt 做出 Datasette 地图插件：AI 编程在专业工具里到底能走多远",
+        "status": "enriched"
+      }
+    ],
+    "original_reading": {
+      "expanded": true,
+      "extra_search_queries": 0
+    }
+  },
+  {
+    "job": "tech/tech_daily",
+    "path": "output/tech/2026-10-30_tech_daily.md",
+    "ts": "2026-10-30T02:10:15+0800",
+    "duration_seconds": 141.8,
+    "searches": 0,
+    "audience_strategy": null,
+    "production_issue": null,
+    "original_reading": {
+      "expanded": null,
+      "extra_search_queries": null
+    }
+  },
+  {
+    "job": "chatgpt_acquisition/t09_updates",
+    "path": "output/chatgpt_acquisition/2026-11-16_t09_updates_1.md",
+    "ts": "2026-11-16T19:14:39+0800",
+    "duration_seconds": 475.6,
+    "searches": 2,
+    "audience_strategy": {
+      "strategy": "audience-v1",
+      "channel": "t09",
+      "candidate_count": 1,
+      "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/chatgpt_acquisition/2026-11-16_t09_updates.md.audience-9880532a256cb1b6.json",
+      "question_material": "question-v1"
+    },
+    "production_issue": {
+      "issue_id": "f90a4dcb29548e4f9ea8bd8b2bff7a249182e3761679449eb61f9f311d85bb85",
+      "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+      "research_window": {
+        "mode": "previous_slot",
+        "days": 1,
+        "start": "2026-11-15T07:40:00+08:00",
+        "end": "2026-11-16T07:40:00+08:00",
+        "timezone": "Asia/Shanghai"
+      }
+    },
+    "question_material": {
+      "status": "enriched",
+      "search_calls": 2
+    },
+    "topic_enrichment": [
+      {
+        "title": "ChatGPT Wallet 小范围开放代付：美国 Pro 用户批准前核对四项，批准也不等于下单成功",
+        "status": "enriched"
+      }
+    ],
+    "original_reading": {
+      "expanded": true,
+      "extra_search_queries": 0
+    }
+  },
+  {
+    "job": "science/science_illustrated",
+    "path": "output/science/2026-11-16_science_illustrated.md",
+    "ts": "2026-11-16T08:54:20+0800",
+    "duration_seconds": 255.2,
+    "searches": 2,
+    "audience_strategy": {
+      "strategy": "audience-v1",
+      "channel": "science_illustrated",
+      "candidate_count": 1,
+      "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/science/2026-11-16_science_illustrated.md.audience-22b9ee0c29391cd5.json",
+      "question_material": "question-v1"
+    },
+    "production_issue": null,
+    "question_material": {
+      "status": "enriched",
+      "search_calls": 2
+    },
+    "topic_enrichment": [
+      {
+        "title": "为什么高压锅煮东西更快？",
+        "status": "enriched"
+      }
+    ],
+    "original_reading": {
+      "expanded": null,
+      "extra_search_queries": null
+    }
+  },
+  {
+    "job": "ai_media/ai_tool_tutorials",
+    "path": "output/ai_tutorial/2026-11-16_ai_tool_tutorials.md",
+    "ts": "2026-11-16T10:42:37+0800",
+    "duration_seconds": 743.5,
+    "searches": 4,
+    "audience_strategy": {
+      "strategy": "audience-v1",
+      "channel": "ai_tutorial",
+      "candidate_count": 3,
+      "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/ai_tutorial/2026-11-16_ai_tool_tutorials.md.audience-24652496c842f496.json",
+      "question_material": "question-v1"
+    },
+    "production_issue": {
+      "issue_id": "a0aa661bc020389097daae9e3b6a697e12f7e0992aaaf569ea9fb2745946278b",
+      "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+      "research_window": {
+        "mode": "previous_slot",
+        "days": 1,
+        "start": "2026-11-15T10:30:00+08:00",
+        "end": "2026-11-16T10:30:00+08:00",
+        "timezone": "Asia/Shanghai"
+      }
+    },
+    "question_material": {
+      "status": "enriched",
+      "search_calls": 4
+    },
+    "topic_enrichment": [
+      {
+        "title": "同一个调查 CSV，让 Claude 分清要 pptx、pdf、xlsx：一次产出三份交付物",
+        "status": "enriched"
+      },
+      {
+        "title": "WorkBuddy 预览产物后点右上角分享：不先另存，直接发到微信或企业微信",
+        "status": "already_sufficient"
+      },
+      {
+        "title": "Qoder 左上角先选编程还是通用：整理资料和改代码别进错模式",
+        "status": "enriched"
+      }
+    ],
+    "original_reading": {
+      "expanded": null,
+      "extra_search_queries": null
+    }
+  }
+]

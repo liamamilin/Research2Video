@@ -1,0 +1,84 @@
+{
+  "status": "integrated_input_parity_correction_required",
+  "goal": "正常自动成片的解释对象及时出现，随旁白引导重点；避免标题和字幕之间长时间没有主体内容。",
+  "baseline": "daily autopilot actual completed jobs; inventory.json in runtime directory",
+  "production": {
+    "entry": "video_autopilot.start_run -> writer/approval -> video_render -> G3/G2 -> download",
+    "automatic_visual_materials": false,
+    "hand_prepared_materials": false,
+    "llm_settings": "G3 data/llm-settings.json, existing configured service; do not use direct default provider"
+  },
+  "primary": {
+    "job": "d42653c1-acde-4837-81fc-c1aaef51bf0a",
+    "seconds": [
+      14.07,
+      17.13
+    ],
+    "problem": "问 API 还是本地部署时主体仍未显示"
+  },
+  "cross_observation": {
+    "job": "b30f3cd0-a774-4c4d-a72f-153d3df4d50b",
+    "seconds": [
+      29.23,
+      35
+    ],
+    "problem": "进入新对象后仍主要只有标题/字幕，需要进一步查明实际显现时点"
+  },
+  "candidates": [
+    "全部内容从开场可见，旁白选择强调",
+    "对象从开场可见，细节随旁白展开"
+  ],
+  "stop": "两轮无明确观看收益则换路；不扩大到素材采集或新布局系统",
+  "acceptance": "最终从实际日常报告及生产入口完整生成，至少另一不同结构选题；不手选素材或分镜。保留局部对照和完整成片。",
+  "manual_interventions": [
+    "选择已有真实日报及原生产入口，隔离状态与输出",
+    "观察真实成片，在同稿原声实验中比较表达办法",
+    "修改公共实现；最终任务没有手工改讲稿、分镜或选图"
+  ],
+  "selected": "对象从开场可见，细节随旁白展开",
+  "formal_jobs": [
+    "eb7f5028-b0c3-4bbe-928d-eb3457a4d878",
+    "fc205eb8-e5e1-4486-bfd6-5993fa709d55"
+  ],
+  "experiment": "三种同讲稿、同音频、同编排的连续视频已完成；没有计入完整工作流验收",
+  "full_video_finding": {
+    "job": "fc205eb8-e5e1-4486-bfd6-5993fa709d55",
+    "seconds": [
+      470,
+      495
+    ],
+    "problem": "自动推断的回顾缩略图引用了不相关章节，覆盖正确的原编排画面",
+    "decision": "放弃共享对象名/最近重点页自动选择回顾缩略图；保留原计划的总结画面",
+    "experiment": "466.67–500.00 秒同讲稿同音频连续对照；不是完整工作流验收"
+  },
+  "final_runs": [
+    "main-final",
+    "holdout-final"
+  ],
+  "final_jobs": [
+    "f3d07e64-8355-4fa0-b73a-5d9371623868",
+    "463d4879-05e3-4610-b211-9b16176c547c"
+  ],
+  "outcome": [
+    "概念对象及时出现，已拆分细节及强调保留原旁白时点",
+    "放弃不可靠的自动回顾缩略图推断，保留原编排的总结画面"
+  ],
+  "final_acceptance": {
+    "short_seconds": 124.133333,
+    "daily_seconds": 624.866667,
+    "full_decode": true,
+    "download_hash_matches": true,
+    "whole_movie_chronological_visual_inspection": true,
+    "continuous_human_listening": false,
+    "manual_content_or_materials": false,
+    "published": false,
+    "report": "REPORT.md"
+  },
+  "correction_20261112": {
+    "original_material_characters": 273965,
+    "isolated_material_characters": 0,
+    "effect_comparisons_still_valid": true,
+    "complete_input_equivalence_withdrawn": true,
+    "followup": "daily-effects-20261112"
+  }
+}

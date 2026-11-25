@@ -1,0 +1,46 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 与「深度解读（全景）」互补：围绕丰富报告中的某一个核心问题或子角度深挖讲透，适合同一份报告拆出多篇独立深度视频。
+
+name: 深度单点
+description: 面向{{audience}}深挖报告或材料里的一个具体问题或子角度，适合同一份丰富报告拆出多篇独立深度视频。
+status: enabled
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: deep_dive_focus
+    name: 深度单点
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [developer, non_tech]
+target_minutes: 5
+minutes_range: [4, 8]
+topic:
+  kind: single
+  sources: []
+  whole_report: true
+  fields: [核心角度, 目标受众, 为什么有人在乎]
+research:
+  template: deep_dive
+  optional: true
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: explainer
+  style: |
+    面向{{audience}}只围绕一个最值得追问的核心问题或子切口深挖讲透，不贪大求全。
+    从具体案例、实验对照或工程动作切入，层层拆解原因、评测口径与适用边界（单节控制在 3 到 5 段以内）；同一份长报告里的其他无关板块不必硬塞进来，留给其他独立单点视频。
+    严禁在口播里逐行朗读多列跑分表、延迟表或价目表（只讲翻转判断的关键拐点数字，完整表格留给画面），不念英文配置键名或代码路径，数字保留原小数位，前后不车轱辘重复。
+    结尾把这一单点的核心结论落回一个具体、可执行的判断。
+output:
+  use: auto_form
+  packaging:
+    use: common
+    label: 深度单点
+    outro:
+      lines:
+      - 面向{{audience}}的 深度单点
+      seconds: 2.5

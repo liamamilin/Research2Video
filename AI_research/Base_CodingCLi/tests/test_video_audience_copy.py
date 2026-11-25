@@ -46,7 +46,8 @@ def test_concrete_internal_copy_gets_repaired_and_reaudited(client, video_env, r
     _login(client)
     script = _make(client, "point_short", "不按预设问题改稿")
     shown = script["version_shown"]
-    assert shown["sections"][0]["paragraphs"][0]["text"] == text
+    assert shown["sections"][0]["paragraphs"][0]["text"] == "这是一个开源工具。"
+    assert "材料没有提供" not in shown["sections"][0]["paragraphs"][0]["text"]
     assert not llm.revise_calls and not llm.audit_calls and shown["checks"]["issues"] == []
 
 
@@ -75,6 +76,6 @@ def test_unresolved_internal_copy_cannot_slip_through_automatic_approval(client,
     made = _make(client, "point_short", "不预设拦截")
     script = store.get_script(made["id"])
     decision = video_executor.advance_auto(script, {}, can_start_script=True, can_start_render=True)
-    assert decision["hold"] is None and not decision["took"]["script"]
-    assert store.get_script(script["id"])["status"] == "APPROVED"
-    assert decision["item"]["gate"]["audited"] is False
+    assert decision["hold"] and not decision["took"]["script"]
+    assert store.get_script(script["id"])["status"] == "DRAFT"
+    assert decision["item"]["gate"]["approved"] is False

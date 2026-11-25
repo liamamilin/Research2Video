@@ -68,7 +68,7 @@ export interface MatrixFields {
   content?: Matrix["content"];
 }
 
-export const listMatrices = (signal?: AbortSignal) => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices", { signal });
+export const listMatrices = (signal?: AbortSignal) => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices", { signal, query: { compact: "true" } });
 export const getMatrix = (key: string, signal?: AbortSignal, reports = true) =>
   api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { signal, query: reports ? undefined : { reports: "false" } });
 export const createMatrix = (body: MatrixFields & { key: string }) => api<Matrix>("/api/matrices", { method: "POST", body });

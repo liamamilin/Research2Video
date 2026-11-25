@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from pathlib import Path
 
 
@@ -51,7 +52,7 @@ def run(pipeline, label: str, argv: list, cwd: Path, *, timeout: int, resources:
             raise
         record["status"] = "completed"
         target.parent.mkdir(parents=True, exist_ok=True)
-        output.replace(target)
+        shutil.move(str(output), str(target))
         report.update(status="completed", output=str(target))
         pipeline.write_json(report_path, report)
         return

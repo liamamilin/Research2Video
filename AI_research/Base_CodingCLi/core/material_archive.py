@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 import time
 from contextlib import contextmanager
 from dataclasses import asdict
@@ -11,31 +12,54 @@ from pathlib import Path
 
 from core.search import SearchResult
 
+_ARCHIVE_INIT_LOCK = threading.Lock()
+_ARCHIVE_INITIALIZED: set[tuple[Path, int, int]] = set()
+
+
+def _db_identity(path: Path) -> tuple[Path, int, int] | None:
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    return (path.resolve(), st.st_dev, st.st_ino)
+
 
 class MaterialArchive:
     def __init__(self, state_dir: str | Path):
         root = Path(state_dir)
         root.mkdir(parents=True, exist_ok=True)
         self.path = root / "materials.db"
-        with self.connect() as db:
-            db.executescript("""
-                CREATE TABLE IF NOT EXISTS observations (
-                    id INTEGER PRIMARY KEY, spec TEXT NOT NULL, item_key TEXT NOT NULL,
-                    fingerprint TEXT NOT NULL, first_seen REAL NOT NULL, last_seen REAL NOT NULL,
-                    payload TEXT NOT NULL
-                );
-                CREATE INDEX IF NOT EXISTS material_source ON observations(spec,item_key,first_seen);
-                CREATE TABLE IF NOT EXISTS fetches (
-                    id INTEGER PRIMARY KEY, spec TEXT NOT NULL, observed_at REAL NOT NULL,
-                    count INTEGER NOT NULL, error TEXT NOT NULL, coverage TEXT NOT NULL
-                );
-                CREATE INDEX IF NOT EXISTS material_fetch ON fetches(spec,observed_at);
-            """)
+        ident = _db_identity(self.path)
+        if ident is not None and ident in _ARCHIVE_INITIALIZED:
+            return
+        with _ARCHIVE_INIT_LOCK:
+            ident = _db_identity(self.path)
+            if ident is not None and ident in _ARCHIVE_INITIALIZED:
+                return
+            with self.connect() as db:
+                db.execute("PRAGMA journal_mode=WAL")
+                db.executescript("""
+                    CREATE TABLE IF NOT EXISTS observations (
+                        id INTEGER PRIMARY KEY, spec TEXT NOT NULL, item_key TEXT NOT NULL,
+                        fingerprint TEXT NOT NULL, first_seen REAL NOT NULL, last_seen REAL NOT NULL,
+                        payload TEXT NOT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS material_source ON observations(spec,item_key,first_seen);
+                    CREATE TABLE IF NOT EXISTS fetches (
+                        id INTEGER PRIMARY KEY, spec TEXT NOT NULL, observed_at REAL NOT NULL,
+                        count INTEGER NOT NULL, error TEXT NOT NULL, coverage TEXT NOT NULL
+                    );
+                    CREATE INDEX IF NOT EXISTS material_fetch ON fetches(spec,observed_at);
+                """)
+            ident = _db_identity(self.path)
+            if ident is not None:
+                _ARCHIVE_INITIALIZED.add(ident)
 
     @contextmanager
     def connect(self):
-        db = sqlite3.connect(self.path, timeout=10)
+        db = sqlite3.connect(self.path, timeout=15)
         db.row_factory = sqlite3.Row
+        db.execute("PRAGMA busy_timeout=15000")
         try:
             with db:
                 yield db

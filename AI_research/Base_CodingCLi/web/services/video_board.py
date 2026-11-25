@@ -78,6 +78,11 @@ def board(columns: dict, *, limit: int = 100000, config_dir: str = "config", job
     scripts = [s for s in scripts if not owners[s["id"]]["matrix_archived"]]
     versions = store.current_versions([s["id"] for s in scripts])
     render_statuses = store.render_statuses_by_script()
+    recheck_ids = [
+        s["id"] for s in scripts
+        if s["status"] == "APPROVED" and (columns.get(s["column_key"]) is not None and columns.get(s["column_key"]).recheck)
+    ]
+    rechecks_map = store.rechecks_by_script(recheck_ids) if recheck_ids else {}
     items = []
     for script in scripts:
         every_render = render_statuses.get(script["id"], [])
@@ -92,7 +97,7 @@ def board(columns: dict, *, limit: int = 100000, config_dir: str = "config", job
         freshness = []
         if stage in ("approved", "rendering", "rendered"):
             if column is not None and version is not None and column.recheck:
-                freshness = video_recheck.freshness(script, version, column, store.list_rechecks(script["id"])).get("warnings", [])
+                freshness = video_recheck.freshness(script, version, column, rechecks_map.get(script["id"], [])).get("warnings", [])
         item = {"script_id": script["id"], "title": version["title"] if version else script["topic"].get("title", ""),
                 "column_key": script["column_key"], "column_label": " · ".join(filter(None, [column.name, column.audience])) if column else script["column_key"],
                 "created_at": script["created_at"], "updated_at": script["updated_at"], "credibility": label,

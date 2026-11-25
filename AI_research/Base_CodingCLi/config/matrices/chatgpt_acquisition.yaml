@@ -1,8 +1,6 @@
 name: ChatGPT 获客矩阵
 domain: ChatGPT 产品使用、应用价值与订阅决策
-keywords:
-- ChatGPT
-- ChatGPT Plus
+keywords: []
 jobs:
 - chatgpt_acquisition/t01_product
 - chatgpt_acquisition/t02_scenarios
@@ -19,7 +17,7 @@ content:
   name: ChatGPT 获客矩阵
   role: domain
   audience: 中文普通用户、职场与学习人群，以及正在考虑购买或升级 ChatGPT 的潜在用户
-  description: 围绕了解、使用和购买 ChatGPT 的过程，以 T01–T09 九类题材展示价值、培养兴趣并承接订阅需求。信息源分为 S01 官方产品、S02 官方教程与案例、S03 优质创作者、S04 用户需求、S05
+  description: 围绕了解、使用和购买 ChatGPT 的过程，以 T01–T09 九类题材展示价值、培养兴趣并承接订阅需求。信息源分为 S01 官方产品、S02 官方教程与案例、S03 优质创作者、S04 用户需求、S05 
     套餐付款订阅、S06 趋势与补充资料。
   status: configured
   visual_focus:

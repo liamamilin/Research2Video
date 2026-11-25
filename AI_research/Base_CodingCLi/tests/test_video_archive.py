@@ -110,3 +110,42 @@ def test_an_archived_renders_file_is_still_served(disks, monkeypatch):
     render = {"id": "r1", "artifacts": [{"name": "video.mp4"}]}
     assert video_render.safe_file(render, "video.mp4") == disk / "AREC成片副本" / "r1" / "video.mp4"
     assert video_render.safe_file({"id": "r1", "artifacts": []}, "video.mp4") is None
+
+
+def test_first_young_outputs_are_mirrored_on_an_empty_archive(disks):
+    state, data, disk = disks
+    _render_files(state, "young")
+    _jobs_db(data, [("young-job", "COMPLETED", _iso(1), None)])
+    source = data / "jobs" / "young-job"
+    source.mkdir()
+    (source / "video.mp4").write_text("job video")
+
+    result = archive.run("config", str(state), [
+        {"id": "young", "status": "COMPLETED", "completed_at": _iso(1)}])
+
+    assert result["renders"]["mirrored"] == 1
+    assert result["jobs"]["mirrored"] == 1
+    assert (disk / archive.RENDERS_FOLDER / "young" / "video.mp4").read_text() == "video"
+    assert (archive.jobs_archive(str(disk)) / "young-job" / "video.mp4").read_text() == "job video"
+    assert source.is_dir()
+    assert (state / "video_renders" / "young").is_dir()
+
+
+def test_job_archive_repairs_same_size_same_mtime_corruption_before_removal(disks):
+    state, data, disk = disks
+    _jobs_db(data, [("old-job", "COMPLETED", _iso(9), None)])
+    source = data / "jobs" / "old-job"
+    dest = archive.jobs_archive(str(disk)) / "old-job"
+    source.mkdir()
+    dest.mkdir(parents=True)
+    (source / "video.mp4").write_bytes(b"good")
+    (dest / "video.mp4").write_bytes(b"oops")
+    stamp = int(time.time()) - 86400
+    os.utime(source / "video.mp4", (stamp, stamp))
+    os.utime(dest / "video.mp4", (stamp, stamp))
+
+    result = archive.run("config", str(state), [])
+
+    assert result["jobs"]["moved"] == 1
+    assert (dest / "video.mp4").read_bytes() == b"good"
+    assert not source.exists()

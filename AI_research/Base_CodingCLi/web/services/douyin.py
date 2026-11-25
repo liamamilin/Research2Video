@@ -1,4 +1,4 @@
-"""Account connection, guarded posting, and confirmed publication recording for Douyin."""
+"""Account connection, guarded posting, auto-upload policy, and confirmed publication recording for Douyin."""
 
 from __future__ import annotations
 
@@ -7,16 +7,20 @@ from contextlib import contextmanager
 from datetime import datetime
 import fcntl
 import json
+import logging
 import os
 from pathlib import Path
 import re
 import subprocess
 import time
+from urllib.parse import quote
 
-from core.douyin import DouyinError, UID, WORK_ID, work_id, clean_first_comment
+import yaml
+
+from core.douyin import DouyinError, UID, WORK_ID, work_id, clean_first_comment, clean_publish_window
 from core.douyin_store import DouyinStore, ACTIVE
 from core.social.verification import check_progress, lookup_revision, MAX_UNRESOLVED_CHECKS
-from core.video import store as video_store
+from core.video import credibility, store as video_store
 from scripts.douyin_worker import private_json
 from web.services import platform_manager, video_render
 from web.services.publish_cover import publish_covers
@@ -24,6 +28,9 @@ from web.settings import get_settings
 
 PIN = "3847fff01f5434a8a32829833163cd6723cabc59"
 ROOT = Path(__file__).resolve().parents[2]
+UNKNOWN_LOOKUP_DAYS = 7
+UNKNOWN_LOOKUP_MAX = 10
+logger = logging.getLogger(__name__)
 
 
 def directory() -> Path:
@@ -69,20 +76,97 @@ def uid() -> str:
     return value
 
 
+def settings(owner: str | None = None) -> dict:
+    owner_id = account().get("uid", "") if owner is None else owner
+    db = store()
+    return {"first_comment": db.comment_settings(owner_id), **db.policy_settings(owner_id)}
+
+
+def save_settings(value: dict) -> dict:
+    with dispatch_lock():
+        owner = uid()
+        db = store()
+        current = db.policy_settings(owner)
+        patch: dict = {}
+        if "auto_upload" in value:
+            enabled = bool(value["auto_upload"])
+            patch["auto_upload"] = enabled
+            if enabled and not current.get("auto_upload"):
+                patch["auto_since"] = time.time()
+        if "headless" in value:
+            patch["headless"] = bool(value["headless"])
+        if "publish_window" in value:
+            patch["publish_window"] = clean_publish_window(value["publish_window"])
+        if "first_comment" in value:
+            db.save_comment_settings(owner, clean_first_comment(value["first_comment"]))
+        if patch:
+            db.save_policy_settings(owner, patch)
+        return settings(owner)
+
+
+def automatic_upload_excluded(script: dict) -> bool:
+    """Apply the Douyin publishing hold to the research job recorded on the script."""
+    path = Path(get_settings().paths.config_dir) / "douyin_auto_upload.yaml"
+    try:
+        cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+        excluded_jobs = (cfg or {}).get("excluded_jobs") or []
+        if not isinstance(excluded_jobs, list) or not all(isinstance(job, str) for job in excluded_jobs):
+            raise ValueError("excluded_jobs must be a list of job names")
+    except FileNotFoundError:
+        return False
+    except (OSError, yaml.YAMLError, TypeError, ValueError) as exc:
+        raise DouyinError("抖音自动投稿排除配置无法读取，请检查配置。") from exc
+    topic = script.get("topic") or {}
+    context = script.get("content_context") or {}
+    jobs = (
+        context.get("job"),
+        (topic.get("episode") or {}).get("job"),
+        (topic.get("matrix_dedup") or {}).get("job"),
+        topic.get("knowledge_job"),
+    )
+    return any(job in excluded_jobs for job in jobs)
+
+
+def window_allows(now: float, window: dict, taken: list[float]) -> bool:
+    """Return True when an automatic Douyin upload can be dispatched now."""
+    if not window or not window.get("enabled"):
+        return True
+    start, end = int(window.get("start", 8)), int(window.get("end", 23))
+    spacing = max(1, int(window.get("spacing") or 30)) * 60
+    if not 0 <= start < end <= 24:
+        return True
+    local = datetime.fromtimestamp(now).astimezone()
+    if not (start <= local.hour < end):
+        return False
+    return all(abs(now - t) >= spacing for t in taken)
+
+
+def held_note(window: dict) -> str:
+    return (f"等待发布时段：{int(window.get('start', 8)):02d}:00–{int(window.get('end', 23)):02d}:00 内按间隔依次投稿，"
+            f"每条至少间隔 {int(window.get('spacing') or 30)} 分钟")
+
+
 def public_job(row: dict, *, comments: dict | None = None, checks: dict | None = None) -> dict:
     result = {**{k: row[k] for k in ("id", "kind", "status", "phase", "error", "work_id", "script_id", "version", "render_id", "created_at", "updated_at")},
               "payload": {k: row["payload"][k] for k in ("title", "description", "tags", "first_comment") if k in row["payload"]},
+              "automatic": bool(row["payload"].get("automatic")),
               "url": f"https://www.douyin.com/video/{row['work_id']}" if WORK_ID.fullmatch(row["work_id"]) else "",
-              "can_retry": row["status"] in ("FAILED", "CANCELLED") and bool(row["result"].get("confirmed_not_submitted"))}
+              "can_retry": row["status"] in ("FAILED", "CANCELLED") and bool(row["result"].get("confirmed_not_submitted")),
+              "has_diagnostic": (directory() / "jobs" / row["id"] / "error.png").is_file(),
+              "recovery": row["result"].get("recovery") or {}}
     if row['kind'] == 'UPLOAD':
-        comment = (comments if comments is not None else store().comments(row['uid'])).get(row['id'])
+        if comments is not None:
+            comment = comments.get(row['id'])
+        else:
+            found_comments = store().list(uid=row['uid'], kind='FIRST_COMMENT', parent_id=row['id'])
+            comment = found_comments[0] if found_comments else None
         result['first_comment'] = None if not comment else {
             **{k: comment[k] for k in ('id', 'status', 'phase', 'error', 'created_at', 'updated_at')},
             'text': comment['payload']['text'], 'comment_id': comment['result'].get('comment_id', ''),
             'read_back': bool(comment['result'].get('read_back')),
             'can_retry': comment['status'] in ('FAILED', 'CANCELLED') and bool(comment['result'].get('confirmed_not_submitted'))}
         if checks is None:
-            checks = verification_checks(store().list(uid=row['uid'], kind='RECONCILE'))
+            checks = verification_checks(store().list(uid=row['uid'], kind='RECONCILE', parent_id=row['id']))
         check = checks.get(row['id'])
         tracking = row['result'].get('verification', {})
         result['verification'] = {'automatic': row['status'] == 'SUBMITTED' and bool(row['work_id']) and not tracking.get('exhausted'),
@@ -105,8 +189,11 @@ def verification_checks(rows: list[dict]) -> dict:
 
 def settle_verification(db: DouyinStore) -> None:
     """Retain failed checks, back off, and stop a persistent unresolved lookup."""
-    checks = verification_checks(db.list(kind='RECONCILE'))
-    for parent in db.list(kind='UPLOAD', statuses=('SUBMITTED', 'UNKNOWN')):
+    parents = db.list(kind='UPLOAD', statuses=('SUBMITTED', 'UNKNOWN'))
+    if not parents:
+        return
+    checks = verification_checks(db.list(kind='RECONCILE', parent_ids=[p['id'] for p in parents]))
+    for parent in parents:
         latest = checks.get(parent['id'])
         previous = parent['result'].get('verification', {})
         if (not latest or latest['status'] in ACTIVE or previous.get('last_check_id') == latest['id']
@@ -233,33 +320,74 @@ def disconnect() -> dict:
         if store().list(statuses=ACTIVE):
             raise DouyinError("抖音任务正在运行，请完成后再断开账号。")
         owner = uid()
+        store().save_policy_settings(owner, {"auto_upload": False})
         (directory() / "account.json").unlink(missing_ok=True)
         (directory() / "accounts" / owner / "storage.json").unlink(missing_ok=True)
     return {"connected": False}
 
 
-def candidates() -> list[dict]:
+def candidate_catalog() -> tuple[list[dict], dict]:
     from core.video import content_guard
 
-    queued = {(r["script_id"], r["version"]) for r in store().list(uid=account().get("uid", ""), kind="UPLOAD")}
+    owner = account().get("uid", "")
+    queued = {(r["script_id"], r["version"]) for r in store().list(uid=owner, kind="UPLOAD")}
     with video_store.connect() as conn:
         rows = conn.execute("SELECT r.id AS render_id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
-                            "s.archived,s.status AS script_status,s.current_version,s.approved_version "
+                            "s.archived,s.status AS script_status,s.current_version,s.approved_version,"
+                            "(json_extract(s.topic,'$.local_video') IS NOT NULL) AS local_video,"
+                            f"({content_guard.PUBLISHABLE_SQL}) AS publishable,"
+                            "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
+                            "AND p.platform='douyin' AND p.removed_at='' AND (p.account_uid=? OR p.account_uid='')) AS published "
                             "FROM renders r JOIN scripts s ON s.id=r.script_id "
-                            f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} AND NOT EXISTS "
-                            "(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version AND p.platform='douyin' AND (p.account_uid=? OR p.account_uid='')) "
-                            "ORDER BY r.completed_at DESC,r.created_at DESC", (account().get("uid", ""),)).fetchall()
+                            "WHERE r.status='COMPLETED' "
+                            "ORDER BY r.completed_at DESC,r.created_at DESC", (owner,)).fetchall()
+    stats = {"completed_renders": len(rows), "available_versions": 0, "published_versions": 0,
+             "queued_versions": 0, "unavailable_versions": 0, "ready_versions": 0}
+    all_versions = {(row["script_id"], row["version"]) for row in rows}
     seen, result = set(), []
+    has_video = video_render.file_checker("video.mp4")
     for row in rows:
         key = (row["script_id"], row["version"])
-        if key in queued or key in seen:
+        if key in seen:
             continue
         render = {"id": row["render_id"], "artifacts": json.loads(row["artifacts"])}
-        if video_render.safe_file(render, "video.mp4") is None:
+        if not has_video(render):
             continue
         seen.add(key)
-        result.append({k: row[k] for k in row.keys() if k != "artifacts"})
-    return result
+        stats["available_versions"] += 1
+        if row["published"]:
+            stats["published_versions"] += 1
+        elif key in queued:
+            stats["queued_versions"] += 1
+        elif row["publishable"]:
+            result.append({k: row[k] for k in ("render_id", "script_id", "version", "title", "completed_at",
+                                               "archived", "script_status", "current_version", "approved_version", "local_video")})
+    stats["unavailable_versions"] = len(all_versions - seen)
+    stats["ready_versions"] = len(result)
+    return result, stats
+
+
+def candidates() -> list[dict]:
+    return candidate_catalog()[0]
+
+
+def cover_file(render_id: str, orientation: str, title: str = "") -> Path:
+    if orientation not in ("portrait", "landscape"):
+        raise DouyinError("不支持的封面比例。")
+    render, _, _ = platform_manager.eligible(render_id)
+    covers = publish_covers(render, (title or render.get("title") or "").strip(), portrait=True)
+    raw = covers.get("cover_portrait" if orientation == "portrait" else "cover", "")
+    if not raw or not Path(raw).is_file():
+        raise DouyinError("当前成片尚未生成对应比例的封面。")
+    return Path(raw).resolve()
+
+
+def diagnostic_file(key: str) -> Path:
+    upload_task(key)
+    path = directory() / "jobs" / key / "error.png"
+    if not path.is_file():
+        raise DouyinError("这条任务没有失败截图记录。")
+    return path.resolve()
 
 
 def preview(render_id: str) -> dict:
@@ -269,23 +397,44 @@ def preview(render_id: str) -> dict:
     from core.video.platform_publish import adapt
     from core.social.publish_text import default_comment
     adaptation = adapt(pack, "douyin")
-    warnings = list(pack.get("warnings", [])) + list(pack.get("freshness", {}).get("warnings", []))
+    freshness_warnings = list(pack.get("freshness", {}).get("warnings", []))
+    warnings = list(pack.get("warnings", [])) + freshness_warnings
     if len(adaptation["payload"]["title"]) > 30:
         warnings.append("原发布包标题超过抖音 30 字限制，请编辑后投稿。")
     if len(adaptation["payload"]["description"]) > 1000:
         warnings.append("原发布包简介超过抖音 1000 字限制，请编辑后投稿。")
+    owner = account().get("uid", "")
+    existing = next((public_job(u) for u in (store().list(uid=owner, kind="UPLOAD") if owner else [])
+                     if u["script_id"] == script["id"] and u["version"] == render["version"]), None)
+    cover_title = quote(adaptation["payload"]["title"][:30], safe="")
+    covers = {
+        "portrait_url": f"/api/platforms/douyin/covers/{quote(render['id'], safe='')}/portrait?title={cover_title}",
+        "landscape_url": f"/api/platforms/douyin/covers/{quote(render['id'], safe='')}/landscape?title={cover_title}",
+    }
     return {**preview_draft(render, "douyin"), "render_id": render["id"], "script_id": script["id"], "version": render["version"],
-            **adaptation["payload"], "adaptation": adaptation, "warnings": warnings,
-            "first_comment": default_comment(store().comment_settings(account().get("uid", "")))}
+            **adaptation["payload"],
+            **({"douyin_title": pack["douyin_title"]} if pack.get("douyin_title") else {}),
+            "adaptation": adaptation, "warnings": warnings,
+            "freshness_warnings": freshness_warnings, "credibility": credibility.label(version),
+            "covers": covers, "existing_upload": existing,
+            "first_comment": default_comment(store().comment_settings(owner))}
 
 
-def enqueue(render_id: str, payload: dict) -> dict:
+def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     owner = uid()
     if payload.get("account_uid") and payload["account_uid"] != owner:
         raise DouyinError("平台账号已改变，请刷新后重试。")
     if not runtime()["ready"]:
         raise DouyinError("抖音上传组件尚未准备好。")
     render, script, _ = platform_manager.eligible(render_id)
+    if automatic:
+        if (script.get("topic") or {}).get("local_video"):
+            raise DouyinError("本地视频不加入全局自动投稿。")
+        if automatic_upload_excluded(script):
+            raise DouyinError("此研究链路已配置跳过抖音自动投稿。")
+        if (script.get("archived") or script["status"] != "APPROVED" or
+                script.get("approved_version") != render["version"] or script.get("current_version") != render["version"]):
+            raise DouyinError("自动投稿只处理未归档文稿的当前定稿成片。")
     title, description = payload["title"].strip(), payload["description"].strip()
     tags = [v.strip().lstrip("#") for v in payload["tags"] if v.strip()]
     if not 1 <= len(title) <= 30 or len(description) > 1000 or len(tags) > 5 or any(len(t) > 20 or any(c in t for c in " ,，\n") for t in tags):
@@ -295,10 +444,14 @@ def enqueue(render_id: str, payload: dict) -> dict:
         raise DouyinError("简介与话题合计超过 1000 字，请精简后投稿。")
     if video_store.has_publication(script["id"], render["version"], "douyin", owner):
         raise DouyinError("这个版本已记录抖音发布，请查看文稿发布记录。")
-    clean = {"title": title, "description": description, "tags": tags,
+    clean = {"title": title, "description": description, "tags": tags, "automatic": automatic,
              "video_path": str(video_render.safe_file(render, "video.mp4").resolve()),
              **publish_covers(render, title, portrait=True),
              "first_comment": clean_first_comment(payload.get("first_comment", store().comment_settings(owner)))}
+    if automatic:
+        row = store().create("UPLOAD", owner, clean, render=render)
+        _ensure_comment(store(), row)
+        return public_job(store().get(row["id"]))
     with dispatch_lock():
         if uid() != owner or any(r["kind"] == "LOGIN" for r in store().list(statuses=ACTIVE)):
             raise DouyinError("账号正在更换，请刷新后重新投稿。")
@@ -323,10 +476,51 @@ def reconcile(key: str, value: str = "") -> dict:
     if row["status"] not in ("UNKNOWN", "SUBMITTED"):
         raise DouyinError("当前任务无需核对。")
     with dispatch_lock():
-        existing = [r for r in store().list(statuses=ACTIVE) if r["parent_id"] == key]
+        existing = [r for r in store().list(statuses=ACTIVE) if r["parent_id"] == key and r["kind"] == "RECONCILE"]
         check = existing[0] if existing else store().create("RECONCILE", row["uid"], {"work_id": target}, parent_id=key)
     tick()
     return public_job(store().get(check["id"]))
+
+
+def lookup_upload(key: str) -> dict:
+    row = upload_task(key)
+    if row["work_id"]:
+        return reconcile(key)
+    if row["status"] != "UNKNOWN":
+        raise DouyinError("只有结果待核对且缺少作品 ID 的任务需要自动回查。")
+    with dispatch_lock():
+        existing = [r for r in store().list(statuses=ACTIVE) if r["parent_id"] == key and r["kind"] == "LOOKUP"]
+        check = existing[0] if existing else store().create("LOOKUP", row["uid"], parent_id=key)
+    tick()
+    return public_job(store().get(check["id"]))
+
+
+def mark_removed(key: str) -> dict:
+    with dispatch_lock():
+        row = upload_task(key)
+        if row["status"] not in ("SUBMITTED", "PUBLISHED"):
+            raise DouyinError("只有已投稿或已公开的抖音作品可以标记为已删除。")
+        note = f"作品 {row['work_id'] or ''} 已标记在抖音删除，可按需重新投稿。".strip()
+        if not store().mark_removed(key, row["uid"], note):
+            raise DouyinError("这条投稿状态已变化，请刷新后再试。")
+        for record in video_store.list_publications(row["script_id"]):
+            if record.get("platform") == "douyin" and record.get("version") == row["version"]:
+                if not row["work_id"] or row["work_id"] in (record.get("url") or ""):
+                    video_store.delete_publication(record["id"])
+    return public_job(store().get(key))
+
+
+def reupload(key: str) -> dict:
+    with dispatch_lock():
+        row = upload_task(key)
+        if row["status"] != "REMOVED":
+            raise DouyinError("只有已标记删除的抖音投稿可以重新投稿。")
+        render, _, _ = platform_manager.eligible(row["render_id"])
+        video_path = str(video_render.safe_file(render, "video.mp4").resolve())
+        if not store().requeue_removed(key, row["uid"], video_path):
+            raise DouyinError("这条投稿状态已变化，请刷新后再试。")
+    tick()
+    return public_job(store().get(key))
 
 
 def action(key: str, kind: str) -> dict:
@@ -336,7 +530,8 @@ def action(key: str, kind: str) -> dict:
             store().update(key, expected="QUEUED", status="CANCELLED", result={"confirmed_not_submitted": True})
         elif kind == "retry" and row["status"] in ("FAILED", "CANCELLED") and row["result"].get("confirmed_not_submitted"):
             render, _, _ = platform_manager.eligible(row["render_id"])
-            if video_store.has_publication(row["script_id"], row["version"], "douyin", row["uid"]):
+            if video_store.has_publication(row["script_id"], row["version"], "douyin", row["uid"],
+                                           deleted=tuple(row["payload"].get("removed_work_ids") or ())):
                 raise DouyinError("这个版本已记录抖音发布，不能再次投稿。")
             payload = {**row["payload"], "video_path": str(video_render.safe_file(render, "video.mp4").resolve())}
             store().update(key, expected=row["status"], status="QUEUED", error="", result={}, payload=payload)
@@ -350,14 +545,18 @@ def overview() -> dict:
     owner = account().get("uid", "")
     login_path = directory() / "login.json"
     active_login = json.loads(login_path.read_text()).get("id") if login_path.is_file() else None
-    jobs = store().list(uid=owner) if owner else []
-    comments = {c['parent_id']: c for c in jobs if c['kind'] == 'FIRST_COMMENT'}
-    checks = verification_checks([c for c in jobs if c['kind'] == 'RECONCILE'])
+    db = store()
+    uploads = db.list(uid=owner, kind="UPLOAD") if owner else []
+    comments = db.comments(owner) if owner else {}
+    pending_ids = [u["id"] for u in uploads if u["status"] in ("SUBMITTED", "UNKNOWN")]
+    checks = verification_checks(db.list(uid=owner, kind="RECONCILE", parent_ids=pending_ids)) if (owner and pending_ids) else {}
+    recent_checks = db.list(uid=owner, kinds=("VERIFY", "RECONCILE", "LOOKUP"), limit=10) if owner else []
+    available, summary = candidate_catalog() if owner else ([], None)
     return {"account": account(), "runtime_ready": runtime()["ready"], "login_id": active_login,
-            "settings": {"first_comment": store().comment_settings(owner)}, "capabilities": {"first_comment": True, "pin_comment": False},
-            "uploads": [public_job(r, comments=comments, checks=checks) for r in jobs if r["kind"] == "UPLOAD"],
-            "checks": [public_job(r) for r in jobs if r["kind"] in ("VERIFY", "RECONCILE")][:10],
-            "candidates": candidates() if owner else []}
+            "settings": settings(owner), "capabilities": {"first_comment": True, "pin_comment": False},
+            "uploads": [public_job(r, comments=comments, checks=checks) for r in uploads],
+            "checks": [public_job(r) for r in recent_checks],
+            "candidates": available, "candidate_summary": summary}
 
 
 def _settle(db: DouyinStore) -> None:
@@ -384,6 +583,34 @@ def _settle(db: DouyinStore) -> None:
             private_json(directory() / "account.json", {**row["result"], "verified_at": row["updated_at"]})
             db.update(row["id"], status="RECORDED")
         elif row["kind"] == "COMMENT_CHECK":
+            db.update(row["id"], status="RECORDED")
+        elif row["kind"] == "LOOKUP":
+            parent = db.get(row["parent_id"])
+            receipt = row["result"]
+            if parent and parent["uid"] == row["uid"] and parent["status"] == "UNKNOWN" and not parent["work_id"]:
+                prev = parent["result"].get("recovery") or {}
+                count = int(prev.get("lookup_count") or 0) + 1
+                now = time.time()
+                schedule = {"lookup_count": count, "last_checked_at": now,
+                            "next_lookup_at": now + min(3600, 60 * 2 ** min(count, 6))}
+                wid = str(receipt.get("work_id") or "")
+                taken_elsewhere = bool(wid and any(
+                    u["id"] != parent["id"] and u["work_id"] == wid
+                    for u in db.list(uid=row["uid"], kind="UPLOAD")
+                ))
+                if receipt.get("matched") and WORK_ID.fullmatch(wid) and not taken_elsewhere:
+                    db.update(
+                        parent["id"], expected="UNKNOWN", status="SUBMITTED", work_id=wid,
+                        phase="已自动匹配创作中心稿件，等待核对公开状态", error="",
+                        result={**parent["result"], "accepted": True, "work_id": wid, "uid": row["uid"],
+                                "recovery": {**schedule, "matched_work_id": wid, "note": "已自动匹配创作中心稿件，等待核对公开状态。"}},
+                    )
+                else:
+                    note = ("匹配到多条或已被其他任务关联的作品，保留原任务等待人工核对。"
+                            if (receipt.get("candidates", 0) > 1 or taken_elsewhere)
+                            else f"已按标题回查创作中心（{receipt.get('pages', 1)} 页），暂未找到匹配；继续自动回查，不会重复投稿。")
+                    db.update(parent["id"], expected="UNKNOWN",
+                              result={**parent["result"], "recovery": {**schedule, "note": note}})
             db.update(row["id"], status="RECORDED")
         elif row["kind"] == "RECONCILE":
             parent = db.get(row["parent_id"])
@@ -418,6 +645,95 @@ def _settle(db: DouyinStore) -> None:
             _activate_comment(db, child, parent)
 
 
+def _shorten_douyin_title(title: str, limit: int = 30) -> str:
+    """Fit a longer Bilibili title into Douyin's 30-char cap at natural punctuation when possible."""
+    text = " ".join(title.split()).strip()
+    if len(text) <= limit:
+        return text
+    best = ""
+    for match in re.finditer(r"[：:|｜，,；;？?！!]|——", text):
+        idx = match.start()
+        if 8 <= idx <= limit:
+            best = text[:idx].rstrip("：:|｜，,；; ")
+    if best and 8 <= len(best) <= limit:
+        return best
+    return text[: limit - 1].rstrip("：:|｜，,；; ") + "…"
+
+
+def _fit_douyin_auto_pack(pack: dict) -> dict:
+    """Adapt title/description/tags for unattended Douyin publishing without losing the full title."""
+    from core.social.publish_text import combined_text
+
+    original_title = str(pack.get("title") or "").strip()
+    polished_douyin = str(pack.get("douyin_title") or "").strip()
+    if 1 <= len(polished_douyin) <= 30:
+        title = polished_douyin
+    else:
+        title = _shorten_douyin_title(original_title, 30)
+    description = str(pack.get("description") or "").strip()
+    if original_title and title != original_title and not description.startswith(original_title):
+        description = f"{original_title}\n\n{description}" if description else original_title
+    tags = []
+    for raw in pack.get("tags") or []:
+        clean = re.sub(r"[\s,，]+", "", str(raw).strip().lstrip("#"))
+        if clean and len(clean) <= 20 and clean not in tags:
+            tags.append(clean)
+        if len(tags) >= 5:
+            break
+    if len(description) > 1000:
+        description = description[:999].rstrip() + "…"
+    total = len(combined_text("douyin", title, description, tags))
+    if total > 1000:
+        excess = total - 1000
+        keep = max(0, len(description) - excess - 1)
+        description = (description[:keep].rstrip() + "…") if keep > 0 else ""
+    return {**pack, "title": title, "description": description, "tags": tags}
+
+
+def _auto_enqueue(db: DouyinStore, owner: str, policy: dict) -> None:
+    if not policy.get("auto_upload"):
+        return
+    since = float(policy.get("auto_since") or 0)
+    for candidate in candidates():
+        if (candidate.get("local_video") or candidate["archived"] or candidate["script_status"] != "APPROVED" or
+                candidate["version"] != candidate["approved_version"] or candidate["version"] != candidate["current_version"]):
+            continue
+        try:
+            if platform_manager._timestamp(candidate["completed_at"]) < since:
+                continue
+            pack = preview(candidate["render_id"])
+            if pack["credibility"]["tier"] in ("serious", "verify", "unaudited") or pack["freshness_warnings"]:
+                continue
+            fitted = _fit_douyin_auto_pack(pack)
+            if not 1 <= len(fitted["title"]) <= 30 or len(fitted["description"]) > 1000:
+                continue
+            enqueue(candidate["render_id"], fitted, automatic=True)
+        except (DouyinError, platform_manager.Error, ValueError, TypeError) as exc:
+            logger.debug("Douyin auto upload skipped %s: %s", candidate["render_id"], exc)
+            continue
+
+
+def _pick_queued_job(db: DouyinStore, owner: str, policy: dict) -> dict | None:
+    queued = list(reversed(db.list(statuses=("QUEUED",))))
+    if not queued:
+        return None
+    # Non-upload jobs (LOGIN, VERIFY, RECONCILE, LOOKUP, FIRST_COMMENT, COMMENT_CHECK) and manual uploads go first.
+    for row in queued:
+        if row["kind"] != "UPLOAD" or not row["payload"].get("automatic"):
+            return db.claim(row["id"])
+    window = policy.get("publish_window") or {}
+    now = time.time()
+    for row in queued:
+        if row["uid"] != owner:
+            continue
+        if window_allows(now, window, db.reserved_publish_times(owner, row["id"])):
+            return db.claim(row["id"])
+        note = held_note(window)
+        if row["phase"] != note:
+            db.update(row["id"], expected="QUEUED", phase=note)
+    return None
+
+
 def tick() -> None:
     with dispatch_lock():
         db = store()
@@ -430,6 +746,9 @@ def tick() -> None:
                 return
             db.recover()
         current = account().get("uid", "")
+        policy = db.policy_settings(current) if current else {}
+        if current and runtime()["ready"]:
+            _auto_enqueue(db, current, policy)
         active = db.list(statuses=ACTIVE)
         if not active and current:
             checks_by_comment = {}
@@ -444,8 +763,26 @@ def tick() -> None:
                     break
             active = db.list(statuses=ACTIVE)
         if not active and current:
+            now = time.time()
+            for row in db.list(uid=current, kind="UPLOAD", statuses=("UNKNOWN",)):
+                if row["work_id"]:
+                    continue
+                rec = row["result"].get("recovery") or {}
+                if now - float(row["created_at"]) > UNKNOWN_LOOKUP_DAYS * 86400 or int(rec.get("lookup_count") or 0) >= UNKNOWN_LOOKUP_MAX:
+                    if not rec.get("auto_stopped"):
+                        db.update(row["id"], expected="UNKNOWN", result={**row["result"], "recovery": {
+                            **rec, "auto_stopped": True, "next_lookup_at": 0,
+                            "note": f"已停止自动回查；请到创作中心确认后手动填写作品链接，或点「自动回查一次」。",
+                        }})
+                    continue
+                if row["updated_at"] > now - 60 or float(rec.get("next_lookup_at") or 0) > now:
+                    continue
+                db.create("LOOKUP", current, parent_id=row["id"])
+                break
+            active = db.list(statuses=ACTIVE)
+        if not active and current:
             pending = db.list(uid=current, kind="UPLOAD", statuses=("SUBMITTED",))
-            latest_checks = verification_checks(db.list(kind='RECONCILE'))
+            latest_checks = verification_checks(db.list(uid=current, kind='RECONCILE', parent_ids=[r['id'] for r in pending])) if pending else {}
             for row in pending:
                 tracking = row['result'].get('verification', {})
                 latest = latest_checks.get(row['id'])
@@ -455,7 +792,7 @@ def tick() -> None:
                     break
         if not runtime()["ready"]:
             return
-        row = db.claim()
+        row = _pick_queued_job(db, current, policy)
         if not row:
             return
         if row['kind'] == 'FIRST_COMMENT':
@@ -468,9 +805,14 @@ def tick() -> None:
                 if row["uid"] != current:
                     raise DouyinError("原投稿账号已断开，请连接原账号后重试。")
                 render, _, _ = platform_manager.eligible(row["render_id"])
-                if video_store.has_publication(row["script_id"], row["version"], "douyin", row["uid"]):
+                if video_store.has_publication(row["script_id"], row["version"], "douyin", row["uid"],
+                                               deleted=tuple(row["payload"].get("removed_work_ids") or ())):
                     raise DouyinError("这个版本已记录抖音发布，已停止重复投稿。")
-                db.update(row["id"], payload={**row["payload"], "video_path": str(video_render.safe_file(render, "video.mp4").resolve())})
+                db.update(row["id"], payload={
+                    **row["payload"],
+                    "video_path": str(video_render.safe_file(render, "video.mp4").resolve()),
+                    "headless": bool(policy.get("headless", True)),
+                })
             except (DouyinError, platform_manager.Error) as exc:
                 db.update(row["id"], status="FAILED", error=str(exc), result={"confirmed_not_submitted": True})
                 return

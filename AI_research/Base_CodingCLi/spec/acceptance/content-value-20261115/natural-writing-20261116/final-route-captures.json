@@ -1,0 +1,458 @@
+[
+  {
+    "job": "ai_media/ai_tool_tutorials",
+    "production": "ai_tool_tutorials",
+    "recipe": "chatgpt_acquisition",
+    "profile": "ai-tool-natural-v4",
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai_tool_tutorials.json"
+  },
+  {
+    "job": "ai_media/daily_opensource_radar",
+    "production": "ai_media_opensource_digest",
+    "recipe": "report_digest",
+    "profile": "opensource-radar-v2",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai_media_opensource_digest.json"
+  },
+  {
+    "job": "ai_media/weekly_business_watch",
+    "production": "ai_media_business_digest",
+    "recipe": "report_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai_media_business_digest.json"
+  },
+  {
+    "job": "ai_media/weekly_deep_research",
+    "production": "ai_media_deep_dive",
+    "recipe": "deep_dive",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai_media_deep_dive.json"
+  },
+  {
+    "job": "ai_media/weekly_model_arena",
+    "production": "ai_media_arena_digest",
+    "recipe": "report_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai_media_arena_digest.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t01_product",
+    "production": "chatgpt_t01_product",
+    "recipe": "chatgpt_acquisition",
+    "profile": "t01-task-boundary-v1",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t01_product.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t02_scenarios",
+    "production": "chatgpt_t02_scenarios",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t02_scenarios.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t03_tutorials",
+    "production": "chatgpt_t03_tutorials",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t03_tutorials.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t04_testing",
+    "production": "chatgpt_t04_testing",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t04_testing.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t05_comparison",
+    "production": "chatgpt_t05_comparison",
+    "recipe": "chatgpt_acquisition-m5",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t05_comparison.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t06_value",
+    "production": "chatgpt_t06_value",
+    "recipe": "chatgpt_acquisition-m5",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t06_value.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t07_subscription",
+    "production": "chatgpt_t07_subscription",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t07_subscription.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t08_troubleshooting",
+    "production": "chatgpt_t08_troubleshooting",
+    "recipe": "chatgpt_acquisition",
+    "profile": "t08-v2",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t08_troubleshooting.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t09_updates",
+    "production": "chatgpt_t09_updates",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t09_updates.json"
+  },
+  {
+    "job": "chatgpt_acquisition/t09_updates",
+    "production": "chatgpt_t09_updates_each",
+    "recipe": "chatgpt_acquisition",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/chatgpt_t09_updates_each.json"
+  },
+  {
+    "job": "company/company_daily",
+    "production": "company_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/company_daily.json"
+  },
+  {
+    "job": "company/company_illustrated",
+    "production": "company_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/company_illustrated.json"
+  },
+  {
+    "job": "company/company_weekly",
+    "production": "company_weekly",
+    "recipe": "topic_digest",
+    "profile": "company-weekly-v3",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/company_weekly.json"
+  },
+  {
+    "job": "consumer/consumer_daily",
+    "production": "consumer_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/consumer_daily.json"
+  },
+  {
+    "job": "consumer/consumer_illustrated",
+    "production": "consumer_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/consumer_illustrated.json"
+  },
+  {
+    "job": "consumer/consumer_weekly",
+    "production": "consumer_weekly",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/consumer_weekly.json"
+  },
+  {
+    "job": "culture/culture_daily",
+    "production": "culture_daily",
+    "recipe": "topic_digest",
+    "profile": "culture-daily-v1",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/culture_daily.json"
+  },
+  {
+    "job": "culture/culture_illustrated",
+    "production": "culture_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/culture_illustrated.json"
+  },
+  {
+    "job": "culture/culture_weekly",
+    "production": "culture_weekly",
+    "recipe": "topic_digest",
+    "profile": "culture-weekly-reader-v4",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/culture_weekly.json"
+  },
+  {
+    "job": "economy/economy_daily",
+    "production": "ai-non_tech-deep_dive-long-2",
+    "recipe": "ai-non_tech-deep_dive-long",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai-non_tech-deep_dive-long-2.json"
+  },
+  {
+    "job": "economy/economy_daily",
+    "production": "economy_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/economy_daily.json"
+  },
+  {
+    "job": "economy/economy_illustrated",
+    "production": "economy_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/economy_illustrated.json"
+  },
+  {
+    "job": "economy/economy_weekly",
+    "production": "economy_weekly",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/economy_weekly.json"
+  },
+  {
+    "job": "geography/geography_daily",
+    "production": "geography_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/geography_daily.json"
+  },
+  {
+    "job": "geography/geography_illustrated",
+    "production": "geography_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/geography_illustrated.json"
+  },
+  {
+    "job": "geography/geography_weekly",
+    "production": "geography_weekly",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/geography_weekly.json"
+  },
+  {
+    "job": "history/history_daily",
+    "production": "history_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/history_daily.json"
+  },
+  {
+    "job": "history/history_illustrated",
+    "production": "history_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/history_illustrated.json"
+  },
+  {
+    "job": "history/history_weekly",
+    "production": "history_weekly",
+    "recipe": "topic_digest",
+    "profile": "history-weekly-v1",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/history_weekly.json"
+  },
+  {
+    "job": "industry/industry_daily",
+    "production": "industry_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/industry_daily.json"
+  },
+  {
+    "job": "industry/industry_illustrated",
+    "production": "industry_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/industry_illustrated.json"
+  },
+  {
+    "job": "industry/industry_weekly",
+    "production": "industry_weekly",
+    "recipe": "topic_digest",
+    "profile": "industry-weekly-v1",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/industry_weekly.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "ai-developer-roundup-long",
+    "recipe": "ai-developer-roundup-long",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai-developer-roundup-long.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "ai-non_tech-one_point-short",
+    "recipe": "ai-non_tech-one_point-short",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai-non_tech-one_point-short.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "ai-non_tech-quick_take-short",
+    "recipe": "ai-non_tech-quick_take-short",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai-non_tech-quick_take-short.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "flash",
+    "recipe": "flash",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/flash.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "flash_daily",
+    "recipe": "flash-nr",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/flash_daily.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "flash_each",
+    "recipe": "flash-nr",
+    "profile": "flash-explanation-v2",
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/flash_each.json"
+  },
+  {
+    "job": "monitoring/ai_flash_discovery",
+    "production": "point_short",
+    "recipe": "point_short",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/point_short.json"
+  },
+  {
+    "job": "research/assistant_app_acceptance_20261025",
+    "production": "deep_dive-4",
+    "recipe": "deep_dive",
+    "profile": "assistant-app-acceptance-v2",
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/deep_dive-4.json"
+  },
+  {
+    "job": "research/assistant_iteration_acceptance_20261025",
+    "production": "deep_dive-2",
+    "recipe": "deep_dive",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/deep_dive-2.json"
+  },
+  {
+    "job": "research/assistant_ops_acceptance_20261025",
+    "production": "deep_dive-3",
+    "recipe": "deep_dive",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/deep_dive-3.json"
+  },
+  {
+    "job": "science/science_daily",
+    "production": "science_daily",
+    "recipe": "topic_digest",
+    "profile": "science-daily-v3",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/science_daily.json"
+  },
+  {
+    "job": "science/science_illustrated",
+    "production": "science_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/science_illustrated.json"
+  },
+  {
+    "job": "science/science_weekly",
+    "production": "science_weekly",
+    "recipe": "topic_digest",
+    "profile": "science-weekly-v2",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/science_weekly.json"
+  },
+  {
+    "job": "software/software_daily",
+    "production": "software_daily",
+    "recipe": "topic_digest",
+    "profile": "software-daily-v3",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/software_daily.json"
+  },
+  {
+    "job": "software/software_illustrated",
+    "production": "software_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/software_illustrated.json"
+  },
+  {
+    "job": "software/software_weekly",
+    "production": "software_weekly",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/software_weekly.json"
+  },
+  {
+    "job": "tech/tech_daily",
+    "production": "ai-non_tech-headline-short",
+    "recipe": "ai-non_tech-headline-short",
+    "profile": null,
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/ai-non_tech-headline-short.json"
+  },
+  {
+    "job": "tech/tech_daily",
+    "production": "tech_daily",
+    "recipe": "topic_digest",
+    "profile": null,
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/tech_daily.json"
+  },
+  {
+    "job": "tech/tech_illustrated",
+    "production": "tech_illustrated",
+    "recipe": "illustrated_explainer",
+    "profile": "tech-illustrated-v3",
+    "mode": "individual",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/tech_illustrated.json"
+  },
+  {
+    "job": "tech/tech_weekly",
+    "production": "tech_weekly",
+    "recipe": "topic_digest",
+    "profile": "tech-weekly-v1",
+    "mode": "episode",
+    "path": "state/acceptance-content-value-20261115/natural-writing-20261116/final/routes/tech_weekly.json"
+  }
+]

@@ -1,0 +1,122 @@
+FFFF.....                                                                [100%]
+=================================== FAILURES ===================================
+____________ test_backups_in_the_same_second_preserve_each_original ____________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_backups_in_the_same_secon0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c753c70>
+
+    def test_backups_in_the_same_second_preserve_each_original(tmp_path, monkeypatch):
+        monkeypatch.setattr(yaml_io, "_backup_dir", lambda: str(tmp_path))
+        monkeypatch.setattr(yaml_io.time, "strftime", lambda *_: "20261115_120000")
+        paths = [yaml_io.save_backup("jobs/a/job.yaml", "name: first\n"),
+                 yaml_io.save_backup("jobs/b/job.yaml", "name: second\n"),
+                 yaml_io.save_backup("jobs/a/job.yaml", "name: third\n")]
+>       assert len(set(paths)) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = len({'/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_backups_in_the_same_secon0/job_20261115_120000.yaml'})
+E        +    where {'/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_backups_in_the_same_secon0/job_20261115_120000.yaml'} = set(['/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_backups_in_the_same_secon0/.../tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_backups_in_the_same_secon0/job_20261115_120000.yaml'])
+
+tests/test_yaml_io.py:20: AssertionError
+___________ test_parallel_yaml_requests_keep_their_own_parser_state ____________
+
+    def test_parallel_yaml_requests_keep_their_own_parser_state():
+        def round_trip(index):
+            payload = {"name": f"job-{index}", "prompt": "line\n" * 100, "keywords": list(range(100))}
+            return yaml_io.parse_yaml(yaml_io.dump_yaml(payload)) == payload
+        with ThreadPoolExecutor(max_workers=8) as pool:
+>           assert all(pool.map(round_trip, range(32)))
+E           assert False
+E            +  where False = all(<generator object Executor.map.<locals>.result_iterator at 0x117533290>)
+E            +    where <generator object Executor.map.<locals>.result_iterator at 0x117533290> = map(<function test_parallel_yaml_requests_keep_their_own_parser_state.<locals>.round_trip at 0x1174984c0>, range(0, 32))
+E            +      where map = <concurrent.futures.thread.ThreadPoolExecutor object at 0x1174eb9d0>.map
+E            +      and   range(0, 32) = range(32)
+
+tests/test_yaml_io.py:29: AssertionError
+__________ test_duplicate_yaml_keys_are_reported_as_validation_errors __________
+
+    def test_duplicate_yaml_keys_are_reported_as_validation_errors():
+        with pytest.raises(ValueError, match="YAML"):
+>           yaml_io.parse_yaml("name: first\nname: second\n")
+
+tests/test_yaml_io.py:34:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+web/services/yaml_io.py:37: in parse_yaml
+    data = _yaml.load(content)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/main.py:453: in load
+    return constructor.get_single_data()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/constructor.py:119: in get_single_data
+    return self.construct_document(node)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/constructor.py:128: in construct_document
+    for _dummy in generator:
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/constructor.py:1486: in construct_yaml_map
+    self.construct_mapping(node, data, deep=True)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/constructor.py:1376: in construct_mapping
+    if self.check_mapping_key(node, key_node, maptyp, key, value):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ruamel.yaml.constructor.RoundTripConstructor object at 0x10c752b60>
+node = MappingNode(tag='tag:yaml.org,2002:map', value=[(ScalarNode(tag='tag:yaml.org,2002:str', value='name'), ScalarNode(tag...')), (ScalarNode(tag='tag:yaml.org,2002:str', value='name'), ScalarNode(tag='tag:yaml.org,2002:str', value='second'))])
+key_node = ScalarNode(tag='tag:yaml.org,2002:str', value='name')
+mapping = {'name': 'first'}, key = 'name', value = 'second'
+
+    def check_mapping_key(
+        self, node: Any, key_node: Any, mapping: Any, key: Any, value: Any,
+    ) -> bool:
+        """return True if key is unique"""
+        if key in mapping:
+            if not self.allow_duplicate_keys:
+                mk = mapping.get(key)
+                args = [
+                    'while constructing a mapping',
+                    node.start_mark,
+                    f'found duplicate key "{key}" with value "{value}" '
+                    f'(original value: "{mk}")',
+                    key_node.start_mark,
+                    f"""
+                    To suppress this check see:
+                        {DUPKEY_URL}
+                    """,
+                    """\
+                    Duplicate keys will become an error in future releases, and are errors
+                    by default when using the new API.
+                    """,
+                ]
+                if self.allow_duplicate_keys is None:
+                    warnings.warn(DuplicateKeyFutureWarning(*args), stacklevel=1)
+                else:
+>                   raise DuplicateKeyError(*args)
+E                   ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
+E                     in "<unicode string>", line 1, column 1:
+E                       name: first
+E                       ^ (line: 1)
+E                   found duplicate key "name" with value "second" (original value: "first")
+E                     in "<unicode string>", line 2, column 1:
+E                       name: second
+E                       ^ (line: 2)
+E
+E                   To suppress this check see:
+E                       https://yaml.dev/doc/ruamel.yaml/api/#Duplicate_keys
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/ruamel/yaml/constructor.py:281: DuplicateKeyError
+________________ test_sub_millisecond_edit_is_still_a_conflict _________________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-412/test_sub_millisecond_edit_is_s0')
+
+    def test_sub_millisecond_edit_is_still_a_conflict(tmp_path):
+        import os
+
+        target = tmp_path / "job.yaml"
+        target.write_text("name: original\n")
+        original = target.stat()
+        target.write_text("name: external\n")
+        os.utime(target, ns=(original.st_atime_ns, original.st_mtime_ns + 500_000))
+>       with pytest.raises(IOError, match="外部修改"):
+E       Failed: DID NOT RAISE <class 'OSError'>
+
+tests/test_yaml_io.py:45: Failed
+=========================== short test summary info ============================
+FAILED tests/test_yaml_io.py::test_backups_in_the_same_second_preserve_each_original
+FAILED tests/test_yaml_io.py::test_parallel_yaml_requests_keep_their_own_parser_state
+FAILED tests/test_yaml_io.py::test_duplicate_yaml_keys_are_reported_as_validation_errors
+FAILED tests/test_yaml_io.py::test_sub_millisecond_edit_is_still_a_conflict
+4 failed, 5 passed in 0.52s

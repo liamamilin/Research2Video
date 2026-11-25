@@ -50,7 +50,7 @@ export interface WholeReport {
 
 export const getPending = (key: string) =>
   api<{ report_date: string | null; report_path: string; items: PendingItem[]; reports?: WholeReport[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
-export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; auto?: number; name?: string; render?: ProductionConfig["render"] }) =>
+export const addProduction = (body: { chain_key?: string; job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; auto?: number; name?: string; render?: ProductionConfig["render"] }) =>
   api<ProductionConfig>("/api/production", { method: "POST", body });
 export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
 export const writeFromProduction = (key: string, topicIds: string[]) =>

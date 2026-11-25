@@ -1,0 +1,34 @@
+name: AI 科研进展
+domain: AI 科研进展
+enabled: true
+language: zh
+keywords:
+- AI 科学发现
+- 科研方法
+- 证据边界
+search: false
+sources:
+- source:chain_source_mwlrtqz9
+- source:cg_openai_news
+sources_limit: 10
+runtime:
+  timeout_seconds: 3600
+  skip_if_running: true
+prompt: |
+  跟踪 AI 在科学发现与科研方法上的公开进展。为关注 AI 的中文观众讲清：具体研究问题是什么、AI 在哪一步帮了忙、证据支持到哪里；说明适用范围和尚待验证的部分。
+  从已取得的科学博客与相关材料中选择本期最值得讲清的一条（或少数几条）进展；优先有原文链接、能说明方法与结果边界的材料。不要为了凑题材编造未提供的实验细节。
+  日期：{date}。根据取得的材料形成可供视频作者使用的研究底稿。保留具体变化、例子、解释及原始链接。使用条目格式：
+  ### 1.1 选题标题
+  - **一句话**：内容
+  - **发布日期**：日期
+  - **证据来源**：链接
+  正文充分展开，末尾列来源清单。没有可用题材时写“本次暂无新题材”。
+output: output/chains/ai_science_updates/{date}.md
+audience_channel: ai_science
+content_strategy: audience-v1
+topics:
+  alias: ai_science_updates
+  format: flash
+  prefix: AAA
+  refresh: true
+question_material: question-v1

@@ -130,17 +130,21 @@ def tags(title: str, topic_title: str = "") -> list[str]:
 _WORD_CHAR = re.compile(r"[A-Za-z0-9.\-_/]")
 
 
-def cover_text(title: str, column, *, programme: bool = False) -> dict:
-    """Keep programme names/dates intact; suggest short cover copy for individuals."""
-    headline = re.split(r"[：:，,]", title)[0].strip() if len(title) > 14 else title
-    if programme:
+def cover_text(title: str, column, *, programme: bool = False, cover_headline: str = "") -> dict:
+    """Prefer polished cover headline when available; otherwise suggest short cover copy."""
+    polished = " ".join((cover_headline or "").split()).strip()
+    if polished:
+        headline = polished
+    elif programme:
         # This is editable publish-pack copy, not a renderer text-capacity limit.
         headline = title
-    elif len(headline) > 14:
-        cut = 14
-        while cut > 0 and _WORD_CHAR.match(headline[cut - 1]) and _WORD_CHAR.match(headline[cut]):
-            cut -= 1  # never cut a model name or a number in half (GPT-4o)
-        headline = headline[:cut].strip() or headline[:14]
+    else:
+        headline = re.split(r"[：:，,]", title)[0].strip() if len(title) > 14 else title
+        if len(headline) > 14:
+            cut = 14
+            while cut > 0 and _WORD_CHAR.match(headline[cut - 1]) and _WORD_CHAR.match(headline[cut]):
+                cut -= 1  # never cut a model name or a number in half (GPT-4o)
+            headline = headline[:cut].strip() or headline[:14]
     packaging = getattr(column, "packaging", None) or {}
     badge = packaging.get("badge", {}).get("text") or packaging.get("label") or (column.package or {}).get("badge") or column.name
     return {"headline": headline, "badge": badge}
@@ -241,15 +245,21 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
     if dateless:
         warnings.append(f"{len(dateless)} 个来源没有发布日期，简介里只写了网址。")
 
+    headline_meta = (version.get("meta") or {}).get("headline") or {}
+    douyin_title = str(headline_meta.get("douyin_title") or "").strip()
+    cover_headline = str(headline_meta.get("cover_headline") or "").strip()
+
     warnings += (freshness or {}).get("warnings") or []
     return {
         "title": title,
+        **({"douyin_title": douyin_title} if douyin_title else {}),
         "description": description,
         "chapters": chapters,
         "chapter_note": CHAPTER_NOTE if chapters else "",
         "tags": tags(title, (script.get("topic") or {}).get("title", "")),
         "cover": cover_text(title, column, programme=(script.get("topic") or {}).get("content_mode") == "episode"
-                            or ((version.get("meta") or {}).get("episode") or {}).get("mode") == "episode"),
+                            or ((version.get("meta") or {}).get("episode") or {}).get("mode") == "episode",
+                            cover_headline=cover_headline),
         "references": refs,
         "warnings": warnings,
         "version": version.get("version"),

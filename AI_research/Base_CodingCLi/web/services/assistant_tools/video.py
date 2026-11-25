@@ -38,6 +38,20 @@ def _brief(s: dict) -> dict:
             'error': s.get('error'), 'href': _href(s['id'])}
 
 
+def _active_batch(script_id: str) -> dict | None:
+    from core.video import autopilot_store
+    with autopilot_store.connect() as conn:
+        row = conn.execute(
+            "SELECT r.id, r.status, i.state AS item_state FROM autopilot_items i "
+            "JOIN autopilot_runs r ON r.id = i.run_id "
+            "WHERE i.script_id = ? ORDER BY i.updated_at DESC LIMIT 1",
+            (script_id,),
+        ).fetchone()
+    if not row:
+        return None
+    return {'id': row['id'], 'status': row['status'], 'item_state': row['item_state']}
+
+
 def _detail(script_id: str, user) -> dict:
     from core.video import material_context
     d = video.get_script(script_id, user=user)
@@ -46,6 +60,7 @@ def _detail(script_id: str, user) -> dict:
         'script_id': script_id, 'title': shown.get('title') or d['topic'].get('title'), 'column': d['column_key'],
         'status': d['status'], 'stage': d.get('stage'), 'error': d.get('error'),
         'current_version': d['current_version'], 'approved_version': d.get('approved_version'),
+        'active_batch': _active_batch(script_id),
         'material_context': material_context.get(d) or None,
         'length': duration(shown), 'review': review(shown, running=bool(d.get('stage'))),
         'check_summary': review(shown, running=bool(d.get('stage')))['summary'],
@@ -208,6 +223,7 @@ TOOLS['update_video_materials'] = Tool(MaterialUpdate,
 
 class ContinueVideo(Arguments):
     script_id: str
+    action: Literal['continue', 'cancel'] = 'continue'
 
 
 def continue_video(a, request, user):
@@ -215,6 +231,32 @@ def continue_video(a, request, user):
     script = store.get_script(a.script_id)
     if not script:
         raise ValueError('视频文稿不存在')
+    if a.action == 'cancel':
+        cancelled = autopilot_store.cancel_open_items(script['id'], note='用户取消')
+        with autopilot_store.connect() as conn:
+            run_ids = [r['run_id'] for r in conn.execute(
+                "SELECT DISTINCT run_id FROM autopilot_items WHERE script_id = ?", (script['id'],)
+            ).fetchall()]
+        cancelled_runs = []
+        for run_id in run_ids:
+            run = autopilot_store.get_run(run_id)
+            if run and run['status'] == 'RUNNING' and all(
+                item['state'] in ('DONE', 'FAILED', 'CANCELLED') for item in run['items']
+            ):
+                autopilot_store.update_run(run_id, status='CANCELLED')
+                cancelled_runs.append(run_id)
+        active_renders = [r for r in store.list_renders(script_id=script['id'])
+                          if r.get('status') not in ('COMPLETED', 'FAILED', 'CANCELLED')]
+        if cancelled or cancelled_runs:
+            msg = ('已中断该视频的自动工作流批次（后续步骤不再自动推进）；'
+                   + ('当前已在运行的渲染会自然跑完，系统不支持中途强杀单条渲染。' if active_renders else '当前无进行中的渲染任务。'))
+        else:
+            msg = ('该文稿当前没有进行中的自动工作流批次'
+                   + ('，但有一条已在运行的渲染会自然跑完。' if active_renders else '。'))
+        return {'script_id': script['id'], 'href': _href(script['id']), 'status': 'cancelled',
+                'cancelled_items': cancelled, 'cancelled_runs': cancelled_runs,
+                'active_renders': [{'id': r['id'], 'status': r['status'], 'active_stage': r.get('active_stage')} for r in active_renders],
+                'message': msg}
     if script.get('archived'):
         raise ValueError('文稿已归档，先明确恢复后再制作')
     run = autopilot_store.adopt_script(script, started_by=user['username'])
@@ -222,5 +264,5 @@ def continue_video(a, request, user):
             'status': 'started', 'submitted': True, 'message': '已交给视频 workflow，写稿、定稿与出片会在后台继续；工作区显示实际结果。'}
 
 
-TOOLS['continue_video'] = Tool(ContinueVideo, '用户明确要求完整制作视频时，在创建文稿后调用，或将已有文稿继续制作到成片。使用现有持久视频workflow，不需等写稿结束后再手动定稿/出片；重复调用复用正在进行的批次。只写草稿时不要调用。耗时取决于队列；提交不代表成片完成。',
-                               continue_video, 'editor', True, '继续制作视频')
+TOOLS['continue_video'] = Tool(ContinueVideo, '继续或中断视频工作流：action="continue"（默认）将文稿交给现有持久workflow完成写稿/定稿/出片；action="cancel"直接中断该文稿进行中的自动批次（无需反复查application_actions）。只写草稿时不要调用continue；耗时取决于队列，提交不代表完成。',
+                               continue_video, 'editor', True, '继续或中断视频工作流')

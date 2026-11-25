@@ -28,8 +28,9 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import threading
 from contextlib import contextmanager
-from typing import Iterator, Optional
+from typing import Callable, Iterator, Optional
 
 #: Durable but not paranoid. ``FULL`` fsyncs on every commit; for the scheduler's
 #: own bookkeeping that is the right trade, for a report index read on every page
@@ -113,3 +114,26 @@ def is_wal(path: str) -> Optional[bool]:
         return None
     finally:
         conn.close()
+
+
+_SCHEMA_IDENTITIES: dict[str, tuple[int, int]] = {}
+_SCHEMA_LOCK = threading.RLock()
+
+
+def initialize_schema_once(path: str, initialize: Callable[[], None]) -> None:
+    """Ensure a schema once per physical database, including replacement recovery."""
+    def identity():
+        try:
+            stat = os.stat(path)
+            return stat.st_dev, stat.st_ino
+        except FileNotFoundError:
+            return None
+
+    with _SCHEMA_LOCK:
+        current = identity()
+        if current is not None and _SCHEMA_IDENTITIES.get(path) == current:
+            return
+        initialize()
+        current = identity()
+        if current is not None:
+            _SCHEMA_IDENTITIES[path] = current

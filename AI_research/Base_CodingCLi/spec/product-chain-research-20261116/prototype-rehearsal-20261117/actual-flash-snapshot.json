@@ -1,0 +1,2404 @@
+{
+  "captured_at": "2026-11-17T13:55:20.663262+08:00",
+  "job": "monitoring/ai_flash_discovery",
+  "declared_sources": [
+    "source:bili_hot_ai",
+    "source:cg_release_notes",
+    "source:cg_openai_news",
+    "source:cg_pro_tiers",
+    "tag:ai_daily_shared",
+    "github:anthropics/claude-code",
+    "tldr:ai",
+    "rss:https://www.therundown.ai/feed",
+    "hf_models:trending",
+    "tag:ai_radar",
+    "tag:ai_news",
+    "tag:radar_official",
+    "tag:radar_dev"
+  ],
+  "expanded_declared_sources": [
+    "bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI",
+    "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+    "rss:https://openai.com/news/rss.xml",
+    "page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+    "page:https://learn.chatgpt.com/docs/whats-new.md",
+    "page:https://developers.openai.com/api/docs/changelog.md",
+    "rss:https://ratelimitnow.com/whats-new.xml",
+    "rss:https://aicatchup.com/rss.xml",
+    "github:anthropics/claude-code",
+    "tldr:ai",
+    "rss:https://www.therundown.ai/feed",
+    "hf_models:trending",
+    "rss:https://aftergradient.com/rss.xml?kind=news",
+    "rss:https://devbrief.dev/rss.xml",
+    "rss:https://onevium.com/zh/rss.xml",
+    "rss:https://zhangwen.site/rss.xml",
+    "rss:https://www.ifanr.com/feed",
+    "rss:https://techcrunch.com/category/artificial-intelligence/feed/",
+    "rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "rss:https://the-decoder.com/feed/",
+    "rss:https://www.testingcatalog.com/rss/",
+    "rss:https://9to5mac.com/guides/apple-intelligence/feed/",
+    "radar:chatgpt / claude / codex 动态",
+    "radar:Ollama / Claude Code / Codex 重要更新",
+    "radar:AI 编程工具产品动态（每周对比）",
+    "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具"
+  ],
+  "bindings": {
+    "flash_daily": {
+      "job": "monitoring/ai_flash_discovery",
+      "recipe": "flash-nr",
+      "split": "whole",
+      "auto": 1,
+      "reverify": false,
+      "content_mode": "episode",
+      "content_column_id": "ai_flash",
+      "audience": "开发者",
+      "minutes": 0.0,
+      "render": {},
+      "selection": {},
+      "errors": []
+    },
+    "flash_each": {
+      "job": "monitoring/ai_flash_discovery",
+      "recipe": "flash-nr",
+      "split": "each",
+      "auto": 1,
+      "reverify": false,
+      "content_mode": "individual",
+      "content_column_id": "",
+      "audience": "开发者",
+      "minutes": 0.0,
+      "render": {},
+      "selection": {
+        "heat_min": 20000,
+        "angle_min": 500000
+      },
+      "errors": []
+    }
+  },
+  "schedules": [
+    {
+      "job_name": "monitoring/ai_flash_discovery",
+      "schedule": "30 7,18 * * *",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 2,
+      "version": 13,
+      "deleted": 0
+    },
+    {
+      "job_name": "source_discovery/ai_media",
+      "schedule": "30 5 * * 0",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 1,
+      "version": 5,
+      "deleted": 0
+    },
+    {
+      "job_name": "system/material_collection",
+      "schedule": "20 7 * * *",
+      "timezone": "Asia/Shanghai",
+      "enabled": 1,
+      "missed_policy": "skip",
+      "max_retries": 0,
+      "version": 2,
+      "deleted": 0
+    }
+  ],
+  "latest_research_runs": [
+    {
+      "id": "d66c9d7093324995887aa43f197599d8",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "success",
+      "attempt": 1,
+      "started_at": 1794871804.104573,
+      "finished_at": 1794875076.627136,
+      "output_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-17_ai_flash_discovery.md",
+      "error": ""
+    },
+    {
+      "id": "5666710f98dd436681edc306bd83a25f",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "failed",
+      "attempt": 3,
+      "started_at": 1794825808.538487,
+      "finished_at": 1794826021.336607,
+      "output_path": null,
+      "error": "联网搜索不可用，已中止，没有生成报告。exa: HTTP 402: {\"requestId\":\"a73f47a3487d1f86d859826e2dc11f7b\",\"error\":\"You have exceeded your credits limit. Please top up to keep using Exa at dashboard.exa.ai\",\"tag\":\"NO_MORE_CREDITS\"}。请到「设置 → 搜索」检查服务商额度和 Key，或换一个搜索服务商后重新运行。"
+    },
+    {
+      "id": "b2ebd1b9304f48e6bd40e567398a290e",
+      "job_name": "monitoring/ai_flash_discovery",
+      "status": "success",
+      "attempt": 1,
+      "started_at": 1794785408.553608,
+      "finished_at": 1794786877.352849,
+      "output_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md",
+      "error": ""
+    }
+  ],
+  "outputs": [
+    {
+      "id": "ad185da5b6074494bc015d15cb3a4ebf",
+      "production": "flash_daily",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:30:37+0800",
+      "render_id": "ec87040f39264626899723fd969b73d7",
+      "render_status": "COMPLETED",
+      "title": "豆包21个工作台，苹果给Siri上日限额",
+      "completed_at": "2026-11-17T09:39:01+0800",
+      "topic": {
+        "id": null,
+        "from_item": null,
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "episode"
+        }
+      },
+      "episode": {
+        "report_identity": "fe1be2f4a73a1e02e446ff44e44eed66430bc613abcf867d3447d97979b7e648",
+        "issue": {
+          "issue_id": "e3d325b89945bd04aa6444cda13702f1ee85786ee3b76e0aef24a44304368cb5",
+          "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+          "research_window": {
+            "mode": "previous_slot",
+            "days": 1,
+            "start": "2026-11-16T18:30:00+08:00",
+            "end": "2026-11-17T07:30:00+08:00",
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "items": [
+          {
+            "id": "2026-11-17/F1@rfe1be2f4a73a1e02",
+            "title": "豆包工作台上线：金融投研等21个专业场景预置技能，个人工作台可保存分享"
+          },
+          {
+            "id": "2026-11-17/F2@rfe1be2f4a73a1e02",
+            "title": "加州起诉 OpenAI：AI agent 越出测试环境，另一边出现全自动漏洞利用工具"
+          },
+          {
+            "id": "2026-11-17/F3@rfe1be2f4a73a1e02",
+            "title": "Qwen4-Max 发布：专业任务成本约为前代三分之一，API 价格和 Live Delivery 怎么用"
+          },
+          {
+            "id": "2026-11-17/F4@rfe1be2f4a73a1e02",
+            "title": "Apple 测试 Siri 高级功能日限额：基础免费，图像和自动化重度使用看 iCloud+ 档位"
+          },
+          {
+            "id": "2026-11-17/F5@rfe1be2f4a73a1e02",
+            "title": "Poppy 1.0 发布：AI 助手替你逛店、查余额、订票，先解决它能做什么的授权"
+          },
+          {
+            "id": "2026-11-17/F6@rfe1be2f4a73a1e02",
+            "title": "GitHub Copilot 11月16日弃用三款模型：写死模型名的脚本和管理员策略要查什么"
+          },
+          {
+            "id": "2026-11-17/F7@rfe1be2f4a73a1e02",
+            "title": "中国区 Apple Intelligence 扩到 iPad 和 Mac 测试：写作工具、Genmoji 可用，但没有 Siri AI"
+          },
+          {
+            "id": "2026-11-17/F8@rfe1be2f4a73a1e02",
+            "title": "OpenAI 开放 5 万份科研资助：每份覆盖最多 3 人，11月23日先到先得"
+          },
+          {
+            "id": "2026-11-17/F9@rfe1be2f4a73a1e02",
+            "title": "Anthropic 的 agent 记忆研究：存 413 个文件只拿 1 个徽章，少记策略反而走得更远"
+          },
+          {
+            "id": "2026-11-17/F10@rfe1be2f4a73a1e02",
+            "title": "Embla 1 想在手机上离线跑推理模型：1.77 秒、每次请求免费，但数学是短板"
+          },
+          {
+            "id": "flash-raw:3becc690a6c46079f79891ac",
+            "title": "[Changelog · Nov 16](https://developers.openai.com/api/docs/changelog.md#:~:text=Nov%2016) — published 2026-11-16"
+          },
+          {
+            "id": "flash-raw:e61986747fba32e958b52116",
+            "title": "[2.1.326](https://code.claude.com/docs/en/changelog#2-1-326) — published Mon, 16 Nov 2026 22:18:49 GMT"
+          },
+          {
+            "id": "flash-raw:a9c8700b711920e84d04d45d",
+            "title": "[Devin Apps (3 minute read)](https://devin.ai/blog/devin-apps) — published 2026-11-16"
+          },
+          {
+            "id": "flash-raw:5c760c64238db4f569258c03",
+            "title": "[Apple launches new app to study how people use AI for health](https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/) — published Mon, 16 Nov 2026 01:30:00 +0000"
+          },
+          {
+            "id": "flash-raw:33bc06b8baad44653f1e5812",
+            "title": "[Bulk start AI Scan for repositories](https://github.blog/changelog/2026-11-16-bulk-start-ai-scan-for-repositories) — published 2026-11-17T04:33:33+08:00"
+          },
+          {
+            "id": "flash-raw:8f53da5c9dc8466dd4ce0720",
+            "title": "[Claude now builds interactive websites inside canvas graphics, reviving the Flash era with real HTML](https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html/) — published Mon, 16 Nov 2026 16:10:22 +0000"
+          }
+        ]
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_daily",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "id": "d5b8a7b2a9d8415b9e9a98d01ee3ab20",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:33:45+0800",
+      "render_id": "32e2aa9467a847379e4ae0c59aa05a8e",
+      "render_status": "COMPLETED",
+      "title": "豆包工作台月费68元起，金融投研为什么可能还要再买一份数据",
+      "completed_at": "2026-11-17T10:03:32+0800",
+      "topic": {
+        "id": "2026-11-17/F1@rfe1be2f4a73a1e02~money",
+        "from_item": "2026-11-17/F1@rfe1be2f4a73a1e02",
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "2026-11-17/F1@rfe1be2f4a73a1e02"
+        }
+      },
+      "episode": {
+        "report_identity": null,
+        "issue": null,
+        "items": null
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "id": "18ddc9402e084787ac80d57b4fbd636a",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:34:49+0800",
+      "render_id": "b12ae81883bf4a90b302c8b7e930dfbd",
+      "render_status": "COMPLETED",
+      "title": "FBI 警告 Artex 三小时打进内网：先查第三方凭据，别先封 IP",
+      "completed_at": "2026-11-17T10:31:42+0800",
+      "topic": {
+        "id": "2026-11-17/F2@rfe1be2f4a73a1e02~howto",
+        "from_item": "2026-11-17/F2@rfe1be2f4a73a1e02",
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "2026-11-17/F2@rfe1be2f4a73a1e02"
+        }
+      },
+      "episode": {
+        "report_identity": null,
+        "issue": null,
+        "items": null
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "id": "5bb378b65d8e425ebdb700b82977c6a0",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:36:53+0800",
+      "render_id": "fdfaafa43eab42b88e9ddbd33ebabc78",
+      "render_status": "COMPLETED",
+      "title": "Qwen4-Max 单价只降 17%，单任务成本为什么降了 58%？",
+      "completed_at": "2026-11-17T10:59:36+0800",
+      "topic": {
+        "id": "2026-11-17/F3@rfe1be2f4a73a1e02~money",
+        "from_item": "2026-11-17/F3@rfe1be2f4a73a1e02",
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "2026-11-17/F3@rfe1be2f4a73a1e02"
+        }
+      },
+      "episode": {
+        "report_identity": null,
+        "issue": null,
+        "items": null
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "id": "6df6881c9975433989423a290741eaa3",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:40:01+0800",
+      "render_id": "4c338a7420574a268c228878706d2d24",
+      "render_status": "COMPLETED",
+      "title": "Poppy 支持名单很长，但真能读到文件的只有 16 家",
+      "completed_at": "2026-11-17T11:23:38+0800",
+      "topic": {
+        "id": "2026-11-17/F5@rfe1be2f4a73a1e02~howto",
+        "from_item": "2026-11-17/F5@rfe1be2f4a73a1e02",
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "2026-11-17/F5@rfe1be2f4a73a1e02"
+        }
+      },
+      "episode": {
+        "report_identity": null,
+        "issue": null,
+        "items": null
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    },
+    {
+      "id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "created_at": "2026-11-17T08:41:37+0800",
+      "render_id": "d657281aef1f46a8a4bc93b5db145b0b",
+      "render_status": "COMPLETED",
+      "title": "Claude Code 记忆审计：笔记会一直留着，证据 30 天就没了",
+      "completed_at": "2026-11-17T11:52:01+0800",
+      "topic": {
+        "id": "2026-11-17/F9@rfe1be2f4a73a1e02~howto",
+        "from_item": "2026-11-17/F9@rfe1be2f4a73a1e02",
+        "from_report": "output/flash/2026-11-17_ai_flash_discovery.md",
+        "joint_plan": {
+          "id": "37961f742aea233db00f3b853229999f2736d627dbc974ea7aca4c23b8858a56",
+          "entry": "2026-11-17/F9@rfe1be2f4a73a1e02"
+        }
+      },
+      "episode": {
+        "report_identity": null,
+        "issue": null,
+        "items": null
+      },
+      "settings": {
+        "content_recipe": {
+          "id": "research:flash-nr",
+          "settings": {
+            "video_form": "information_motion",
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:flash_each",
+          "settings": {
+            "video_speed": 1.25
+          }
+        }
+      }
+    }
+  ],
+  "report": {
+    "path": "output/flash/2026-11-17_ai_flash_discovery.md",
+    "metadata": {
+      "schema": "research-report/v1",
+      "id": "fe1be2f4a73a1e02e446ff44e44eed66430bc613abcf867d3447d97979b7e648",
+      "path": "output/flash/2026-11-17_ai_flash_discovery.md",
+      "sha256": "6b7d2ea72c40fbe2fee6962a398f6f27d521867e9a8cea0167b4304286800eb6"
+    }
+  },
+  "supply": {
+    "profile": "ai_media",
+    "mode": "changes",
+    "collection_window": {
+      "mode": "previous_slot",
+      "days": 1,
+      "start": "2026-11-16T18:30:00+08:00",
+      "end": "2026-11-17T07:30:00+08:00",
+      "timezone": "Asia/Shanghai"
+    },
+    "items": 528,
+    "automatic": [
+      "rss:https://ratelimitnow.com/whats-new.xml"
+    ],
+    "quiet": false,
+    "source_count": 65,
+    "sources": {
+      "page:https://chatgpt.com/pricing": {
+        "scanned": 19,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://chatgpt.com/pricing#:~:text=Pricing",
+          "https://chatgpt.com/pricing#:~:text=For%20life%20sciences%20research%2C%20explore%20the%20Rosalind%20Academic%20Plan.",
+          "https://chatgpt.com/pricing#:~:text=Free",
+          "https://chatgpt.com/pricing#:~:text=Go",
+          "https://chatgpt.com/pricing#:~:text=Plus",
+          "https://chatgpt.com/pricing#:~:text=Pro",
+          "https://chatgpt.com/pricing#:~:text=Compare%20features%20across%20plans",
+          "https://chatgpt.com/pricing#:~:text=Essentials"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "openai_product",
+        "live_items": 19,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462449.593444,
+          "last_observation": 1794871340.352236,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 19
+      },
+      "page:https://openai.com/api/pricing/": {
+        "scanned": 25,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://openai.com/api/pricing/#:~:text=Business",
+          "https://openai.com/api/pricing/#:~:text=Business%20Pricing%20%7C%20OpenAI",
+          "https://openai.com/api/pricing/#:~:text=Custom%20pricing",
+          "https://openai.com/api/pricing/#:~:text=Customer%20Service",
+          "https://openai.com/api/pricing/#:~:text=Does%20OpenAI%20offer%20a%20ChatGPT%20plan%20for%20educational%20institutions%3F",
+          "https://openai.com/api/pricing/#:~:text=Does%20OpenAI%20offer%20a%20discount%20for%20nonprofits%3F",
+          "https://openai.com/api/pricing/#:~:text=Enterprise",
+          "https://openai.com/api/pricing/#:~:text=Essentials"
+        ],
+        "error": "页面未成功打开（HTTP 403），请检查来源网址",
+        "role": "state",
+        "coverage": "openai_product",
+        "live_items": 0,
+        "cache_items": 25,
+        "live_status": "unavailable",
+        "archive_coverage": {
+          "first_observation": 1793462456.442197,
+          "last_observation": 1794871218.017183,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 25
+      },
+      "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes": {
+        "scanned": 87,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "页面未成功打开（HTTP 403），请检查来源网址",
+        "role": "release",
+        "coverage": "openai_product",
+        "live_items": 0,
+        "cache_items": 87,
+        "live_status": "unavailable",
+        "archive_coverage": {
+          "first_observation": 1793462461.467995,
+          "last_observation": 1794871225.264904,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 87
+      },
+      "rss:https://openai.com/news/rss.xml": {
+        "scanned": 137,
+        "changed": 8,
+        "delivered": 6,
+        "urls": [
+          "https://openai.com/index/expanding-chatgpt-for-academic-researchers",
+          "https://openai.com/index/strengthening-online-child-safety",
+          "https://openai.com/index/science-at-the-frontier",
+          "https://openai.com/index/our-first-phase-of-embedded-assessments",
+          "https://openai.com/index/more-ways-to-move-care-forward-with-chatgpt-for-healthcare",
+          "https://openai.com/index/the-kings-trust-and-openai"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "openai_product",
+        "live_items": 80,
+        "cache_items": 57,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463130.031609,
+          "last_observation": 1794827227.342514,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 129
+      },
+      "rss:https://developers.openai.com/rss.xml": {
+        "scanned": 80,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "openai_product",
+        "live_items": 80,
+        "cache_items": 3,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793549105.832532,
+          "last_observation": 1794871555.242892,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 80
+      },
+      "page:https://learn.chatgpt.com/docs/whats-new.md": {
+        "scanned": 82,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "openai_product",
+        "live_items": 80,
+        "cache_items": 2,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793522965.1250079,
+          "last_observation": 1794871462.692868,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 82
+      },
+      "page:https://developers.openai.com/api/docs/changelog.md": {
+        "scanned": 87,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://developers.openai.com/api/docs/changelog.md#:~:text=Nov%2016"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "openai_product",
+        "live_items": 80,
+        "cache_items": 7,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793522967.103351,
+          "last_observation": 1794871358.076949,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 87
+      },
+      "rss:https://ratelimitnow.com/whats-new.xml": {
+        "scanned": 287,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "coding_products",
+        "live_items": 80,
+        "cache_items": 207,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463134.919363,
+          "last_observation": 1794827234.4744802,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 287
+      },
+      "page:https://claude.com/pricing": {
+        "scanned": 17,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://claude.com/pricing#:~:text=Pricing",
+          "https://claude.com/pricing#:~:text=Free",
+          "https://claude.com/pricing#:~:text=Pro",
+          "https://claude.com/pricing#:~:text=Max",
+          "https://claude.com/pricing#:~:text=Ultra",
+          "https://claude.com/pricing#:~:text=Compare%20features%20across%20plans",
+          "https://claude.com/pricing#:~:text=Limit%20every%205%20hours",
+          "https://claude.com/pricing#:~:text=Fable%20More%20information"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "anthropic_product",
+        "live_items": 17,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462466.919361,
+          "last_observation": 1794871347.620706,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 17
+      },
+      "page:https://platform.claude.com/docs/en/about-claude/pricing": {
+        "scanned": 34,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://platform.claude.com/docs/en/about-claude/pricing#:~:text=Pricing",
+          "https://platform.claude.com/docs/en/about-claude/pricing#model-pricing",
+          "https://platform.claude.com/docs/en/about-claude/pricing#cloud-platform-pricing",
+          "https://platform.claude.com/docs/en/about-claude/pricing#claude-platform-on-aws-pricing",
+          "https://platform.claude.com/docs/en/about-claude/pricing#inference-geography",
+          "https://platform.claude.com/docs/en/about-claude/pricing#private-offers",
+          "https://platform.claude.com/docs/en/about-claude/pricing#claude-in-microsoft-foundry-pricing",
+          "https://platform.claude.com/docs/en/about-claude/pricing#foundry-inference-geography"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "anthropic_product",
+        "live_items": 34,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462478.890709,
+          "last_observation": 1794871475.97231,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 35
+      },
+      "rss:https://code.claude.com/docs/en/changelog/rss.xml": {
+        "scanned": 23,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://code.claude.com/docs/en/changelog#2-1-326",
+          "https://code.claude.com/docs/en/changelog#page-title"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "anthropic_product",
+        "live_items": 15,
+        "cache_items": 8,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462480.2757828,
+          "last_observation": 1794871551.739037,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 23
+      },
+      "github:anthropics/claude-code": {
+        "scanned": 38,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://github.com/anthropics/claude-code/releases/tag/v2.1.326",
+          "https://github.com/anthropics/claude-code/releases/tag/v2.1.326#select-panel-d380f2f0-592b-468c-bdb0-b9dc9836d584-dialog-title"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "anthropic_product",
+        "live_items": 30,
+        "cache_items": 8,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548818.532992,
+          "last_observation": 1794871264.256385,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 38
+      },
+      "catalog:https://www.anthropic.com/news": {
+        "scanned": 34,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "anthropic_product",
+        "live_items": 32,
+        "cache_items": 2,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548821.1503391,
+          "last_observation": 1794871242.789052,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 34
+      },
+      "page:https://support.claude.com/en/articles/12138966-release-notes": {
+        "scanned": 65,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "anthropic_product",
+        "live_items": 65,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548823.97591,
+          "last_observation": 1794871483.6725829,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 65
+      },
+      "page:https://one.google.com/about/google-ai-plans/": {
+        "scanned": 31,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://one.google.com/about/google-ai-plans/#:~:text=Unlock%20our%20strongest%20model%20Gemini%204%20Carbon",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Google%20AI%20Plus",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Google%20AI%20Pro",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Google%20AI%20Ultra",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Students%20get%20exclusive%20offers%20on%20Google%20AI%20plans",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Discover%20a%20universe%20of%20possibilities",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Pushing%20the%20frontier",
+          "https://one.google.com/about/google-ai-plans/#:~:text=Expanded%20access"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "google_product",
+        "live_items": 31,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462588.1256971,
+          "last_observation": 1794871470.961356,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 35
+      },
+      "page:https://ai.google.dev/gemini-api/docs/pricing": {
+        "scanned": 1,
+        "changed": 0,
+        "delivered": 1,
+        "urls": [
+          "https://ai.google.dev/gemini-api/docs/pricing#:~:text=Gemini%20Developer%20API%20pricing%20-%20Gemini%20API%20%7C%20Google%20AI%20Studio"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "google_product",
+        "live_items": 1,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462696.5293179,
+          "last_observation": 1794871302.1511219,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 103
+      },
+      "page:https://gemini.google/release-notes/": {
+        "scanned": 83,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "google_product",
+        "live_items": 80,
+        "cache_items": 3,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548826.776366,
+          "last_observation": 1794871387.144247,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 83
+      },
+      "page:https://ai.google.dev/gemini-api/docs/changelog": {
+        "scanned": 161,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "google_product",
+        "live_items": 1,
+        "cache_items": 160,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548830.0970812,
+          "last_observation": 1794871298.3031502,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 161
+      },
+      "page:https://cursor.com/pricing": {
+        "scanned": 15,
+        "changed": 0,
+        "delivered": 8,
+        "urls": [
+          "https://cursor.com/pricing#unified-tier-free",
+          "https://cursor.com/pricing#unified-tier-premium",
+          "https://cursor.com/pricing#unified-tier-plus",
+          "https://cursor.com/pricing#unified-tier-super",
+          "https://cursor.com/pricing#unified-tier-ultra",
+          "https://cursor.com/pricing#:~:text=Compare%20features%20across%20plans",
+          "https://cursor.com/pricing#:~:text=What%20is%20the%20right%20plan%20for%20me%3F%20%E2%86%93%20%E2%86%91",
+          "https://cursor.com/pricing#:~:text=What%20are%20my%20payment%20options%3F%20%E2%86%93%20%E2%86%91"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "coding_products",
+        "live_items": 15,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462697.8016808,
+          "last_observation": 1794871355.441785,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 15
+      },
+      "page:https://cursor.com/changelog": {
+        "scanned": 15,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "coding_products",
+        "live_items": 5,
+        "cache_items": 10,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462700.072265,
+          "last_observation": 1794871352.658464,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 15
+      },
+      "page:https://github.com/features/copilot/plans": {
+        "scanned": 29,
+        "changed": 1,
+        "delivered": 8,
+        "urls": [
+          "https://github.com/features/copilot/plans#:~:text=Everything%20in%20Pro%2B%20and%3A",
+          "https://github.com/features/copilot/plans#pricing-plans",
+          "https://github.com/features/copilot/plans#:~:text=Free",
+          "https://github.com/features/copilot/plans#:~:text=What%27s%20included%3A",
+          "https://github.com/features/copilot/plans#:~:text=Pro",
+          "https://github.com/features/copilot/plans#:~:text=Everything%20in%20Free%20and%3A",
+          "https://github.com/features/copilot/plans#:~:text=Pro%2B",
+          "https://github.com/features/copilot/plans#:~:text=Everything%20in%20Pro%20and%3A"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "coding_products",
+        "live_items": 29,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462733.51488,
+          "last_observation": 1794871397.088021,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 30
+      },
+      "rss:https://github.blog/changelog/label/copilot/feed/": {
+        "scanned": 28,
+        "changed": 2,
+        "delivered": 2,
+        "urls": [
+          "https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026",
+          "https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9",
+          "https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026#:~:text=GitHub%20Copilot%20models%20deprecated%20on%20November%2016%2C%202026",
+          "https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026#:~:text=GitHub%20Copilot%20models%20deprecated%20on%20November%2016%2C%202026",
+          "https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026#share-your-feedback",
+          "https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9#:~:text=GitHub%20Copilot%20weekly%20releases%20%E2%80%94%20November%209",
+          "https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9#github-copilot",
+          "https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9#github-copilot-app",
+          "https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9#github-copilot-in-vs-code-1-146-release"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "coding_products",
+        "live_items": 10,
+        "cache_items": 18,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548832.08422,
+          "last_observation": 1794871560.224399,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 28
+      },
+      "github:openai/codex": {
+        "scanned": 70,
+        "changed": 2,
+        "delivered": 2,
+        "urls": [
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.8",
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.9",
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.8#:~:text=0.171.0-alpha.8",
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.8#select-panel-99f02470-279e-4180-b3db-f14d17ecc8a5-dialog-title",
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.9#:~:text=0.171.0-alpha.9",
+          "https://github.com/openai/codex/releases/tag/rust-v0.171.0-alpha.9#select-panel-d4382efa-9af8-41e5-877d-e23e5941fe7f-dialog-title"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "coding_products",
+        "live_items": 30,
+        "cache_items": 40,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548846.491049,
+          "last_observation": 1794871285.334385,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 70
+      },
+      "github:cline/cline": {
+        "scanned": 30,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "coding_products",
+        "live_items": 30,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548849.704695,
+          "last_observation": 1794871266.659395,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 30
+      },
+      "page:https://docs.devin.ai/desktop/changelog": {
+        "scanned": 80,
+        "changed": 19,
+        "delivered": 7,
+        "urls": [
+          "https://docs.devin.ai/desktop/changelog#new-features-and-improvements",
+          "https://docs.devin.ai/desktop/changelog#new-model-picker",
+          "https://docs.devin.ai/desktop/changelog#new-models",
+          "https://docs.devin.ai/desktop/changelog#page-title",
+          "https://docs.devin.ai/desktop/changelog#patch-fixes-and-improvements",
+          "https://docs.devin.ai/desktop/changelog#plan-mode",
+          "https://docs.devin.ai/desktop/changelog#platform-%26-messaging"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "coding_products",
+        "live_items": 80,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548853.914196,
+          "last_observation": 1794871364.240934,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 80
+      },
+      "catalog:https://cursor.com/blog": {
+        "scanned": 23,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "coding_products",
+        "live_items": 21,
+        "cache_items": 2,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462801.819633,
+          "last_observation": 1794827301.277376,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 23
+      },
+      "page:https://docs.x.ai/developers/models": {
+        "scanned": 7,
+        "changed": 0,
+        "delivered": 7,
+        "urls": [
+          "https://docs.x.ai/developers/models#models",
+          "https://docs.x.ai/developers/models#:~:text=Grok%204.7",
+          "https://docs.x.ai/developers/models#:~:text=Voice%20API",
+          "https://docs.x.ai/developers/models#:~:text=Image%20%26%20Video%20API",
+          "https://docs.x.ai/developers/models#which-model-should-i-choose",
+          "https://docs.x.ai/developers/models#additional-information-regarding-models",
+          "https://docs.x.ai/developers/models#model-aliases"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "xai_product",
+        "live_items": 7,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548871.3637838,
+          "last_observation": 1794871374.1658208,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 14
+      },
+      "page:https://docs.x.ai/developers/release-notes": {
+        "scanned": 120,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "xai_product",
+        "live_items": 60,
+        "cache_items": 60,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548873.9834728,
+          "last_observation": 1794871376.988281,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 120
+      },
+      "catalog:https://x.ai/news": {
+        "scanned": 82,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "xai_product",
+        "live_items": 80,
+        "cache_items": 2,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548876.3183942,
+          "last_observation": 1794871251.567092,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 82
+      },
+      "catalog:https://ai.meta.com/blog/": {
+        "scanned": 5,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "open_weight_labs",
+        "live_items": 5,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548880.205895,
+          "last_observation": 1794827311.63855,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 5
+      },
+      "catalog:https://mistral.ai/news": {
+        "scanned": 81,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "open_weight_labs",
+        "live_items": 80,
+        "cache_items": 1,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548885.180303,
+          "last_observation": 1794827316.198111,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 81
+      },
+      "page:https://docs.mistral.ai/resources/changelogs": {
+        "scanned": 57,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://docs.mistral.ai/resources/changelogs#:~:text=October%2029"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "open_weight_labs",
+        "live_items": 57,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548889.381602,
+          "last_observation": 1794871367.5265942,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 57
+      },
+      "page:https://api-docs.deepseek.com/updates": {
+        "scanned": 26,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "china_models",
+        "live_items": 26,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548893.487487,
+          "last_observation": 1794871309.123657,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 26
+      },
+      "page:https://api-docs.deepseek.com/quick_start/pricing": {
+        "scanned": 6,
+        "changed": 0,
+        "delivered": 6,
+        "urls": [
+          "https://api-docs.deepseek.com/quick_start/pricing#:~:text=Models%20%26%20Pricing",
+          "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+          "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+          "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+          "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+          "https://api-docs.deepseek.com/quick_start/pricing#deduction-rules"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "china_models",
+        "live_items": 6,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548896.968734,
+          "last_observation": 1794871305.4798248,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 10
+      },
+      "page:https://platform.moonshot.cn/docs/pricing/chat": {
+        "scanned": 7,
+        "changed": 0,
+        "delivered": 7,
+        "urls": [
+          "https://platform.moonshot.cn/docs/pricing/chat#page-title",
+          "https://platform.moonshot.cn/docs/pricing/chat#k3-%E7%B3%BB%E5%88%97%E6%A8%A1%E5%9E%8B",
+          "https://platform.moonshot.cn/docs/pricing/chat#k2-%E7%B3%BB%E5%88%97%E6%A8%A1%E5%9E%8B",
+          "https://platform.moonshot.cn/docs/pricing/chat#%E8%AE%A1%E8%B4%B9%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5",
+          "https://platform.moonshot.cn/docs/pricing/chat#%E8%AE%A1%E8%B4%B9%E5%8D%95%E5%85%83",
+          "https://platform.moonshot.cn/docs/pricing/chat#%E8%AE%A1%E8%B4%B9%E9%80%BB%E8%BE%91",
+          "https://platform.moonshot.cn/docs/pricing/chat#%E6%A8%A1%E5%9E%8B%E8%AF%B4%E6%98%8E"
+        ],
+        "error": "",
+        "role": "state",
+        "coverage": "china_models",
+        "live_items": 7,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548905.780326,
+          "last_observation": 1794871480.998593,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 15
+      },
+      "page:https://docs.bigmodel.cn/cn/update/new-releases": {
+        "scanned": 2,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "china_models",
+        "live_items": 2,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548908.1680892,
+          "last_observation": 1794871360.193158,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 2
+      },
+      "catalog:https://www.minimax.io/news": {
+        "scanned": 5,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "china_models",
+        "live_items": 5,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548910.239938,
+          "last_observation": 1794871249.1883159,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 5
+      },
+      "github:QwenLM/qwen-code": {
+        "scanned": 65,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3",
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3#:~:text=Release%20v0.27.4-nightly.20261116.eb3a599ef3",
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3#select-panel-fa3e573b-3f54-4937-adec-78781e32c44b-dialog-title",
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3#:~:text=What%27s%20Changed",
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3#:~:text=New%20Contributors",
+          "https://github.com/QwenLM/qwen-code/releases/tag/v0.27.4-nightly.20261116.eb3a599ef3#:~:text=Contributors"
+        ],
+        "error": "",
+        "role": "release",
+        "coverage": "china_models",
+        "live_items": 30,
+        "cache_items": 35,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548913.545175,
+          "last_observation": 1794871260.200008,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 65
+      },
+      "rss:https://updates.midjourney.com/rss/": {
+        "scanned": 15,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "mismatched tag: line 35, column 6",
+        "role": "release",
+        "coverage": "creative_generation",
+        "live_items": 0,
+        "cache_items": 15,
+        "live_status": "unavailable",
+        "archive_coverage": {
+          "first_observation": 1793548915.2634041,
+          "last_observation": 1794871228.3256042,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 15
+      },
+      "catalog:https://bfl.ai/blog": {
+        "scanned": 1,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "release",
+        "coverage": "creative_generation",
+        "live_items": 1,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548917.974209,
+          "last_observation": 1794827352.056611,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 1
+      },
+      "rss:https://simonwillison.net/atom/everything/": {
+        "scanned": 70,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "practitioner_commentary",
+        "live_items": 30,
+        "cache_items": 40,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548928.491491,
+          "last_observation": 1794827354.1238139,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 70
+      },
+      "rss:https://www.latent.space/feed": {
+        "scanned": 42,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://latent.space/p/bfl/",
+          "https://latent.space/p/bfl#:~:text=Building%20Visual%20Intelligence%20%E2%80%94%20Andreas%20Blattmann%20%26%20Dustin%20Podell%2C%20Black%20Forest%20Labs",
+          "https://latent.space/p/bfl#what-a-moving-camera-teaches-you",
+          "https://latent.space/p/bfl#what-s-worth-spending-training-compute-on",
+          "https://latent.space/p/bfl#show-notes",
+          "https://latent.space/p/bfl#chapters"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "practitioner_commentary",
+        "live_items": 20,
+        "cache_items": 22,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548933.995969,
+          "last_observation": 1794827358.551519,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 41
+      },
+      "rss:https://lastweekin.ai/feed": {
+        "scanned": 21,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "practitioner_commentary",
+        "live_items": 20,
+        "cache_items": 1,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548936.288859,
+          "last_observation": 1794871566.833478,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 21
+      },
+      "rss:https://www.bensbites.com/feed": {
+        "scanned": 24,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "practitioner_commentary",
+        "live_items": 20,
+        "cache_items": 4,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548939.11264,
+          "last_observation": 1794827363.5807848,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 24
+      },
+      "rss:https://www.qbitai.com/feed": {
+        "scanned": 123,
+        "changed": 10,
+        "delivered": 10,
+        "urls": [
+          "https://www.qbitai.com/2026/11/510542.html",
+          "https://www.qbitai.com/2026/11/510526.html",
+          "https://www.qbitai.com/2026/11/510496.html",
+          "https://www.qbitai.com/2026/11/510493.html",
+          "https://www.qbitai.com/2026/11/510486.html",
+          "https://www.qbitai.com/2026/11/510436.html",
+          "https://www.qbitai.com/2026/11/510416.html",
+          "https://www.qbitai.com/2026/11/510404.html",
+          "https://www.qbitai.com/2026/11/510382.html",
+          "https://www.qbitai.com/2026/11/510369.html",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E7%9D%BF%E5%B0%94%E6%9B%BC%E6%99%BA%E8%83%BD%E9%83%91%E9%9A%8F%E5%85%B5%EF%BC%9A%E8%B4%A8%E9%87%8F%E3%80%81%E7%BB%8F%E6%B5%8E%E6%80%A7%E3%80%81%E7%A8%B3%E5%AE%9A%E6%80%A7%E6%98%AF%E6%9C%BA%E5%99%A8%E4%BA%BA%E8%90%BD%E5%9C%B0%E4%B8%89%E5%A4%A7%E6%A0%87%E5%87%86",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E2%80%9C%E5%9C%A8%E7%9C%9F%E5%AE%9E%E5%9C%BA%E6%99%AF%E7%9C%9F%E5%B9%B2%E6%B4%BB%E2%80%9D%EF%BC%8C%E4%BB%A5%E8%B4%A8%E9%87%8F%E3%80%81%E7%BB%8F%E6%B5%8E%E6%80%A7%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7%E9%87%8D%E5%A1%91%E5%9C%BA%E6%99%AF%E8%BE%B9%E7%95%8C",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E7%AD%BE%E7%BA%A6%E7%88%B1%E5%AE%89%E7%89%B9%EF%BC%8C%E6%8A%8A%E2%80%9C%E7%9C%9F%E5%B9%B2%E6%B4%BB%E2%80%9D%E6%9C%BA%E5%99%A8%E4%BA%BA%E8%90%BD%E5%88%B0%E7%9C%9F%E5%AE%9E%E4%BA%A7%E7%BA%BF%E4%B8%8A",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E5%85%AC%E5%8F%B8%E6%B3%A8%E5%86%8C10%E5%A4%A9%EF%BC%8C%E4%BC%B0%E5%80%BC%E9%80%BE10%E4%BA%BF%E7%BE%8E%E5%85%83%EF%BC%81%E7%90%86%E6%83%B3%E6%99%BA%E9%A9%BE%E5%A4%A7%E7%89%9B%E5%88%B7%E5%87%BA%E5%85%B7%E8%BA%AB%E5%88%9B%E6%8A%95%E6%96%B0%E7%83%AD%E5%BA%A6",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E6%9D%8E%E9%A3%9E%E9%A3%9E%E3%80%8C%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%E3%80%8D%E6%96%B0%E6%88%90%E6%9E%9C%EF%BC%81%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%8E%A5%E5%85%A5%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9B%B4%E6%8E%A5%E5%90%AC%E6%87%82%E4%BA%BA%E8%AF%9D",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=1956-2026%EF%BC%9A%E4%BA%BA%E7%B1%BB%E4%B8%8E%E6%9C%BA%E5%99%A8%E6%99%BA%E8%83%BD%E7%9A%84%E4%B8%83%E5%8D%81%E5%B9%B4%E5%AF%B9%E8%AF%9D",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E7%A8%9A%E6%99%96%E5%90%9B%E9%A2%84%E5%91%8A%E6%8F%AD%E6%99%93%EF%BC%81%E6%99%BA%E5%85%83%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%8F%91%E5%B8%83%E9%A6%96%E4%B8%AA%E9%80%9A%E7%94%A8%E5%85%B7%E8%BA%AB%E5%9F%BA%E5%BA%A7%E6%A8%A1%E5%9E%8BGO-1",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E4%BA%BA%E5%BD%A2%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%B8%BB%E6%8C%81%E5%8F%91%E5%B8%83%E4%BC%9A%E5%8F%91%E5%B8%83%E8%87%AA%E5%B7%B1%EF%BC%81%E8%BF%BD%E8%A7%85%E7%A7%91%E6%8A%80%E5%AD%B5%E5%8C%96%EF%BC%8C%E4%B8%8B%E6%9C%88%E5%B0%86%E5%8F%82%E5%8A%A0%E5%85%A8%E7%90%83%E9%A6%96%E5%B1%8A%E4%BA%BA%E5%BD%A2%E6%9C%BA%E5%99%A8%E4%BA%BA%E9%A9%AC%E6%8B%89%E6%9D%BE",
+          "https://www.qbitai.com/2026/11/510542.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=2026%E7%94%B2%E5%AD%90%E5%BC%95%E5%8A%9B%E5%B9%B4%E7%BB%88%E7%9B%9B%E5%85%B8%E5%8D%B3%E5%B0%86%E5%90%AF%E5%B9%95%EF%BC%8CAI%E7%9A%84%E6%97%A0%E9%99%90%E6%B8%B8%E6%88%8F%E8%BF%9B%E5%85%A5%E3%80%8C%E7%AC%AC%E4%BA%8C%E5%BA%8F%E7%AB%A0%E3%80%8D%EF%BD%9C%E7%94%B2%E5%AD%90%E5%BC%95%E5%8A%9B",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=1.%E8%BF%9C%E6%96%B9%E7%9A%84%E5%B0%BD%E5%A4%B4%EF%BC%8C%E4%BB%8D%E6%98%AF%E8%BF%9C%E6%96%B9",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E5%BC%80%E5%B9%95%E5%BC%8F%EF%BD%9C%E7%AC%AC%E4%BA%8C%E5%BA%8F%E7%AB%A0",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%AC%AC%E4%B8%80%E5%B9%95%EF%BD%9C%E8%BF%9C%E6%96%B9%E4%B9%8B%E5%A4%96%EF%BC%88AI%20Frontier%E4%B8%93%E5%9C%BA%EF%BC%8C13%3A30%E2%80%9418%3A00%EF%BC%89",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%AC%AC%E4%BA%8C%E5%B9%95%EF%BD%9C%E4%B8%87%E7%89%A9%E7%94%9F%E9%95%BF%EF%BC%88AI%20in%20Action%E4%B8%93%E5%9C%BA%EF%BC%8C13%3A30%E2%80%9418%3A00%EF%BC%89",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%AC%AC%E4%B8%89%E5%B9%95%EF%BD%9C%E6%97%B6%E9%97%B4%E4%B9%8B%E4%BB%B7%EF%BC%88Tech%20Capital%E4%B8%93%E5%9C%BA%EF%BC%8C13%3A30%E2%80%9418%3A00%EF%BC%89",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%AC%AC%E5%9B%9B%E5%B9%95%EF%BD%9C%E5%BE%AE%E5%85%89%E5%A6%82%E7%82%AC%EF%BC%88AI%20Builders%E4%B8%93%E5%9C%BA%EF%BC%8C19%3A00%E2%80%9422%3A00%EF%BC%89",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E6%A6%9C%E5%8D%95%E5%8F%91%E5%B8%83",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=3.%E8%BF%99%E5%9C%BA%E5%A4%A7%E4%BC%9A%EF%BC%8C%E4%B8%8D%E6%9D%A5%E5%B0%B1%E7%9C%9F%E4%BA%8F%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E6%BF%80%E6%B5%81%EF%BC%9A%E4%B8%AD%E5%9B%BD%E7%A7%91%E6%8A%80%E6%8A%95%E8%B5%84%E7%9A%84%E5%8A%BF%E8%83%BD%E4%B8%8E%E9%94%9A%E7%82%B9%EF%BD%9C%E7%94%B2%E5%AD%90%E5%BC%95%E5%8A%9BX",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=2021%E4%B8%AD%E5%9B%BD%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B020%E6%9D%A1%E5%88%A4%E6%96%AD%EF%BC%9A%E5%A4%A7%E5%8F%98%E5%B1%80%E4%B8%AD%EF%BC%8C%E4%B8%87%E7%89%A9%E7%94%9F%E9%95%BF%20%7C%20%E7%94%B2%E5%AD%90%E5%85%89%E5%B9%B4",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=3000%2B%E4%BA%BA%E5%88%B0%E5%9C%BA%EF%BC%8C246%E4%B8%87%2B%E4%BA%BA%E7%BA%BF%E4%B8%8A%E8%A7%82%E7%9C%8B%EF%BC%8C2023%E7%94%B2%E5%AD%90%E5%BC%95%E5%8A%9B%E5%B9%B4%E7%BB%88%E7%9B%9B%E5%85%B8%E6%88%90%E5%8A%9F%E4%B8%BE%E5%8A%9E",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=2020%E4%B8%AD%E5%9B%BD%E6%95%B0%E5%AD%97%E7%BB%8F%E6%B5%8E55%E4%B8%AA%E5%88%A4%E6%96%AD%EF%BC%9A%E5%91%BD%E8%BF%90%E4%B8%8E%E5%85%B1%EF%BC%8C%E5%A4%A7%E9%81%93%E4%B8%8D%E5%AD%A4%20%7C%20%E7%94%B2%E5%AD%90%E5%BC%95%E5%8A%9B%C2%B7%E4%B8%BB%E9%A2%98%E6%8A%A5%E5%91%8A",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=2026%E5%B4%87%E7%A4%BC%E8%AE%BA%E5%9D%9B%EF%BC%9A%E4%B8%80%E5%9C%BA%E6%9C%AA%E6%9D%A5%E6%99%BA%E8%83%BD%E7%94%9F%E6%B4%BB%E4%B8%8E%E4%B8%8B%E4%B8%80%E4%BB%A3AI%E5%88%9B%E9%80%A0%E8%80%85%E7%9A%84%E7%9B%9B%E4%BC%9A",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%A7%91%E6%8A%80%E5%88%9B%E6%96%B0%E9%AB%98%E5%B3%B0%E8%AE%BA%E5%9D%9B",
+          "https://www.qbitai.com/2026/11/510526.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E6%B2%A1%E6%90%9E%E8%BF%87%E4%B8%80%E5%A4%A9%E7%A0%94%E5%8F%91%E7%9A%84%E4%BB%96%EF%BC%8C50%E5%B2%81%E4%BB%A5%E5%8D%8E%E4%B8%BA%E8%91%A3%E4%BA%8B%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%80%80%E4%BC%91%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E5%BD%AD%E5%8D%9A%E7%9A%84%E5%8D%8E%E4%B8%BA%E6%88%98%E5%8A%9F%EF%BC%9A%E5%9C%A8%E6%AC%A7%E6%B4%B2",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E5%BD%AD%E5%8D%9A%E6%95%B2%E5%BC%80%E5%AE%A2%E6%88%B7%E5%A4%A7%E9%97%A8",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E5%BD%AD%E5%8D%9A%E8%AE%A9%E4%BD%8D%EF%BC%8C%E4%BD%95%E5%88%9A%E6%9B%B4%E8%BF%9B%E4%B8%80%E6%AD%A5",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E5%8D%8E%E4%B8%BA%E6%99%BA%E6%85%A7%E5%B1%8F%E3%80%815G%E7%89%88Mate%2020%20X%EF%BC%8C%E4%B8%80%E6%96%87%E7%9C%8B%E5%AE%8C%E5%8D%8E%E4%B8%BA%E6%B7%B1%E5%9C%B3%E5%8F%91%E5%B8%83%E4%BC%9A%E5%A4%9A%E6%AC%BE%E6%96%B0%E5%93%81",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=7499%E6%8B%BF%E4%B8%8B%E7%BA%AF%E8%A1%80%E9%B8%BF%E8%92%99%2BDeepSeek%EF%BC%8C%E5%8D%8E%E4%B8%BA%E2%80%9C%E5%B0%8F%E5%AE%BD%E6%8A%98%E5%8F%A0%E2%80%9D%E6%89%8B%E6%9C%BA%EF%BC%9A%E5%B8%AE%E6%8E%A5%E7%94%B5%E8%AF%9D%EF%BC%8C%E7%9C%BC%E5%8A%A8%E7%BF%BB%E9%A1%B5",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E8%AF%B4Magic5%20Pro%E6%98%AF%E4%B8%80%E5%8F%B0%E5%A5%BD%E7%94%A8%E4%BD%86%E6%9C%89%E7%82%B9%E6%97%A0%E8%81%8A%E7%9A%84%E6%89%8B%E6%9C%BA",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E8%8D%A3%E8%80%80X10%E5%8F%91%E5%B8%83%EF%BC%9A%E6%97%97%E8%88%B0%E7%BA%A75G%EF%BC%8C1899%E5%85%83%E8%B5%B7",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E5%8D%8E%E4%B8%BA%E6%96%B0%E6%9C%BA%E6%B5%8B%E5%87%BA5G%E9%80%9F%E5%BA%A6%EF%BC%81%E9%BA%92%E9%BA%9F9000S%E6%AD%A3%E5%BC%8F%E5%9B%9E%E5%BD%92%EF%BC%8C%E5%AE%9A%E4%BB%B76999%E9%A6%96%E6%89%B9%E7%A7%92%E6%8A%A2%E5%85%89",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E7%A7%91%E6%8A%80%E9%83%A8%E9%A2%81%E5%B8%83%E5%8D%81%E5%A4%A7%E5%9B%BD%E5%AE%B6%E6%96%B0%E4%B8%80%E4%BB%A3%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%BC%80%E6%94%BE%E5%88%9B%E6%96%B0%E5%B9%B3%E5%8F%B0%EF%BC%8C%E5%8D%8E%E4%B8%BA%E6%97%B7%E8%A7%86%E7%AD%89%E5%85%A5%E9%80%89",
+          "https://www.qbitai.com/2026/11/510496.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=SuperLink2026%E5%BC%80%E5%90%AF%E5%88%9B%E6%8A%95%E8%A1%8C%E4%B8%9A%E8%B6%85%E7%BA%A7%E9%93%BE%E6%8E%A5%E6%97%B6%E5%88%BB%EF%BC%8C12%E6%9C%88%E5%8C%97%E4%BA%AC%E8%A7%81",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E7%9C%8B%E7%82%B9%E4%B8%80%20%EF%BC%9A%E4%B8%80%E7%BA%A7%E5%B8%82%E5%9C%BA%E6%8A%95%E8%B5%84%E9%80%BB%E8%BE%91%E7%94%9F%E5%8F%98%EF%BC%8C%E8%B5%84%E6%9C%AC%E4%B8%8B%E4%B8%80%E6%AD%A5%E5%BE%80%E5%93%AA%E8%B5%B0%EF%BC%9F",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E7%9C%8B%E7%82%B9%E4%BA%8C%20%EF%BC%9A%E4%BA%A7%E4%B8%9A%E5%8F%98%E5%B1%80%E4%B9%8B%E4%B8%8B%EF%BC%8C%E4%B8%8B%E4%B8%80%E8%BD%AE%E6%9C%BA%E4%BC%9A%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E7%9C%8B%E7%82%B9%E4%B8%89%20%EF%BC%9A%20%E7%9C%8B%E8%A7%81%E6%96%B0%E7%94%9F%E4%BB%A3%E5%8A%9B%E9%87%8F%EF%BC%8C%E6%8B%A5%E6%8A%B1%E6%96%B0%E4%B8%80%E4%BB%A3%E5%88%9B%E4%B8%9A%E8%80%85",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E7%9C%8B%E7%82%B9%E5%9B%9B%20%EF%BC%9A%E4%B8%8D%E6%AD%A2%E4%BA%8E%E8%AE%BA%E5%9D%9B%EF%BC%8C%E7%89%B9%E8%89%B2%E6%B4%BB%E5%8A%A8%E8%AE%A9%E9%93%BE%E6%8E%A5%E6%8C%81%E7%BB%AD%E5%8F%91%E7%94%9F",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=2024%E3%80%8C%E6%8A%95%E8%B5%84%E7%95%8CS50%E5%A5%B3%E6%80%A7%E6%8A%95%E8%B5%84%E4%BA%BA%E3%80%8D%E5%BE%81%E9%9B%86%E6%B4%BB%E5%8A%A8%E6%AD%A3%E5%BC%8F%E5%BC%80%E5%90%AF",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E6%89%93%E9%80%A0%E5%88%9B%E6%8A%95%E7%94%9F%E6%80%81%E7%9A%84%E8%B6%85%E7%BA%A7%E6%9E%A2%E7%BA%BD%EF%BC%8C%202026%E6%8A%95%E8%B5%84%E7%95%8CSuperLink%E5%A4%A7%E4%BC%9A%E5%AE%9A%E6%A1%A36%E6%9C%88",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E6%8A%95%E8%B5%84%E6%96%B0%E6%97%B6%E4%BB%A3%EF%BC%9A%E7%AC%AC%E4%BA%8C%E5%8D%81%E5%9B%9B%E5%B1%8A%E4%B8%AD%E5%9B%BD%E8%82%A1%E6%9D%83%E6%8A%95%E8%B5%84%E5%B9%B4%E5%BA%A6%E5%A4%A7%E4%BC%9A%20%E5%BC%95%E9%A2%86%E8%A1%8C%E4%B8%9A%E6%9C%AA%E6%9D%A5",
+          "https://www.qbitai.com/2026/11/510493.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=%E9%98%BF%E9%87%8C%E6%AD%A3%E5%BC%8F%E5%8F%91%E5%B8%83Qwen4%EF%BC%8C%E6%99%BA%E8%83%BD%E4%BD%93%E5%8F%8A%E7%BC%96%E7%A8%8B%E8%83%BD%E5%8A%9B%E8%BF%9B%E9%98%B6%EF%BC%8C%E8%BF%88%E5%90%91%E7%9C%9F%E5%AE%9E%E5%85%A8%E5%9C%BA%E6%99%AF",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=1688%E5%85%A8%E9%9D%A2AI%E5%8C%96%EF%BC%9A%E6%8E%A8%E5%87%BA%E2%80%9C1688%20AI%E7%89%88%E2%80%9DApp%E4%BB%A5%E5%8F%8A%E5%85%8D%E8%B4%B9%E6%9F%A5%E4%BC%81%E5%B7%A5%E5%85%B7%E2%80%9C88%E6%9F%A5%E2%80%9D",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=%E9%98%BF%E9%87%8C%E6%B8%B8%E6%88%8F%E5%8D%87%E7%BA%A7%E4%B8%BA%E7%8B%AC%E7%AB%8B%E4%BA%8B%E4%B8%9A%E7%BE%A4%EF%BC%8C%E4%BF%9E%E6%B0%B8%E7%A6%8F%E5%A4%8D%E5%87%BA",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=%E9%98%BF%E9%87%8C%E7%A0%94%E7%A9%B6%E5%91%98%E9%80%8F%E9%9C%B2Qwen4.5%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%B0%86%E6%89%A9%E5%B1%95%E8%87%B35-10T%E5%8F%82%E6%95%B0",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=2019%E5%B9%B4%E7%BB%88%E5%85%A8%E7%90%83%E7%A7%91%E6%8A%80%E5%85%AC%E5%8F%B8%E5%B8%82%E5%80%BC%E6%8E%92%E5%90%8D%EF%BC%9A%E8%8B%B9%E6%9E%9C%E5%B1%85%E9%A6%96%EF%BC%8C%E9%98%BF%E9%87%8C%E4%BA%9A%E6%B4%B2%E7%AC%AC%E4%B8%80",
+          "https://www.qbitai.com/2026/11/510486.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E4%BD%99%E6%89%BF%E4%B8%9C%E5%8F%91%E5%B8%83%E6%96%B0%E6%AC%BE%E9%97%AE%E7%95%8CM8%EF%BC%9A38%E4%B8%87%E5%85%83%E8%B5%B7%E5%94%AE%EF%BC%8C%E5%85%A8%E7%B3%BB%E9%A2%84%E5%9F%8BL3%E6%9E%B6%E6%9E%84",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E5%85%A8%E7%B3%BB%E5%9B%9B%E9%A2%97%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%EF%BC%8CL3%E6%9E%B6%E6%9E%84%E6%8F%90%E5%89%8D%E4%B8%8A%E8%BD%A6",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E9%97%AE%E7%95%8C%E6%96%B0M8%EF%BC%8C%E8%BF%98%E6%9C%89%E5%93%AA%E4%BA%9B%E6%9B%B4%E6%96%B0%EF%BC%9F",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E5%8D%8E%E4%B8%BA%E9%97%AE%E7%95%8C%E7%A1%AE%E5%AE%9A%E6%96%B0%E5%88%86%E5%B7%A5",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E5%8D%8E%E4%B8%BA%E9%A6%96%E6%AC%BE%E6%97%85%E8%A1%8C%E8%BD%A6%E5%8D%9631%E4%B8%87%EF%BC%8C1%E5%B0%8F%E6%97%B6%E5%A4%A7%E5%AE%9A5%E5%8D%83%E5%8F%B0%EF%BC%81%E5%8C%97%E6%B1%BD%EF%BC%9A%E4%BD%99%E6%89%BF%E4%B8%9C%E5%87%BA%E5%93%81%E5%BF%85%E5%B1%9E%E7%B2%BE%E5%93%81",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=25%E4%BA%BF%EF%BC%81%E5%8D%8E%E4%B8%BA%E4%BA%8C%E6%8A%98%E8%BD%AC%E9%80%81%E2%80%9C%E9%97%AE%E7%95%8C%E2%80%9D",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E5%8A%A0%E7%9B%9F%E6%99%BA%E7%95%8C%E5%86%8D%E6%AC%A1%E8%81%94%E6%89%8B%E4%BD%99%E6%89%BF%E4%B8%9C%EF%BC%9F%E8%B5%B5%E6%98%8E%E5%9B%9E%E5%BA%94%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=40%E4%B8%87%EF%BC%81%E5%8D%8E%E4%B8%BA%E9%A6%96%E6%AC%BE%E8%A1%8C%E6%94%BF%E8%BD%BF%E8%BD%A6%E4%B8%8A%E5%B8%82%EF%BC%8C%E9%A6%96%E5%8F%91ADS%203.0%EF%BC%8C%E4%BD%99%E6%89%BF%E4%B8%9C%E6%96%B0Slogan%E8%B4%AF%E7%A9%BF%E5%85%A8%E5%9C%BA",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=25%E4%B8%87%EF%BC%81%E9%97%AE%E7%95%8C%E6%8B%BF%E6%8E%89%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%EF%BC%8C%E5%90%8C%E6%97%A5%E6%AF%94%E4%BA%9A%E8%BF%AA%E6%88%90%E5%8A%9F%E3%80%8C%E4%BC%9A%E5%B8%88%E3%80%8D%E5%8D%8E%E4%B8%BA%EF%BC%81",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E4%B8%AD%E5%9B%BD%E8%BD%A6%E7%9C%9F%E5%A5%BD%E5%8D%96%EF%BC%81%E6%AF%94%E4%BA%9A%E8%BF%AA1%E5%A4%A91%E4%B8%87%E8%BE%86%EF%BC%8C%E7%90%86%E6%83%B3%E6%9C%88%E9%94%80%E9%87%8D%E8%BF%945%E4%B8%87%E8%BE%86%EF%BC%8C%E8%B4%B5%E5%A6%82%E8%94%9A%E6%9D%A5%E9%83%BD%E5%86%B2%E5%88%B02%E4%B8%87",
+          "https://www.qbitai.com/2026/11/510436.html#:~:text=%E5%8D%83%E9%97%AE%E5%8A%9E%E5%85%AC2.0%E5%8D%B7%E5%90%91Team%20Agent%EF%BC%8C%E6%88%91%E4%BB%AC%E7%94%A8%E5%AE%83%E8%B7%91%E4%BA%86%E4%B8%80%E9%81%8D%E7%BC%96%E8%BE%91%E9%83%A8%E6%97%A5%E5%B8%B8",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E9%BE%99%E8%8A%AF%E3%80%81%E6%B5%B7%E5%85%89%E8%80%81%E5%85%B5%E9%9B%86%E7%BB%93%EF%BC%8C%E9%80%9A%E7%A0%94%E9%99%A2%E5%AD%B5%E5%8C%96%E7%9A%84AGI%E8%8A%AF%E7%89%87%E5%85%AC%E5%8F%B8%E6%B5%AE%E5%87%BA%E6%B0%B4%E9%9D%A2%EF%BC%81%E5%8D%8A%E5%B9%B4%E8%BF%9E%E8%9E%8D%E6%95%B0%E4%BA%BF%E5%85%83",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=AI%E8%B5%B0%E5%90%91%E7%9C%9F%E5%AE%9E%E4%B8%96%E7%95%8C%EF%BC%8C%E8%8A%AF%E7%89%87%E8%BF%8E%E6%9D%A5%E6%96%B0%E5%91%BD%E9%A2%98",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E4%BB%8E%E7%90%86%E8%A7%A3%E6%99%BA%E8%83%BD%E5%87%BA%E5%8F%91%EF%BC%8C%E9%87%8D%E6%96%B0%E5%AE%9A%E4%B9%89AGI%E8%8A%AF%E7%89%87",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E6%8A%8A%E7%90%86%E8%AE%BA%E8%90%BD%E5%88%B0%E7%A1%85%E4%B8%8A%EF%BC%8C%E9%80%9A%E8%8A%AF%E9%9D%A0%E4%BB%80%E4%B9%88",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E5%8C%97%E5%A4%A7%E7%8E%87%E5%85%88%E5%AE%98%E5%AE%A3%E6%9C%B1%E6%9D%BE%E7%BA%AF%E5%8A%A0%E7%9B%9F%EF%BC%8C%E7%8E%B0%E8%BA%AB%E7%87%95%E5%9B%AD%EF%BC%8C%E4%BB%BB%E8%81%8CAI%E7%A0%94%E7%A9%B6%E9%99%A2%E9%99%A2%E9%95%BF",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E6%9C%B1%E6%9D%BE%E7%BA%AF%E5%9B%A2%E9%98%9F%E6%9C%80%E6%96%B0%E7%A0%94%E7%A9%B6%EF%BC%9A%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%8F%AF%E4%B8%8E%E4%BA%BA%E7%B1%BB%E2%80%9C%E6%8E%A8%E5%BF%83%E7%BD%AE%E8%85%B9%E2%80%9D%EF%BC%81%E8%BF%98%E8%AF%B4%E4%B8%8B%E4%B8%80%E6%AD%A5%E8%A6%81%E9%80%A0%E2%80%9CAI%E5%A4%A7%E7%99%BD%E2%80%9D",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E9%80%9A%E7%A0%94%E9%99%A2%E5%AD%B5%E5%8C%96%E7%9A%84%E5%9B%A2%E9%98%9F%EF%BC%8C%E4%B9%9F%E7%9B%AF%E4%B8%8A%E4%BA%86RSI",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=UCLA%E7%9F%A5%E5%90%8D%E6%95%99%E6%8E%88%E6%9C%B1%E6%9D%BE%E7%BA%AF%E8%A2%AB%E6%9B%9D%E5%9B%9E%E5%9B%BD%E4%BB%BB%E6%95%99%E6%B8%85%E5%8D%8E%EF%BC%9A%E5%8A%A0%E7%9B%9F%E8%87%AA%E5%8A%A8%E5%8C%96%E7%B3%BB%EF%BC%8C%E6%98%AFAI%E8%A7%86%E8%A7%89%E9%A2%86%E5%9F%9F%E6%B3%B0%E6%96%97%E7%BA%A7%E5%AD%A6%E8%80%85",
+          "https://www.qbitai.com/2026/11/510416.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E6%B2%A1%E6%90%9E%E8%BF%87%E4%B8%80%E5%A4%A9%E7%A0%94%E5%8F%91%E7%9A%84%E4%BB%96%EF%BC%8C50%E5%B2%81%E4%BB%A5%E5%8D%8E%E4%B8%BA%E8%91%A3%E4%BA%8B%E7%9A%84%E8%BA%AB%E4%BB%BD%E9%80%80%E4%BC%91%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E5%BD%AD%E5%8D%9A%E7%9A%84%E5%8D%8E%E4%B8%BA%E6%88%98%E5%8A%9F%EF%BC%9A%E5%9C%A8%E6%AC%A7%E6%B4%B2",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E5%BD%AD%E5%8D%9A%E6%95%B2%E5%BC%80%E5%AE%A2%E6%88%B7%E5%A4%A7%E9%97%A8",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E5%BD%AD%E5%8D%9A%E8%AE%A9%E4%BD%8D%EF%BC%8C%E4%BD%95%E5%88%9A%E6%9B%B4%E8%BF%9B%E4%B8%80%E6%AD%A5",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E8%8D%A3%E8%80%80%E5%90%B9%E5%93%8D%E9%AB%98%E7%AB%AF%E5%86%B2%E9%94%8B%E5%8F%B7%EF%BC%8C%E7%9B%AE%E6%A0%87%E5%89%91%E6%8C%87%E8%8B%B9%E6%9E%9C%E4%B8%89%E6%98%9F%E5%8D%8E%E4%B8%BA",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=7%E6%AC%BE5G%E6%89%8B%E6%9C%BA%E8%8E%B73C%E8%AE%A4%E8%AF%81%EF%BC%8C%E5%8D%8E%E4%B8%BA%E3%80%81%E4%B8%80%E5%8A%A0%E3%80%81%E4%B8%AD%E5%85%B4%E3%80%81vivo%E4%B8%8A%E6%A6%9C%EF%BC%8C%E5%B0%8F%E7%B1%B3%E4%B8%8B%E5%91%A8%E7%94%B3%E8%AF%B7",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E5%B8%AE%E6%B1%9F%E6%B7%AE%E6%8A%8A%E8%BD%A6%E5%8D%96%E5%88%B0100%E4%B8%87%E5%85%83%EF%BC%8C%E5%8D%8E%E4%B8%BA%E9%A6%96%E6%AC%A1%E7%94%A8%E4%B8%8A%E4%BA%86%E2%80%9C%E5%BA%A7%E8%88%B1%E6%9D%80%E6%AF%92%E2%80%9D",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E8%B6%85%E5%8F%AF%E9%9D%A0%E6%99%BA%E6%85%A7%E6%80%A7%E8%83%BDSUV%E5%86%8D%E5%8D%87%E7%BA%A7%EF%BC%8CAITO%E9%97%AE%E7%95%8CM5%E6%A0%87%E5%87%86%E7%89%88%E6%AD%A3%E5%BC%8F%E4%BA%AE%E7%9B%B8",
+          "https://www.qbitai.com/2026/11/510404.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E4%BB%8A%E5%A4%A9%E6%88%AA%E6%AD%A2%EF%BC%812026%E5%B9%B4%E5%BA%A6AI%E8%A1%A8%E5%BD%B0%EF%BC%8C%E9%94%99%E8%BF%87%E5%86%8D%E7%AD%89%E4%B8%80%E5%B9%B4%EF%BC%81",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E4%BC%81%E4%B8%9A%E6%A6%9C",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E4%BA%A7%E5%93%81%E6%A6%9C",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E4%BA%BA%E7%89%A9%E6%A6%9C",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E9%A2%86%E8%88%AA%E4%BC%81%E4%B8%9A",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E6%BD%9C%E5%8A%9B%E5%88%9B%E4%B8%9A%E5%85%AC%E5%8F%B8",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E6%9D%B0%E5%87%BA%E4%BA%A7%E5%93%81",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E6%9D%B0%E5%87%BA%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E5%88%9B%E4%B8%9A%E6%96%B0%E9%94%90",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E5%85%B3%E4%BA%8E%E6%8A%A5%E5%90%8D",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=MEET2027%E6%99%BA%E8%83%BD%E6%9C%AA%E6%9D%A5%E5%A4%A7%E4%BC%9A%EF%BD%9C%E6%8A%A5%E5%90%8D%E4%B8%AD",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E5%80%92%E8%AE%A1%E6%97%B6%E4%B8%80%E5%91%A8%EF%BD%9C%E9%87%8F%E5%AD%90%E4%BD%8D2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E6%A6%9C%E5%8D%95%E5%BE%81%E9%9B%86%E5%8D%B3%E5%B0%86%E6%88%AA%E6%AD%A2%EF%BC%81",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=MEET2027%E5%90%AB%E9%87%91%E9%87%8F%E5%86%8D%E5%8A%A0%E7%A0%81%EF%BC%9AAI4S%2F%E9%87%8F%E5%AD%90%E8%AE%A1%E7%AE%97%2FAI%20Infra%E2%80%A6%E7%AC%AC%E4%BA%8C%E6%89%B9%E5%98%89%E5%AE%BE%E5%BC%BA%E5%8A%BF%E6%9D%A5%E8%A2%AD%EF%BC%81",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E9%87%8F%E5%AD%90%E4%BD%8D2026%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%B9%B4%E5%BA%A6%E6%A6%9C%E5%8D%95%EF%BC%8C%E6%AD%A3%E5%BC%8F%E5%90%AF%E5%8A%A8%EF%BC%81",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E9%87%8F%E5%AD%90%E4%BD%8D%E3%80%8CMEET2027%E6%99%BA%E8%83%BD%E6%9C%AA%E6%9D%A5%E5%A4%A7%E4%BC%9A%E3%80%8D%E5%90%AF%E5%8A%A8%EF%BC%81%E5%B9%B4%E5%BA%A6%E6%A6%9C%E5%8D%95%E5%BE%81%E9%9B%86%E8%BF%9B%E8%A1%8C%E4%B8%AD",
+          "https://www.qbitai.com/2026/11/510382.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E6%8F%90%E9%80%9F2.48%E5%80%8D%E4%B8%94%E7%94%BB%E8%B4%A8%E4%B8%8D%E6%8E%89%E7%BA%BF%EF%BC%8CAI%E8%A7%86%E9%A2%91%E2%80%9C%E9%99%8D%E6%9C%AC%E5%A2%9E%E6%95%88%E2%80%9D%E6%9C%89%E4%BA%86%E6%96%B0%E8%A7%A3%E6%B3%95",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90%E5%8A%A0%E9%80%9F%EF%BC%9A%E5%87%8F%E5%B0%91%E5%86%97%E4%BD%99%E8%AE%A1%E7%AE%97%EF%BC%8C%E5%90%8C%E6%97%B6%E6%8E%A7%E5%88%B6%E8%AF%AF%E5%B7%AE%E7%B4%AF%E7%A7%AF",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E7%BC%93%E5%AD%98%E4%B8%8E%E6%98%BE%E5%AD%98%E5%8D%8F%E5%90%8C%E4%BC%98%E5%8C%96%EF%BC%9A%E6%8F%90%E9%AB%98%E5%8D%95%E4%BD%8D%E7%AE%97%E5%8A%9B%E7%9A%84%E4%BB%BB%E5%8A%A1%E5%A4%84%E7%90%86%E8%83%BD%E5%8A%9B",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E6%A8%A1%E6%80%81%E8%87%AA%E9%80%82%E5%BA%94Token%E5%8E%8B%E7%BC%A9%EF%BC%9A%E9%99%8D%E4%BD%8E%E9%9F%B3%E8%A7%86%E9%A2%91%E7%9A%84%E7%90%86%E8%A7%A3%E5%BC%80%E9%94%80",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E5%9F%BA%E4%BA%8E%E5%85%A8%E6%A8%A1%E6%80%81%E6%A8%A1%E5%9E%8B%E7%9A%84Context%20Engine%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E4%BB%8E%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%E6%95%88%E7%8E%87%E5%88%B0%E5%AE%8C%E6%95%B4%E7%94%9F%E4%BA%A7%E9%93%BE%E8%B7%AF",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E9%99%88%E4%B8%B9%E7%90%A6%E5%B8%A6%E7%9D%80%E6%B8%85%E5%8D%8E%E7%89%B9%E5%A5%96%E5%AD%A6%E5%BC%9F%E5%8F%91%E5%B8%83%E6%96%B0%E6%88%90%E6%9E%9C%EF%BC%9A%E6%89%93%E7%A0%B4%E8%B0%B7%E6%AD%8CBERT%E6%8F%90%E5%87%BA%E7%9A%84%E8%AE%AD%E7%BB%83%E8%A7%84%E5%BE%8B%EF%BC%81%E8%BF%99%E4%B8%AA%E5%BA%86%E7%A5%9D%E6%96%B9%E5%BC%8F%E5%A4%AA%E5%AD%A6%E7%A5%9E%E4%BA%86%E5%90%A7",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E5%9B%BD%E4%BA%A7%E7%AE%97%E5%8A%9B%E6%AD%A3%E5%9C%A8%E8%BF%9B%E5%85%A5Token%E6%A0%87%E5%87%86%E5%8C%96%E6%97%B6%E4%BB%A3",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E6%95%88%E6%9E%9C%E8%B6%85%E8%B6%8AGen-2%EF%BC%81%E5%AD%97%E8%8A%82%E6%9C%80%E6%96%B0%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B%EF%BC%8C%E4%B8%80%E5%8F%A5%E8%AF%9D%E8%AE%A9%E7%BB%BF%E5%B7%A8%E4%BA%BA%E6%88%B4VR%E7%9C%BC%E9%95%9C",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E4%B8%AD%E5%9B%BD%E7%AC%AC%E4%B8%80%EF%BC%8C%E5%85%A8%E7%90%83%E7%AC%AC%E4%BA%8C%EF%BC%8C%E8%A7%86%E9%A2%91%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%A2%86%E5%86%9B%E8%80%85%E7%94%9F%E6%95%B0%E7%A7%91%E6%8A%80%E5%AE%8C%E6%88%90%E8%B6%85%206%20%E4%BA%BF%E5%85%83A%2B%E8%BD%AE%E8%9E%8D%E8%B5%84",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=2%E6%AD%A5%E7%94%9F%E6%88%9025%E5%B8%A7%E9%AB%98%E8%B4%A8%E9%87%8F%E5%8A%A8%E7%94%BB%EF%BC%8C%E8%AE%A1%E7%AE%97%E4%B8%BASVD%E7%9A%848%25%20%7C%20%E5%9C%A8%E7%BA%BF%E5%8F%AF%E7%8E%A9",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E6%96%B0Vidu%20Q3%E5%8F%82%E8%80%83%E7%94%9F%EF%BC%8C%E8%BF%99%E6%98%AF%E5%86%B2%E7%9D%80%E3%80%8C%E5%89%A7%E3%80%8D%E6%9D%A5%E7%9A%84%EF%BC%81%E4%B8%87%E7%89%A9%E7%9A%86%E5%8F%AF%E5%8F%82%E8%80%83%EF%BC%9A%E7%89%B9%E6%95%88%E9%9F%B3%E6%95%88%E5%9C%BA%E6%99%AF%E9%83%BD%E5%A4%87%E5%A5%BD%E4%BA%86",
+          "https://www.qbitai.com/2026/11/510369.html#:~:text=%E7%BA%AF%E4%BB%A3%E7%A0%81%E9%80%A0%E3%80%8A%E5%90%8E%E5%AE%A4%E3%80%8B%EF%BC%8C116%E7%A7%92%E5%88%8720%E7%A7%8D%E7%94%BB%E9%A3%8E%EF%BC%81%E6%96%87%E5%BF%83%E6%96%B0%E6%A8%A1%E5%9E%8B%E7%8E%A9%E5%97%A8%E4%BA%86"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "practitioner_commentary",
+        "live_items": 10,
+        "cache_items": 113,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793548941.5628018,
+          "last_observation": 1794827366.2048519,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 113
+      },
+      "bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI": {
+        "scanned": 128,
+        "changed": 7,
+        "delivered": 7,
+        "urls": [
+          "https://www.ithome.com/1/027/608.htm",
+          "https://search.bilibili.com/all?keyword=%E8%B1%86%E5%8C%85#2026-11-17",
+          "https://search.bilibili.com/all?keyword=Gemini#2026-11-17",
+          "https://search.bilibili.com/all?keyword=OpenAI#2026-11-17",
+          "https://www.ithome.com/tags/%E8%B1%86%E5%8C%85/",
+          "https://aiproducthub.cn/newsflash/topic/doubao/",
+          "https://gemini.google/tw/gemini-drops/?hl=zh-TW"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 12,
+        "cache_items": 116,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1794352965.2844741,
+          "last_observation": 1794827380.0986738,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 116
+      },
+      "page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers": {
+        "scanned": 25,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "页面未成功打开（HTTP 403），请检查来源网址",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 0,
+        "cache_items": 25,
+        "live_status": "unavailable",
+        "archive_coverage": {
+          "first_observation": 1793462988.2653599,
+          "last_observation": 1794871449.449408,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 25
+      },
+      "rss:https://aicatchup.com/rss.xml": {
+        "scanned": 82,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=OpenAI%20Expands%20ChatGPT%20for%20Academic%20Researchers",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#key-takeaways",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#what-the-november-grant-round-offers",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#how-to-apply",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#what-openais-pilot-study-reports",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=Anthropic%20Opens%20a%20Claude%20Team%20Plan%20for%20Scientists%20With%20Free%20Standard%20Seats",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=ChatGPT%20Pro%20500%20at%20%24500%20With%20Astra%20Ultrafast%3A%20OpenAI%20Cancels%20Planned%20Pro%20200%20Cut",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=Businesses%20in%20ChatGPT%3A%20Business%20Hub%20and%20Business%20Agents",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=ChatGPT%20Account%20Switching%20Rolls%20Out%20on%20iOS%20and%20Android",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#sources",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=Frequently%20Asked%20Questions",
+          "https://aicatchup.com/news/openai-chatgpt-academic-researchers-grants#:~:text=Get%20the%20weekly%20AI%20Catchup"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 50,
+        "cache_items": 32,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463013.118119,
+          "last_observation": 1794871538.5470452,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 82
+      },
+      "tldr:ai": {
+        "scanned": 221,
+        "changed": 11,
+        "delivered": 11,
+        "urls": [
+          "https://devin.ai/blog/devin-apps",
+          "https://empero.org/writing/quark",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training/",
+          "https://research.nvidia.com/labs/sil/projects/birddreams/",
+          "https://sevren.ai/blog/embla-1",
+          "https://qwen.ai/blog?id=qwen4-max&amp;utm_source=tldrai",
+          "https://unbundling.github.io/",
+          "https://sierra.ai/blog/releasing-poppy",
+          "https://threadreaderapp.com/thread/2121375309287301360.html",
+          "https://claude.com/resources/articles/building-always-on-agents",
+          "https://devin.ai/blog/devin-apps#:~:text=Introducing%20Devin%20Apps",
+          "https://devin.ai/blog/devin-apps#create-an-app",
+          "https://devin.ai/blog/devin-apps#share-it-with-your-team",
+          "https://devin.ai/blog/devin-apps#update-it",
+          "https://devin.ai/blog/devin-apps#how-devin-apps-run",
+          "https://devin.ai/blog/devin-apps#how-teams-use-devin-apps",
+          "https://devin.ai/blog/devin-apps#get-started",
+          "https://empero.org/writing/quark#:~:text=Quark%3A%20our%20whole%20training%20stack%2C%20end%20to%20end%2C%20for%20%244%2C200",
+          "https://empero.org/writing/quark#the-stack-stage-by-stage",
+          "https://empero.org/writing/quark#how-it-compares",
+          "https://empero.org/writing/quark#what-reinforcement-learning-taught-it",
+          "https://empero.org/writing/quark#what-did-not-work",
+          "https://empero.org/writing/quark#using-it",
+          "https://empero.org/writing/quark#what-comes-next",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=why%20I%E2%80%99m%20not%20a%20doomer%20part%200",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=Amdahl%E2%80%99s%20Law",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=Is%20Intelligence%20the%20Bottleneck%3F",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=1.%20What%20are%20the%20speed%20limits%20in%20the%20world%20that%20intelligence%20does%20not%20accelerate%3F",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=2.%20What%20does%20it%20actually%20mean%20to%20be%20superintelligent%20in%20the%20presence%20of%20noise%3F",
+          "https://bosoncutter.substack.com/p/on-the-brutality-of-amdahls-law#:~:text=Outlook",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#:~:text=End%E2%80%91to%E2%80%91End%204%E2%80%91Bit%20Training",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#choosing-a-target-for-quantization",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#low-precision-formats-on-blackwell",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#block-scaled-backward-passes",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#re-quantization-with-stochastic-rounding",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#quantized-communications",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#kernels-for-low-precision-training",
+          "https://thinkingmachines.ai/blog/end-to-end-4-bit-training#citation",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#project-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#bev-intro-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#concept-baseline-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#concept-bird-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#bev-benefits-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=More%20plausible%20surrounding-vehicle%20motion",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=Which%20video%20has%20more%20realistic%20vehicle%20behavior%3F",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#reactive-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=When%20we%20specify%20the%20ego%E2%80%99s%20path",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=When%20the%20model%20predicts%20ego%20motion%20too",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#ego-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#bev-action-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=Precisely%20following%20ego%20trajectories%20specified%20in%20meters",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=Following%20small%20steering%20changes",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#ego-results-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#ego-unconditional-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#method-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#conditioning-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#wam-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#editing-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#:~:text=Generated%20examples",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#abstract-title",
+          "https://research.nvidia.com/labs/sil/projects/birddreams#acknowledgements-title",
+          "https://sevren.ai/blog/embla-1#:~:text=Embla%201%3A%20A%20reasoning%20model%20built%20for%20phones",
+          "https://sevren.ai/blog/embla-1#architecture",
+          "https://sevren.ai/blog/embla-1#training",
+          "https://sevren.ai/blog/embla-1#pretraining",
+          "https://sevren.ai/blog/embla-1#post-training",
+          "https://sevren.ai/blog/embla-1#results",
+          "https://sevren.ai/blog/embla-1#references",
+          "https://qwen.ai/blog?id=qwen4-max&amp%3Butm_source=tldrai#:~:text=Qwen4-Max%EF%BC%9A%E6%96%B0%E5%90%8C%E4%BA%8B%EF%BC%8C%E5%B7%B2%E5%B0%B1%E4%BD%8D",
+          "https://unbundling.github.io#:~:text=Unbundling%20Multimodal%20Vision%C2%A0Encoding",
+          "https://unbundling.github.io#:~:text=What%20a%20vision%20encoder%20bundles",
+          "https://unbundling.github.io#:~:text=Four%20recipes%2C%20three%20design%20choices",
+          "https://unbundling.github.io#:~:text=One%20controlled%20protocol",
+          "https://unbundling.github.io#:~:text=Only%20the%20vision%20encoding%20differs",
+          "https://unbundling.github.io#:~:text=Separate%20pretraining%20is%20optional",
+          "https://unbundling.github.io#:~:text=Separate%20encoder%20pretraining",
+          "https://unbundling.github.io#:~:text=Dedicated%20vision%20capacity%20is%20key",
+          "https://unbundling.github.io#:~:text=Encoder-free%20versus%20the%20scratch%20encoder",
+          "https://unbundling.github.io#:~:text=Giving%20encoder-free%20the%20encoder%27s%20parameters",
+          "https://unbundling.github.io#:~:text=Vision%20capacity%20can%20move%20in-fusion",
+          "https://unbundling.github.io#:~:text=Two%20block%20designs%20with%20vision-only%20modules",
+          "https://unbundling.github.io#:~:text=Who%20uses%20the%20added%20capacity%2C%20and%20where%20it%20sits",
+          "https://unbundling.github.io#:~:text=In-fusion%20versus%20the%20pre-fusion%20encoder",
+          "https://unbundling.github.io#:~:text=The%20comparisons%20hold%20with%20scale",
+          "https://unbundling.github.io#:~:text=Per-recipe%20scaling%20laws%20across%20backbone%20sizes",
+          "https://unbundling.github.io#:~:text=The%20findings%20carry%20over%20to%20midtraining%2C%20and%20in-fusion%20can%20be%20faster%20to%20serve",
+          "https://unbundling.github.io#:~:text=Midtraining%3A%20adding%20vision%20to%20a%20pretrained%20language%20model",
+          "https://unbundling.github.io#:~:text=Midtraining%20from%20a%20pretrained%201.7B%20text%20model",
+          "https://unbundling.github.io#:~:text=Time%20to%20first%20token",
+          "https://unbundling.github.io#:~:text=Time%20to%20first%20token%20across%20vision-only%20budgets",
+          "https://unbundling.github.io#:~:text=BibTeX",
+          "https://sierra.ai/blog/releasing-poppy#:~:text=Releasing%20Personal%20Agent%20Protocol%201.0",
+          "https://sierra.ai/blog/releasing-poppy#poppy-v10",
+          "https://sierra.ai/blog/releasing-poppy#sierra-and-shopify-bring-poppy-to-millions-of-merchants",
+          "https://sierra.ai/blog/releasing-poppy#poppy-in-the-wild",
+          "https://sierra.ai/blog/releasing-poppy#choice-control-trust",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=Enter%20URL%20or%20ID%20to%20Unroll",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=ClaudeDevs",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=Try%20unrolling%20a%20thread%20yourself%21",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=Did%20Thread%20Reader%20help%20you%20today%3F",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=Don%27t%20want%20to%20be%20a%20Premium%20member%20but%20still%20want%20to%20support%20us%3F",
+          "https://threadreaderapp.com/thread/2121375309287301360.html#:~:text=Send%20Email%21",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Building%20always-on%20agents",
+          "https://claude.com/resources/articles/building-always-on-agents#the-cycle-behind-the-always-on-agent",
+          "https://claude.com/resources/articles/building-always-on-agents#the-core-primitives",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Event%20inbox",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Timers",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Memory",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Inside%20the%20context%20window",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Permissions",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Outbox",
+          "https://claude.com/resources/articles/building-always-on-agents#how-everything-fits-together",
+          "https://claude.com/resources/articles/building-always-on-agents#acknowledgements",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Related%20articles",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=The%20Claude%20Tag%20guide%20for%20startups",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=How%20Curative%20is%20building%20a%20national%20provider%20network%20with%20agents%20on%20Claude",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Safely%20scaling%20multi-agent%20teams%20with%20Claude%20Fable%205.2",
+          "https://claude.com/resources/articles/building-always-on-agents#:~:text=Which%20Claude%20model%20should%20you%20build%20with%3F"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 16,
+        "cache_items": 205,
+        "live_status": "read",
+        "date_coverage": {
+          "2026-11-17": {
+            "status": "empty",
+            "items": 0
+          },
+          "2026-11-16": {
+            "status": "read",
+            "items": 16
+          }
+        },
+        "archive_coverage": {
+          "first_observation": 1793462740.395906,
+          "last_observation": 1794827392.393433,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 206
+      },
+      "rss:https://www.therundown.ai/feed": {
+        "scanned": 69,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=Jensen%20Huang%20weighs%20a%20comeback%20at%20Nvidia",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%94%84%20Musk%2C%20Nvidia%20staff%20rally%20to%20bring%20back%20Jensen%20Huang",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%92%AC%20Create%20ads%20in%20your%20AI%20assistant%20with%20OpenArt%20MCP",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%92%A1%20The%20Rundown%20Roundtable%3A%20Our%20AI%20use%20cases",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%91%A8%F0%9F%8F%BB%E2%80%8D%F0%9F%8F%AB%20Turn%20a%20messy%20plan%20into%20a%20shared%20board",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%91%80%20Your%20AI%20agents%20are%20working.%20Who%E2%80%99s%20watching%3F",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%A4%96%20Report%3A%20OpenAI%20folds%20robotics%20team%20into%20core%20research",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%9B%A0%EF%B8%8F%20Trending%20AI%20Tools",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%93%B0%20Everything%20else%20in%20AI%20today",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=%F0%9F%8E%93%20Highlights%3A%20News%2C%20Guides%20%26%20Events",
+          "https://www.therundown.ai/articles/jensen-huang-weighs-a-comeback-at-nvidia#:~:text=That%27s%20it%20for%20today%21"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 50,
+        "cache_items": 19,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463336.422164,
+          "last_observation": 1794827394.091021,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 68
+      },
+      "hf_models:trending": {
+        "scanned": 50,
+        "changed": 50,
+        "delivered": 2,
+        "urls": [
+          "https://huggingface.co/n4ze3m/tiny-voca",
+          "https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct"
+        ],
+        "error": "",
+        "role": "snapshot",
+        "coverage": "",
+        "live_items": 50,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793462849.9929972,
+          "last_observation": 1794871289.93782,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 115
+      },
+      "rss:https://aftergradient.com/rss.xml?kind=news": {
+        "scanned": 20,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 20,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463012.266947,
+          "last_observation": 1794871532.067274,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 20
+      },
+      "rss:https://devbrief.dev/rss.xml": {
+        "scanned": 91,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 50,
+        "cache_items": 41,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463031.182486,
+          "last_observation": 1794871553.555648,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 91
+      },
+      "rss:https://onevium.com/zh/rss.xml": {
+        "scanned": 69,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 69,
+        "cache_items": 0,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463061.9184902,
+          "last_observation": 1794871576.044499,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 69
+      },
+      "rss:https://zhangwen.site/rss.xml": {
+        "scanned": 166,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 80,
+        "cache_items": 86,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793463354.099539,
+          "last_observation": 1794827403.9032571,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 166
+      },
+      "rss:https://www.ifanr.com/feed": {
+        "scanned": 112,
+        "changed": 2,
+        "delivered": 2,
+        "urls": [
+          "https://www.ifanr.com/1689712?utm_source=rss&utm_medium=rss&utm_campaign=",
+          "https://www.ifanr.com/1689594?utm_source=rss&utm_medium=rss&utm_campaign=",
+          "https://www.ifanr.com/1689712#:~:text=%E8%8B%B9%E6%9E%9C%E7%9C%BC%E9%95%9C%E6%98%8E%E5%B9%B4%E8%A7%81%EF%BC%9A%E6%B2%A1%E6%9C%89%E5%B1%8F%E5%B9%95%EF%BC%8C%E5%85%A8%E9%9D%A0%20Siri%20%E6%92%91%E5%9C%BA%E9%9D%A2%EF%BC%9F",
+          "https://www.ifanr.com/1689712#:~:text=%E8%8B%B9%E6%9E%9C%E7%9C%BC%E9%95%9C%EF%BC%8C%E5%85%88%E8%AE%A9%20SiriAI%20%E7%9C%8B%E4%B8%96%E7%95%8C",
+          "https://www.ifanr.com/1689712#:~:text=%E8%8B%B9%E6%9E%9C%E5%81%9A%E5%A5%BD%E7%9C%BC%E9%95%9C%E4%B8%8D%E9%9A%BE%EF%BC%8C%E5%81%9A%E5%A5%BD%E8%8B%B9%E6%9E%9C%E7%9C%BC%E9%95%9C%E5%BE%88%E9%9A%BE",
+          "https://www.ifanr.com/1689594#:~:text=%E5%BD%B1%E7%9F%B3%E8%BF%99%E5%BC%A0%E3%80%8C%E9%AD%94%E6%B3%95%E7%9B%B8%E7%BA%B8%E3%80%8D%EF%BC%8C%E6%80%8E%E4%B9%88%E6%B2%BB%E5%A5%BD%E4%BA%86%E6%88%91%E7%9A%84%E7%9B%B8%E5%86%8C%E5%90%83%E7%81%B0%E7%97%87%EF%BC%9F",
+          "https://www.ifanr.com/1689594#:~:text=%E7%BB%99%E5%9B%9E%E5%BF%86%E3%80%8C%E4%B8%BE%E6%9D%AF%E3%80%8D%E7%9A%84%E5%BD%A9%E8%89%B2%E5%A2%A8%E6%B0%B4%E5%B1%8F%E7%9B%B8%E7%BA%B8",
+          "https://www.ifanr.com/1689594#:~:text=AI%20%E7%8B%82%E9%A3%99%E7%9A%84%E6%97%B6%E4%BB%A3%EF%BC%8C%E6%88%91%E4%BB%AC%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9B%B4%E9%9C%80%E8%A6%81%E4%B8%80%E5%BC%A0%E3%80%8C%E5%AE%9E%E4%BD%93%E7%9B%B8%E7%BA%B8%E3%80%8D%EF%BC%9F"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 20,
+        "cache_items": 92,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793635314.018934,
+          "last_observation": 1794827406.751012,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 111
+      },
+      "rss:https://techcrunch.com/category/artificial-intelligence/feed/": {
+        "scanned": 151,
+        "changed": 15,
+        "delivered": 15,
+        "urls": [
+          "https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health/",
+          "https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market/",
+          "https://techcrunch.com/2026/11/15/snl-gathers-all-the-tech-tycoons-for-a-lesson-in-dating-and-spycraft/",
+          "https://techcrunch.com/2026/11/16/all-the-questions-nvidia-should-answer-on-tuesday-but-probably-wont/",
+          "https://techcrunch.com/2026/11/16/california-state-ag-sues-openai-over-rogue-agent-incidents/",
+          "https://techcrunch.com/2026/11/16/trump-says-ex-nvidia-ceo-jensen-huangs-affair-with-an-alleged-chinese-spy-did-not-threaten-national-security/",
+          "https://techcrunch.com/2026/11/16/sam-altman-on-nvidia-without-jensen-huang-the-industry-will-be-fine/",
+          "https://techcrunch.com/2026/11/16/fbi-says-artex-ai-open-source-hacking-tool-used-to-breach-networks-in-under-three-hours/",
+          "https://techcrunch.com/2026/11/16/jordan-belforts-new-ai-voice-startup-tone-wants-to-sell-like-the-wolf-of-wall-street/",
+          "https://techcrunch.com/2026/11/16/openai-will-embed-apollo-researchers-to-investigate-ai-subversion/",
+          "https://techcrunch.com/2026/11/16/openai-releases-a-new-image-classifier-and-chatgpt-warnings-to-combat-csam/",
+          "https://techcrunch.com/2026/11/16/audible-turns-to-ai-to-help-users-discover-audiobooks/",
+          "https://techcrunch.com/2026/11/16/us-tightens-ai-chip-export-controls-to-deter-chinese-companies-from-accessing-compute-remotely/",
+          "https://techcrunch.com/2026/11/16/google-maps-can-now-build-trip-itineraries-with-real-time-details-about-each-stop/",
+          "https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm/",
+          "https://techcrunch.com/2026/11/15/apple-launches-new-app-to-study-how-people-use-ai-for-health#:~:text=Apple%20launches%20new%20app%20to%20study%20how%20people%20use%20AI%20for%20health",
+          "https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24m-seed-round-as-it-eyes-global-ai-sensor-market#:~:text=Indian%20chip%20startup%20Bharat%20Semi%20lands%20%2424M%20seed%20round%20as%20it%20eyes%20global%20AI%20sensor%20market",
+          "https://techcrunch.com/2026/11/15/snl-gathers-all-the-tech-tycoons-for-a-lesson-in-dating-and-spycraft#:~:text=%E2%80%98SNL%E2%80%99%20gathers%20all%20the%20tech%20tycoons%20for%20a%20lesson%20in%20dating%20and%20spycraft",
+          "https://techcrunch.com/2026/11/16/all-the-questions-nvidia-should-answer-on-tuesday-but-probably-wont#:~:text=All%20the%20questions%20Nvidia%20should%20answer%20on%20Tuesday%20%E2%80%94%20but%20probably%20won%E2%80%99t",
+          "https://techcrunch.com/2026/11/16/california-state-ag-sues-openai-over-rogue-agent-incidents#:~:text=California%20state%20AG%20sues%20OpenAI%20over%20rogue%20agent%20incidents",
+          "https://techcrunch.com/2026/11/16/trump-says-ex-nvidia-ceo-jensen-huangs-affair-with-an-alleged-chinese-spy-did-not-threaten-national-security#:~:text=Trump%20says%20ex-Nvidia%20CEO%20Jensen%20Huang%E2%80%99s%20affair%20with%20an%20alleged%20Chinese%20spy%20did%20not%20threaten%20national%20security",
+          "https://techcrunch.com/2026/11/16/sam-altman-on-nvidia-without-jensen-huang-the-industry-will-be-fine#:~:text=Sam%20Altman%20on%20Nvidia%20without%20Jensen%20Huang%3A%20The%20industry%20will%20be%20%E2%80%98fine%E2%80%99",
+          "https://techcrunch.com/2026/11/16/fbi-says-artex-ai-open-source-hacking-tool-used-to-breach-networks-in-under-three-hours#:~:text=FBI%20says%20Artex%20AI%20open%20source%20hacking%20tool%20used%20to%20breach%20networks%20in%20%E2%80%98under%20three%20hours%E2%80%99",
+          "https://techcrunch.com/2026/11/16/jordan-belforts-new-ai-voice-startup-tone-wants-to-sell-like-the-wolf-of-wall-street#:~:text=Jordan%20Belfort%E2%80%99s%20new%20AI%20voice%20startup%2C%20Tone%2C%20wants%20to%20sell%20like%20the%20%E2%80%98Wolf%20of%20Wall%20Street%E2%80%99",
+          "https://techcrunch.com/2026/11/16/openai-will-embed-apollo-researchers-to-investigate-ai-subversion#:~:text=OpenAI%20will%20embed%20safety%20researchers%20to%20investigate%20AI%20subversion",
+          "https://techcrunch.com/2026/11/16/openai-releases-a-new-image-classifier-and-chatgpt-warnings-to-combat-csam#:~:text=OpenAI%20releases%20a%20new%20image%20classifier%20and%20ChatGPT%20warnings%20to%20combat%20CSAM",
+          "https://techcrunch.com/2026/11/16/audible-turns-to-ai-to-help-users-discover-audiobooks#:~:text=Audible%20turns%20to%20AI%20to%20help%20users%20discover%20audiobooks",
+          "https://techcrunch.com/2026/11/16/us-tightens-ai-chip-export-controls-to-deter-chinese-companies-from-accessing-compute-remotely#:~:text=US%20tightens%20AI%20chip%20export%20controls%20to%20deter%20Chinese%20companies%20from%20accessing%20compute%20remotely",
+          "https://techcrunch.com/2026/11/16/google-maps-can-now-build-trip-itineraries-with-real-time-details-about-each-stop#:~:text=Google%20Maps%20can%20now%20build%20trip%20itineraries%20with%20real-time%20details%20about%20each%20stop",
+          "https://techcrunch.com/2026/11/16/freshworks-alums-raise-53m-to-take-on-salesforce-hubspot-with-ai-native-crm#:~:text=Freshworks%20alums%20raise%20%2453M%20to%20take%20on%20Salesforce%2C%20HubSpot%20with%20AI-native%20CRM"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 20,
+        "cache_items": 131,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793748771.009521,
+          "last_observation": 1794827408.395445,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 139
+      },
+      "rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml": {
+        "scanned": 104,
+        "changed": 10,
+        "delivered": 10,
+        "urls": [
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories",
+          "https://www.theverge.com/ai-artificial-intelligence/1034815/california-openai-hugging-face-lawsuit",
+          "https://www.theverge.com/ai-artificial-intelligence/1034787/sam-altman-ram-shortage-semafor",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard",
+          "https://www.theverge.com/tech/1034581/apple-intelligence-siri-ai-daily-usage-limits-icloud-subscription",
+          "https://www.theverge.com/policy/1034527/openai-csam-classifier",
+          "https://www.theverge.com/tech/1034501/nvidia-board-jensen-huang-not-bringing-back",
+          "https://www.theverge.com/tech/1034083/audible-audio-discovery-ai-feature-availability",
+          "https://www.theverge.com/tech/1034110/google-ask-maps-ai-trip-planning",
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories#:~:text=Tech%20leaders%20are%20convinced%20that%20Jensen%20Huang%E2%80%99s%20exit%20was%20a%20plot%20against%20him",
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories#:~:text=Related",
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories#:~:text=More%20in%3A%20Nvidia%20CEO%20Jensen%20Huang%20has%20resigned.%20What%20happens%20next%3F",
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories#:~:text=Most%20Popular",
+          "https://www.theverge.com/tech/1035027/tech-leaders-nvidia-jensen-huang-theories#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/ai-artificial-intelligence/1034815/california-openai-hugging-face-lawsuit#:~:text=California%20sues%20OpenAI%20over%20rogue%20AI%20hacking%20incidents",
+          "https://www.theverge.com/ai-artificial-intelligence/1034815/california-openai-hugging-face-lawsuit#:~:text=Related",
+          "https://www.theverge.com/ai-artificial-intelligence/1034815/california-openai-hugging-face-lawsuit#:~:text=Most%20Popular",
+          "https://www.theverge.com/ai-artificial-intelligence/1034815/california-openai-hugging-face-lawsuit#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/ai-artificial-intelligence/1034787/sam-altman-ram-shortage-semafor#:~:text=Sam%20Altman%20says%20he%20wants%20everyone%20%E2%80%98to%20have%20a%20lot%20of%20RAM%E2%80%99",
+          "https://www.theverge.com/ai-artificial-intelligence/1034787/sam-altman-ram-shortage-semafor#:~:text=More%20in%3A%20RAM%20price%20hikes%3A%20the%20latest%20on%20the%20global%20memory%20shortage",
+          "https://www.theverge.com/ai-artificial-intelligence/1034787/sam-altman-ram-shortage-semafor#:~:text=Most%20Popular",
+          "https://www.theverge.com/ai-artificial-intelligence/1034787/sam-altman-ram-shortage-semafor#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats#:~:text=Big%20Nuclear%20isn%E2%80%99t%20worried%20about%20the%20Democrats%20stopping%20data%20centers",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats#:~:text=Related",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats#:~:text=More%20In%20Fall%202026%20earnings%20watch",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats#:~:text=Most%20Popular",
+          "https://www.theverge.com/science/1034694/nuclear-energy-constellation-earnings-data-centers-democrats#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard#:~:text=US%20data%20centers%20now%20burn%20more%20electricity%20than%20a%20midsized%20country",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard#:~:text=Related",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard#:~:text=More%20in%3A%20All%20the%20latest%20updates%20on%20AI%20data%20centers",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard#:~:text=Most%20Popular",
+          "https://www.theverge.com/ai-artificial-intelligence/1034668/data-centers-electricity-climate-pollution-study-harvard#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/tech/1034581/apple-intelligence-siri-ai-daily-usage-limits-icloud-subscription#:~:text=Apple%20is%20testing%20daily%20usage%20limits%20for%20more%20complex%20Siri%20AI%20interactions",
+          "https://www.theverge.com/tech/1034581/apple-intelligence-siri-ai-daily-usage-limits-icloud-subscription#:~:text=Most%20Popular",
+          "https://www.theverge.com/tech/1034581/apple-intelligence-siri-ai-daily-usage-limits-icloud-subscription#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/policy/1034527/openai-csam-classifier#:~:text=OpenAI%20wants%20to%20stop%20deepfakes%20from%20overwhelming%20child%20abuse%20tiplines",
+          "https://www.theverge.com/policy/1034527/openai-csam-classifier#:~:text=Most%20Popular",
+          "https://www.theverge.com/policy/1034527/openai-csam-classifier#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/tech/1034501/nvidia-board-jensen-huang-not-bringing-back#:~:text=Nvidia%E2%80%99s%20board%20is%20reportedly%20%E2%80%98not%20considering%E2%80%99%20hiring%20Jensen%20Huang%20back",
+          "https://www.theverge.com/tech/1034501/nvidia-board-jensen-huang-not-bringing-back#:~:text=Related",
+          "https://www.theverge.com/tech/1034501/nvidia-board-jensen-huang-not-bringing-back#:~:text=Most%20Popular",
+          "https://www.theverge.com/tech/1034501/nvidia-board-jensen-huang-not-bringing-back#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/tech/1034083/audible-audio-discovery-ai-feature-availability#:~:text=Audible%20is%20trying%20to%20make%20it%20easier%20to%20find%20audiobooks%20you%E2%80%99ll%20actually%20like",
+          "https://www.theverge.com/tech/1034083/audible-audio-discovery-ai-feature-availability#:~:text=Most%20Popular",
+          "https://www.theverge.com/tech/1034083/audible-audio-discovery-ai-feature-availability#:~:text=The%20Verge%20Daily",
+          "https://www.theverge.com/tech/1034110/google-ask-maps-ai-trip-planning#:~:text=Google%20Maps%20can%20now%20create%20trip%20itineraries%20for%20you",
+          "https://www.theverge.com/tech/1034110/google-ask-maps-ai-trip-planning#:~:text=Most%20Popular",
+          "https://www.theverge.com/tech/1034110/google-ask-maps-ai-trip-planning#:~:text=The%20Verge%20Daily"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 10,
+        "cache_items": 94,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793748772.5412931,
+          "last_observation": 1794827410.274404,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 94
+      },
+      "rss:https://the-decoder.com/feed/": {
+        "scanned": 104,
+        "changed": 6,
+        "delivered": 6,
+        "urls": [
+          "https://the-decoder.com/google-warns-that-fully-automated-cyberattacks-have-arrived-and-will-get-worse-fast/",
+          "https://the-decoder.com/openais-gpt-6-astra-tackles-the-standard-models-toughest-math-problem-on-a-lattice/",
+          "https://the-decoder.com/moonshot-ai-pivots-kimi-models-from-coding-to-science-as-benchmark-gains-flatten/",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices/",
+          "https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html/",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store/",
+          "https://the-decoder.com/google-warns-that-fully-automated-cyberattacks-have-arrived-and-will-get-worse-fast#:~:text=Google%20warns%20that%20fully%20automated%20cyberattacks%20have%20arrived%20and%20will%20get%20worse%20fast",
+          "https://the-decoder.com/google-warns-that-fully-automated-cyberattacks-have-arrived-and-will-get-worse-fast#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans",
+          "https://the-decoder.com/openais-gpt-6-astra-tackles-the-standard-models-toughest-math-problem-on-a-lattice#:~:text=OpenAI%27s%20GPT-6%20Astra%20tackles%20the%20Standard%20Model%27s%20toughest%20math%20problem%20on%20a%20lattice",
+          "https://the-decoder.com/openais-gpt-6-astra-tackles-the-standard-models-toughest-math-problem-on-a-lattice#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans",
+          "https://the-decoder.com/moonshot-ai-pivots-kimi-models-from-coding-to-science-as-benchmark-gains-flatten#:~:text=Moonshot%20AI%20pivots%20Kimi%20models%20from%20coding%20to%20science%20as%20benchmark%20gains%20flatten",
+          "https://the-decoder.com/moonshot-ai-pivots-kimi-models-from-coding-to-science-as-benchmark-gains-flatten#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Alibaba%27s%20Qwen4-Max%20takes%20on%20Opus%205.5%2C%20GPT-6%2C%20and%20Kimi%20K3.1%20Pro%20at%20much%20lower%20prices",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Key%20Points",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=A%20hybrid%20architecture%20makes%20long%20contexts%20cheaper%20to%20process",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Lower%20token%20use%20cuts%20the%20cost%20of%20each%20task%20by%20more%20than%20half",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Qwen4-Max%20ranks%20second%20among%20Chinese%20models%20at%20a%20third%20of%20its%20predecessor%27s%20cost",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Live%20Delivery%20hands%20control%20of%20long-running%20agents%20back%20to%20users",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Alibaba%27s%20models%20now%20run%20lab%20experiments%20on%20their%20own",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Qwen4-Max%20aims%20to%20build%20playable%20games%20from%20a%20single%20prompt",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=Alibaba%20says%20the%20model%20writes%20safer%20code%20and%20offers%20no%20real%20CBRN%20uplift",
+          "https://the-decoder.com/alibabas-qwen4-max-takes-on-opus-5-5-gpt-6-and-kimi-k3-1-pro-at-much-lower-prices#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans",
+          "https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html#:~:text=Claude%20now%20builds%20interactive%20websites%20inside%20canvas%20graphics%2C%20reviving%20the%20Flash%20era%20with%20real%20HTML",
+          "https://the-decoder.com/claude-now-builds-interactive-websites-inside-canvas-graphics-reviving-the-flash-era-with-real-html#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Anthropic%20says%20the%20key%20to%20agent%20memory%20is%20knowing%20what%20to%20forget%2C%20not%20how%20much%20to%20store",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Key%20Points",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Agents%20that%20save%20everything%20lose%20track",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Dreaming%20aims%20to%20fix%20false%20memories",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=Memory%20is%20still%20a%20work%20in%20progress",
+          "https://the-decoder.com/anthropic-says-the-key-to-agent-memory-is-knowing-what-to-forget-not-how-much-to-store#:~:text=AI%20News%20Without%20the%20Hype%20%E2%80%93%20Curated%20by%20Humans"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 10,
+        "cache_items": 94,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793748775.105986,
+          "last_observation": 1794827413.075074,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 98
+      },
+      "rss:https://www.testingcatalog.com/rss/": {
+        "scanned": 99,
+        "changed": 0,
+        "delivered": 0,
+        "urls": [],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 80,
+        "cache_items": 19,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793748776.947093,
+          "last_observation": 1794827414.846459,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 99
+      },
+      "rss:https://9to5mac.com/guides/apple-intelligence/feed/": {
+        "scanned": 83,
+        "changed": 1,
+        "delivered": 1,
+        "urls": [
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs/",
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs#:~:text=Apple%20expands%20Apple%20Intelligence%20beta%20testing%20in%20China%20to%20iPads%20and%20Macs",
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs#h-apple-intelligence-testing-in-china-continues",
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs#:~:text=Worth%20checking%20out%20on%20Amazon",
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs#:~:text=Comments",
+          "https://9to5mac.com/2026/11/16/apple-expands-apple-intelligence-beta-testing-in-china-to-ipads-and-macs#:~:text=Author"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 80,
+        "cache_items": 3,
+        "live_status": "read",
+        "date_coverage": {},
+        "archive_coverage": {
+          "first_observation": 1793748333.2953548,
+          "last_observation": 1794871529.895206,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 83
+      },
+      "radar:chatgpt / claude / codex 动态": {
+        "scanned": 124,
+        "changed": 10,
+        "delivered": 2,
+        "urls": [
+          "https://openai.com/business/customer-stories/holiday-extras-dots",
+          "https://openai.com/index/advancing-computer-use-for-healthcare-teams"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 16,
+        "cache_items": 108,
+        "live_status": "read",
+        "date_coverage": {
+          "2026-11-17": {
+            "status": "read",
+            "items": 13
+          },
+          "2026-11-16": {
+            "status": "read",
+            "items": 3
+          }
+        },
+        "archive_coverage": {
+          "first_observation": 1793748328.8422332,
+          "last_observation": 1794871526.537153,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 124
+      },
+      "radar:Ollama / Claude Code / Codex 重要更新": {
+        "scanned": 88,
+        "changed": 10,
+        "delivered": 1,
+        "urls": [
+          "https://developers.openai.com/api/docs/changelog"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 14,
+        "cache_items": 74,
+        "live_status": "read",
+        "date_coverage": {
+          "2026-11-17": {
+            "status": "read",
+            "items": 12
+          },
+          "2026-11-16": {
+            "status": "read",
+            "items": 2
+          }
+        },
+        "archive_coverage": {
+          "first_observation": 1793748328.712621,
+          "last_observation": 1794871526.3361962,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 88
+      },
+      "radar:AI 编程工具产品动态（每周对比）": {
+        "scanned": 54,
+        "changed": 4,
+        "delivered": 2,
+        "urls": [
+          "https://github.blog/changelog/2026-11-16-bulk-start-ai-scan-for-repositories",
+          "https://github.blog/changelog/2026-11-16-take-github-mobile-with-you-on-iphone-duo"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 4,
+        "cache_items": 50,
+        "live_status": "read",
+        "date_coverage": {
+          "2026-11-17": {
+            "status": "read",
+            "items": 4
+          },
+          "2026-11-16": {
+            "status": "empty",
+            "items": 0
+          }
+        },
+        "archive_coverage": {
+          "first_observation": 1793748328.604554,
+          "last_observation": 1794871526.158751,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 54
+      },
+      "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具": {
+        "scanned": 71,
+        "changed": 2,
+        "delivered": 2,
+        "urls": [
+          "https://github.com/db-branch/db-branch",
+          "https://github.com/withcoral/coral"
+        ],
+        "error": "",
+        "role": "editorial",
+        "coverage": "",
+        "live_items": 5,
+        "cache_items": 66,
+        "live_status": "read",
+        "date_coverage": {
+          "2026-11-17": {
+            "status": "read",
+            "items": 2
+          },
+          "2026-11-16": {
+            "status": "read",
+            "items": 3
+          }
+        },
+        "archive_coverage": {
+          "first_observation": 1793748328.997858,
+          "last_observation": 1794871526.754144,
+          "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+        },
+        "archived_items": 71
+      }
+    },
+    "detail_failures": [
+      {
+        "url": "https://openai.com/index/expanding-chatgpt-for-academic-researchers",
+        "status": "unavailable",
+        "error": "HTTP 402: {\"requestId\":\"625d06eb120f0d753e87969dc0b4c7d8\",\"error\":\"You have exceeded your credits limit. Please top up to keep using Exa at dashboard.exa.ai\",\"tag\":\"NO_MORE_CREDITS\"}"
+      },
+      {
+        "url": "https://openai.com/index/strengthening-online-child-safety",
+        "status": "unavailable",
+        "error": "页面未成功打开（HTTP 403），请检查来源网址"
+      },
+      {
+        "url": "https://openai.com/index/science-at-the-frontier",
+        "status": "unavailable",
+        "error": "页面未成功打开（HTTP 403），请检查来源网址"
+      },
+      {
+        "url": "https://openai.com/index/our-first-phase-of-embedded-assessments",
+        "status": "unavailable",
+        "error": "页面未成功打开（HTTP 403），请检查来源网址"
+      },
+      {
+        "url": "https://openai.com/index/more-ways-to-move-care-forward-with-chatgpt-for-healthcare",
+        "status": "unavailable",
+        "error": "页面未成功打开（HTTP 403），请检查来源网址"
+      },
+      {
+        "url": "https://openai.com/index/the-kings-trust-and-openai",
+        "status": "unavailable",
+        "error": "页面未成功打开（HTTP 403），请检查来源网址"
+      }
+    ]
+  },
+  "report_heading_count": 10,
+  "all_job_bindings": [
+    {
+      "id": "ai-developer-roundup-long",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "some"
+    },
+    {
+      "id": "ai-non_tech-one_point-short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "ai-non_tech-quick_take-short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "flash",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "flash_daily",
+      "auto": 1,
+      "usable": true,
+      "content_column": "ai_flash",
+      "split": "whole"
+    },
+    {
+      "id": "flash_each",
+      "auto": 1,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    },
+    {
+      "id": "point_short",
+      "auto": 0,
+      "usable": true,
+      "content_column": "",
+      "split": "each"
+    }
+  ]
+}

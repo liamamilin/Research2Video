@@ -1,0 +1,407 @@
+{
+  "job_id": "43c7266e-2f53-4150-a757-b8ed4dac403c",
+  "title": "视频生产状态与章节复用",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 2,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "5b45d6d5f0662374edc94c137c7bfe0da55301808a49eb5d682094c4fc5fb5ce",
+  "source_char_count": 95,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "voxcpm_anchor",
+  "created_at": "2026-10-28T09:53:49.860+00:00",
+  "updated_at": "2026-10-28T10:02:55.315+00:00",
+  "version": 20,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "",
+    "purpose": "",
+    "tone": "",
+    "focus": ""
+  },
+  "revision_mode": null,
+  "input_mode": "narration",
+  "idempotency_key": null,
+  "background_music_resolved": null,
+  "background_music": {
+    "enabled": false
+  },
+  "production_recipe_resolved": null,
+  "production_plan": {
+    "schema_version": 1,
+    "settings": {
+      "content_notices": [],
+      "creative_intent": {
+        "audience": "",
+        "purpose": "",
+        "tone": "",
+        "focus": ""
+      },
+      "duration_mode": "content",
+      "image_materials": [],
+      "music": null,
+      "packaging": {
+        "sound": {
+          "enabled": false
+        },
+        "preset": "common"
+      },
+      "production_context": null,
+      "production_mode": "fast",
+      "production_recipe": null,
+      "slideshow_images": [],
+      "slideshow_images_resolved": null,
+      "target_duration_sec": 60,
+      "video_form": "information_cards",
+      "video_speed": 1.0,
+      "visual_storytelling": true,
+      "visual_style": "editorial_light",
+      "voice_id": "voxcpm_anchor"
+    },
+    "origins": {
+      "packaging.label": "common",
+      "packaging.accent": "common",
+      "packaging.enabled": "common",
+      "packaging.intro.component": "common",
+      "packaging.intro.enabled": "common",
+      "packaging.intro.seconds": "common",
+      "packaging.outro.component": "common",
+      "packaging.outro.enabled": "common",
+      "packaging.outro.seconds": "common",
+      "packaging.badge.component": "common",
+      "packaging.badge.enabled": "common",
+      "packaging.source_card.component": "common",
+      "packaging.source_card.enabled": "common",
+      "packaging.source_card.seconds": "common",
+      "packaging.sound.component": "common",
+      "packaging.sound.enabled": "request",
+      "video_form": "fast_capability_selection",
+      "production_mode": "request",
+      "visual_style": "fast_capability_selection",
+      "duration_mode": "request",
+      "target_duration_sec": "common",
+      "voice_id": "request",
+      "video_speed": "common",
+      "creative_intent": "common",
+      "visual_style.accent": "packaging.accent"
+    },
+    "style": {
+      "id": "editorial_light",
+      "version": 1,
+      "background": "#f3f5f1",
+      "surface": "#ffffff",
+      "text": "#182720",
+      "muted": "#637168",
+      "accent": "#1f7a4d",
+      "warning": "#9b650c",
+      "subtitle": "#182720"
+    },
+    "executor": {
+      "id": "hybrid_cards",
+      "version": 1
+    },
+    "output": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 30
+    },
+    "packaging_sha256": "f45fd3577c42803bc1120d7206ea5180944fe8f169df6788c8b3c2ecb8f98e97",
+    "packaging": {
+      "library": "autovideo-packaging",
+      "version": 2,
+      "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+      "selection": {
+        "sound": {
+          "enabled": false
+        },
+        "preset": "common"
+      },
+      "components": {
+        "label": "知识讲解",
+        "accent": "#1f7a4d",
+        "enabled": true,
+        "intro": {
+          "component": "stinger",
+          "enabled": true,
+          "seconds": 1.5
+        },
+        "outro": {
+          "component": "end_card",
+          "enabled": true,
+          "seconds": 2.5
+        },
+        "badge": {
+          "component": "corner_badge",
+          "enabled": true
+        },
+        "source_card": {
+          "component": "source_card",
+          "enabled": true,
+          "seconds": 4.5
+        },
+        "sound": {
+          "component": "synth_sting",
+          "enabled": false
+        }
+      },
+      "package": {
+        "accent": "#1f7a4d",
+        "badge": "知识讲解",
+        "intro": {
+          "template": "stinger",
+          "title": "知识讲解",
+          "seconds": 1.5
+        },
+        "outro": {
+          "template": "end_card",
+          "title": "知识讲解",
+          "seconds": 2.5
+        }
+      },
+      "badge": {
+        "text": "知识讲解",
+        "color": "#1f7a4d"
+      },
+      "source_card": null,
+      "source_card_state": "no_sources",
+      "component_versions": {
+        "intro": {
+          "id": "stinger",
+          "version": 1
+        },
+        "outro": {
+          "id": "end_card",
+          "version": 2
+        },
+        "badge": {
+          "id": "corner_badge",
+          "version": 1
+        },
+        "source_card": {
+          "id": "source_card",
+          "version": 2
+        },
+        "sound": {
+          "id": "synth_sting",
+          "version": 1
+        }
+      },
+      "sha256": "f45fd3577c42803bc1120d7206ea5180944fe8f169df6788c8b3c2ecb8f98e97"
+    },
+    "recipe_sha256": null,
+    "source_sha256": "5b45d6d5f0662374edc94c137c7bfe0da55301808a49eb5d682094c4fc5fb5ce",
+    "music": {
+      "selection": null,
+      "background_music_generated": false
+    },
+    "sha256": "805dea9079392b327ffd0a413f8782e71b800f1718c4b27648d4c34489471075"
+  },
+  "production_mode": "fast",
+  "visual_style": "editorial_light",
+  "video_speed": 1.0,
+  "video_form": "information_cards",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "information_cards",
+    "selected_form": "information_cards",
+    "recommended_form": "information_cards",
+    "selection_mode": "manual",
+    "status": "ready",
+    "reason": "按指定形式制作，定稿讲稿逐字配音。",
+    "issues": [],
+    "retained_units": 4,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_cards",
+  "attempts": [
+    {
+      "attempt_no": 2,
+      "status": "COMPLETED",
+      "started_at": "2026-10-28T09:56:16.686+00:00",
+      "completed_at": "2026-10-28T10:02:55.315+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T09:56:16.686+00:00",
+          "completed_at": "2026-10-28T09:56:17.062+00:00",
+          "duration_seconds": 0.0,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T09:56:17.066+00:00",
+          "completed_at": "2026-10-28T09:59:06.322+00:00",
+          "duration_seconds": 169.37,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T09:59:06.333+00:00",
+          "completed_at": "2026-10-28T09:59:45.466+00:00",
+          "duration_seconds": 39.08,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:59:45.469+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T09:59:45.828+00:00",
+          "completed_at": "2026-10-28T10:01:08.838+00:00",
+          "duration_seconds": 82.85,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T10:01:08.845+00:00",
+          "completed_at": "2026-10-28T10:02:36.588+00:00",
+          "duration_seconds": 87.81,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T10:02:36.594+00:00",
+          "completed_at": "2026-10-28T10:02:55.315+00:00",
+          "duration_seconds": 5.08,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "PACKAGE",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T10:02:41.615+00:00",
+          "completed_at": "2026-10-28T10:02:54.929+00:00",
+          "duration_seconds": 13.4,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "AUDIO_MIX",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T10:02:54.934+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    },
+    {
+      "attempt_no": 1,
+      "status": "FAILED",
+      "started_at": "2026-10-28T09:53:50.112+00:00",
+      "completed_at": "2026-10-28T09:55:28.771+00:00",
+      "error_code": "COMMAND_FAILED",
+      "error_message": "local-mlx-voice exited 1; see /Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-performance-stability-20261028/3942851cf4d444f1913a8cf4b11b3fd1/jobs/43c7266e-2f53-4150-a757-b8ed4dac403c/attempts/1/g2-run/logs/local-mlx-voice.log",
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-28T09:53:50.112+00:00",
+          "completed_at": "2026-10-28T09:53:50.489+00:00",
+          "duration_seconds": 0.0,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "FAILED",
+          "started_at": "2026-10-28T09:53:50.491+00:00",
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": "COMMAND_FAILED",
+          "error_message": "local-mlx-voice exited 1; see /Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-performance-stability-20261028/3942851cf4d444f1913a8cf4b11b3fd1/jobs/43c7266e-2f53-4150-a757-b8ed4dac403c/attempts/1/g2-run/logs/local-mlx-voice.log"
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "PACKAGE",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "AUDIO_MIX",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-28T09:55:28.771+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

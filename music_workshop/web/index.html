@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>音乐创作工坊 · 从一句灵感开始</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="音乐创作工坊首页"><span class="brand-mark">♫</span><span>音乐创作工坊<small>MUSIC WORKSHOP</small></span></a>
+    <div class="side-label">我的创作</div>
+    <button class="side-active" id="show-all">◈ &nbsp; 作品工作台 <span id="total">0</span></button>
+    <div class="side-note"><span class="tiny-disc">♪</span><strong>好故事，值得唱出来。</strong><p>收集生活里的片刻，<br>让一句灵感长成一首歌。</p></div>
+    <div class="side-footer">独立创作空间 <span>本地保存</span></div>
+  </aside>
+  <main>
+    <header><div><div class="eyebrow">CREATIVE STUDIO / 01</div><h1>从一句灵感开始</h1><p>创意、歌曲与画面，在同一个作品里慢慢长成。</p></div><div class="header-actions"><button id="import-button" class="quiet">导入项目</button><input id="import-file" type="file" accept="application/json,.json" hidden><button id="new-project" class="primary">＋ 新建创意</button></div></header>
+    <section class="overview" aria-label="创作概览"><div><span class="stat-mark">✦</span><span>创意作品<strong id="idea-count">0</strong></span></div><div><span class="stat-mark">♫</span><span>歌曲版本<strong id="song-count">0</strong></span></div><div><span class="stat-mark">▤</span><span>MV 草案<strong id="video-count">0</strong></span></div><p>把值得记住的事情<br><b>变成值得分享的作品。</b></p></section>
+    <div class="workspace"><section class="library"><div class="section-top"><h2>灵感与作品</h2><span id="list-count"></span></div><label class="search"><span>⌕</span><input id="search" placeholder="搜索标题、故事或副歌" aria-label="搜索作品"></label><div id="project-list"></div><button id="example-button" class="example">↗ 载入「蓝按钮」创作案例</button></section><section id="editor" class="editor" aria-label="作品编辑区"></section></div>
+    <div id="notice" class="notice" role="status" hidden></div>
+  </main>
+  <dialog id="prompt-dialog"><div class="section-top"><div><div class="eyebrow">CREATIVE BRIEF</div><h2>带着素材，继续挖掘</h2></div><button id="close-dialog" class="quiet">关闭</button></div><p>这是为当前作品整理的创作简报。复制给模型或创作助手，探索三个不同方向。</p><textarea id="prompt-text" aria-label="创意挖掘简报" readonly></textarea><button id="copy-prompt" class="primary">复制创作简报</button></dialog>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

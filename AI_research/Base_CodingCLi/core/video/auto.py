@@ -87,6 +87,9 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
                     owns = any(p.get("production") == config.key for p in selected)
                     if not owns:
                         continue
+                    if spec.get("chain_run_id") and spec.get("report_identity") == revision:
+                        handled = True
+                        continue
                     if spec.get("report_identity") == revision and any(
                             p.get("production") == config.key and p.get("all") for p in selected):
                         handled = True

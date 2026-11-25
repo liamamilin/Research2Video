@@ -1,0 +1,367 @@
+{
+ "job_id": "44abdb5f-95eb-4977-8d4e-f22ea4f07260",
+ "title": "齐白石画虾从不画水，那片空白为什么看着像河",
+ "status": "COMPLETED",
+ "active_stage": "COMPLETE",
+ "attempt_count": 1,
+ "cancel_requested": false,
+ "error_code": null,
+ "error_message": null,
+ "retryable": false,
+ "source_sha256": "07f4f86fb591ada415d6fbe3e01913845a97cfd8e0cc4b58fad78a6b84bc1ce0",
+ "source_char_count": 1096,
+ "target_duration_sec": 60,
+ "theme": "minimal_dark",
+ "voice_id": "voxcpm_anchor",
+ "created_at": "2026-11-09T11:02:13.368+00:00",
+ "updated_at": "2026-11-09T11:17:11.005+00:00",
+ "version": 14,
+ "operation_type": "generate",
+ "parent_job_id": null,
+ "parent_attempt_no": null,
+ "scene_id": null,
+ "creative_intent": {
+  "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+  "purpose": "知识讲解",
+  "tone": "",
+  "focus": "齐白石画虾从不画水，那片空白为什么看着像河"
+ },
+ "revision_mode": null,
+ "input_mode": "narration",
+ "idempotency_key": null,
+ "background_music_resolved": null,
+ "background_music": {
+  "enabled": false
+ },
+ "production_recipe_resolved": null,
+ "production_plan": {
+  "schema_version": 1,
+  "settings": {
+   "chapter_keywords": null,
+   "content_notices": [
+    {
+     "chapter_index": 1,
+     "message": "本章节有内容待核实"
+    },
+    {
+     "chapter_index": 3,
+     "message": "本章节有内容待核实"
+    },
+    {
+     "chapter_index": 5,
+     "message": "本章节有内容待核实"
+    }
+   ],
+   "creative_intent": {
+    "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+    "purpose": "知识讲解",
+    "tone": "",
+    "focus": "齐白石画虾从不画水，那片空白为什么看着像河"
+   },
+   "duration_mode": "content",
+   "illustration_style": "flat",
+   "music": null,
+   "packaging": {
+    "preset": "common",
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "recipe": "illustrated_explainer",
+    "intro": {
+     "title": "齐白石画虾从不画水"
+    }
+   },
+   "production_context": {
+    "content_recipe": {
+     "id": "research:illustrated_explainer",
+     "settings": {
+      "video_form": "illustrated_explainer",
+      "creative_intent": {
+       "purpose": "知识讲解",
+       "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+       "focus": "齐白石画虾从不画水，那片空白为什么看着像河"
+      },
+      "packaging": {
+       "preset": "common",
+       "label": "插画讲解",
+       "accent": "#1f7a4d",
+       "recipe": "illustrated_explainer",
+       "intro": {
+        "title": "齐白石画虾从不画水"
+       }
+      },
+      "voice_id": "voxcpm_anchor"
+     }
+    },
+    "matrix": {
+     "id": "research-production:culture_illustrated",
+     "settings": {
+      "video_speed": 1.25,
+      "illustration_style": "flat"
+     }
+    }
+   },
+   "production_mode": "standard",
+   "production_recipe": null,
+   "slideshow_images": [],
+   "slideshow_images_resolved": null,
+   "target_duration_sec": 60,
+   "video_form": "illustrated_explainer",
+   "video_speed": 1.25,
+   "visual_style": "legacy",
+   "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+   "packaging.label": "content_recipe",
+   "packaging.accent": "content_recipe",
+   "packaging.enabled": "common",
+   "packaging.intro.component": "common",
+   "packaging.intro.enabled": "common",
+   "packaging.intro.seconds": "common",
+   "packaging.intro.title": "content_recipe",
+   "packaging.outro.component": "common",
+   "packaging.outro.enabled": "common",
+   "packaging.outro.seconds": "common",
+   "packaging.badge.component": "common",
+   "packaging.badge.enabled": "common",
+   "packaging.source_card.component": "common",
+   "packaging.source_card.enabled": "common",
+   "packaging.source_card.seconds": "common",
+   "packaging.sound.component": "common",
+   "packaging.sound.enabled": "common",
+   "video_form": "content_recipe",
+   "production_mode": "common",
+   "visual_style": "common",
+   "duration_mode": "request",
+   "target_duration_sec": "common",
+   "voice_id": "content_recipe",
+   "video_speed": "matrix",
+   "creative_intent": "common",
+   "creative_intent.purpose": "content_recipe",
+   "creative_intent.audience": "content_recipe",
+   "creative_intent.focus": "content_recipe",
+   "packaging.preset": "content_recipe",
+   "packaging.recipe": "content_recipe",
+   "illustration_style": "matrix"
+  },
+  "style": {
+   "id": "legacy",
+   "version": 1,
+   "description": "保留各既有形式的原始视觉定义"
+  },
+  "executor": {
+   "id": "remotion",
+   "version": 1
+  },
+  "output": {
+   "width": 1920,
+   "height": 1080,
+   "fps": 30
+  },
+  "packaging_sha256": "9d237e5eaedced22e5824469a50c4c22ca35c98394243338ed2b17672f6adb19",
+  "packaging": {
+   "library": "autovideo-packaging",
+   "version": 2,
+   "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+   "selection": {
+    "preset": "common",
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "recipe": "illustrated_explainer",
+    "intro": {
+     "title": "齐白石画虾从不画水"
+    }
+   },
+   "components": {
+    "label": "插画讲解",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+     "component": "stinger",
+     "enabled": true,
+     "seconds": 1.5,
+     "title": "齐白石画虾从不画水"
+    },
+    "outro": {
+     "component": "end_card",
+     "enabled": true,
+     "seconds": 2.5
+    },
+    "badge": {
+     "component": "corner_badge",
+     "enabled": true
+    },
+    "source_card": {
+     "component": "source_card",
+     "enabled": true,
+     "seconds": 4.5
+    },
+    "sound": {
+     "component": "synth_sting",
+     "enabled": true
+    }
+   },
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "插画讲解",
+    "intro": {
+     "template": "stinger",
+     "title": "齐白石画虾从不画水",
+     "seconds": 1.5,
+     "sound": "synth_sting"
+    },
+    "outro": {
+     "template": "end_card",
+     "title": "插画讲解",
+     "seconds": 2.5,
+     "sound": "synth_sting"
+    }
+   },
+   "badge": {
+    "text": "插画讲解",
+    "color": "#1f7a4d"
+   },
+   "source_card": null,
+   "source_card_state": "no_sources",
+   "component_versions": {
+    "intro": {
+     "id": "stinger",
+     "version": 1
+    },
+    "outro": {
+     "id": "end_card",
+     "version": 2
+    },
+    "badge": {
+     "id": "corner_badge",
+     "version": 1
+    },
+    "source_card": {
+     "id": "source_card",
+     "version": 2
+    },
+    "sound": {
+     "id": "synth_sting",
+     "version": 1
+    }
+   },
+   "sha256": "9d237e5eaedced22e5824469a50c4c22ca35c98394243338ed2b17672f6adb19"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "07f4f86fb591ada415d6fbe3e01913845a97cfd8e0cc4b58fad78a6b84bc1ce0",
+  "music": {
+   "selection": null,
+   "background_music_generated": false
+  },
+  "sha256": "e4795e81141ce047d34f2e3bcdb01c93a18205096da622d02769c90cf751667d"
+ },
+ "production_mode": "standard",
+ "visual_style": "legacy",
+ "video_speed": 1.25,
+ "video_form": "illustrated_explainer",
+ "duration_mode": "content",
+ "input_analysis": {
+  "requested_form": "illustrated_explainer",
+  "selected_form": "illustrated_explainer",
+  "recommended_form": "illustrated_explainer",
+  "selection_mode": "manual",
+  "status": "ready",
+  "reason": "按指定形式制作，定稿讲稿逐字配音。",
+  "issues": [],
+  "retained_units": 42,
+  "excluded_units": 0
+ },
+ "resolved_video_form": "illustrated_explainer",
+ "attempts": [
+  {
+   "attempt_no": 1,
+   "status": "COMPLETED",
+   "started_at": "2026-11-09T11:02:13.376+00:00",
+   "completed_at": "2026-11-09T11:17:11.005+00:00",
+   "error_code": null,
+   "error_message": null,
+   "stages": [
+    {
+     "stage": "PLAN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:02:13.376+00:00",
+     "completed_at": "2026-11-09T11:02:13.747+00:00",
+     "duration_seconds": 0.0,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "VOICE_ALIGN",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:02:13.749+00:00",
+     "completed_at": "2026-11-09T11:07:08.255+00:00",
+     "duration_seconds": 294.65,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "STORYBOARD",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:02:13.750+00:00",
+     "completed_at": "2026-11-09T11:02:13.752+00:00",
+     "duration_seconds": 0.0,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "SCENE_IMAGES",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:07:08.260+00:00",
+     "completed_at": "2026-11-09T11:10:26.044+00:00",
+     "duration_seconds": 197.82,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "BUILD_IR",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:10:26.051+00:00",
+     "completed_at": "2026-11-09T11:10:26.406+00:00",
+     "duration_seconds": 0.25,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "RENDER",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:10:26.410+00:00",
+     "completed_at": "2026-11-09T11:16:29.063+00:00",
+     "duration_seconds": 362.64,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "QUALITY_CHECK",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:16:29.074+00:00",
+     "completed_at": "2026-11-09T11:17:11.005+00:00",
+     "duration_seconds": 12.4,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "PACKAGE",
+     "status": "SUCCEEDED",
+     "started_at": "2026-11-09T11:16:41.471+00:00",
+     "completed_at": "2026-11-09T11:17:10.922+00:00",
+     "duration_seconds": 29.22,
+     "error_code": null,
+     "error_message": null
+    },
+    {
+     "stage": "AUDIO_MIX",
+     "status": "SKIPPED",
+     "started_at": null,
+     "completed_at": "2026-11-09T11:17:10.937+00:00",
+     "duration_seconds": null,
+     "error_code": null,
+     "error_message": null
+    }
+   ]
+  }
+ ]
+}

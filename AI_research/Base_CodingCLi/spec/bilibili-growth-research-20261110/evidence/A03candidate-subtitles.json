@@ -1,0 +1,1055 @@
+{
+  "bvid": "BV1ky1rBYE35",
+  "observed_at": "2026-11-10T08:56:57.743943+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 0.12,
+      "to": 2.72,
+      "sid": 1,
+      "location": 2,
+      "content": "别再被充电至80%忽悠了两年",
+      "music": 0.0
+    },
+    {
+      "from": 2.72,
+      "to": 5.02,
+      "sid": 2,
+      "location": 2,
+      "content": "实测揭露手机电池保养的残酷真相",
+      "music": 0.0
+    },
+    {
+      "from": 5.02,
+      "to": 6.66,
+      "sid": 3,
+      "location": 2,
+      "content": "看似科学的充电法则",
+      "music": 0.0
+    },
+    {
+      "from": 6.66,
+      "to": 8.58,
+      "sid": 4,
+      "location": 2,
+      "content": "反而让你提前陷入续航焦虑",
+      "music": 0.0
+    },
+    {
+      "from": 8.58,
+      "to": 11.1,
+      "sid": 5,
+      "location": 2,
+      "content": "当你花近万元买下一部最新款IPHONE时",
+      "music": 0.0
+    },
+    {
+      "from": 11.1,
+      "to": 13.42,
+      "sid": 6,
+      "location": 2,
+      "content": "是否也曾小心翼翼地开启充电上限",
+      "music": 0.0
+    },
+    {
+      "from": 13.42,
+      "to": 14.52,
+      "sid": 7,
+      "location": 2,
+      "content": "80%功能",
+      "music": 0.0
+    },
+    {
+      "from": 14.52,
+      "to": 16.4,
+      "sid": 8,
+      "location": 2,
+      "content": "试图让电池寿命更长一些",
+      "music": 0.0
+    },
+    {
+      "from": 16.4,
+      "to": 17.1,
+      "sid": 9,
+      "location": 2,
+      "content": "近年来",
+      "music": 0.0
+    },
+    {
+      "from": 17.1,
+      "to": 18.78,
+      "sid": 10,
+      "location": 2,
+      "content": "从手机厂商到科技博主",
+      "music": 0.0
+    },
+    {
+      "from": 18.78,
+      "to": 20.2,
+      "sid": 11,
+      "location": 2,
+      "content": "几乎众口一词的宣扬",
+      "music": 0.0
+    },
+    {
+      "from": 20.2,
+      "to": 22.3,
+      "sid": 12,
+      "location": 2,
+      "content": "避免满充可延缓电池老化",
+      "music": 0.0
+    },
+    {
+      "from": 22.3,
+      "to": 24.6,
+      "sid": 13,
+      "location": 2,
+      "content": "甚至将这一功能直接内置到系统中",
+      "music": 0.0
+    },
+    {
+      "from": 24.6,
+      "to": 27.1,
+      "sid": 14,
+      "location": 2,
+      "content": "然而一场持续近两年的硬核测试",
+      "music": 0.0
+    },
+    {
+      "from": 27.1,
+      "to": 29.1,
+      "sid": 15,
+      "location": 2,
+      "content": "却揭开了这一常识背后的矛盾",
+      "music": 0.0
+    },
+    {
+      "from": 29.1,
+      "to": 30.58,
+      "sid": 16,
+      "location": 2,
+      "content": "现实理想很丰满",
+      "music": 0.0
+    },
+    {
+      "from": 30.58,
+      "to": 32.3,
+      "sid": 17,
+      "location": 2,
+      "content": "80%限制的理论依据",
+      "music": 0.0
+    },
+    {
+      "from": 32.3,
+      "to": 35.36,
+      "sid": 18,
+      "location": 2,
+      "content": "锂离子电池的寿命的确与充电深度密切相关",
+      "music": 0.0
+    },
+    {
+      "from": 35.36,
+      "to": 36.42,
+      "sid": 19,
+      "location": 2,
+      "content": "从化学原理看",
+      "music": 0.0
+    },
+    {
+      "from": 36.42,
+      "to": 37.52,
+      "sid": 20,
+      "location": 2,
+      "content": "电池在高压状态",
+      "music": 0.0
+    },
+    {
+      "from": 37.52,
+      "to": 39.24,
+      "sid": 21,
+      "location": 2,
+      "content": "如电量超过80%下",
+      "music": 0.0
+    },
+    {
+      "from": 39.24,
+      "to": 41.76,
+      "sid": 22,
+      "location": 2,
+      "content": "电极颗粒会因锂离子频繁嵌入和脱出",
+      "music": 0.0
+    },
+    {
+      "from": 41.76,
+      "to": 42.9,
+      "sid": 23,
+      "location": 2,
+      "content": "而产生更多裂纹",
+      "music": 0.0
+    },
+    {
+      "from": 42.9,
+      "to": 44.26,
+      "sid": 24,
+      "location": 2,
+      "content": "加速活性物质失效",
+      "music": 0.0
+    },
+    {
+      "from": 44.26,
+      "to": 47.08,
+      "sid": 25,
+      "location": 2,
+      "content": "因此理论上避免电池长期处于满电状态",
+      "music": 0.0
+    },
+    {
+      "from": 47.08,
+      "to": 48.34,
+      "sid": 26,
+      "location": 2,
+      "content": "能减少电极应力",
+      "music": 0.0
+    },
+    {
+      "from": 48.34,
+      "to": 49.48,
+      "sid": 27,
+      "location": 2,
+      "content": "延缓容量衰减",
+      "music": 0.0
+    },
+    {
+      "from": 49.48,
+      "to": 52.22,
+      "sid": 28,
+      "location": 2,
+      "content": "苹果华为等厂商推出的充电限制功能",
+      "music": 0.0
+    },
+    {
+      "from": 52.22,
+      "to": 53.48,
+      "sid": 29,
+      "location": 2,
+      "content": "正是基于这一原理",
+      "music": 0.0
+    },
+    {
+      "from": 53.48,
+      "to": 56.06,
+      "sid": 30,
+      "location": 2,
+      "content": "试图通过浅充浅放提升电池耐久性",
+      "music": 0.0
+    },
+    {
+      "from": 56.06,
+      "to": 58.3,
+      "sid": 31,
+      "location": 2,
+      "content": "然而理论终究需要实践检验",
+      "music": 0.0
+    },
+    {
+      "from": 58.3,
+      "to": 59.34,
+      "sid": 32,
+      "location": 2,
+      "content": "现实很骨感",
+      "music": 0.0
+    },
+    {
+      "from": 59.34,
+      "to": 61.06,
+      "sid": 33,
+      "location": 2,
+      "content": "长期测试结果令人意外",
+      "music": 0.0
+    },
+    {
+      "from": 61.06,
+      "to": 62.26,
+      "sid": 34,
+      "location": 2,
+      "content": "2023年9月",
+      "music": 0.0
+    },
+    {
+      "from": 62.26,
+      "to": 64.16,
+      "sid": 35,
+      "location": 2,
+      "content": "科技媒体z d net的特约编辑",
+      "music": 0.0
+    },
+    {
+      "from": 64.16,
+      "to": 66.96,
+      "sid": 36,
+      "location": 2,
+      "content": "阿德里安金斯利修斯开启了一项大胆实验",
+      "music": 0.0
+    },
+    {
+      "from": 66.96,
+      "to": 68.8,
+      "sid": 37,
+      "location": 2,
+      "content": "对新购入的IPHONE15pro max",
+      "music": 0.0
+    },
+    {
+      "from": 68.8,
+      "to": 70.82,
+      "sid": 38,
+      "location": 2,
+      "content": "严格执行80%充电上限",
+      "music": 0.0
+    },
+    {
+      "from": 70.82,
+      "to": 72.86,
+      "sid": 39,
+      "location": 2,
+      "content": "起初一切似乎符合预期",
+      "music": 0.0
+    },
+    {
+      "from": 72.86,
+      "to": 74.74,
+      "sid": 40,
+      "location": 2,
+      "content": "即便电量限制在80%",
+      "music": 0.0
+    },
+    {
+      "from": 74.74,
+      "to": 76.76,
+      "sid": 41,
+      "location": 2,
+      "content": "手机仍能轻松支撑一天使用",
+      "music": 0.0
+    },
+    {
+      "from": 76.76,
+      "to": 79.0,
+      "sid": 42,
+      "location": 2,
+      "content": "剩余电量维持在35%以上",
+      "music": 0.0
+    },
+    {
+      "from": 79.0,
+      "to": 79.82,
+      "sid": 43,
+      "location": 2,
+      "content": "但一年后",
+      "music": 0.0
+    },
+    {
+      "from": 79.82,
+      "to": 81.88,
+      "sid": 44,
+      "location": 2,
+      "content": "电池健康度降至91%",
+      "music": 0.0
+    },
+    {
+      "from": 81.88,
+      "to": 83.48,
+      "sid": 45,
+      "location": 2,
+      "content": "虽然优于部分满充用户",
+      "music": 0.0
+    },
+    {
+      "from": 83.48,
+      "to": 84.76,
+      "sid": 46,
+      "location": 2,
+      "content": "差距却并不显著",
+      "music": 0.0
+    },
+    {
+      "from": 84.76,
+      "to": 86.9,
+      "sid": 47,
+      "location": 2,
+      "content": "真正的转折发生在第17个月",
+      "music": 0.0
+    },
+    {
+      "from": 86.9,
+      "to": 89.12,
+      "sid": 48,
+      "location": 2,
+      "content": "此时手机充电循环达500一次",
+      "music": 0.0
+    },
+    {
+      "from": 89.12,
+      "to": 91.78,
+      "sid": 49,
+      "location": 2,
+      "content": "约为苹果宣称的1000次循环寿命的一半",
+      "music": 0.0
+    },
+    {
+      "from": 91.78,
+      "to": 94.16,
+      "sid": 50,
+      "location": 2,
+      "content": "电池健康度却已跌至89%",
+      "music": 0.0
+    },
+    {
+      "from": 94.16,
+      "to": 94.98,
+      "sid": 51,
+      "location": 2,
+      "content": "编辑发现",
+      "music": 0.0
+    },
+    {
+      "from": 94.98,
+      "to": 97.16,
+      "sid": 52,
+      "location": 2,
+      "content": "手机在下午三四点便电量告急",
+      "music": 0.0
+    },
+    {
+      "from": 97.16,
+      "to": 99.02,
+      "sid": 53,
+      "location": 2,
+      "content": "移动电源成为随身必备品",
+      "music": 0.0
+    },
+    {
+      "from": 99.02,
+      "to": 101.54,
+      "sid": 54,
+      "location": 2,
+      "content": "续航焦虑甚至比电池损耗更早到来",
+      "music": 0.0
+    },
+    {
+      "from": 101.54,
+      "to": 102.4,
+      "sid": 55,
+      "location": 2,
+      "content": "休斯坦言",
+      "music": 0.0
+    },
+    {
+      "from": 102.4,
+      "to": 105.38,
+      "sid": 56,
+      "location": 2,
+      "content": "一部顶级旗舰的有效续航寿命竟不足两年",
+      "music": 0.0
+    },
+    {
+      "from": 105.38,
+      "to": 106.32,
+      "sid": 57,
+      "location": 2,
+      "content": "更讽刺的是",
+      "music": 0.0
+    },
+    {
+      "from": 106.32,
+      "to": 109.0,
+      "sid": 58,
+      "location": 2,
+      "content": "对鼻祖数据进一步动摇了这一理论的根基",
+      "music": 0.0
+    },
+    {
+      "from": 109.0,
+      "to": 111.96,
+      "sid": 59,
+      "location": 2,
+      "content": "麦克rumors在IPHONE16pro max上的测试显示",
+      "music": 0.0
+    },
+    {
+      "from": 111.96,
+      "to": 113.36,
+      "sid": 60,
+      "location": 2,
+      "content": "开启80%限制",
+      "music": 0.0
+    },
+    {
+      "from": 113.36,
+      "to": 115.72,
+      "sid": 61,
+      "location": 2,
+      "content": "一年后电池健康度为94%",
+      "music": 0.0
+    },
+    {
+      "from": 115.72,
+      "to": 119.0,
+      "sid": 62,
+      "location": 2,
+      "content": "而一名未开启限制的同事在相似循环次数下",
+      "music": 0.0
+    },
+    {
+      "from": 119.0,
+      "to": 121.1,
+      "sid": 63,
+      "location": 2,
+      "content": "健康度反而保持在96%",
+      "music": 0.0
+    },
+    {
+      "from": 121.1,
+      "to": 123.72,
+      "sid": 64,
+      "location": 2,
+      "content": "另一组对IPHONE15pro max的追踪也发现",
+      "music": 0.0
+    },
+    {
+      "from": 123.72,
+      "to": 126.72,
+      "sid": 65,
+      "location": 2,
+      "content": "两年后满充用户的电池健康度为88%",
+      "music": 0.0
+    },
+    {
+      "from": 126.72,
+      "to": 128.56,
+      "sid": 66,
+      "location": 2,
+      "content": "与限制充电用户差距微弱",
+      "music": 0.0
+    },
+    {
+      "from": 128.56,
+      "to": 130.2,
+      "sid": 67,
+      "location": 2,
+      "content": "为什么完美方案反而失灵",
+      "music": 0.0
+    },
+    {
+      "from": 130.2,
+      "to": 131.86,
+      "sid": 68,
+      "location": 2,
+      "content": "问题并非出在理论本身",
+      "music": 0.0
+    },
+    {
+      "from": 131.86,
+      "to": 133.68,
+      "sid": 69,
+      "location": 2,
+      "content": "而是用户的实际使用场景",
+      "music": 0.0
+    },
+    {
+      "from": 133.68,
+      "to": 136.06,
+      "sid": 70,
+      "location": 2,
+      "content": "锂离子电池的寿命受多重因素影响",
+      "music": 0.0
+    },
+    {
+      "from": 136.06,
+      "to": 137.6,
+      "sid": 71,
+      "location": 2,
+      "content": "循环频率的隐性代价",
+      "music": 0.0
+    },
+    {
+      "from": 137.6,
+      "to": 139.18,
+      "sid": 72,
+      "location": 2,
+      "content": "限制充电至80%",
+      "music": 0.0
+    },
+    {
+      "from": 139.18,
+      "to": 140.68,
+      "sid": 73,
+      "location": 2,
+      "content": "意味着单次续航缩短",
+      "music": 0.0
+    },
+    {
+      "from": 140.68,
+      "to": 142.12,
+      "sid": 74,
+      "location": 2,
+      "content": "用户需更频繁充电",
+      "music": 0.0
+    },
+    {
+      "from": 142.12,
+      "to": 144.46,
+      "sid": 75,
+      "location": 2,
+      "content": "例如一天一充可能变为一天两充",
+      "music": 0.0
+    },
+    {
+      "from": 144.46,
+      "to": 146.14,
+      "sid": 76,
+      "location": 2,
+      "content": "反而加速循环次数积累",
+      "music": 0.0
+    },
+    {
+      "from": 146.14,
+      "to": 147.64,
+      "sid": 77,
+      "location": 2,
+      "content": "温度与充电方式的干扰",
+      "music": 0.0
+    },
+    {
+      "from": 147.64,
+      "to": 149.04,
+      "sid": 78,
+      "location": 2,
+      "content": "无线充电如max safe1",
+      "music": 0.0
+    },
+    {
+      "from": 149.04,
+      "to": 150.04,
+      "sid": 79,
+      "location": 2,
+      "content": "导致设备发热",
+      "music": 0.0
+    },
+    {
+      "from": 150.04,
+      "to": 152.6,
+      "sid": 80,
+      "location": 2,
+      "content": "高温对电池的损耗远超过满充的影响",
+      "music": 0.0
+    },
+    {
+      "from": 152.6,
+      "to": 155.46,
+      "sid": 81,
+      "location": 2,
+      "content": "测试中边际混合使用有线与无线充电",
+      "music": 0.0
+    },
+    {
+      "from": 155.46,
+      "to": 157.3,
+      "sid": 82,
+      "location": 2,
+      "content": "可能抵消了限制充电的益处",
+      "music": 0.0
+    },
+    {
+      "from": 157.3,
+      "to": 160.54,
+      "sid": 83,
+      "location": 2,
+      "content": "电量校准的偶然性系统偶尔会自动完成充满电",
+      "music": 0.0
+    },
+    {
+      "from": 160.54,
+      "to": 161.78,
+      "sid": 84,
+      "location": 2,
+      "content": "以校准电量统计",
+      "music": 0.0
+    },
+    {
+      "from": 161.78,
+      "to": 164.46,
+      "sid": 85,
+      "location": 2,
+      "content": "这些意外满充反而成为续航的救命稻草",
+      "music": 0.0
+    },
+    {
+      "from": 164.46,
+      "to": 165.32,
+      "sid": 86,
+      "location": 2,
+      "content": "更重要的是",
+      "music": 0.0
+    },
+    {
+      "from": 165.32,
+      "to": 166.72,
+      "sid": 87,
+      "location": 2,
+      "content": "电池管理系统的优化",
+      "music": 0.0
+    },
+    {
+      "from": 166.72,
+      "to": 168.44,
+      "sid": 88,
+      "location": 2,
+      "content": "已大幅削弱了满冲的危害",
+      "music": 0.0
+    },
+    {
+      "from": 168.44,
+      "to": 170.84,
+      "sid": 89,
+      "location": 2,
+      "content": "现代智能手机在电量达100%后",
+      "music": 0.0
+    },
+    {
+      "from": 170.84,
+      "to": 172.4,
+      "sid": 90,
+      "location": 2,
+      "content": "会自动切断充电回路",
+      "music": 0.0
+    },
+    {
+      "from": 172.4,
+      "to": 175.38,
+      "sid": 91,
+      "location": 2,
+      "content": "且夜间充电时长采用先快充至80%",
+      "music": 0.0
+    },
+    {
+      "from": 175.38,
+      "to": 176.76,
+      "sid": 92,
+      "location": 2,
+      "content": "在凌晨补满的策略",
+      "music": 0.0
+    },
+    {
+      "from": 176.76,
+      "to": 178.84,
+      "sid": 93,
+      "location": 2,
+      "content": "减少电池高压状态持续时间",
+      "music": 0.0
+    },
+    {
+      "from": 178.84,
+      "to": 181.06,
+      "sid": 94,
+      "location": 2,
+      "content": "用户真正该关注的电池保养法则",
+      "music": 0.0
+    },
+    {
+      "from": 181.06,
+      "to": 182.7,
+      "sid": 95,
+      "location": 2,
+      "content": "与其纠结于充电百分比",
+      "music": 0.0
+    },
+    {
+      "from": 182.7,
+      "to": 184.36,
+      "sid": 96,
+      "location": 2,
+      "content": "不如回归科学保养的本质",
+      "music": 0.0
+    },
+    {
+      "from": 184.36,
+      "to": 185.52,
+      "sid": 97,
+      "location": 2,
+      "content": "避免极端环境",
+      "music": 0.0
+    },
+    {
+      "from": 185.52,
+      "to": 187.18,
+      "sid": 98,
+      "location": 2,
+      "content": "高温是电池的头号杀手",
+      "music": 0.0
+    },
+    {
+      "from": 187.18,
+      "to": 188.76,
+      "sid": 99,
+      "location": 2,
+      "content": "充电时尽量移除手机壳",
+      "music": 0.0
+    },
+    {
+      "from": 188.76,
+      "to": 189.28,
+      "sid": 100,
+      "location": 2,
+      "content": "助散热",
+      "music": 0.0
+    },
+    {
+      "from": 189.28,
+      "to": 191.84,
+      "sid": 101,
+      "location": 2,
+      "content": "低于0℃或超过35℃的环境",
+      "music": 0.0
+    },
+    {
+      "from": 191.84,
+      "to": 193.12,
+      "sid": 102,
+      "location": 2,
+      "content": "会直接损伤电池",
+      "music": 0.0
+    },
+    {
+      "from": 193.12,
+      "to": 194.5,
+      "sid": 103,
+      "location": 2,
+      "content": "选用原装充电设备",
+      "music": 0.0
+    },
+    {
+      "from": 194.5,
+      "to": 196.84,
+      "sid": 104,
+      "location": 2,
+      "content": "非认证充电器可能输出不稳定电流",
+      "music": 0.0
+    },
+    {
+      "from": 196.84,
+      "to": 198.02,
+      "sid": 105,
+      "location": 2,
+      "content": "加速电机老化",
+      "music": 0.0
+    },
+    {
+      "from": 198.02,
+      "to": 198.86,
+      "sid": 106,
+      "location": 2,
+      "content": "随用随充",
+      "music": 0.0
+    },
+    {
+      "from": 198.86,
+      "to": 201.08,
+      "sid": 107,
+      "location": 2,
+      "content": "避免耗尽锂电池无记忆效应",
+      "music": 0.0
+    },
+    {
+      "from": 201.08,
+      "to": 204.22,
+      "sid": 108,
+      "location": 2,
+      "content": "电量降至20%到30%时充电即可",
+      "music": 0.0
+    },
+    {
+      "from": 204.22,
+      "to": 205.4,
+      "sid": 109,
+      "location": 2,
+      "content": "无需刻意放电",
+      "music": 0.0
+    },
+    {
+      "from": 205.4,
+      "to": 206.82,
+      "sid": 110,
+      "location": 2,
+      "content": "长期存放保留半电",
+      "music": 0.0
+    },
+    {
+      "from": 206.82,
+      "to": 207.48,
+      "sid": 111,
+      "location": 2,
+      "content": "若手机显示",
+      "music": 0.0
+    },
+    {
+      "from": 207.48,
+      "to": 210.18,
+      "sid": 112,
+      "location": 2,
+      "content": "保持电量在40%到60%",
+      "music": 0.0
+    },
+    {
+      "from": 210.18,
+      "to": 212.66,
+      "sid": 113,
+      "location": 2,
+      "content": "可最大限度减缓自放电导致的衰减",
+      "music": 0.0
+    },
+    {
+      "from": 212.66,
+      "to": 214.12,
+      "sid": 114,
+      "location": 2,
+      "content": "结余电池是工具",
+      "music": 0.0
+    },
+    {
+      "from": 214.12,
+      "to": 215.32,
+      "sid": 115,
+      "location": 2,
+      "content": "而非供奉的文物",
+      "music": 0.0
+    },
+    {
+      "from": 215.32,
+      "to": 216.86,
+      "sid": 116,
+      "location": 2,
+      "content": "科技媒体最终得出结论",
+      "music": 0.0
+    },
+    {
+      "from": 216.86,
+      "to": 219.26,
+      "sid": 117,
+      "location": 2,
+      "content": "80%充电限制带来的续航不便",
+      "music": 0.0
+    },
+    {
+      "from": 219.26,
+      "to": 221.74,
+      "sid": 118,
+      "location": 2,
+      "content": "远高于其对电池健康的微弱保护作用",
+      "music": 0.0
+    },
+    {
+      "from": 221.74,
+      "to": 223.52,
+      "sid": 119,
+      "location": 2,
+      "content": "当用户为了虚无的长期健康",
+      "music": 0.0
+    },
+    {
+      "from": 223.52,
+      "to": 224.98,
+      "sid": 120,
+      "location": 2,
+      "content": "牺牲日常使用体验时",
+      "music": 0.0
+    },
+    {
+      "from": 224.98,
+      "to": 226.66,
+      "sid": 121,
+      "location": 2,
+      "content": "Technology has failed its purpose",
+      "music": 0.0
+    },
+    {
+      "from": 226.66,
+      "to": 228.08,
+      "sid": 122,
+      "location": 2,
+      "content": "科技以背离其初衷",
+      "music": 0.0
+    },
+    {
+      "from": 228.08,
+      "to": 229.76,
+      "sid": 123,
+      "location": 2,
+      "content": "毕竟电池是消耗品",
+      "music": 0.0
+    },
+    {
+      "from": 229.76,
+      "to": 231.12,
+      "sid": 124,
+      "location": 2,
+      "content": "手机是服务人的工具",
+      "music": 0.0
+    },
+    {
+      "from": 231.12,
+      "to": 232.68,
+      "sid": 125,
+      "location": 2,
+      "content": "与其战战兢兢的省着用",
+      "music": 0.0
+    },
+    {
+      "from": 232.68,
+      "to": 233.68,
+      "sid": 126,
+      "location": 2,
+      "content": "不如敞开心态",
+      "music": 0.0
+    },
+    {
+      "from": 233.68,
+      "to": 234.28,
+      "sid": 127,
+      "location": 2,
+      "content": "放心用",
+      "music": 0.0
+    },
+    {
+      "from": 234.28,
+      "to": 234.84,
+      "sid": 128,
+      "location": 2,
+      "content": "两年后",
+      "music": 0.0
+    },
+    {
+      "from": 234.84,
+      "to": 235.76,
+      "sid": 129,
+      "location": 2,
+      "content": "若电池衰减",
+      "music": 0.0
+    },
+    {
+      "from": 235.76,
+      "to": 237.06,
+      "sid": 130,
+      "location": 2,
+      "content": "换一块电池的成本",
+      "music": 0.0
+    },
+    {
+      "from": 237.06,
+      "to": 239.64,
+      "sid": 131,
+      "location": 2,
+      "content": "远低于长期续航焦虑带来的精神损耗",
+      "music": 0.0
+    }
+  ]
+}

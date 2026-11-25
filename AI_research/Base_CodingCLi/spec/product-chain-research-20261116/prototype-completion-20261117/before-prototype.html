@@ -1,0 +1,205 @@
+<div id="production-chain-prototype" aria-label="研映生产链交互原型"></div>
+<style>
+#production-chain-prototype{--pc-bg:light-dark(#f5f7f9,#141a22);--pc-paper:light-dark(#ffffff,#1d2530);--pc-ink:light-dark(#192a3a,#e6edf5);--pc-muted:light-dark(#617183,#a6b3c2);--pc-line:light-dark(#dce3ea,#374352);--pc-accent:light-dark(#167567,#7cd9c6);--pc-on:light-dark(#fff,#102c27);--pc-soft:light-dark(#eaf5f1,#233e39);--pc-warn:light-dark(#955b19,#f2c47d);--pc-warnbg:light-dark(#fff5e6,#3c3020);color:var(--pc-ink);background:var(--pc-bg);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;border:1px solid var(--pc-line);border-radius:16px;overflow:clip;min-width:0;color-scheme:light dark}
+#production-chain-prototype *{box-sizing:border-box}
+#production-chain-prototype button,#production-chain-prototype input,#production-chain-prototype select,#production-chain-prototype textarea{font:inherit}
+#production-chain-prototype button:disabled{cursor:not-allowed;opacity:.48}
+#production-chain-prototype button:focus-visible,#production-chain-prototype input:focus-visible,#production-chain-prototype select:focus-visible,#production-chain-prototype textarea:focus-visible{outline:3px solid var(--pc-accent);outline-offset:3px}
+#production-chain-prototype h1,#production-chain-prototype h2,#production-chain-prototype h3,#production-chain-prototype p{margin:0}
+#production-chain-prototype h1{font-size:26px;font-weight:600;letter-spacing:-.6px;line-height:1.35}
+#production-chain-prototype h2{font-size:19px;font-weight:600;line-height:1.4}
+#production-chain-prototype h3{font-size:15px;font-weight:600}
+#production-chain-prototype .pc-top{background:var(--pc-paper);padding:17px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-bottom:1px solid var(--pc-line)}
+#production-chain-prototype .pc-brand{font-weight:650;letter-spacing:1px;display:flex;align-items:center;gap:9px}
+#production-chain-prototype .pc-logo{width:26px;height:26px;border-radius:8px;background:var(--pc-accent);color:var(--pc-on);display:grid;place-items:center;font-size:16px}
+#production-chain-prototype .pc-topnav{display:flex;gap:6px;flex-wrap:wrap}
+#production-chain-prototype .pc-topnav button{border:0;background:transparent;color:var(--pc-muted);padding:6px 10px;border-radius:7px}
+#production-chain-prototype .pc-topnav button[aria-current=page]{background:var(--pc-soft);color:var(--pc-accent)}
+#production-chain-prototype .pc-demo{font-size:12px;color:var(--pc-muted);margin-left:auto;margin-right:65px}
+#production-chain-prototype .pc-main{padding:26px;min-height:510px}
+#production-chain-prototype .pc-stack{display:grid;gap:18px}
+#production-chain-prototype .pc-stack-sm{display:grid;gap:10px}
+#production-chain-prototype .pc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#production-chain-prototype .pc-between{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#production-chain-prototype .pc-muted{color:var(--pc-muted);font-size:12px}
+#production-chain-prototype .pc-sub{color:var(--pc-muted);margin-top:5px;font-size:13px}
+#production-chain-prototype .pc-kicker{color:var(--pc-accent);font-size:12px;font-weight:600;letter-spacing:.6px;margin-bottom:7px}
+#production-chain-prototype .pc-btn{border:1px solid var(--pc-line);color:var(--pc-ink);background:var(--pc-paper);padding:8px 13px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:normal;text-align:center;min-height:38px}
+#production-chain-prototype .pc-btn:hover{background:var(--pc-bg)}
+#production-chain-prototype .pc-primary{border-color:var(--pc-accent);background:var(--pc-accent);color:var(--pc-on)}
+#production-chain-prototype .pc-primary:hover{filter:brightness(.95);background:var(--pc-accent)}
+#production-chain-prototype .pc-link{border:0;background:transparent;color:var(--pc-accent);padding:3px 0;text-align:left;text-decoration:none}
+#production-chain-prototype .pc-tag{display:inline-block;border-radius:5px;padding:2px 7px;background:var(--pc-soft);color:var(--pc-accent);font-size:12px;white-space:normal}
+#production-chain-prototype .pc-tag-neutral{background:var(--pc-bg);color:var(--pc-muted);border:1px solid var(--pc-line)}
+#production-chain-prototype .pc-tag-warn{background:var(--pc-warnbg);color:var(--pc-warn)}
+#production-chain-prototype .pc-card{background:var(--pc-paper);border:1px solid var(--pc-line);border-radius:12px;padding:19px}
+#production-chain-prototype .pc-chain{display:grid;grid-template-columns:minmax(170px,1.4fr) minmax(120px,.9fr) minmax(160px,1.1fr) auto;gap:18px;align-items:center;padding:20px;background:var(--pc-paper);border:1px solid var(--pc-line);border-radius:12px}
+#production-chain-prototype .pc-chain-title{font-size:17px;font-weight:600;color:var(--pc-ink)}
+#production-chain-prototype .pc-chain-title:hover{color:var(--pc-accent)}
+#production-chain-prototype .pc-tabs{display:flex;gap:18px;border-bottom:1px solid var(--pc-line);flex-wrap:wrap}
+#production-chain-prototype .pc-tab{border:0;background:transparent;color:var(--pc-muted);padding:10px 1px;border-bottom:2px solid transparent}
+#production-chain-prototype .pc-tab[aria-pressed=true]{color:var(--pc-accent);border-bottom-color:var(--pc-accent);font-weight:600}
+#production-chain-prototype .pc-flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+#production-chain-prototype .pc-node{position:relative;border:1px solid var(--pc-line);border-radius:9px;padding:12px 10px;text-align:left;background:var(--pc-paper);color:var(--pc-ink);min-width:0;display:grid;gap:5px;align-content:start}
+#production-chain-prototype .pc-node:not(:last-child):after{content:'→';position:absolute;right:-12px;top:30px;color:var(--pc-muted);font-size:12px}
+#production-chain-prototype .pc-node[aria-pressed=true]{border-color:var(--pc-accent);background:var(--pc-soft);box-shadow:inset 0 2px var(--pc-accent)}
+#production-chain-prototype .pc-num{font-size:11px;color:var(--pc-muted);font-variant-numeric:tabular-nums}
+#production-chain-prototype .pc-node strong{font-size:13px;font-weight:600}
+#production-chain-prototype .pc-node small{font-size:11px;color:var(--pc-muted);line-height:1.4}
+#production-chain-prototype .pc-panel{background:var(--pc-paper);border:1px solid var(--pc-line);border-radius:12px;padding:22px;min-width:0}
+#production-chain-prototype .pc-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+#production-chain-prototype .pc-detail-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(230px,1fr);gap:22px}
+#production-chain-prototype .pc-field{display:grid;gap:6px;font-size:13px;font-weight:500;min-width:0}
+#production-chain-prototype .pc-field input,#production-chain-prototype .pc-field select,#production-chain-prototype .pc-field textarea{width:100%;min-width:0;border:1px solid var(--pc-line);border-radius:8px;background:var(--pc-paper);color:var(--pc-ink);padding:9px 11px;font-weight:400}
+#production-chain-prototype .pc-field textarea{resize:vertical;min-height:90px}
+#production-chain-prototype .pc-check{display:flex;align-items:flex-start;gap:9px;font-size:13px;font-weight:400}
+#production-chain-prototype .pc-check input{accent-color:var(--pc-accent);width:16px;height:16px;flex:none;margin:3px 0 0}
+#production-chain-prototype .pc-choice{display:grid;gap:6px;padding:16px;border:1px solid var(--pc-line);border-radius:10px;background:var(--pc-paper);color:var(--pc-ink);text-align:left}
+#production-chain-prototype .pc-choice[aria-pressed=true]{border-color:var(--pc-accent);background:var(--pc-soft)}
+#production-chain-prototype .pc-notice{background:var(--pc-soft);color:var(--pc-ink);border-radius:8px;padding:12px 14px;font-size:13px}
+#production-chain-prototype .pc-warning{background:var(--pc-warnbg);color:var(--pc-warn)}
+#production-chain-prototype .pc-error{color:var(--pc-warn);font-size:13px}
+#production-chain-prototype .pc-divider{height:1px;background:var(--pc-line);margin:3px 0}
+#production-chain-prototype .pc-source{padding:12px 0;border-bottom:1px solid var(--pc-line);display:flex;gap:12px;justify-content:space-between;align-items:center}
+#production-chain-prototype .pc-source:last-child{border-bottom:0}
+#production-chain-prototype .pc-url{font-size:11px;color:var(--pc-muted);overflow-wrap:anywhere}
+#production-chain-prototype .pc-excluded{opacity:.65}
+#production-chain-prototype .pc-stepper{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#production-chain-prototype .pc-step{border:0;border-top:3px solid var(--pc-line);text-align:left;padding:9px 0;background:transparent;color:var(--pc-muted);font-size:12px}
+#production-chain-prototype .pc-step[aria-current=step]{border-color:var(--pc-accent);color:var(--pc-accent);font-weight:600}
+#production-chain-prototype .pc-stepsummary{padding:14px;border-radius:9px;background:var(--pc-bg);font-size:12px;color:var(--pc-muted)}
+#production-chain-prototype .pc-topic{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--pc-line)}
+#production-chain-prototype .pc-output{border:1px solid var(--pc-line);border-radius:10px;padding:15px;display:grid;gap:10px;background:var(--pc-paper)}
+#production-chain-prototype .pc-mini{width:44px;height:34px;border-radius:6px;background:var(--pc-soft);display:grid;place-items:center;color:var(--pc-accent);font-size:11px;flex:none}
+#production-chain-prototype .pc-progress{height:5px;background:var(--pc-line);border-radius:4px;overflow:hidden}
+#production-chain-prototype .pc-progress span{display:block;height:100%;background:var(--pc-accent)}
+#production-chain-prototype .pc-visual{aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;padding:22px;background:var(--pc-soft);border-radius:10px;min-width:0}
+#production-chain-prototype .pc-visual h3{font-size:22px;max-width:90%;line-height:1.4}
+#production-chain-prototype .pc-log{border-left:2px solid var(--pc-line);padding-left:15px;display:grid;gap:12px;font-size:13px}
+#production-chain-prototype .pc-footer{border-top:1px solid var(--pc-line);padding:10px 24px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--pc-muted);font-size:11px;background:var(--pc-paper)}
+#production-chain-prototype .pc-toast{color:var(--pc-accent);font-size:13px;min-height:21px}
+#production-chain-prototype .pc-empty{padding:35px 12px;text-align:center;display:grid;gap:13px;justify-items:center}
+#production-chain-prototype .pc-detail-grid>*{min-width:0}
+@media(max-width:750px){#production-chain-prototype .pc-chain{grid-template-columns:1fr 1fr}#production-chain-prototype .pc-detail-grid{grid-template-columns:1fr}#production-chain-prototype .pc-flow{grid-template-columns:repeat(3,minmax(0,1fr))}#production-chain-prototype .pc-node:nth-child(3):after{display:none}#production-chain-prototype .pc-demo{margin-left:0;margin-right:0}#production-chain-prototype .pc-top{gap:10px 18px}}
+@media(max-width:470px){#production-chain-prototype .pc-main{padding:16px}#production-chain-prototype .pc-top{padding:15px 16px}#production-chain-prototype h1{font-size:22px}#production-chain-prototype .pc-chain,#production-chain-prototype .pc-grid2{grid-template-columns:1fr}#production-chain-prototype .pc-panel{padding:16px}#production-chain-prototype .pc-stepper{gap:6px}#production-chain-prototype .pc-step{font-size:11px}#production-chain-prototype .pc-flow{grid-template-columns:repeat(2,minmax(0,1fr))}#production-chain-prototype .pc-node:nth-child(3):after{display:block}#production-chain-prototype .pc-node:nth-child(2n):after{display:none}#production-chain-prototype .pc-topic{grid-template-columns:1fr}#production-chain-prototype .pc-visual h3{font-size:18px}#production-chain-prototype .pc-btn{min-height:44px}#production-chain-prototype .pc-field input,#production-chain-prototype .pc-field select,#production-chain-prototype .pc-field textarea{font-size:16px}}
+</style>
+<style>
+#production-chain-prototype .pc-flow{grid-template-columns:repeat(4,minmax(0,1fr))}
+#production-chain-prototype .pc-chain{grid-template-columns:minmax(0,1fr) auto}
+#production-chain-prototype .pc-route{color:var(--pc-muted);font-size:13px;overflow-wrap:anywhere}
+#production-chain-prototype .pc-runrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:15px 0;border-bottom:1px solid var(--pc-line)}
+#production-chain-prototype .pc-runrow:last-child{border-bottom:0}
+#production-chain-prototype .pc-danger{color:light-dark(#ac3333,#ffa9a9);border-color:light-dark(#e9baba,#765252)}
+#production-chain-prototype .pc-inline-menu{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+#production-chain-prototype .pc-stage-head{display:flex;gap:12px;justify-content:space-between;align-items:start}
+#production-chain-prototype .pc-summary{padding:12px 0;display:grid;gap:5px}
+#production-chain-prototype .pc-name{overflow-wrap:anywhere}
+#production-chain-prototype details summary{color:var(--pc-accent);padding:8px 0}
+#production-chain-prototype .pc-runrow strong{overflow-wrap:anywhere}
+@media(max-width:750px){#production-chain-prototype .pc-flow{grid-template-columns:repeat(2,minmax(0,1fr))}#production-chain-prototype .pc-node:nth-child(2n):after{display:none}#production-chain-prototype .pc-node:nth-child(3):after{display:block}}
+@media(max-width:470px){#production-chain-prototype .pc-chain,#production-chain-prototype .pc-runrow{grid-template-columns:1fr}#production-chain-prototype .pc-demo{margin-right:0}#production-chain-prototype .pc-brand .pc-muted{display:none}}
+</style>
+<script>
+(()=>{
+const root=document.getElementById('production-chain-prototype');
+const clone=x=>JSON.parse(JSON.stringify(x));
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const steps=['信息源','内容处理','讲稿','视频生成'];
+const sources=[{id:'science',name:'OpenAI 科学博客',url:'https://openai.com/index/our-new-blog-for-science'},{id:'news',name:'OpenAI 新闻',url:'https://openai.com/news/'},{id:'simon',name:'Simon Willison',url:'https://simonwillison.net/'}];
+const defaults=()=>({name:'',refs:[],topic:'',audience:'普通科技爱好者',focus:'选出一个值得讲清楚的新变化，解释它的实际意义。',window:'最近 7 天',writing:'先提出具体问题，再用例子解释，最后说明实际用途。',duration:'约 2 分钟',output:'独立单条',voice:'清晰讲述',style:'信息图解',speed:'1.25',frequency:'手动运行',time:'09:00',weekday:'星期一'});
+const science={...defaults(),name:'科学发现视频',refs:['science'],topic:'AI 如何推动科学发现',frequency:'每周运行'};
+const makeRun=(cfg,v,failed=false)=>({id:uid(),label:'11 月 17 日 09:00 · 示例',cfg:clone(cfg),version:v,sourceSnapshot:cfg.refs.map(id=>clone(sources.find(s=>s.id===id))),stage:4,status:failed?'failed':'done',materials:['研究者使用 AI 推进科学发现的一手记录'],topic:'AI 如何帮助研究者探索新的科学问题？',script:'科学研究中，AI 能在哪些环节提供帮助？这期从一个具体研究问题出发，解释工具怎样辅助探索，以及研究者怎样使用结果。',attempts:[{version:1,attempt:1,status:failed?'failed':'done',voice:cfg.voice,style:cfg.style,speed:cfg.speed,rule:v}],researchCount:1});
+const initial=()=>({version:4,page:'list',active:'science-chain',sources:clone(sources),chains:[{id:'science-chain',version:1,cfg:clone(science),paused:false,runs:[makeRun(science,1,true)]},{id:'tools-chain',version:1,cfg:{...defaults(),name:'AI 编程工具观察',refs:['simon'],topic:'专业工具中的 AI 编程'},paused:false,runs:[]}],retained:[]});
+let S=initial(),section=0,view='settings',draft=null,creating=false,step=0,panel='',menu=false,runId='',runStage=3,notice='',error='',newName='',newUrl='',pendingSources=[],lastSaved='',showFrame=false;
+const saved=window.openai?.widgetState?.privateContent;if(saved?.version===4)S=clone(saved);
+const c=()=>S.chains.find(x=>x.id===S.active);
+const source=id=>S.sources.find(x=>x.id===id)||pendingSources.find(x=>x.id===id);
+const currentRun=()=>[...S.chains,...S.retained].flatMap(x=>x.runs).find(x=>x.id===runId);
+const running=x=>x.runs.some(r=>r.status==='running'||r.status==='retrying');
+const last=r=>r.attempts[r.attempts.length-1];
+const plan=cfg=>cfg.frequency==='手动运行'?'手动运行':cfg.frequency==='每天运行'?`每天 ${cfg.time}`:`每周${cfg.weekday.slice(2)} ${cfg.time}`;
+const state=x=>x.paused?'已暂停自动运行':x.cfg.frequency==='手动运行'?'手动运行':'自动运行已开启';
+const runState=r=>r.status==='running'?`${steps[r.stage]}进行中`:r.status==='retrying'?'正在重试视频':r.status==='failed'?'视频生成失败':r.status==='cancelled'?'已取消':'已完成';
+const btn=(label,action,id='',kind='')=>`<button class="pc-btn cursor-interaction ${kind}" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
+const field=(label,key,value,type='text')=>`<label class="pc-field">${label}<input data-field="${key}" type="${type}" value="${esc(value)}"></label>`;
+const area=(label,key,value)=>`<label class="pc-field">${label}<textarea data-field="${key}" rows="3">${esc(value)}</textarea></label>`;
+const select=(label,key,value,opts)=>`<label class="pc-field">${label}<select data-field="${key}">${opts.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+const badge=(text,warn=false)=>`<span class="pc-tag ${warn?'pc-tag-warn':''}">${esc(text)}</span>`;
+function persist(){S.revision=(S.revision||0)+1;const snapshot=clone(S);const payload={modelContent:{prototype:'单条信息源到视频链路',page:S.page,chain:c()?.cfg.name,view,editing:!!draft},privateContent:snapshot};lastSaved=JSON.stringify(S);if(new TextEncoder().encode(JSON.stringify(payload)).length<16000)window.openai?.setWidgetState?.(payload).catch(()=>{});}
+function resetLocal(){draft=null;creating=false;panel='';menu=false;pendingSources=[];newName='';newUrl='';error='';showFrame=false;}
+function message(t){notice=t;error='';}
+function route(cfg){return `${cfg.refs.map(id=>source(id)?.name||'已保存来源').join('、')||'选择信息源'} → ${cfg.topic||'设置内容方向'} → ${cfg.output}视频`;}
+function top(){return `<header class="pc-top"><div class="pc-brand"><span class="pc-logo">映</span>研映 <span class="pc-muted">信息源 → 视频</span></div><nav class="pc-topnav" aria-label="主导航">${btn('链路管理','home')}${btn('作品与运行记录','library')}${btn('来源库','sources')}</nav><span class="pc-demo">交互原型 · 全部为模拟</span></header>`;}
+function list(){return `<div class="pc-stack"><div class="pc-between"><div><div class="pc-kicker">一条链，一个内容目标</div><h1>我的链路</h1><p class="pc-sub">选择一条链，就能管理它从来源到视频的完整流程。</p></div>${btn('＋ 新建链路','new','','pc-primary')}</div>${S.chains.map(x=>`<article class="pc-chain"><div class="pc-stack-sm"><div class="pc-row"><h2 class="pc-name">${esc(x.cfg.name)}</h2>${badge(state(x),x.paused)}</div><p class="pc-route">${esc(route(x.cfg))}</p><p class="pc-muted">${esc(plan(x.cfg))} · ${x.runs[0]?`最近运行：${runState(x.runs[0])}`:'尚未运行'}</p></div><div class="pc-row">${btn('管理链路','open',x.id,'pc-primary')}${btn('运行一次','run-list',x.id)}</div></article>`).join('')||`<div class="pc-panel pc-empty"><h2>还没有链路</h2><p>先选择一个信息源，建立第一条视频生产链。</p>${btn('创建第一条链路','new','','pc-primary')}</div>`}<p class="pc-muted">示例中的科学博客和视频状态仅用于体验交互，不表示正式系统已订阅或产出。</p></div>`;}
+function sourceEditor(cfg){return `<div class="pc-stack-sm">${cfg.refs.map(id=>{const s=source(id);return `<div class="pc-source"><div><strong>${esc(s?.name)}</strong><p class="pc-url">${esc(s?.url)}</p></div>${btn('从本链移除','remove-source',id)}</div>`;}).join('')||'<p class="pc-muted">还未选择来源。可以使用来源库，也可以粘贴新网址。</p>'}<div class="pc-row">${S.sources.filter(s=>!cfg.refs.includes(s.id)).map(s=>btn('＋ '+esc(s.name),'attach',s.id)).join('')}</div><details ${panel==='add-source'?'open':''}><summary class="cursor-interaction">＋ 粘贴新的来源网址</summary><div class="pc-stack-sm">${field('来源名称','sourceName',newName)}${field('来源网址','sourceUrl',newUrl,'url')}${btn('加入本链','add-source')}</div></details><p class="pc-muted">移除只影响本链；来源库和其他链保留。不自动加入未选择的来源。</p></div>`;}
+function editor(cfg,s){if(s===0)return sourceEditor(cfg);if(s===1)return `<div class="pc-stack">${field('关注什么内容','topic',cfg.topic)}${field('给谁看','audience',cfg.audience)}${area('怎样挑选和处理内容','focus',cfg.focus)}${select('每次读取的材料范围','window',cfg.window,['最近 24 小时','最近 7 天','自上次运行以来'])}</div>`;if(s===2)return `<div class="pc-stack">${area('讲稿怎样讲','writing',cfg.writing)}${select('每条视频的讲述时长','duration',cfg.duration,['约 1 分钟','约 2 分钟','约 3 分钟'])}</div>`;return `<div class="pc-grid2">${select('产出形式','output',cfg.output,['独立单条','一期合集','合集＋重点单条'])}${select('声音','voice',cfg.voice,['清晰讲述','沉稳解说','轻快自然'])}${select('画面样式','style',cfg.style,['信息图解','插画讲解','操作步骤'])}${select('播放速度','speed',cfg.speed,['1.0','1.25','1.5'])}</div>`;}
+function summary(cfg,s){if(s===0)return `<div class="pc-stack-sm">${cfg.refs.map(id=>{const src=source(id);return `<div><strong>${esc(src?.name)}</strong><p class="pc-url">${esc(src?.url)}</p></div>`;}).join('')}<p class="pc-muted">只读取本链选择的 ${cfg.refs.length} 个来源。</p></div>`;if(s===1)return `<div class="pc-stack-sm"><p><strong>${esc(cfg.topic)}</strong> · ${esc(cfg.audience)}</p><p>${esc(cfg.focus)}</p><p class="pc-muted">材料范围：${esc(cfg.window)}</p></div>`;if(s===2)return `<div class="pc-stack-sm"><p>${esc(cfg.writing)}</p><p class="pc-muted">每条 ${esc(cfg.duration)}</p></div>`;return `<p>${esc(cfg.output)} · ${esc(cfg.voice)} · ${esc(cfg.style)} · ${esc(cfg.speed)} 倍</p>`;}
+function flow(cfg,selected,action='stage',r=null){const briefs=[cfg.refs.map(id=>source(id)?.name).filter(Boolean).join('、')||'选择来源',cfg.topic||'设置方向',cfg.duration,cfg.output];return `<nav class="pc-flow" aria-label="信息源到视频的四个步骤">${steps.map((n,i)=>`<button class="pc-node cursor-interaction" data-action="${action}" data-id="${i}" aria-pressed="${selected===i}"><span class="pc-num">0${i+1}</span><strong>${n}</strong><small>${esc(r?(r.status==='cancelled'&&i>r.stage?'未继续':i===3&&['failed','retrying'].includes(r.status)?runState(r):i<r.stage?'已完成':i===r.stage?runState(r):'等待上游'):briefs[i])}</small></button>`).join('')}</nav>`;}
+function scheduleForm(cfg){return `<div class="pc-grid2">${select('运行方式','frequency',cfg.frequency,['手动运行','每天运行','每周运行'])}${cfg.frequency==='每周运行'?select('每周哪天','weekday',cfg.weekday,['星期一','星期二','星期三','星期四','星期五','星期六','星期日']):''}${cfg.frequency!=='手动运行'?field('运行时间 · 亚洲/上海','time',cfg.time,'time'):''}</div>`;}
+function createView(){return `<div class="pc-stack"><div class="pc-between"><div><div class="pc-kicker">新建链路 · ${step+1} / 4</div><h1>${steps[step]}</h1></div>${btn('取消创建','cancel-create')}</div>${flow(draft,step,'create-stage')}<section class="pc-panel pc-stack">${step===0?field('链路名称','name',draft.name):''}${editor(draft,step)}${step===3?`<div class="pc-divider"></div><h3>这条链什么时候运行？</h3>${scheduleForm(draft)}<p class="pc-muted">所有设置都可以在创建后修改。</p>`:''}<p class="pc-error" role="alert">${esc(error)}</p><div class="pc-between"><div>${step>0?btn('← 上一步','previous'):''}</div><div class="pc-row">${step===3?btn('创建链路','create')+btn('创建并运行一次','create-run','','pc-primary'):btn('下一步 →','next','','pc-primary')}</div></div></section><p class="pc-route">${esc(route(draft))}</p></div>`;}
+function runRows(x,limit=100){return x.runs.slice(0,limit).map(r=>`<div class="pc-runrow"><div><strong>${esc(r.label)}</strong><p class="pc-muted">规则 v${r.version} · ${esc(runState(r))}</p></div><div class="pc-row">${r.status==='failed'&&!x.deleted?btn('仅重试视频','retry-row',r.id):''}${btn('查看运行','show-run',r.id)}</div></div>`).join('')||'<p class="pc-muted">还没有运行记录。点击“运行一次”生成首批模拟结果。</p>';}
+function detail(){const x=c();if(!x){S.page='list';return list();}return `<div class="pc-stack"><div>${btn('← 我的链路','home')}</div><div class="pc-between"><div><div class="pc-row"><h1 class="pc-name">${esc(x.cfg.name)}</h1>${badge(state(x),x.paused)}</div><p class="pc-sub">${esc(route(x.cfg))}</p></div><div class="pc-row">${btn(running(x)?'查看进行中的运行':'运行一次','run','','pc-primary')}${x.cfg.frequency!=='手动运行'?btn(x.paused?'恢复自动运行':'暂停自动运行','pause'):''}${btn('更多操作','more')}</div></div>${menu?`<div class="pc-inline-menu">${btn('修改名称','rename')}${btn('复制链路','copy')}${btn('删除链路','delete','','pc-danger')}</div>`:''}<div class="pc-between"><p class="pc-muted">${esc(plan(x.cfg))} · 规则 v${x.version}${x.paused?' · 自动运行已暂停':''}${running(x)?' · 有一批正在执行':''}</p>${btn('修改运行方式','schedule')}</div><div class="pc-tabs"><button class="pc-tab cursor-interaction" aria-pressed="${view==='settings'}" data-action="settings">链路设置</button><button class="pc-tab cursor-interaction" aria-pressed="${view==='runs'}" data-action="runs">运行记录 · ${x.runs.length}</button></div>${view==='runs'?`<section class="pc-panel">${runRows(x)}</section>`:`${flow(draft||x.cfg,section)}<section class="pc-panel pc-stack"><div class="pc-stage-head"><div><div class="pc-kicker">步骤 ${section+1} · ${draft?'修改后下一次运行生效':'当前规则 v'+x.version}</div><h2>${steps[section]}</h2></div>${!draft?btn('修改这一步','edit'):''}</div>${draft?editor(draft,section):summary(x.cfg,section)}${draft?`<p class="pc-error" role="alert">${esc(error)}</p><div class="pc-notice">仅修改「${esc(x.cfg.name)}」。正在运行与历史批次保持原设置。</div><div class="pc-row">${btn('保存修改','save','','pc-primary')}${btn('取消','cancel-edit')}</div>`:''}</section><section class="pc-panel"><div class="pc-between"><h3>最近运行</h3>${btn('查看全部运行','runs')}</div>${runRows(x,2)}</section>`}</div>`;}
+function sheet(){const x=c();if(panel==='delete')return `<div class="pc-stack">${btn('← 返回链路','close-panel')}<h1>删除「${esc(x.cfg.name)}」</h1><section class="pc-panel pc-stack"><p>删除这条链的配置和自动运行计划。</p>${running(x)?'<div class="pc-notice pc-warning">当前还有运行任务。删除时会同时取消，已完成的步骤和作品仍保留。</div>':''}<div class="pc-grid2"><div><h3>保留</h3><p>${x.runs.length} 次运行记录、已生成的讲稿与视频</p><p>${x.cfg.refs.length} 个共享来源，以及其他链路</p></div><div><h3>删除后在哪里找？</h3><p>历史内容在「作品与运行记录」中查看，来源仍在「来源库」。</p></div></div><div class="pc-row">${btn(running(x)?'取消当前运行并删除链路':'删除链路','confirm-delete','','pc-danger')}${btn('保留链路，返回','close-panel')}</div></section></div>`;
+let title=panel==='schedule'?'修改运行方式':panel==='copy'?'复制链路':'修改链路名称';return `<div class="pc-stack">${btn('← 返回链路','close-panel')}<h1>${title}</h1><section class="pc-panel pc-stack">${panel==='schedule'?scheduleForm(draft):field('链路名称','name',draft.name)}${panel==='copy'?'<p class="pc-muted">完整复制四个步骤的配置。新链使用共享来源、独立修改，默认手动运行，不复制历史。</p>':panel==='schedule'?`<p class="pc-muted">只改变后续自动运行。${x.paused?'本链仍保持暂停，保存不会自动恢复。':'当前批次继续执行。'}</p>`:''}<p class="pc-error" role="alert">${esc(error)}</p><div class="pc-row">${btn('保存','save-panel','','pc-primary')}${btn('取消','close-panel')}</div></section></div>`;}
+function runView(){const r=currentRun();if(!r)return '<p>该记录不可用。</p>';const owner=S.chains.find(x=>x.runs.some(q=>q.id===r.id));let body='';if(runStage===0)body=`<h3>本次使用的来源</h3>${r.sourceSnapshot.map(s=>`<div><strong>${esc(s.name)}</strong><p class="pc-url">${esc(s.url)}</p></div>`).join('')}<p class="pc-muted">固定为本次开始时的来源，后续修改不影响此记录。</p>`;
+if(runStage===1)body=`<h3>本次选题 · 示例</h3><p>${esc(r.topic)}</p><p class="pc-muted">${esc(r.cfg.focus)} · ${esc(r.cfg.window)}</p>`;
+if(runStage===2)body=`<h3>讲稿 · 示例</h3><p>${esc(r.script)}</p><p class="pc-muted">${esc(r.cfg.writing)} · ${esc(r.cfg.duration)}</p>`;
+if(runStage===3){const t=last(r);body=`<div class="pc-between"><h3>${esc(r.topic)}</h3>${badge(runState(r),r.status==='failed')}</div><p>${esc(r.cfg.output)} · ${esc(t.voice)} · ${esc(t.style)} · ${esc(t.speed)} 倍</p>${r.status==='failed'?'<div class="pc-notice pc-warning">模拟故障：视频生成中断。讲稿已经完成，可以从视频这一步重试。</div>':''}<div class="pc-row">${r.status==='failed'&&owner?btn('仅重试视频','retry',r.id,'pc-primary'):''}${t.status==='done'?btn(showFrame?'收起画面示意':'查看画面示意','preview'):''}${owner&&r.status==='done'?btn('用当前设置重新生成视频','rerender',r.id):''}</div>${showFrame?`<div class="pc-visual"><span>画面示意 · 非真实成片</span><h3>${esc(r.topic)}</h3><span>${esc(t.style)} · ${esc(t.voice)}</span></div>`:''}<details><summary class="cursor-interaction">制作记录 · ${r.attempts.length} 次尝试</summary><div class="pc-log">${[...r.attempts].reverse().map(a=>`<p>视频 v${a.version} · 尝试 ${a.attempt} · ${a.status==='done'?'已完成':a.status==='failed'?'失败':a.status==='cancelled'?'已取消':'制作中'}<br><span class="pc-muted">规则 v${a.rule} · ${esc(a.speed)} 倍 · ${esc(a.style)}</span></p>`).join('')}</div></details><p class="pc-muted">本次研究执行 ${r.researchCount} 次；重试视频复用原讲稿与原设置，不重新研究。</p>`;}
+if((r.status==='running'&&runStage>=r.stage)||(r.status==='cancelled'&&runStage>=r.stage))body=`<h3>${steps[runStage]}</h3><p class="pc-muted">${r.status==='cancelled'?'本次运行已取消，此步骤没有完成。':runStage===r.stage?'正在模拟执行，完成后显示结果。':'等待上游步骤完成。'}</p>`;
+return `<div class="pc-stack"><div>${btn(owner?'← 返回链路':'← 作品与运行记录',owner?'back-chain':'library')}</div><div class="pc-between"><div><div class="pc-kicker">${esc(r.cfg.name)}${owner?'':' · 链路已删除，记录保留'}</div><h1>${esc(r.label)}</h1></div>${r.status==='running'||r.status==='retrying'?btn('取消本次运行','cancel-run',r.id):''}</div><div class="pc-notice">${esc(runState(r))} · 本次规则 v${r.version}${owner&&owner.version!==r.version?`；链路当前已是 v${owner.version}，本次输入保持不变。`:'，记录保留本次使用的输入和设置。'}</div>${flow(r.cfg,runStage,'run-stage',r)}<section class="pc-panel pc-stack">${body}</section></div>`;}
+function library(){const groups=[...S.chains.map(x=>({name:x.cfg.name,runs:x.runs,deleted:false})),...S.retained.map(x=>({...x,deleted:true}))].filter(x=>x.runs.length);return `<div class="pc-stack"><h1>作品与运行记录</h1><p class="pc-sub">删除链路后，已完成的内容与运行记录仍可在这里查看。</p>${groups.map(g=>`<section class="pc-panel"><div class="pc-between"><h2>${esc(g.name)}</h2>${badge(g.deleted?'链路已删除 · 记录保留':'链路使用中')}</div>${runRows(g)}</section>`).join('')||'<div class="pc-empty">暂时没有运行记录。</div>'}</div>`;}
+function sourceLibrary(){return `<div class="pc-stack"><h1>来源库</h1><p class="pc-sub">链路引用共享来源。移除引用或删除链路，不会删除这里的来源。</p><section class="pc-panel">${S.sources.map(s=>`<div class="pc-source"><div><strong>${esc(s.name)}</strong><p class="pc-url">${esc(s.url)}</p><p class="pc-muted">用于：${S.chains.filter(x=>x.cfg.refs.includes(s.id)).map(x=>esc(x.cfg.name)).join('、')||'暂未被链路使用'}</p></div>${btn('用此来源新建链路','source-new',s.id)}</div>`).join('')}</section></div>`;}
+function render(){root.innerHTML=top()+`<main class="pc-main"><div class="pc-toast" role="status" aria-live="polite">${esc(notice)}</div>${creating?createView():['delete','copy','rename','schedule'].includes(panel)?sheet():S.page==='detail'?detail():S.page==='run'?runView():S.page==='library'?library():S.page==='sources'?sourceLibrary():list()}</main><footer class="pc-footer"><span>单条链路评审版 · 仅模拟，不连接正式系统</span><span>创建 · 修改 · 运行 · 删除</span></footer>`;}
+function validate(cfg,stage=4){if(!cfg.name.trim())return '请填写链路名称。';if(!cfg.refs.length)return '请选择至少一个信息源。';if(stage>=1&&!cfg.topic.trim())return '请填写关注的内容方向。';if(stage>=1&&!cfg.audience.trim())return '请填写目标观众。';if(stage>=2&&!cfg.writing.trim())return '请填写讲稿表达要求。';if(stage>=3&&cfg.frequency!=='手动运行'&&!cfg.time)return '请选择运行时间。';return '';}
+function commitSources(){pendingSources.forEach(s=>{if(!S.sources.some(q=>q.id===s.id))S.sources.push(s);});pendingSources=[];}
+function saveConfig(){const x=c();commitSources();x.cfg=clone(draft);x.version++;draft=null;panel='';message(`已保存为规则 v${x.version}，下一次运行生效；当前与历史批次保持原设置。`);}
+const timers=new Set();
+function simulate(r){if(timers.has(r.id))return;timers.add(r.id);const tick=()=>{if(!root.isConnected||!['running','retrying'].includes(r.status)){timers.delete(r.id);return;}if(r.status==='retrying'||r.stage>=3){r.stage=4;r.status='done';last(r).status='done';timers.delete(r.id);message('模拟运行完成，视频结果已保存。');}else r.stage++;persist();if(!draft&&!panel&&((S.page==='run'&&runId===r.id)||['list','detail','library'].includes(S.page)))render();if(r.status==='running')setTimeout(tick,1800);};setTimeout(tick,1800);}
+function start(x){const active=x.runs.find(r=>['running','retrying'].includes(r.status));if(active){runId=active.id;S.page='run';runStage=active.stage;message('这条链已有运行任务，已打开当前进度。');return;}const cfg=clone(x.cfg);const r={id:uid(),label:`第 ${x.runs.length+1} 次运行 · 刚刚`,cfg,version:x.version,sourceSnapshot:cfg.refs.map(id=>clone(source(id))),stage:0,status:'running',materials:[],topic:`${cfg.topic}：一个值得讲清楚的问题`,script:`这期围绕“${cfg.topic}”展开。${cfg.writing}（此处为交互演示讲稿，不是实际研究结果。）`,attempts:[{version:1,attempt:1,status:'working',voice:cfg.voice,style:cfg.style,speed:cfg.speed,rule:x.version}],researchCount:1};x.runs.unshift(r);runId=r.id;runStage=0;S.page='run';message(x.paused?'仅手动运行这一批，自动运行仍保持暂停。':'开始模拟：信息源 → 内容处理 → 讲稿 → 视频。');simulate(r);}
+function cancel(r){r.status='cancelled';last(r).status='cancelled';message('已取消本次运行，之前完成的步骤保留；后续运行计划不变。');}
+function retry(r,useCurrent=false){if(!['failed','done'].includes(r.status))return;const old=last(r),owner=S.chains.find(x=>x.runs.some(q=>q.id===r.id)),cfg=useCurrent?owner.cfg:null;r.attempts.push({version:useCurrent?old.version+1:old.version,attempt:useCurrent?1:old.attempt+1,status:'working',voice:cfg?.voice||old.voice,style:cfg?.style||old.style,speed:cfg?.speed||old.speed,rule:useCurrent?owner.version:old.rule});r.status='retrying';r.stage=3;runId=r.id;runStage=3;S.page='run';message(useCurrent?'保留旧版本，复用原讲稿，按当前视频设置制作新版本。':'从视频生成继续，原讲稿和原视频设置保持不变。');simulate(r);}
+root.addEventListener('input',e=>{const key=e.target.dataset.field;if(key==='sourceName')newName=e.target.value;else if(key==='sourceUrl')newUrl=e.target.value;else if(draft&&key)draft[key]=e.target.value;});
+root.addEventListener('change',e=>{const key=e.target.dataset.field;if(draft&&key){draft[key]=e.target.value;if(key==='frequency')render();}});
+root.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action,id=b.dataset.id;error='';const x=c();
+const mayNavigate=['home','library','sources','run','runs','settings','more','show-run','run-list','open','schedule','delete','copy','rename','retry-row'];
+if(draft&&!creating&&!['copy','rename','schedule'].includes(panel)&&mayNavigate.includes(a)){message('当前步骤有未保存的修改，请先保存或取消。');render();return;}
+if(a==='home'||a==='library'||a==='sources'){resetLocal();S.page=a==='home'?'list':a;notice='';}
+if(a==='new'||a==='source-new'){resetLocal();creating=true;draft=defaults();if(a==='source-new'){draft.refs=[id];draft.name=source(id).name+'视频';}step=0;notice='';}
+if(a==='cancel-create'){resetLocal();S.page='list';message('已取消创建，没有新增链路或来源。');}
+if(a==='open'){resetLocal();S.active=id;S.page='detail';section=0;view='settings';notice='';}
+if(a==='stage'){if(draft){message('请先保存或取消当前步骤的修改。');}else section=Number(id);}
+if(a==='create-stage'){const target=Number(id);if(target<=step)step=target;else{error=validate(draft,step);if(!error)step=Math.min(target,step+1);}}
+if(a==='next'){error=validate(draft,step);if(!error)step++;}
+if(a==='previous')step=Math.max(0,step-1);
+if(a==='attach'){draft.refs.push(id);message('已加入当前草稿，保存后生效。');}
+if(a==='remove-source'){draft.refs=draft.refs.filter(q=>q!==id);message('已从当前草稿移除；来源库与其他链不变。');}
+if(a==='add-source'){let url;try{url=new URL(newUrl);if(!['https:','http:'].includes(url.protocol))throw Error();}catch{error='请输入完整的 http 或 https 网址。';}if(!newName.trim())error='请填写来源名称。';if(!error){const existing=[...S.sources,...pendingSources].find(s=>s.url===url.href);const item=existing||{id:uid(),name:newName.trim(),url:url.href};if(!existing)pendingSources.push(item);if(!draft.refs.includes(item.id))draft.refs.push(item.id);newName='';newUrl='';panel='';message('来源已加入草稿；保存链路后才生效。');}else panel='add-source';}
+if(a==='create'||a==='create-run'){error=validate(draft);if(!error){commitSources();const item={id:uid(),version:1,cfg:clone(draft),paused:false,runs:[]};S.chains.push(item);S.active=item.id;resetLocal();S.page='detail';view='settings';section=0;message('链路已创建，四个步骤都可以独立修改。');if(a==='create-run')start(item);}}
+if(a==='edit'){draft=clone(x.cfg);pendingSources=[];notice='';}
+if(a==='cancel-edit'){draft=null;panel='';pendingSources=[];newName='';newUrl='';message('已取消修改，当前规则保持不变。');}
+if(a==='save'){error=validate(draft);if(!error)saveConfig();}
+if(a==='more')menu=!menu;
+if(a==='rename'||a==='copy'||a==='schedule'){panel=a;draft=clone(x.cfg);menu=false;notice='';if(a==='copy')draft.name+=' · 副本';}
+if(a==='delete'){panel='delete';menu=false;notice='';}
+if(a==='close-panel'){resetLocal();S.page='detail';}
+if(a==='save-panel'){if(!draft.name.trim())error='请填写链路名称。';else if(draft.frequency!=='手动运行'&&!draft.time)error='请选择运行时间。';else if(panel==='copy'){const item={id:uid(),version:1,cfg:{...clone(draft),frequency:'手动运行'},paused:false,runs:[]};S.chains.push(item);S.active=item.id;resetLocal();section=0;view='settings';message('已复制全部步骤，新链默认手动运行，历史记录没有复制。');}else saveConfig();}
+if(a==='confirm-delete'){x.runs.filter(r=>['running','retrying'].includes(r.status)).forEach(cancel);if(x.runs.length)S.retained.push({id:x.id,name:x.cfg.name,runs:x.runs});S.chains=S.chains.filter(q=>q.id!==x.id);resetLocal();S.page='list';S.active=S.chains[0]?.id||'';message(`已删除「${x.cfg.name}」。${x.runs.length} 次运行记录保留在“作品与运行记录”，来源库未改变。`);}
+if(a==='settings'){view='settings';notice='';}
+if(a==='runs'){view='runs';notice='';}
+if(a==='pause'){x.paused=!x.paused;message(x.paused?'自动运行已暂停。当前批次继续，也可以手动运行一次。':'已恢复后续自动运行，不补跑暂停期间的时段。');}
+if(a==='run'||a==='run-list'){if(a==='run-list')S.active=id;resetLocal();start(c());}
+if(a==='show-run'){runId=id;runStage=3;showFrame=false;S.page='run';notice='';}
+if(a==='back-chain'){const owner=S.chains.find(q=>q.runs.some(r=>r.id===runId));S.active=owner.id;S.page='detail';view='runs';notice='';}
+if(a==='run-stage'){runStage=Number(id);showFrame=false;}
+if(a==='cancel-run')cancel(currentRun());
+if(a==='retry-row'||a==='retry'){const r=[...S.chains,...S.retained].flatMap(q=>q.runs).find(q=>q.id===id);retry(r);}
+if(a==='rerender')retry(currentRun(),true);
+if(a==='preview')showFrame=!showFrame;
+persist();render();
+});
+window.addEventListener('openai:set_globals',e=>{const incoming=e.detail?.globals?.widgetState?.privateContent;if(incoming?.version===4&&(incoming.revision||0)>(S.revision||0)&&JSON.stringify(incoming)!==lastSaved&&!draft&&!timers.size){S=clone(incoming);resetLocal();runId='';if(S.page==='run')S.page='library';render();}});
+if(S.page==='run')S.page='library';
+render();[...S.chains,...S.retained].flatMap(x=>x.runs).filter(r=>['running','retrying'].includes(r.status)).forEach(simulate);
+})();
+</script>

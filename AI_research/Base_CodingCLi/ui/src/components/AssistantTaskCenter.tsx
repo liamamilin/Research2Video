@@ -9,8 +9,8 @@ import { ApplicationBatchCard } from './ApplicationBatchCard';
 const FILTERS = { all: '全部', running: '进行中', attention: '待处理', completed: '已完成' } as const;
 type Filter = keyof typeof FILTERS;
 
-export function AssistantTaskCenter({ revision, busy, onOpenConversation }: {
-  revision: number; busy: boolean; onOpenConversation: (id: string, prompt?: string) => void;
+export function AssistantTaskCenter({ revision, busy, onOpenConversation, visible = true }: {
+  revision: number; busy: boolean; onOpenConversation: (id: string, prompt?: string) => void; visible?: boolean;
 }) {
   const [limit, setLimit] = useState(20);
   const [active, setActive] = useState(false);
@@ -25,14 +25,14 @@ export function AssistantTaskCenter({ revision, busy, onOpenConversation }: {
     if (!signal.aborted) setBatchesActive(data.items.some(b => b.active));
     return data;
   }, [revision]);
-  const batchResource = usePageResource(loadBatches, batchesActive ? 5000 : 0);
+  const batchResource = usePageResource(loadBatches, batchesActive && visible ? 5000 : 0);
   const load = useCallback(async (signal: AbortSignal) => {
     void revision;
     const data = await getAssistantTasks(limit, signal);
     if (!signal.aborted) setActive(data.active);
     return data;
   }, [limit, revision]);
-  const resource = usePageResource(load, active ? 5000 : 0);
+  const resource = usePageResource(load, active && visible ? 5000 : 0);
   const loadedTasks = resource.data?.tasks || [];
   const tasks = focusedBatch ? loadedTasks.filter(t => t.batches?.some(b => b.id === focusedBatch)) : loadedTasks;
   const matches = (status: string, selected: Filter) => selected === 'all' || (selected === 'attention'

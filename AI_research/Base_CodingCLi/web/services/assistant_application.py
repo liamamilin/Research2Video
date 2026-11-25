@@ -143,6 +143,7 @@ async def native(request: Request, method: str, path: str, *, query: dict | None
     headers = {k: request.headers[k] for k in ('cookie', 'authorization', 'x-csrf-token') if k in request.headers}
     async def authenticated_app(scope, receive, send):
         deps.inherit_background(request.scope, scope)
+        deps.inherit_stream(request.scope, scope)
         scope['console_internal_request'] = True
         await request.app(scope, receive, send)
     transport = httpx.ASGITransport(app=authenticated_app, client=(request.client.host if request.client else '127.0.0.1', 0))
@@ -247,6 +248,17 @@ def configuration_change(area: str, path: str, values: dict, before: dict, chang
             'next': next_step, 'existing_outputs': '已有文稿和视频保留，保存配置不会自动改写历史产物。'}
 
 
+def _output_root(job: dict):
+    """A job YAML's own write root (11-15: an assistant-set absolute root let a run overwrite any .md file)."""
+    import yaml
+    try:
+        parsed = yaml.safe_load(job.get('yaml_content') or '') or {}
+    except yaml.YAMLError:
+        return None
+    runtime = parsed.get('runtime') if isinstance(parsed, dict) else None
+    return runtime.get('output_root') if isinstance(runtime, dict) else None
+
+
 def execute(a: Any, request: Request, user: dict, *, write: bool = False) -> dict:
     selected = next(((r, m) for key, r, m in routes(request, user) if key == a.action_id), None)
     if selected is None:
@@ -272,6 +284,16 @@ def execute(a: Any, request: Request, user: dict, *, write: bool = False) -> dic
         diffs = configuration_diff(before, compared)
         fields = [c['field'] for c in diffs]
         change = configuration_change(area, route.path_format, a.path, before, diffs)
+    if area == 'jobs' and method in ('POST', 'PUT', 'PATCH') and isinstance(a.body, dict) \
+            and isinstance(a.body.get('yaml_content'), str):
+        current = {}
+        if method != 'POST':
+            try:
+                _, current = asyncio.run(native(request, 'GET', path_for(route, a.path)))
+            except (HTTPException, ValueError):
+                current = {}
+        if _output_root(a.body) != _output_root(current if isinstance(current, dict) else {}):
+            raise ValueError('任务的 runtime.output_root 决定报告写到哪里，请在任务编辑页修改')
     status, data = asyncio.run(native(request, method, path_for(route, a.path), query=a.query, body=a.body))
     refs = targets(route, a.path, data)
     if isinstance(data, dict) and route.path_format.startswith('/api/video/scripts') and 'version_shown' in data:

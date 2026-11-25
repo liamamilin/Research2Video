@@ -134,6 +134,21 @@ def reap_orphans() -> list[int]:
     return stopped
 
 
+def wait_unless_csp(page, expression: str, timeout: float) -> bool:
+    """``page.wait_for_function`` for a readiness check that is a nicety, not a requirement.
+
+    Playwright evaluates the string expression in the page; a site whose Content-Security-Policy forbids eval refuses
+    it at once, which failed the whole capture or page read (11-15: 45 times in T05 runs). Skip the wait on exactly
+    that refusal; a timeout or any other error still raises. True when the condition was met."""
+    try:
+        page.wait_for_function(expression, timeout=timeout)
+        return True
+    except Exception as exc:
+        if "Content Security Policy" not in str(exc) and "EvalError" not in str(exc):
+            raise
+        return False
+
+
 @contextmanager
 def page_for_capture(url: str, *, timeout_seconds: float = 60):
     """One guarded anonymous page, shared by DOM inspection and the final screenshot."""
@@ -178,7 +193,8 @@ def page_for_capture(url: str, *, timeout_seconds: float = 60):
                     raise PageUnavailable(f"页面未成功打开（HTTP {response.status if response else '无响应'}），请检查来源网址")
                 public_url(page.url)
                 # Read-only DOM inspection. User input is never evaluated as code.
-                page.wait_for_function("document.fonts.status === 'loaded'", timeout=min(10_000, max(1000, int((deadline-time.monotonic())*1000))))
+                wait_unless_csp(page, "document.fonts.status === 'loaded'",
+                                min(10_000, max(1000, int((deadline-time.monotonic())*1000))))
                 if time.monotonic() >= deadline:
                     raise ScreenshotError("网页获取已达到时间预算")
                 yield page

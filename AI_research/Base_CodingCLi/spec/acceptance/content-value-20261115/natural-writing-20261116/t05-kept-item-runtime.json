@@ -1,0 +1,17 @@
+{
+  "legacy": {
+    "previous": "sequel-wrap/t05/candidate",
+    "current": "t05-kept-item/legacy/candidate",
+    "same_saved_topic_report_and_source_snapshot": true,
+    "same_author_system_message": true,
+    "author_characters_before": 54314,
+    "author_characters_after": 88936,
+    "result": "all three vendors and actual teaser present in whole new draft"
+  },
+  "marked": {
+    "current": "t05-kept-item/marked/candidate",
+    "runtime_path": "existing audience selection",
+    "result": "two vendors compared with example input and outputs"
+  },
+  "validation": "269 passed in focused backend tests; one compatibility guard and rewrite scope"
+}

@@ -3,10 +3,75 @@
 from __future__ import annotations
 
 import threading
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 import pytest
 
 from web.services import yaml_io
+
+
+def test_backups_in_the_same_second_preserve_each_original(tmp_path, monkeypatch):
+    monkeypatch.setattr(yaml_io, "_backup_dir", lambda: str(tmp_path))
+    monkeypatch.setattr(yaml_io.time, "strftime", lambda *_: "20261115_120000")
+    paths = [yaml_io.save_backup("jobs/a/job.yaml", "name: first\n"),
+             yaml_io.save_backup("jobs/b/job.yaml", "name: second\n"),
+             yaml_io.save_backup("jobs/a/job.yaml", "name: third\n")]
+    assert len(set(paths)) == 3
+    assert [Path(path).read_text() for path in paths] == ["name: first\n", "name: second\n", "name: third\n"]
+
+
+def test_parallel_yaml_requests_keep_their_own_parser_state():
+    def round_trip(index):
+        payload = {"name": f"job-{index}", "prompt": "line\n" * 100, "keywords": list(range(100))}
+        return yaml_io.parse_yaml(yaml_io.dump_yaml(payload)) == payload
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        assert all(pool.map(round_trip, range(32)))
+
+
+def test_duplicate_yaml_keys_are_reported_as_validation_errors():
+    with pytest.raises(ValueError, match="YAML"):
+        yaml_io.parse_yaml("name: first\nname: second\n")
+
+
+def test_sub_millisecond_edit_is_still_a_conflict(tmp_path):
+    import os
+
+    target = tmp_path / "job.yaml"
+    target.write_text("name: original\n")
+    original = target.stat()
+    target.write_text("name: external\n")
+    os.utime(target, ns=(original.st_atime_ns, original.st_mtime_ns + 500_000))
+    with pytest.raises(IOError, match="外部修改"):
+        yaml_io.save_job_yaml(str(target), "name: stale\n", expected_mtime=original.st_mtime, backup=False)
+    assert target.read_text() == "name: external\n"
+
+
+def test_concurrent_versioned_saves_accept_only_one_writer(tmp_path, monkeypatch):
+    import os
+
+    target = tmp_path / "job.yaml"
+    target.write_text("name: original\n")
+    os.utime(target, (1_700_000_000, 1_700_000_000))
+    expected = target.stat().st_mtime
+    monkeypatch.setattr(yaml_io, "_backup_dir", lambda: str(tmp_path / "backups"))
+    barrier = threading.Barrier(4)
+
+    def save(index):
+        barrier.wait(timeout=5)
+        try:
+            yaml_io.save_job_yaml(str(target), f"name: writer-{index}\n", expected_mtime=expected)
+            return index
+        except IOError as exc:
+            assert "外部修改" in str(exc)
+            return None
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        winners = [value for value in pool.map(save, range(4)) if value is not None]
+    assert len(winners) == 1
+    assert target.read_text() == f"name: writer-{winners[0]}\n"
+    backups = list((tmp_path / "backups").glob("*.yaml"))
+    assert len(backups) == 1 and backups[0].read_text() == "name: original\n"
 
 
 def test_concurrent_saves_both_land_and_neither_names_a_missing_file(tmp_path):
@@ -90,10 +155,7 @@ def test_an_external_edit_blocks_the_save_and_warns_it_costs_the_unsaved_text(tm
     target.write_text("name: original\n", encoding="utf-8")
     stale_mtime = os.path.getmtime(target)
 
-    # The file moves on underneath us, as a terminal edit would. The mtime is
-    # set explicitly because two writes in one test run land tens of
-    # microseconds apart, inside the guard's 10ms jitter tolerance -- so a
-    # bare second write would pass the check and prove nothing.
+    # Make the external version's timestamp deterministic across filesystems.
     later = stale_mtime + 60
     target.write_text("name: terminal\n", encoding="utf-8")
     os.utime(target, (later, later))

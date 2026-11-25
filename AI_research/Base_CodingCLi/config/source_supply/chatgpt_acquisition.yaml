@@ -25,47 +25,58 @@ discovery_objective: 为「ChatGPT 获客矩阵」寻找可持续读取的机构
 jobs:
   chatgpt_acquisition/t01_product:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT official product capabilities documentation release
+    direction: ChatGPT 获客矩阵：ChatGPT official product capabilities documentation release；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
       notes
     query:
     - ChatGPT official product capabilities documentation release notes
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T01 产品与能力认知
   chatgpt_acquisition/t02_scenarios:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT official work examples use cases stories
+    direction: ChatGPT 获客矩阵：ChatGPT official work examples use cases stories；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT official work examples use cases stories
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T02 应用场景与成果
   chatgpt_acquisition/t03_tutorials:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT official tutorials academy guides
+    direction: ChatGPT 获客矩阵：ChatGPT official tutorials academy guides；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT official tutorials academy guides
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T03 使用方法与教程
   chatgpt_acquisition/t04_testing:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT capabilities examples evaluations documentation
+    direction: ChatGPT 获客矩阵：ChatGPT capabilities examples evaluations documentation；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT capabilities examples evaluations documentation
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T04 实测与能力验证
   chatgpt_acquisition/t05_comparison:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT Claude Gemini practical comparison documentation
+    direction: ChatGPT 获客矩阵：ChatGPT Claude Gemini practical comparison documentation；补充中文普通用户的购买疑问、额度困惑、工作生活中的具体使用案例，按需求线索与变化/案例/比较背景搭配。
     query:
     - ChatGPT Claude Gemini practical comparison documentation
+    - AI 订阅 值不值 使用限制 普通用户 实际案例
+    - AI 工作 生活 使用体验 选择 困惑
   chatgpt_acquisition/t06_value:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT plans pricing limits official help
+    direction: ChatGPT 获客矩阵：ChatGPT plans pricing limits official help；补充中文普通用户的购买疑问、额度困惑、工作生活中的具体使用案例，按需求线索与变化/案例/比较背景搭配。
     query:
     - ChatGPT plans pricing limits official help
+    - AI 订阅 值不值 使用限制 普通用户 实际案例
+    - AI 工作 生活 使用体验 选择 困惑
   chatgpt_acquisition/t07_subscription:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT subscription billing payment official help updates
+    direction: ChatGPT 获客矩阵：ChatGPT subscription billing payment official help updates；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT subscription billing payment official help updates
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T07 订阅与支付
   chatgpt_acquisition/t08_troubleshooting:
     mode: context
-    direction: ChatGPT 获客矩阵：ChatGPT troubleshooting help center errors official
+    direction: ChatGPT 获客矩阵：ChatGPT troubleshooting help center errors official；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT troubleshooting help center errors official
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T08 使用问题与避坑
   chatgpt_acquisition/t09_updates:
     mode: changes
-    direction: ChatGPT 获客矩阵：ChatGPT release notes official product updates RSS
+    direction: ChatGPT 获客矩阵：ChatGPT release notes official product updates RSS；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - ChatGPT release notes official product updates RSS
+    - ChatGPT 中文用户 常见问题 操作 结果 案例 T09 产品动态与热点

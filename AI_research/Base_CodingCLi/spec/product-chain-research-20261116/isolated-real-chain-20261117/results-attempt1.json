@@ -1,0 +1,240 @@
+{
+  "status": "隔离真实接口检查完成",
+  "summary": {
+    "job": "monitoring/ai_flash_discovery",
+    "productions": [
+      {
+        "key": "ai-developer-roundup-long",
+        "name": "盘点 · 开发者 · B 站横屏长",
+        "auto": 0,
+        "split": "some",
+        "content_mode": "individual"
+      },
+      {
+        "key": "ai-non_tech-one_point-short",
+        "name": "一个知识点 · 普通用户 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "ai-non_tech-quick_take-short",
+        "name": "快讯 · 普通用户 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "flash",
+        "name": "快讯 · 开发者 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "flash_daily",
+        "name": "快讯 · 每天（不再调研）",
+        "auto": 1,
+        "split": "whole",
+        "content_mode": "episode"
+      },
+      {
+        "key": "flash_each",
+        "name": "快讯 · 每条一期（不再调研）",
+        "auto": 1,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "point_short",
+        "name": "一个知识点 · 开发者 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      }
+    ],
+    "matrix": "AI 视频栏目",
+    "schedule": {
+      "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+      "schedule": "30 7,18 * * *",
+      "version": 13,
+      "enabled": true,
+      "timezone": "Asia/Shanghai"
+    },
+    "history": {
+      "scripts": 226,
+      "renders": 151
+    },
+    "effective_render": {
+      "video_speed": 1.25,
+      "packaging": {
+        "label": "AI 快讯",
+        "preset": "common"
+      }
+    },
+    "source_usages": [
+      {
+        "job": "video/theme_research-m4_2e6607dd",
+        "name": "theme_research-m4_2e6607dd",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "video/theme_research-m4_dda3b4f4",
+        "name": "theme_research-m4_dda3b4f4",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "chatgpt_acquisition/t09_updates",
+        "name": "T09 · 产品动态与热点",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "monitoring/ai_flash_discovery",
+        "name": "AI Flash Discovery",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      }
+    ],
+    "edited_script": {
+      "id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "before_version": 1,
+      "status": 200,
+      "after_version": 2
+    }
+  },
+  "checks": [
+    {
+      "name": "真实链路七个生产引用",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实合集依赖栏目身份",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "来源 enabled 字段被真实接口拒绝",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实来源保存",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "来源冲突保护",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实来源引用保护",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "周期保存真实SQLite",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "周期重新读取生效",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "调度版本冲突",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "输出暂停不暂停共享研究",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "共享计划真实停用",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "矩阵默认进入实际输出配置",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "输出覆盖和另一输出隔离",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "讲稿修改保留成片数量",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实新Job加计划创建",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "S1",
+      "title": "原型的全局来源停用目前没有真实接口",
+      "evidence": {
+        "status": 422,
+        "allowed_fields": [
+          "name",
+          "spec",
+          "tags",
+          "note"
+        ]
+      },
+      "impact": "不能把原型开关直接上线，需要确定来源停用模型及其对直接声明、来源组、覆盖、发现的作用。"
+    },
+    {
+      "id": "N1",
+      "title": "基础Job创建未完成可制作的选题契约",
+      "evidence": {
+        "response": {
+          "error": {
+            "code": "invalid_config",
+            "message": "research/isolation_science 的报告不是条目列表，而是整份的：配方 flash-nr 要从条目里挑，不能用；整份报告要用写了 topic.whole_report 的配方（比如深度解读）",
+            "details": {}
+          }
+        }
+      },
+      "impact": "需要创建向导显式建立 topics/source 等业务配置，不能只保存名称、来源、时间。"
+    }
+  ],
+  "boundaries": [
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    }
+  ],
+  "external_execution": false,
+  "restored_snapshot": true,
+  "requests": 31
+}

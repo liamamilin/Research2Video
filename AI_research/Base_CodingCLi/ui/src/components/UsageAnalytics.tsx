@@ -87,8 +87,13 @@ function BillDetail({ id, showCost }: { id: string; showCost: boolean }) {
 function Bills({ days, showCost }: { days: number; showCost: boolean }) {
   const [offset, setOffset] = useState(0);
   const [open, setOpen] = useState("");
-  const load = useCallback((signal: AbortSignal) => loadScriptBills(days, offset, signal), [days, offset]);
-  const { data, error, reload } = usePageResource(load, 15000);
+  const [syncing, setSyncing] = useState(false);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const next = await loadScriptBills(days, offset, signal);
+    if (!signal.aborted) setSyncing(Boolean(next.syncing));
+    return next;
+  }, [days, offset]);
+  const { data, error, reload } = usePageResource(load, syncing ? 15000 : 0);
   const columns = 7 + (showCost ? 1 : 0);
   return <section className="card p-4 space-y-3">
     <div><h2 className="text-sm font-medium">按视频{data ? <span className="text-text-muted font-normal ml-2">{data.total} 条</span> : null}</h2>
@@ -118,7 +123,7 @@ function Bills({ days, showCost }: { days: number; showCost: boolean }) {
 function Comparison({ days, showCost }: { days: number; showCost: boolean }) {
   const [by, setBy] = useState<CompareBy>("column_key");
   const load = useCallback((signal: AbortSignal) => loadComparison(by, days, signal), [by, days]);
-  const { data, error, reload } = usePageResource(load, 30000);
+  const { data, error, reload } = usePageResource(load);
   return <section className="card p-4 space-y-3">
     <div className="flex flex-wrap items-center gap-3"><div className="mr-auto"><h2 className="text-sm font-medium">链路对比</h2><p className="text-xs text-text-muted mt-1">同类视频的典型耗时（中位数）和平均用量。</p></div>
       <label className="text-xs text-text-muted flex items-center gap-2">按<select aria-label="对比维度" className="input text-xs w-auto" value={by} onChange={e => setBy(e.target.value as CompareBy)}>{COMPARE.map(c => <option key={c.by} value={c.by}>{c.label}</option>)}</select></label></div>
@@ -139,7 +144,7 @@ function Performance({ days, showCost }: { days: number; showCost: boolean }) {
   const [by, setBy] = useState<CompareBy>("column_key");
   const [all, setAll] = useState(false);
   const load = useCallback((signal: AbortSignal) => loadPerformance(by, days, signal), [by, days]);
-  const { data, error, reload } = usePageResource(load, 60000);
+  const { data, error, reload } = usePageResource(load);
   const label = COMPARE.find(c => c.by === by)?.label;
   const items = data?.items ? (all ? data.items : data.items.slice(0, 10)) : [];
   const th = "pb-2 font-normal text-right whitespace-nowrap";
@@ -214,8 +219,13 @@ export function storedCost(): boolean {
 export function UsageAnalytics() {
   const [days, setDays] = useState(30);
   const [showCost, setShowCost] = useState(storedCost);
-  const load = useCallback((signal: AbortSignal) => loadTelemetrySummary(days, signal), [days]);
-  const { data, error, loading, reload } = usePageResource(load, 15000);
+  const [syncing, setSyncing] = useState(false);
+  const load = useCallback(async (signal: AbortSignal) => {
+    const next = await loadTelemetrySummary(days, signal);
+    if (!signal.aborted) setSyncing(Boolean(next.syncing));
+    return next;
+  }, [days]);
+  const { data, error, loading, reload } = usePageResource(load, syncing ? 15000 : 0);
   const toggleCost = (value: boolean) => { setShowCost(value); try { localStorage.setItem(COST_KEY, value ? "1" : "0"); } catch { /* per-viewer convenience only */ } };
   const llm = data?.llm, search = data?.search;
   return <div className="space-y-4">

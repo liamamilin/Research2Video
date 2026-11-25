@@ -14,6 +14,7 @@ with web-search results. Specs are strings:
 * ``aa:models``            Artificial Analysis model leaderboard (intelligence, price, speed)
 * ``wb:CODE[@ISO;ISO]``   World Bank indicator: the two latest yearly values for the world and nine large economies
 * ``radar:<section title>`` one section of the local Radar app's daily briefings (read-only ``radar-cli``)
+* ``bili_hot:词,词``        B站 viewers' hot AI words this week, with the latest web news on each (``core/bili_hot.py``)
 
 A Job's ``sources`` may also name entries of the registry (``config/sources.yaml``): ``source:<id>`` is one source,
 ``tag:<tag>`` every source carrying that tag, in registry order. ``resolve`` turns them into the specs above.
@@ -29,6 +30,7 @@ import json
 import logging
 import os
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -44,13 +46,35 @@ logger = logging.getLogger(__name__)
 _UA = "BaseCodingCLi-ResearchAgent/2.0"
 _ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
 _CONTENT = "{http://purl.org/rss/1.0/modules/content/}encoded"
-FEED_EXCERPT_CHARS = 3000
+FEED_EXCERPT_CHARS = 50000
 _TAG_RE = re.compile(r"<[^>]+>")
+
+
+_MAX_PERMANENT_REDIRECTS = 5
+
+
+def _open_following_308(request: urllib.request.Request, timeout: int):
+    """``urlopen`` that also follows HTTP 308. Python 3.10's redirect handler stops at 308 (3.11 follows it), so
+    pages that moved permanently failed and fell back to the paid content API (11-15: 27 fetches in three days).
+    Only for requests without credentials; only to http(s), as urllib does for the codes it follows."""
+    for _ in range(_MAX_PERMANENT_REDIRECTS + 1):
+        try:
+            return urllib.request.urlopen(request, timeout=timeout)
+        except urllib.error.HTTPError as exc:
+            location = exc.headers.get("Location") if exc.code == 308 and exc.headers else None
+            if not location:
+                raise
+            target = urllib.parse.urljoin(request.full_url, location)
+            if urllib.parse.urlsplit(target).scheme not in ("http", "https"):
+                raise
+            exc.close()
+            request = urllib.request.Request(target, headers=dict(request.header_items()))
+    raise urllib.error.URLError(f"too many permanent redirects from {request.full_url}")
 
 
 def _get_text(url: str, timeout: int, accept: str = "*/*") -> str:
     request = urllib.request.Request(url, headers={"User-Agent": _UA, "Accept": accept})
-    with urllib.request.urlopen(request, timeout=timeout) as resp:
+    with _open_following_308(request, timeout) as resp:
         return resp.read().decode("utf-8", "replace")
 
 
@@ -181,7 +205,7 @@ _BROWSER_UA = "Mozilla/5.0 (compatible; BaseCodingCLi/2.0)"  # some sites refuse
 
 def _get_page(url: str, timeout: int, accept: str = "text/html,application/json") -> str:
     request = urllib.request.Request(url, headers={"User-Agent": _BROWSER_UA, "Accept": accept})
-    with urllib.request.urlopen(request, timeout=timeout) as resp:
+    with _open_following_308(request, timeout) as resp:
         return resp.read().decode("utf-8", "replace")
 
 
@@ -501,7 +525,12 @@ def fetch_search(query: str, limit: int = 8, timeout: int = 20) -> list[SearchRe
     raise ValueError("search: 来源需要研究引擎提供搜索客户端")
 
 
-_ADAPTERS.update({"page": fetch_web_page, "catalog": fetch_catalog, "search": fetch_search})
+def fetch_bili_hot(target: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+    from .bili_hot import fetch
+    return fetch(target, limit, timeout)
+
+
+_ADAPTERS.update({"page": fetch_web_page, "catalog": fetch_catalog, "search": fetch_search, "bili_hot": fetch_bili_hot})
 
 
 REGISTRY_FILE = "sources.yaml"
@@ -534,7 +563,7 @@ def load_registry(config_dir: str = "config") -> dict[str, dict]:
             raise RegistryError(f"信息源 {key} 的 spec 不对：{spec or '（空）'}")
         tags = entry.get("tags") or []
         out[str(key)] = {"name": str(entry.get("name") or key), "spec": spec,
-                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or "")}
+                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or ""), "enabled": entry.get("enabled", True)}
     return out
 
 
@@ -544,11 +573,10 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
     Raises ``RegistryError`` for an id or tag the registry does not have: a Job must not run on fewer sources than it
     asked for without anyone being told. A caller resolving many Jobs may supply one already loaded registry
     so the entire operation sees the same configuration snapshot."""
-    if not any(str(s).startswith(("source:", "tag:")) for s in specs or []):
-        return list(specs or [])
     if registry is None:
         registry = load_registry(config_dir)
     out: list[str] = []
+    disabled = {e["spec"] for e in registry.values() if not e.get("enabled", True)}
     for spec in specs:
         spec = str(spec).strip()
         kind, _, target = spec.partition(":")
@@ -562,7 +590,7 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
                 raise RegistryError(f"信息源注册表里没有标签 {target.strip()} 的源")
         else:
             found = [spec]
-        out += [f for f in found if f not in out]
+        out += [f for f in found if f not in out and f not in disabled]
     return out
 
 
@@ -582,6 +610,9 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
         from .source_pages import fetch_page
         return fetch_page(target, limit, timeout, get_page=_get_page,
                           search_client=search_client, catalog=kind == "catalog")
+    if kind == "bili_hot":
+        from .bili_hot import fetch
+        return fetch(target, limit, timeout, search_client=search_client)
     if kind == "search" and search_client is not None:
         from .research_window import instruction
         results = search_client.search([target], objective="收集此固定来源中与查询相关的公开内容" + instruction(collection_window))

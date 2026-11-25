@@ -1,0 +1,29 @@
+name: flash_f13f7818
+description: 快讯：agent-relay、Orchevia、pi-cowboy：把 Codex 和 Claude Code 串成一条流水线
+enabled: true
+keywords:
+  - agent-relay
+  - Orchevia
+  - pi-cowboy
+  - 把 Codex 和 Claude Code 串成一条流水线
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。
+  选题：agent-relay、Orchevia、pi-cowboy：把 Codex 和 Claude Code 串成一条流水线
+  目标观众：开发者
+  选题资料：三个社区工具分别做“接力”“本地计划-审查-PR 流水线”“并行子 agent”，共同点是不再让一个 agent 从头干到尾。；（未提供）
+  来源资料：https://aftergradient.com/news/2026/10/agent-relay-codex-claude-code
+  https://aftergradient.com/news/2026/10/orchevia-claude-code-codex-pipeline
+  https://aftergradient.com/news/2026/10/pi-cowboy-coding-agents-as-subagents
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_flash_f13f7818.md

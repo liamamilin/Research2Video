@@ -94,6 +94,35 @@ _RETRYABLE_CODES = {"upstream_stream_interrupted"}
 #: (or cheaper) model or a top-up does. Seen live from an OpenAI-compatible
 #: gateway: ``{"code": "insufficient_balance", "details": {"coding_plan_exhausted": true}}``.
 _QUOTA_EXHAUSTED_CODES = {"insufficient_balance", "quota_exhausted"}
+QUOTA_COOLDOWN_SECONDS = float(os.environ.get("AREC_LLM_QUOTA_COOLDOWN_SECONDS", "600"))
+_QUOTA_COOLDOWN: dict[tuple[str, str], float] = {}
+_QUOTA_COOLDOWN_LOCK = threading.Lock()
+
+
+def _mark_quota_exhausted(base_url: str, model: str, seconds: float | None = None) -> None:
+    ttl = QUOTA_COOLDOWN_SECONDS if seconds is None else float(seconds)
+    if ttl <= 0 or not model:
+        return
+    key = ((base_url or "").rstrip("/"), model)
+    with _QUOTA_COOLDOWN_LOCK:
+        _QUOTA_COOLDOWN[key] = time.monotonic() + ttl
+
+
+def _is_quota_cooled(base_url: str, model: str) -> bool:
+    key = ((base_url or "").rstrip("/"), model)
+    with _QUOTA_COOLDOWN_LOCK:
+        until = _QUOTA_COOLDOWN.get(key)
+        if until is None:
+            return False
+        if time.monotonic() < until:
+            return True
+        _QUOTA_COOLDOWN.pop(key, None)
+        return False
+
+
+def clear_quota_cooldown() -> None:
+    with _QUOTA_COOLDOWN_LOCK:
+        _QUOTA_COOLDOWN.clear()
 #: Statuses that say "this model cannot serve you", not "the request was wrong": the key is refused for it (401/403),
 #: or it is gone (404 not found, 410 deprecated). Another model on the same endpoint may still answer.
 _MODEL_REFUSED_STATUS = {401: "鉴权被拒绝", 403: "没有权限使用它", 404: "不存在", 410: "已下线"}
@@ -319,6 +348,7 @@ class LLMClient:
         # client switches away from an exhausted model it stays switched for
         # the rest of the job rather than re-trying the known-bad one.
         self._model_idx = 0
+        self._skip_cooled_targets()
         self._chat_started = False
         self._client = self._make_client()
         self.usage = {
@@ -435,6 +465,24 @@ class LLMClient:
                 )
                 self._sleep_cancellable(delay)
 
+    def _skip_cooled_targets(self) -> None:
+        """Start on the first non-cooled target when an earlier provider recently returned 402."""
+        targets = self._targets()
+        if len(targets) < 2:
+            return
+        for idx, target in enumerate(targets):
+            if not _is_quota_cooled(target.base_url, target.model):
+                if idx > 0:
+                    prev = targets[0]
+                    logger.info(
+                        "Skipping cooled-down LLM target %r (%s); starting on %r (%s)",
+                        prev.model, telemetry.provider_of(prev.base_url),
+                        target.model, telemetry.provider_of(target.base_url),
+                    )
+                    self._model_idx = idx
+                    self.config = target
+                return
+
     def _targets(self) -> list[LLMConfig]:
         """The endpoint+model chain (``fallback_targets``), worked out once from the configuration the client began
         with: after a switch ``self.config`` is the target in use."""
@@ -514,7 +562,10 @@ class LLMClient:
     def _switch_model(self, reason: str, exc: Exception) -> bool:
         """Move to the next fallback model for ``reason``; False (and nothing changes) when none is left."""
         previous = self._active_model()
-        previous_host = telemetry.provider_of(self.config.base_url)
+        previous_base_url = self.config.base_url
+        previous_host = telemetry.provider_of(previous_base_url)
+        if self._is_quota_exhausted(exc):
+            _mark_quota_exhausted(previous_base_url, previous)
         if not self._advance_model():
             return False
         host = telemetry.provider_of(self.config.base_url)

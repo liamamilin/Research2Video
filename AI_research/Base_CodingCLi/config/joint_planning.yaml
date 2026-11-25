@@ -1,0 +1,11 @@
+# 仅在同一新批次同时制作合集和单条时共同分配内容；不改已有批次。
+enabled: true
+pairs:
+  - episode_production: flash_daily
+    single_production: flash_each
+  - episode_production: chatgpt_t09_updates
+    single_production: chatgpt_t09_updates_each
+  - episode_production: hot_trends_daily
+    single_production: hot_trends_each
+  - episode_production: blockchain_daily
+    single_production: blockchain_each

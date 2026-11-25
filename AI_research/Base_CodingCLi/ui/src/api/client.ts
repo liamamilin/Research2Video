@@ -1,5 +1,6 @@
 // API client with CSRF, auto-refresh, and 401 handling
 import { sessionRevision } from "@/lib/session-events";
+import { invalidatePageSnapshots } from "@/lib/page-snapshots";
 
 export class ApiError extends Error {
   code: string;
@@ -112,6 +113,12 @@ async function tryRefresh(): Promise<RefreshResult> {
   }
 }
 
+/** Proactively refresh the access cookie before opening a long-running SSE stream. */
+export async function ensureFreshSession(): Promise<void> {
+  if (!getCookie("ai_research_csrf")) return;
+  await tryRefresh();
+}
+
 // --- Main api function ---
 
 export async function api<T = unknown>(
@@ -123,6 +130,8 @@ export async function api<T = unknown>(
   const sessionCsrf = getCookie("ai_research_csrf");
   const sessionChanged = () => revision !== sessionRevision() || sessionCsrf !== getCookie("ai_research_csrf");
   const method = opts.method || "GET";
+  const mutating = !["GET", "HEAD", "OPTIONS"].includes(method);
+  if (mutating) invalidatePageSnapshots();
   const headers: Record<string, string> = {
     Accept: opts.responseType === "stream" ? "text/event-stream" : "application/json",
   };
@@ -162,6 +171,8 @@ export async function api<T = unknown>(
       throw new ApiError(0, "network_error", "网络请求失败: " + (err as Error).message);
     }
     throw err;
+  } finally {
+    if (mutating) invalidatePageSnapshots();
   }
 
   // 204 No Content

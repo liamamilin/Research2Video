@@ -1,0 +1,24 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_accepted_cancel_wins_over_a_concurrent_generation_failure ________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-394/test_accepted_cancel_wins_over0')
+
+    def test_accepted_cancel_wins_over_a_concurrent_generation_failure(tmp_path):
+        store = make_store(tmp_path)
+        job_id = new_job(store)
+        store.claim_next()
+        store.request_cancel(job_id)
+        # A failure may already be on its way after the runner's last cancel check.
+        store.mark_failed(job_id, 1, "STORYBOARD", "MODEL_TIMEOUT", "timed out", True)
+        job = store.get_job(job_id)
+>       assert job["status"] == "CANCELLED"
+E       AssertionError: assert 'FAILED' == 'CANCELLED'
+E
+E         - CANCELLED
+E         + FAILED
+
+g3/tests/test_g3.py:130: AssertionError
+=========================== short test summary info ============================
+FAILED g3/tests/test_g3.py::test_accepted_cancel_wins_over_a_concurrent_generation_failure
+1 failed, 17 deselected in 0.31s

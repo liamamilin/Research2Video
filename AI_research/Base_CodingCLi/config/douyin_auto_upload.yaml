@@ -1,0 +1,3 @@
+# 跳过抖音自动投稿的研究链路（与 B 站保持一致，保留成片供人工查看和手动投稿）
+excluded_jobs:
+  - chains/ai_science_updates

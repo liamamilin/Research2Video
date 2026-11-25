@@ -1,0 +1,26 @@
+最新状态更正（2026-11-16）：以下保留前轮记录，不再作为当前完成结论。强约束续查与输入优先调整见 SOFT-PLAN.txt、SOFT-REVIEW.txt、soft-job-reviews.json；本轮不宣称内容质量已稳定。
+
+验证记录（最终检查全部通过）
+
+代码与配置
+- 74个唯一在用 job 均有独立分析和最终处理结论。
+- 最终57条实际配置绑定全部组装成功，0错误；final-route-captures.json。
+- 15个本轮修改文件的现有内容与 applied-files.json 哈希逐一一致。六个生产文件与 round11-source.json 一致；其余九个是行为测试及固定展开快照。
+- git diff --check 通过。
+
+模型与业务服务
+- 用户已授权全部在用 job 的相关材料经现有 OpenCode 接口作隔离对照，本轮沿用该授权；没有发布。
+- 同材料表达试验、初次失败 holdout、不同结构独立题、插画失败试验、文化缩小路线均保留原始结果；见各轮 REVIEW。
+- 当前代码直接进入报告到文稿服务的 flash/tutorial/t05/science illustrated 均到 DRAFT，完整最终稿已通读。文化最终 reader-only 变更用同一服务、与采用文件相同哈希运行到 DRAFT，完整稿与修订已通读。
+- DRAFT 只表示流程完成；T05重复总结、文化宽松结构反例等内容缺陷单独记录，不由状态覆盖。没有逐个重新生成74项，静态组合不作为效果验收。
+- 测试使用保存的自动报告与材料；未重新采集、未启动在线 HTTP/UI、未生成音视频、未发布或修改历史稿件。
+
+离线回归
+- 初次沙箱内 scripts/check.sh 因禁止本地监听端口出现服务测试失败，确认 socket.bind PermissionError 后中止，保留 check.log；不作为业务回归失败结论。
+- 允许本地端口的第一次全量检查：4744 passed / 5 failed / 2 skipped，479.89秒。失败为4处本次意图改变后失效的固定文案/快照断言，及1处已有取消测试 mock 未接收新增 job 关键字导致 TypeError 被降级。分别更新语义检查、必要快照与 mock 签名，没有修改取消业务逻辑。日志 check-local-ports.log。
+- 修正后的相关七组测试：152 passed，7.51秒，targeted-final.log。
+- 独立 run.py --validate：All checks passed，config-validation.log。
+- 独立前端检查：TypeScript、lint、96文件/751项测试、production build 全通过；ui-build.log 保存构建输出，终端会话13247记录测试结果。
+- 最终 scripts/check.sh：exit 0，ALL CHECKS PASSED。Python 4749 passed / 2 skipped，488.26秒；配置验证通过；TypeScript、lint、96文件/751项前端测试与 production build 全部通过。完整日志 check-final.log。现有框架弃用及前端包体积提示不影响通过。
+
+所有 state 路径均位于 state/acceptance-content-value-20261115/natural-writing-20261116/。没有 Git 提交；工作区其他任务的改动保留。

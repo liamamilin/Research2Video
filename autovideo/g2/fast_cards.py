@@ -25,7 +25,7 @@ def font(size: int):
 def lines(text: str, face, width: int) -> list[str]:
     """Pixel wrap with indivisible Latin words, model numbers and numeric units."""
     result, current = [], ""
-    atoms = re.findall(r"[A-Za-z0-9]+(?:[.'’+-][A-Za-z0-9]+)*(?:%|％|℃|°C|小时|分钟|秒|毫安时|元|块)?|\n|.", text)
+    atoms = re.findall(r"[A-Za-z0-9]+(?:[.'’+-][A-Za-z0-9]+)*(?:%|％|℃|°C|小时|分钟|秒|毫安时|元|块|倍)?|\n|.", text)
     current_atoms = []
     for char in atoms:
         if char == "\n":

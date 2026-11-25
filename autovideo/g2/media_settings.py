@@ -11,7 +11,53 @@ def tempo_filter(ratio: float) -> str:
     return ','.join(f'atempo={value:.12g}' for value in factors)
 
 
+def prepare_retimed_audio(pipeline, alignment: dict, speed: float) -> dict:
+    """Prepare retimed WAV & segment timestamps ahead of BUILD_IR so forced alignment overlaps STORYBOARD."""
+    import json
+    import numpy as np
+    import soundfile as sf
+
+    base_path = alignment["audio_path"]
+    segments = [{k: row[k] for k in ("id", "text", "start_ms", "end_ms")} for row in alignment["rows"]]
+    if speed == 1:
+        return {
+            "audio_path": base_path,
+            "audio_sha256": pipeline.digest(base_path),
+            "duration_ms": alignment["duration_ms"],
+            "segments": segments,
+        }
+    early_path = base_path.with_name("early-retimed-voice.wav")
+    pipeline._run_fixed_command(
+        "early-retime-audio",
+        [pipeline.FFMPEG, "-nostdin", "-v", "error", "-y", "-i", base_path,
+         "-af", tempo_filter(speed), "-ar", str(pipeline.SAMPLE_RATE), "-ac", "1", early_path],
+        pipeline.PROJECT,
+    )
+    samples, sr = sf.read(early_path, dtype="float32")
+    assert sr == pipeline.SAMPLE_RATE
+    frames = math.ceil(len(samples) / (sr // pipeline.FPS))
+    samples = np.pad(samples, (0, frames * (sr // pipeline.FPS) - len(samples)))
+    sf.write(early_path, samples, sr, subtype="PCM_16")
+    duration = round(frames * 1000 / pipeline.FPS)
+    factor = duration / alignment["duration_ms"]
+    t = lambda ms: round(ms * factor)
+    retimed_segments = [{**s, "start_ms": t(s["start_ms"]), "end_ms": t(s["end_ms"])} for s in segments]
+    retimed_sha = pipeline.digest(early_path)
+    meta_path = early_path.with_suffix(".json")
+    meta_path.write_text(
+        json.dumps({"speed": speed, "base_sha256": pipeline.digest(base_path), "retimed_sha256": retimed_sha}),
+        encoding="utf-8",
+    )
+    return {
+        "audio_path": early_path,
+        "audio_sha256": retimed_sha,
+        "duration_ms": duration,
+        "segments": retimed_segments,
+    }
+
+
 def retime_ir(pipeline, ir: dict, speed: float) -> dict:
+    import json
     import numpy as np
     import soundfile as sf
     current=ir.get('playback',{}).get('speed',1.0)
@@ -26,8 +72,23 @@ def retime_ir(pipeline, ir: dict, speed: float) -> dict:
     if speed==1:
         samples,sr=sf.read(base,dtype='float32')
     else:
-        pipeline._run_fixed_command('retime-audio',[pipeline.FFMPEG,'-nostdin','-v','error','-y','-i',base,'-af',tempo_filter(speed),'-ar',str(pipeline.SAMPLE_RATE),'-ac','1',temp],pipeline.PROJECT)
-        samples,sr=sf.read(temp,dtype='float32')
+        early=path.with_name('early-retimed-voice.wav')
+        early_meta=early.with_suffix('.json')
+        reused=False
+        if early.is_file() and early_meta.is_file():
+            try:
+                meta=json.loads(early_meta.read_text(encoding='utf-8'))
+                if meta.get('speed')==speed and meta.get('base_sha256')==pipeline.digest(base) and meta.get('retimed_sha256')==pipeline.digest(early):
+                    samples,sr=sf.read(early,dtype='float32')
+                    reused=True
+            except (OSError, ValueError):
+                reused=False
+        if not reused:
+            pipeline._run_fixed_command('retime-audio',[pipeline.FFMPEG,'-nostdin','-v','error','-y','-i',base,'-af',tempo_filter(speed),'-ar',str(pipeline.SAMPLE_RATE),'-ac','1',temp],pipeline.PROJECT)
+            samples,sr=sf.read(temp,dtype='float32')
+        for stale in (early, early_meta):
+            if stale.is_file():
+                stale.unlink()
     assert sr==pipeline.SAMPLE_RATE
     frames=math.ceil(len(samples)/(sr//pipeline.FPS))
     samples=np.pad(samples,(0,frames*(sr//pipeline.FPS)-len(samples)))

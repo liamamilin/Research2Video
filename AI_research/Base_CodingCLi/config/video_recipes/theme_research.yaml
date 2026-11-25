@@ -1,6 +1,7 @@
 name: 主题讲解
 description: 围绕一个确定的观众问题，使用主题研究的场景、具体材料和原始资料组织完整讲述。
-status: enabled
+status: blocked
+reason: 已归档：主题工作台已统一复用「深度解读（全景）」(deep_dive) 配方。
 tags:
   domain: {key: themes, name: 主题创作}
   type: {key: explainer, name: 主题讲解}

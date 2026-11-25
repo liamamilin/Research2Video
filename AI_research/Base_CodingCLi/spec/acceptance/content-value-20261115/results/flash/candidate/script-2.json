@@ -1,0 +1,122 @@
+{
+  "title": "DeepSeek把语音、OCR、搜索拆开计价：小团队先算哪一笔",
+  "sections": [
+    {
+      "title": "先看三张价签",
+      "paragraphs": [
+        {
+          "text": "DeepSeek把语音、文件解析、搜索抓取拆成了独立计费的接口，有报道把这叫“开放全家桶API”。我把价签摆在一起看，结论有点反直觉：单价最低的是语音转写，但最容易让预算失控的是搜索。大家好，我是洛洛，今天我们聊聊，小团队接这套东西先算哪几项，哪些价格不能当长期价。",
+          "citations": [
+            "https://www.qbitai.com/2026/11/510003.html",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "三种计费单位不一样。语音是 TTS 每万字符 0.45 美元、ASR 每小时音频 0.116 美元；文件解析和 OCR 按页，每千页 0.225 美元；搜索和网页抓取按次，每千次 0.75 美元，你直接调 API，或者让模型通过 web tools 去用，都照这个算。语音和 OCR 能按小时、按页数提前估；搜索估不准，一次问答可能检索好几轮、再抓几个网页，次数会放大，这是我把它列在最前面的原因。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "五折别写进报价",
+      "paragraphs": [
+        {
+          "text": "语音现在挂的是限时五折，TTS 降到 0.225 美元，ASR 降到 0.058 美元。听着很划算，但做报价、算单位成本，得按列表价 0.45 和 0.116 来算，五折只能当短期缓冲。搜索、抓取、OCR 页面没标限时价，就按标价进预算。折扣一停，语音这块成本直接翻倍，这一步不做，报出去的价就是错的。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "会议记录先接哪一段",
+      "paragraphs": [
+        {
+          "text": "拿会议记录试水，我建议的顺序是先从 ASR 接入：它最便宜，也最容易验证。如果转写准确率不够，后面总结再便宜也没用。转完文本走模型总结，这里有个坑：模型 token 分峰谷，非高峰价是高峰价的一半，而高峰时段是 UTC 工作日 01:00 到 04:00、06:00 到 10:00，换成北京时间正好是工作日的上午九点到十二点、下午两点到六点。也就是说，想省这一半的 token 成本，批处理得挪到晚上和周末跑。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的判断是：语音和 OCR 先接，试错成本低；搜索先设一个每日调用上限再上线，它是最可能失控的一项；所有对外报价一律按列表价，不按五折。我是洛洛，我们下期见。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 594,
+    "estimated_seconds": 131,
+    "segments": 22,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.753,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先看三张价签",
+        "spoken_length": 252,
+        "budget": 109
+      },
+      {
+        "title": "五折别写进报价",
+        "spoken_length": 114,
+        "budget": 109
+      },
+      {
+        "title": "会议记录先接哪一段",
+        "spoken_length": 228,
+        "budget": 108
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2557,
+      "completion_tokens": 6322,
+      "total_tokens": 8879,
+      "cache_read_tokens": 512,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 5407,
+      "cost_usd": 0.00410149,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 64.444,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+    "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+    "trusted_urls": 19
+  }
+}

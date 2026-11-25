@@ -1,0 +1,117 @@
+{
+  "title": "删掉“think hard”后，Claude Opus 5.5 的提示该怎么改",
+  "sections": [
+    {
+      "title": "先删掉旧咒语",
+      "paragraphs": [
+        {
+          "text": "如果你还在提示词末尾加“think hard”，现在可能不是在帮 Claude，而是在拖慢它。Anthropic 已把 Claude Opus 5.5 设为所有付费计划的默认模型，并发布指南让用户改掉旧习惯：先删掉“think hard”，从 Medium effort 起步。大家好，我是洛洛，今天我们聊聊日常用 Claude 做文档、分析、编码的人，提示该怎么改。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "一条消息把任务说全",
+      "paragraphs": [
+        {
+          "text": "我看下来，新习惯的核心是别再一次给一句指令。官方建议在一条消息里说全三件事：目标、输出格式，以及模型该在什么时候回来提问。Opus 5.5 更能自己完成多步任务，甚至能从一次初始输入开始“自己提示自己”。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "图表和表格也别再手打，直接作为图片或文件附上；需要成品文档或表格，就直接要成品，不必先要草稿。官方称，Opus 5.5 即使最低 effort，读密集图表数值也比 Opus 5 最高档更准。对做分析的人，这比在提示词里描述表格更省事。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=From%20chatting%20to%20setting%20goals"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "设计任务要写具体禁例。别笼统写“不要 generic design”，直接点名不要奶油色背景、不要胶囊按钮；官方说，笼统禁令往往只是把一种默认风格换成另一种。接上 connectors 让模型自己取文件，结果也会更贴合。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5#:~:text=Naming%20specific%20styles%20works%20better%20than%20banning%20generic%20design"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的判断",
+      "paragraphs": [
+        {
+          "text": "所以我的判断是，旧提示习惯的收益正在变低。继续堆“think hard”这类咒语，不如把任务边界和验收标准一次交代清楚。先从 Medium effort 起步，把附件和具体禁例用对，再决定要不要加码。这些目前是官方指南的方向，效果还要放进你的工作流里看。我是洛洛，我们下期见。",
+          "citations": [
+            "https://the-decoder.com/anthropic-says-outdated-prompting-habits-are-slowing-down-claude-opus-5-5/"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 458,
+    "estimated_seconds": 103,
+    "segments": 20,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.376,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先删掉旧咒语",
+        "spoken_length": 103,
+        "budget": 109
+      },
+      {
+        "title": "一条消息把任务说全",
+        "spoken_length": 251,
+        "budget": 109
+      },
+      {
+        "title": "我的判断",
+        "spoken_length": 104,
+        "budget": 108
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 1861,
+      "completion_tokens": 3581,
+      "total_tokens": 5442,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2870,
+      "cost_usd": 0.00242775,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 37.866,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+    "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+    "trusted_urls": 1
+  }
+}

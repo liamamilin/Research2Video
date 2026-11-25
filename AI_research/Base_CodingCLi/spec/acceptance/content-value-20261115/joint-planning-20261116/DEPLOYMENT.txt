@@ -1,0 +1,37 @@
+2026-11-16 02:10 合集与单条共同规划接入记录
+
+状态：新批次配置已启用；真实报告的生产选题/写稿入口已在隔离状态验证。
+尚未验证：上线后的新一期真实生产报告、MP4 成片或发布收益；没有为验收启动生产视频任务。
+
+接入范围
+flash_daily + flash_each
+chatgpt_t09_updates + chatgpt_t09_updates_each
+config/joint_planning.yaml 为可提交文件，enabled: true。
+已有 ITEMS 批次与稿件不重排；联合规划在后台执行，不阻塞其他批次调度。
+
+最终验证
+隔离副本 scripts/check.sh 全部通过：
+- 后端 4721 passed, 11 skipped（55 条既有依赖/弃用等 warning）。
+- 前端 96 个文件、751 项测试通过；类型、lint、配置检查与构建通过。
+- 构建仍提示部分 chunk 大于 500 kB，本轮未修改前端。
+- 最新后台调度及关联回归 78 通过；此前相关整组回归 331 通过。
+- 部署文件 SHA256 与最终测试源文件快照逐项一致，git diff --check 通过。
+
+运行安全
+启用前：研究服务 PID 89040；manual_runs、rounds、busy_work 均为空。
+通过现有维护入口 action=restart、active_runs=wait 执行，不强杀、不取消任务。
+维护回执 769d973b69f54d5a8109fa5936a6e7f6：completed。
+新研究服务 PID 95530，instance_id 696ed4046d40411c8d855c39e7a61e53。
+8766 直连、8775 网关均 health=ok、相同新 instance_id。
+AutoVideo 8011 health=ok、worker_primary=true，PID 89183 前后未变。
+恢复后 manual_runs、rounds、busy_work 仍为空。
+
+证据
+state/acceptance-content-value-20261115/joint-planning-20261116/
+  joint-planning-release.log
+  source-hashes.json、deployment-files.json
+  service-before.json、service-after.json、restart-receipt.json
+  dispatch-replay/result.json
+  manuscript-comparison.txt
+
+仅安装 5 个已验证实现/配置/测试文件以及本轮验收记录，未改变 AutoVideo、旧实验、生产数据库记录或已生成材料。

@@ -328,7 +328,10 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
     if checks.get("audits_complete") and checks["summary"]["passed"]:
         from .. import headline
         stage("标题打磨")
-        headline_result = headline.finish(client, title=title, sections=sections, column_style=column_style)
+        headline_result = headline.finish(
+            client, title=title, sections=sections, column_style=column_style,
+            column_key=str(getattr(column, "key", "") or ""),
+        )
         title = headline_result["title"]
     budgets = [b["budget"] for b in plan["beats"]] if len(plan["beats"]) == len(sections) else None
     meta = {

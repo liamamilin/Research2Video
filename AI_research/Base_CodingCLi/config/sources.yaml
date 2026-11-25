@@ -331,15 +331,16 @@ cg_release_notes:
   name: ChatGPT Release Notes
   spec: page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
-  note: 极高优先；产品动态任务每次比较上次成功报告的页面内容。
+    - chatgpt_acquisition
+    - chatgpt_s01
+  note: 极高优先；产品动态任务每次比较上次成功报告的页面内容。；2026-11-20 归档：help.openai.com release notes 长期 HTTP 403
+  enabled: false
 cg_openai_news:
   name: OpenAI News
   spec: rss:https://openai.com/news/rss.xml
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
+    - chatgpt_acquisition
+    - chatgpt_s01
   note: 高优先；官方新闻与产品发布。
 cg_learn_updates:
   name: ChatGPT Learn · 官方更新
@@ -360,329 +361,338 @@ cg_pro_tiers:
   name: ChatGPT Pro Tiers
   spec: page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers
   tags:
-  - ai_official
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: Pro 套餐权益、Work 与 Codex 使用量变化；直接读取官方正文。
+    - ai_official
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: Pro 套餐权益、Work 与 Codex 使用量变化；直接读取官方正文。；2026-11-20 归档：help.openai.com Pro tiers 长期 HTTP 403
+  enabled: false
 cg_pricing:
   name: ChatGPT Pricing
   spec: page:https://chatgpt.com/pricing/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
-  - chatgpt_s05
+    - chatgpt_acquisition
+    - chatgpt_s01
+    - chatgpt_s05
   note: 极高优先；套餐、价格与权益。页面有访问限制时使用已配置的 Exa 正文读取。
 cg_status:
   name: OpenAI Status
   spec: rss:https://status.openai.com/history.rss
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
+    - chatgpt_acquisition
+    - chatgpt_s01
   note: 低优先；仅供服务故障与问题排查。
 cg_help:
   name: OpenAI Help Center · ChatGPT
   spec: page:https://help.openai.com/en/collections/3742473-chatgpt
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
-  note: 极高优先；帮助中心目录摘要，具体操作另读能力总览和错误排查文章。
+    - chatgpt_acquisition
+    - chatgpt_s01
+  note: 极高优先；帮助中心目录摘要，具体操作另读能力总览和错误排查文章。；2026-11-20 归档：help.openai.com 集合页长期 HTTP 403
+  enabled: false
 cg_learn_videos:
   name: ChatGPT Learn · Videos
   spec: catalog:https://learn.chatgpt.com/videos
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s02
+    - chatgpt_acquisition
+    - chatgpt_s02
   note: 最高优先；官方演示与教程目录，获取标题、日期和视频链接；不包含视频字幕或转写。
 cg_academy:
   name: OpenAI Academy
   spec: catalog:https://academy.openai.com/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s02
+    - chatgpt_acquisition
+    - chatgpt_s02
   note: 高优先；课程和活动案例。
 cg_stories:
   name: OpenAI · ChatGPT 客户案例
   spec: catalog:https://openai.com/zh-Hans-CN/stories/chatgpt/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s02
-  note: 高优先；普通用户、小企业与创作案例。
+    - chatgpt_acquisition
+    - chatgpt_s02
+  note: 高优先；普通用户、小企业与创作案例。；2026-11-20 归档：openai.com/stories 长期 HTTP 403
+  enabled: false
 cg_youtube_openai:
   name: OpenAI 官方 YouTube
   spec: rss:https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 极高优先；官方频道订阅接口，获取公开视频标题、日期、链接和简介，不下载或转写视频。
 cg_kevin:
   name: Kevin Stratvert · ChatGPT 教程
   spec: search:site:youtube.com Kevin Stratvert ChatGPT tutorial
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 极高优先；检索公开视频标题、简介和索引文本。
 cg_ai_advantage:
   name: The AI Advantage · ChatGPT 实操
   spec: search:site:youtube.com AI Advantage ChatGPT workflow comparison
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 极高优先；玩法、工作流、横向比较。主页 https://myaiadvantage.com/。
 cg_ai_explained:
   name: AI Explained · 能力解读
   spec: search:site:youtube.com/channel/UCNJ1Ymd5yFuUPtn21xtRbbw ChatGPT
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 高优先；模型能力与实测分析，频道路径未命中时会记录无内容。
 cg_matt_wolfe:
   name: Matt Wolfe · 最新视频
   spec: catalog:https://mattwolfe.com/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 中高优先；视频目录与热点线索。
 cg_how_i_ai:
   name: How I AI · 工作场景案例
   spec: catalog:https://podcasts.apple.com/us/podcast/how-i-ai/id1809663079
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s03
+    - chatgpt_acquisition
+    - chatgpt_s03
   note: 高优先；节目简介与工作流案例，不自动获取音频转写。
 cg_bilibili:
   name: B站 · ChatGPT 用户需求
   spec: search:site:bilibili.com ChatGPT Plus 使用 教程 订阅
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
-  - chatgpt_s06
+    - chatgpt_acquisition
+    - chatgpt_s04
+    - chatgpt_s06
   note: 极高优先；固定关键词检索公开索引内容；不是全站采集或完整评论数据。
 cg_zhihu:
   name: 知乎 · ChatGPT 购买前疑问
   spec: search:site:zhihu.com ChatGPT Plus 值得 付款 升级
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
+    - chatgpt_acquisition
+    - chatgpt_s04
   note: 固定关键词检索公开问题和回答摘要。
 cg_xiaohongshu:
   name: 小红书 · ChatGPT 使用需求
   spec: search:site:xiaohongshu.com ChatGPT 学习 职场 支付
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
+    - chatgpt_acquisition
+    - chatgpt_s04
   note: 固定关键词检索公开索引内容；索引可能有限。
 cg_reddit_chatgpt:
   name: Reddit r/ChatGPT
   spec: search:site:reddit.com/r/ChatGPT/ ChatGPT Plus subscription limits worth
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
+    - chatgpt_acquisition
+    - chatgpt_s04
   note: 公开讨论检索；未依赖 Reddit RSS；用户发言作为需求线索。
 cg_reddit_openai:
   name: Reddit r/OpenAI
   spec: search:site:reddit.com/r/OpenAI/ ChatGPT Plus subscription limits worth
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
+    - chatgpt_acquisition
+    - chatgpt_s04
   note: 公开讨论检索；未依赖 Reddit RSS；用户发言作为需求线索。
 cg_reddit_plus:
   name: Reddit r/chatgptplus
   spec: search:site:reddit.com/r/chatgptplus/ ChatGPT Plus subscription limits worth
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
+    - chatgpt_acquisition
+    - chatgpt_s04
   note: 公开讨论检索；未依赖 Reddit RSS；用户发言作为需求线索。
 cg_plus:
   name: ChatGPT Plus 官方说明
   spec: page:https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: 极高优先；功能、费用、购买与使用限制。
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: 极高优先；功能、费用、购买与使用限制。；2026-11-20 归档：help.openai.com Plus 说明长期 HTTP 403
+  enabled: false
 cg_claude_pricing:
   name: Claude 套餐与价格
   spec: page:https://claude.com/pricing
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Free/Pro/Max 套餐与权益。
 cg_claude_release_notes:
   name: Claude 应用更新记录
   spec: page:https://support.claude.com/en/articles/12138966-release-notes.md
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；官方 Markdown 版更新记录，带日期。
 cg_anthropic_news:
   name: Anthropic 新闻
   spec: page:https://www.anthropic.com/news
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；模型与产品发布。
 cg_gemini_plans:
   name: Gemini 订阅方案
   spec: page:https://gemini.google/subscriptions/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Google AI 各档订阅与权益。
 cg_gemini_release_notes:
   name: Gemini 应用更新记录
   spec: page:https://gemini.google/release-notes/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Gemini App 功能更新。
 cg_gemini_blog:
   name: Google 博客 · Gemini
   spec: rss:https://blog.google/products/gemini/rss/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Gemini 产品动态，带日期。
 cg_grok:
   name: Grok 产品页
   spec: page:https://x.ai/grok
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Grok 功能与 SuperGrok 套餐。
 cg_xai_news:
   name: xAI 新闻
   spec: page:https://x.ai/news
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Grok 模型与功能发布。
 cg_mistral_pricing:
   name: Mistral Le Chat 价格
   spec: page:https://mistral.ai/pricing
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；Le Chat 各档与 API 价格。
 cg_zai_release_notes:
   name: 智谱 Z.ai 更新记录
   spec: page:https://docs.z.ai/release-notes
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；GLM 模型与产品更新。
 cg_qbitai:
   name: 量子位
   spec: rss:https://www.qbitai.com/feed
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；国内 AI 产品动态（豆包、Kimi、通义千问、元宝、DeepSeek 等），正文较短。
 cg_ifanr:
   name: 爱范儿
   spec: rss:https://www.ifanr.com/feed
   tags:
-  - chatgpt_acquisition
-  - ai_news
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - ai_news
+    - chatgpt_t05
   note: T05 横向比较；面向普通用户的 AI 产品体验与评测。
 cg_tomsguide_ai:
   name: Tom's Guide · AI
   spec: rss:https://www.tomsguide.com/feeds/tag/artificial-intelligence
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；面向普通用户的 AI 助手实测与横评。
 cg_cn_ai_apps:
   name: 国内 AI 助手会员与新功能
   spec: search:豆包 Kimi 通义千问 腾讯元宝 DeepSeek 会员 新功能 对比
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
+    - chatgpt_acquisition
+    - chatgpt_t05
   note: T05 横向比较；国内应用页面需要脚本渲染，直接读取不到，改用检索。
 cg_reddit_compare:
   name: Reddit · AI 订阅横向讨论
   spec: search:site:reddit.com ChatGPT vs Claude vs Gemini vs Grok which subscription
   tags:
-  - chatgpt_acquisition
-  - chatgpt_t05
-  note: T05 横向比较；用户真实选择理由，作为需求线索。
+    - chatgpt_acquisition
+    - chatgpt_t05
+  note: T05 横向比较；用户真实选择理由，作为需求线索。；2026-11-20 归档：Reddit 横向搜索连续失败无正文（历史 20 次）
+  enabled: false
 cg_multicurrency:
   name: ChatGPT 多币种与支付方式
   spec: page:https://help.openai.com/en/articles/10421635-multicurrency-billing
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: 极高优先；按地区、币种和订阅渠道说明支付方式。
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: 极高优先；按地区、币种和订阅渠道说明支付方式。；2026-11-20 归档：help.openai.com 多币种页长期 HTTP 403
+  enabled: false
 cg_billing:
   name: ChatGPT 与 API 账单管理
   spec: page:https://help.openai.com/en/articles/9039756-managing-billing-for-chatgpt-and-the-api-platform
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: 高优先；区分 ChatGPT 订阅与 API 账单。
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: 高优先；区分 ChatGPT 订阅与 API 账单。；2026-11-20 归档：help.openai.com 账单页长期 HTTP 403
+  enabled: false
 cg_regions:
   name: ChatGPT 支持的国家和地区
   spec: page:https://help.openai.com/en/articles/7947663-chatgpt-supported-countries
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: 高优先；付款方式与服务支持地区分别说明。
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: 高优先；付款方式与服务支持地区分别说明。；2026-11-20 归档：help.openai.com 地区页长期 HTTP 403
+  enabled: false
 cg_cancel:
   name: ChatGPT 取消订阅
   spec: page:https://help.openai.com/en/articles/7232927-how-do-i-cancel-my-chatgpt-subscription
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s05
-  note: 高优先；续费、取消和渠道差异。
+    - chatgpt_acquisition
+    - chatgpt_s05
+  note: 高优先；续费、取消和渠道差异。；2026-11-20 归档：help.openai.com 取消订阅页长期 HTTP 403
+  enabled: false
 cg_payment_questions:
   name: 中文用户 · ChatGPT 支付问题
   spec: search:ChatGPT 支付失败 信用卡 没有国际信用卡 付款方式 扣款没到账 无法升级
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s04
-  - chatgpt_s05
+    - chatgpt_acquisition
+    - chatgpt_s04
+    - chatgpt_s05
   note: 初始需求词库；购买意图、支付困难与订阅管理。
 cg_trends:
   name: Google Trends · ChatGPT 相关线索
   spec: search:site:trends.google.com ChatGPT Plus 免费版
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s06
+    - chatgpt_acquisition
+    - chatgpt_s06
   note: 补充线索；只检索公开索引页面，不提供真实趋势序列或搜索量，不得据此声称热度上涨。
 cg_prompts:
   name: prompts.chat · 应用创意
   spec: page:https://github.com/f/prompts.chat
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s06
+    - chatgpt_acquisition
+    - chatgpt_s06
   note: 中高优先；Prompt 与应用创意，不等于效果已实测。
 cg_cookbook:
   name: OpenAI Cookbook · 应用案例
   spec: page:https://github.com/openai/openai-cookbook
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s06
+    - chatgpt_acquisition
+    - chatgpt_s06
   note: 中优先；少量补充技术案例，标明 API 与 ChatGPT 产品的差别。
 cg_business_stories:
   name: OpenAI 企业客户案例
   spec: catalog:https://openai.com/business/customer-stories/
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s06
-  note: 中高优先；业务场景和成果展示。
-
+    - chatgpt_acquisition
+    - chatgpt_s06
+  note: 中高优先；业务场景和成果展示。；2026-11-20 归档：customer-stories 长期 HTTP 403
+  enabled: false
 cg_capabilities:
   name: ChatGPT 能力总览
   spec: page:https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
+    - chatgpt_acquisition
+    - chatgpt_s01
   note: 极高优先；直接读取官方功能正文，补充帮助中心目录摘要。
 cg_errors:
   name: ChatGPT 错误排查
   spec: page:https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages
   tags:
-  - chatgpt_acquisition
-  - chatgpt_s01
+    - chatgpt_acquisition
+    - chatgpt_s01
   note: 极高优先；读取错误信息和排查步骤正文。
 
 # --- Radar 导入 · AI 矩阵（2026-10-29）---
@@ -690,66 +700,68 @@ aftergradient:
   name: aftergradient.com Feed
   spec: rss:https://aftergradient.com/rss.xml?kind=news
   tags:
-  - ai
-  - ai_radar
-  - ai_updates
+    - ai
+    - ai_radar
+    - ai_updates
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
 aicatchup:
   name: aicatchup.com Feed
   spec: rss:https://aicatchup.com/rss.xml
   tags:
-  - ai
-  - ai_radar
-  - ai_updates
-  - ai_daily_shared
+    - ai
+    - ai_radar
+    - ai_updates
+    - ai_daily_shared
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
 r_project_blog:
   name: blog.r-project.org Feed
   spec: rss:https://blog.r-project.org/index.xml
   tags:
-  - r_language
+    - r_language
   note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 devbrief:
   name: devbrief.dev Feed
   spec: rss:https://devbrief.dev/rss.xml
   tags:
-  - ai
-  - ai_radar
-  - ai_updates
+    - ai
+    - ai_radar
+    - ai_updates
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
 onevium_zh:
   name: onevium.com Feed
   spec: rss:https://onevium.com/zh/rss.xml
   tags:
-  - ai
-  - ai_radar
-  - ai_updates
+    - ai
+    - ai_radar
+    - ai_updates
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
 r_consortium:
   name: r-consortium.org Feed
   spec: rss:https://r-consortium.org/blog/index.xml
   tags:
-  - r_language
+    - r_language
   note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 r_for_rest_of_us:
   name: rfortherestofus.com Feed
   spec: rss:https://rfortherestofus.com/blog/feed/atom
   tags:
-  - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
+    - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。；2026-11-20 归档：Atom 长期断连/超时，无活跃 Job 引用
+  enabled: false
 r_weekly:
   name: rweekly.org Feed
   spec: rss:https://rweekly.org/atom.xml
   tags:
-  - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
+    - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。；2026-11-20 归档：Atom 长期超时，无活跃 Job 引用
+  enabled: false
 zhangwen:
   name: zhangwen.site Feed
   spec: rss:https://zhangwen.site/rss.xml
   tags:
-  - ai
-  - ai_radar
-  - ai_updates
+    - ai
+    - ai_radar
+    - ai_updates
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
 
 # --- 2026-11-01 补充：各矩阵源头信息（官方机构、期刊、公司与项目原始发布；本组与下组都逐个试读通过）---
@@ -893,7 +905,6 @@ esa_tech:
   name: ESA · 空间工程与技术
   spec: rss:https://www.esa.int/rssfeed/Our_Activities/Space_Engineering_Technology
   tags: [tech, space]
-# --- 2026-11-01 补充：高质量二手报道、评论与聚合 ---
 techmeme:
   name: Techmeme
   spec: rss:https://www.techmeme.com/feed.xml
@@ -1095,22 +1106,128 @@ nine_to_five_mac_ai:
   tags: [ai, ai_news]
 radar_chatgpt_claude_codex:
   name: Radar · chatgpt / claude / codex 动态
-  spec: "radar:chatgpt / claude / codex 动态"
+  spec: radar:chatgpt / claude / codex 动态
   tags: [ai, radar_brief, radar_official]
   note: 本机 Radar 每日简报的一个栏目（radar-cli 只读）；条目原文仍按原文补读流程取得
 radar_tool_updates:
   name: Radar · Ollama / Claude Code / Codex 重要更新
-  spec: "radar:Ollama / Claude Code / Codex 重要更新"
+  spec: radar:Ollama / Claude Code / Codex 重要更新
   tags: [ai, radar_brief, radar_dev]
 radar_coding_tools:
   name: Radar · AI 编程工具产品动态
-  spec: "radar:AI 编程工具产品动态（每周对比）"
+  spec: radar:AI 编程工具产品动态（每周对比）
   tags: [ai, radar_brief, radar_dev]
 radar_dev_community:
   name: Radar · 开发者社区
-  spec: "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具"
+  spec: radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具
   tags: [ai, radar_brief, radar_dev]
 radar_opensource_models:
   name: Radar · 开源大模型发布雷达
-  spec: "radar:开源大模型发布雷达"
+  spec: radar:开源大模型发布雷达
   tags: [ai, radar_brief, radar_opensource]
+curious_kids:
+  name: The Conversation · Curious Kids
+  spec: rss:https://theconversation.com/us/topics/curious-kids-us-74795/articles.atom
+  tags: [science, explainer_questions]
+  note: 孩子提的"为什么"、专家作答；插画讲解的选题参考
+livescience_mysteries:
+  name: Live Science · Life's Little Mysteries
+  spec: rss:https://www.livescience.com/feeds/tag/lifes-little-mysteries
+  tags: [science, explainer_questions]
+  note: 生活里的小谜题问答；插画讲解的选题参考
+boe_knowledge_bank:
+  name: Bank of England · Knowledge Bank
+  spec: rss:https://www.bankofengland.co.uk/rss/knowledgebank
+  tags: [economy, explainer_questions]
+  note: 「什么是……」经济概念讲解；插画讲解的选题参考
+economics_se:
+  name: Economics StackExchange
+  spec: rss:https://economics.stackexchange.com/feeds
+  tags: [economy, explainer_questions]
+  note: 真实经济学提问，学术题多，只挑生活里看得见的；插画讲解的选题参考
+npr_planet_money:
+  name: NPR · Planet Money
+  spec: rss:https://feeds.npr.org/510289/podcast.xml
+  tags: [company, explainer_questions]
+  note: 讲生意和经济原理的节目；插画讲解的选题参考
+howtogeek:
+  name: How-To Geek
+  spec: rss:https://www.howtogeek.com/feed/
+  tags: [consumer, explainer_questions]
+  note: 数码产品和软件的用法与原理；插画讲解的选题参考
+makeuseof:
+  name: MakeUseOf
+  spec: rss:https://www.makeuseof.com/feed/
+  tags: [software, explainer_questions]
+  note: 日常软件、手机电脑功能讲解；插画讲解的选题参考
+geography_realm:
+  name: Geography Realm
+  spec: rss:https://www.geographyrealm.com/feed/
+  tags: [geography, explainer_questions]
+  note: 地理常识与地方现象讲解；插画讲解的选题参考
+livescience_earth:
+  name: Live Science · Planet Earth
+  spec: rss:https://www.livescience.com/feeds/tag/planet-earth
+  tags: [geography, explainer_questions]
+  note: 地球与环境现象；插画讲解的选题参考
+historyextra:
+  name: HistoryExtra
+  spec: rss:https://www.historyextra.com/feed/
+  tags: [history, explainer_questions]
+  note: 历史小知识、古人生活；插画讲解的选题参考
+livescience_history:
+  name: Live Science · History
+  spec: rss:https://www.livescience.com/feeds/tag/history
+  tags: [history, explainer_questions]
+  note: 考古与古人生活；插画讲解的选题参考
+interesting_engineering:
+  name: Interesting Engineering
+  spec: rss:https://interestingengineering.com/feed
+  tags: [industry, explainer_questions]
+  note: 工程与制造，含 Explained 讲解；新闻多，只挑原理题；插画讲解的选题参考
+livescience_tech:
+  name: Live Science · Technology
+  spec: rss:https://www.livescience.com/feeds/tag/technology
+  tags: [tech, explainer_questions]
+  note: 技术原理与评论，只挑原理题；插画讲解的选题参考
+bili_hot_ai:
+  name: B站 · AI 热词
+  spec: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI
+  tags: [ai_hot]
+  note: B站热搜里的 AI 词 + 这些产品近 7 天在 B站的热度，最热的几个附最新网页报道；让快讯覆盖观众正在看的国内热点（11-10 选题热度）
+chain_source_mwlrtqz9:
+  name: OpenAI 科学博客
+  tags: []
+  note: 通过链路创建向导添加；2026-11-20 归档：openai.com/news/science 长期 HTTP 403；科研链路改用 cg_openai_news
+  spec: catalog:https://openai.com/news/science/
+  enabled: false
+coindesk:
+  name: CoinDesk
+  spec: rss:https://www.coindesk.com/arc/outboundfeeds/rss/
+  tags: [blockchain, web3]
+  note: 国际主流区块链与数字资产媒体；覆盖监管政策、机构动态、稳定币与基础设施进展
+the_block:
+  name: The Block
+  spec: rss:https://www.theblock.co/rss.xml
+  tags: [blockchain, web3]
+  note: 机构级区块链研究与快讯媒体；偏重基础设施、合规、ETF 与数据统计
+decrypt:
+  name: Decrypt
+  spec: rss:https://decrypt.co/feed
+  tags: [blockchain, web3]
+  note: Web3 与区块链技术媒体；覆盖协议升级、安全事件与应用落地
+blockworks:
+  name: Blockworks
+  spec: rss:https://blockworks.co/feed
+  tags: [blockchain, web3]
+  note: 侧重机构金融、RWA、稳定币与宏观合规视角的区块链媒体
+ethereum_blog:
+  name: Ethereum Foundation Blog
+  spec: rss:https://blog.ethereum.org/feed.xml
+  tags: [blockchain, protocol]
+  note: 以太坊基金会官方博客；一手协议升级、扩容路线图与客户端动态
+vitalik_blog:
+  name: Vitalik Buterin's Blog
+  spec: rss:https://vitalik.eth.limo/feed.xml
+  tags: [blockchain, protocol]
+  note: Vitalik 个人博客；公链架构、密码学、零知识证明与协议设计一手长文

@@ -1,0 +1,10 @@
+{
+  "checked_files": 18,
+  "changed_files": [],
+  "production_database_access": "sqlite URI mode=ro plus PRAGMA query_only=ON; no mutation APIs called",
+  "browser_target": "http://127.0.0.1:9246/chain-rehearsal-preview.html",
+  "formal_jobs_created": 0,
+  "formal_jobs_deleted": 0,
+  "formal_runs_triggered": 0,
+  "prototype_source_unchanged": true
+}

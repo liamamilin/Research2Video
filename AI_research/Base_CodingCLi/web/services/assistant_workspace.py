@@ -209,19 +209,26 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
                         'impact': result.get('impact', ''), 'fields': result.get('changed_fields', []),
                         'configuration': result.get('configuration_change'), 'recovered_by': recovered.get(op['id'])})
     from web.services.assistant_tasks import video_task
+    from web.services.assistant_batch_store import BatchStore, view as batch_view
+    batch_cache: dict[str, dict | None] = {}
     task_cards = []
     for record in reversed(conversation['requests']):
         actions = [op for op in reversed(operations) if op['request_id'] == record['id']]
         modifications = [change for change in reversed(changes) if change['request_id'] == record['id']]
-        from web.services.assistant_batch_store import BatchStore, view as batch_view
 
         def read_batches(keys):
             found = []
+            missing = [k for k in keys if k not in batch_cache]
+            if missing:
+                store = BatchStore()
+                for key in missing:
+                    try:
+                        batch_cache[key] = batch_view(store.get(key, user))
+                    except ValueError:
+                        batch_cache[key] = None
             for key in keys:
-                try:
-                    found.append(batch_view(BatchStore().get(key, user)))
-                except ValueError:
-                    pass
+                if batch_cache.get(key) is not None:
+                    found.append(batch_cache[key])
             return found
         keys = [key for key in dict.fromkeys(op['result'].get('application_batch_id') for op in actions if op.get('result')) if key]
         batches = await asyncio.to_thread(read_batches, keys) if keys else []

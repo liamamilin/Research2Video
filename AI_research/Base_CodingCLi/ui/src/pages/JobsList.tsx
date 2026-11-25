@@ -1,3 +1,4 @@
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
@@ -32,6 +33,7 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 export function JobsListPage() {
+  const chainScope=useChainScope();
   const { data: jobData, error, loading, reload: fetchJobs } = usePageResource(listJobs, 15000);
   const jobs = jobData ?? [];
   const { data: matrices } = usePageResource(listMatrices);
@@ -157,6 +159,7 @@ export function JobsListPage() {
   };
 
   const visible = jobs.filter((j) => {
+    if (!chainScope.job(j.name)) return false;
     if (matrix && (owner(j.name)?.key || "_independent") !== matrix) return false;
     if (statusFilter === "failed" && j.state?.last_status !== "failed") return false;
     if (statusFilter === "enabled" && !j.enabled) return false;

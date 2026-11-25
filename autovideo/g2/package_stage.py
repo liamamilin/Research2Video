@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -93,10 +94,59 @@ def probe(runner, ffprobe, path: Path, *, frames: bool = False, frame_formats: b
 from g2.packaging_library.templates import render_clip_frames
 
 
-def encode_clip(runner, ffmpeg, frames_dir: Path, out: Path) -> None:
-    runner(f"package-clip-{frames_dir.name.split('-')[0]}", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", "-framerate", str(FPS),
-                            "-i", frames_dir / "f%04d.png", "-c:v", "libx264", "-preset", "medium", "-crf", "16",
-                            "-pix_fmt", "yuv420p", "-r", str(FPS), "-an", out])
+def _profile_name(raw: str | None) -> str:
+    value = str(raw or "high").strip().lower()
+    if "baseline" in value:
+        return "baseline"
+    if "main" in value:
+        return "main"
+    return "high"
+
+
+def _video_timescale(video_stream: dict | None) -> int | None:
+    if not video_stream:
+        return None
+    tb = str(video_stream.get("time_base") or "")
+    if "/" in tb:
+        num, den = tb.split("/", 1)
+        if num == "1" and den.isdigit() and int(den) > 0:
+            return int(den)
+    return None
+
+
+def _color_flags(video_stream: dict | None) -> list[str]:
+    if not video_stream:
+        return []
+    flags: list[str] = []
+    cr = video_stream.get("color_range")
+    if cr in ("tv", "pc"):
+        flags += ["-color_range", cr]
+    cs = video_stream.get("color_space")
+    if cs and cs != "unknown":
+        flags += ["-colorspace", cs]
+    ct = video_stream.get("color_transfer")
+    if ct and ct != "unknown":
+        flags += ["-color_trc", ct]
+    cp = video_stream.get("color_primaries")
+    if cp and cp != "unknown":
+        flags += ["-color_primaries", cp]
+    return flags
+
+
+def encode_clip(runner, ffmpeg, frames_dir: Path, out: Path, *, video_spec: dict | None = None) -> None:
+    timescale = _video_timescale(video_spec)
+    profile = _profile_name((video_spec or {}).get("profile"))
+    pix_fmt = str((video_spec or {}).get("pix_fmt") or "yuv420p")
+    if pix_fmt not in ("yuv420p", "yuvj420p"):
+        pix_fmt = "yuv420p"
+    argv = [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", "-framerate", str(FPS),
+            "-i", frames_dir / "f%04d.png", "-vf", f"scale={WIDTH}:{HEIGHT},format={pix_fmt},setsar=1",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-profile:v", profile,
+            "-pix_fmt", pix_fmt, "-r", str(FPS), *_color_flags(video_spec)]
+    if timescale is not None:
+        argv += ["-video_track_timescale", str(timescale)]
+    argv += ["-an", out]
+    runner(f"package-clip-{frames_dir.name.split('-')[0]}", argv)
 
 
 # ---------------------------------------------------------------- audio
@@ -288,7 +338,7 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
         try:
             render_clip_frames(cfg["template"], cfg, config["accent"], frames, frame_dir,
                                version=version, theme=visual_theme)
-            encode_clip(runner, ffmpeg, frame_dir, work / f"{part}.mp4")
+            encode_clip(runner, ffmpeg, frame_dir, work / f"{part}.mp4", video_spec=cv)
         except PackageFault:
             raise
         except Exception as exc:
@@ -312,36 +362,82 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
         ordered.append(("source_card", source_frames, clips["source_card"]["video"], clips["source_card"]["audio"]))
     if "outro" in clips:
         ordered.append(("outro", outro_frames, clips["outro"]["video"], clips["outro"]["audio"]))
-    input_args: list = []
-    graph: list[str] = []
-    streams: list[str] = []
-    next_input = 0
-    for n, (name, frames, video_path, audio_path) in enumerate(ordered):
-        total = round(frames * rate / FPS)
-        input_args += ["-i", video_path]
-        v_idx = next_input
-        next_input += 1
-        if audio_path is None:
-            a_idx = v_idx
-        else:
-            input_args += ["-i", audio_path]
-            a_idx = next_input
-            next_input += 1
-        graph.append(f"[{v_idx}:v]trim=end_frame={frames},fps={FPS},scale={WIDTH}:{HEIGHT},format=yuv420p,setsar=1,"
-                     f"setpts=PTS-STARTPTS[v{n}]")
-        graph.append(f"[{a_idx}:a]{fmt},apad=whole_len={total},atrim=end_sample={total},asetpts=PTS-STARTPTS[a{n}]")
-        streams.append(f"[v{n}][a{n}]")
-    graph.append("".join(streams) + f"concat=n={len(ordered)}:v=1:a=1[v][a]")
     packaged = out_dir / "video.mp4"
-    runner("package-concat", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", *input_args,
-                              "-filter_complex", ";".join(graph), "-map", "[v]", "-map", "[a]",
-                              "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p",
-                              "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-ar", str(rate), "-ac", str(channels),
-                              "-movflags", "+faststart", packaged])
     cue_names = {part: clips[part]["sound"].get("sound") for part in clips}
-    checks = verify_package(runner, ffmpeg, ffprobe, packaged, content_probe=content, intro_frames=intro_frames,
-                            content_frames=content_frames, outro_frames=outro_frames, voice_wav=voice_wav,
-                            work=work, cue_names=cue_names, source_frames=source_frames)
+    video_concat_mode = "stream_copy"
+
+    def _quote_ffconcat(path: Path) -> str:
+        return str(path.resolve()).replace("'", r"'\''")
+
+    def _concat_stream_copy() -> dict:
+        vlist = work / "video-clips.ffconcat"
+        vlist.write_text(
+            "ffconcat version 1.0\n" + "\n".join(f"file '{_quote_ffconcat(vp)}'" for _, _, vp, _ in ordered) + "\n",
+            encoding="utf-8",
+        )
+        a_inputs: list = []
+        a_graph: list[str] = []
+        a_streams: list[str] = []
+        for idx, (name, frames, video_path, audio_path) in enumerate(ordered):
+            total = round(frames * rate / FPS)
+            src = video_path if audio_path is None else audio_path
+            a_inputs += ["-i", src]
+            in_idx = idx + 1
+            a_graph.append(f"[{in_idx}:a]{fmt},apad=whole_len={total},atrim=end_sample={total},asetpts=PTS-STARTPTS[a{idx}]")
+            a_streams.append(f"[a{idx}]")
+        a_graph.append("".join(a_streams) + f"concat=n={len(ordered)}:v=0:a=1[a]")
+        runner("package-concat-copy", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y",
+                                       "-safe", "0", "-f", "concat", "-i", vlist, *a_inputs,
+                                       "-filter_complex", ";".join(a_graph), "-map", "0:v:0", "-map", "[a]",
+                                       "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", str(rate),
+                                       "-ac", str(channels), "-movflags", "+faststart", packaged])
+        return verify_package(runner, ffmpeg, ffprobe, packaged, content_probe=content, intro_frames=intro_frames,
+                              content_frames=content_frames, outro_frames=outro_frames, voice_wav=voice_wav,
+                              work=work, cue_names=cue_names, source_frames=source_frames)
+
+    def _concat_reencode() -> dict:
+        input_args: list = []
+        graph: list[str] = []
+        streams: list[str] = []
+        next_input = 0
+        for n, (name, frames, video_path, audio_path) in enumerate(ordered):
+            total = round(frames * rate / FPS)
+            input_args += ["-i", video_path]
+            v_idx = next_input
+            next_input += 1
+            if audio_path is None:
+                a_idx = v_idx
+            else:
+                input_args += ["-i", audio_path]
+                a_idx = next_input
+                next_input += 1
+            graph.append(f"[{v_idx}:v]trim=end_frame={frames},fps={FPS},scale={WIDTH}:{HEIGHT},format=yuv420p,setsar=1,"
+                         f"setpts=PTS-STARTPTS[v{n}]")
+            graph.append(f"[{a_idx}:a]{fmt},apad=whole_len={total},atrim=end_sample={total},asetpts=PTS-STARTPTS[a{n}]")
+            streams.append(f"[v{n}][a{n}]")
+        graph.append("".join(streams) + f"concat=n={len(ordered)}:v=1:a=1[v][a]")
+        runner("package-concat", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", *input_args,
+                                  "-filter_complex", ";".join(graph), "-map", "[v]", "-map", "[a]",
+                                  "-c:v", "libx264", "-preset", "medium", "-crf", "16", "-pix_fmt", "yuv420p",
+                                  "-r", str(FPS), "-c:a", "aac", "-b:a", "192k", "-ar", str(rate), "-ac", str(channels),
+                                  "-movflags", "+faststart", packaged])
+        return verify_package(runner, ffmpeg, ffprobe, packaged, content_probe=content, intro_frames=intro_frames,
+                              content_frames=content_frames, outro_frames=outro_frames, voice_wav=voice_wav,
+                              work=work, cue_names=cue_names, source_frames=source_frames)
+
+    if len(ordered) == 1 and ordered[0][0] == "content":
+        # No intro, source card, or outro clips: avoid redundant full video+audio re-encoding.
+        shutil.copyfile(content_video, packaged)
+        video_concat_mode = "direct_copy"
+        checks = verify_package(runner, ffmpeg, ffprobe, packaged, content_probe=content, intro_frames=intro_frames,
+                                content_frames=content_frames, outro_frames=outro_frames, voice_wav=voice_wav,
+                                work=work, cue_names=cue_names, source_frames=source_frames)
+    else:
+        try:
+            checks = _concat_stream_copy()
+        except PackageFault:
+            video_concat_mode = "reencode_fallback"
+            checks = _concat_reencode()
     offset_ms = round(intro_frames * 1000 / FPS)
     total_seconds = (intro_frames + content_frames + source_frames + outro_frames) / FPS
     captions = artifacts / "captions.srt"
@@ -353,7 +449,7 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
             shift_chapters(json.loads(chapters.read_text(encoding="utf-8")), offset_ms, total_seconds),
             ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     contact_sheet(runner, ffmpeg, packaged, out_dir / "contact-sheet.jpg", intro_frames, content_frames, outro_frames, work, source_frames)
-    record = {"status": "PASS", "config": config, "fps": FPS,
+    record = {"status": "PASS", "config": config, "fps": FPS, "video_concat": video_concat_mode,
               "intro": {"frames": intro_frames, "seconds": intro_frames / FPS, "offset_ms": 0,
                         "sound": clips.get("intro", {}).get("sound")},
               "content": {"frames": content_frames, "seconds": content_frames / FPS, "offset_ms": offset_ms,

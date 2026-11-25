@@ -1,0 +1,669 @@
+FFF.F.FF                                                                 [100%]
+=================================== FAILURES ===================================
+_______ test_invalid_config_at_worker_start_finishes_the_registered_task _______
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-390/test_invalid_config_at_worker_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c99aa70>
+
+    def test_invalid_config_at_worker_start_finishes_the_registered_task(tmp_path, monkeypatch):
+        from core import activity
+
+        monkeypatch.setattr(activity, "set_running", lambda *args: None)
+        config = tmp_path / "config"
+        config.mkdir()
+        (config / "system.yaml").write_text("ai: [\n")
+        task = _task()
+        registry = TaskRegistry()
+        registry._tasks[task.job_name] = task
+        handlers = list(logging.getLogger().handlers)
+
+>       executor.run_job_in_thread(task, str(config), str(tmp_path / "jobs"))
+
+tests/test_executor.py:145:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+web/runner/executor.py:56: in run_job_in_thread
+    ???
+core/engine.py:45: in __init__
+    self.sys = load_system_config(config_dir)
+core/config.py:26: in load_system_config
+    cfg = load_yaml(f) or {}
+core/yaml_cache.py:22: in load_yaml
+    return copy.deepcopy(_parse(text))
+core/yaml_cache.py:14: in _parse
+    return yaml.safe_load(text)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/__init__.py:125: in safe_load
+    return load(stream, SafeLoader)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/__init__.py:81: in load
+    return loader.get_single_data()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/constructor.py:49: in get_single_data
+    node = self.get_single_node()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:36: in get_single_node
+    document = self.compose_document()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:55: in compose_document
+    node = self.compose_node(None, None)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:84: in compose_node
+    node = self.compose_mapping_node(anchor)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:133: in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:82: in compose_node
+    node = self.compose_sequence_node(anchor)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/composer.py:110: in compose_sequence_node
+    while not self.check_event(SequenceEndEvent):
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/parser.py:98: in check_event
+    self.current_event = self.state()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/parser.py:474: in parse_flow_sequence_first_entry
+    return self.parse_flow_sequence_entry(first=True)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/parser.py:495: in parse_flow_sequence_entry
+    return self.parse_flow_node()
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/parser.py:268: in parse_flow_node
+    return self.parse_node()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <yaml.loader.SafeLoader object at 0x10c998670>, block = False
+indentless_sequence = False
+
+    def parse_node(self, block=False, indentless_sequence=False):
+        if self.check_token(AliasToken):
+            token = self.get_token()
+            event = AliasEvent(token.value, token.start_mark, token.end_mark)
+            self.state = self.states.pop()
+        else:
+            anchor = None
+            tag = None
+            start_mark = end_mark = tag_mark = None
+            if self.check_token(AnchorToken):
+                token = self.get_token()
+                start_mark = token.start_mark
+                end_mark = token.end_mark
+                anchor = token.value
+                if self.check_token(TagToken):
+                    token = self.get_token()
+                    tag_mark = token.start_mark
+                    end_mark = token.end_mark
+                    tag = token.value
+            elif self.check_token(TagToken):
+                token = self.get_token()
+                start_mark = tag_mark = token.start_mark
+                end_mark = token.end_mark
+                tag = token.value
+                if self.check_token(AnchorToken):
+                    token = self.get_token()
+                    end_mark = token.end_mark
+                    anchor = token.value
+            if tag is not None:
+                handle, suffix = tag
+                if handle is not None:
+                    if handle not in self.tag_handles:
+                        raise ParserError("while parsing a node", start_mark,
+                                "found undefined tag handle %r" % handle,
+                                tag_mark)
+                    tag = self.tag_handles[handle]+suffix
+                else:
+                    tag = suffix
+            #if tag == '!':
+            #    raise ParserError("while parsing a node", start_mark,
+            #            "found non-specific tag '!'", tag_mark,
+            #            "Please check 'http://pyyaml.org/wiki/YAMLNonSpecificTag' and share your opinion.")
+            if start_mark is None:
+                start_mark = end_mark = self.peek_token().start_mark
+            event = None
+            implicit = (tag is None or tag == '!')
+            if indentless_sequence and self.check_token(BlockEntryToken):
+                end_mark = self.peek_token().end_mark
+                event = SequenceStartEvent(anchor, tag, implicit,
+                        start_mark, end_mark)
+                self.state = self.parse_indentless_sequence_entry
+            else:
+                if self.check_token(ScalarToken):
+                    token = self.get_token()
+                    end_mark = token.end_mark
+                    if (token.plain and tag is None) or tag == '!':
+                        implicit = (True, False)
+                    elif tag is None:
+                        implicit = (False, True)
+                    else:
+                        implicit = (False, False)
+                    event = ScalarEvent(anchor, tag, implicit, token.value,
+                            start_mark, end_mark, style=token.style)
+                    self.state = self.states.pop()
+                elif self.check_token(FlowSequenceStartToken):
+                    end_mark = self.peek_token().end_mark
+                    event = SequenceStartEvent(anchor, tag, implicit,
+                            start_mark, end_mark, flow_style=True)
+                    self.state = self.parse_flow_sequence_first_entry
+                elif self.check_token(FlowMappingStartToken):
+                    end_mark = self.peek_token().end_mark
+                    event = MappingStartEvent(anchor, tag, implicit,
+                            start_mark, end_mark, flow_style=True)
+                    self.state = self.parse_flow_mapping_first_key
+                elif block and self.check_token(BlockSequenceStartToken):
+                    end_mark = self.peek_token().start_mark
+                    event = SequenceStartEvent(anchor, tag, implicit,
+                            start_mark, end_mark, flow_style=False)
+                    self.state = self.parse_block_sequence_first_entry
+                elif block and self.check_token(BlockMappingStartToken):
+                    end_mark = self.peek_token().start_mark
+                    event = MappingStartEvent(anchor, tag, implicit,
+                            start_mark, end_mark, flow_style=False)
+                    self.state = self.parse_block_mapping_first_key
+                elif anchor is not None or tag is not None:
+                    # Empty scalars are allowed even if a tag or an anchor is
+                    # specified.
+                    event = ScalarEvent(anchor, tag, (implicit, False), '',
+                            start_mark, end_mark)
+                    self.state = self.states.pop()
+                else:
+                    if block:
+                        node = 'block'
+                    else:
+                        node = 'flow'
+                    token = self.peek_token()
+>                   raise ParserError("while parsing a %s node" % node, start_mark,
+                            "expected the node content, but found %r" % token.id,
+                            token.start_mark)
+E                   yaml.parser.ParserError: while parsing a flow node
+E                   expected the node content, but found '<stream end>'
+E                     in "<unicode string>", line 2, column 1:
+E
+E                       ^
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/yaml/parser.py:369: ParserError
+_________ test_completion_during_replay_includes_final_logs_and_closes _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cbe7910>
+
+    def test_completion_during_replay_includes_final_logs_and_closes(monkeypatch):
+        task, bus = make_task(monkeypatch)
+        bus.write({"type": "log", "message": "started"})
+
+        async def run():
+            iterator = await stream(task)
+            assert (await read_event(iterator))["message"] == "started"
+            bus.write({"type": "log", "message": "last output"})
+            task.status = "success"
+            bus.write({"type": "status", "status": "success"})
+            assert (await read_event(iterator))["message"] == "last output"
+            assert (await read_event(iterator))["status"] == "success"
+            await assert_closed(iterator)
+            assert not bus._subscribers
+
+>       asyncio.run(run())
+
+tests/test_job_stream.py:62:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+tests/test_job_stream.py:57: in run
+    assert (await read_event(iterator))["message"] == "last output"
+tests/test_job_stream.py:29: in read_event
+    raw = await asyncio.wait_for(anext(iterator), timeout=1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+fut = <Task finished name='Task-3' coro=<<async_generator_asend without __name__>()> exception=StopAsyncIteration()>
+timeout = 1
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+>                   return fut.result()
+E                   StopAsyncIteration
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:456: StopAsyncIteration
+________ test_overlap_between_replay_and_subscription_is_delivered_once ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca4c910>
+
+    def test_overlap_between_replay_and_subscription_is_delivered_once(monkeypatch):
+        task, bus = make_task(monkeypatch)
+        original_replay = bus.replay
+
+        def replay(since_id=0):
+            bus.write({"type": "log", "message": "overlap"})
+            return original_replay(since_id)
+
+        monkeypatch.setattr(bus, "replay", replay)
+
+        async def run():
+            iterator = await stream(task)
+            assert (await read_event(iterator))["message"] == "overlap"
+            # Keep task running here so the next event uses the live queue.
+            bus.write({"type": "status", "status": "success"})
+            assert (await read_event(iterator))["status"] == "success"
+            await assert_closed(iterator)
+
+>       asyncio.run(run())
+
+tests/test_job_stream.py:83:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+tests/test_job_stream.py:80: in run
+    assert (await read_event(iterator))["status"] == "success"
+tests/test_job_stream.py:29: in read_event
+    raw = await asyncio.wait_for(anext(iterator), timeout=1)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+fut = <Task finished name='Task-9' coro=<<async_generator_asend without __name__>()> exception=StopAsyncIteration()>
+timeout = 1
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+>                   return fut.result()
+E                   StopAsyncIteration
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:456: StopAsyncIteration
+__________________ test_error_does_not_hide_the_final_status ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ca5e9e0>
+
+    def test_error_does_not_hide_the_final_status(monkeypatch):
+        task, bus = make_task(monkeypatch)
+        bus.write({"type": "error", "message": "failed to initialize"})
+        bus.write({"type": "status", "status": "failed"})
+        task.status = "failed"
+
+        async def run():
+            iterator = await stream(task)
+            assert (await read_event(iterator))["type"] == "error"
+            assert (await read_event(iterator))["status"] == "failed"
+            await assert_closed(iterator)
+
+>       asyncio.run(run())
+
+tests/test_job_stream.py:112:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+tests/test_job_stream.py:110: in run
+    await assert_closed(iterator)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+iterator = <async_generator object stream_job.<locals>.event_stream at 0x10cbd6cc0>
+
+    async def assert_closed(iterator):
+        pending = asyncio.create_task(anext(iterator))
+        done, _ = await asyncio.wait({pending}, timeout=0.2)
+        if not done:
+            pending.cancel()
+            await asyncio.gather(pending, return_exceptions=True)
+>           raise AssertionError("terminal status must close the stream without cancellation")
+E           AssertionError: terminal status must close the stream without cancellation
+
+tests/test_job_stream.py:39: AssertionError
+_______ test_subscription_receives_worker_event_before_first_queue_read ________
+
+self = <Queue at 0x10cbca860 maxsize=1000>
+
+    async def get(self):
+        """Remove and return an item from the queue.
+
+        If queue is empty, wait until an item is available.
+        """
+        while self.empty():
+            getter = self._get_loop().create_future()
+            self._getters.append(getter)
+            try:
+>               await getter
+E               asyncio.exceptions.CancelledError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:159: CancelledError
+
+During handling of the above exception, another exception occurred:
+
+fut = <Task cancelled name='Task-31' coro=<Queue.get() done, defined at /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:150>>
+timeout = 1
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+>                   return fut.result()
+E                   asyncio.exceptions.CancelledError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:456: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+    def test_subscription_receives_worker_event_before_first_queue_read():
+        async def run():
+            bus = LogBus("early")
+            q = bus.subscribe()
+            await asyncio.to_thread(bus.write, {"type": "status", "status": "success"})
+            assert (await asyncio.wait_for(q.get(), timeout=1))["status"] == "success"
+            bus.unsubscribe(q)
+
+>       asyncio.run(run())
+
+tests/test_job_stream.py:136:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+tests/test_job_stream.py:133: in run
+    assert (await asyncio.wait_for(q.get(), timeout=1))["status"] == "success"
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+fut = <Task cancelled name='Task-31' coro=<Queue.get() done, defined at /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/queues.py:150>>
+timeout = 1
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+
+        Coroutine will be wrapped in Task.
+
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+
+        If the wait is cancelled, the task is also cancelled.
+
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+
+        if timeout is None:
+            return await fut
+
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+
+            if fut.done():
+                return fut.result()
+
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+                    return fut.result()
+                except exceptions.CancelledError as exc:
+>                   raise exceptions.TimeoutError() from exc
+E                   asyncio.exceptions.TimeoutError
+
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/tasks.py:458: TimeoutError
+_____ test_slow_subscriber_retains_terminal_event_without_callback_errors ______
+
+    def test_slow_subscriber_retains_terminal_event_without_callback_errors():
+        async def run():
+            bus = LogBus("slow")
+            q = bus.subscribe()
+            errors = []
+            asyncio.get_running_loop().set_exception_handler(lambda loop, context: errors.append(context))
+            for number in range(q.maxsize + 10):
+                bus.write({"type": "log", "message": str(number)})
+            bus.write({"type": "status", "status": "success"})
+            await asyncio.sleep(0)
+            events = [q.get_nowait() for _ in range(q.qsize())]
+            assert events[-1]["status"] == "success"
+            assert len(events) == q.maxsize
+            assert [event["_id"] for event in events] == sorted(event["_id"] for event in events)
+            assert not errors
+            bus.unsubscribe(q)
+
+>       asyncio.run(run())
+
+tests/test_job_stream.py:156:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/runners.py:44: in run
+    return loop.run_until_complete(main)
+/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/asyncio/base_events.py:649: in run_until_complete
+    return future.result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def run():
+        bus = LogBus("slow")
+        q = bus.subscribe()
+        errors = []
+        asyncio.get_running_loop().set_exception_handler(lambda loop, context: errors.append(context))
+        for number in range(q.maxsize + 10):
+            bus.write({"type": "log", "message": str(number)})
+        bus.write({"type": "status", "status": "success"})
+        await asyncio.sleep(0)
+        events = [q.get_nowait() for _ in range(q.qsize())]
+>       assert events[-1]["status"] == "success"
+E       IndexError: list index out of range
+
+tests/test_job_stream.py:150: IndexError
+=============================== warnings summary ===============================
+../../../../../.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; logfire
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+../../../../../.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/_pytest/config/__init__.py:1303: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_executor.py::test_invalid_config_at_worker_start_finishes_the_registered_task
+FAILED tests/test_job_stream.py::test_completion_during_replay_includes_final_logs_and_closes
+FAILED tests/test_job_stream.py::test_overlap_between_replay_and_subscription_is_delivered_once
+FAILED tests/test_job_stream.py::test_error_does_not_hide_the_final_status - ...
+FAILED tests/test_job_stream.py::test_subscription_receives_worker_event_before_first_queue_read
+FAILED tests/test_job_stream.py::test_slow_subscriber_retains_terminal_event_without_callback_errors
+6 failed, 2 passed, 2 warnings in 3.46s

@@ -1,0 +1,35 @@
+# Job-specific writing workflows accepted for production.
+jobs:
+  - ai_media/ai_tool_tutorials
+  - ai_media/daily_opensource_radar
+  - ai_media/weekly_business_watch
+  - ai_media/weekly_deep_research
+  - ai_media/weekly_model_arena
+  - analysis/ai_gap_analysis
+  - chatgpt_acquisition/t01_product
+  - chatgpt_acquisition/t02_scenarios
+  - chatgpt_acquisition/t03_tutorials
+  - chatgpt_acquisition/t04_testing
+  - chatgpt_acquisition/t05_comparison
+  - chatgpt_acquisition/t06_value
+  - chatgpt_acquisition/t07_subscription
+  - chatgpt_acquisition/t08_troubleshooting
+  - chatgpt_acquisition/t09_updates
+  - company/company_weekly
+  - culture/culture_daily
+  - culture/culture_weekly
+  - economy/economy_illustrated
+  - history/history_daily
+  - history/history_weekly
+  - industry/industry_weekly
+  - monitoring/ai_flash_discovery
+  - practical_ai_intelligence/04_project_understanding_radar
+  - research/ai
+  - research/assistant_app_acceptance_20261025
+  - science/science_daily
+  - science/science_illustrated
+  - science/science_weekly
+  - software/software_daily
+  - software/software_weekly
+  - tech/tech_illustrated
+  - tech/tech_weekly

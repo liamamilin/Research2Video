@@ -1,0 +1,56 @@
+{
+  "source:bili_hot_ai": [
+    "bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI"
+  ],
+  "source:cg_release_notes": [
+    "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+  ],
+  "source:cg_openai_news": [
+    "rss:https://openai.com/news/rss.xml"
+  ],
+  "source:cg_pro_tiers": [
+    "page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers"
+  ],
+  "tag:ai_daily_shared": [
+    "page:https://learn.chatgpt.com/docs/whats-new.md",
+    "page:https://developers.openai.com/api/docs/changelog.md",
+    "rss:https://ratelimitnow.com/whats-new.xml",
+    "rss:https://aicatchup.com/rss.xml"
+  ],
+  "github:anthropics/claude-code": [
+    "github:anthropics/claude-code"
+  ],
+  "tldr:ai": [
+    "tldr:ai"
+  ],
+  "rss:https://www.therundown.ai/feed": [
+    "rss:https://www.therundown.ai/feed"
+  ],
+  "hf_models:trending": [
+    "hf_models:trending"
+  ],
+  "tag:ai_radar": [
+    "rss:https://ratelimitnow.com/whats-new.xml",
+    "rss:https://aftergradient.com/rss.xml?kind=news",
+    "rss:https://aicatchup.com/rss.xml",
+    "rss:https://devbrief.dev/rss.xml",
+    "rss:https://onevium.com/zh/rss.xml",
+    "rss:https://zhangwen.site/rss.xml"
+  ],
+  "tag:ai_news": [
+    "rss:https://www.ifanr.com/feed",
+    "rss:https://techcrunch.com/category/artificial-intelligence/feed/",
+    "rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    "rss:https://the-decoder.com/feed/",
+    "rss:https://www.testingcatalog.com/rss/",
+    "rss:https://9to5mac.com/guides/apple-intelligence/feed/"
+  ],
+  "tag:radar_official": [
+    "radar:chatgpt / claude / codex 动态"
+  ],
+  "tag:radar_dev": [
+    "radar:Ollama / Claude Code / Codex 重要更新",
+    "radar:AI 编程工具产品动态（每周对比）",
+    "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具"
+  ]
+}

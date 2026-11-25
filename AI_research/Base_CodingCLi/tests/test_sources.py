@@ -363,3 +363,59 @@ def test_radar_cli_failure_is_an_error_not_a_quiet_day(tmp_path, monkeypatch):
     _fake_radar(tmp_path, monkeypatch, {}, fail=True)
     with pytest.raises(RuntimeError, match="退出码 3：db locked"):
         sources.fetch_source("radar:chatgpt / claude / codex 动态")
+
+
+class _Page:
+    def __init__(self, body: bytes):
+        self.body = body
+
+    def read(self):
+        return self.body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def _moved(url, location):
+    import email.message
+    import urllib.error
+    headers = email.message.Message()
+    headers["Location"] = location
+    return urllib.error.HTTPError(url, 308, "Permanent Redirect", headers, None)
+
+
+def test_page_fetch_follows_a_permanent_redirect(monkeypatch):
+    # Python 3.10's urllib stops at 308 (11-15: developers.openai.com/codex/changelog -> learn.chatgpt.com).
+    asked = []
+
+    def urlopen(request, timeout=None):
+        asked.append(request.full_url)
+        if len(asked) == 1:
+            raise _moved(request.full_url, "/docs/changelog")
+        return _Page(b"<html>moved here</html>")
+
+    monkeypatch.setattr(sources.urllib.request, "urlopen", urlopen)
+    assert sources._get_page("https://old.example/codex/changelog", 5) == "<html>moved here</html>"
+    assert asked == ["https://old.example/codex/changelog", "https://old.example/docs/changelog"]
+
+
+def test_permanent_redirect_never_leaves_http(monkeypatch):
+    import urllib.error
+
+    def urlopen(request, timeout=None):
+        raise _moved(request.full_url, "file:///etc/passwd")
+
+    monkeypatch.setattr(sources.urllib.request, "urlopen", urlopen)
+    with pytest.raises(urllib.error.HTTPError):
+        sources._get_page("https://old.example/a", 5)
+
+
+def test_endless_permanent_redirects_stop(monkeypatch):
+    import urllib.error
+    monkeypatch.setattr(sources.urllib.request, "urlopen",
+                        lambda request, timeout=None: (_ for _ in ()).throw(_moved(request.full_url, "/loop")))
+    with pytest.raises(urllib.error.URLError, match="too many permanent redirects"):
+        sources._get_text("https://old.example/a", 5)

@@ -80,7 +80,7 @@ class TaskRegistry:
             prev = self._tasks.get(job_name)
             if prev and prev.is_running:
                 prev.cancel_token.set()
-            if prev and prev.future is not None and not prev.future.done():
+            if prev and (prev.is_running or (prev.future is not None and not prev.future.done())):
                 self._retiring[prev.task_id] = prev
             self._tasks[job_name] = task
         self._publish_activity()
@@ -98,12 +98,16 @@ class TaskRegistry:
 
     def cancel(self, job_name: str) -> bool:
         """Cancel a running task. Returns True if a task was cancelled."""
-        task = self.get(job_name)
-        if task and task.is_running:
+        with self._lock:
+            task = self._tasks.get(job_name)
+            if not task or not task.is_running:
+                return False
             task.cancel_token.set()
             task.status = "cancelled"
-            return True
-        return False
+        # The engine may still be blocked on I/O. Wake SSE clients immediately;
+        # all_tasks keeps unfinished futures visible to safe restart checks.
+        task.log_bus.write({"type": "status", "status": "cancelled"})
+        return True
 
     def is_running(self, job_name: str) -> bool:
         task = self.get(job_name)

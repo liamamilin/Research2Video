@@ -1,0 +1,58 @@
+[
+  {
+    "case": "identical_job_different_identifier",
+    "original": {
+      "selection_channel": "flash",
+      "source_supply_profile": "ai_media",
+      "question_enrichment": true,
+      "original_reading": true
+    },
+    "clone": {
+      "selection_channel": "",
+      "source_supply_profile": null,
+      "question_enrichment": false,
+      "original_reading": false
+    },
+    "scope": "Only _file changed in memory; not the UI copy operation."
+  },
+  {
+    "case": "remove_declared_openai_source",
+    "still_declared": false,
+    "still_in_coverage": true,
+    "scope": "Simulated removal of one Job reference only; source_supply.collect unions both sets."
+  },
+  {
+    "case": "old_column_snapshot_with_current_overrides",
+    "before": {
+      "video_speed": 1.0,
+      "voice_id": "old_voice",
+      "production_mode": "standard"
+    },
+    "after": {
+      "video_speed": 1.5,
+      "voice_id": "old_voice",
+      "production_mode": "fast"
+    },
+    "scope": "Resolver boundary; video_render.create supplies live matrix/production and saved content_context."
+  },
+  {
+    "case": "column_change_masked_by_production_override",
+    "matrix": 1.0,
+    "column": 1.5,
+    "production": 1.25,
+    "effective": 1.25
+  },
+  {
+    "case": "downstream_pending_independent_of_research_schedule",
+    "pending_count": 1,
+    "picks": [
+      {
+        "column": "demo",
+        "all": true,
+        "production": "demo",
+        "whole": true
+      }
+    ],
+    "scope": "Function-boundary fixture, not a production pause experiment or full dispatch test."
+  }
+]

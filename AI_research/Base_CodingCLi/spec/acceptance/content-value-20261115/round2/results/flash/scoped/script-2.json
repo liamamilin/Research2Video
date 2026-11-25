@@ -1,0 +1,143 @@
+{
+  "title": "DeepSeek 语音一小时 5.8 美分，贵的不在语音上",
+  "sections": [
+    {
+      "title": "语音一小时 5.8 美分，先别算它",
+      "paragraphs": [
+        {
+          "text": "如果你的团队在做会议记录或者语音助手，先记住一个数：DeepSeek 的语音识别，一小时录音收 11.6 美分，限时价 5.8 美分。大家好，我是洛洛，今天聊聊 DeepSeek 把搜索、文件、语音都拆成 API 之后，小团队到底该先算哪几项。我的结论有点反直觉：语音和文件这两项，先接，别算。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "官网价目表是这样的：搜索和网页抓取都是每 1000 次 0.75 美元，一次不到一厘钱；文件解析和 OCR 每 1000 页 0.225 美元；语音合成每万字符 0.45 美元，限时五折 0.225；语音识别就是我开头说的小时价。官方公告的说法是，App 里的功能都可以自由组合调用，不用整套搬。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://www.qbitai.com/2026/11/510003.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "一场一小时的会，不到 8 美分",
+      "paragraphs": [
+        {
+          "text": "拿你最熟的一场会算。一小时的会，录音走语音识别，限时价 5.8 美分；转出来一万字上下，丢给 deepseek-flash 做总结，输出一千字左右，这部分 token 钱小到可以忽略；再把摘要用语音合成念出来，一千字符 2.25 美分。一场会不到 8 美分。一天十场、一个月 22 个工作日，220 场会，语音这块总共不到 20 美元。同样，1000 页合同丢进 OCR，是 0.225 美元。这两项之所以我建议先接，不是因为它们不重要，是因为它们的量级进不了预算会议。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#speech-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "真正要算的，是你跑在几点、缓存命中没有",
+      "paragraphs": [
+        {
+          "text": "真正要算的是模型那一侧。先说时段。flash 缓存没命中的输入，非高峰每百万 token 0.15 美元，高峰 0.3；输出非高峰 0.6，高峰 1.2。pro 是 0.66 和 1.32 的输入，1.98 和 3.96 的输出。高峰是 UTC 周一到周五 01:00 到 04:00、06:00 到 10:00，换成北京时间就是上午 9 点到 12 点、下午 2 点到 6 点。这正好是国内团队在上班。会议记录这种“会开完就跑”的任务基本躲不开峰价，所以我建议别把“错峰省一半”写进你的成本模型，那笔钱你多半拿不到。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "再算缓存。还是 flash，缓存命中的输入每百万 token 0.003 美元，没命中 0.15，差 50 倍。你的系统提示词、RAG 里那段固定前缀、每次都要带上的说明，命中不命中，比你纠结 flash 还是 pro 值钱得多。还有一笔容易忘的：搜索和抓取按次收，一次不到一厘，但如果是 agent 自己决定搜几次，一个任务搜 3 次和搜 30 次差 10 倍，我建议直接给它设个上限。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的顺序：先接语音和 OCR，先别急着升 pro",
+      "paragraphs": [
+        {
+          "text": "所以我的顺序是：语音和 OCR 直接接上，它们便宜到不构成选择；精力放在三件事上——能挪的批量任务挪到非高峰，固定前缀做成能命中缓存，搜索和抓取设次数上限。至于 flash 还是 pro，我建议先别升级：pro 的输出价是 flash 的 3.3 倍，而且 pro 不支持视觉。你要处理截图、扫描件里的图表，flash 反而是唯一能用的那个。你们那边真正烧钱的，是单次调用贵，还是调用次数太多？我挺想听你们算出来的结果。我是洛洛，我们下期见。",
+          "citations": [
+            "https://api-docs.deepseek.com/quick_start/pricing#model-details",
+            "https://api-docs.deepseek.com/quick_start/pricing#web-tools-pricing",
+            "https://api-docs.deepseek.com/quick_start/pricing#ocr-pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 880,
+    "estimated_seconds": 197,
+    "segments": 35,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 2.622,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "语音一小时 5.8 美分，先别算它",
+        "spoken_length": 221,
+        "budget": 82
+      },
+      {
+        "title": "一场一小时的会，不到 8 美分",
+        "spoken_length": 173,
+        "budget": 82
+      },
+      {
+        "title": "真正要算的，是你跑在几点、缓存命中没有",
+        "spoken_length": 320,
+        "budget": 81
+      },
+      {
+        "title": "我的顺序：先接语音和 OCR，先别急着升 pro",
+        "spoken_length": 166,
+        "budget": 81
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3065,
+      "completion_tokens": 4881,
+      "total_tokens": 7946,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 3545,
+      "cost_usd": 0.00338835,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 52.077,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+    "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+    "trusted_urls": 19
+  }
+}

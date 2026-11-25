@@ -1,7 +1,9 @@
 """Job-related routes (M1+M3: read-only, edit, run, cancel, SSE stream)."""
 
 from __future__ import annotations
+from web.services.chains import mutation
 
+from core.config_transaction import remove as remove_config_file
 import asyncio
 import json
 import logging
@@ -66,7 +68,7 @@ def _summary(job: dict) -> JobSummary:
 
 
 @router.get("", response_model=list[JobSummary])
-def list_all(user=Depends(require_viewer)):
+def list_all(user=Depends(require_viewer), compact: bool = False):
     settings = get_settings()
     names = list_jobs(settings.paths.jobs_dir, enabled_only=False)
     result: list[JobSummary] = []
@@ -74,7 +76,11 @@ def list_all(user=Depends(require_viewer)):
         job = load_job(settings.paths.jobs_dir, name)
         if not job:
             continue
-        result.append(_summary(job))
+        summary = _summary(job)
+        if compact and summary.state:
+            from web.services.video_list_payload import job_state
+            summary.state = JobState(**job_state(summary.state.model_dump()))
+        result.append(summary)
     return result
 
 
@@ -134,6 +140,7 @@ def list_templates(user=Depends(require_viewer)):
 
 
 @router.post("/templates", status_code=status.HTTP_201_CREATED)
+@mutation
 def create_template(payload: dict, user=Depends(require_editor)):
     """Create a new reusable job template in jobs/_templates/."""
     settings = get_settings()
@@ -152,6 +159,7 @@ def create_template(payload: dict, user=Depends(require_editor)):
 
 
 @router.put("/templates/{key}")
+@mutation
 def update_template(key: str, payload: dict, user=Depends(require_editor)):
     """Update an existing template. Built-in templates may be edited but not deleted."""
     settings = get_settings()
@@ -170,6 +178,7 @@ def update_template(key: str, payload: dict, user=Depends(require_editor)):
 
 
 @router.delete("/templates/{key}")
+@mutation
 def delete_template(key: str, user=Depends(require_editor)):
     """Delete a user-created template. Built-in templates are protected."""
     settings = get_settings()
@@ -178,7 +187,7 @@ def delete_template(key: str, user=Depends(require_editor)):
     file_path = _template_path(tmpl_dir, key)
     if not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail=ApiError.make("template_not_found", f"模板 '{key}' 不存在"))
-    os.remove(file_path)
+    remove_config_file(file_path)
     audit.log("template_delete", user=user["username"], target=key, result="success")
     return {"ok": True, "key": key}
 
@@ -385,6 +394,7 @@ def _read_template(tmpl_dir: str, key: str) -> dict:
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
+@mutation
 def create_job(payload: dict, user=Depends(require_editor)):
     """Create a new job file from a template."""
     settings = get_settings()
@@ -533,7 +543,7 @@ def create_job(payload: dict, user=Depends(require_editor)):
             # no longer existed on disk.
             try:
                 if os.stat(file_path).st_ino == created_inode:
-                    os.remove(file_path)
+                    remove_config_file(file_path)
             except OSError:
                 pass
             raise
@@ -743,36 +753,29 @@ async def stream_job(name: str, request: Request, user=Depends(require_viewer)):
         except (ValueError, TypeError):
             pass
 
-    # Replay events since last_id
-    initial_events = task.log_bus.replay(since_id=last_id)
-
-    # If the task is finished and no new events, return a single SSE status event
-    if not task.is_running and not initial_events:
-        async def final_event():
-            yield _sse_format({"type": "status", "status": task.status})
-
-        return StreamingResponse(
-            final_event(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
-            },
-        )
-
     async def event_stream():
-        # Flush initial replay
-        for event in initial_events:
-            yield _sse_format(event)
-
-        # Subscribe for new events
+        # Subscribe first: events written during replay are queued as well.
+        # The bus binds its loop at subscription, before the first q.get().
         q = task.log_bus.subscribe()
+        cursor = last_id
         try:
+            events = task.log_bus.replay(since_id=cursor)
             while True:
-                event = await q.get()
-                yield _sse_format(event)
-                if event.get("type") in ("status", "error"):
-                    break
+                for event in events:
+                    if event["_id"] <= cursor:
+                        continue
+                    cursor = event["_id"]
+                    yield _sse_format(event)
+                    if event.get("type") == "status":
+                        return
+                if not task.is_running:
+                    # Include final logs written while the replay was sent.
+                    events = task.log_bus.replay(since_id=cursor)
+                    if events:
+                        continue
+                    yield _sse_format({"type": "status", "status": task.status})
+                    return
+                events = [await q.get()]
         except asyncio.CancelledError:
             pass
         finally:
@@ -848,6 +851,7 @@ def validate_yaml(
 
 
 @router.put("/{name:path}", response_model=dict)
+@mutation
 def update_yaml(
     name: str,
     payload: JobYamlUpdate,
@@ -969,6 +973,7 @@ def get_one(name: str, user=Depends(require_viewer)):
 
 
 @router.delete("/{name:path}")
+@mutation
 def delete_job(name: str, request: Request, user=Depends(require_editor)):
     """Delete a job YAML file. Refuses while the job is running."""
     settings = get_settings()
@@ -985,6 +990,10 @@ def delete_job(name: str, request: Request, user=Depends(require_editor)):
             detail=ApiError.make("already_running", "Job 正在运行，无法删除"),
         )
 
+    from core.video import production
+    used = [c.name or c.key for c in production.load_all(settings.paths.config_dir, jobs_dir).values() if c.job == name]
+    if used:
+        raise HTTPException(409, '研究仍被视频输出使用：' + '、'.join(used) + '。请从链路管理处理关联后删除。')
     rel = job["_file"]
     deleted_path = None
     for ext in (".yaml", ".yml"):
@@ -1016,7 +1025,7 @@ def delete_job(name: str, request: Request, user=Depends(require_editor)):
     try:
         from core.schedule_store import ScheduleStore
         ScheduleStore(settings.paths.state_dir).delete_for_job(rel)
-        os.remove(deleted_path)
+        remove_config_file(deleted_path)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=ApiError.make('already_running', str(exc))) from exc
     except OSError as exc:

@@ -1,0 +1,38 @@
+{
+  "geography": {
+    "control": {
+      "research_title": "河流为什么大多弯弯曲曲，而不是直的？",
+      "search_calls": 2,
+      "sources_read": 4,
+      "author_request_has_supplement": true,
+      "author_system_sha256": "920913e84455211b320c57faf1d89cc7bcac5cf0a5218bec7309d548ffeaaada",
+      "length": 2080
+    },
+    "candidate": {
+      "research_title": "为什么重庆的路总是上上下下、弯来弯去",
+      "search_calls": 2,
+      "sources_read": 4,
+      "author_request_has_supplement": true,
+      "author_system_sha256": "920913e84455211b320c57faf1d89cc7bcac5cf0a5218bec7309d548ffeaaada",
+      "length": 2621
+    }
+  },
+  "history": {
+    "control": {
+      "research_title": "古人没有钟表，是怎么知道时间的？",
+      "search_calls": 2,
+      "sources_read": 4,
+      "author_request_has_supplement": true,
+      "author_system_sha256": "920913e84455211b320c57faf1d89cc7bcac5cf0a5218bec7309d548ffeaaada",
+      "length": 3884
+    },
+    "candidate": {
+      "research_title": "古人没有钟表，是怎么知道时间的？",
+      "search_calls": 2,
+      "sources_read": 4,
+      "author_request_has_supplement": true,
+      "author_system_sha256": "920913e84455211b320c57faf1d89cc7bcac5cf0a5218bec7309d548ffeaaada",
+      "length": 3903
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+ "scenes": [
+  {
+   "section": 1,
+   "scene": "In a winter doorway, a young woman in a grey sweater jerks her hand back from a cold iron door handle, then rests the same hand calmly on the wooden door frame beside it.",
+   "overlay": [
+    "同一个屋子",
+    "手感差远了"
+   ],
+   "note": "冬天进门，她缩回抓铁门把手的手，改扶旁边的木门框，一点事没有。"
+  },
+  {
+   "section": 2,
+   "scene": "In a cool room, the bare hand of a young woman in a grey sweater hovers a breath above a dull metal tabletop, her warm skin close to the cold surface.",
+   "overlay": [
+    "皮肤约 33 度",
+    "热往外流"
+   ],
+   "note": "一只手悬在冷金属桌面上方，皮肤比周围东西热，热只能往外流。"
+  },
+  {
+   "section": 3,
+   "scene": "At a kitchen table, a young woman in a grey sweater and a young man in a navy shirt each press one fingertip down, she on a metal slab, he on a wooden board.",
+   "overlay": [
+    "粗水管",
+    "细吸管"
+   ],
+   "note": "两人指尖同时按上金属台面和木台面，一个热跑得飞快，一个挤着走。"
+  },
+  {
+   "section": 4,
+   "scene": "Same kitchen table: the woman's fingertip stays on a thick metal slab backed by a heavy block, while the man's fingertip rests on a thin wooden board.",
+   "overlay": [
+    "管子粗",
+    "池子还大"
+   ],
+   "note": "金属背后是厚厚一大块，木头只是薄薄一层，热无处可去就堵住了。"
+  },
+  {
+   "section": 5,
+   "scene": "At the counter, the woman touches a metal spoon, then a wooden spoon, wincing at the first and leaving her finger resting on the second.",
+   "overlay": [
+    "降温快",
+    "就觉得冷"
+   ],
+   "note": "她碰金属勺立刻缩手，碰木勺却能一直按着，皮肤报的是降温有多快。"
+  },
+  {
+   "section": 6,
+   "scene": "Barefoot at the kitchen threshold, a young woman in a grey sweater stands with one foot on cold tile and one on a soft rug, a wooden-handled pan on the stove behind her.",
+   "overlay": [
+    "瓷砖",
+    "地毯"
+   ],
+   "note": "她一只脚踩瓷砖一只脚踩地毯，锅柄是木头的，这套机制在家里到处都是。"
+  }
+ ]
+}

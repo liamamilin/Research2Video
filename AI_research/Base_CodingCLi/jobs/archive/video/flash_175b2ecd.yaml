@@ -1,0 +1,31 @@
+name: flash_175b2ecd
+description: 快讯：GPT-6.1 Terra：标准价 $1/$5，但长上下文、Fast、cache write 是三套倍率
+enabled: true
+keywords:
+  - GPT-6.1 Terra
+  - 标准价 $1/$5
+  - 但长上下文
+  - Fast
+  - cache write 是三套倍率
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。
+  选题：GPT-6.1 Terra：标准价 $1/$5，但长上下文、Fast、cache write 是三套倍率
+  目标观众：开发者
+  选题资料：OpenAI 新模型 Terra 以 GPT-6.1 Sol 一半的标准价提供更快的视觉推理和 computer use，并进入 Codex、ChatGPT Work、GitHub Copilot 和 API；代价是计价维度变多，且 ChatGPT Chat 里用不到。；（未提供）
+  来源资料：https://openai.com/index/introducing-gpt-6-1-terra/
+  https://aicatchup.com/news/openai-gpt-6-1-terra
+  https://devbrief.dev/ai-coding/ai-coding-2026-10-27/
+  https://developers.openai.com/api/docs/pricing
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。
+output: output/video/{datetime}_flash_175b2ecd.md

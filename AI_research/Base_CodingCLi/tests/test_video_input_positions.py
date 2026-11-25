@@ -11,8 +11,9 @@ from web.services import video_render
 @pytest.mark.parametrize('gap', ['section', 'paragraph', 'both'])
 def test_empty_authored_content_does_not_shift_navigation_or_visual_positions(video_env, gap):
     url = 'https://docs.example.com/updates'
+    title_a = 'Gemini 4 Hydrogen进搜索和免费App'
     sections = [{'title': title, 'episode_role': 'item', 'paragraphs': [
-        {'text': text, 'citations': [url]}]} for title, text in [('内容甲', '讲解第一个变化。'), ('内容乙', '讲解第二个变化。')]]
+        {'text': text, 'citations': [url]}]} for title, text in [(title_a, '讲解第一个变化。'), ('内容乙', '讲解第二个变化。')]]
     if gap in {'paragraph', 'both'}:
         for section in sections:
             section['paragraphs'].insert(0, {'text': '  ', 'citations': []})
@@ -29,8 +30,8 @@ def test_empty_authored_content_does_not_shift_navigation_or_visual_positions(vi
     request = video_render.create(script)['request']
     assert request['chapters'] == screenshots.chapters(version)
     assert request['episode']['items'] == [
-        {'title': '内容甲', 'chapter_indexes': [0]}, {'title': '内容乙', 'chapter_indexes': [1]}]
+        {'title': title_a, 'chapter_indexes': [0]}, {'title': '内容乙', 'chapter_indexes': [1]}]
     assert [(r['title'], r['chapter_index'], r['paragraphs']) for r in episodes.manifest(topic, sections)['items']] == [
-        ('内容甲', 0, 1), ('内容乙', 1, 1)]
+        (title_a, 0, 1), ('内容乙', 1, 1)]
     assert [(n['chapter_index'], n['paragraph_index']) for n in visual_materials.needs_for(version)] == [(0, 0), (1, 0)]
     assert sections == before

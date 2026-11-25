@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:performance": "vitest run src/console-performance.test.tsx src/lib/page-snapshots.test.ts src/lib/use-page-resource.test.tsx src/lib/use-chain-scope.test.tsx src/lib/page-modules.test.ts src/api/client.test.ts",
     "test:watch": "vitest",
     "lint": "eslint src"
   },

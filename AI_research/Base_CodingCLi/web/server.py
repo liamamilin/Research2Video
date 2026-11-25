@@ -134,6 +134,13 @@ async def lifespan(app: FastAPI):
         logger.info("Indexed %d reports from %s", scan_result["indexed"], settings.paths.output_dir)
     elif scan_result["indexed"] == 0:
         logger.info("No reports found in %s", settings.paths.output_dir)
+    def associate_chain_reports():
+        try:
+            from web.services.chain_reports import reconcile
+            reconcile()
+        except Exception:
+            logger.exception('Report producer association deferred')
+    # Run after video initialization below; no replacement of the native lifespan.
     # Start incremental file watcher
     start_watcher(settings.paths.output_dir, state_dir=settings.paths.state_dir)
 
@@ -146,12 +153,19 @@ async def lifespan(app: FastAPI):
         interrupted = video_store.fail_interrupted()
         if interrupted:
             logger.info("Settled %d interrupted video script(s)", interrupted)
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            try:
+                from web.routes import video as video_routes
+                video_routes.home_board(user={"id": 0, "username": "system", "role": "admin"})
+            except Exception:
+                pass
         resumed = video_render.resume_active()
         if resumed:
             logger.info("Resumed %d in-flight video render(s)", resumed)
 
     video_store.use_state_dir(settings.paths.state_dir)
     video_store.init_db()
+    threading.Thread(target=associate_chain_reports,name="chain-report-association",daemon=True).start()
     from web.services import distributions
     distributions.migrate_confirmed_accounts()
     recover_video_work()
@@ -183,25 +197,45 @@ async def lifespan(app: FastAPI):
             try:
                 from web.services import video_storage
                 if not video_storage.migration_pending():
+                    from web.services import chain_runner
+                    chain_runner.tick()
                     video_autopilot.tick()
+                    chain_runner.tick()
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
-    from core.video import archive as video_archive
+    from core.video import archive as video_archive, cleanup as video_cleanup
 
     def archive_loop() -> None:
-        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py)."""
+        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py).
+        External-storage retention cleanup runs on the same background loop (core/video/cleanup.py)."""
         paths = get_settings().paths
         while not sweep_stop.wait(600):
             try:
                 if video_archive.due(paths.state_dir):
                     result = video_archive.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
                     logger.info("video archive pass: %s", result)
+                if video_cleanup.due(paths.config_dir, paths.state_dir):
+                    result = video_cleanup.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
+                    logger.info("video cleanup pass: %s", result)
             except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
-                logger.exception("video archive pass failed")
+                logger.exception("video archive/cleanup pass failed")
+
+    def hot_trigger_loop() -> None:
+        """B站热搜 AI words start an extra flash run (web/services/hot_trigger.py); it throttles itself."""
+        from web.services import hot_trigger
+
+        while not sweep_stop.wait(300):
+            try:
+                note = hot_trigger.tick()
+                if note:
+                    logger.info("hot trigger: %s", note)
+            except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
+                logger.exception("hot trigger pass failed")
 
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=archive_loop, name="video-archive", daemon=True).start()
+        threading.Thread(target=hot_trigger_loop, name="hot-trigger", daemon=True).start()
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
         threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
 
@@ -242,11 +276,18 @@ async def lifespan(app: FastAPI):
 
     def assistant_batch_loop() -> None:
         from web.services import assistant_batches
-        while not sweep_stop.wait(3):
+        from web.services.assistant_batch_store import BatchStore
+        wait_seconds = 3
+        while not sweep_stop.wait(wait_seconds):
             try:
-                asyncio.run(assistant_batches.tick(app))
+                if not BatchStore().list(active=True):
+                    wait_seconds = 15
+                    continue
+                dispatched = asyncio.run(assistant_batches.tick(app))
+                wait_seconds = 3 if dispatched or BatchStore().list(active=True) else 15
             except Exception:
                 logger.exception('assistant batch pass failed')
+                wait_seconds = 15
 
     if not os.environ.get('AREC_NO_AUTOPILOT_LOOP'):
         threading.Thread(target=assistant_batch_loop, name='assistant-batches', daemon=True).start()
@@ -275,11 +316,34 @@ async def lifespan(app: FastAPI):
 
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=analytics_manual_loop, name="analytics-manual", daemon=True).start()
+        try:  # A/B module (spec/ab-testing.md §2): its own thread; a missing or broken module never stops startup
+            from core.experiments import background as experiments_background
+            experiments_background.start_background(settings.paths.state_dir, sweep_stop)
+        except Exception:  # noqa: BLE001
+            logger.exception("experiments module did not start")
+
+    # Keep WAL databases open without a read transaction. On external storage,
+    # closing the last short-lived reader repeatedly checkpoints/reopens the WAL.
+    import sqlite3
+    from web.services import chains
+    with chains.db():
+        pass
+    database_anchors = []
+    database_paths = [Path(settings.paths.state_dir) / name for name in
+                      ('video.db', 'reports.db', 'schedules.db', 'users.db', 'platforms.db', 'douyin.db', 'chains.db')]
+    database_paths.extend((Path(settings.paths.state_dir) / 'platforms').glob('*/queue.db'))
+    for path in database_paths:
+        if path.is_file():
+            anchor = sqlite3.connect(str(path), timeout=10)
+            anchor.execute('SELECT name FROM sqlite_master LIMIT 1').fetchall()
+            database_anchors.append(anchor)
 
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
     yield
     sweep_stop.set()
+    for anchor in database_anchors:
+        anchor.close()
     # Shutdown: cancel all running tasks
     registry = TaskRegistry()
     running = registry.all_running()
@@ -441,15 +505,26 @@ def create_app() -> FastAPI:
     app.include_router(video_brands_router)
     app.include_router(sources_router)
     app.include_router(production_router)
+    from web.routes.chains import router as chains_router
+    app.include_router(chains_router)
     app.include_router(outputs_router)
     app.include_router(platforms_router)
     app.include_router(douyin_router)
     app.include_router(social_publishing_router)
+    try:  # A/B module (spec/ab-testing.md §2): optional, so an import failure leaves the rest of the app up
+        from web.routes.experiments import router as experiments_router
+        app.include_router(experiments_router)
+    except Exception:  # noqa: BLE001
+        logger.exception("experiments routes not loaded")
 
     @app.get("/api/live")
     async def live():
         """Cheap gateway liveness; dependency diagnostics remain on /api/health."""
         return {"status": "ok", "instance_id": getattr(app.state, "instance_id", None)}
+
+    app.state.health_cache = {}
+    _health_lock = threading.Lock()
+    _health_ttl = 5.0
 
     @app.get("/api/health")
     def health():
@@ -457,12 +532,28 @@ def create_app() -> FastAPI:
         from core.health import run_checks
 
         settings = get_settings()
+        key = (settings.paths.state_dir, settings.paths.output_dir, settings.paths.config_dir)
+        now = time.monotonic()
+        with _health_lock:
+            cached = app.state.health_cache.get(key)
+            if cached is not None and now - cached[0] < _health_ttl:
+                result = dict(cached[1])
+                result['instance_id'] = getattr(app.state, 'instance_id', None)
+                return JSONResponse(
+                    status_code=503 if result["status"] == "error" else 200,
+                    content=result,
+                )
         result = run_checks(
             state_dir=settings.paths.state_dir,
             output_dir=settings.paths.output_dir,
             config_dir=settings.paths.config_dir,
             deep=False,
         )
+        # Cache only healthy answers so a brief outage is rechecked and
+        # unexpected run_checks failures still surface as 500.
+        if result.get("status") != "error":
+            with _health_lock:
+                app.state.health_cache[key] = (time.monotonic(), dict(result))
         result['instance_id'] = getattr(app.state, 'instance_id', None)
         return JSONResponse(
             status_code=503 if result["status"] == "error" else 200,

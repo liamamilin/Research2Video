@@ -96,6 +96,14 @@ def test_very_long_single_tts_phrase_stays_whole_and_fast_short_phrases_do_not_f
     assert len(arrange(groups, speech, {})[0]) == 1
 
 
+def test_short_head_chunk_in_split_paragraph_is_absorbed_without_flash_page():
+    # A 1.7s opener followed by a 13s sentence in brief mode (max=14s, min=4s) fits within 1.25*max.
+    groups, speech = inputs([1.7, 13.0], [2])
+    units, _ = arrange(groups, speech, {'_shot_profile': 'brief'})
+    assert len(units) == 1
+    assert units[0]['segment_ids'] == ['n0', 'n1']
+
+
 def test_speed_and_available_objects_adjust_visual_budget():
     groups, speech = inputs([8]*4, [4], [[0]])
     regular = arrange(groups, speech, {})[0]

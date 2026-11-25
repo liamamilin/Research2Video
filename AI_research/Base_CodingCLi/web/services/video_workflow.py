@@ -67,6 +67,10 @@ def _read_report(report_path: str) -> str:
 def report_of(script: dict, report_path: str = "", *, version: dict | None = None) -> str:
     """The text a script is written and checked against: its report, or for an item written without research that
     item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
+    from core.video import joint_planning
+    planned = joint_planning.assignment(script.get("topic") or {})
+    if planned is not None:
+        return planned["report"]
     if script.get("topic", {}).get("user_materials"):
         from web.services.assistant_materials import source_of
         from core.video import material_context
@@ -79,11 +83,18 @@ def report_of(script: dict, report_path: str = "", *, version: dict | None = Non
 
     text = writer.report_body(_read_report(report_path or script["report_path"]))
     topic = script.get("topic") or {}
+    if topic.get("_material_reselection") and (version or script.get("current_version")):
+        story = ((version or {}).get("meta") or {}).get("story") or topic.get("story")
+        if story:
+            try:
+                return story_pool.brief(story) + "\n\n" + story_pool.material_for(story_pool.get(story["pool_id"]), story)
+            except (story_pool.SelectionError, KeyError) as exc:
+                raise OSError("读不到重新选中的快讯原始材料") from exc
     if not topic.get("from_item"):
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
                                 summary=(topic.get("fields") or {}).get("一句话") or "",
-                                include_nested=research_dossier.enabled(script))
+                                include_nested=True)
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -138,6 +149,17 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
     return spec
 
 
+def _is_theme_report(topic: dict, report_path: str = "", report_info: dict | None = None) -> bool:
+    """True when this script originates from a single-topic theme research report."""
+    if topic.get("theme_research"):
+        return True
+    path = str(report_path or topic.get("from_report") or "")
+    if "theme_research" in os.path.basename(path):
+        return True
+    info = report_info if report_info is not None else (report_meta.get(path) or {} if path else {})
+    return (info.get("opencode_pipeline") or {}).get("mode") == "opencode_single_topic"
+
+
 def start(column_key: str, topic: dict, started_by: str) -> dict:
     """Create a script for ``topic`` and start researching it in the background."""
     settings = get_settings()
@@ -158,8 +180,14 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     topic = episodes.publication_topic(topic, context)
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
-    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
+    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic) and not _is_theme_report(topic):
         topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
+    try:  # the A/B module's one write point (spec/ab-testing.md §5); any failure leaves the script as today (A)
+        from core.experiments import hook as experiments_hook
+        context = experiments_hook.arm_for(settings.paths.state_dir, context, column_key=column.key,
+                                           created_by=started_by)
+    except Exception:  # noqa: BLE001
+        logger.exception("experiments: arm_for failed; this script is produced as today")
     script = store.create_script(column.key, topic, created_by=started_by,
                                  production=production_id, content_context=context)
     if topic.get("article"):
@@ -328,20 +356,63 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
-    column = apply_script_context(column, script.get("content_context") or {})
+    context = script.get("content_context") or {}
+    video_config = load_system_config(settings.paths.config_dir).get("video") or {}
+    from core.video import manuscript_workflow
+
+    profile = manuscript_workflow.profile_for(script, settings.paths.config_dir, settings.paths.jobs_dir, video_config)
+    if profile and profile.draft and context.get("column"):
+        context = {**context, "notes": profile.draft}
+    column = apply_script_context(column, context)
+    if profile and profile.draft and not context.get("column"):
+        column = replace(column, script_style=column.script_style + "\n" + profile.draft)
+    programme_direction = column.script_style
+    if report_images:
+        from core.video.material_context import visual_brief
+        column = replace(column, script_style=column.script_style + visual_brief(settings.paths.state_dir, report_images))
     from core.video import episodes
     is_episode = episodes.enabled(topic)
-    joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    from core.video import joint_planning
+    planned = joint_planning.assignment(topic)
+    if planned is not None:
+        from core.video import author_input_gates
+        direction, _ = author_input_gates.scrub(planned["direction"])
+        column = replace(column, script_style=column.script_style + "\n" + direction)
+        if planned.get("single"):
+            takeaway = joint_planning.viewer_takeaway(planned["single"]["incremental_value"])
+            topic = {**topic, "fields": {**(topic.get("fields") or {}), "核心角度": takeaway}}
+            script = {**script, "topic": topic}
+    from core.video import audience_strategy
+    audience_channel = audience_strategy.topic_channel(topic)
+    if audience_strategy.PRODUCTIONS.get(script.get("production")) != audience_channel:
+        audience_channel = ""
+    if audience_channel:
+        topic = {**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
+        script = {**script, "topic": topic}
+    selected_audience_report = report
+    audience_material = bool(audience_channel) and audience_channel not in audience_strategy.KNOWLEDGE
+    # The selected T05 report item is a comparison even in reports saved before
+    # audience marking. Its products are evidence for one editorial question.
+    legacy_comparison = (not audience_channel and script.get("production") == "chatgpt_t05_comparison"
+                         and bool(topic.get("from_item")))
+    scoped_material = audience_material or legacy_comparison
+    is_theme_single = _is_theme_report(topic, report_path, report_info)
+    is_opencode_report = bool((report_info.get("opencode_pipeline") or {}).get("mode"))
+    joint_input = (planned is not None or scoped_material or is_episode
+                   or research_dossier.enabled(script) or is_theme_single or is_opencode_report)
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
-    guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
+    guarded = not is_episode and not is_theme_single and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
-    dedup_meta, filtered_material = {}, ""
+    dedup_meta, filtered_material, comparison_material = {}, "", ""
     if guarded:
         store.update_script(script_id, topic=script["topic"])
         topic = script["topic"]
-        reference = (report_meta.get(report_path) or {}).get("material") or {}
+        reference = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
+        original = (planned["material"] if planned is not None else
+                    report_material.read(reference, full_path, _read_report(report_path)) if reference else "")
+        if legacy_comparison:
+            comparison_material = audience_strategy.material_for_report(report, original)
         try:
             if story_pool.enabled(topic):
                 store.update_script(script_id, stage="选题")
@@ -353,20 +424,39 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     story = topic["story"]
                     pool = story_pool.get(story["pool_id"])
                 else:
-                    if topic.get("from_item") and original:
-                        # A flash item cannot wander into another item from its feed.
-                        cited = story_pool.cited(report)
-                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
-                                                                 if story_pool.cited_packet(p, cited))
-                    selection_report = research_dossier.selection_brief(report, script)
-                    # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
-                    pool = story_pool.load_or_create(key, selection_report, original, peers, config,
-                                                     references=bool(topic.get("from_item")))
+                    if topic.get("_material_reselection"):
+                        from web.services.video_autopilot import material_story_pool
+
+                        pool = material_story_pool(script, report, original, peers, config, column)
+                    else:
+                        if topic.get("from_item") and original:
+                            # A report item may only use the material it cites.
+                            cited = story_pool.cited(report)
+                            if legacy_comparison:
+                                original = comparison_material
+                            elif audience_channel:
+                                original = audience_strategy.material_for_report(report, original)
+                            else:
+                                original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                         if story_pool.cited_packet(p, cited))
+                        selection_report = research_dossier.selection_brief(report, script)
+                        options = ({"tutorial": True} if context.get("type") == "tutorial"
+                                   else {"evergreen": True} if context.get("type") == "comparison" else {})
+                        if audience_channel or legacy_comparison or planned is not None:
+                            options["audience_brief"] = {"title": topic.get("from_item_title") or topic["title"],
+                                                         "audience": (topic.get("fields") or {}).get("目标受众", ""),
+                                                         "promise": (topic.get("fields") or {}).get("核心角度", "")}
+                        pool = story_pool.load_or_create(key, selection_report, original, peers, config,
+                                                         references=bool(topic.get("from_item")), **options)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
                 filtered_material = story_pool.material_for(pool, story)
-                if joint_input:
+                if legacy_comparison:
+                    dossier_report, dossier_selection = selected_audience_report, "comparison_item"
+                elif audience_channel:
+                    dossier_report, dossier_selection = selected_audience_report, "audience_selection"
+                elif joint_input:
                     dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool, script)
                     if dossier_selection == "column_explanation":
                         selected = content_guard.sources(dossier_report)
@@ -375,10 +465,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         filtered_material = "\n\n---\n\n".join(related) or filtered_material
                 report = story_pool.brief(story) + "\n\n" + filtered_material
                 dedup_meta = story_pool.selection(script_id)
-                # News keeps the selected event as its writing scope. A coherent
-                # domain explainer follows its completed dossier main question;
-                # the stored event and coverage reservation remain unchanged.
-                if dossier_selection != "column_explanation":
+                # The regular author already receives the event in writer._request.
+                # Retain the direction for the separate adaptation path.
+                if (column.writer == "adapt" and not is_episode
+                        and dossier_selection not in {"column_explanation", "comparison_item"}):
                     column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
             else:
                 report, filtered_material, dedup_meta = content_guard.prepare(
@@ -386,7 +476,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 dossier_report = report
         except story_pool.NoCandidate as exc:
             peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
-            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
+            reason = exc.decisions[-1]["reason"] if topic.get("_material_reselection") else str(exc)
+            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, reason), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
     if column.writer == "adapt" and not is_episode:
@@ -422,22 +513,51 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         return "DRAFT"
     try:
         store.update_script(script_id, stage="写稿")
-        material_ref = (report_meta.get(report_path) or {}).get("material") or {}
+        material_ref = report_info.get("material") or {}
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
-        material = (report_material.read(material_ref, full_path, _read_report(report_path))
-                    if material_ref else "")
-        if guarded:
+        if planned is not None:
+            material = planned["material"]
+        elif guarded and legacy_comparison:
+            material = comparison_material
+        elif guarded:
             material = filtered_material
-        if topic.get("from_item") and material and not topic.get("story"):
-            # A discovered topic is one item, not the entire feed. Keep the
-            # original blocks that contain its links, with its selected context.
-            from core.provenance import extract_urls, normalize_url
-
-            urls = {normalize_url(url) for url in extract_urls(report)}
-            parts = [part for part in material.split("\n\n---\n\n")
-                     if urls & {normalize_url(url) for url in extract_urls(part)}]
-            material = "\n\n---\n\n".join(parts)
-        writing_topic = topic
+        elif topic.get("_material_reselection") or is_theme_single:
+            # Theme research reports are self-contained single-topic dossiers; skip raw
+            # material snapshots that might still carry legacy column subscription feeds.
+            material = ""
+        else:
+            material = report_material.read(material_ref, full_path, _read_report(report_path)) if material_ref else ""
+        if topic.get("from_item") and not (guarded and topic.get("story")):
+            # Rewriting a published item skips deduplication, but its story
+            # and source scope are still frozen to the selected item.
+            material = (audience_strategy.material_for_report(report, material) if scoped_material else
+                        story_pool.material_for_report_item(report, material, topic.get("story")))
+        if audience_material and not guarded:
+            material = audience_strategy.material_for_report(dossier_report, material)
+        if audience_channel in audience_strategy.KNOWLEDGE:
+            # Idea snippets and supplemental pages never replace the knowledge
+            # dossier, including when no supplement was needed or collection failed.
+            material = ""
+        if planned is not None:
+            # Both outputs consume their own frozen allocation, including on rewrite.
+            # In particular, do not refill a brief episode from the complete dossier.
+            dossier_report, material = planned["report"], planned["material"]
+        active_report = dossier_report if joint_input else report
+        active_report, report_fit = fit_report(active_report, topic)
+        if joint_input:
+            dossier_report = active_report
+        else:
+            report = active_report
+        material, material_fit = fit_material(active_report, material)
+        writing_topic = ({**topic, "preserve_audience_scope": True, "audience_strategy": audience_channel}
+                         if audience_channel else topic)
+        if is_theme_single:
+            writing_topic = {k: v for k, v in writing_topic.items() if k not in ("story", "matrix_dedup")}
+        if legacy_comparison:
+            # Old event claims remain available for deduplication. The selected
+            # comparison owns the writer's title and evidence, including on redo.
+            writing_topic = {key: value for key, value in writing_topic.items() if key != "story"}
+            writing_topic["title"] = topic.get("from_item_title") or topic["title"]
         told = _episode_told(script, topic, dossier_report) if is_episode else []
         if told:
             items = topic["episode"]["items"]
@@ -454,7 +574,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
         greeting = episodes.greeting(topic, script.get("content_context") or {})
-        written = writer.write_for_column(
+        written = manuscript_workflow.write(
+            mode=video_config.get("manuscript_workflow"), profile=profile,
+            headline_polish=bool(video_config.get("headline_polish", True)),
             column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
@@ -466,6 +588,12 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             **({"original_material": material} if joint_input else {}),
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
+        if planned is not None:
+            written.meta["joint_plan"] = dict(topic["joint_plan"])
+        if audience_channel:
+            written.meta["audience_strategy"] = {"strategy": audience_strategy.MARKER, "channel": audience_channel,
+                                                 "writer": "original_with_audience_scope"}
+        written.meta['programme_direction'] = programme_direction
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
             if told:
@@ -476,10 +604,14 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
+        if report_fit:
+            written.meta["report_fit"] = report_fit
+        if material_fit:
+            written.meta["material_fit"] = material_fit
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
-        if topic.get("story"):
+        if topic.get("story") and not is_theme_single:
             written.meta["story"] = topic["story"]
     except content_guard.DuplicateContent as exc:
         return _duplicate_script(script_id, exc, failed_status)
@@ -499,10 +631,103 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         edit_type="GENERATED",
         meta={**meta, "checks": adapt_review.unrequested()},
         created_by=started_by,
-        story_claim=(topic.get("story") or {}).get("event_key", ""),
+        story_claim="" if is_theme_single else (topic.get("story") or {}).get("event_key", ""),
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+MATERIAL_SEPARATOR = "\n\n---\n\n"
+
+
+def _block_duplicated_in_report(block: str, report_norm: str) -> bool:
+    """True when a material block's substantive body is already verbatim/near-verbatim in ``report``."""
+    lines = [line.strip() for line in block.splitlines() if line.strip() and not line.strip().startswith("### [")]
+    if not lines:
+        return False
+    body = re.sub(r"\s+", " ", " ".join(lines))
+    if len(body) >= 120 and body in report_norm:
+        return True
+    substantial = [re.sub(r"\s+", " ", line) for line in lines if len(line) >= 24]
+    if len(substantial) < 3:
+        return False
+    matched = sum(1 for line in substantial if line in report_norm)
+    return matched / len(substantial) >= 0.8
+
+
+def fit_report(report: str, topic: dict | None = None, limit: int | None = None) -> tuple[str, dict]:
+    """Keep an oversized multi-topic report inside the writer's safe window."""
+    from core import research_batches
+    from core.video import excerpt
+
+    limit = limit or research_batches.MAX_PROMPT_CHARS
+    if not report or len(report) <= limit:
+        return report, {}
+    topic = topic or {}
+    title = (topic.get("from_item_title") or topic.get("title") or "").strip()
+    summary = str((topic.get("fields") or {}).get("一句话") or "").strip()
+    if title:
+        part = excerpt.item_excerpt(report, title, summary=summary, include_nested=True)
+        if part and len(part) <= limit:
+            return part, {"reason": "报告超出写稿窗口，已按当前选题自动切片",
+                          "original_chars": len(report), "kept_chars": len(part), "mode": "item_excerpt"}
+    sections = re.split(r"(?m)(?=^#{1,2}\s+)", report)
+    kept, used = [], 0
+    for sec in sections:
+        if not sec:
+            continue
+        if used + len(sec) <= limit:
+            kept.append(sec)
+            used += len(sec)
+        else:
+            remain = limit - used
+            if remain > 600:
+                kept.append(sec[:remain].rstrip() + "\n\n（后续内容因超长已截断）")
+                used = limit
+            break
+    trimmed = "".join(kept) or report[:limit]
+    return trimmed, {"reason": "报告超出写稿窗口，已按章节边界安全裁剪",
+                     "original_chars": len(report), "kept_chars": len(trimmed), "mode": "section_cap"}
+
+
+def fit_material(report: str, material: str, limit: int | None = None) -> tuple[str, dict]:
+    """The original material the writer is sent, kept inside the model's window.
+
+    Deduplicates blocks already verbatim inside ``report`` (e.g. opencode_topic_v1
+    dossiers stored in both report and material snapshots) and trims oversized
+    material to report-cited blocks inside ``limit``.
+    """
+    from core import research_batches
+    from core.provenance import extract_urls, normalize_url
+
+    limit = limit or research_batches.MAX_PROMPT_CHARS
+    if not material:
+        return material, {}
+    blocks = material.split(MATERIAL_SEPARATOR)
+    report_norm = re.sub(r"\s+", " ", report or "")
+    deduped_blocks = [b for b in blocks if not _block_duplicated_in_report(b, report_norm)] if report_norm else blocks
+    dedup_dropped = len(blocks) - len(deduped_blocks)
+    working = MATERIAL_SEPARATOR.join(deduped_blocks)
+    room = limit - len(report)
+    if len(working) <= room:
+        if dedup_dropped:
+            return working, {"reason": "原始材料与研究底稿内容重复，已自动去重",
+                             "blocks": len(blocks), "dedup_dropped": dedup_dropped,
+                             "kept": len(deduped_blocks), "chars": len(material), "kept_chars": len(working)}
+        return working, {}
+    cited_urls = {normalize_url(url) for url in extract_urls(report)}
+    cited = [b for b in deduped_blocks if cited_urls & {normalize_url(url) for url in extract_urls(b)}]
+    kept, used = [], 0
+    for block in cited:
+        cost = len(block) + len(MATERIAL_SEPARATOR)
+        if used + cost > room:
+            break
+        kept.append(block)
+        used += cost
+    return MATERIAL_SEPARATOR.join(kept), {"reason": "原始材料超出模型上限，只保留报告引用的材料",
+                                           "blocks": len(blocks), "dedup_dropped": dedup_dropped,
+                                           "cited": len(cited), "kept": len(kept),
+                                           "chars": len(material), "kept_chars": used}
 
 
 def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
@@ -522,9 +747,10 @@ def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
 
 def _duplicate_script(script_id: str, exc: content_guard.DuplicateContent, failed_status: str) -> str:
     reason = str(exc)
+    target_status = "SKIPPED" if failed_status == "FAILED" else failed_status
     if content_guard.archive_duplicate(script_id, reason, [p["script_id"] for p in exc.peers]):
-        store.update_script(script_id, status=failed_status, stage=None, error=reason)
-    return failed_status
+        store.update_script(script_id, status=target_status, stage=None, error=reason)
+    return target_status
 
 
 def _attach_report(script: dict, report_path: str, column, started_by: str) -> None:
@@ -1225,6 +1451,11 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
             for para in section["paragraphs"]:
                 for key in ("facts", "introduces", "recap"):
                     para.pop(key)
+    article = base_meta.get("article") or {}
+    stance = {}
+    if article.get("mode") != "read" and base_meta.get("generation") != "article_verbatim":
+        from core.video.narration_stance import settle_sections
+        clean, stance = settle_sections(clean)
 
     style = _style_of(base_meta, column) if sheet else None
     if base_meta.get("article"):
@@ -1239,6 +1470,8 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                                     plan=plan, sheet=sheet, style=style)
         meta = {"problems": writer.lint(clean),
                 "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
+    from core.video.narration_stance import note as note_stance
+    note_stance(meta, stance)
     from core.video import episodes
     if base_meta.get('user_materials'):
         meta.update(input_kind='user_materials', user_materials=base_meta['user_materials'])

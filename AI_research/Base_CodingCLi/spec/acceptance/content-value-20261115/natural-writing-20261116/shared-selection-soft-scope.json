@@ -1,0 +1,438 @@
+{
+  "scope": {
+    "jobs": 74,
+    "matrices": 15,
+    "bindings": 57
+  },
+  "applicable_selection_jobs": 35,
+  "direct_theme_helpers": 13,
+  "selection_bindings": 44,
+  "jobs": {
+    "ai_media/ai_tool_tutorials": {
+      "effective_use": "two-stage audience selection",
+      "channel": "ai_tutorial",
+      "context_sha256": "a97e8ded4b15d419a30874bb007b8faa90b7f767387a98490bacbf8e4e2b48d1",
+      "bindings": [
+        "ai_tool_tutorials"
+      ]
+    },
+    "ai_media/daily_opensource_radar": {
+      "effective_use": "two-stage audience selection",
+      "channel": "ai_opensource",
+      "context_sha256": "dacff6871d7e02cbc387626efe7af06f74ef317052b8396cefad5ef0b4a3e75f",
+      "bindings": [
+        "ai_media_opensource_digest"
+      ]
+    },
+    "ai_media/weekly_business_watch": {
+      "effective_use": "two-stage audience selection",
+      "channel": "ai_business",
+      "context_sha256": "496d8fd44c3b699902866fe91dac36b670bb69b47e4d4fd06df2a8179f54b73e",
+      "bindings": [
+        "ai_media_business_digest"
+      ]
+    },
+    "ai_media/weekly_deep_research": {
+      "effective_use": "two-stage audience selection",
+      "channel": "ai_deep",
+      "context_sha256": "5d59abf6047038bf4b7ab32ce3e8024d3f9acbf0c2a2d4131d3f4c34bc45dff5",
+      "bindings": [
+        "ai_media_deep_dive"
+      ]
+    },
+    "ai_media/weekly_model_arena": {
+      "effective_use": "two-stage audience selection",
+      "channel": "ai_arena",
+      "context_sha256": "f00991d824c947cdc8258a08f51c9603231c36da1df4d82a4e67d2dec6b79bf7",
+      "bindings": [
+        "ai_media_arena_digest"
+      ]
+    },
+    "chatgpt_acquisition/t01_product": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t01",
+      "context_sha256": "35558df576dba1434dddee683bf86afa58e4195c0f145e8c745cdd42ef0604e2",
+      "bindings": [
+        "chatgpt_t01_product"
+      ]
+    },
+    "chatgpt_acquisition/t02_scenarios": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t02",
+      "context_sha256": "f36bae61b4777abb81aae51703f207c471532e0895c38d158f10a0e4cf41bd14",
+      "bindings": [
+        "chatgpt_t02_scenarios"
+      ]
+    },
+    "chatgpt_acquisition/t03_tutorials": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t03",
+      "context_sha256": "df58f7104b18f62691b81860006c44a8edf7266ba149fd276f3590b068974b66",
+      "bindings": [
+        "chatgpt_t03_tutorials"
+      ]
+    },
+    "chatgpt_acquisition/t04_testing": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t04",
+      "context_sha256": "f4b651b08e411c19e4c198a7b28b9c6f457244654e8a9628a3e49a73065bf39d",
+      "bindings": [
+        "chatgpt_t04_testing"
+      ]
+    },
+    "chatgpt_acquisition/t05_comparison": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t05",
+      "context_sha256": "5b1a9bbf463c92332c903732c87d729039a09cf453ec9bd9b15d51629d3f01c5",
+      "bindings": [
+        "chatgpt_t05_comparison"
+      ]
+    },
+    "chatgpt_acquisition/t06_value": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t06",
+      "context_sha256": "dc6be472d88bdf0c4246d42986990481b5d4f1116ba0c2156cdf6f07fedf4515",
+      "bindings": [
+        "chatgpt_t06_value"
+      ]
+    },
+    "chatgpt_acquisition/t07_subscription": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t07",
+      "context_sha256": "d12477fa3076a726d968b8a9adc50a945f9327e863dbb45c704b3cf5915274c9",
+      "bindings": [
+        "chatgpt_t07_subscription"
+      ]
+    },
+    "chatgpt_acquisition/t08_troubleshooting": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t08",
+      "context_sha256": "ccadc734c9907e258520ef0e91eeeb9e65f20e458bf8bffa4033d82bdba5c06d",
+      "bindings": [
+        "chatgpt_t08_troubleshooting"
+      ]
+    },
+    "chatgpt_acquisition/t09_updates": {
+      "effective_use": "two-stage audience selection",
+      "channel": "t09",
+      "context_sha256": "be0c5b4c652042a14e521866a48a3a9319494b5cd86e5dccc5e46be24deaa81f",
+      "bindings": [
+        "chatgpt_t09_updates",
+        "chatgpt_t09_updates_each"
+      ]
+    },
+    "company/company_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "company_daily",
+      "context_sha256": "1666dafee2ced4b28da1f46380fd10cb05051cffdefd3fca03e26b7a5600bab0",
+      "bindings": [
+        "company_daily"
+      ]
+    },
+    "company/company_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "company_weekly",
+      "context_sha256": "b63503d30177862fbe2465c795ffc21750d23c070124acfbd72bce01093c6e44",
+      "bindings": [
+        "company_weekly"
+      ]
+    },
+    "consumer/consumer_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "consumer_daily",
+      "context_sha256": "94a95abf5e45a9aacde9c77eaec2c3dc39608226f88ab0325eef86d889d165b0",
+      "bindings": [
+        "consumer_daily"
+      ]
+    },
+    "consumer/consumer_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "consumer_weekly",
+      "context_sha256": "28dabbac9c350ac64074242587133b92fe85c200709180bd527982fbff86303f",
+      "bindings": [
+        "consumer_weekly"
+      ]
+    },
+    "culture/culture_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "culture_daily",
+      "context_sha256": "cfed48957603abe5895858112da5af465b3534d475bb0a531c5b967706c6ce2a",
+      "bindings": [
+        "culture_daily"
+      ]
+    },
+    "culture/culture_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "culture_weekly",
+      "context_sha256": "727c495d8a5c3f7aa489185d567a121bb49afd1b16698a7ca048f368f90eef9f",
+      "bindings": [
+        "culture_weekly"
+      ]
+    },
+    "economy/economy_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "economy_daily",
+      "context_sha256": "f99d9775b1c7e2c4ac46058964718c0e15690b407ea7ded83b509bfe8006d6b5",
+      "bindings": [
+        "ai-non_tech-deep_dive-long-2",
+        "economy_daily"
+      ]
+    },
+    "economy/economy_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "economy_weekly",
+      "context_sha256": "4a6596f7221b167515a24543db2a828c26c97ce53da3488298e4c578f111f447",
+      "bindings": [
+        "economy_weekly"
+      ]
+    },
+    "geography/geography_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "geography_daily",
+      "context_sha256": "8c8d3c32fe96cbd225c2df758af7bd92933a07f5305f728e4dbb1c6d54f6776d",
+      "bindings": [
+        "geography_daily"
+      ]
+    },
+    "geography/geography_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "geography_weekly",
+      "context_sha256": "b33fb66396ce0d0e9a646ca1d7e653a44cf951df639334a9989ce2eac834ab44",
+      "bindings": [
+        "geography_weekly"
+      ]
+    },
+    "history/history_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "history_daily",
+      "context_sha256": "5dd84d62b992f749e30cd3ad29ab6962a07c43f98e71d8523e0c26eb6065c1e6",
+      "bindings": [
+        "history_daily"
+      ]
+    },
+    "history/history_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "history_weekly",
+      "context_sha256": "c1b4e29b3c9d19dc243aab612a5a1b7041bb6dc224622b6cd6fcb3514b99fb80",
+      "bindings": [
+        "history_weekly"
+      ]
+    },
+    "industry/industry_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "industry_daily",
+      "context_sha256": "82284bf41b1f943f18ee735da68c8d79da7d5d31698cb01daf11d753503f0244",
+      "bindings": [
+        "industry_daily"
+      ]
+    },
+    "industry/industry_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "industry_weekly",
+      "context_sha256": "aae0e3692b9f680ece8ba604070346db5f5fea387e9a1c2e3bf47063c19db25d",
+      "bindings": [
+        "industry_weekly"
+      ]
+    },
+    "monitoring/ai_flash_discovery": {
+      "effective_use": "two-stage audience selection",
+      "channel": "flash",
+      "context_sha256": "85bbd94398a45c4f04609eb03a268873a15c78bfefdaca0807f8c43b2864c4cd",
+      "bindings": [
+        "ai-developer-roundup-long",
+        "ai-non_tech-one_point-short",
+        "ai-non_tech-quick_take-short",
+        "flash",
+        "flash_daily",
+        "flash_each",
+        "point_short"
+      ]
+    },
+    "science/science_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "science_daily",
+      "context_sha256": "58c0f865bb642a339180c609a02f2beb1ffcab6490e37f98c7ffdc8fd3d1a0ed",
+      "bindings": [
+        "science_daily"
+      ]
+    },
+    "science/science_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "science_weekly",
+      "context_sha256": "e25818349783a2735d874fa11983657dd68f0a84e792914c37e9ebdd4e51add6",
+      "bindings": [
+        "science_weekly"
+      ]
+    },
+    "software/software_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "software_daily",
+      "context_sha256": "5c6c8111b4d9daea1d765704960dfea907955f2aa32ee72b1132996928d1f72e",
+      "bindings": [
+        "software_daily"
+      ]
+    },
+    "software/software_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "software_weekly",
+      "context_sha256": "c00f19642eb45b9cee1cc413284a418480cf72b3f40adc1a180f1bc66c18a7c2",
+      "bindings": [
+        "software_weekly"
+      ]
+    },
+    "tech/tech_daily": {
+      "effective_use": "two-stage audience selection",
+      "channel": "tech_daily",
+      "context_sha256": "1db0c6d17d072abb96d8d7cd5ce589198e9cd873c62fd27498a22d7c760ea099",
+      "bindings": [
+        "ai-non_tech-headline-short",
+        "tech_daily"
+      ]
+    },
+    "tech/tech_weekly": {
+      "effective_use": "two-stage audience selection",
+      "channel": "tech_weekly",
+      "context_sha256": "47562d11846619951825f5dbbe205439ee14dd4fd18bed33f3785215ec86f5ac",
+      "bindings": [
+        "tech_weekly"
+      ]
+    },
+    "topic_discovery/ai_media": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/chatgpt_acquisition": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/company": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/consumer": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/culture": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/economy": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/education": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/geography": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/history": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/industry": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_discovery/science": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_ideas/chatgpt_acquisition": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    },
+    "topic_platform/chatgpt_acquisition": {
+      "effective_use": "topic discovery or ideas helper",
+      "bindings": []
+    }
+  },
+  "files": {
+    "core/video/audience_strategy.py": {
+      "before_sha256": "3a3fe9280f409653d7ccf6340d3bfc3fa6fd38397876aba40c981cbc8729c4d0",
+      "after_sha256": "f62f28e0c200e66c99dfda92b0e73b2abf6fc4e864b08320b93ed4a0d0ea6c5a"
+    },
+    "config/content_strategy.yaml": {
+      "before_sha256": "851216256284b4f4c06186d87fc63daf04b32b4e67aaf2f97d375988f58b4a25",
+      "after_sha256": "e288ef3f229f4cf7bfe477facb5870b98a40d03b9a2f409a8d40c8d76b653d38"
+    },
+    "tests/test_audience_rollout.py": {
+      "before_sha256": "e7fda6a963e1482a71c93bbbd0900c4d63f4b9d5ca338998ff44a81416defd9e",
+      "after_sha256": "462f1f34d75eced7db790d1ccf2b196a9f1a14462fc61a4a9bdc4c406c621b3b"
+    },
+    "core/theme_ideas.py": {
+      "before_sha256": "fede48026c205cf7122e0ba5f2a668df3b845a304c26a411fa780b9f9ec48e95",
+      "after_sha256": "b2b2b85f3e0ff52ab344db411000af036ad49df5ca5e7179f0b9a1c67a33ff3e"
+    },
+    "core/theme_library.py": {
+      "before_sha256": "c7dda7f3f6ded92516d6df9e919c8fe2677745312f9b4f60c70f71a9ad6860a0",
+      "after_sha256": "de6b51e2356c1d0e6fb54efd4657f09867a27f6aad2e11015285905855f2f512"
+    },
+    "core/theme_discovery.py": {
+      "before_sha256": "8b2f1051502cc8fd1b921130a4a449f069c6190e54b99ac8ff3754420d8cef6d",
+      "after_sha256": "ec17df67275e6aea00079ed6e13721125ad2aa3c9b91698b705af5c98e71520b"
+    },
+    "core/theme_context.py": {
+      "before_sha256": "d13ca24f380b09a197ba5cdb71612c33cae114e66af37665b673aa67a8cb724b",
+      "after_sha256": "457414f0c066f7169750fe3d36ae77461287ffb46c6ad862af6009678419a9e4"
+    },
+    "tests/test_theme_library.py": {
+      "before_sha256": "d11afb36881cdcebbc3796fce06a2b534903a2c1003e6250b86e0947afed2bec",
+      "after_sha256": "df170502bcaa4eb653e73b5141ccb3ed7871d2916f50edb522e5260ac49e372d"
+    }
+  },
+  "strategy_version": 6,
+  "scope_notes": [
+    "Knowledge dossiers bypass these selection calls.",
+    "The live theme workbench can also reuse the shared editorial guidance for user-selected material.",
+    "保留生产队列数量和已登记来源 ID 合同；移除实测导致重复重写的单条候选来源八条上限。已有上下文和回落机制照常。",
+    "Line 32 is the independently resolved seven-day window timestamp; same stored collection text and system/model/options."
+  ],
+  "theme_idea_structure": "Retained reference identity, at most one output card per category, and parser-compatible list values; outline count and sentences are no longer prescribed.",
+  "flash_frozen_supply_first_request_changes": {
+    "same-supply-control→same-supply-current": [
+      26,
+      28,
+      32
+    ],
+    "same-supply-current→same-supply-soft-selector": [
+      32
+    ]
+  },
+  "t05_existing_cap_replay": {
+    "old_endpoint_returned_oversize_sets": true,
+    "latest_schema_accepts_original_known_ids": true,
+    "first_pass": {
+      "initial_title": "2026 年 11 月，第一笔 AI 订阅钱该花给谁：先用四个日常任务看 ChatGPT、Claude、Gemini、Grok、Mistral 和国产 AI 的免费版够不够",
+      "after_retry_title": "2026 年 11 月，第一笔 AI 订阅钱该花给谁：先用四个日常任务看 ChatGPT、Claude、Gemini、Grok 和国产 AI 的免费版够不够",
+      "before_sources": 14,
+      "after_retry_sources": 8,
+      "omitted_titles": [
+        "Pricing",
+        "突发！DeepSeek开放全家桶API",
+        "Pricing · Compare features across plans",
+        "Get more out of Gemini · Analyze vast amounts of info like a pro",
+        "2026年国内大模型横评：DeepSeek、通义千问、豆包、Kimi……谁才是你的最佳搭子？",
+        "腾讯元宝对比其他AI · 腾讯元宝橙皮书 · 永无岛"
+      ],
+      "before_context_chars": 996,
+      "after_context_chars": 836
+    },
+    "full_text_pass": {
+      "initial_title": "先别急着订 ChatGPT Plus：免费版卡在哪，Gemini、Claude、Grok 和国产 AI 又贵在什么地方",
+      "after_retry_title": "先别急着订 ChatGPT Plus：免费版卡在哪，Gemini、Claude 和国产 AI 又贵在什么地方",
+      "before_sources": 9,
+      "after_retry_sources": 8,
+      "omitted_titles": [
+        "AI that is useful for everyone."
+      ],
+      "before_context_chars": 1567,
+      "after_context_chars": 1463
+    }
+  },
+  "test_result": "328 passed in one targeted run",
+  "validation": "config validation and git diff --check passed"
+}

@@ -1,0 +1,24 @@
+{
+  "session_id": 5442,
+  "checked_at": "2026-11-16T08:06:26.942333+00:00",
+  "live_session_verified": true,
+  "status": {
+    "status": "DRAFT",
+    "seconds": 2927.1666982080787,
+    "error": null,
+    "report": "output/flash/2026-11-16_ai_flash_discovery.md"
+  },
+  "provider_requests": 7,
+  "fetches": 64,
+  "observations": 2360,
+  "resume_note": "The original run exited with a fallback draft. Exact initial selection request replay succeeded. See flash-live-runtime.json.",
+  "last_handle_check": "session 5442 exited 0 and complete draft inspected",
+  "provider_responses": 5,
+  "progress": {
+    "status": "kept_original",
+    "error": {
+      "type": "LLMError"
+    },
+    "question_material_status": "no_candidates"
+  }
+}

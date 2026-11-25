@@ -54,8 +54,12 @@ export interface ThemeWorkbenchData {
 const path = (matrix: string) => `/api/matrices/${encodeURIComponent(matrix)}/themes`;
 export const getThemeWorkbench = (matrix: string, signal?: AbortSignal) => api<ThemeWorkbenchData>(path(matrix), { signal });
 export const createTheme = (matrix: string, body: ThemeInput) => api<Theme>(path(matrix), { method: "POST", body });
-export const updateTheme = (matrix: string, id: string, body: Omit<ThemeInput, "category">) =>
+export const updateTheme = (matrix: string, id: string, body: Partial<ThemeInput> & Omit<ThemeInput, "category">) =>
   api<Theme>(`${path(matrix)}/${id}`, { method: "PATCH", body });
+export const deleteTheme = (matrix: string, id: string) =>
+  api<{ deleted: boolean; id: string }>(`${path(matrix)}/${id}`, { method: "DELETE" });
+export const reuseTheme = (matrix: string, id: string) =>
+  api<Theme>(`${path(matrix)}/${id}/reuse`, { method: "POST" });
 export const discoverThemes = (matrix: string) => api<{ status: string; job: string }>(`${path(matrix)}/discover`, { method: "POST" });
 export const generateThemes = (matrix: string, brief: string, category_key: string, pattern_id: string) =>
   api(`${path(matrix)}/generate`, { method: "POST", body: { brief, category_key, pattern_id } });

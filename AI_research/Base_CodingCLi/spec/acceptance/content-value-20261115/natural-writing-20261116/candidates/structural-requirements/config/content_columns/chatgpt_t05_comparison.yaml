@@ -1,0 +1,23 @@
+schema_version: 1
+name: T05 · AI 产品横向选择
+matrix: chatgpt_acquisition
+type: comparison
+audience: 需要在不同 AI 工具间做选择的中文工作、学习与日常使用人群
+promise: 不同需要下，哪些 AI 工具值得用、怎样搭配
+production_ids:
+- chatgpt_t05_comparison
+render_inheritance: content_matrix
+render:
+  packaging:
+    label: AI 产品横向选择
+presentation:
+  strategy: 围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。
+  preferred_visuals:
+  - 并排输出对比
+  - 价格卡
+  - 对比表
+  - 产品真实截图
+  - 操作步骤
+status: configured
+notes: "题材编号 T05；围绕本次受众关心的选择问题，比较至少两家不同公司的产品。把产品放到可比的任务或维度下，用材料中的输入、操作、结果及费用解释实际差异。选题核心角度中明确提出的比较点需要讲清；影响适用性的入口、地区、套餐和换用成本在相关处说明。比较范围、展开顺序和结尾由本题的问题与证据决定，让观众理解不同需要下的选择依据。只比较 ChatGPT 自家档位的题目交给 T06。直接使用上游已有材料，公开说明按公开说明介绍，不声称亲测。"
+content_mode: individual

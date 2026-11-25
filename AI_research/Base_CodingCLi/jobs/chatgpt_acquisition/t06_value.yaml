@@ -1,7 +1,10 @@
 name: T06 · 套餐与付费价值
 description: 我有没有必要付费？ — 精准转化；按 S01–S06 资料研究 ChatGPT 视频题材。
+domain: ChatGPT 产品使用、应用价值与订阅决策
 enabled: true
 keywords:
+- ChatGPT
+- ChatGPT Plus
 - ChatGPT Free Go Plus Pro
 - ChatGPT Plus 值不值得
 - 免费与付费差别
@@ -55,8 +58,13 @@ prompt: |
   记录实际使用的来源链接。
   当前完整来源可用于解释现有套餐、操作与常见问题；变化区块用于区分哪些内容刚有修改，不把未变化内容说成新发布。
 output: output/chatgpt_acquisition/{date}_t06_value.md
+audience_channel: t06
+content_strategy: audience-v1
 topics:
   alias: chatgpt_t06_value
   format: items
   prefix: CGF
   refresh: true
+
+# After initial research and audience-led selection; preserves the existing writer.
+question_material: question-v1

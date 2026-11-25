@@ -175,14 +175,51 @@ class ThemeStore:
                 made.append(key)
         return [self.get(key) for key in made]
 
-    def edit(self, key: str, *, title: str, angle: str, audience: str, notes: str) -> dict:
+    def edit(self, key: str, *, title: str, angle: str, audience: str, notes: str,
+             category: str | None = None) -> dict:
+        now = time.time()
         with sqlite_util.connect(self.path, write=True) as db:
-            changed = db.execute("UPDATE themes SET title=?,angle=?,audience=?,notes=?,updated_at=?,edited=1 "
-                                 "WHERE id=? AND script_id='' AND used_at=0 AND status IN ('ready','recommended','dismissed')",
-                                 (title.strip(), angle, audience, notes, time.time(), key)).rowcount
+            if category is not None:
+                changed = db.execute(
+                    "UPDATE themes SET category=?,title=?,angle=?,audience=?,notes=?,updated_at=?,edited=1 WHERE id=?",
+                    (category, title.strip(), angle, audience, notes, now, key),
+                ).rowcount
+            else:
+                changed = db.execute(
+                    "UPDATE themes SET title=?,angle=?,audience=?,notes=?,updated_at=?,edited=1 WHERE id=?",
+                    (title.strip(), angle, audience, notes, now, key),
+                ).rowcount
             if not changed:
-                raise ValueError("主题已进入制作，请在关联文稿中修改")
+                raise LookupError("主题不存在")
         return self.get(key)
+
+    def delete(self, key: str) -> dict:
+        with sqlite_util.connect(self.path, write=True) as db:
+            changed = db.execute("DELETE FROM themes WHERE id=?", (key,)).rowcount
+            if not changed:
+                raise LookupError("主题不存在")
+            db.execute("DELETE FROM theme_feedback WHERE theme_id=?", (key,))
+        return {"deleted": True, "id": key}
+
+    def reuse(self, key: str) -> dict:
+        """Clone an existing (e.g. historical or failed) theme back into a fresh ready theme."""
+        source = self.get(key)
+        if source is None:
+            raise LookupError("主题不存在")
+        now, new_key = time.time(), uuid.uuid4().hex
+        with sqlite_util.connect(self.path, write=True) as db:
+            db.execute(
+                "INSERT INTO themes(id,matrix,category,title,angle,audience,notes,origin,day,reason,signals,status,"
+                "script_id,auto_video,created_at,updated_at,inspiration) "
+                "VALUES (?,?,?,?,?,?,?,'manual','',?,?,?, '', 0, ?, ?, ?)",
+                (
+                    new_key, source["matrix"], source["category"], source["title"],
+                    source["angle"], source["audience"], source["notes"], source.get("reason", ""),
+                    json.dumps(source.get("signals") or [], ensure_ascii=False), "ready",
+                    now, now, json.dumps(source.get("inspiration") or {}, ensure_ascii=False),
+                ),
+            )
+        return self.get(new_key)
 
     def dismiss(self, key: str, dismissed: bool) -> dict:
         return self.feedback(key, "dismissed" if dismissed else "clear", "not_now" if dismissed else "")

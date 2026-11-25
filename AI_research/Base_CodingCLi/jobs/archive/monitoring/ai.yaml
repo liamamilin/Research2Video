@@ -1,0 +1,438 @@
+name: AI
+description: 24 小时窗口的每日速报：Top 10 重要发现 + 影响判断 + 待核实信号 + 明日关注
+domain: AI 与软件开发
+enabled: true
+keywords:
+- AI机会
+- 大模型机会
+- AI创业
+- 大模型创业
+- AI商业化
+- AI变现
+- AI副业
+- AI应用
+- AI产品
+- AI SaaS
+- AI工具
+- AI原生应用
+- AI原生产品
+- AI Agent
+- Agentic AI
+- AI Agent创业
+- Agent应用
+- Agent平台
+- Agent工作流
+- Agent Harness
+- Coding Agent
+- AI编程
+- Vibe Coding
+- AI开发工具
+- AI IDE
+- AI Copilot
+- AI自动化
+- 工作流自动化
+- 智能自动化
+- RPA+AI
+- AI办公
+- AI生产力
+- 个人AI助手
+- 企业AI助手
+- 企业级AI
+- Enterprise AI
+- AI数字员工
+- AI员工
+- AI客服
+- AI销售
+- AI营销
+- AI运营
+- AI招聘
+- AI财务
+- AI法务
+- AI教育
+- AI医疗
+- AI科研
+- AI咨询
+- AI内容创作
+- AI写作
+- AI视频
+- AI图片
+- AI音频
+- AI设计
+- AI游戏
+- AI翻译
+- AI搜索
+- AI浏览器
+- AI知识库
+- AI问答
+- RAG
+- GraphRAG
+- 知识图谱+LLM
+- 企业知识管理
+- 文档智能
+- PDF智能处理
+- OCR+LLM
+- 数据分析Agent
+- BI Agent
+- AI数据分析
+- AI报表
+- AI研究助手
+- Deep Research
+- AI信息搜集
+- AI情报
+- AI监控
+- AI报告生成
+- AI舆情
+- AI投研
+- AI金融
+- AI风控
+- AI电商
+- AI跨境电商
+- AI广告
+- AI SEO
+- GEO
+- Generative Engine Optimization
+- AI内容分发
+- AI客服机器人
+- AI外呼
+- Voice Agent
+- 语音Agent
+- 实时语音AI
+- AI陪伴
+- AI角色
+- AI NPC
+- AI游戏角色
+- AI虚拟人
+- 数字人
+- AI视频生成
+- AI短视频
+- AI直播
+- AI剪辑
+- AI漫画
+- AI音乐
+- AI播客
+- 多模态AI
+- Multimodal AI
+- Vision Language Model
+- VLM
+- 文生图
+- 文生视频
+- 世界模型
+- World Model
+- AI模拟
+- AI机器人
+- 具身智能
+- Embodied AI
+- 人形机器人
+- 机器人Agent
+- AI+硬件
+- AI可穿戴
+- AI眼镜
+- AI终端
+- AI手机
+- AI PC
+- 边缘AI
+- Edge AI
+- 端侧大模型
+- On-device AI
+- 本地大模型
+- Local LLM
+- 私有化部署
+- AI私有部署
+- 企业私有模型
+- AI安全
+- LLM Security
+- Prompt Injection
+- AI红队
+- AI治理
+- AI合规
+- AI审计
+- AI评测
+- LLM Evaluation
+- 模型评测
+- Agent评测
+- Benchmark
+- AI可观测性
+- LLM Observability
+- Prompt Engineering
+- Context Engineering
+- Context Management
+- Memory System
+- Agent Memory
+- Tool Use
+- Function Calling
+- MCP
+- Model Context Protocol
+- A2A
+- Agent Protocol
+- Agent Infrastructure
+- AI基础设施
+- LLM Infra
+- 推理服务
+- Inference
+- 模型部署
+- Model Serving
+- 推理优化
+- KV Cache
+- Speculative Decoding
+- Quantization
+- LoRA
+- Fine-tuning
+- SFT
+- RLHF
+- RLAIF
+- Post-training
+- Distillation
+- Model Compression
+- Small Language Model
+- SLM
+- 开源大模型
+- Open Source LLM
+- AI API
+- Model API
+- API聚合
+- Model Router
+- AI Gateway
+- 模型路由
+- 多模型编排
+- LLM Orchestration
+- AI中间件
+- AI开发平台
+- Agent平台
+- AI工作台
+- AI工作流平台
+- Prompt管理
+- AI成本优化
+- Token成本
+- 推理成本
+- AI计费
+- AI支付
+- Agent支付
+- AI身份
+- Agent Identity
+- AI权限管理
+- Agent权限
+- AI沙箱
+- Code Sandbox
+- Browser Agent
+- Computer Use
+- GUI Agent
+- Web Agent
+- Autonomous Agent
+- Multi-Agent
+- Agent Swarm
+- Agent协作
+- Human-in-the-loop
+- AI协同
+- 人机协作
+- AI增强工作
+- AI替代岗位
+- AI新职业
+- AI人才
+- AI工程师
+- LLM Engineer
+- AI Product Manager
+- AI Product Engineer
+- AI Application Engineer
+- AI Solutions Architect
+- AI Automation Engineer
+- Agent Engineer
+- Context Engineer
+- AI Consultant
+- AI Trainer
+- AI Evaluator
+- AI创业机会
+- AI行业机会
+- AI细分赛道
+- AI垂直应用
+- Vertical AI
+- Vertical SaaS+AI
+- AI微型SaaS
+- Micro SaaS
+- AI一人公司
+- One-person AI Company
+- AI服务公司
+- AI实施
+- AI集成
+- AI定制开发
+- AI解决方案
+- AI外包
+- AI培训
+- AI课程
+- AI知识付费
+- AI企业培训
+- AI咨询服务
+- AI转型
+- 企业AI转型
+- AI落地
+- AI adoption
+- AI ROI
+- AI降本增效
+- AI替代流程
+- AI重构流程
+- AI工作流重构
+- AI业务重构
+- AI产品化
+- AI平台化
+- AI生态
+- AI Marketplace
+- Agent Marketplace
+- Skill Marketplace
+- AI插件
+- AI插件生态
+- AI应用商店
+- AI消费级应用
+- Consumer AI
+- AI社交
+- AI社区
+- AI创作者经济
+- AI Creator Economy
+- AI个性化
+- Personal AI
+- Personal AI OS
+- Personal Capability OS
+- AI第二大脑
+- AI知识管理
+- AI个人助理
+- AI生活助手
+- AI健康助手
+- AI学习助手
+- AI职业助手
+- AI决策助手
+- AI研究员
+- AI分析师
+- AI程序员
+- AI项目经理
+- AI运营经理
+- AI销售代理
+- AI创业趋势
+- AI投资机会
+- AI风口
+- AI蓝海
+- AI增量市场
+- 大模型应用层
+- 大模型中间层
+- 大模型基础设施
+- AI产业链
+- AI价值链
+- AI护城河
+- AI商业模式
+- AI定价
+- AI订阅
+- AI按结果付费
+- Outcome-based Pricing
+- AI按任务付费
+- AI劳动力市场
+- AI Agent Economy
+- Agentic Commerce
+- AI交易
+- AI采购Agent
+- AI商务Agent
+- AI谈判Agent
+- AI服务市场
+- AI数据机会
+- Synthetic Data
+- 数据飞轮
+- Data Flywheel
+- 数据工程+LLM
+- 数据治理+AI
+- 数据清洗Agent
+- 数据标注AI
+- 数据合成
+- AI数据产品
+- AI知识资产
+- Structured Cognition
+- AI认知系统
+- AI推理增强
+- Reasoning Model
+- Long Context
+- Memory AI
+- Continual Learning
+- Personalization
+- AI个性化模型
+- Domain LLM
+- 行业大模型
+- 专用模型
+- AI模型蒸馏
+- AI低成本部署
+- AI国产替代
+- 国产大模型
+- 开源模型商业化
+- AI开发者工具
+- AI基础设施创业
+- AI应用创业
+- AI垂直行业创业
+- AI Agent创业
+- AI个人工具
+- AI效率工具
+- AI企业服务
+- AI机会地图
+- AI创业地图
+- AI能力栈
+- AI职业机会
+- AI项目机会
+- AI产品机会
+- AI服务机会
+language: zh
+schedule:
+  type: daily
+  time: 08:00
+  timezone: Asia/Shanghai
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+prompt: |-
+  你是 {name} 领域的资深情报分析师。你的读者是一位每天早上花 5 分钟扫读本简报的 AI 技术从业者，需要据此决定当天关注什么。
+
+  ## 任务
+  检索 {date_1d_ago} 至 {date}（24 小时窗口）内与以下关键词相关的公开信息：
+  {keywords}
+
+  输出一份可在 1 分钟内读完的 Markdown 简报，使用语言：{language}（专业术语首次出现时括注英文原词，如"智能体（agent）"）。
+
+  {reported_events}
+
+  ## 证据规则（硬性要求）
+  1. 每条发现必须包含三要素：事件或结论、发布日期（YYYY-MM-DD）、可访问的来源 URL。
+  2. 只收录发布日期落在上述窗口内的信息。窗口内确无实质信息时，直接写"本期无重大更新"并简述已检索的角度，禁止用旧闻凑数。
+  3. 同一事件被多家报道时合并为一条，标注至少 2 个独立来源。来源之间存在冲突时并列陈述并说明分歧点。
+  4. 无法确认日期或来源的传闻、社交媒体传言，归入"待核实信号"并明确标注不确定性。
+
+  ## 输出结构
+  ### 1. 本期速览
+  不超过 120 字，说明本期最重要的 1-2 件事及其对读者的影响。
+
+  ### 2. Top 发现
+  按重要性排序，最多 10 条，使用表格：
+
+  | 重要性 | 事件/结论 | 日期 | 来源 | 一句话影响 |
+  |--------|-----------|------|------|-----------|
+  | ★★★ / ★★ / ★ | ... | YYYY-MM-DD | [链接](URL) | 对谁、在什么场景下产生影响 |
+
+  重要性判定：★★★ = 可能改变行业或团队决策；★★ = 值得跟进；★ = 背景信息。
+
+  ### 3. 关键细节
+  仅对 ★★★ 条目展开，每条 3-5 句：客观事实、关键数据、影响范围与时间尺度。
+
+  ### 4. 风险与不确定性
+  本期信息中未经验证、可能反转、或存在明显利益相关方（厂商、投资者）的部分。
+
+  ### 5. 明日关注
+  3-5 个具体、可跟踪的观察点，写成可验证的命题而非话题。
+
+  ### 6. 来源清单
+  编号列表：标题 | 发布日期 | URL
+
+  ## 质量红线
+  - 禁止编造未证实的信息、数字、日期或 URL。
+  - 禁止"AI 将彻底改变行业"这类无事实支撑的泛论。
+  - 禁止把厂商营销口径当作独立结论。
+  - 禁止超出窗口日期的信息出现在 Top 发现中（历史背景请放入"关键细节"并注明日期）。
+
+  ## 长度约束
+  正文不超过 1500 字；表格之外的全部展开内容不超过 600 字。
+
+  ## 忽略清单
+  - 纯融资、IPO 新闻（除非涉及并购、技术授权、供应关系变化）
+  - 无发布日期的二手转述、内容农场文章
+  - 与关键词仅表面相关的泛行业评论
+output: output/monitoring/{date}_{name}.md

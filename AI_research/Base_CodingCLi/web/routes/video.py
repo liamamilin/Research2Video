@@ -172,18 +172,24 @@ def cell_coverage(user=Depends(require_viewer)) -> list[dict]:
 @router.get("/board")
 def home_board(user=Depends(require_viewer)) -> dict:
     """Counts per pipeline stage and what needs the user, for the home page."""
-    from web.services import video_board
+    from web.services import read_cache, video_board
 
     paths = get_settings().paths
-    return video_board.board(_known_columns(), config_dir=paths.config_dir, jobs_dir=paths.jobs_dir)
+    key = (paths.config_dir, paths.jobs_dir, read_cache.state_revision(paths.state_dir))
+    return read_cache.cached(
+        "video_board", key, 15.0,
+        lambda: video_board.board(_known_columns(), config_dir=paths.config_dir, jobs_dir=paths.jobs_dir),
+    )
 
 
 @router.get("/alerts")
 def automation_alerts(user=Depends(require_viewer)) -> list[dict]:
     """What ran on its own this week and went wrong (empty batches, failed or restarted jobs, missed plans)."""
-    from web.services import automation_health
+    from web.services import automation_health, read_cache
 
-    return automation_health.alerts()
+    paths = get_settings().paths
+    key = (paths.state_dir, read_cache.state_revision(paths.state_dir))
+    return read_cache.cached("video_alerts", key, 15.0, automation_health.alerts)
 
 
 class AlertAckIn(BaseModel):
@@ -196,8 +202,10 @@ class AlertAckIn(BaseModel):
 def ack_alert(body: AlertAckIn, user=Depends(require_editor)) -> dict:
     """The user has seen an alert: it leaves the board."""
     from core.video import autopilot_store
+    from web.services import read_cache
 
     autopilot_store.ack_alert(body.key, user["username"])
+    read_cache.invalidate("video_alerts")
     audit.log("automation_alert_ack", user=user["username"], target=body.key, result="acked")
     return {"key": body.key, "acked": True}
 
@@ -205,13 +213,19 @@ def ack_alert(body: AlertAckIn, user=Depends(require_editor)) -> dict:
 @router.get("/shipments")
 def shipments(user=Depends(require_viewer), compact: bool = False, include_history: bool = False) -> list[dict]:
     """Approved scripts with their render and publication state, for the 成片与发布 page."""
-    from web.services import video_board
+    from web.services import read_cache, video_board
 
-    rows = video_board.shipments(_known_columns(), include_history=include_history)
-    if compact:
-        from web.services.video_list_payload import compact as project
-        return [project(row) for row in rows]
-    return rows
+    paths = get_settings().paths
+    key = (compact, include_history, read_cache.state_revision(paths.state_dir))
+
+    def _compute() -> list[dict]:
+        rows = video_board.shipments(_known_columns(), include_history=include_history)
+        if compact:
+            from web.services.video_list_payload import compact as project
+            return [project(row) for row in rows]
+        return rows
+
+    return read_cache.cached("video_shipments", key, 15.0, _compute)
 
 
 @router.get("/quality")
@@ -594,26 +608,34 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 
 @router.get("/scripts")
 def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer), compact: bool = False) -> list[dict]:
-    published = store.published_versions_by_script()
-    renders = store.render_statuses_by_script()
-    scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+    from web.services import distributions, read_cache
+
     paths = get_settings().paths
-    owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, scripts)
-    scripts = sorted((s for s in scripts if bool(s.get("archived") or owners[s["id"]]["matrix_archived"]) == archived),
-                     key=lambda s: (s["created_at"], s["id"]), reverse=True)[:min(max(limit, 1), 100000)]
-    versions = store.current_versions([s["id"] for s in scripts])
-    columns = _known_columns()
-    from web.services import distributions
-    distribution_rows = distributions.overview(scripts)
-    rows = [{**_script_summary(s, published, versions=versions),
-             "distributions": [d for d in distribution_rows[s["id"]] if d["version"] == s["current_version"]],
-             **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
-             "column_label": '本地视频' if s['topic'].get('local_video') else owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
-             **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
-    if compact:
-        from web.services.video_list_payload import compact as project
-        return [project(row) for row in rows]
-    return rows
+    clamped = min(max(limit, 1), 100000)
+    key = (clamped, archived, compact, paths.config_dir, paths.jobs_dir, read_cache.state_revision(paths.state_dir))
+
+    def _compute() -> list[dict]:
+        published = store.published_versions_by_script()
+        renders = store.render_statuses_by_script()
+        scripts = (store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+                   if archived else store.list_scripts(limit=100000))
+        owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, scripts)
+        scripts = sorted((s for s in scripts if bool(s.get("archived") or owners[s["id"]]["matrix_archived"]) == archived),
+                         key=lambda s: (s["created_at"], s["id"]), reverse=True)[:clamped]
+        versions = store.current_versions([s["id"] for s in scripts])
+        columns = _known_columns()
+        distribution_rows = distributions.overview(scripts)
+        rows = [{**_script_summary(s, published, versions=versions),
+                 "distributions": [d for d in distribution_rows[s["id"]] if d["version"] == s["current_version"]],
+                 **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
+                 "column_label": '本地视频' if s['topic'].get('local_video') else owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
+                 **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
+        if compact:
+            from web.services.video_list_payload import compact as project
+            return [project(row) for row in rows]
+        return rows
+
+    return read_cache.cached("video_scripts", key, 15.0, _compute)
 
 
 class ArchiveIn(BaseModel):
@@ -655,6 +677,8 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
     column = _known_columns().get(script["column_key"])
     if current is not None and column is not None:
         current = {**current, "checks": video_workflow.rule_checks(current, column)}
+    renders = store.list_renders(script_id)
+    latest_version = current if shown == script["current_version"] else None
     return {
         **script,
         "selection_skip": topic_progress.selection_skips([script]).get(script_id),
@@ -664,13 +688,13 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "configuration": context(script, current, get_settings().paths.config_dir, get_settings().paths.jobs_dir),
         "version_shown": current,
         "versions": store.list_versions(script_id),
-        "renders": [_render_out(r) for r in store.list_renders(script_id)],
+        "renders": [_render_out(r) for r in renders],
         "publications": store.list_publications(script_id),
         "platform_uploads": platform_manager.script_uploads(script_id),
         "distributions": distributions.overview([script])[script_id],
         "rechecks": store.list_rechecks(script_id)[:5],
         # research → write → audit → approve → render, read off the records above; and who started what
-        "steps": video_executor.steps_of(script),
+        "steps": video_executor.steps_of(script, version=latest_version, renders=renders, column=column),
         "events": video_steps.events(script_id),
         # the plan waiting for the user, when the recipe pauses after the plan (writing.pause_after_plan)
         "pending_plan": _plan_out(video_plans.pending(script_id)) if script["status"] == "PLAN_READY" else None,

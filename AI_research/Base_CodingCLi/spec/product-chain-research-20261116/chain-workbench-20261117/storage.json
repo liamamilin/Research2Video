@@ -1,0 +1,26 @@
+[
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/state",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/state"
+  },
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/output",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/output"
+  },
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/logs",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/logs"
+  },
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/tmp",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/tmp"
+  },
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/cache",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/research/chain-workbench-20261117/cache"
+  },
+  {
+    "local": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/product-chain-research-20261116/chain-workbench-20261117/runtime/renderer/g3/data",
+    "external": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/工作流试验/新试验/autovideo/chain-workbench-20261117/data"
+  }
+]

@@ -100,7 +100,7 @@ def overview(config_dir: str, state_dir: str) -> dict:
                 status = row['status']
                 counts[status] = counts.get(status, 0) + 1
         result.append({'key': profile['key'], 'name': profile.get('name', profile['key']),
-                       'cells': cells, 'candidates': counts})
+                       'jobs':list(profile.get('jobs',{})), 'cells': cells, 'candidates': counts})
     return {'profiles': result}
 
 

@@ -1,0 +1,10 @@
+{
+  "seed": 2026111103,
+  "files": {
+    "holdout2.json": {
+      "sha256": "51875d8bb2d2dd09afde163175d44d54bd96979b324138c6df437c4ef1525291",
+      "cases": 52
+    }
+  },
+  "frozen_implementation": "238d6b535ade764a4f73718b4c5d4d03d4cdcf3895b3fca351dcb9ec0f8ad956"
+}

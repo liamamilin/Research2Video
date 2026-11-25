@@ -1,0 +1,54 @@
+name: theme_research-m4_7ea2a65f
+description: 主题讲解：第一次用 ChatGPT 规划带老人孩子的短途旅行，从哪里开始、怎样一步步核对？
+enabled: true
+keywords:
+  - 第一次用 ChatGPT 规划带老人孩子的短途旅行，从哪里开始、怎样一步步核对？
+  - ChatGPT 产品使用、应用价值与订阅决策
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：围绕已经确定的主题研究，准备后续作者可以展开讲述的材料。
+  主题：第一次用 ChatGPT 规划带老人孩子的短途旅行，从哪里开始、怎样一步步核对？
+  领域：ChatGPT 产品使用、应用价值与订阅决策
+  栏目：T03 · 使用方法与教程
+  栏目交付目标：怎样才能用好 ChatGPT？
+  目标观众：中文普通用户、家庭出行人群
+  创作角度：把出行人数、预算、体力限制作输入，逐步生成并校正日程、交通和备选方案。
+  用户补充材料：面向中文普通用户和职场新人，优先能展示具体输入、操作和成果的题目。九个栏目保持多样性；套餐和订阅围绕真实决策问题，不要求每类凑满。
+  发现时的线索（用于确定问题，继续阅读相关正文）：
+  - How to Use ChatGPT Library Feature for Files !: https://www.youtube.com/watch?v=DQF0QOq7HlM
+    How to use ChatGPT's library feature for files. The ChatGPT library feature allows plus, [music] pro, and team business users to store, manage, and reuse files uploaded across different conversations. You can use the web app. Ensure you are using the ChatGPT web browser version that is desktop or web. Look for the library option in the left-hand sidebar menu if you are using it on the web. On the left-hand sidebar, you should be able to find the library option. Now, as you can see on the app, it's not there, but on the web, you should be able to find it. Then you can click on library to browse all previously uploaded or generated files, PDFs, docs, images, etc. [music] So, hope this video was helpful. Do like and subscribe, and also do not forget to leave the comments down below if you have any further issues as well.
+  研究日期：{date}
+
+  先明确这个题目需要回答的几个子问题。阅读提供的相关来源，定向搜索并阅读能回答这些问题的页面。
+  有用的旧教程、现行规则和案例同样可以使用；页面是否今天新增不决定它是否与本主题有关。
+  围绕信息缺口继续补充；材料充分后形成判断，不预设必须购买、升级或支持某种结论。
+  “使用一个月”等标题表述默认是目标观众所处的阶段；用户提供个人经历时把具体经历融入材料。
+  保留具体场景中的任务、输入、操作、结果和选择依据；将实际材料、可操作演示与待实测方案写清。
+  优先提供足以讲生动、讲明白的例子；用户给出的数据、计算与结论直接作为创作输入。
+
+  输出一份 Markdown 主题研究底稿：
+  # 主题标题
+  ## 要回答的问题与主要判断
+  ## 观众场景与具体材料
+  ## 问题逐项展开（每个问题的具体资料、例子、机制和适用条件）
+  ## 可用于讲述的操作与结果
+  ## 画面材料（页面链接、展示区域、对应讲述内容、输入与输出的演示建议）
+  ## 原始材料中值得保留的细节
+  ## 来源清单
+  这是一份题目已经确定的研究底稿，不再生成多个候选选题。后续作者可以自主组织讲述顺序。
+output: output/video/{datetime}_theme_research-m4_7ea2a65f.md
+sources:
+  - source:cg_capabilities
+  - source:cg_learn_videos
+  - source:cg_academy
+  - source:cg_kevin
+  - source:cg_ai_advantage
+  - source:cg_prompts
+sources_limit: 6
+max_searches: 8

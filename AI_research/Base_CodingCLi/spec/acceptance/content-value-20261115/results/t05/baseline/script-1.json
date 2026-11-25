@@ -1,0 +1,186 @@
+{
+  "title": "读200页招股书，Kimi和元宝差在一个页码上",
+  "sections": [
+    {
+      "title": "开场：同一份200页PDF，分水岭在哪",
+      "paragraphs": [
+        {
+          "text": "一份200页的招股书，同时丢给两个AI，两边都能还你一页挺像样的总结。真正让我分出高下的，是其中一份会写清楚“这句话在第几页第几段”，另一份不会。大家好，我是洛洛，今天聊一个很具体的问题：读200页招股书，Kimi和腾讯元宝，到底该用哪个。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "想象一下周一早上，你桌上摊着一份刚下发的招股说明书PDF，两百页，你把它拖进对话框，敲下一句提示词：请总结这份招股说明书的核心风险、业务模式和财务亮点，并标出对应页码。注意最后半句，“标出对应页码”。就是这个要求，让两个工具的差别藏不住了。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "页码这件事，为什么值钱",
+      "paragraphs": [
+        {
+          "text": "材料里这道题的结果是：Kimi能精准定位到第X页第X段，引用准确度极高；元宝读取也快，结构也清晰，引用准确度高，但理解深度是中到高这一档。差别听着不大，落到活儿上就不一样了。我猜难点在这儿：总结本身是把两百页压成两页，谁都能做到；标页码是要求它在压缩的时候，还得记住每句话原来待的位置。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "为什么这一条在招股书场景里最要紧？因为你的输出不是终点，是起点。你拿着这份摘要去写内部备忘录，合伙人翻到“关联交易风险”那一条，问你依据在哪，你得答得出来。AI给了页码，你两秒钟翻回去核对；AI不给，你就得从两百页里重新捞一遍，前面省下的半小时又吐回去了。所以我的判断很清楚：读单份招股书这类活儿，先看它敢不敢给位置，再看它写得好不好看。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "容量不是胜负手，任务形状才是",
+      "paragraphs": [
+        {
+          "text": "有人会说，那比谁装得多。这轮恰恰不是。Kimi的长文档能力标的是极强，200万字，折算下来大约4000页；元宝是单次50个文件。两百页的招股书对这两家都是零头，谁都能一口吞下。所以在这道题上，容量不决定结果，页码精度才决定。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但换个任务，天平就倒了。假设你要把20家同行的招股书一起过一遍，先摸清谁的风险披露最保守、谁的毛利率口径最奇怪。这种活儿的关键是横向铺开，不是单份钻深。元宝一次能并行50个文件，你一次性全传上去，不用开二十个窗口来回倒腾。材料给的结论也是这么分的：单份超长PDF找Kimi，几十份一起读找元宝。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我不会说谁更强，我会说先看你的活儿长什么样。一份一份啃年报、啃招股书、啃合同，这种形状的任务，选Kimi；一次几十份做初筛、做横向对比，这种形状的任务，选元宝。同一个人两个都装，一点都不矛盾。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "钱不是这道题的门槛，ChatGPT也别急着指望",
+      "paragraphs": [
+        {
+          "text": "再说钱。Kimi Pro是99元一年，折下来一个月8块左右；元宝的核心功能是完全免费的。8块钱一个月，跟你在两百页里反复翻找花掉的时间比，基本可以忽略。所以这道题的门槛不在付费，在选对任务类型——选错了，免费也是浪费；选对了，8块钱一个月也不算事。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html",
+            "https://ainavhub.cc/compare/doubao-vs-tongyi-vs-deepseek-2026"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "那已经订着ChatGPT的人要不要换？这份材料里，ChatGPT的长文档能力只标了个“中”，同一道题的实测结果也没有给出来。所以这一轮我不把它拉进来评胜负，也不会替它下结论。我只说一个判断：如果你每月付着20美元，别默认它能替你把这两百页读明白，这件事上，它现在不是首选。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "回到周一早上那份文件",
+      "paragraphs": [
+        {
+          "text": "回到开头那份两百页的招股书。我的建议是先别急着升级任何付费套餐，用手上的免费额度，把你自己真实的那份文件跑一遍，就盯着输出里有没有“第几页第几段”。有，它就能进你的工作流，帮你省下回头复核的那几分钟；没有，它就只是个写得漂亮的读书笔记。等你哪天要一次性过二十份同业文件，再把元宝补上，让它干批量初筛这件它更顺手的事。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我倒挺想知道你那边的情况：你手上那种动辄几百页的文件，是一份一份慢慢读得多，还是一次几十份一起过得多？评论区说说你的真实场景，我看看下一个该拆哪个工具。我是洛洛，我们下期见。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1226,
+    "estimated_seconds": 276,
+    "segments": 51,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.919,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "开场：同一份200页PDF，分水岭在哪",
+        "spoken_length": 206,
+        "budget": 261
+      },
+      {
+        "title": "页码这件事，为什么值钱",
+        "spoken_length": 275,
+        "budget": 261
+      },
+      {
+        "title": "容量不是胜负手，任务形状才是",
+        "spoken_length": 308,
+        "budget": 261
+      },
+      {
+        "title": "钱不是这道题的门槛，ChatGPT也别急着指望",
+        "spoken_length": 215,
+        "budget": 261
+      },
+      {
+        "title": "回到周一早上那份文件",
+        "spoken_length": 222,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 309754,
+      "completion_tokens": 3931,
+      "total_tokens": 313685,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2072,
+      "cost_usd": 0.0488217,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 91.579,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 1068
+  }
+}

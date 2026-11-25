@@ -1,0 +1,44 @@
+{
+  "autovideo_full": {
+    "command": "python3 -m pytest tests g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q",
+    "passed": 1035,
+    "skipped": 1,
+    "sandbox_port_failures": 2
+  },
+  "autovideo_port_retry": {
+    "command": "python3 -m pytest g3/tests/test_local_launcher.py -q",
+    "passed": 2
+  },
+  "arec_full": {
+    "command": "bash scripts/check.sh",
+    "compile": "PASS",
+    "passed": 4344,
+    "skipped": 3,
+    "sandbox_related_failed_or_error": 30
+  },
+  "arec_environment_retry": {
+    "command": "../.AI_research/bin/python -m pytest tests --lf -q",
+    "passed": 30
+  },
+  "arec_latest_targeted": {
+    "command": "../.AI_research/bin/python -m pytest tests/test_tutorial_images.py tests/test_upload_priority.py tests/test_weekly_review.py -q",
+    "passed": 31
+  },
+  "ui": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "test_files": 94,
+    "tests_passed": 747,
+    "build": "PASS"
+  },
+  "configuration": "196 jobs and production policy valid",
+  "diff_check": "PASS",
+  "arec_publish_latest": {
+    "command": "../.AI_research/bin/python -m pytest tests/test_upload_priority.py tests/test_platforms.py -q",
+    "passed": 75
+  },
+  "final_flow_regression": {
+    "command": "python3 -m pytest g2/tests/test_shot_director.py -q",
+    "passed": 30
+  }
+}

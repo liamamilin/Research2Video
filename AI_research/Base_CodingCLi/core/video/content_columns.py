@@ -163,7 +163,9 @@ def snapshot(config_dir: str, production_id: str, job: str) -> dict:
     if column is None:
         return {}
     source = matrices.of_job(job, config_dir)
-    return {"column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
+    owner = matrices.load_all(config_dir).get(column.matrix) if column.matrix else None
+    premise = str(((owner.content if owner else {}) or {}).get("premise") or "").strip()
+    return {**({"premise": premise} if premise else {}), "column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
             "audience": column.audience, "promise": column.promise, "notes": column.notes,
             "content_mode": column.content_mode, "greeting": column.greeting,
@@ -184,13 +186,62 @@ def apply_script_context(recipe, context: dict):
     if structure:
         direction += f"\n{scope}可围绕 {structure} 组织讲述，按素材自然展开。"
     if context.get("type") == "comparison":
-        direction += "\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。"
+        direction += (
+            "\n不要写一碗水端平的优缺点列表，也不要按对象逐个报菜名式念参数。"
+            "按「核心分水岭 → 什么人直接选各自选项（用具体任务、用量或门槛画人群，不用新手/专业人士等空标签）"
+            " → 各自最隐蔽的坑（只挖材料里已有、第一眼看不出的隐藏成本、限额、静默限制或翻车条件，不强求对称、不编造）」组织讲述；"
+            "若核心分水岭本身就是人群准入边界，可直接合并为一节；前面已说清的准入条件或数字后面直接用结论，严禁在分水岭、谁选谁、拍板三处把同一组条件换句式重复念两三遍；"
+            "对象数量沿用材料（都要给清定位，别漏掉日常主力或入门项）；口播只说人耳朵一听就懂的话，不念长串价格数列或路径；小节标题贴合本期具体问题来起，不要照抄框架模板词。"
+        )
+    elif context.get("type") == "news":
+        direction += (
+            "\n不要写成通讯社通稿或新闻联播式播报，也不要在开头念“这条讲三件事”的提纲。"
+            f"{scope}第一句直接亮出最反直觉的变化、冲突、现场切口或后果；讲清真正发生了什么、关键边界或转折是什么（材料有基线缺失或前提限制就顺手点破），"
+            "以及对观众现实判断、当下用法或理解框架的具体影响（若是时效快讯，进一步点清咬到谁的利益，并给出具体可查动作或接下来盯紧的唯一关键信号）。"
+            "口播只说人耳朵一听就懂的话，严禁念具体 IP 地址、邮箱、Git PR/分支路径、长串隐藏文件名（如 .npmrc/.netrc）或大写环境变量全名，用一句大白话概括机制，具体文件名和命令留给画面；"
+            "引用材料数字时保留原小数位，不自行四舍五入抹掉小数；同一事实或数字全篇只在一个位置讲透，前后段落绝不车轱辘重复。"
+            + ("\n整期合集三条铁律：标题里写的最重磅新闻必须排在正文第一个 item；"
+               "opening 只用 1 到 2 句点出共同张力或直接切入，绝不提前把第一节的数字和结论复述一遍；"
+               "严格控制单条篇幅——主打的第一条控制在 3 段以内，其余每条控制在 2 段左右，严禁把合集扩写成近万字的长篇报告。" if programme else "")
+            + "小节标题贴合具体内容来起，不要照抄框架模板词。"
+        )
+    elif context.get("type") == "explainer":
+        direction += (
+            "\n不要写成教科书词条或百科定义汇编，不要在开头念提纲，也不要在同一段里连续堆砌五六个底层专业名词。"
+            f"{scope}从一个具体反常识现象、看得见的账单/动作变化或真实工作卡点直接切入；"
+            "每节只推进一步核心因果（看见的具体现象或动作 → 背后真正起作用的一层机制、激励或约束 → 带来的实际后果），"
+            "抽象术语必须在它解释眼前具体例子的那一刻才出场，并用日常场景或具体对象锚定。"
+            "口播不替画面逐行背诵冗长算账表格、公式或代码路径，也不要直接念带下划线或驼峰的英文配置键名/API参数名（如 completion_window、attributionProject、billing_group_tag、max_tokens），改用中文自然说法（如“后台完成窗口参数”、“项目归属标签”、“最大输出上限”），把英文参数名留给画面；"
+            "引用材料数字时保留原小数位、不自行四舍五入抹掉小数；同一事实、数字或机制解释全篇只在一个位置讲透，前后绝不车轱辘重复。"
+            + ("\n整期合集四条铁律：若包含多个独立议题或案例，标题里最重磅的主菜必须排在正文第一个 item；"
+               "opening 只用 1 到 2 句抛出最反直觉的反差或追问，绝不提前把第一节的数字、拆解过程和结论剧透复述一遍；"
+               "每个 item 小节控制在 3 到 5 段以内（若主打案例同时包含主机制和另一条独立支线，拆成两个有独立小标题的 item，不要把八九段塞进同一小节）；"
+               "不同案例之间没有真实共同机制时各自利落讲透，严禁用“这标志着行业进入新阶段”之类的空洞宏大叙事强行串场。" if programme else "")
+            + "收尾落回开头的问题或情境，留给观众一个下次碰到同类现象能直接套用的判断标尺，或手头能立刻借用的一步动作；小节标题贴合具体内容来起，不要照抄框架模板词。"
+        )
     elif context.get("type") == "tutorial":
-        direction += f"\n{scope}围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。"
+        direction += (
+            f"\n{scope}围绕一个明确任务或高频症状，按一条干净的主操作路径顺着走到底（准备条件 → 关键动作 → 每一步做完后屏幕上能看到的验证信号）。"
+            "不要把官方帮助文档里的边缘例外条款、各国本地支付枚举或企业后台细则全堆进主线，只留真正会让普通用户踩雷、重复扣费或失败的 1 到 2 个核心避坑点。"
+            "口播用自然中文说清点哪儿、看什么信号、改完变成什么样，严禁像机器人一样连续念四层英文菜单路径、长串快捷键组合或四五个英文状态词枚举（精准英文按钮名、路径和命令留给画面）；"
+            "排障和订阅类内容必须按代价从小到大分层，每层只放 1 到 2 个动作并给出清晰的红绿灯分岔（看到什么信号就停/等，看到什么再进下一步），绝不把六七个步骤塞进同一段一口气念完。"
+            "opening 只用 1 到 2 句点出做完能拿到什么或先避开什么冤枉路，绝不提前把全部步骤复述一遍；同一入口、前提或范围边界全篇只说一次，前后绝不车轱辘重复；引用数字保留原小数位；单节控制在 3 到 5 段以内；收尾留一句可立刻照做的动作口诀。"
+        )
+    elif context.get("type") == "deep_research":
+        direction += (
+            "\n从真实实验反差、工程痛点或核心矛盾切入，用一条清晰主线串起各章证据，每章只推进一层独立理解增量（做了什么 → 观察到什么 → 为什么成立及在什么口径/条件下会变）。"
+            "严禁在口播里逐行朗读多列跑分表、延迟表或价目表（如连续报四档/五个模型的分数、耗时、首 token 秒数和单价串）；只挑最能翻转判断的拐点数字或两组同口径对照讲透，把完整表格留给画面。"
+            "涉及多模型或多方案对比章节时，直接说清什么任务选谁、各自最隐蔽的坑或准入门槛，不端水、不报菜名。"
+            "口播不念带下划线或驼峰的英文配置键名、代码路径或环境变量串；引用材料数字沿用底稿原文单位和小数位，不自行做除法心算新倍数或四舍五入；"
+            "单节控制在 3 到 5 段以内，绝不把八九段论文笔记塞进同一小节；opening 不提前把第一节数字剧透复述一遍，前后不车轱辘重复；收尾把全篇证据收束为一句可执行决策或判断标尺。"
+        )
+    premise = (context.get("premise") or "").strip()
+    if premise:  # what the matrix's viewers live with (matrix content.premise), before any column direction
+        direction += f"\n观众前提：{premise}"
     notes = (context.get("notes") or "").strip()
     if notes:
         if programme:
-            direction += "\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。"
+            direction += "\n以下是可参考的创作方向。各项独立内容可采用适合自己的例子与讲法；同一问题的章节以连贯、好理解为目标，安排由作者结合材料决定。"
         direction += f"\n{'单项内容创作方向' if programme else '栏目创作方向'}：{notes}"
     # A concrete business-column brief owns the creative goal. The reused
     # recipe continues to own its input mode, writer and output contract.

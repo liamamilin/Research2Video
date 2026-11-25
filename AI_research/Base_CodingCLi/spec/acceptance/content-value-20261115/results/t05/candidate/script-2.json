@@ -1,0 +1,217 @@
+{
+  "title": "研究生写综述：Gemini选题、Qwen筛文献、ChatGPT出机理图，只订一个够不够？",
+  "sections": [
+    {
+      "title": "只订一个，缺口在流程不在模型",
+      "paragraphs": [
+        {
+          "text": "如果一个AI订阅就想包办综述的选题、筛文献和机理图，我的判断是：能帮你启动，但只订一个，缺口不在“哪个模型最强”，而在它被放在工作流的哪一段。大家好，我是洛洛，今天我们聊聊研究生写综述，Gemini选题、Qwen筛文献、ChatGPT出机理图，只订一个到底够不够。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "原文里有一个很具体的成果：作者作为第一作者，一人完成了一篇食品领域工科综述，最终被《食品科学》录用并网络首发。不同阶段用的工具不一样：Gemini帮助探索研究方向、比较选题和整理框架；Zotero收集管理文献，AI辅助整理摘要；Qwen归纳研究资料、辅助章节逻辑和文字表达；ChatGPT给机理图草图参考，再用Keynote做正式图；最后用WorkBuddy检查文档格式和参考文献。这不是说AI替你写完整篇，而是把科研写作拆成了几段可交接的工作。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我不建议一上来就问哪个模型最强。先问自己：我现在最卡的是发散选题、批量筛摘要、正文归纳、机理图起步，还是格式核验？只订一个的缺口，往往就出在任务切换上。一个工具能把某一段做顺，不等于整条链都有人接。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "选题先收窄，文献别按年份排队",
+      "paragraphs": [
+        {
+          "text": "综述有时效性，主要汇报某个领域近期关于一个小痛点、小热点的研究进展与空白。选题一宽，很容易把每个方向都讲一点，却讲不透。原文用Gemini来探索研究方向、比较选题和整理文章框架，但框架只是起点，不是结论；真正要判断的是这个小问题有没有足够的代表性研究和争议空间。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "文献选取也不该只按年份排队。更实用的做法是按功能分级：经典文献交代背景、基础理论和奠基性方法，引用前要核查有没有后续勘误或结论修正；代表性研究说明关键技术或学术观点的演变；前沿研究反映近3到5年的新突破；争议性研究则横向对比不同团队的结论差异和实验条件局限。这样分完，综述的骨架才稳。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的建议是，先人工把题目收窄成一个小问题，再让AI帮你比较选题、搭框架，然后按功能往框架里填文献。只订一个AI如果只做选题发散，文献分级和后面的摘要筛选还得自己扛，这就是第一处明显缺口。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Qwen筛摘要：先做表，不写正文",
+      "paragraphs": [
+        {
+          "text": "文献阶段，原文先用Zotero收集和管理文献，再把摘要报告投喂给Qwen做相关性分级和信息预提取。提示词里有一条边界很清楚：任务只做文献初筛与摘要提取，禁止直接撰写综述正文。这个边界比“让AI帮我写综述”重要得多。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "它要求输出一张Markdown表，包含六项：原文献编号、作者与年份、研究对象与核心问题、关键研究方法、摘要报告的主要结果与结论、相关性评级高中低。表下再对高相关文献列出归属章节建议和待核实盲区。严谨性红线也写得很细：保留原编号顺序，严禁根据标题脑补实验结果，严禁补充摘要里没出现的数据，不同研究结论有差异要分别记录，摘要含糊处统一标[需读全文核实]。投喂时建议按子章节分批，单次15到20篇，避免输入太长漏读细节。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这里只订一个的缺口是：Qwen适合这类表格化筛选和归纳，但换成只订ChatGPT或Gemini，不是不能做，而是你要重新设计提示词、重新检查输出。更关键的不是模型名，而是那几条红线：不写正文、不脑补、标出待核实。标了[需读全文核实]的地方，最后还得人工读全文确认。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "ChatGPT出机理图草图，正式图还得自己做",
+      "paragraphs": [
+        {
+          "text": "作图阶段，原文让ChatGPT按照综述正文生成机理图草图。角色设定是科研绘图设计师，先梳理视觉排版方案，再生成高分辨率草图；分区可以从左到右的工艺流程，也可以上下分层的宏观到微观机制，先提取3到4个核心阶段和箭头方向。风格要求扁平化2D、纯白背景、主色不超过3种，严禁3D渲染和科幻光效；画面里的反应步骤、物质元素和箭头指向必须严格基于正文，不得捏造未提及的反应路径或实验设备。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第一次生成可能不符，但能拿到一个很重要的东西：模板。原来脑子里没有抓手，现在有了一个可以改的框架。常见错误也很具体：箭头方向不准，要按原始文献重新调整；捏造了正文没有的元素，要删掉；不同过程逻辑混在一起，要按实际机制重新分区；字体、名词不准确，要对照论文逐项改。最后用Keynote临摹，Windows可以用PowerPoint。素材网站像Bioicons、SciDraw、Reactome、Smart Servier、Iconfont、Wikimedia Commons，使用前要检查许可证和署名要求。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以机理图这一段，ChatGPT给的是构图参考，不是最终发表图。只订一个的缺口也在这里：如果你只订Qwen，摘要筛选可能很顺，但机理图草图还得另找入口；如果你只订ChatGPT，图能出草稿，批量文献表格和摘要红线又要重新调。它能省掉从空白开始的焦虑，但省不掉人工核对和正式绘图。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "我的低成本搭法：一个主订，关键节点人工补位",
+      "paragraphs": [
+        {
+          "text": "回到只订一个够不够。我的建议不是三个都订，而是先选一个主工具，放在你最费时间的那一段。文献量最大，就主订Qwen这类做摘要初筛；选题和框架最卡，就主订Gemini这类做发散和比较；最怕作图起步，就主订ChatGPT这类出草图。其他环节用Zotero、Keynote或PowerPoint、现有工具和免费素材补位。这套搭法来自一篇食品科学工科综述的单篇案例，作者也明确说不一定适合其他领域；你换领域，提示词、数据库和文献分级标准都要跟着改。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但低成本不等于低核对。选题要人工收窄，经典文献引用前要查勘误或结论修正，摘要里的[需读全文核实]要真去读，机理图每个箭头和元素要对照正文，参考文献格式要单独核验。AI在这套流程里做的是启动、归纳、出草稿和暴露问题，不是替你做最终判断。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "只订一个够不够？看你缺哪一段。它能让你开始，但很难覆盖选题、筛文献、正文归纳、机理图、格式核验整条链。我的判断是：把工作流拆开，先订一个主工具，把红线写进提示词，把人工核对留在关键节点；这样比追“最强模型”更实际。我是洛洛，我们下期见。",
+          "citations": [
+            "https://sspai.com/post/118153"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1868,
+    "estimated_seconds": 416,
+    "segments": 70,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 1.386,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "只订一个，缺口在流程不在模型",
+        "spoken_length": 361,
+        "budget": 261
+      },
+      {
+        "title": "选题先收窄，文献别按年份排队",
+        "spoken_length": 330,
+        "budget": 261
+      },
+      {
+        "title": "Qwen筛摘要：先做表，不写正文",
+        "spoken_length": 372,
+        "budget": 261
+      },
+      {
+        "title": "ChatGPT出机理图草图，正式图还得自己做",
+        "spoken_length": 434,
+        "budget": 261
+      },
+      {
+        "title": "我的低成本搭法：一个主订，关键节点人工补位",
+        "spoken_length": 371,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 3984,
+      "completion_tokens": 4650,
+      "total_tokens": 8634,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2852,
+      "cost_usd": 0.0033876,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 49.502,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向选题指定的中文观众，以本期观看承诺组织完整口播。根据问题采用比较、事件、工作变化或解释，不强制单个任务。",
+    "author_system_prompt_sha256": "f1de3ec69249678062f2eba454c5ea29eac075dbe2c04553db7d23526e691cec",
+    "trusted_urls": 7
+  }
+}

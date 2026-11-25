@@ -33,6 +33,7 @@ render() {
     -e "s|@SCRIPT_DIR@|$SCRIPT_DIR|g" \
     -e "s|@PYTHON@|$PYTHON_BIN|g" \
     -e "s|@LOG_DIR@|$LOG_DIR|g" \
+    -e "s|@HOME@|$HOME|g" \
     "$PLIST_SRC/$label.plist" > "$AGENT_DIR/$label.plist"
 }
 

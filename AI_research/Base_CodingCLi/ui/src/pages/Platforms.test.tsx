@@ -225,7 +225,7 @@ describe("Platform management", () => {
     expect(screen.getByText("分区更新失败，暂显示上次获取的分区。")).toBeTruthy();
     chooseCategory("默认投稿分区", "知识 / 科学科普");
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
-    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", { auto_upload: false, sync_comments: false, tid: 201, first_comment: { enabled: false, text: "", pin: false }, publish_window: { enabled: true, start: 12, end: 18, spacing: 20 } }, "PUT"));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", { auto_upload: false, sync_comments: false, tid: 201, first_comment: { enabled: false, text: "", pin: false }, publish_window: { enabled: true, start: 8, end: 23, spacing: 20 }, restricted_comment: { enabled: false, text: "", pin: true } }, "PUT"));
   });
 
   it("edits the publish window and blocks an empty range", async () => {
@@ -233,9 +233,10 @@ describe("Platform management", () => {
     vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
     show("/platforms?tab=settings");
     await waitFor(() => expect((screen.getByLabelText("默认投稿分区") as HTMLInputElement).value).toBe("科技 / 数码"));
-    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "19" } });
+    // the default window is 08:00–23:00 (41d649d); a start at the end hour leaves an empty range
+    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "23" } });
     expect((screen.getByRole("button", { name: "保存策略" }) as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.change(screen.getByLabelText("公开时段结束"), { target: { value: "23" } });
+    fireEvent.change(screen.getByLabelText("公开时段开始"), { target: { value: "19" } });
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ publish_window: { enabled: true, start: 19, end: 23, spacing: 20 } }), "PUT"));
   });
@@ -326,5 +327,23 @@ describe("Platform management", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "默认置顶首条评论" }));
     fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ first_comment: { enabled: true, text: "固定说明", pin: true } }), "PUT"));
+  });
+
+  it("lets admins save default creation_statement", async () => {
+    useAuthStore.setState({ user: { username: "admin", role: "admin" } as never });
+    vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
+    show("/platforms?tab=settings");
+    fireEvent.change(await screen.findByLabelText("默认创作声明"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存策略" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/settings", expect.objectContaining({ creation_statement: 3 }), "PUT"));
+  });
+
+  it("lets editors override creation_statement per upload", async () => {
+    vi.mocked(loadBilibiliCategories).mockResolvedValue(catalog);
+    vi.mocked(api).mockResolvedValue({ ...preview, creation_statement: 0 });
+    show("/platforms?tab=uploads&render=r1");
+    fireEvent.change(await screen.findByLabelText("创作声明"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ creation_statement: 1 })));
   });
 });

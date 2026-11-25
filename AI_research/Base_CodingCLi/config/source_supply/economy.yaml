@@ -19,15 +19,17 @@ discovery_objective: 为「财经与经济」寻找可持续读取的机构栏�
 jobs:
   economy/economy_daily:
     mode: context
-    direction: 经济变化怎样沿具体路径传到生活与生意；保留数据、条件与过程
+    direction: 经济变化怎样沿具体路径传到生活与生意；保留数据、条件与过程；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - economic data central bank statistical agency analysis news RSS
     - 经济 数据 统计局 央行 研究 公告 订阅
     - economic research institute policy transmission household business stories
+    - 经济 价格 就业 收入 日常生活 数据 解释 全球经济日报
   economy/economy_weekly:
     mode: context
-    direction: 用具体例子解释一条经济机制，保留指标含义、前后过程和适用条件
+    direction: 用具体例子解释一条经济机制，保留指标含义、前后过程和适用条件；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
     query:
     - economic research mechanisms data explainers central bank publications
     - economics explainers household business inflation trade research blog
     - 经济 机制 数据 解读 央行 研究机构 专题
+    - 经济 价格 就业 收入 日常生活 数据 解释 宏观与数据周解读

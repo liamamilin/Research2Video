@@ -1,0 +1,254 @@
+{
+  "captured_at": "2026-11-16T23:27:23.447093+08:00",
+  "joint_outputs": [
+    {
+      "id": "a188b80788864fd7a95b13c334720a34",
+      "column_key": "flash-nr",
+      "production": "flash_daily",
+      "status": "APPROVED",
+      "render_id": "08f5e507a4584ba5afe40b1a800edda8",
+      "title": "同一任务0.23元，AI开始替你算账了",
+      "render_status": "COMPLETED",
+      "completed_at": "2026-11-16T20:18:38+0800",
+      "topic": {
+        "id": null,
+        "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "episode": {
+          "job": "monitoring/ai_flash_discovery",
+          "production": "flash_daily",
+          "items": [
+            {
+              "id": "2026-11-16/F1@r69947213561243af",
+              "title": "腾讯 Hy4 flash 实测：同一个 3D 网页任务约 0.23 元，DeepSeek 约 1.21 元"
+            },
+            {
+              "id": "2026-11-16/F2@r69947213561243af",
+              "title": "同一天两种 AI 钱包：ChatGPT 能替你买单，Gemini 只能读账，边界差在哪"
+            },
+            {
+              "id": "2026-11-16/F3@r69947213561243af",
+              "title": "豆包 App 上线“找店”：地图上直接看团购、下单、导航，对话里把本地生活走完"
+            },
+            {
+              "id": "2026-11-16/F4@r69947213561243af",
+              "title": "Cursor 安全事件：攻击者借 Fireworks 密钥复制编程 Agent 记录，不到 0.05% 用户受影响"
+            },
+            {
+              "id": "2026-11-16/F5@r69947213561243af",
+              "title": "Gemini 独立 App 进 CarPlay：开车时语音查 Gmail 和日历，需要先满足哪些条件"
+            },
+            {
+              "id": "2026-11-16/F6@r69947213561243af",
+              "title": "一个 prompt 做出 Datasette 地图插件：AI 编程在专业工具里到底能走多远"
+            },
+            {
+              "id": "flash-raw:31ee152d6667695f23759229",
+              "title": "[豆包工作上线“工作台”功能，首批覆盖金融、医疗、教育等21个场景_新浪财经_新浪网](https://finance.sina.com.cn/roll/2026-11-16/doc-iniyxcic1237305.shtml) — published 2026-11-16"
+            },
+            {
+              "id": "flash-raw:c283b36a494a2c96590c5b84",
+              "title": "[Apple’s new study looks to improve the effectiveness of AI health tools](https://www.theverge.com/tech/1033355/apples-new-study-looks-to-improve-the-effectiveness-of-ai-health-tools) — published 2026-11-15T20:47:16-05:00"
+            }
+          ],
+          "report_path": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+          "report_identity": "69947213561243af00dcdd29dc2289c543c41b27a95ec1a671578178c9c3fe3e",
+          "issue": {
+            "issue_id": "bd11592bb1b95e8d8528fdc7ea92de68dfa6ca44911ce09e6aeba6eef80cc990",
+            "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+            "research_window": {
+              "mode": "previous_slot",
+              "days": 1,
+              "start": "2026-11-16T07:30:00+08:00",
+              "end": "2026-11-16T18:30:00+08:00",
+              "timezone": "Asia/Shanghai"
+            }
+          },
+          "publication": {
+            "scheme": "lead-subject/v2",
+            "title": "今日快讯",
+            "label": "今日快讯",
+            "issue_date": "2026-11-16"
+          }
+        },
+        "joint_plan": {
+          "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+          "entry": "episode"
+        }
+      }
+    },
+    {
+      "id": "ac650ddfddaf4a9799764784254c77a9",
+      "column_key": "flash-nr",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "render_id": "cb6617139840448482849145fac0aabc",
+      "title": "同一个 3D 网页：Hy4 flash 0.23 元，DeepSeek 1.21 元，差的不只是单价",
+      "render_status": "COMPLETED",
+      "completed_at": "2026-11-16T20:47:15+0800",
+      "topic": {
+        "id": "2026-11-16/F1@r69947213561243af~money",
+        "from_item": "2026-11-16/F1@r69947213561243af",
+        "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "joint_plan": {
+          "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+          "entry": "2026-11-16/F1@r69947213561243af"
+        }
+      }
+    },
+    {
+      "id": "8dc02c00558e448e95ad82d9f6510d1e",
+      "column_key": "flash-nr",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "render_id": "9029a37cedbc4947abb0764f3826f92b",
+      "title": "ChatGPT Wallet 怎么用上：借记卡不行，批准前先看这五项",
+      "render_status": "COMPLETED",
+      "completed_at": "2026-11-16T21:08:25+0800",
+      "topic": {
+        "id": "2026-11-16/F2@r69947213561243af~howto",
+        "from_item": "2026-11-16/F2@r69947213561243af",
+        "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "joint_plan": {
+          "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+          "entry": "2026-11-16/F2@r69947213561243af"
+        }
+      }
+    },
+    {
+      "id": "6c7148518ab74c38ae7212ac08538c32",
+      "column_key": "flash-nr",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "render_id": "023d7bc5585c473b85bbe009832cc29d",
+      "title": "Cursor 事件后，先查 10 月 29 日那 11 个小时",
+      "render_status": "COMPLETED",
+      "completed_at": "2026-11-16T21:34:40+0800",
+      "topic": {
+        "id": "2026-11-16/F4@r69947213561243af~howto",
+        "from_item": "2026-11-16/F4@r69947213561243af",
+        "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "joint_plan": {
+          "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+          "entry": "2026-11-16/F4@r69947213561243af"
+        }
+      }
+    },
+    {
+      "id": "21e60a394915460289892bd4a996ee30",
+      "column_key": "flash-nr",
+      "production": "flash_each",
+      "status": "APPROVED",
+      "render_id": "8391b5283c4241af80fd26adeaaa850d",
+      "title": "CarPlay 上的 Gemini 图标没出现？先查这三步",
+      "render_status": "COMPLETED",
+      "completed_at": "2026-11-16T22:00:01+0800",
+      "topic": {
+        "id": "2026-11-16/F5@r69947213561243af~howto",
+        "from_item": "2026-11-16/F5@r69947213561243af",
+        "from_report": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+        "joint_plan": {
+          "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+          "entry": "2026-11-16/F5@r69947213561243af"
+        }
+      }
+    }
+  ],
+  "schedules": [
+    {
+      "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+      "job_name": "monitoring/ai_flash_discovery",
+      "schedule": "30 7,18 * * *",
+      "enabled": 1,
+      "deleted": 0
+    },
+    {
+      "id": "3751c3d40bc5457b8e6d47b3d0710246",
+      "job_name": "tech/tech_daily",
+      "schedule": "0 2 * * *",
+      "enabled": 0,
+      "deleted": 0
+    },
+    {
+      "id": "848b38ae019846bab978447089caacb7",
+      "job_name": "tech/tech_weekly",
+      "schedule": "0 2 * * 1",
+      "enabled": 0,
+      "deleted": 0
+    },
+    {
+      "id": "60777dfe65874a1fa2909edc7fc5755b",
+      "job_name": "source_discovery/ai_media",
+      "schedule": "30 5 * * 0",
+      "enabled": 1,
+      "deleted": 0
+    },
+    {
+      "id": "defe1fb22de940f0903e1224ca9cf1cc",
+      "job_name": "system/material_collection",
+      "schedule": "20 7 * * *",
+      "enabled": 1,
+      "deleted": 0
+    }
+  ],
+  "report": {
+    "path": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+    "sha256": "97aa1e1b2ecc64b48c1fa4337335df686e234f1d6348a92d5a986f1f359f1a12",
+    "metadata": {
+      "path": "output/flash/2026-11-16_ai_flash_discovery_1.md",
+      "job": "monitoring/ai_flash_discovery",
+      "ts": "2026-11-16T19:41:35+0800",
+      "duration_seconds": 2088.9,
+      "searches": 15,
+      "audience_strategy": {
+        "strategy": "audience-v1",
+        "channel": "flash",
+        "candidate_count": 6,
+        "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md.audience-97aa1e1b2ecc64b4.json",
+        "question_material": "question-v1"
+      },
+      "production_issue": {
+        "issue_id": "bd11592bb1b95e8d8528fdc7ea92de68dfa6ca44911ce09e6aeba6eef80cc990",
+        "policy_revision": "03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f",
+        "research_window": {
+          "mode": "previous_slot",
+          "days": 1,
+          "start": "2026-11-16T07:30:00+08:00",
+          "end": "2026-11-16T18:30:00+08:00",
+          "timezone": "Asia/Shanghai"
+        }
+      }
+    },
+    "question_material_receipt": {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md.audience-97aa1e1b2ecc64b4.json",
+      "sha256": "f1c201ac0225ec0109498a700e23ec4645c8d060dfd2b2177d305fd2362018a5",
+      "status": "enriched",
+      "usage": {
+        "requests": 25,
+        "prompt_tokens": 211732,
+        "completion_tokens": 83404,
+        "total_tokens": 295136,
+        "cache_read_tokens": 13952,
+        "cache_reported_requests": 25,
+        "reasoning_tokens": 68074,
+        "cost_usd": 0.07975127,
+        "cost_reported_requests": 25,
+        "searches": 12
+      },
+      "topic_count": 6
+    },
+    "history": {
+      "ts": "2026-11-16T19:41:35+0800",
+      "status": "success",
+      "source_count": 65,
+      "question_material": null,
+      "audience_strategy": {
+        "strategy": "audience-v1",
+        "version": 7,
+        "channel": "flash",
+        "candidate_count": 6,
+        "receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/flash/2026-11-16_ai_flash_discovery.md.audience-97aa1e1b2ecc64b4.json",
+        "question_material_status": "enriched"
+      }
+    }
+  }
+}

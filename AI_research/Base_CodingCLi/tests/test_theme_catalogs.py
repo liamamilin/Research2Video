@@ -16,7 +16,8 @@ from tests.test_theme_workbench import theme_env  # noqa: F401
 from tests.test_video_scripts import video_env  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPANDED = ('ai_media', 'company', 'consumer', 'culture', 'economy', 'education',
+# education matrix is archived (no research jobs); theme_library/education.yaml kept for later.
+EXPANDED = ('ai_media', 'company', 'consumer', 'culture', 'economy',
             'geography', 'history', 'industry', 'science')
 
 
@@ -53,7 +54,7 @@ def test_domain_catalog_has_distinct_questions_and_real_reusable_references(tmp_
 def test_every_active_matrix_defaults_to_reference_generation_and_keeps_platforms():
     config = str(ROOT / 'config')
     active = [m for m in matrices.load_all(config).values() if not m.archived and m.content.get('role', 'domain') == 'domain']
-    assert len(active) == 11
+    assert len(active) == 13
     for matrix in active:
         cfg = theme_discovery.configuration(config, matrix.key)
         assert cfg['mode'] == 'ideas'

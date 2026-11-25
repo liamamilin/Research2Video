@@ -57,6 +57,8 @@ def test_report_images_freeze_with_the_script_and_reach_the_existing_durable_wor
                                  content_context={'column': 'tools', 'type': 'tutorial'})
     assert video_workflow.run(script['id'], llm_config=object()) == 'DRAFT'
     first = store.get_version(script['id'], 1)
+    sent = '\n'.join(message['content'] for message in llm.calls[0])
+    assert '展示实际输入与输出' in sent and '项目周报输入，标题和已完成列表' in sent
     assert first['meta']['user_materials'] == context
     assert 'user_materials' not in store.get_script(script['id'])['topic']
     report_meta.append_record(metadata_path, 'tutorial', extra={'user_materials': {**context, 'ids': [], 'revision': 2}})

@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-11-11T09:31:33.850908+00:00",
+  "changed_files": {
+    "g1/renderer/src/Root.tsx": "7a9ad11afacc245d4121c0ca7c4933658953b5bfdcb36d5c94234acd00f53c0c",
+    "g2/explanation.py": "3a7316ec9d24335148d5d913e56ceaa604bbe707704ab90bffb404585cc9399a"
+  },
+  "native_rendering_prefix_and_suffix_unchanged": true,
+  "reason": "Final integration audit: remove remaining planner maxItems=5 override; replace hybrid embedding hardcoded offsets with fitFrame over the shared stage. Neither change tunes native held-out rendering. Hybrid tested separately; no independent hybrid holdout claim.",
+  "final_source_sha256": "28175bae855a9d8bcae6f2a2b6e735a4aee33f132b6fecbb1ad6f92912d4ca27"
+}

@@ -9,12 +9,15 @@ import json
 import sqlite3
 import time
 import uuid
+import threading
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from core import cron
 
 ACTIVE = ('queued', 'starting', 'running', 'retry')
 LEASE_SECONDS = 120
+_INITIALIZED = {}
+_INITIALIZE_LOCK = threading.RLock()
 
 
 class ScheduleConflict(ValueError):
@@ -42,6 +45,11 @@ def iso(at: float | None, timezone: str = 'local') -> str | None:
     return datetime.fromtimestamp(at, zone(timezone)).isoformat(timespec='seconds') if at else None
 
 
+from contextvars import ContextVar
+
+_GROUP_CONNECTIONS = ContextVar("schedule_group_connections", default={})
+
+
 class ScheduleStore:
     """SQLite transactions make slot creation and claims safe across processes."""
 
@@ -51,6 +59,18 @@ class ScheduleStore:
         self.jobs_dir = jobs_dir or str(Path(self.state_dir).parent/'jobs')
         Path(self.state_dir).mkdir(parents=True, exist_ok=True)
         self.path = str(Path(self.state_dir) / 'schedules.db')
+        with _INITIALIZE_LOCK:
+            identity=self._file_identity()
+            if identity is not None and _INITIALIZED.get(self.path)==identity:return
+            self._initialize_schema()
+            _INITIALIZED[self.path]=self._file_identity()
+
+    def _file_identity(self):
+        try:
+            stat=Path(self.path).stat();return (stat.st_dev,stat.st_ino)
+        except FileNotFoundError:return None
+
+    def _initialize_schema(self):
         with self.connect() as db:
             db.executescript('''
                 CREATE TABLE IF NOT EXISTS schedules (
@@ -117,13 +137,32 @@ class ScheduleStore:
                            (plan["timezone"], plan["id"]))
 
     @contextmanager
+    def atomic(self):
+        """Join schedule edits to one transaction; dispatcher writes wait, never get restored."""
+        current = _GROUP_CONNECTIONS.get()
+        if self.path in current:
+            yield current[self.path]
+            return
+        with self.connect(True) as connection:
+            token = _GROUP_CONNECTIONS.set({**current, self.path: connection})
+            try:
+                yield connection
+            finally:
+                _GROUP_CONNECTIONS.reset(token)
+
+    @contextmanager
     def connect(self, write: bool = False):
         """Open a bounded SQLite transaction; writers serialize before reading."""
+        shared = _GROUP_CONNECTIONS.get().get(self.path)
+        if shared is not None:
+            yield shared
+            return
         db = sqlite3.connect(self.path, timeout=10)
         db.row_factory = sqlite3.Row
         db.execute('PRAGMA busy_timeout=10000')
         try:
-            db.execute('PRAGMA journal_mode=WAL')
+            if _INITIALIZED.get(self.path)!=self._file_identity():
+                db.execute('PRAGMA journal_mode=WAL')
         except sqlite3.OperationalError:
             # Switching the journal mode needs a brief exclusive lock, and two
             # connections doing it at once makes the loser fail immediately
@@ -299,12 +338,14 @@ class ScheduleStore:
                 db.execute('UPDATE schedule_runs SET cancel_requested=1 WHERE id=?', (run_id,))
         return self.run(run_id)
 
-    def enqueue_due(self, now: float | None = None) -> int:
+    def enqueue_due(self, now: float | None = None, *, job_names: set[str] | None = None) -> int:
         """Coalesce overdue slots into one; never enqueue overlapping work for a job."""
         now = time.time() if now is None else now
         count = 0
         with self.connect(True) as db:
             for plan in db.execute('SELECT * FROM schedules WHERE enabled=1 AND deleted=0 AND next_run_at<=?', (now,)).fetchall():
+                if job_names is not None and plan['job_name'] not in job_names:
+                    continue
                 active = db.execute("SELECT 1 FROM schedule_runs WHERE job_name=? AND status IN ('queued','starting','running','retry')", (plan['job_name'],)).fetchone()
                 if active:
                     continue
@@ -328,17 +369,20 @@ class ScheduleStore:
                 count += 1
         return count
 
-    def claim(self, now: float | None = None, concurrency: int = 2) -> dict | None:
+    def claim(self, now: float | None = None, concurrency: int = 2, *, job_names: set[str] | None = None) -> dict | None:
         """Reserve one due execution atomically across any number of dispatchers."""
         now = time.time() if now is None else now
         with self.connect(True) as db:
-            active = db.execute("SELECT count(*) FROM schedule_runs WHERE status IN ('starting','running')").fetchone()[0]
-            if active >= concurrency:
-                return None
-            row = db.execute("""SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
+            allowed=list(job_names) if job_names is not None else None
+            if allowed==[]:return None
+            scope=(" AND job_name IN ("+','.join('?' for _ in allowed)+")") if allowed is not None else ''
+            active=db.execute("SELECT count(*) FROM schedule_runs WHERE status IN ('starting','running')"+scope,allowed or []).fetchone()[0]
+            if active>=concurrency:return None
+            scope=(" AND r.job_name IN ("+','.join('?' for _ in allowed)+")") if allowed is not None else ''
+            row=db.execute("""SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
                 WHERE r.status IN ('queued','retry') AND r.ready_at<=? AND s.enabled=1 AND s.deleted=0
-                  AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)
-                ORDER BY r.ready_at,r.created_at LIMIT 1""", (now,)).fetchone()
+                AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)"""+scope+
+                " ORDER BY r.ready_at,r.created_at LIMIT 1",[now]+(allowed or [])).fetchone()
             if not row:
                 return None
             db.execute("UPDATE schedule_runs SET status='starting',attempt=attempt+1,lease_until=? WHERE id=?", (now + LEASE_SECONDS, row['id']))

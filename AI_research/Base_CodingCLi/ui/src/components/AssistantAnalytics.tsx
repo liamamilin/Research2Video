@@ -64,7 +64,7 @@ export function AssistantAnalytics() {
   const [origin, setOrigin] = useState("");
   const [showCost, setShowCost] = useState(storedCost);
   const load = useCallback((signal: AbortSignal) => loadAssistantUsage(days, offset, signal, origin), [days, offset, origin]);
-  const { data, error, loading, reload } = usePageResource(load, 15000);
+  const { data, error, loading, reload } = usePageResource(load);
   const toggleCost = (value: boolean) => { setShowCost(value); try { localStorage.setItem(COST_KEY, value ? "1" : "0"); } catch { /* per-viewer convenience only */ } };
   const totals = data?.totals;
   return <div className="space-y-4">

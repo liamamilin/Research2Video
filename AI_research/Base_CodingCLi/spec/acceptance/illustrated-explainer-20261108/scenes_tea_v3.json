@@ -1,0 +1,80 @@
+{
+ "cast": {
+  "A": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans",
+  "B": "a man in his twenties with short curly black hair, wearing a white hoodie and black trousers"
+ },
+ "scenes": [
+  {
+   "section": 1,
+   "kind": "scene",
+   "scene": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands behind a narrow counter in a tiny shop, pressing a small plain colored sticker onto the paper sleeve of a milk tea cup, a sheet of blank stickers lying on the counter.",
+   "overlay": [
+    "五张贴纸",
+    "单杯价格"
+   ],
+   "overlay_hint": "画面一侧叠出五个不同颜色的色块并排，箭头指向一只杯子，表示几笔开支一起分摊到每杯。",
+   "note": "店长在小店柜台后往杯套上贴一张贴纸。",
+   "scene_template": "{A} stands behind a narrow counter in a tiny shop, pressing a small plain colored sticker onto the paper sleeve of a milk tea cup, a sheet of blank stickers lying on the counter."
+  },
+  {
+   "section": 2,
+   "kind": "scene",
+   "scene": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans crouches beside a crate of oranges at the shop's back door, holding one orange in her hand, a carton of fresh milk on the floor beside her.",
+   "overlay": [
+    "按杯走",
+    "按月走"
+   ],
+   "overlay_hint": "画面上方叠两组箭头：一组随杯子走，一组随日历月份循环转动。",
+   "note": "店长在店后门拆一箱水果。",
+   "scene_template": "{A} crouches beside a crate of oranges at the shop's back door, holding one orange in her hand, a carton of fresh milk on the floor beside her."
+  },
+  {
+   "section": 3,
+   "kind": "scene",
+   "scene": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands alone behind the counter of a quiet shop on a rainy day, pressing a sticker onto a cup sleeve, empty stools in front of her, rain streaking the window behind.",
+   "overlay": [
+    "除法",
+    "杯数"
+   ],
+   "overlay_hint": "画面右侧叠一个除法示意：固定开支被一个杯子数量除开。",
+   "note": "雨天冷清的小店里，店长独自给杯套贴贴纸。",
+   "scene_template": "{A} stands alone behind the counter of a quiet shop on a rainy day, pressing a sticker onto a cup sleeve, empty stools in front of her, rain streaking the window behind."
+  },
+  {
+   "section": 4,
+   "kind": "scene",
+   "scene": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands behind the counter scooping ice from a bucket into a plastic cup, the cup resting on the counter beside a blank plain colored board, her eyes on the cup.",
+   "overlay": [
+    "明涨",
+    "暗变"
+   ],
+   "overlay_hint": "画面旁叠出三种做法的简短小列表：改标价、减少分量、暂时扛住。",
+   "note": "店长在柜台后往杯子里加冰，旁边立着一块空白牌子。",
+   "scene_template": "{A} stands behind the counter scooping ice from a bucket into a plastic cup, the cup resting on the counter beside a blank plain colored board, her eyes on the cup."
+  },
+  {
+   "section": 5,
+   "kind": "scene",
+   "scene": "a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans on the left hands a plain paper takeaway bag across the counter to a man in his twenties with short curly black hair, wearing a white hoodie and black trousers on the right, who reaches for it with one hand, a milk tea cup in the other.",
+   "overlay": [
+    "渠道",
+    "一到两成"
+   ],
+   "overlay_hint": "画面角落叠出四个小图标：机场、商场、社区店、外卖袋，标出渠道差别。",
+   "note": "店长把打包好的袋子递给站在柜台前的顾客。",
+   "scene_template": "{A} on the left hands a plain paper takeaway bag across the counter to {B} on the right, who reaches for it with one hand, a milk tea cup in the other."
+  },
+  {
+   "section": 6,
+   "kind": "scene",
+   "scene": "a man in his twenties with short curly black hair, wearing a white hoodie and black trousers stands on the sidewalk holding a milk tea cup up near eye level, looking at it, a shop front softly behind him, one finger tapping the side of the cup.",
+   "overlay": [
+    "三件事",
+    "渠道"
+   ],
+   "overlay_hint": "画面左侧叠出三个依次亮起的小问号，分别对应成本、杯数、渠道。",
+   "note": "顾客在街边举起奶茶杯端详。",
+   "scene_template": "{B} stands on the sidewalk holding a milk tea cup up near eye level, looking at it, a shop front softly behind him, one finger tapping the side of the cup."
+  }
+ ]
+}

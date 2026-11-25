@@ -1,0 +1,79 @@
+{
+  "formalFiles": [
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/jobs/monitoring/ai_flash_discovery.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/matrices/ai_media.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/source_supply/ai_media.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/content_columns/ai_flash.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/content_strategy.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/joint_planning.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production_policy.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production/flash_daily.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/production/flash_each.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/source_supply.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/material_collection.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/production_policy.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/production.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/joint_planning.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/auto.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/core/video/content_columns.py",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/web/services/video_render.py",
+      "unchanged": true
+    }
+  ],
+  "formalFilesUnchanged": true,
+  "prototypeBytes": 103993,
+  "prototypeSHA256": "ecef3cfd88099f5bb4a56e9530616e1ddcd1edf8b43d794057b5fdbaf86b3c43",
+  "browserObservations": 84,
+  "visibleChecks": 123,
+  "failedObservations": [],
+  "externalCalls": false
+}

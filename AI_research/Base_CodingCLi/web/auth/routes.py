@@ -225,6 +225,26 @@ def me(request: Request):
 # ---------------------------------------------------------------------------
 
 
+def _session_payload(token: str | None, request: Request) -> dict | None:
+    """The access cookie's claims, held to the same rules as ``deps.current_user``; None when they fail.
+
+    A signature alone is not a live session: a refresh token, a logged-out or revoked session, another browser's
+    token or a disabled account must not change passwords or mint API tokens (11-15: these routes checked only the
+    signature, so a revoked "remember me" token could still create a permanent API token)."""
+    payload = jwt_helper.decode_token(token) if token else None
+    if not payload or payload.get("kind") != "access":
+        return None
+    jti = payload.get("jti")
+    if jti and user_db.is_revoked(jti):
+        return None
+    if not jwt_helper.matches_browser_session(payload, request.cookies.get(CSRF_COOKIE)):
+        return None
+    user = user_db.get_user_by_id(int(payload["sub"]))
+    if not user or user.get("disabled"):
+        return None
+    return payload
+
+
 @router.post("/change-password")
 def change_password(payload: dict, request: Request, response: Response):
     """Change the current user's password.
@@ -235,7 +255,7 @@ def change_password(payload: dict, request: Request, response: Response):
     from web.auth.password import hash_password as _hash
 
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if not payload_jwt:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -285,7 +305,7 @@ def change_password(payload: dict, request: Request, response: Response):
 def my_sessions(request: Request):
     """List the current user's active sessions."""
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if not payload_jwt:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -311,7 +331,7 @@ def my_sessions(request: Request):
 def revoke_session(jti: str, request: Request, response: Response):
     """Revoke one of the current user's sessions (e.g. another device)."""
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if not payload_jwt:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -345,7 +365,7 @@ def revoke_session(jti: str, request: Request, response: Response):
 def list_tokens(request: Request):
     """List the current user's API tokens (metadata only)."""
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if payload_jwt:
         user_id = int(payload_jwt["sub"])
     else:
@@ -373,7 +393,7 @@ def list_tokens(request: Request):
 def create_token(payload: dict, request: Request):
     """Create an API token. The plaintext value is returned only once."""
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if not payload_jwt:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail=ApiError.make("not_authenticated", "登录后创建 token"))
@@ -403,7 +423,7 @@ def create_token(payload: dict, request: Request):
 def revoke_token(token_id: int, request: Request):
     """Revoke one of the current user's API tokens."""
     token = request.cookies.get(ACCESS_COOKIE)
-    payload_jwt = jwt_helper.decode_token(token) if token else None
+    payload_jwt = _session_payload(token, request)
     if not payload_jwt:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail=ApiError.make("not_authenticated", "未登录"))

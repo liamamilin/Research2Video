@@ -1,0 +1,40 @@
+{
+  "seeds": {
+    "development": 2026111121,
+    "holdout": 2026111122
+  },
+  "files": {
+    "development.json": {
+      "sha256": "1b201c0e1c3cd6c0669fa13756c935d7fc77ac402ebaa5eaa0adb90c74bfc055",
+      "cases": 40
+    },
+    "holdout.json": {
+      "sha256": "57e033a48f8a89e68b3cb4cc7950248b75592f54ac4e86a8a722d39986ad57c4",
+      "cases": 40
+    }
+  },
+  "representative_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    16,
+    17,
+    32,
+    33
+  ],
+  "limits": {
+    "node_px": 30,
+    "edge_px": 24
+  },
+  "candidate_wrap_widths": [
+    180,
+    300,
+    420,
+    540
+  ]
+}

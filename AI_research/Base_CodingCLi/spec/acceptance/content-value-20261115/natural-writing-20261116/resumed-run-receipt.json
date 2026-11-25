@@ -1,0 +1,46 @@
+{
+  "completed": [
+    {
+      "round": "round5",
+      "case": "flash-svg",
+      "status": "complete",
+      "model_switches": [],
+      "calls": 3,
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/round5/results/flash-svg/candidate/script.txt",
+      "review": "ROUND5-REVIEW.txt"
+    },
+    {
+      "round": "round5",
+      "case": "flash-lattice",
+      "status": "complete",
+      "model_switches": [],
+      "calls": 3,
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/round5/results/flash-lattice/candidate/script.txt",
+      "review": "ROUND5-REVIEW.txt"
+    },
+    {
+      "round": "round6",
+      "case": "flash-svg",
+      "status": "complete",
+      "model_switches": [],
+      "calls": 3,
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/round6/results/flash-svg/candidate/script.txt",
+      "review": "ROUND6-REVIEW.txt"
+    },
+    {
+      "round": "round6",
+      "case": "flash-lattice",
+      "status": "complete",
+      "model_switches": [],
+      "calls": 3,
+      "script": "state/acceptance-content-value-20261115/natural-writing-20261116/round6/results/flash-lattice/candidate/script.txt",
+      "review": "ROUND6-REVIEW.txt"
+    }
+  ],
+  "pending_authorization": [
+    "flash-code",
+    "tutorial-share",
+    "other in-use-job cross-topic validation"
+  ],
+  "production_prompts_changed": false
+}

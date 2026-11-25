@@ -1,3 +1,4 @@
+import { useChainScope } from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -29,6 +30,9 @@ const partLink = (kind: string, name: string) => `/video-recipes/parts/${kind}/$
 
 // 文稿配方：一份 YAML 就是一种文稿的完整做法（调研 → 写稿 → 出片，外加自动流水线从哪挑题），像 Job 一样直接改、复制复用。
 export function VideoRecipesPage() {
+  const chainScope=useChainScope();
+  const chainKey=chainScope.key;
+  const scopedPath=useCallback((path:string)=>path+(chainKey?(path.includes("?")?"&":"?")+"chain="+encodeURIComponent(chainKey):""),[chainKey]);
   const { key, kind, name } = useParams();
   const [search] = useSearchParams();
   const from = search.get("from");
@@ -79,11 +83,12 @@ export function VideoRecipesPage() {
   }, [key, retry]);
 
   useEffect(() => {
-    if (!key && !kind && list.length) navigate(withOrigin(`/video-recipes/${list[0].key}`, from), { replace: true });
-  }, [key, kind, list, navigate, from]);
+    const related=list.filter(r=>!chainKey||chainScope.data?.recipes?.includes(r.key));
+    if (!key && !kind && related.length) navigate(scopedPath(withOrigin(`/video-recipes/${related[0].key}`, from)), { replace: true });
+  }, [key, kind, list, navigate, from, chainKey, chainScope.data, scopedPath]);
 
   const dirty = detail !== null && text !== detail.content;
-  const jump = (path: string) => { if (dirty || partDirty) setPendingPath(withOrigin(path, from)); else navigate(withOrigin(path, from)); };
+  const jump = (path: string) => { if (dirty || partDirty) setPendingPath(scopedPath(withOrigin(path, from))); else navigate(scopedPath(withOrigin(path, from))); };
   useEffect(() => {
     if (!dirty && !partDirty) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
@@ -158,7 +163,7 @@ export function VideoRecipesPage() {
         <nav className="card p-2 space-y-1 md:max-h-[calc(100vh-12rem)] overflow-y-auto" aria-label="配方列表">
           <input className="input text-xs mb-2" aria-label="搜索配方或部件" placeholder="搜索配方或部件" value={query} onChange={(e) => setQuery(e.target.value)} />
           <p className="px-2 text-xs text-text-muted py-2">文稿配方（{list.length}）</p>
-          {list.filter((r) => `${r.key} ${r.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((r) => (
+          {list.filter((r) => (!chainKey||chainScope.data?.recipes?.includes(r.key)) && `${r.key} ${r.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((r) => (
             <button
               key={r.key}
               onClick={() => jump(`/video-recipes/${r.key}`)}

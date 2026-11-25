@@ -1,0 +1,428 @@
+{
+  "status": "隔离真实接口检查完成",
+  "summary": {
+    "job": "monitoring/ai_flash_discovery",
+    "productions": [
+      {
+        "key": "ai-developer-roundup-long",
+        "name": "盘点 · 开发者 · B 站横屏长",
+        "auto": 0,
+        "split": "some",
+        "content_mode": "individual"
+      },
+      {
+        "key": "ai-non_tech-one_point-short",
+        "name": "一个知识点 · 普通用户 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "ai-non_tech-quick_take-short",
+        "name": "快讯 · 普通用户 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "flash",
+        "name": "快讯 · 开发者 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "flash_daily",
+        "name": "快讯 · 每天（不再调研）",
+        "auto": 1,
+        "split": "whole",
+        "content_mode": "episode"
+      },
+      {
+        "key": "flash_each",
+        "name": "快讯 · 每条一期（不再调研）",
+        "auto": 1,
+        "split": "each",
+        "content_mode": "individual"
+      },
+      {
+        "key": "point_short",
+        "name": "一个知识点 · 开发者 · B 站横屏短",
+        "auto": 0,
+        "split": "each",
+        "content_mode": "individual"
+      }
+    ],
+    "matrix": "AI 视频栏目",
+    "schedule": {
+      "id": "9c6289fce9aa401dbeba6fc3ec154ee9",
+      "schedule": "30 7,18 * * *",
+      "version": 13,
+      "enabled": true,
+      "timezone": "Asia/Shanghai"
+    },
+    "history": {
+      "scripts": 226,
+      "renders": 151
+    },
+    "effective_render": {
+      "video_speed": 1.25,
+      "packaging": {
+        "label": "AI 快讯",
+        "preset": "common"
+      }
+    },
+    "source_usages": [
+      {
+        "job": "video/theme_research-m4_2e6607dd",
+        "name": "theme_research-m4_2e6607dd",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "video/theme_research-m4_dda3b4f4",
+        "name": "theme_research-m4_dda3b4f4",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "chatgpt_acquisition/t09_updates",
+        "name": "T09 · 产品动态与热点",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      },
+      {
+        "job": "monitoring/ai_flash_discovery",
+        "name": "AI Flash Discovery",
+        "references": [
+          "source:cg_openai_news"
+        ]
+      }
+    ],
+    "edited_script": {
+      "id": "ba8e1ffc2135414eb32a84b3e5af56c1",
+      "before_version": 1,
+      "status": 200,
+      "after_version": 2
+    },
+    "new_chain": {
+      "job": "research/isolation_science",
+      "outputs": [
+        "isolation_science-nr",
+        "isolation_science-nr-2"
+      ],
+      "column": "isolation_science_episode",
+      "manual_intervention": [
+        "通过 Job YAML 补齐 topics alias/format/prefix；首次 F 前缀冲突后改为 SCI",
+        "隔离副本克隆专属配方，绑定科研选题来源",
+        "隔离副本手工补充 joint_planning pair；没有现成端到端链路创建接口"
+      ],
+      "generation": "未调用外部服务，尚未生成科研报告或视频"
+    },
+    "idle_fixture": {
+      "copied_run_rows_changed": 1,
+      "purpose": "检查空闲 Job 删除；不是实际运行完成"
+    }
+  },
+  "checks": [
+    {
+      "name": "真实链路七个生产引用",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实合集依赖栏目身份",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "来源 enabled 字段被真实接口拒绝",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实来源保存",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "来源冲突保护",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实来源引用保护",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "周期保存真实SQLite",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "周期重新读取生效",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "调度版本冲突",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "输出暂停不暂停共享研究",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "共享计划真实停用",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "矩阵默认进入实际输出配置",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "输出覆盖和另一输出隔离",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "讲稿修改保留成片数量",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实新Job加计划创建",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实栏目创建",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "合集不是输出名称而是栏目契约",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "真实角色权限差异",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "运行中的共享Job拒绝删除",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "空闲共享Job删除实际成功",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "删除Job后生产配置引用失效",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "删除管理对象保留文稿成片",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "尚无统一链路API",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "执行边界确实阻断",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "S1",
+      "title": "原型的全局来源停用目前没有真实接口",
+      "evidence": {
+        "status": 422,
+        "allowed_fields": [
+          "name",
+          "spec",
+          "tags",
+          "note"
+        ]
+      },
+      "impact": "不能把原型开关直接上线，需要确定来源停用模型及其对直接声明、来源组、覆盖、发现的作用。"
+    },
+    {
+      "id": "N1",
+      "title": "基础Job创建未完成可制作的选题契约",
+      "evidence": {
+        "response": {
+          "error": {
+            "code": "invalid_config",
+            "message": "research/isolation_science 的报告不是条目列表，而是整份的：配方 flash-nr 要从条目里挑，不能用；整份报告要用写了 topic.whole_report 的配方（比如深度解读）",
+            "details": {}
+          }
+        }
+      },
+      "impact": "需要创建向导显式建立 topics/source 等业务配置，不能只保存名称、来源、时间。"
+    },
+    {
+      "id": "N3",
+      "title": "配方仍只接受既有 Flash 选题来源",
+      "evidence": {
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "invalid_config",
+            "message": "配方 flash-nr 是给 flash 的条目写的，不读 isolation_science：要用它，先在配方的 topic.sources 里加上 isolation_science",
+            "details": {}
+          }
+        }
+      },
+      "impact": "新人需要创建专属配方或显式扩展配方接受的来源；不应让用户猜测 alias 与 recipe 的绑定。"
+    },
+    {
+      "id": "N2",
+      "title": "新建两份输出与合集栏目不会自动建立联合规划",
+      "evidence": {
+        "episode": "isolation_science-nr-2",
+        "single": "isolation_science-nr",
+        "pair_exists": false,
+        "mode_before": "individual",
+        "mode_after": "episode"
+      },
+      "impact": "原型“合集＋单条”还隐含栏目和联合规划两步。真实创建需要统一组装，而非两次添加生产配置。"
+    },
+    {
+      "id": "N4",
+      "title": "新矩阵未自动纳入现有生产策略",
+      "evidence": {
+        "managed": false,
+        "configured_matrices": [
+          "ai_media",
+          "chatgpt_acquisition"
+        ]
+      },
+      "impact": "创建计划与输出不等于继承现有生产窗口及材料收集策略；新链路需要明确策略归属。"
+    },
+    {
+      "id": "R1",
+      "title": "链路管理不能统一展示为所有用户均可操作",
+      "evidence": {
+        "editor_scheduler_status": 403
+      },
+      "impact": "来源/生产配置编辑与周期调度/矩阵停计划需要不同角色；原型未表达权限。"
+    },
+    {
+      "id": "D1",
+      "title": "删除矩阵可能改变现有合集身份与继承",
+      "evidence": {
+        "before_mode": "episode",
+        "after_mode": "individual",
+        "after_split": "each",
+        "column_errors": [
+          "所属领域矩阵不存在"
+        ],
+        "after_render": {}
+      },
+      "impact": "原型声称“只删除分组且保留默认值”不足以描述实际行为，栏目所属矩阵被删会影响栏目有效性。"
+    },
+    {
+      "id": "D2",
+      "title": "删除生产配置没有清理栏目和联合规划引用",
+      "evidence": {
+        "column_still_references": true,
+        "pair_still_references": true,
+        "history_before": {
+          "scripts": 226,
+          "renders": 151
+        },
+        "history_after": {
+          "scripts": 226,
+          "renders": 151
+        }
+      },
+      "impact": "需要删除影响预览和一致的解除关联；原型中的“自动解除”目前不是后端保证。"
+    },
+    {
+      "id": "D3",
+      "title": "删除共享Job没有拒绝仍被生产配置引用",
+      "evidence": {
+        "delete_status": 200,
+        "remaining_productions": 6,
+        "errors": [
+          {
+            "key": "ai-developer-roundup-long",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          },
+          {
+            "key": "ai-non_tech-one_point-short",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          },
+          {
+            "key": "ai-non_tech-quick_take-short",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          },
+          {
+            "key": "flash",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          },
+          {
+            "key": "flash_each",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          },
+          {
+            "key": "point_short",
+            "errors": [
+              "没有这个 Job：monitoring/ai_flash_discovery"
+            ]
+          }
+        ]
+      },
+      "impact": "从旧Jobs页删除可绕过链路页的共享保留规则，其他tab必须共同遵守引用生命周期。"
+    }
+  ],
+  "boundaries": [
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    },
+    {
+      "event": "dispatcher-install",
+      "replaced": "offline snapshot only"
+    }
+  ],
+  "external_execution": false,
+  "restored_snapshot": true,
+  "requests": 45
+}

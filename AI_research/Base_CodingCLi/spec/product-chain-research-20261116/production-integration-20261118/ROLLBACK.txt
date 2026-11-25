@@ -1,0 +1,35 @@
+正式接入回退操作｜2026-11-18
+
+适用范围：本轮链路管理代码和新UI入口。任务记录、视频、报告与发布记录不从旧库恢复。
+所有命令从 AI_research/Base_CodingCLi 运行，Python使用正式环境 ../.AI_research/bin/python。
+产物/基线目录：state/validation/chain-production-integration-20261118（外接盘软链接）。保留该目录。
+
+1. 先停止受影响链路的未来运行
+   python scripts/manage_chain_rollout.py pause --chain <链路key>
+   只暂停该链路输出；共用同一研究的其他链路仍在使用时，研究周期保留。运行中的任务和历史继续保存。
+   若只需暂时关闭新入口写操作，将 config/chain_access.yaml 的 mode 改为 read_only。
+   这不停止原后台，也不影响原Tab；再次启用时改回 enabled。
+
+2. 单次配置变更逆转
+   python scripts/manage_chain_rollout.py list
+   python scripts/manage_chain_rollout.py undo --change <变更ID>
+   按该次变更的文件内容和周期版本逆向修改，只恢复未来配置，不回写整个 schedules.db。
+   有后续编辑则拒绝覆盖；已有运行/讲稿的新链路创建不能直接撤销，先暂停并保留它的配置和历史。
+   正式周期原ID保持，反向修改递增版本；已有期次使用原冻结上下文。
+
+3. 需要回退代码时
+   用受管维护正常关停，或在连续生产时执行：
+   python spec/product-chain-research-20261116/production-integration-20261118/request_formal_restart.py --action shutdown
+   后者使用原autopilot-tick提交锁，先等规划落库，再冻结新提交；已经执行的研究/写稿/出片/发布必须完成，已准备的排队记录保持原样。
+   等待当前维护回执 completed，关停后不要打开页面唤醒网关，立即运行下面的预检和恢复命令。
+   python spec/product-chain-research-20261116/production-integration-20261118/rollback_source.py
+   以上仅做预检，不写文件；确认范围后执行同一命令加 --apply。
+   工具检查受管关停回执、服务已停止、无实际在途工作（已准备队列保留）、源码仍是本轮候选版本、UI仍是本轮加载版本，然后恢复源码和旧入口HTML。
+   所有旧哈希资源已保留，已打开页面不依赖删除资源。存在后续源码/UI修改时会拒绝覆盖。
+   再由原网关/ run_web.py 启动；原有独立dispatcher若需加载旧版，等其空闲后让现有launchd实例重启。
+   不停止或重置8011渲染服务，不复制隔离试验数据库，不清空新链路元数据、任务和产物。
+
+4. 数据备份
+   formal-before/manifest.json 逐库记录SQLite备份及 integrity_check 完成结果，含全部现存记录ID的备份。
+   此备份用于个别损坏修复和人工核对，不是日常回退时整库覆盖的脚本。
+   native-backup 为同一备份工具的原生预演；逆转真实CLI的预演回执见 native/evidence/final-native-management.json。

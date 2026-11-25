@@ -1,0 +1,545 @@
+E01 jobs/monitoring/ai_flash_discovery.yaml SHA256 7a3f6c7ea0631503e1c56f9161551ff209f1da26a05a0098b415434c62f374b5
+1: name: "AI Flash Discovery"
+2: description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown、Radar 订阅源与 AI 新闻媒体，初稿沿用固定材料，选题后按问题补材）"
+3: enabled: true
+4: keywords:
+5:   - 新模型发布
+6:   - API 价格变化
+7:   - AI 编程工具更新
+8:   - agent 框架发布
+9:   - 开源模型发布
+10:   - 额度与限流变化
+11: language: "zh"
+12: schedule:
+13:   type: "manual"
+14: search: false            # 只读下面声明的订阅源，不联网搜索（core/engine.py）
+15: sources_limit: 10
+16: sources:
+17:   - "source:bili_hot_ai"   # B站观众本周在看的 AI 热点（core/bili_hot.py，11-10 选题热度）
+18:   - "source:cg_release_notes"
+19:   - "source:cg_openai_news"
+20:   - "source:cg_pro_tiers"
+21:   - "tag:ai_daily_shared"
+22:   - "github:anthropics/claude-code"
+23:   - "tldr:ai"
+24:   - "rss:https://www.therundown.ai/feed"
+25:   - "hf_models:trending"
+26:   - "tag:ai_radar"
+27:   - "tag:ai_news"
+28:   - "tag:radar_official"
+29:   - "tag:radar_dev"
+30: runtime:
+31:   timeout_seconds: 3600
+32:   skip_if_running: true
+
+E02 config/source_supply/ai_media.yaml SHA256 35ae9e5ef4c2c7e3ed11750a985873b7213619574de36fc2bff5bf36a20beca7
+1: name: AI 矩阵信息供给
+2: matrix: ai_media
+3: enabled: true
+4: timezone: Asia/Shanghai
+5: # 单独的来源探索周计划；现有五个研究周期保持。
+6: recurrence: "30 5 * * 0"
+7: scan_limit: 80
+8: snapshot_items: 2
+9: retry_items: 3
+10: probes_per_host: 2
+11: material_chars: 180000
+12: pool_per_job: 4
+13: pool_limit: 40
+14: discovery_queries: 5
+15: discovery_probes: 8
+16: # 覆盖目标与来源角色是数据：新增产品/主题只扩展这里，不写供应商分支。
+17: # state 持续比较页面内容；release 追踪公告；snapshot 控制快照条数；editorial 补充案例。
+18: coverage:
+19:   - key: openai_product
+20:     subject: OpenAI / ChatGPT
+21:     topics: [套餐价格, 用量额度, 产品能力, 更新]
+22:     max_age_hours: 48
+23:     jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena, ai_media/weekly_business_watch]
+24:     queries: [OpenAI ChatGPT official pricing plans usage limits updates]
+25:     sources:
+26:       - {spec: 'page:https://chatgpt.com/pricing', role: state}
+27:       - {spec: 'page:https://openai.com/api/pricing/', role: state}
+28:       - {spec: 'page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes', role: release}
+29:       # 帮助中心与价格页常被拒绝直接读取；新闻与开发者订阅源能直接读到。
+30:       - {spec: 'rss:https://openai.com/news/rss.xml', role: release}
+31:       - {spec: 'rss:https://developers.openai.com/rss.xml', role: release}
+32:       - {spec: 'page:https://learn.chatgpt.com/docs/whats-new.md', role: release}
+33:       - {spec: 'page:https://developers.openai.com/api/docs/changelog.md', role: release}
+34:   - key: anthropic_product
+35:     subject: Anthropic / Claude
+36:     topics: [套餐价格, 用量额度, 产品能力, 编程工具]
+37:     max_age_hours: 48
+38:     jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena, ai_media/weekly_business_watch]
+39:     queries: [Anthropic Claude official pricing plans usage limits release notes]
+40:     sources:
+
+E03 core/source_supply.py SHA256 04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45
+25: def profiles(config_dir: str) -> dict[str, dict]:
+26:     result = {}
+27:     for path in sorted((Path(config_dir) / "source_supply").glob("*.yaml")):
+28:         with path.open() as handle:
+29:             value = load_yaml(handle) or {}
+30:         if value.get("enabled", True):
+31:             result[path.stem] = {**value, "key": path.stem}
+32:     return result
+33: 
+34: 
+35: def for_job(config_dir: str, job: dict) -> dict | None:
+36:     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
+37: 
+
+E04 core/source_supply.py SHA256 04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45
+145:         from datetime import datetime
+146:         start = datetime.fromisoformat(window["start"])
+147:         owed = datetime.fromtimestamp(float(baseline["at"]) - window["days"] * 86400, start.tzinfo)
+148:         if owed < start:
+149:             select_window = {**window, "start": owed.isoformat()}
+150:     declared = resolve(list(job.get("sources") or []), engine.config_dir)
+151:     automatic = choose_pool(storage.pool()["sources"], canonical, int(profile.get("pool_per_job", 4)), now)
+152:     coverage = source_coverage.targets(profile, canonical, storage.pool()['sources'])
+153:     metadata = {r['spec']: r for r in automatic}
+154:     metadata.update({r['spec']: r for r in coverage})
+155:     reference_specs.update(r['spec'] for r in coverage if r['role'] in {'state', 'snapshot'})
+156:     specs = list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic]))
+157:     # Snapshot volume is useful context but cannot displace product changes and articles.
+158:     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
+159:     scan = int(profile.get("scan_limit", 80))
+160:     per_source = int(job.get("sources_limit", 10))
+
+E05 core/source_supply.py SHA256 04332628e51d4800444264091157d6c7370cfdc0ffa0b9b4fd934bdb5e183b45
+225:                 row['live_status'] = 'unavailable'
+226:                 fetched = []
+227:             if archive:
+228:                 from .material_archive import merge
+229:                 from datetime import datetime
+230:                 cutoff = datetime.fromisoformat(window['end']).timestamp() if window else now
+231:                 try:
+232:                     archived, row['archive_coverage'] = archive.read(spec, before=cutoff)
+233:                 except (OSError, sqlite3.Error) as exc:
+234:                     archived = []
+235:                     row['archive_error'] = str(exc)[:300]
+236:                     archive = None
+237:                 row['archived_items'] = len(archived)
+238:                 row['cache_items'] = len([item for item in archived if section_key(item) not in live_keys]) if not fetched or role not in {'state', 'snapshot'} else 0
+239:                 if not fetched or role not in {'state', 'snapshot'}:
+240:                     fetched = merge(archived, fetched)
+241:             if not fetched:
+
+E06 config/production_policy.yaml SHA256 03c2d9a52c25d0689370cd661f7250f9d85780a0bd348c6e5400e986f171638f
+1: # 排期在「周期调度」维护；默认研究窗口随相邻计划槽位变化。
+2: schema_version: 1
+3: matrices:
+4:   - ai_media
+5:   - chatgpt_acquisition
+6: window:
+7:   mode: previous_slot
+8:   timezone: Asia/Shanghai
+9: # 可在 jobs 中为任意任务指定 rolling + days，独立调整研究范围而不修改出片周期。
+10: jobs: {}
+11: collection:
+12:   enabled: true
+13:   schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
+14:   timezone: Asia/Shanghai
+15:   retention_days: 60
+16:   limit_per_source: 80
+17:   max_sources: 100
+18:   timeout_seconds: 15
+19: automatic:
+20:   # 每天新接纳的自动节目数；留空（null）表示不限。每期仍只记一次，重试不重复占位。
+21:   daily_limit: null
+22:   timezone: Asia/Shanghai
+23:   recommendations: false
+24: sources:
+25:   reference:
+26:     - source:cg_pro_tiers
+27:     - source:cg_pricing
+28:     - source:cg_help
+29:     - source:cg_capabilities
+30:     - source:cg_errors
+
+E07 core/production_policy.py SHA256 363c18e9298d86f2d9db54f9fa5e59a1e50ae72abe9f87a7a0e63cdea2cb19c5
+175:     timezone = (plan or {}).get("timezone") or rule.get("timezone", "Asia/Shanghai")
+176:     zone = schedule_zone(timezone)
+177:     current = now.replace(tzinfo=zone) if now.tzinfo is None else now.astimezone(zone)
+178:     expression = (plan or {}).get("expression") or (plan or {}).get("schedule")
+179:     if triggered_at is not None:
+180:         current = datetime.fromtimestamp(triggered_at, zone)
+181:     if due is None:
+182:         due = (
+183:             slot(expression, current.timestamp(), timezone, backwards=True)
+184:             if expression and rule["mode"] == "previous_slot"
+185:             else current.timestamp()
+186:         )
+187:     end = datetime.fromtimestamp(due, zone)
+188:     if rule["mode"] == "previous_slot" and expression:
+189:         start = datetime.fromtimestamp(
+190:             slot(expression, due - 60, timezone, backwards=True), zone
+191:         )
+192:     else:
+193:         from datetime import timedelta
+194: 
+195:         start = end - timedelta(days=rule.get("days", job.get("collection_days", 7)))
+196:     mode = rule["mode"]
+197:     if triggered_at is not None:
+198:         end = current
+199:         previous_end = _latest_collection_end(state_dir, name, end)
+200:         if previous_end is not None:
+201:             start = previous_end.astimezone(zone)
+202:         mode = "since_last_collection"
+203:     window = {
+204:         "mode": mode,
+205:         "days": max(1, int((end - start).total_seconds() + 86399) // 86400),
+206:         "start": start.isoformat(),
+207:         "end": end.isoformat(),
+208:         "timezone": timezone,
+209:     }
+
+E08 config/production/flash_daily.yaml SHA256 3b93895b90a0af648faa774cac0890d313d4ffef47f42fcff4e9a87fc14503a1
+1: # 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。
+2: name: 快讯 · 每天（不再调研）
+3: job: monitoring/ai_flash_discovery
+4: recipe: flash
+5: auto: 1
+6: reverify: false
+
+E09 config/production/flash_each.yaml SHA256 7ae50141e6d95edcc0328d444f42a7f1d7e008196d0a329d6cf20f17bb891e5e
+1: # 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，auto 只控制自动制作开关，开启后处理全部不重复选题。
+2: name: 快讯 · 每条一期（不再调研）
+3: job: monitoring/ai_flash_discovery
+4: recipe: flash
+5: auto: 1
+6: reverify: false
+7: # 选题热度（core/video/heat.py，11-10 对标报告）：只做 B站近 7 天同产品视频前 5 条合计播放 ≥ 2 万的条目，按热度从高到低；
+8: # 不到门槛的不做。取不到热度（被拦、次数用完）时照旧全做。
+9: # 热点多角度（core/video/angles.py）：一批里最热、且热度 ≥ 50 万的那一条，按材料能撑起的角度加做「算账值不值」「怎么上手」各一条。
+10: selection:
+11:   heat_min: 20000
+12:   angle_min: 500000
+
+E10 config/content_columns/ai_flash.yaml SHA256 fbe20967a81a5d46b93b3546e6ee3196a5d2b08c70a74aa64c60908a7174694a
+1: schema_version: 1
+2: name: AI 快讯
+3: matrix: ai_media
+4: type: news
+5: audience: 日常在工作、学习和生活中使用或准备使用 AI 的中文观众；具体题目按实际受益人群说明范围
+6: promise: 让观众抓住 AI 重要变化，并理解它们会怎样影响自己的用法
+7: production_ids:
+8: - flash_daily
+9: render_inheritance: source_compatible
+10: render:
+11:   packaging:
+12:     label: AI 快讯
+13: presentation:
+14:   strategy: 用变化前后的操作或使用状态建立画面，截图聚焦本次变化所在的区域。让开场的网站、账号、文件或任务对象持续出现，功能、费用与额度的变化随旁白逐步展开。流程使用简短的对象名和动作标签，先让观众看懂整体，再聚焦当前一步；概念说明贴着这一步出现。版本日期、热度作为辅助标签，收束时保留最值得记住的一处用法变化。
+15:   preferred_visuals:
+16:   - 重点卡
+17:   - 真实截图
+
+E11 config/joint_planning.yaml SHA256 7651cc42ed16be2b9f8d7a3b12eaee045be6be4c243b2628e59ea4faa847bf99
+1: # 仅在同一新批次同时制作合集和单条时共同分配内容；不改已有批次。
+2: enabled: true
+3: pairs:
+4:   - episode_production: flash_daily
+5:     single_production: flash_each
+6:   - episode_production: chatgpt_t09_updates
+7:     single_production: chatgpt_t09_updates_each
+
+E12 core/video/joint_planning.py SHA256 bcbec558cf2e1af81a79feec0067eb75894461282ee4a68ebd16ea68b3a2750b
+230: def enabled_for(spec: dict, config_dir: str) -> bool:
+231:     """Whether this report batch can need a slow shared allocation."""
+232:     if not spec.get("report") or spec.get("job") not in audience_strategy.JOBS:
+233:         return False
+234:     try:
+235:         config = load_yaml((Path(config_dir) / "joint_planning.yaml").read_text()) or {}
+236:         productions = {p.get("production") for p in spec.get("picks", [])}
+237:         return config.get("enabled") is True and any(
+238:             p.get("episode_production") in productions and p.get("single_production") in productions
+239:             for p in config.get("pairs", [config]))
+240:     except Exception:
+241:         return False
+242: 
+243: 
+244: def apply(spec: dict, items: list[dict], config_dir: str, jobs_dir: str, workspace: str,
+245:           llm_config, notes: list | None = None, rank_raw=None) -> list[dict]:
+246:     """Only new paired batches opt in. A failed planner returns the original queue."""
+247:     config_path = Path(config_dir) / "joint_planning.yaml"
+248:     if not config_path.is_file():
+249:         return items
+250:     try:
+251:         config = load_yaml(config_path.read_text()) or {}
+252:         if not isinstance(config, dict):
+253:             raise ValueError("联合规划配置必须是映射")
+254:         pairs = config.get("pairs", [config])
+255:         if not isinstance(pairs, list) or any(not isinstance(p, dict) for p in pairs):
+256:             raise ValueError("联合规划的 pairs 必须是配置列表")
+257:     except Exception as exc:
+258:         logger.warning("Joint planning configuration unavailable: %s", exc)
+259:         if notes is not None:
+260:             notes.append("联合规划配置不可读，保留原选题流程")
+261:         return items
+262:     if config.get("enabled") is not True or not spec.get("report"):
+263:         return items
+264:     episodes, singles = [], []
+265:     for pair in pairs:
+266:         episode_id, single_id = pair.get("episode_production"), pair.get("single_production")
+267:         episodes = [i for i in items if i.get("production") == episode_id and i["topic"].get("content_mode") == "episode"]
+268:         singles = [i for i in items if i.get("production") == single_id and i["topic"].get("from_item") and not i["topic"].get("angle")]
+269:         if len(episodes) == 1 and singles:
+270:             config = {"enabled": True, **pair}
+271:             break
+272:     if len(episodes) != 1 or not singles:
+273:         return items
+274:     channel = audience_strategy.JOBS.get(spec.get("job"))
+275:     if channel not in audience_strategy.CHANNELS:
+
+E13 core/video/joint_planning.py SHA256 bcbec558cf2e1af81a79feec0067eb75894461282ee4a68ebd16ea68b3a2750b
+300:                       for c in episode["topic"]["episode"]["items"]]
+301:         if channel == "flash" and any(i.get("pick", {}).get("all") for i in singles):
+302:             # Bring the existing bounded raw-material recovery forward. This
+303:             # prevents the joint brief from starving singles when no report
+304:             # candidate supports an independent question.
+305:             from core.video import autopilot_store as ap
+306:             taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+307:             cited = set().union(*(story_pool.cited(c["material"]) for c in candidates))
+308:             unused = {}
+309:             for packet in packets:
+310:                 if not packet["links"] or story_pool.cited_packet(packet, cited):
+311:                     continue
+312:                 anchor = story_pool._anchored(packet["links"][0])
+313:                 if anchor not in unused or len(packet["text"]) > len(unused[anchor]["text"]):
+314:                     unused[anchor] = packet
+315:             for packet in list(unused.values())[:40]:
+316:                 raw_id = 'flash-raw:' + hashlib.sha256(json.dumps([packet["links"][0], packet["text"]]).encode()).hexdigest()[:24]
+317:                 if raw_id in taken or any(f'{raw_id}~{angle}' in taken for angle in ('money', 'howto')):
+318:                     continue
+319:                 title = packet["text"].splitlines()[0].lstrip('# ')
+320:                 candidates.append({"id": raw_id, "title": title, "material": packet["text"][:900],
+321:                                    "source_id": packet["id"], "single_allowed": True, "raw_material": True})
+322:                 available.add(raw_id)
+323:                 singles.append({"column_key": singles[0]["column_key"], "production": single_id,
+324:                                 "pick": singles[0]["pick"], "topic": {
+325:                                     "id": raw_id, "title": title, "from_report": spec["report"],
+326:                                     "from_item": raw_id, "from_item_title": title, "fields": {},
+327:                                     "audience_strategy": "flash", "matrix_dedup": singles[0]["topic"].get("matrix_dedup", {})}})
+328:         cited = set().union(*(story_pool.cited(c["material"]) for c in candidates if not c.get("raw_material")))
+
+E14 core/video/content_columns.py SHA256 d78528810610eb95172f96b6716e822d36b9d22a5eda0a810c3696e52da96f36
+216: def render_settings(config_dir: str, source_matrix, context: dict, overrides: dict) -> dict:
+217:     result = copy.deepcopy(source_matrix.render if source_matrix else {})
+218:     if context.get("render_inheritance") == "content_matrix":
+219:         content = matrices.load_all(config_dir).get(context.get("matrix", ""))
+220:         if content and (not source_matrix or content.key != source_matrix.key):
+221:             result = inherit(result, content.render)
+222:     return inherit(inherit(result, context.get("render", {})), overrides)
+
+E15 core/video/production.py SHA256 191b8a6c83a388869e76d0395ab827c18b284a1540c22f437fbacc7d2904f96f
+337: def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:
+338:     """Turn automatic production on (any legacy positive integer) or off (None), keeping the rest of its
+339:     file. False when there is no such config file."""
+340:     path = os.path.join(directory(config_dir), f"{key}.yaml")
+341:     try:
+342:         with open(path, encoding="utf-8") as fh:
+343:             data = yaml.safe_load(fh) or {}
+344:     except (OSError, yaml.YAMLError):
+345:         return False
+346:     if not isinstance(data, dict):
+347:         return False
+348:     data["auto"] = count
+349:     _write(config_dir, key, data)  # the file's time is when auto was turned on: older reports are not written
+350:     return True
+351: 
+352: 
+353: def remove(config_dir: str, key: str) -> bool:
+354:     try:
+355:         os.remove(os.path.join(directory(config_dir), f"{key}.yaml"))
+356:         return True
+357:     except FileNotFoundError:
+358:         return False
+
+E16 core/video/auto.py SHA256 8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc
+38: def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: float) -> list[dict]:
+39:     """Every report run after opt-in is reconciled separately, including same-day runs.
+40: 
+41:     Legacy capped batches from today get one uncapped pass to recover omitted
+42:     topics. Earlier completed batches remain historical; new-content revisions
+43:     are always detected. Selection and event memory protect existing videos.
+44:     """
+45:     try:
+46:         runs = _runs(state_dir)
+47:         configs = production.load_all(config_dir, jobs_dir)
+48:     except sqlite3.Error:
+49:         return []
+50:     by_job: dict[str, list] = {}
+51:     for config in configs.values():
+52:         if config.auto and config.usable and config.split in ("each", "whole"):
+53:             by_job.setdefault(config.job, []).append(config)
+54:     out = []
+55:     today = time.strftime("%Y-%m-%d", time.localtime(now))
+56:     for job, mine in by_job.items():
+57:         declared_source = topic_store.resolve(jobs_dir, job)
+58:         source = declared_source or topic_store.whole_source(jobs_dir, job)
+59:         if source is None:
+60:             continue
+61:         for day, report in reversed(topic_store.all_report_files(source, root)):
+62:             try:
+63:                 reported = os.path.getmtime(report)
+64:                 revision = report_identity.describe(report, root)["id"]
+65:             except OSError:
+66:                 continue
+67:             if now - reported < SETTLE_SECONDS:
+68:                 continue
+69:             if not topic_store.report_has_content(declared_source, report, root):
+70:                 continue
+71:             previous = [r for r in runs if r["spec"]["job"] == job and
+72:                         os.path.abspath(os.path.join(root, r["spec"]["report"])) == os.path.abspath(report)]
+73:             picks = []
+74:             episode_columns = set()
+75:             for config in sorted(mine, key=lambda c: c.key):
+76:                 try:
+77:                     enabled_at = config.auto_enabled_at or os.path.getmtime(
+78:                         os.path.join(production.directory(config_dir), f"{config.key}.yaml"))
+79:                 except OSError:
+80:                     continue
+81:                 if reported <= enabled_at:
+82:                     continue
+83:                 handled = False
+84:                 for run in previous:
+85:                     spec = run["spec"]
+86:                     selected = spec.get("picks") or []
+87:                     owns = any(p.get("production") == config.key for p in selected)
+88:                     if not owns:
+89:                         continue
+90:                     if spec.get("report_identity") == revision and any(
+91:                             p.get("production") == config.key and p.get("all") for p in selected):
+92:                         handled = True
+93:                     elif not any(p.get("all") for p in selected) and (
+94:                             run["status"] == "RUNNING" or (day < today and reported <= run["started"])):
+95:                         handled = True
+96:                 if handled:
+97:                     continue
+98:                 if config.content_mode == "episode":
+99:                     if config.content_column_id in episode_columns:
+100:                         continue
+101:                     episode_columns.add(config.content_column_id)
+102:                 pick = {"column": config.recipe, "all": True, "production": config.key}
+103:                 if config.content_mode == "episode":
+104:                     pick["content_mode"] = "episode"
+105:                 if config.split == "whole":
+106:                     pick["whole"] = True
+
+E17 core/material_collection.py SHA256 3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3
+18: 
+19: def collect(engine, policy: dict) -> dict:
+20:     settings = policy.get("collection", {})
+21:     root = Path(getattr(engine, "state_dir", Path(engine.workspace_dir) / "state"))
+22:     archive = MaterialArchive(root)
+23:     specs = []
+24:     overdue = []
+25:     owners = matrices.load_all(engine.config_dir)
+26:     active = set()
+27:     for key in policy["matrices"]:
+28:         owner = owners.get(key)
+29:         if not owner or owner.paused or owner.archived:
+30:             continue
+31:         active.add(key)
+32:         for name in owner.jobs:
+33:             job = load_job(engine.jobs_dir, name)
+34:             if job and job.get("enabled", True):
+35:                 specs.extend(
+36:                     sources.resolve(job.get("sources") or [], engine.config_dir)
+37:                 )
+38:     for profile in source_supply.profiles(engine.config_dir).values():
+39:         if profile.get("matrix") in active:
+40:             from core.source_coverage import CoverageStore
+41:             coverage = CoverageStore(root, profile['key']).status(profile)
+42:             specs.extend(r['spec'] for r in coverage)
+43:             overdue.extend(r for r in coverage if r['status'] != 'current')
+44:             specs.extend(
+45:                 r["spec"] for r in SupplyStore(root, profile["key"]).pool()["sources"]
+46:             )
+47:     # Fetch source identities in a stable rotation when the configured bound is smaller than the pool.
+48:     specs = sorted(set(specs))
+
+E18 core/engine.py SHA256 b61e9eb990be2e2209480c65e112187d9a3db03b33a12da63bdf939b9054cfd1
+324:                 from .video import audience_strategy, question_material
+325:                 audience_detail = {}
+326:                 supplement_material = ""
+327:                 if audience_strategy.job_channel(job):
+328:                     self._progress({"type": "phase", "phase": "organizing_topics"})
+329:                     initial_report = cleaned
+330:                     import hashlib
+331:                     import json
+332:                     initial_path = output_path + ".audience-initial-" + hashlib.sha256(cleaned.encode()).hexdigest()[:16] + ".json"
+333:                     atomic_write(initial_path, json.dumps({"report": initial_report}, ensure_ascii=False) + "\n")
+334:                     cleaned, audience_detail = audience_strategy.prepare_report(
+335:                         job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+336:                         LLMConfig.from_system(self.sys, "ai"), cancel_token=self._cancel)
+337:                     cleaned, supplement_material, supplement_detail = question_material.enhance(
+338:                         job, cleaned, "\n\n".join([source_block or "", *getattr(agent, "materials", [])]),
+339:                         {**audience_detail, "initial_report": initial_report}, self.sys,
+340:                         cancel_token=self._cancel, progress_cb=self._progress)
+341:                     if supplement_detail:
+342:                         audience_detail["question_material"] = supplement_detail
+343:                         # These URLs were actually read by the supplemental stage.
+344:                         # Keep the existing citation display consistent with its inputs.
+345:                         self._prompt_urls.update(
+346:                             source["url"] for topic in supplement_detail.get("topics", [])
+347:                             for source in topic.get("retrieved_sources", []) if source.get("text"))
+348:                         for name, value in supplement_detail.get("usage", {}).items():
+349:                             if isinstance(value, (int, float)) and not isinstance(value, bool):
+350:                                 usage[name] = usage.get(name, 0) + value
+
+E19 web/services/video_render.py SHA256 dd59cf065f4d89032ea8e60f80f2c4da6a7292ff1893d2a739351aa08d1166a9
+222: def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None,
+223:            record: Optional[Callable[..., dict]] = None) -> dict:
+224:     """Record a render of the script's approved version. Does not contact AutoVideo.
+225: 
+226:     ``record`` replaces ``store.create_render`` for a caller that needs the request without a render row: the A/B
+227:     preview (core/experiments/preview.py), whose output must never become a publishable render.
+228:     """
+229:     if (script.get('topic') or {}).get('local_video'):
+230:         raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
+231:     version_no = script.get("approved_version")
+232:     if not version_no:
+233:         raise RenderError("文稿还没有定稿，不能出片")
+234:     version = store.get_version(script["id"], version_no)
+235:     if version is None:
+236:         raise RenderError("找不到定稿版本，请重新选择文稿版本")
+237:     from core.video.article_writer import readiness
+238:     if problem := readiness(version):
+
+E20 core/video/content_columns.py SHA256 d78528810610eb95172f96b6716e822d36b9d22a5eda0a810c3696e52da96f36
+138:         except (OSError, ValueError, TypeError, yaml.YAMLError) as exc:
+139:             result[path.stem] = ContentColumn(key=path.stem, name=path.stem, errors=(str(exc),))
+140:     references: dict[str, list[str]] = {}
+141:     for column in result.values():
+142:         for pid in column.production_ids:
+143:             references.setdefault(pid, []).append(column.key)
+144:     for key, column in list(result.items()):
+145:         errors = list(column.errors)
+146:         for pid in column.production_ids:
+147:             if len(references[pid]) > 1:
+148:                 errors.append(f"生产配置 {pid} 被多个栏目引用：{'、'.join(references[pid])}")
+149:             if configs is not None and pid not in configs:
+150:                 errors.append(f"生产配置不存在：{pid}")
+151:         if errors:
+152:             result[key] = replace(column, errors=tuple(errors))
+153:     return result
+154: 
+155: 
+
+E21 config/content_strategy.yaml SHA256 e288ef3f229f4cf7bfe477facb5870b98a40d03b9a2f409a8d40c8d76b653d38
+48:   software_weekly: 软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
+49:   software_illustrated: 软件：工作、学习和日常数字生活中的共同需求，保留工具的输入、操作、结果与使用门槛；开发专用工具保留专业范围。
+50:   tech_daily: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+51:   tech_weekly: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+52:   tech_illustrated: 科技：技术变化让哪些能力成为可能、如何影响日常生活与工作，保留机制、具体场景和采用条件，不只追发布会参数。
+53: jobs:
+54:   monitoring/ai_flash_discovery: flash
+55:   chatgpt_acquisition/t01_product: t01
+56:   chatgpt_acquisition/t02_scenarios: t02
+57:   chatgpt_acquisition/t03_tutorials: t03
+58:   chatgpt_acquisition/t04_testing: t04
+59:   chatgpt_acquisition/t05_comparison: t05
+60:   chatgpt_acquisition/t06_value: t06

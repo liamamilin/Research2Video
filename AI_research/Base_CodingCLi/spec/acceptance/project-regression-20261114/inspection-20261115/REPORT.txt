@@ -1,0 +1,95 @@
+2026-11-15 全仓代码检查与逻辑缺陷修复
+
+目的与边界
+用户明确要求检查全部项目代码中的明显 bug、逻辑错误，测试仅作为辅助证据。
+本轮执行全仓静态检查，人工沿研究、调度、视频生成、持久化、文件归档、前端草稿和发布接续等链路追踪实现。
+全量静态检查不等于每个源文件的每一行都完成了人工语义审查；本报告不作“逐行人工全覆盖”或“项目没有剩余 bug”的声明。
+没有修改生产数据库、生成任务或调度器，没有重启服务，没有实际调用模型、生成视频或向平台投稿。
+测试在 /tmp/video-workflow-regression-20261115/source 独立源码副本内执行，复制当前源码，不复制生产 .env、运行数据库或作品数据，只复用已安装依赖。
+没有改动渲染表达或音视频生成算法，因此本轮不作新成片质量验证主张。
+
+确认并修复的问题（8 类）
+
+1. AutoVideo 工作目录归档可能保留错误副本并删除正确原件。
+   core/video/archive.py 的任务归档此前依赖 rsync 默认大小/mtime 比较。
+   隔离用例把原文件 good 与副本 oops 设置为相同大小、相同 mtime；修复前原件被删除，副本仍是 oops。
+   现在任务镜像、清理前比较和恢复都启用内容校验，与研究端成片归档保持一致。
+   代价：任务归档增加读取文件内容的 I/O；生产服务本轮未加载该改动。
+   证据：archive-before.log、archive-after.log、tests/test_video_archive.py。
+
+2. 文稿草稿跨用户/文稿/版本串写。
+   use-script-editor.ts 切换 key 的同一轮 effect 中，重置状态尚未生效，保存 effect 仍拿旧草稿写新 key。
+   可覆盖新版本已经暂存的草稿，或把原文稿内容放进另一份文稿的恢复记录。
+   新增草稿所属 key，所属范围不一致时禁止保存，等待重置完成。
+   证据：editor-before.log 两项失败；editor-after.log 与 ui-final.log 通过。
+
+3. 并发 YAML 请求共享有状态的 ruamel 解析/输出对象。
+   8 个线程处理 32 份不同配置的真实 round-trip 在修复前触发解析/输出异常。
+   每次操作创建独立 YAML 对象，保留原注释、缩进和多行文本设置。
+
+4. YAML 重复键没有转成约定的校验错误。
+   DuplicateKeyError 没有被原来的 ParserError/ScannerError 捕获，会绕过路由的 ValueError -> 422 处理。
+   现在捕获 ruamel YAMLError 并转成 ValueError；不改变既有重复键拒绝规则。
+
+5. YAML 备份在同一秒被覆盖。
+   同名文件来自不同目录，或同一任务连续修改时，原来的 {stem}_{秒}.yaml 路径重复。
+   使用独占创建的唯一文件名；三个同秒备份各自保留原内容。
+
+6. 配置保存可能丢失并发修改。
+   原来 10ms 的 mtime 容差把真实快速修改当作未变化，检查与替换也没有共同锁。
+   现在精确比较客户端读到的 mtime，并对同一文件的检查、备份、替换整体加锁。
+   新用例验证 0.5ms 时间差被识别，以及 4 个持有同一旧版本的保存请求只成功一个。
+   3—6 的证据：yaml-before.log 四项失败、yaml-related.log、inspection-focused-final.log、tests/test_yaml_io.py。
+
+7. 待处理批次不能正确接续已定稿文稿及其成片。
+   reopen_approved 原来把任意版本的已完成/活动成片当作不恢复的理由。
+   v1 已完成时，v2 定稿仍可能卡在 HELD；用户手动出片后，批次也可能一直显示待处理。
+   现在恢复已定稿且未归档的文稿，由 advance_auto 按 approved_version 复用活动/完成成片，再决定是否新提交。
+   用例覆盖旧版本完成后制作新版，以及同版本 RUNNING/COMPLETED 的接续；后两者均只有一个 render。
+
+8. 恢复逻辑错误复用了展示列表的条数限制。
+   自动恢复只看最近 50 条 HELD，人工批量恢复只看最近 500 条，较旧且满足恢复条件的记录可能永远排在限制之外。
+   held_items 保留展示默认上限，三个恢复调用明确使用 limit=None。
+   用例构造 51 条待处理记录，只有最旧一条已定稿；修复前恢复数量 0，修复后恢复数量 1。
+   7—8 的证据：autopilot-before.log、autopilot-adopt-before.log、inspection-focused-final.log。
+
+另做两处小修：补全 events.py 的 Iterator 类型导入，删除 health.py 的重复 Optional 导入。
+全量回归首轮暴露 test_telemetry.py 的旧 SimpleNamespace 替身缺少新增 status 字段；已补全替身，不以放宽生产代码绕过测试。
+
+审查范围与未采纳的静态提示
+全仓 Python 语法检查覆盖 991 份文件（989 个已跟踪 Python 源文件及两份既有未跟踪回归测试）。
+对 462 个生产 Python 文件执行 Ruff F/B/ASYNC 等规则扫描；结果保留在 python-inspection.json。
+补全导入后，989 个已跟踪 Python 文件的 F821/F822/F823/E9 检查没有剩余发现。
+研究端 UI 执行全量 ESLint、TypeScript、Vitest 和生产构建；AutoVideo 的 g1/g2/g3 共 32 个 TS/TSX 入口执行 strict noEmit。
+AutoVideo 临时类型检查配置补用研究 UI 已安装的 react-dom 类型声明，未安装或改写生产依赖。
+9 个 JavaScript/CJS 文件、9 个 Shell 脚本、3 个 Swift 文件分别通过 node --check、bash -n、swiftc -frontend -parse。
+原有 AutoVideo 静态 bundle 在隔离副本重新构建，JS/CSS 都与提交版本字节一致。
+API 路由声明做过静态/动态路径遮挡扫描，未发现被先注册动态路由遮挡的静态路径。
+FastAPI Depends 默认参数、立即调用的循环内闭包、复制后 set 的 ContextVar 字典等提示未计为实际缺陷；未做纯风格批量修改。
+
+人工追踪的主要实现
+研究与基础设施：core/budget.py、state.py、fileio.py、sqlite_util.py、lock.py、processes.py、cron.py、periods.py、schedule_runner.py、schedule_store.py；研究/LLM/搜索的取消和重试分支、research_batches.py、source_supply_store.py、report_identity.py。
+API/任务：web/runner 的 executor/registry/log_bus，jobs 路由保存与流式输出，yaml_io、JWT/deps、ratelimit、assistant_background/tasks/batches、索引 watcher/vector_sync、telemetry 的 store/query/pricing/retention。
+视频业务：archive/autopilot_store/production_admission/autovideo 客户端、video_autopilot/video_executor/video_render/video_queue_state/video_storage/local_video；发布服务的 settle/reconcile/claim、回执恢复与重试分类。
+AutoVideo：输入文档与 input_preparation、G3 任务/音乐状态与恢复、revision_support、file_integrity、render_checkpoint/retry、voice_cache/file_fingerprint、media_settings/music_mix/pauses、scene_fields/assembly、Video IR 时间与引用验证。
+前端：API 请求及会话处理、JobDetail/VideoScriptView 的请求与编辑状态、use-script-editor/use-publish-draft/use-page-resource，AutoVideo 的任务轮询与音乐/图片交互；渲染组件的边界、图表与相邻场景状态相关实现。
+以上是人工重点读取的文件或分支，不表示这些大文件的所有分支都经过穷举。
+归档中的 music_workshop 仅做现有代码扫描和回归，没有恢复产品开发。
+
+验证结果
+最终全量后端：4492 passed、5 skipped（502.59 秒）；见 research-final.log 与 research-final.xml。全量运行期间继续修正的自动恢复逻辑另以最终定向回归验证。
+最终定向回归：97 passed，包括自动队列、生产名额、队列状态、YAML 保存、视频归档；见 inspection-focused-final.xml。
+配置/API/任务/遥测相关定向回归：117 passed；见 yaml-related.log。
+研究 UI：96 个文件、751 项测试通过；lint、类型检查、生产构建通过。
+AutoVideo：1125 passed，默认 Python 缺 pypinyin 的模块跳过，另用已安装环境补跑 15 passed。
+音乐工坊：5 passed。没有运行歌曲或视频生成。
+本轮新增 13 个测试用例（11 后端、2 前端），已有失败复现日志均保留。
+最终源文件哈希见 final-source-manifest.json；与测试副本共有源文件比较，无内容差异。
+跳过项涉及隔离副本未复制的应用包、生产状态、真实轮次/成片及专用生产配置，不将其描述为已验证。
+构建保留现有 Monaco/YamlEditor 大 bundle 警告；这是构建体积提示，本轮未变更拆包。
+
+服务与部署状态
+2026-11-15 本轮只读核对：网关 PID 2629，启动时间 11-09 21:09:39；AutoVideo PID 7448，启动时间 11-14 22:34:22；研究服务 PID 7484，启动时间 11-14 22:34:24。
+三个进程和启动时间均未因本轮检查改变。工作区修复与隔离验证完成，未重启发布；研究 UI 也只构建到隔离副本。
+
+Git 入库说明：测试日志及 XML 仅清理行尾空白与末尾多余空行；保留全部结果、错误和堆栈内容。

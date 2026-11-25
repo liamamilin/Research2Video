@@ -103,6 +103,12 @@ def autopilot_due(state_dir: str, now: float, runtime: Runtime | None = None) ->
     Reads video.db directly (stdlib only) so this works while the web app is down. With ``runtime`` it also asks whether a
     Job with auto configs has a new report to write from."""
     import sqlite3
+    chain_path=Path(state_dir)/'chains.db'
+    if chain_path.is_file():
+        try:
+            with sqlite3.connect(f'file:{chain_path}?mode=ro',uri=True,timeout=2) as db:
+                if db.execute("SELECT 1 FROM runs WHERE json_extract(data,'$.status') IN ('RUNNING','CANCELLING') LIMIT 1").fetchone():return True
+        except sqlite3.Error:pass
     path = Path(state_dir) / 'video.db'
     if not path.is_file():
         return False
@@ -196,7 +202,7 @@ def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = No
     except Exception:
         logger.exception('Video pipeline wake-up failed')
     store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity(),
-                     'issue_context_version': 1})
+                     'issue_context_version': 1, 'chain_tracking_version': 1})
     return launched
 
 
@@ -210,6 +216,7 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
     from core.budget import pipeline_allowed
     from core.config import load_system_config
     from core.engine import ResearchEngine
+    from core.local_proxy import ProxyUnavailableError, ensure_local_proxy
     state.use_state_dir(runtime.state_dir)
     lock._LOCK_DIR = str(Path(runtime.state_dir) / 'locks')
     report_meta.META_FILE = str(Path(runtime.state_dir) / 'report_meta.jsonl')
@@ -223,8 +230,13 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
             return 'blocked', '此期次入队时研究任务已停用', None
     except ValueError as exc:
         return 'blocked', str(exc), None
+    sys_cfg = load_system_config(runtime.config_dir)
+    try:
+        ensure_local_proxy(sys_cfg)
+    except ProxyUnavailableError as exc:
+        return 'failed', f'本地代理不可用：{exc}', None
     if not job.get('source_collection'):
-        allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
+        allowed, reason = pipeline_allowed(sys_cfg)
         if not allowed:
             return 'blocked', reason, None
     from core.matrices import cap_block
@@ -237,8 +249,10 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, con
                             cancel_token=cancel, user='scheduler')
     engine.run_context = context or {}
     output = engine.run_job(canonical)
-    if output and Path(output).is_file():
-        return 'success', '', str(Path(output).resolve())
+    if output:
+        report = Path(runtime.workspace) / output
+        if report.is_file():
+            return 'success', '', str(report.resolve())
     last = state.StateManager.get(canonical) or {}
     if job.get('source_collection') and last.get('last_status') == 'skipped':
         return 'skipped', '素材积累已关闭，未调用模型或生产视频', None

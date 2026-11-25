@@ -12,6 +12,7 @@ beforeEach(() => {
     calls.push({ url: String(url), body: init?.body });
     if (String(url).includes("/api/video/cells")) return response(cells);
     if (String(url).includes("/api/production")) return response([]);
+    if (String(url).includes("/api/matrices")) return response({ matrices: [], ungrouped: [] });
     if (String(url).includes("/articles/import")) return rejectUpload ? response({ detail: { code: "article_invalid", message: "扫描 PDF 需要 OCR" } }, 422)
       : response({ id: "source-1", text: "雨停以后，风翻动了书页。", filename: "散文.txt", chars: 14, warnings: ["请检查提取正文"] });
     return response({ id: "article-1" }, 202);
@@ -20,16 +21,15 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("article creation", () => {
-  it("creates a pasted article using the selected mode and shared recipe", async () => {
+  it("defaults to adapt + information and supports optional auto_render", async () => {
     const created = vi.fn(); render(<ArticleCreate onCreated={created} />);
     fireEvent.change(screen.getByLabelText("文章正文"), { target: { value: "这是一篇信息文章，保留适用条件。" } });
-    fireEvent.change(screen.getByLabelText("处理方式"), { target: { value: "adapt" } });
-    fireEvent.change(screen.getByLabelText("文章类型"), { target: { value: "information" } });
     await waitFor(() => expect((screen.getByRole("button", { name: "生成文稿" }) as HTMLButtonElement).disabled).toBe(false));
-    fireEvent.click(screen.getByRole("button", { name: "生成文稿" }));
+    fireEvent.click(screen.getByLabelText(/生成后自动定稿并出片/));
+    fireEvent.click(screen.getByRole("button", { name: "生成文稿并自动出片" }));
     await waitFor(() => expect(created).toHaveBeenCalledWith("article-1"));
     const request = calls.find(c => c.url.includes("/articles/scripts"));
-    expect(JSON.parse(String(request?.body))).toMatchObject({ mode: "adapt", kind: "information", column: "topic_digest", text: "这是一篇信息文章，保留适用条件。" });
+    expect(JSON.parse(String(request?.body))).toMatchObject({ mode: "adapt", kind: "information", column: "topic_digest", auto_render: true, text: "这是一篇信息文章，保留适用条件。" });
     expect(calls.filter(c => c.url.includes("/articles/scripts"))).toHaveLength(1);
   });
   it("uploads with multipart and retains the original import when the preview is edited", async () => {

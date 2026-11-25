@@ -1,0 +1,9 @@
+{
+  "jobs": 74,
+  "matrices": 15,
+  "bindings": 57,
+  "modified_job_files": 43,
+  "manifest_integrity": true,
+  "service_activation": "t05-kept-item-activation.json",
+  "scope_note": "57 bound report routes; helper prompts remain documented in the 74-item reviews"
+}

@@ -510,13 +510,18 @@ def raw_report(path: str, user=Depends(require_viewer)):
 def search(
     q: str = Query(..., min_length=1, max_length=200),
     limit: int = Query(20, ge=1, le=100),
+    job: str | None = None,
     user=Depends(require_viewer),
 ):
     """Full-text search across report titles and content using FTS5."""
     if not q.strip():
         return {"results": [], "total": 0}
 
-    results = index_db.search_reports(q.strip(), limit=limit)
+    allowed_paths=None
+    if job:
+        with index_db.connect() as connection:
+            allowed_paths={r['path'] for r in connection.execute('SELECT path FROM reports WHERE job_name=?',(job,))}
+    results = index_db.search_reports(q.strip(), limit=limit, allowed_paths=allowed_paths)
     meta_map = report_meta.load_all()
     for item in results:
         if not item.get("title"):

@@ -1,0 +1,873 @@
+[
+  {
+    "channel": "flash",
+    "index": 1,
+    "topic": "删掉“think hard”：Claude Opus 5.5 的提示习惯该怎么改",
+    "judgment": [
+      "受众范围：修正版保持文档、分析与编码用户的共同提示习惯问题，没有让30页财报成为主线；原版用一份财报贯穿中段。",
+      "具体性与叙述：修正版仍有成品表格、奶油色背景、胶囊按钮等具体细节，原有口语表达保留；但少了完整走一遍的例子，更像多条建议。局部受众改善，不等于整稿全面优胜。"
+    ],
+    "control": {
+      "title": "Claude Opus 5.5 默认了，先把“think hard”删掉",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2319,
+          "completion_tokens": 3184,
+          "total_tokens": 5503,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2119,
+          "cost_usd": 0.00225825,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 34.861,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 1
+      },
+      "length_check": {
+        "spoken_length": 494,
+        "estimated_seconds": 113,
+        "segments": 23,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 1.509,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "开场：那句“think hard”现在反着使",
+            "spoken_length": 133,
+            "budget": 109
+          },
+          {
+            "title": "一个真活儿：30 页财报变一页对比表",
+            "spoken_length": 188,
+            "budget": 109
+          },
+          {
+            "title": "设计任务同理，以及我的建议：先在一个任务上试",
+            "spoken_length": 173,
+            "budget": 108
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "Claude Opus 5.5 默认上线，先删掉那句 think hard",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2369,
+          "completion_tokens": 4016,
+          "total_tokens": 6385,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3001,
+          "cost_usd": 0.00276495,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 46.62,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 1
+      },
+      "length_check": {
+        "spoken_length": 571,
+        "estimated_seconds": 129,
+        "segments": 22,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 1.719,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "开场：那句 think hard，官方劝你删",
+            "spoken_length": 58,
+            "budget": 55
+          },
+          {
+            "title": "为什么旧的加压方式反而碍事",
+            "spoken_length": 103,
+            "budget": 55
+          },
+          {
+            "title": "一条消息说全：目标、格式、什么时候回来问",
+            "spoken_length": 96,
+            "budget": 54
+          },
+          {
+            "title": "设计任务要点名具体不要什么",
+            "spoken_length": 104,
+            "budget": 54
+          },
+          {
+            "title": "我的判断：结构今天就改，效果数字自己验",
+            "spoken_length": 123,
+            "budget": 54
+          },
+          {
+            "title": "结尾：删掉它，把目标说清楚",
+            "spoken_length": 87,
+            "budget": 54
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "flash",
+    "index": 2,
+    "topic": "DeepSeek把搜索、文件、语音拆成API：小团队先算哪几项",
+    "judgment": [
+      "受众范围：两版均保留小团队/API使用者，未把专业材料泛化为人人适用。修正版仍使用会议记录例子，但同时讨论缓存、搜索、文件处理，不要求全片跟着同一场会议。",
+      "采用判断：未见清晰的受众收益。原版自行组合出“一场会一块三”的账单；修正版出现“语音和文件先接，别算”“便宜到不构成选择”。低接口单价不等于应接入，属于原写法的判断风险；本轮不将其归因于受众修正，也不自动改稿掩盖。"
+    ],
+    "control": {
+      "title": "DeepSeek 把语音搜索拆成 API：一场会一块多",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 3015,
+          "completion_tokens": 5466,
+          "total_tokens": 8481,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3963,
+          "cost_usd": 0.00373185,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 61.072,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 19
+      },
+      "length_check": {
+        "spoken_length": 1142,
+        "estimated_seconds": 253,
+        "segments": 40,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 3.372,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先把一场会的账单摆出来",
+            "spoken_length": 270,
+            "budget": 82
+          },
+          {
+            "title": "真正会放大的是搜索那一项",
+            "spoken_length": 343,
+            "budget": 82
+          },
+          {
+            "title": "模型层有一个能省钱的时间差",
+            "spoken_length": 254,
+            "budget": 81
+          },
+          {
+            "title": "我的结论",
+            "spoken_length": 275,
+            "budget": 81
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "DeepSeek 语音一小时 5.8 美分，贵的不在语音上",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 3065,
+          "completion_tokens": 4881,
+          "total_tokens": 7946,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3545,
+          "cost_usd": 0.00338835,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 52.077,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 19
+      },
+      "length_check": {
+        "spoken_length": 880,
+        "estimated_seconds": 197,
+        "segments": 35,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 1.25,
+        "budget": 326,
+        "ratio": 2.622,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "语音一小时 5.8 美分，先别算它",
+            "spoken_length": 221,
+            "budget": 82
+          },
+          {
+            "title": "一场一小时的会，不到 8 美分",
+            "spoken_length": 173,
+            "budget": 82
+          },
+          {
+            "title": "真正要算的，是你跑在几点、缓存命中没有",
+            "spoken_length": 320,
+            "budget": 81
+          },
+          {
+            "title": "我的顺序：先接语音和 OCR，先别急着升 pro",
+            "spoken_length": 166,
+            "budget": 81
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t05",
+    "index": 1,
+    "topic": "国内四款AI怎么搭：哪些日常任务用免费版就够，Kimi Pro的99元/年该不该花？",
+    "judgment": [
+      "受众范围：原版从“晚上十点，八十页PDF合同”展开，并在结尾回到这份合同；修正版用周报、简历、翻译、论文、合同和访谈记录说明不同需要，主线保持普通用户的免费/付费选择。是本轮较清楚的局部改善。",
+      "具体性与叙述：修正版保留具体动作、频率和个人判断，没有变成纯抽象说明。但仍有较长API价格段和过强的产品取舍，整稿并未因此全面成熟。",
+      "保留原写法的代价：原版把“年费摊到每月8元”写成“第二天花8元开一个月”；修正版虽然不再明确这样购买，仍把价值主要归于长文档，没有给出同产品免费与付费的完整区别。本轮记录这些存量判断问题，不把范围修正当作已解决。"
+    ],
+    "control": {
+      "title": "豆包通义免费够用，Kimi Pro 99元一年该不该花？",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 4828,
+          "completion_tokens": 6578,
+          "total_tokens": 11406,
+          "cache_read_tokens": 1152,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 4975,
+          "cost_usd": 0.00450166,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 79.629,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 2
+      },
+      "length_check": {
+        "spoken_length": 1324,
+        "estimated_seconds": 297,
+        "segments": 54,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.99,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先看一个周五晚上的任务",
+            "spoken_length": 352,
+            "budget": 327
+          },
+          {
+            "title": "八十页的合同，卡的不是文件大小",
+            "spoken_length": 362,
+            "budget": 326
+          },
+          {
+            "title": "API那笔钱，跟你聊天没关系",
+            "spoken_length": 208,
+            "budget": 326
+          },
+          {
+            "title": "我的搭法：主用一款，长文档再花那8块",
+            "spoken_length": 402,
+            "budget": 326
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "Kimi Pro一年99元，我建议大多数人先别买",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 4878,
+          "completion_tokens": 5020,
+          "total_tokens": 9898,
+          "cache_read_tokens": 384,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 3352,
+          "cost_usd": 0.00368725,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 62.167,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 2
+      },
+      "length_check": {
+        "spoken_length": 1311,
+        "estimated_seconds": 291,
+        "segments": 48,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.971,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "开场：99元买的到底是什么",
+            "spoken_length": 155,
+            "budget": 187
+          },
+          {
+            "title": "最容易算错的地方：会员和接口是两笔账",
+            "spoken_length": 147,
+            "budget": 187
+          },
+          {
+            "title": "日常活儿，四家的免费版都能接",
+            "spoken_length": 147,
+            "budget": 187
+          },
+          {
+            "title": "什么时候才轮到Kimi Pro",
+            "spoken_length": 299,
+            "budget": 186
+          },
+          {
+            "title": "反过来：真要调接口，别选Kimi",
+            "spoken_length": 179,
+            "budget": 186
+          },
+          {
+            "title": "豆包和通义站在什么位置",
+            "spoken_length": 158,
+            "budget": 186
+          },
+          {
+            "title": "我的搭法：一主一辅，不用四款都留",
+            "spoken_length": 226,
+            "budget": 186
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t05",
+    "index": 2,
+    "topic": "研究生写综述：Gemini选题、Qwen筛文献、ChatGPT出机理图草图，只订一个够不够？",
+    "judgment": [
+      "范围边界：两版均保留研究生/论文写作受众，并明确食品工科案例的适用限制。修正版没有为了扩大受众改成全民工具推荐，也没有丢掉筛文献表格、15到20篇分批、构图与Keynote临摹等细节。",
+      "采用判断：未见明确的范围收益，这是有意保留的专业题边界样本。两版依然从“用了多种工具”的案例推论“一个订阅够不够”；所需能力与是否必须付费没有在材料中建立对应关系。这题不作为大众主线的成功样本。"
+    ],
+    "control": {
+      "title": "Gemini选题、Qwen筛文献、ChatGPT画图，订一个够吗？",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 4440,
+          "completion_tokens": 8033,
+          "total_tokens": 12473,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 6135,
+          "cost_usd": 0.0054858,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 91.936,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 7
+      },
+      "length_check": {
+        "spoken_length": 1583,
+        "estimated_seconds": 356,
+        "segments": 59,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 1.186,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "一篇综述，一个人，三个AI",
+            "spoken_length": 203,
+            "budget": 261
+          },
+          {
+            "title": "选题：Gemini帮的不是想题目",
+            "spoken_length": 287,
+            "budget": 261
+          },
+          {
+            "title": "筛文献：Qwen那张六列表格",
+            "spoken_length": 318,
+            "budget": 261
+          },
+          {
+            "title": "画图：ChatGPT给的不是图，是模板",
+            "spoken_length": 332,
+            "budget": 261
+          },
+          {
+            "title": "只订一个够不够",
+            "spoken_length": 443,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "Gemini选题、Qwen筛文献、ChatGPT画图，只订一个够吗？",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 4490,
+          "completion_tokens": 7436,
+          "total_tokens": 11926,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 5873,
+          "cost_usd": 0.0051351,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 90.861,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 7
+      },
+      "length_check": {
+        "spoken_length": 1525,
+        "estimated_seconds": 340,
+        "segments": 61,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 1.132,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "一个人，五道工序，四个工具",
+            "spoken_length": 339,
+            "budget": 327
+          },
+          {
+            "title": "筛文献：值钱的是那几条红线",
+            "spoken_length": 391,
+            "budget": 326
+          },
+          {
+            "title": "机理图：ChatGPT给的是抓手，不是成品",
+            "spoken_length": 312,
+            "budget": 326
+          },
+          {
+            "title": "只订一个，缺的是能力不是数量",
+            "spoken_length": 483,
+            "budget": 326
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t06",
+    "index": 1,
+    "topic": "免费版到底卡在哪：用 27K、12 页、Limited 三个信号先判断要不要付费",
+    "judgment": [
+      "受众范围：原版用周五晚上30页行业报告的情节开场、收尾，并把模型漏答解释为后文没读到；修正版同时给出长报告、Codex、短邮件与日常问答，围绕不同使用瓶颈展开。局部范围改善，例子仍具体。",
+      "正文负担：修正版仍有型号与Limited清单，速度条件还重复出现。标题也仍堆27K、12页、Limited。这说明修正受众范围不会自动解决参数密度问题；不能把本轮结果写成文稿全面优化。"
+    ],
+    "control": {
+      "title": "免费版 ChatGPT 卡在哪：27K 和 12 页",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 3339,
+          "completion_tokens": 3503,
+          "total_tokens": 6842,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 2155,
+          "cost_usd": 0.00260265,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 44.49,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 3
+      },
+      "length_check": {
+        "spoken_length": 1248,
+        "estimated_seconds": 282,
+        "segments": 56,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.939,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "一份 30 页的报告，刚好卡在 12 页上",
+            "spoken_length": 507,
+            "budget": 327
+          },
+          {
+            "title": "六个 Limited，哪一个先咬到你",
+            "spoken_length": 215,
+            "budget": 326
+          },
+          {
+            "title": "慢这件事，Go 救不了",
+            "spoken_length": 322,
+            "budget": 326
+          },
+          {
+            "title": "回到那份 30 页的报告",
+            "spoken_length": 204,
+            "budget": 326
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "ChatGPT 免费版卡在哪：27K、12页和Limited",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 3389,
+          "completion_tokens": 6738,
+          "total_tokens": 10127,
+          "cache_read_tokens": 0,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 5685,
+          "cost_usd": 0.00455115,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 74.79,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 3
+      },
+      "length_check": {
+        "spoken_length": 796,
+        "estimated_seconds": 178,
+        "segments": 33,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.593,
+        "status": "UNDER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "20页报告贴进去，先撞上12页",
+            "spoken_length": 332,
+            "budget": 435
+          },
+          {
+            "title": "Limited不是一句口号，是一串具体限制",
+            "spoken_length": 265,
+            "budget": 435
+          },
+          {
+            "title": "卡页数升Go，卡速度别只看Go",
+            "spoken_length": 199,
+            "budget": 435
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  },
+  {
+    "channel": "t06",
+    "index": 2,
+    "topic": "每月 20 美元的 Plus 买到什么：九项增量里，哪些是任务解锁，哪些只是额度变大",
+    "judgment": [
+      "受众范围：修正版仍用30份访谈交给老板的例子展开主要论证，虽带到研究与代码任务，没有显示出明确的范围改善。开头还逐条念九项权益，比原版更像清单。此组不判修正版优胜。",
+      "叙述与判断：原版称两项真解锁，修正版称只有一项；两者都主要根据页面用词分类，并把项目、定时任务、自定义GPT串成自动工作流。材料列出功能，并不足以证明免费版没有这些能力或这条组合流程能自动完成。该推论问题两版都有，本轮不靠追加规则改写到满意。",
+      "采用判断：保留“新能力还是更多额度”的选题方向，这篇不作为修正有效的证据；明确保留失败例，后续不能声称受众收窄已全部解决。"
+    ],
+    "control": {
+      "title": "ChatGPT Plus 每月 20 美元，九项新增里只有两项是真解锁",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2783,
+          "completion_tokens": 5804,
+          "total_tokens": 8587,
+          "cache_read_tokens": 384,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 4023,
+          "cost_usd": 0.0038434,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 69.734,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+        "trusted_urls": 6
+      },
+      "length_check": {
+        "spoken_length": 1546,
+        "estimated_seconds": 350,
+        "segments": 63,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 1.166,
+        "status": "OVER",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "九项里，只有两项改了你能做什么",
+            "spoken_length": 213,
+            "budget": 218
+          },
+          {
+            "title": "先解决重贴背景这件烦事",
+            "spoken_length": 358,
+            "budget": 218
+          },
+          {
+            "title": "活往下走，一定会撞到额度墙",
+            "spoken_length": 276,
+            "budget": 218
+          },
+          {
+            "title": "Pro 那页是最好的说明书",
+            "spoken_length": 171,
+            "budget": 217
+          },
+          {
+            "title": "这 20 美元怎么花",
+            "spoken_length": 321,
+            "budget": 217
+          },
+          {
+            "title": "决定权不在“九”这个数字上",
+            "spoken_length": 207,
+            "budget": 217
+          }
+        ],
+        "dropped_citations": 0
+      }
+    },
+    "scoped": {
+      "title": "20美元的ChatGPT Plus：六项只是额度，一项是真解锁",
+      "meta": {
+        "attempts": 1,
+        "usage": {
+          "requests": 1,
+          "prompt_tokens": 2833,
+          "completion_tokens": 7443,
+          "total_tokens": 10276,
+          "cache_read_tokens": 384,
+          "cache_reported_requests": 1,
+          "reasoning_tokens": 5630,
+          "cost_usd": 0.0048343,
+          "cost_reported_requests": 1
+        },
+        "problems": [],
+        "model": "deepseek-v4.1-flash",
+        "model_switches": [],
+        "duration_seconds": 86.384,
+        "generation": "goal_first",
+        "prompt_version": 15,
+        "introduction": {
+          "status": "authored",
+          "requests": 0
+        },
+        "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+        "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+        "trusted_urls": 6
+      },
+      "length_check": {
+        "spoken_length": 1306,
+        "estimated_seconds": 296,
+        "segments": 57,
+        "units_per_second": 4.35,
+        "voice": "voxcpm_anchor",
+        "target_minutes": 5,
+        "budget": 1305,
+        "ratio": 0.986,
+        "status": "OK",
+        "tolerance": 0.15,
+        "sections": [
+          {
+            "title": "先把结论摆出来",
+            "spoken_length": 159,
+            "budget": 261
+          },
+          {
+            "title": "答案其实写在页面自己的用词里",
+            "spoken_length": 272,
+            "budget": 261
+          },
+          {
+            "title": "为什么我盯住Projects这一行",
+            "spoken_length": 319,
+            "budget": 261
+          },
+          {
+            "title": "那六项“更多”什么时候才翻上来",
+            "spoken_length": 227,
+            "budget": 261
+          },
+          {
+            "title": "两个容易忽略的前提，和你怎么自己验",
+            "spoken_length": 329,
+            "budget": 261
+          }
+        ],
+        "dropped_citations": 0
+      }
+    }
+  }
+]

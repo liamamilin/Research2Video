@@ -1,0 +1,29 @@
+{
+  "research_constructor_failure": {
+    "exception": "ParserError",
+    "future_done": true,
+    "task_status": "running",
+    "events": []
+  },
+  "sse_completion_gap": {
+    "replayed_initial_log": true,
+    "terminal_in_bus": {
+      "type": "status",
+      "status": "success",
+      "_id": 2
+    },
+    "stream_waiting_after_completion": true
+  },
+  "video_worker_failure_write_lock": {
+    "worker_alive": false,
+    "uncaught": [
+      "OperationalError"
+    ],
+    "job_statuses": [
+      "RUNNING",
+      "QUEUED"
+    ],
+    "processed_count": 1,
+    "exclusive_lock_retained": true
+  }
+}

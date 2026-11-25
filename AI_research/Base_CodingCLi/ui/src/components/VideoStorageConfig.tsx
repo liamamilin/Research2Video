@@ -32,8 +32,15 @@ export function VideoStorageConfig() {
   useEffect(() => { void load(true); }, [load]);
   useEffect(() => {
     if (!pending) return;
-    const timer = setInterval(() => { void load(); }, 3000);
-    return () => clearInterval(timer);
+    let inFlight = false;
+    const refresh = () => {
+      if (document.hidden || inFlight) return;
+      inFlight = true;
+      void load().finally(() => { inFlight = false; });
+    };
+    const timer = window.setInterval(refresh, 3000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [load, pending]);
   const browse = async (path: string) => {
     setError("");

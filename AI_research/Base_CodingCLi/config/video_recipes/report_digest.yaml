@@ -4,7 +4,8 @@
 
 name: 报告速览
 description: 从这份材料中找到{{audience}}最值得知道的变化，组织成有重点、有联系的一次讲述，让人听完记得住这期的发现。
-status: experimental
+status: blocked
+reason: 已归档：已合并至通用「专题速览」(topic_digest) 配方，AI 媒体栏目已迁移。
 tags:
   domain:
     key: ai

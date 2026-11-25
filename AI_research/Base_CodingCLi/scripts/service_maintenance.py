@@ -24,7 +24,8 @@ def perform(path: Path):
     spec = json.loads(path.read_text())
     try:
         if spec['action'] in ('restart', 'shutdown'):
-            with restart_gate(Path(spec['state_dir']), expected_runtime=spec['runtime']):
+            with restart_gate(Path(spec['state_dir']), expected_runtime=spec['runtime'],
+                              handoff_waiting_video=spec.get('handoff_waiting_video', False)):
                 _perform_idle(path)
         else:
             _perform_idle(path)
@@ -53,6 +54,10 @@ def _perform_idle(path: Path):
         current = json.loads((state / 'app_runtime.json').read_text())
         if current.get('pid') != old_pid or current.get('instance_id') != runtime.get('instance_id'):
             raise ValueError('研究端实例已变更，未向旧 PID 发送信号；请核对当前服务')
+        # A long drain can outlive the gateway's maintenance marker freshness.
+        # Renew it immediately before the process handover so the gateway cannot
+        # spawn a competing child while this helper starts the replacement.
+        save(status='applying')
         try:
             os.kill(old_pid, signal.SIGTERM)
         except ProcessLookupError:

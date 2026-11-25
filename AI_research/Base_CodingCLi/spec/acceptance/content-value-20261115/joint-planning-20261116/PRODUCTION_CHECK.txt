@@ -1,0 +1,50 @@
+2026-11-16 实际生产核查与补修
+
+结论：部分生效，尚不能称为合集和单条共同规划完整生产验证。
+今早的 4 条单条确实使用了联合规划的独立问题与研究简报，并完成旁白和 MP4；两份合集却被错误排重漏掉，原始采集材料也因路径差异没有进入规划。本记录修正此前隔离验收对实际生产覆盖程度的判断。原文稿对照结果仍有效，不能据此推断生产历史与绝对路径下同样完整。
+
+实际入口与结果
+正常自动批次入口，config/joint_planning.yaml 启用 AI 快讯和 T09 两对 production。
+- AI 快讯 run cf6cbdc5f4e94197bd6d1125812cdcf4：07:55 创建，09:06 完成；计划合集 3 项 + 3 单条，实际 0 合集 + 3 单条。
+- T09 run 0e41e319888b4bbf90131a3e23df683c：08:00 创建，09:23 完成；计划合集 1 项 + 1 单条，实际 0 合集 + 1 单条。
+- 其余 T01/T02/T05、科学和商业等当前批次不属于这两对生产入口，不以没有 joint_plan 判为故障。
+
+单条成片证据
+Fable 成本、Claude Code Code Mode、GPT-6 Astra、ChatGPT Wallet 四篇的 topic 与 manuscript version.meta 均有对应 plan 引用。
+分配的研究简报 SHA256 与写稿 research_dossier.report_sha256 一致；稿件与 render.source_text 忽略空白后一致；render.source_sha256 与其保存文本一致；实际本地 MP4 的 SHA256 与 artifact 记录一致。
+四条 authored-narration.json 都为 model_rewrite:false、exact_text_check.status:PASS。证明独立问题和简报进入实际旁白/成片，不只是配置启用。未完整观看视频，不主张整片质量或播放增长。
+Wallet 示例 render：180b80a4f53846619d66afaab4cd7e5f；视频位于 state/video_renders/该编号/video.mp4。
+
+新发现与修复
+1. 合集 topic.id 本来就是 null，但新增的排重误用 (production, topic.id)。昨日任意同栏目合集便会误占今日合集。
+改用 production + 报告内容身份；旧记录依次回退 report_id、报告路径、非空 topic ID，不把空 ID 当作全局覆盖。同报告同 revision 仍排重，改版报告及其他 production 不混为一谈。
+隔离回归覆盖历史 script、历史 queue、跨日期、同 revision、新 revision、不同 production、旧记录，以及 pick_topics 到事务入队。旧代码 5 失败 / 4 通过，修复后通过。
+真实生产数据库以 mode=ro 读取，重放两份冻结规划的合集资格：旧实现均为 0，修复后均为 1；实际队列写入为 0，没有补生成或修改已完成批次。
+
+2. 正常自动批次给绝对报告路径，report_meta 却按相对路径索引。联合规划因此读不到材料元数据，退回整份报告。
+今早快讯原始材料 470900 字符、T09 为 292320 字符，快照及哈希完好；但这两份规划分配的 material 都等于完整报告，只得到 S1 一个材料包。不能将它描述成完整原始材料分配已生效。
+修复在原查询未命中时使用 workspace-relative 路径索引，保留相对路径兼容与既有失败回退；不修改已有冻结分配。
+新增测试使用绝对路径的生产 spec、相对索引的真实材料元数据：旧实现只有 1 个材料包并回退，新实现读取 3 个原始包，单条只取得分配给自己的包。
+
+验证与接入边界
+新增 tests/test_joint_episode_history.py 共 10 个回归用例。两处修复后的联合规划、自动批次、快讯、合集覆盖、角度、材料与报告元数据等相关测试：192 passed，1 个既有 Starlette 弃用警告。git diff --check 通过。
+主提交此前的完整检查为后端 4733 passed / 11 skipped，前端 751 passed；这不是两处补修后的再次全量结果。
+测试均在 /tmp/joint-review-dev-20261116，生产数据库仅只读核查；已核对安装文件与测试文件 SHA256 一致。
+通过现有维护入口以 active_runs=wait 提交切换，回执 77ec5e924e8641628a18eb3c6d2a07be。记录时仍为 applying，旧研究 PID 97917 未退出，5 个 autopilot 批次和 1 个 render 正在运行。维护程序必须等待在途工作清空，超时会失败且不发送重启信号；未取消或强杀任务。
+两处补修已落盘，但此记录时尚未由新进程加载；不能将今早已生成的视频描述为用了补修版。今早漏掉的两份合集没有补生成；修复后的完整新一轮合集＋单条成片仍待生产验证。
+
+证据（本地生成数据，不提交 Git）
+state/acceptance-content-value-20261115/joint-planning-20261116/production-check-20261116/
+observed.json、live-history-replay.json、live-history-readonly.py、source-hashes.json、maintenance-receipt.json、修复前复现与 192 项通过日志。
+
+2026-11-16 09:55 上线收尾：用户授权短暂停止调度，修改后继续
+以下状态取代上文“等待切换、补修尚未加载”的当前状态；今早成片的历史结论不变。
+
+用户明确要求先停当前任务、更新后继续。通过现有 autopilot-tick 跨进程锁暂停批次推进，保存一致数据库备份及所有在途 run/item/script 标识。确认没有研究、写稿、投稿或尚未持久化的渲染提交；剩下已提交的 AutoVideo 任务有稳定 job_id。停止本次自有的等待式维护 helper，调用现有维护实现正常退出研究服务并启动新进程。未新增维护产品功能，未取消批次或 AutoVideo 任务。
+实际研究服务 PID 97917 → 21144；新 instance_id dcffd913b2a44563b8128254f188bf49。维护回执 77ec5e924e8641628a18eb3c6d2a07be 已 completed。8766 直连与 8775 网关健康检查均为 ok，且返回相同的新 instance_id。源文件 SHA256 与已通过 192 项回归、已提交的修复文件一致。
+锁释放后原队列已恢复。T01 在切换前自行完成；切换时剩余 4 个批次、7 个队列条目（包含原有 2 个候选不足而取消的条目）原 ID、顺序、script_id、稿件版本及已取消原因均保留，未新增取消。
+T05 render fbd2211840ba4a5f8fb0df5a9d459981 的 AutoVideo job 27738822-309d-4716-a1d8-7ae6047230a8 在独立出片服务继续，attempt_count 仍为 1。研究服务接续同一 job_id 的轮询，process_runs 从原进程转为第 2 次跟踪；这是跟踪恢复，不是第 2 次视频生成。恢复后的心跳及批次条目更新时间已推进，暂停前后相关稿件的 render ID 列表一致，无重复渲染。
+
+两处修复的真实条件核验：生产数据库以 mode=ro 打开，在当前部署代码的独立只读检查进程中验证。AI 快讯与 T09 的今早合集均通过历史资格检查；绝对报告路径分别读回 470900 / 292320 字符原始材料，解析为 334 / 172 个原始包（这是完整快照的包数，不是最终传给规划模型的筛选数量）。两份材料 SHA256 与原快照一致。没有给生产队列写入测试条目。
+当前结论：补修代码已上线，原任务已恢复；两处生产条件的只读检查与隔离集成回归通过。没有把今早已生成视频改写成补修版，也没有补生成漏掉的两份合集。本轮没有生成补修后的新“合集＋单条”成片，不能将部署和恢复验收说成新一轮成片验收。
+新增本地证据：handover-before.json、video-before-handover.db（一致备份，不提交）、handover-after.json、更新后的 maintenance-receipt.json、两份执行与只读核验脚本。

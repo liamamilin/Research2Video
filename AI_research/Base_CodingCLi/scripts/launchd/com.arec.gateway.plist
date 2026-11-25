@@ -14,6 +14,14 @@
   <key>WorkingDirectory</key>
   <string>@REPO@</string>
 
+  <!-- launchd default PATH is /usr/bin:/bin only; OpenCode CLI lives under
+       ~/.opencode/bin and must be visible to the Research app it spawns. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>@HOME@/.opencode/bin:@HOME@/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
   <!-- KeepAlive is the whole point: this process must outlive the app, the
        30-minute idle shutdown, and a crash, so a bookmarked URL always
        answers. RunAtLoad brings it back after a reboot or login. -->

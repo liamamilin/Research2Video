@@ -486,6 +486,9 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
 @router.post("/stream")
 async def stream_chat(payload: ChatRequest, request: Request, user=Depends(require_viewer)):
     """Forward model deltas and completed operations as POST SSE events."""
+    from web import deps
+    if user.get("id") is not None:
+        deps.delegate_stream(request.scope, int(user["id"]))
     loop = asyncio.get_running_loop()
     queue: asyncio.Queue = asyncio.Queue()
     cancelled = threading.Event()

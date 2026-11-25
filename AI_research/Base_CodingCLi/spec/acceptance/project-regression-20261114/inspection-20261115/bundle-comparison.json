@@ -1,0 +1,10 @@
+{
+  "app.js": {
+    "matches_committed_bundle": true,
+    "sha256": "f008ce4f651686f0a8712767ddce44ddd86cf918b728c6b0d160a90538f819e5"
+  },
+  "app.css": {
+    "matches_committed_bundle": true,
+    "sha256": "ca31953e53c62e59f6177610563cbc468ac63b58e16d2aa762fda91bdc44a079"
+  }
+}

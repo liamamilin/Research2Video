@@ -2,9 +2,9 @@
 # research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
-name: 对比
-description: 陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
-status: experimental
+name: 横向对比
+description: 陪开发者弄明白多个模型、工具或方案各自适合什么场景，沿着真正影响选择的差别展开，听完能作出自己的判断。
+status: enabled
 tags:
   domain:
     key: ai
@@ -14,15 +14,17 @@ tags:
     name: 开发者
   type:
     key: comparison
-    name: 对比
+    name: 横向对比
   format:
     key: long
     name: B 站横屏长
 audience: 开发者
 target_minutes: 4.5
+minutes_range: [4, 8]
 topic:
   kind: comparison
   sources: []
+  whole_report: true
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
   template: comparison_developer
@@ -32,7 +34,9 @@ writing:
     depth: intermediate
     tone: explainer
   style: |
-    陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
+    不要写一碗水端平的优缺点列表，也不要按型号/产品逐个报菜名式念完价目表和参数表。
+    开场一句点破决定选型的唯一核心分水岭；主体按「什么具体任务和工作流直接选各自选项（用具体场景、用量、并发或预算门槛画边界，禁用“适合新手/专业人士”等空标签，每个核心档位/选项都要给清归属，别只讲高端档漏掉日常主力或入门档）→ 各自最隐蔽的坑（只挖材料里已有、第一眼看不到的隐藏加价阈值、缓存失效线、账面单价与实际总价倒挂、静默降级或准入限制，不强求左右对称、严禁编造）」展开。
+    若分水岭本身就是准入边界可直接合并小节；已讲过的条件或数字后面直接引用结论，绝不跨节车轱辘复读；只念直接改变决定的同口径关键数字，避免连续背诵长串单价倍率或代码路径；结尾给出一句话拍板选型口诀及改选触发条件。
 output:
   use: motion
   packaging:

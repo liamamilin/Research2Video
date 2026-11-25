@@ -16,7 +16,7 @@ import { errorMessage } from "@/lib/toast";
 
 const MANUAL = "manual";
 const WRITING_LABEL = {
-  RESEARCHING: "研究中", WRITING: "写稿中", PLAN_READY: "方案待确认", DRAFT: "待审稿", APPROVED: "已定稿", FAILED: "失败",
+  RESEARCHING: "研究中", WRITING: "写稿中", PLAN_READY: "方案待确认", DRAFT: "待审稿", APPROVED: "已定稿", SKIPPED: "已跳过", FAILED: "失败",
 };
 const VIDEO_LABEL = { none: "未出片", working: "出片中", done: "已出片", failed: "失败" };
 const VIDEO_CLASS = { none: "border-border text-text-muted", working: "border-accent text-accent", done: "border-success text-success", failed: "border-danger text-danger" };
@@ -294,8 +294,10 @@ export function TopicsPage() {
       finally { pending = false; }
     };
     void load();
-    const timer = window.setInterval(load, 15000);
-    return () => { active = false; window.clearInterval(timer); };
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, 15000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [source, sourceInfo?.refresh, tick]);
 
   useEffect(() => {
@@ -483,7 +485,7 @@ export function TopicsPage() {
               <p className="text-sm">
                 {t.title}{" "}
                 {fits.map((c) => {
-                  const done = (t.scripts ?? []).some((x) => cellOf(x) === c.cell && x.status !== "FAILED");
+                  const done = (t.scripts ?? []).some((x) => cellOf(x) === c.cell && !["FAILED", "SKIPPED"].includes(x.status));
                   return (
                     <button key={c.cell} className={`badge border mr-1 ${done ? "border-success text-success" : "border-border text-text-muted"} ${c.cell === current?.cell ? "font-semibold" : ""}`} title={done ? "这个格子已写过" : "还没写"} onClick={() => setSelected(c.cell)}>
                       {typeName(c.cell)}{done ? " ✓" : ""}

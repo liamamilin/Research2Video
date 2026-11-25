@@ -16,7 +16,7 @@ Configured via ``system.yaml``::
         serper: "SERPER_API_KEY"
       mode: "advanced"              # turbo | fast | basic | advanced
       max_results: 10
-      max_chars_per_result: 3000
+      max_chars_per_result: 20000
       after_date: ""                # optional YYYY-MM-DD freshness bound
       fallback_provider: "duckduckgo"
 """
@@ -82,8 +82,8 @@ class SearchConfig:
     api_key_env: str = "PARALLEL_API_KEY"
     mode: str = "advanced"
     max_results: int = 10
-    max_chars_per_result: int = 3000
-    max_chars_total: int = 60000
+    max_chars_per_result: int = 20000
+    max_chars_total: int = 200000
     after_date: str = ""
     timeout: int = 60
     fallback_provider: str = "duckduckgo"
@@ -119,8 +119,8 @@ class SearchConfig:
             api_key_env=api_key_env,
             mode=cfg.get("mode", "advanced"),
             max_results=int(cfg.get("max_results", 10)),
-            max_chars_per_result=int(cfg.get("max_chars_per_result", 3000)),
-            max_chars_total=int(cfg.get("max_chars_total", 60000)),
+            max_chars_per_result=int(cfg.get("max_chars_per_result", 20000)),
+            max_chars_total=int(cfg.get("max_chars_total", 200000)),
             after_date=after_date,
             timeout=int(cfg.get("timeout", 60)),
             fallback_provider=cfg.get("fallback_provider", "duckduckgo"),
@@ -146,6 +146,10 @@ class SearchClient:
         self.calls = 0
         #: provider -> why it gave nothing, from the last ``search`` (a provider that failed is otherwise only in the log)
         self.errors: dict[str, str] = {}
+        #: Cached Exa Contents quota/rate failure so later page reads skip the paid reader.
+        self.contents_exhausted: str = ""
+        #: In-memory cooldown fallback when shared search_health state_dir is unset (e.g. CLI runs).
+        self._local_cooling: dict[str, dict] = {}
 
     # ------------------------------------------------------------------
     # Public API
@@ -182,8 +186,10 @@ class SearchClient:
         from core import search_health
 
         # Credits, keys and rate limits do not recover within one run: skip a provider that just failed that way
-        # (shared with the other processes) instead of spending another doomed request on it.
-        cooling = search_health.cooling()
+        # (shared with the other processes, plus in-memory fallback for standalone CLI runs).
+        now = time.time()
+        cooling = {k: v for k, v in self._local_cooling.items() if v.get("until", 0) > now}
+        cooling.update(search_health.cooling(now=now))
         answered = False
         for provider in providers:
             if provider in cooling:
@@ -229,11 +235,16 @@ class SearchClient:
             except CancelledError:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
-                self.errors[provider] = str(exc)[:300]
-                telemetry.record_search(provider, self.errors[provider], started)
-                search_health.record_failures({provider: self.errors[provider]})
+                reason = str(exc)[:300]
+                self.errors[provider] = reason
+                telemetry.record_search(provider, reason, started)
+                search_health.record_failures({provider: reason})
+                if kind := search_health.classify(reason):
+                    wait = (search_health.PERMANENT_COOLDOWN if kind == "permanent"
+                            else search_health.RATE_LIMIT_COOLDOWN)
+                    self._local_cooling[provider] = {"until": time.time() + wait, "kind": kind, "reason": reason}
                 logger.warning(
-                    "Search provider '%s' failed: %s", provider, str(exc)[:300]
+                    "Search provider '%s' failed: %s", provider, reason
                 )
 
         if not answered:
@@ -251,19 +262,43 @@ class SearchClient:
         return header + "\n\n---\n\n".join(blocks)
 
     def read_page(self, url: str) -> SearchResult:
-        """Read one exact public URL through Exa Contents when direct fetching is unavailable."""
+        """Read one exact public URL through Exa Contents when direct fetching is unavailable.
+
+        Credits/rate-limit failures are remembered on this client and in
+        ``search_health`` (same as search). Later reads and later jobs skip Exa
+        instead of paying for another doomed Contents request per URL.
+        """
         if self._cancel.is_set():
             raise CancelledError("Cancelled before reading page")
+        from core import search_health
+        from .source_pages import paid_reader_exhausted
+
+        # Same rule as search(): skip while cooling. After cooldown, one probe is
+        # allowed so a topped-up key can recover; contents_exhausted still stops
+        # further Contents calls inside this client/run.
+        if not self.contents_exhausted:
+            cooling = search_health.cooling().get("exa")
+            if cooling:
+                self.contents_exhausted = str(cooling.get("reason") or "exa unavailable")[:300]
+        if self.contents_exhausted:
+            raise RuntimeError(self.contents_exhausted)
         key = self.config.api_keys.get("exa")
         if not key:
             raise RuntimeError("网页直接读取失败；可配置 EXA_API_KEY 使用 Exa 网页正文读取")
         self._progress({"type": "tool", "tool": "read_page", "url": url})
-        body = self._post_json("https://api.exa.ai/contents", {
-            "urls": [url], "text": True, "maxAgeHours": 0,
-        }, api_key=key)
+        try:
+            body = self._post_json("https://api.exa.ai/contents", {
+                "urls": [url], "text": True, "maxAgeHours": 0,
+            }, api_key=key)
+        except Exception as exc:
+            if paid_reader_exhausted(exc):
+                self.contents_exhausted = str(exc)[:300]
+                search_health.record_failures({"exa": self.contents_exhausted})
+            raise
         from .source_pages import canonical_url
         for item in body.get("results") or []:
             if canonical_url(item.get("url") or "") == canonical_url(url) and item.get("text"):
+                search_health.record_answer("exa")
                 return SearchResult(title=item.get("title") or url, url=url,
                                     publish_date=item.get("publishedDate"),
                                     excerpts=[item["text"][:120000]], provider="exa_contents")

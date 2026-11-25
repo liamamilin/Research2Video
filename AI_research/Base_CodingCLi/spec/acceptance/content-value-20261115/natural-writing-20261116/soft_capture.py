@@ -1,0 +1,89 @@
+"""Capture current configuration-composed author instructions without generation.
+
+Dynamic topic, history, materials, joint allocation and on-demand repairs are
+explicitly absent. These artifacts prove composition, not production execution.
+"""
+from __future__ import annotations
+
+import json
+import argparse
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+INPUT_ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path('/tmp/natural-writing-20261116-soft/candidate')
+sys.path.insert(0, str(ROOT))
+
+from core.video import content_columns, episodes, manuscript_workflow, persona, production, recipes, writer
+
+HERE = Path(__file__).resolve().parent
+BASE = INPUT_ROOT / "state/acceptance-content-value-20261115/natural-writing-20261116/baseline"
+
+
+def main(label: str = 'baseline') -> None:
+    destination = BASE if label == 'baseline' else BASE.parent / label
+    index = HERE / ('route-captures.json' if label == 'baseline' else label + '-route-captures.json')
+    if (destination / 'routes').exists() or index.exists():
+        raise FileExistsError('Preserve previous captures')
+    inventory = json.loads((HERE / "inventory.json").read_text())
+    every = recipes.expanded(str(ROOT / "config"))
+    narrator = persona.load(str(ROOT / "config"))
+    summary = []
+    for entry in inventory["jobs"]:
+        bundle = json.loads((INPUT_ROOT / entry["input_snapshot"]).read_text())
+        for pid, value in bundle["production"].items():
+            key, error = production.column_key(every, value.get("recipe", ""), value.get("audience", ""),
+                                               value.get("minutes"), value.get("reverify"))
+            recipe = recipes.find(str(ROOT / "config"), key, every=every)
+            if error or recipe is None or recipe.column is None:
+                summary.append({"job": entry["job"], "production": pid, "error": error or "unresolved recipe"})
+                continue
+            context = content_columns.snapshot(str(ROOT / "config"), pid, entry["job"])
+            profile = manuscript_workflow.JOB_PROMPTS.get(entry["job"]) if bundle["manuscript_enabled"] else None
+            if profile and profile.production_id and profile.production_id != pid:
+                profile = None
+            original_context = context
+            if profile and profile.draft and context.get("column"):
+                context = {**context, "notes": profile.draft}
+            column = content_columns.apply_script_context(recipe.column, context)
+            if profile and profile.draft and not context.get("column"):
+                column = replace(column, script_style=column.script_style + "\n" + profile.draft)
+            # Current business columns default to episode. Unbound recipes keep
+            # their own individual mode; actual topic setup is checked later.
+            topic = {"title": "<实际选题>", "content_mode": context.get("content_mode", "individual"),
+                     "fields": {"目标受众": context.get("audience") or column.audience}}
+            if topic["content_mode"] == "episode":
+                topic["episode"] = {"items": []}
+            tutorial = writer.tutorial_context(original_context)
+            greeting = episodes.greeting(topic, original_context) or None
+            system = writer.author_system_prompt(topic, narrator, greeting=greeting, tutorial=tutorial,
+                                                  episode_prompt=profile.episode_prompt if profile else None,
+                                                  episode_lead=profile.episode_lead if profile else None)
+            prompt = writer._request("<实际研究底稿：本捕获不提供>", topic,
+                                     column.script_style + episodes.brief(topic, tutorial=tutorial),
+                                     column.target_minutes, 0, topic_fields=column.writer_topic_fields(),
+                                     original_material="<实际自动材料：本捕获不提供>")
+            output = {"job": entry["job"], "production": pid, "recipe": key,
+                      "capture_kind": "configuration_composition_only",
+                      "missing_runtime_layers": ["actual topic and audience flags", "joint allocation direction",
+                                                 "event/history selection", "original material and report",
+                                                 "introduction/episode opening repair requests", "polish triggers"],
+                      "context": original_context, "profile": profile.version if profile else None,
+                      "system": system, "user_shape": prompt,
+                      "reader": profile.read if profile else None,
+                      "revision": profile.revise if profile else None,
+                      "research_recipe_prompt": column.research_prompt,
+                      "recipe_sources": {"path": recipe.path, "uses": recipe.uses}}
+            target = destination / "routes" / f"{pid}.json"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n")
+            summary.append({"job": entry["job"], "production": pid, "recipe": key,
+                            "profile": output["profile"], "mode": topic["content_mode"],
+                            "path": str(target.relative_to(INPUT_ROOT))})
+    index.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
+    print(json.dumps({"bindings": len(summary), "errors": [r for r in summary if "error" in r]}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main('soft-candidate')

@@ -1,3 +1,5 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
+import {useChainScope} from '@/lib/use-chain-scope';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, ChevronRight, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
@@ -77,13 +79,14 @@ function ByOwner({ data, rows, matrix, onSelect, limit }: { data: Outputs; rows:
 }
 
 export function OutputsPage() {
+  const chainScope=useChainScope();
   const filters = useFilters(["matrix", "render", "range", "archived"]);
   const [params, setParams] = useSearchParams();
   const { q, matrix, render, range } = filters.values;
   const archived = ["1", "true"].includes(filters.values.archived);
   const view = params.get("view") === "time" ? "time" : "owner";
   const newest = params.get("order") !== "asc";
-  const [result, setResult] = useState<{ archived: boolean; body: Outputs } | null>(null);
+  const [result, setResult] = useState<{ archived: boolean; body: Outputs } | null>(() => readPageSnapshot(`outputs:${archived}`));
   const data = result?.archived === archived ? result.body : null;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -92,13 +95,14 @@ export function OutputsPage() {
   const flight = useRef<AbortController | null>(null);
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller; setLoading(true); setError("");
     try {
       const next = await listOutputs(archived, controller.signal);
       if (!Array.isArray(next?.scripts) || !Array.isArray(next?.jobs) || !Array.isArray(next?.matrices)) throw new Error("产出数据格式异常，请重试");
-      if (!controller.signal.aborted) setResult({ archived, body: next });
-    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e)); }
-    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { const result = { archived, body: next }; savePageSnapshot(`outputs:${archived}`, result, revision); setResult(result); }
+    } catch (e) { if (!controller.signal.aborted && revision === snapshotRevision()) setError(errorMessage(e)); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, [archived]);
   useEffect(() => {
     void load();
@@ -112,12 +116,12 @@ export function OutputsPage() {
   const scoped = useMemo(() => {
     if (!data) return [];
     const since = range ? Date.now() - Number(range) * 86400000 : 0;
-    return data.scripts.filter((s) => (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
+    return data.scripts.filter((s) => chainScope.output(s.production) && (!since || timeOf(s.created_at) >= since) && (!render || renderState(s) === render)
       && matchesText(q, s.title, s.production_name, s.column_key, s.report_path, s.report_date, s.job, s.matrix, jobName(data, s.job), matrixName(data, ownerKey(s))))
       .sort((a, b) => newest ? b.created_at.localeCompare(a.created_at) : a.created_at.localeCompare(b.created_at));
-  }, [data, range, render, newest, q]);
+  }, [data, range, render, newest, q, chainScope]);
   const rows = useMemo(() => scoped.filter((s) => !matrix || ownerKey(s) === matrix), [scoped, matrix]);
-  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })) : [];
+  const owners = data ? [...new Set(data.scripts.map(ownerKey))].map((key) => ({ key, name: matrixName(data, key), count: scoped.filter((s) => ownerKey(s) === key).length })).filter(x=>!chainScope.key||x.count>0) : [];
   const dates = new Map<string, OutputScript[]>();
   for (const row of rows.slice(0, limit)) { const day = row.created_at.slice(0, 10); const group = dates.get(day) || []; group.push(row); dates.set(day, group); }
   const units = view === "owner" && !matrix ? new Set(rows.map(ownerKey)).size : rows.length;

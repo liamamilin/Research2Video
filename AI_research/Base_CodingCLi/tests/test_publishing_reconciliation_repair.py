@@ -149,6 +149,30 @@ def test_maintenance_keeps_receipts_and_waiting_comments_but_blocks_real_workers
     assert db.get(queued['id'])['status'] == 'QUEUED'
 
 
+def test_maintenance_preserves_held_bilibili_uploads_and_blocks_released_work(tmp_path):
+    import fcntl
+    from core.platform_store import PlatformStore
+
+    db = PlatformStore(str(tmp_path))
+    upload = db.enqueue('123', {'id': 'render', 'script_id': 'script', 'version': 1}, {'automatic': True})
+    lock = tmp_path / 'platforms/bilibili/worker.lock'
+    lock.parent.mkdir(parents=True)
+    lock.touch()
+    assert busy_work(tmp_path)[0]['count'] == 1
+    assert db.hold_upload(upload['id'], '等待前置集发布')
+    before = db.pending_uploads('123')
+    assert not busy_work(tmp_path)
+    with restart_gate(tmp_path, timeout=1):
+        with lock.open('a') as probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    assert db.pending_uploads('123') == before
+    assert db.schedule_upload(upload['id'], None)
+    assert busy_work(tmp_path)[0]['count'] == 1
+    assert db.update_upload(upload['id'], status='UPLOADING', expected='QUEUED')
+    assert busy_work(tmp_path)[0]['count'] == 1
+
+
 def test_old_web_receipt_replacement_can_be_repaired_without_overwriting_public_result(tmp_path):
     from scripts.repair_publishing_lookups import retain_douyin_receipts
     folder = tmp_path / 'platforms/douyin'; folder.mkdir(parents=True)
@@ -187,3 +211,21 @@ def test_new_instance_ends_obsolete_maintenance_even_while_upload_is_queued(tmp_
         with restart_gate(tmp_path, expected_runtime={'pid': 11, 'instance_id': 'old'}):
             pytest.fail('must not restart an already replaced instance')
     assert caught.value.runtime['pid'] == 22 and db.get(queued['id'])['status'] == 'QUEUED'
+
+
+def test_detached_maintenance_waits_for_research_owned_by_the_web_process(tmp_path):
+    runtime = {'pid': 1234, 'instance_id': 'web'}
+    (tmp_path / 'app_runtime.json').write_text(json.dumps(runtime))
+    locks = tmp_path / 'locks'
+    locks.mkdir()
+    manual = locks / 'manual_research.lock'
+    manual.write_text(json.dumps({'pid': runtime['pid']}))
+    (locks / 'independent.lock').write_text(json.dumps({'pid': 2345}))
+
+    assert not busy_work(tmp_path)  # The web research has no row in a worker database.
+    with pytest.raises(RuntimeError, match='未发送重启信号'):
+        with restart_gate(tmp_path, timeout=0.01, expected_runtime=runtime):
+            pytest.fail('the detached helper must wait for the web research lock')
+    manual.unlink()
+    with restart_gate(tmp_path, timeout=1, expected_runtime=runtime):
+        assert (locks / 'independent.lock').is_file()

@@ -1,3 +1,4 @@
+# 特例配置：多 Job 共用自动供给池（见 spec/config-simplification.md）。普通监测 Job 可不关心本文件。
 name: AI 矩阵信息供给
 matrix: ai_media
 enabled: true
@@ -24,11 +25,9 @@ coverage:
     queries: [OpenAI ChatGPT official pricing plans usage limits updates]
     sources:
       - {spec: 'page:https://chatgpt.com/pricing', role: state}
-      - {spec: 'page:https://openai.com/api/pricing/', role: state}
-      - {spec: 'page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes', role: release}
+      # 2026-11-20 归档：openai.com/api/pricing、help release-notes、developers RSS 长期 403/不可用
       # 帮助中心与价格页常被拒绝直接读取；新闻与开发者订阅源能直接读到。
       - {spec: 'rss:https://openai.com/news/rss.xml', role: release}
-      - {spec: 'rss:https://developers.openai.com/rss.xml', role: release}
       - {spec: 'page:https://learn.chatgpt.com/docs/whats-new.md', role: release}
       - {spec: 'page:https://developers.openai.com/api/docs/changelog.md', role: release}
   - key: anthropic_product
@@ -121,7 +120,7 @@ coverage:
     jobs: [monitoring/ai_flash_discovery]
     queries: [AI image video generation model official release Midjourney Kling Runway Veo FLUX]
     sources:
-      - {spec: 'rss:https://updates.midjourney.com/rss/', role: release}
+      # 2026-11-20 归档：updates.midjourney.com/rss 长期 XML 解析失败
       - {spec: 'catalog:https://bfl.ai/blog', role: release}
   - key: platform_vendors
     subject: 云与硬件平台（微软 / 英伟达 / AWS / 苹果）
@@ -160,21 +159,33 @@ coverage:
 jobs:
   monitoring/ai_flash_discovery:
     mode: changes
-    direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化
-    query: AI coding tools official release notes changelog pricing usage limits
+    optional_article_details: true
+    direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化；补充中文普通用户的购买疑问、额度困惑、工作生活中的具体使用案例，按需求线索与变化/案例/比较背景搭配。
+    query:
+    - AI coding tools official release notes changelog pricing usage limits
+    - AI 订阅 值不值 使用限制 普通用户 实际案例
+    - AI 工作 生活 使用体验 选择 困惑
   ai_media/daily_opensource_radar:
     mode: context
-    direction: 开源 AI 工具与项目，实际输入、安装用法、处理过程与输出
-    query: open source AI developer tools releases project blog examples
+    direction: 开源 AI 工具与项目，实际输入、安装用法、处理过程与输出；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - open source AI developer tools releases project blog examples
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 开源雷达
   ai_media/weekly_model_arena:
     mode: context
-    direction: 模型能力、价格、延迟、上下文与真实任务比较
-    query: AI model evaluation benchmark pricing latency methodology updates
+    direction: 模型能力、价格、延迟、上下文与真实任务比较；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI model evaluation benchmark pricing latency methodology updates
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 模型竞技场
   ai_media/weekly_business_watch:
     mode: context
-    direction: AI 产品商业模式、企业采用、参与者与用户的交付关系
-    query: AI enterprise product adoption engineering case study company blog
+    direction: AI 产品商业模式、企业采用、参与者与用户的交付关系；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI enterprise product adoption engineering case study company blog
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 商业观察
   ai_media/weekly_deep_research:
     mode: context
-    direction: 智能体、模型机制、工程实践，有具体任务、实验与过程解释
-    query: AI agents model research engineering blog experiments mechanisms
+    direction: 智能体、模型机制、工程实践，有具体任务、实验与过程解释；围绕观众共同疑问搭配需求线索、具体案例与解释背景，保留专业适用范围。
+    query:
+    - AI agents model research engineering blog experiments mechanisms
+    - AI 工具 工作 学习 使用疑问 实际案例 操作 AI 深度研究

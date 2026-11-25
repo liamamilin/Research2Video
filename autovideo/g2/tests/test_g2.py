@@ -4,9 +4,9 @@ import pytest
 
 from g2.run_g2 import (
     G2Fault,
-    MAX_PROJECTED_API_COST_USD,
     MAX_TOTAL_CALLS,
     MAX_TOKENS_PER_CALL,
+    model_cost_budget,
     build_narration_messages,
     build_storyboard_messages,
     duration_is_acceptable,
@@ -81,10 +81,23 @@ def test_long_form_duration_and_narration_targets_scale_with_requested_length():
         duration_range_for(91)
 
 
-def test_deepseek_completion_budget_allows_long_reasoning_with_cost_bound_updated():
+def test_deepseek_completion_limit_allows_long_reasoning():
     assert MAX_TOKENS_PER_CALL == 100_000
     assert MAX_TOTAL_CALLS == 16
-    assert MAX_PROJECTED_API_COST_USD == pytest.approx(1.968)
+
+
+def test_model_budget_defaults_to_twenty_usd_and_environment_overrides_file(tmp_path):
+    env = tmp_path / ".env"
+    assert model_cost_budget(env, {}) == 20.0
+    env.write_text("AUTOVIDEO_G2_MAX_COST_USD=35\n")
+    assert model_cost_budget(env, {}) == 35.0
+    assert model_cost_budget(env, {"AUTOVIDEO_G2_MAX_COST_USD": "50"}) == 50.0
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "nan", "inf", "", "invalid"])
+def test_model_budget_requires_a_positive_finite_amount(tmp_path, value):
+    with pytest.raises(ValueError, match="AUTOVIDEO_G2_MAX_COST_USD"):
+        model_cost_budget(tmp_path / ".env", {"AUTOVIDEO_G2_MAX_COST_USD": value})
 
 
 def test_long_form_prompt_requests_duration_scaled_narration():

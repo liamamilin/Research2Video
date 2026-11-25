@@ -19,7 +19,8 @@ from . import source_coverage
 from .yaml_cache import load_yaml
 
 logger = logging.getLogger(__name__)
-PAGE_CHARS = 24000  # one article read in full, as the page reader splits it
+PAGE_CHARS = 80000  # one article read in full, as the page reader splits it
+DEFAULT_DETAIL_TIMEOUT_SECONDS = 180.0  # wall-clock cap for teaser detail-reading loop; 0 disables
 
 
 def profiles(config_dir: str) -> dict[str, dict]:
@@ -33,6 +34,8 @@ def profiles(config_dir: str) -> dict[str, dict]:
 
 
 def for_job(config_dir: str, job: dict) -> dict | None:
+    if job.get("source_supply_enabled") is False:
+        return None
     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
 
 
@@ -76,28 +79,17 @@ def fingerprint(item) -> str:
 
 
 def read_page(url: str, *, limit: int = 80, timeout: int = 15, search_client=None, browser: bool = True,
-              catalog: bool = False):
-    """Reuse public-page readers and anonymous browser; never use a publishing login."""
+              catalog: bool = False, allow_paid: bool = True):
+    """HTTP → anonymous browser → optional paid reader; never a publishing login."""
     from .sources import _get_page
-    from .source_pages import fetch_page
-    try:
-        result = fetch_page(url, limit, timeout, get_page=_get_page, search_client=search_client,
-                            section_chars=24000, catalog=catalog)
-        if not result:
-            raise ValueError("正文读取未取得段落")
-        return result
-    except CancelledError:
-        raise
-    except Exception:
-        if not browser:
-            raise
-        from .video.screenshots import page_for_capture
-        from .source_pages import parse_page, parse_catalog
-        with page_for_capture(url, timeout_seconds=timeout) as page:
-            page.wait_for_function("(document.querySelector('article, main') || document.body).innerText.length > 120",
-                                   timeout=timeout * 1000)
-            return (parse_catalog(page.content(), page.url, limit) if catalog else
-                    parse_page(page.content(), page.url, limit, section_chars=24000))
+    from .source_pages import PAGE_SECTION_CHARS, fetch_page
+
+    result = fetch_page(url, limit, timeout, get_page=_get_page, search_client=search_client,
+                        section_chars=PAGE_SECTION_CHARS, catalog=catalog, browser=browser,
+                        allow_paid=allow_paid and search_client is not None)
+    if not result:
+        raise ValueError("正文读取未取得段落")
+    return result
 
 
 def choose_pool(pool: list[dict], job: str, count: int, now: float) -> list[dict]:
@@ -152,12 +144,14 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     metadata = {r['spec']: r for r in automatic}
     metadata.update({r['spec']: r for r in coverage})
     reference_specs.update(r['spec'] for r in coverage if r['role'] in {'state', 'snapshot'})
-    specs = list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic]))
+    specs = resolve(list(dict.fromkeys([r['spec'] for r in coverage] + declared + [r["spec"] for r in automatic])), engine.config_dir)
     # Snapshot volume is useful context but cannot displace product changes and articles.
     specs.sort(key=lambda spec: metadata.get(spec, {}).get('role') == 'snapshot')
     scan = int(profile.get("scan_limit", 80))
     per_source = int(job.get("sources_limit", 10))
-    mode = profile["jobs"][canonical].get("mode", "context")
+    job_profile = profile["jobs"][canonical]
+    mode = job_profile.get("mode", "context")
+    optional_details = job_profile.get("optional_article_details", False)
     client = engine._source_options(["page:https://example.org"])["search_client"]
     pending = {"profile": profile["key"], "job": canonical, "at": now, "delivered": {}, "sources": {},
                "initial_baseline": {}, "candidates": []}
@@ -306,7 +300,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         if when and window_start and (when.replace(tzinfo=window_start.tzinfo) if when.tzinfo is None else when) < window_start:
             state += "；发布于本期范围开始之前、此前没有交给研究，本期补交，按原发布日期报道"
         if prior and revised(prior, record):
-            text += "\n上次已交付内容：" + prior["text"][:3000]
+            text += "\n上次已交付内容：" + prior["text"][:20000]
         material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
         rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])
         size = len(rendered.to_markdown())
@@ -327,36 +321,49 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         if item.provider in {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"} and detail_left:
             target = canonical_url(item.url)
             if target not in detailed:
-                candidates.append((target, row, material_id, news))
+                candidates.append((target, row, material_id, news, len(items) - 1))
                 detailed.add(target)
         stats[spec] = row["delivered"]
     attempts = 0
+    exa_detail_error = ""
     max_attempts = float(profile.get('detail_attempts') or "inf")
     article_chars = int(profile.get('detail_chars', PAGE_CHARS))
+    raw_timeout = profile.get('detail_timeout_seconds')
+    detail_timeout = DEFAULT_DETAIL_TIMEOUT_SECONDS if raw_timeout is None else float(raw_timeout)
+    detail_started = time.monotonic()
+    detail_timed_out = False
+    skipped_by_timeout = 0
     # News articles are all read in full; page-context articles share what is left of the budget.
-    for url, row, material_id, news in sorted(candidates, key=lambda c: not c[3]):
+    for url, row, material_id, news, seed_index in sorted(candidates, key=lambda c: not c[3]):
         if detail_left <= 0 or attempts >= max_attempts or (not news and used_chars >= budget):
             continue
         if engine._cancel.is_set():
             raise CancelledError("正文补读已取消")
+        if detail_timeout > 0 and (time.monotonic() - detail_started) >= detail_timeout:
+            detail_timed_out = True
+            skipped_by_timeout += 1
+            if optional_details:
+                seed = items[seed_index]
+                items[seed_index] = replace(seed, excerpts=[
+                    *seed.excerpts, "正文补读达到时间预算，以上是该来源已取得的内容。"
+                ])
+            continue
         attempts += 1
         detail = {"url": url, "status": "unavailable", "sections": 0, "news": news}
         receipt["details"].append(detail)
         try:
-            try:
-                parts = read_page(url, limit=scan, search_client=None)
-            except CancelledError:
-                raise
-            except Exception:
-                if client is None:
-                    raise
-                detail["reader"] = "exa"  # the paid reader, only after direct and browser reads fail
-                try:
-                    parts = read_page(url, limit=scan, search_client=client, browser=False)
-                except RuntimeError as exc:
-                    if re.search(r"HTTP (401|402|429)\b", str(exc)):
-                        raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc  # out of quota: stop, don't thin out
-                    raise
+            from .source_pages import paid_reader_exhausted
+            # fetch_page may re-raise local 403 after Exa 402; trust contents_exhausted too.
+            exhausted = str(getattr(client, "contents_exhausted", "") or "")
+            exa_detail_error = exa_detail_error or exhausted
+            if exa_detail_error:
+                detail["fallback_error"] = exa_detail_error
+            # One call: HTTP → browser → optional paid reader (skipped after quota failure).
+            allow_paid = client is not None and not exa_detail_error
+            parts = read_page(url, limit=scan, search_client=client if allow_paid else None,
+                              browser=True, allow_paid=allow_paid)
+            if allow_paid and client is not None:
+                detail["reader"] = "unified"  # HTTP → browser → paid inside read_page
             from .ai_dossier_sources import detail_sections
             room = article_chars if news else min(article_chars, budget - used_chars)
             whole = parts
@@ -383,6 +390,19 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
+            from .source_pages import paid_reader_exhausted
+            exhausted = str(getattr(client, "contents_exhausted", "") or "")
+            if paid_reader_exhausted(exc) or exhausted:
+                if not optional_details and paid_reader_exhausted(exc):
+                    raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc
+                exa_detail_error = (str(exc) if paid_reader_exhausted(exc) else exhausted)[:300]
+                detail["fallback_error"] = exa_detail_error
+            if optional_details:
+                seed = items[seed_index]
+                items[seed_index] = replace(seed, excerpts=[
+                    *seed.excerpts, "原网页未能补读，以上是该来源已取得的内容。"
+                ])
+    detail_elapsed = round(time.monotonic() - detail_started, 2)
     # A delivered change is not automatically an adopted story. Re-offer a bounded
     # number on a later day; baseline comparison and editorial adoption stay separate.
     from .search import SearchResult
@@ -401,6 +421,8 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     source_coverage.CoverageStore(root, profile['key']).record(pending['sources'], at=now)
     receipt['coverage'] = source_coverage.CoverageStore(root, profile['key']).status(profile, now=now)
     receipt['detail_budget'] = {'success_limit': profile.get('detail_pages'), 'attempt_limit': profile.get('detail_attempts'),
+                                'timeout_seconds': detail_timeout, 'elapsed_seconds': detail_elapsed,
+                                'timed_out': detail_timed_out, 'skipped_by_timeout': skipped_by_timeout,
                                 'article_chars': article_chars, 'news_chars': news_chars,
                                 'attempts': attempts, 'successful': sum(d['status'] == 'read' for d in receipt['details'])}
     storage.remember_links(list(dict.fromkeys(canonical_url(u) for u in discovered_links)))

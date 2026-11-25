@@ -1,0 +1,110 @@
+[
+  {
+    "production": "flash_daily",
+    "state": "DONE",
+    "note": "成片完成，等你看片和发布",
+    "script_id": "a188b80788864fd7a95b13c334720a34",
+    "title": "同一任务0.23元，AI开始替你算账了",
+    "status": "COMPLETED",
+    "completed_at": "2026-11-16T20:18:38+0800",
+    "topic_title": "AI Flash Discovery 研究底稿（2026-11-16）",
+    "joint_plan": {
+      "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+      "entry": "episode"
+    },
+    "episode_items": [
+      {
+        "id": "2026-11-16/F1@r69947213561243af",
+        "title": "腾讯 Hy4 flash 实测：同一个 3D 网页任务约 0.23 元，DeepSeek 约 1.21 元"
+      },
+      {
+        "id": "2026-11-16/F2@r69947213561243af",
+        "title": "同一天两种 AI 钱包：ChatGPT 能替你买单，Gemini 只能读账，边界差在哪"
+      },
+      {
+        "id": "2026-11-16/F3@r69947213561243af",
+        "title": "豆包 App 上线“找店”：地图上直接看团购、下单、导航，对话里把本地生活走完"
+      },
+      {
+        "id": "2026-11-16/F4@r69947213561243af",
+        "title": "Cursor 安全事件：攻击者借 Fireworks 密钥复制编程 Agent 记录，不到 0.05% 用户受影响"
+      },
+      {
+        "id": "2026-11-16/F5@r69947213561243af",
+        "title": "Gemini 独立 App 进 CarPlay：开车时语音查 Gmail 和日历，需要先满足哪些条件"
+      },
+      {
+        "id": "2026-11-16/F6@r69947213561243af",
+        "title": "一个 prompt 做出 Datasette 地图插件：AI 编程在专业工具里到底能走多远"
+      },
+      {
+        "id": "flash-raw:31ee152d6667695f23759229",
+        "title": "[豆包工作上线“工作台”功能，首批覆盖金融、医疗、教育等21个场景_新浪财经_新浪网](https://finance.sina.com.cn/roll/2026-11-16/doc-iniyxcic1237305.shtml) — published 2026-11-16"
+      },
+      {
+        "id": "flash-raw:c283b36a494a2c96590c5b84",
+        "title": "[Apple’s new study looks to improve the effectiveness of AI health tools](https://www.theverge.com/tech/1033355/apples-new-study-looks-to-improve-the-effectiveness-of-ai-health-tools) — published 2026-11-15T20:47:16-05:00"
+      }
+    ]
+  },
+  {
+    "production": "flash_each",
+    "state": "DONE",
+    "note": "成片完成，等你看片和发布",
+    "script_id": "ac650ddfddaf4a9799764784254c77a9",
+    "title": "同一个 3D 网页：Hy4 flash 0.23 元，DeepSeek 1.21 元，差的不只是单价",
+    "status": "COMPLETED",
+    "completed_at": "2026-11-16T20:47:15+0800",
+    "topic_title": "同一个 3D 网页任务，Hy4 flash 0.23 元、DeepSeek 1.21 元：费用差在哪、免费额度怎么用、哪些任务该选谁？",
+    "joint_plan": {
+      "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+      "entry": "2026-11-16/F1@r69947213561243af"
+    },
+    "episode_items": null
+  },
+  {
+    "production": "flash_each",
+    "state": "DONE",
+    "note": "成片完成，等你看片和发布",
+    "script_id": "8dc02c00558e448e95ad82d9f6510d1e",
+    "title": "ChatGPT Wallet 怎么用上：借记卡不行，批准前先看这五项",
+    "status": "COMPLETED",
+    "completed_at": "2026-11-16T21:08:25+0800",
+    "topic_title": "ChatGPT Wallet 代买：谁能用、付款前确认什么、出错找谁？",
+    "joint_plan": {
+      "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+      "entry": "2026-11-16/F2@r69947213561243af"
+    },
+    "episode_items": null
+  },
+  {
+    "production": "flash_each",
+    "state": "DONE",
+    "note": "成片完成，等你看片和发布",
+    "script_id": "6c7148518ab74c38ae7212ac08538c32",
+    "title": "Cursor 事件后，先查 10 月 29 日那 11 个小时",
+    "status": "COMPLETED",
+    "completed_at": "2026-11-16T21:34:40+0800",
+    "topic_title": "Cursor 事件后，开发者该查什么：扩展版本、Privacy Mode 和凭证轮换",
+    "joint_plan": {
+      "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+      "entry": "2026-11-16/F4@r69947213561243af"
+    },
+    "episode_items": null
+  },
+  {
+    "production": "flash_each",
+    "state": "DONE",
+    "note": "成片完成，等你看片和发布",
+    "script_id": "21e60a394915460289892bd4a996ee30",
+    "title": "CarPlay 上的 Gemini 图标没出现？先查这三步",
+    "status": "COMPLETED",
+    "completed_at": "2026-11-16T22:00:01+0800",
+    "topic_title": "在 CarPlay 上用 Gemini Live：更新、权限、首次对话和地区限制",
+    "joint_plan": {
+      "id": "4ba5d2951ed11d67b8c6c01398b35d24b92ea5e57895b1c86a584c89ee0b3757",
+      "entry": "2026-11-16/F5@r69947213561243af"
+    },
+    "episode_items": null
+  }
+]

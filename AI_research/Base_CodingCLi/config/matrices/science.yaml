@@ -5,6 +5,7 @@ keywords: []
 jobs:
 - science/science_daily
 - science/science_weekly
+- science/science_illustrated
 render:
   video_speed: 1.25
 content:

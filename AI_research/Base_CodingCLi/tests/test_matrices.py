@@ -28,7 +28,7 @@ def _engine(config_dir: str) -> ResearchEngine:
 
 
 AI_MEDIA = {"monitoring/ai_flash_discovery", "ai_media/daily_opensource_radar", "ai_media/weekly_model_arena",
-            "ai_media/weekly_business_watch", "ai_media/weekly_deep_research"}
+            "ai_media/weekly_business_watch", "ai_media/weekly_deep_research", "ai_media/ai_tool_tutorials"}
 
 
 def test_every_existing_job_renders_the_prompt_it_rendered_before_matrices():
@@ -61,7 +61,8 @@ def test_the_ai_matrices_hold_the_old_jobs_and_the_media_jobs_and_only_the_flash
     loaded = matrices.load_all(os.path.join(ROOT, "config"))
     ai, media = loaded["ai"], loaded["ai_media"]
     assert not ai.errors and not media.errors and ai.keywords == () and ai.domain == media.domain == "AI 与软件开发"
-    assert set(media.jobs) == AI_MEDIA and not AI_MEDIA & set(ai.jobs) and "research/独立游戏" not in ai.jobs
+    assert ai.archived and ai.jobs == []  # legacy PAI/research Jobs archived under jobs/archive/
+    assert set(media.jobs) == AI_MEDIA and "research/独立游戏" not in ai.jobs
     assert [m.job for m in media.members if m.copy_as] == ["monitoring/ai_flash_discovery"]
     assert not [m for m in ai.members if m.copy_as]
     assert os.path.isfile(os.path.join(ROOT, "jobs/_templates/_flash_discovery.yaml"))
@@ -73,13 +74,20 @@ def write(config, key: str, text: str) -> None:
     (folder / f"{key}.yaml").write_text(text, encoding="utf-8")
 
 
-def test_a_member_runs_with_the_matrix_keywords_first_and_its_domain(tmp_path):
+def test_job_authored_domain_and_keywords_win_over_matrix(tmp_path):
     write(tmp_path, "medical", "name: 医疗矩阵\ndomain: 医疗健康\nkeywords: [新药审批, 医保政策]\njobs: [medical/flash]\n")
-    job = {"_file": "medical/flash", "name": "医疗快讯", "keywords": ["医保政策", "医学家"],
+    job = {"_file": "medical/flash", "name": "医疗快讯", "domain": "Job领域",
+           "keywords": ["医保政策", "医学家"],
            "prompt": "领域：{domain}。关键词：{keywords}。{name}"}
     run = matrices.for_run(job, str(tmp_path))
-    assert run["keywords"] == ["新药审批", "医保政策", "医学家"] and job["keywords"] == ["医保政策", "医学家"]
-    assert _engine(str(tmp_path))._build_prompt(run) == "领域：医疗健康。关键词：新药审批, 医保政策, 医学家。医疗快讯"
+    assert run["keywords"] == ["医保政策", "医学家"] and run["_matrix"] == "medical"
+    assert run["_domain"] == "Job领域"
+    assert _engine(str(tmp_path))._build_prompt(run) == "领域：Job领域。关键词：医保政策, 医学家。医疗快讯"
+    legacy = {"_file": "medical/flash", "name": "医疗快讯", "keywords": ["医学家"],
+              "prompt": "领域：{domain}。关键词：{keywords}。{name}"}
+    legacy_run = matrices.for_run(legacy, str(tmp_path))
+    assert legacy_run["_domain"] == "医疗健康"  # Job omitted domain: matrix display domain fills in
+    assert legacy_run["keywords"] == ["医学家"]  # matrix keywords are not merged
     outside = {"_file": "research/x", "name": "独立游戏", "prompt": "{domain}"}
     assert matrices.for_run(outside, str(tmp_path)) is outside
     assert _engine(str(tmp_path))._build_prompt(outside) == "独立游戏"  # no matrix: {domain} is the Job's name
@@ -193,7 +201,8 @@ def test_api_copying_a_matrix_makes_manual_jobs_with_their_own_topic_source(clie
     assert made.status_code == 201, made.text
     assert made.json()["keywords"] == ["新药审批", "医保政策"] and made.json()["members"][0]["job"] == "medical/flash_discovery"
     job = load_job(str(matrix_env / "jobs"), "medical/flash_discovery")
-    assert job["enabled"] and job["schedule"] == {"type": "manual"} and job["keywords"] == []
+    assert job["enabled"] and job["schedule"] == {"type": "manual"}
+    assert job["domain"] == "医疗健康" and job["keywords"] == ["新药审批", "医保政策"]
     assert job["output"] == "output/medical/{date}_flash_discovery.md" and job["name"] == "医疗健康 快讯发现"
     assert job["topics"] == {"alias": "medical_flash_discovery", "format": "flash", "prefix": "MF", "refresh": False}
     sources = topic_store.sources(str(matrix_env / "jobs"))

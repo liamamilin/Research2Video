@@ -1,0 +1,70 @@
+{
+  "status": "verified_local_improvements",
+  "production_changes": [
+    "readable numeric context before spoken emphasis",
+    "change badges wait for their comparison"
+  ],
+  "cases": [
+    {
+      "case": "news",
+      "scene": "card_2_p2",
+      "seconds": 5.633333333333334,
+      "story_and_scene_props_identical": true,
+      "audio_correlation": 0.9999999999999998,
+      "decode": "pass",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-news-card_2_p2/before.mp4",
+          "sha256": "55a541b0d1086562bbbfd6f380b20b98ac1af87ec8eb442f6d7ee73e7f70bedf"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-news-card_2_p2/after.mp4",
+          "sha256": "e01d33392cefb7cd31a3bd1dd3d1565b9eee66fb0774c0642f33c915a3c560eb"
+        }
+      }
+    },
+    {
+      "case": "decrease",
+      "scene": "card_2",
+      "seconds": 21.933333333333334,
+      "story_and_scene_props_identical": true,
+      "audio_correlation": 1.0,
+      "decode": "pass",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-decrease-card_2/before.mp4",
+          "sha256": "09a6c1f2d9d8a009f91815fc57e38b6fda6bbf56238d833ded5537b3251a809b"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-decrease-card_2/after.mp4",
+          "sha256": "7f5fd485a3e25d6302ab1d48c3ae09a1c8f7e01b56eb04640066472181bc638c"
+        }
+      }
+    },
+    {
+      "case": "rates",
+      "scene": "card_38",
+      "seconds": 13.833333333333334,
+      "story_and_scene_props_identical": true,
+      "audio_correlation": 0.9999999999999998,
+      "decode": "pass",
+      "clips": {
+        "before": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-rates-card_38/before.mp4",
+          "sha256": "6854d966d3871fe52e425a29ffbcd336b6bb34b118420f5f19ba418558ad6182"
+        },
+        "after": {
+          "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/validation/viewing-effects-20261111/final-rates-card_38/after.mp4",
+          "sha256": "dab528982bbb61fa19fc5ebf8a634752258a6e8e2439a79edad42b138f8097f2"
+        }
+      }
+    }
+  ],
+  "offline_tests": {
+    "passed": 1062,
+    "skipped": 1
+  },
+  "visual_review": "timeline frame comparisons; not a viewer study",
+  "automatic_replanning": "not integrated; configured service returned HTTP 402",
+  "retained_attempts": true
+}

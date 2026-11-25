@@ -1,0 +1,14 @@
+{
+  "authorized": true,
+  "answer": "授权使用现有模型服务生成对照",
+  "scope": [
+    "三期冻结研究底稿",
+    "对应自动采集材料",
+    "选题与文稿生成所需文本"
+  ],
+  "services": [
+    "opencode.ai",
+    "configured Open Design fallback"
+  ],
+  "production_changes": false
+}

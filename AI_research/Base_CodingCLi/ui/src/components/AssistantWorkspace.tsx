@@ -8,8 +8,8 @@ import { AssistantTaskCard } from './AssistantTaskCard';
 
 const STATUS: Record<string, string> = { RESEARCHING: '调研中', WRITING: '写稿中', DRAFT: '草稿', APPROVED: '已定稿', PLAN_READY: '待确认方案',
   FAILED: '失败', COMPLETE: '成片完成', COMPLETED: '成片完成', DONE: '已结束', HELD: '需要处理', WORKING: '进行中', CANCELLED: '已取消', PENDING: '等待中', QUEUED: '排队中', RUNNING: '进行中', SUBMITTING: '提交中', DOWNLOADING: '回传中' };
-export function AssistantWorkspacePanel({ conversationId, context, revision, onPrompt }: {
-  conversationId?: string; context: AssistantContext | null; revision: number; onPrompt: (text: string) => void;
+export function AssistantWorkspacePanel({ conversationId, context, revision, onPrompt, visible = true }: {
+  conversationId?: string; context: AssistantContext | null; revision: number; onPrompt: (text: string) => void; visible?: boolean;
 }) {
   const [active, setActive] = useState(false);
   const load = useCallback(async (signal: AbortSignal) => {
@@ -19,7 +19,7 @@ export function AssistantWorkspacePanel({ conversationId, context, revision, onP
     return value;
   }, [conversationId, context, revision]);
   // Poll only the business projection. It never calls a model or replays an operation.
-  const resource = usePageResource(load, active ? 5000 : 0);
+  const resource = usePageResource(load, active && visible ? 5000 : 0);
   const data = resource.data;
   return <div className="space-y-4" aria-label="助手工作区">
     <div className="flex items-center justify-between"><h2 className="font-medium text-sm">工作区</h2>

@@ -1,0 +1,1807 @@
+{
+  "bvid": "BV1PEnB6TEbX",
+  "observed_at": "2026-11-10T08:58:48.905898+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 0.54,
+      "to": 3.4,
+      "sid": 1,
+      "location": 2,
+      "content": "做AI视频到底开哪家会员更划算",
+      "music": 0.0
+    },
+    {
+      "from": 3.4,
+      "to": 6.55,
+      "sid": 2,
+      "location": 2,
+      "content": "这期就把市面上比较常见的几个平台盘点一下",
+      "music": 0.0
+    },
+    {
+      "from": 6.55,
+      "to": 8.23,
+      "sid": 3,
+      "location": 2,
+      "content": "从夯到拉排一遍",
+      "music": 0.0
+    },
+    {
+      "from": 8.23,
+      "to": 11.57,
+      "sid": 4,
+      "location": 2,
+      "content": "从限时优惠和日常价格两方面分别给他算一遍",
+      "music": 0.0
+    },
+    {
+      "from": 11.57,
+      "to": 14.2,
+      "sid": 5,
+      "location": 2,
+      "content": "注意此次只单纯比较平台价格",
+      "music": 0.0
+    },
+    {
+      "from": 14.2,
+      "to": 16.43,
+      "sid": 6,
+      "location": 2,
+      "content": "未从使用体验出发",
+      "music": 0.0
+    },
+    {
+      "from": 16.83,
+      "to": 18.58,
+      "sid": 7,
+      "location": 2,
+      "content": "先来看极梦和小云雀",
+      "music": 0.0
+    },
+    {
+      "from": 18.58,
+      "to": 20.5,
+      "sid": 8,
+      "location": 2,
+      "content": "这也是普遍用的比较多的平台",
+      "music": 0.0
+    },
+    {
+      "from": 20.5,
+      "to": 22.36,
+      "sid": 9,
+      "location": 2,
+      "content": "统一按720P来算",
+      "music": 0.0
+    },
+    {
+      "from": 22.36,
+      "to": 24.7,
+      "sid": 10,
+      "location": 2,
+      "content": "这次比较的模型是c dance2.5",
+      "music": 0.0
+    },
+    {
+      "from": 24.7,
+      "to": 26.7,
+      "sid": 11,
+      "location": 2,
+      "content": "有视频参考和无视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 26.7,
+      "to": 28.92,
+      "sid": 12,
+      "location": 2,
+      "content": "分开看这两家的超级会员",
+      "music": 0.0
+    },
+    {
+      "from": 28.92,
+      "to": 30.58,
+      "sid": 13,
+      "location": 2,
+      "content": "目前套餐和扣点一样",
+      "music": 0.0
+    },
+    {
+      "from": 30.58,
+      "to": 32.45,
+      "sid": 14,
+      "location": 2,
+      "content": "先算不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 32.45,
+      "to": 34.97,
+      "sid": 15,
+      "location": 2,
+      "content": "连续包月首月2235",
+      "music": 0.0
+    },
+    {
+      "from": 34.97,
+      "to": 36.989,
+      "sid": 16,
+      "location": 2,
+      "content": "每月5万4600积分",
+      "music": 0.0
+    },
+    {
+      "from": 36.989,
+      "to": 40.369,
+      "sid": 17,
+      "location": 2,
+      "content": "按现在每秒20积分能生成45分半",
+      "music": 0.0
+    },
+    {
+      "from": 40.369,
+      "to": 41.77,
+      "sid": 18,
+      "location": 2,
+      "content": "折合八毛二一秒",
+      "music": 0.0
+    },
+    {
+      "from": 41.77,
+      "to": 43.81,
+      "sid": 19,
+      "location": 2,
+      "content": "年付1万9656",
+      "music": 0.0
+    },
+    {
+      "from": 43.81,
+      "to": 45.8,
+      "sid": 20,
+      "location": 2,
+      "content": "摊到每个月1638",
+      "music": 0.0
+    },
+    {
+      "from": 45.8,
+      "to": 49.34,
+      "sid": 21,
+      "location": 2,
+      "content": "前三个月每月加赠4万1460积分",
+      "music": 0.0
+    },
+    {
+      "from": 49.34,
+      "to": 50.54,
+      "sid": 22,
+      "location": 2,
+      "content": "按当前扣点",
+      "music": 0.0
+    },
+    {
+      "from": 50.54,
+      "to": 52.94,
+      "sid": 23,
+      "location": 2,
+      "content": "每批额度能生成80分03秒",
+      "music": 0.0
+    },
+    {
+      "from": 52.94,
+      "to": 54.36,
+      "sid": 24,
+      "location": 2,
+      "content": "折合三毛四一秒",
+      "music": 0.0
+    },
+    {
+      "from": 54.36,
+      "to": 55.66,
+      "sid": 25,
+      "location": 2,
+      "content": "后面没有这份加赠",
+      "music": 0.0
+    },
+    {
+      "from": 55.66,
+      "to": 58.24,
+      "sid": 26,
+      "location": 2,
+      "content": "同样按当前扣点算是45分半",
+      "music": 0.0
+    },
+    {
+      "from": 58.24,
+      "to": 59.15,
+      "sid": 27,
+      "location": 2,
+      "content": "六毛一秒",
+      "music": 0.0
+    },
+    {
+      "from": 59.15,
+      "to": 63.11,
+      "sid": 28,
+      "location": 2,
+      "content": "待视频参考超级年卡叠加前三个月的加赠活动",
+      "music": 0.0
+    },
+    {
+      "from": 63.11,
+      "to": 64.989,
+      "sid": 29,
+      "location": 2,
+      "content": "折合一毛九一秒给到夯",
+      "music": 0.0
+    },
+    {
+      "from": 64.989,
+      "to": 68.229,
+      "sid": 30,
+      "location": 2,
+      "content": "不过参考视频输入的时长也要计费一毛九",
+      "music": 0.0
+    },
+    {
+      "from": 68.229,
+      "to": 68.869,
+      "sid": 31,
+      "location": 2,
+      "content": "不等于一秒",
+      "music": 0.0
+    },
+    {
+      "from": 68.869,
+      "to": 70.129,
+      "sid": 32,
+      "location": 2,
+      "content": "成片只花一毛九",
+      "music": 0.0
+    },
+    {
+      "from": 70.129,
+      "to": 72.65,
+      "sid": 33,
+      "location": 2,
+      "content": "这轮购卡活动到10月26日",
+      "music": 0.0
+    },
+    {
+      "from": 72.65,
+      "to": 76.29,
+      "sid": 34,
+      "location": 2,
+      "content": "守三个月送积分和生成扣点优惠是两回事",
+      "music": 0.0
+    },
+    {
+      "from": 76.29,
+      "to": 79.61,
+      "sid": 35,
+      "location": 2,
+      "content": "不能把现在的扣点直接算成全年锁价",
+      "music": 0.0
+    },
+    {
+      "from": 80.04,
+      "to": 81.27,
+      "sid": 36,
+      "location": 2,
+      "content": "再看running hub",
+      "music": 0.0
+    },
+    {
+      "from": 81.27,
+      "to": 85.31,
+      "sid": 37,
+      "location": 2,
+      "content": "带视频参考超能plus年卡1万6999",
+      "music": 0.0
+    },
+    {
+      "from": 85.31,
+      "to": 87.29,
+      "sid": 38,
+      "location": 2,
+      "content": "每个月5600钱包额度",
+      "music": 0.0
+    },
+    {
+      "from": 87.29,
+      "to": 89.83,
+      "sid": 39,
+      "location": 2,
+      "content": "活动折合一毛八一秒给到夯",
+      "music": 0.0
+    },
+    {
+      "from": 89.83,
+      "to": 91.15,
+      "sid": 40,
+      "location": 2,
+      "content": "先别急着下单",
+      "music": 0.0
+    },
+    {
+      "from": 91.15,
+      "to": 93.85,
+      "sid": 41,
+      "location": 2,
+      "content": "这个带参考5.1折只能用十天",
+      "music": 0.0
+    },
+    {
+      "from": 93.85,
+      "to": 97.08,
+      "sid": 42,
+      "location": 2,
+      "content": "不带视频参考的九折能用14天购卡",
+      "music": 0.0
+    },
+    {
+      "from": 97.08,
+      "to": 99.16,
+      "sid": 43,
+      "location": 2,
+      "content": "活动到10月25日24点",
+      "music": 0.0
+    },
+    {
+      "from": 99.16,
+      "to": 103.18,
+      "sid": 44,
+      "location": 2,
+      "content": "在视频参考超能plus年卡的14天九折期内",
+      "music": 0.0
+    },
+    {
+      "from": 103.18,
+      "to": 105.47,
+      "sid": 45,
+      "location": 2,
+      "content": "每月5600钱包全部用完",
+      "music": 0.0
+    },
+    {
+      "from": 105.47,
+      "to": 107.57,
+      "sid": 46,
+      "location": 2,
+      "content": "相当于54分52秒",
+      "music": 0.0
+    },
+    {
+      "from": 107.57,
+      "to": 108.75,
+      "sid": 47,
+      "location": 2,
+      "content": "按年费摊下来",
+      "music": 0.0
+    },
+    {
+      "from": 108.75,
+      "to": 109.99,
+      "sid": 48,
+      "location": 2,
+      "content": "折合四毛三一秒",
+      "music": 0.0
+    },
+    {
+      "from": 109.99,
+      "to": 112.27,
+      "sid": 49,
+      "location": 2,
+      "content": "另外钱包每31天到期",
+      "music": 0.0
+    },
+    {
+      "from": 112.27,
+      "to": 114.63,
+      "sid": 50,
+      "location": 2,
+      "content": "2HB不能直接当钱包加进去",
+      "music": 0.0
+    },
+    {
+      "from": 114.63,
+      "to": 118.0,
+      "sid": 51,
+      "location": 2,
+      "content": "这套年卡额度也不支持拿去调用API",
+      "music": 0.0
+    },
+    {
+      "from": 118.48,
+      "to": 122.5,
+      "sid": 52,
+      "location": 2,
+      "content": "接下来live TV至尊9万2积分档",
+      "music": 0.0
+    },
+    {
+      "from": 122.5,
+      "to": 124.42,
+      "sid": 53,
+      "location": 2,
+      "content": "年付1万8299",
+      "music": 0.0
+    },
+    {
+      "from": 124.42,
+      "to": 125.4,
+      "sid": 54,
+      "location": 2,
+      "content": "再送一个月",
+      "music": 0.0
+    },
+    {
+      "from": 125.4,
+      "to": 129.75,
+      "sid": 55,
+      "location": 2,
+      "content": "待视频参考活动折合一毛九一秒给到夯",
+      "music": 0.0
+    },
+    {
+      "from": 129.75,
+      "to": 132.57,
+      "sid": 56,
+      "location": 2,
+      "content": "但它的3.4折只能用七天",
+      "music": 0.0
+    },
+    {
+      "from": 132.57,
+      "to": 136.719,
+      "sid": 57,
+      "location": 2,
+      "content": "不带视频参考的8.4折能用14天购卡",
+      "music": 0.0
+    },
+    {
+      "from": 136.719,
+      "to": 139.119,
+      "sid": 58,
+      "location": 2,
+      "content": "活动到10月26日24点",
+      "music": 0.0
+    },
+    {
+      "from": 139.119,
+      "to": 140.979,
+      "sid": 59,
+      "location": 2,
+      "content": "无待视频参考年卡",
+      "music": 0.0
+    },
+    {
+      "from": 140.979,
+      "to": 144.87,
+      "sid": 60,
+      "location": 2,
+      "content": "14天的8.4折期内用完一批9万2积分",
+      "music": 0.0
+    },
+    {
+      "from": 144.87,
+      "to": 147.01,
+      "sid": 61,
+      "location": 2,
+      "content": "相当于39分41秒",
+      "music": 0.0
+    },
+    {
+      "from": 147.01,
+      "to": 148.74,
+      "sid": 62,
+      "location": 2,
+      "content": "折合六毛四一秒",
+      "music": 0.0
+    },
+    {
+      "from": 148.74,
+      "to": 151.3,
+      "sid": 63,
+      "location": 2,
+      "content": "年费统一按12个月摊赠送",
+      "music": 0.0
+    },
+    {
+      "from": 151.3,
+      "to": 152.64,
+      "sid": 64,
+      "location": 2,
+      "content": "那个月先不加进去",
+      "music": 0.0
+    },
+    {
+      "from": 152.64,
+      "to": 154.82,
+      "sid": 65,
+      "location": 2,
+      "content": "这些积分每31天重置",
+      "music": 0.0
+    },
+    {
+      "from": 154.82,
+      "to": 159.04,
+      "sid": 66,
+      "location": 2,
+      "content": "没用完的部分不会一直给你留着再看flag",
+      "music": 0.0
+    },
+    {
+      "from": 159.04,
+      "to": 160.6,
+      "sid": 67,
+      "location": 2,
+      "content": "pro月付1400",
+      "music": 0.0
+    },
+    {
+      "from": 160.6,
+      "to": 161.8,
+      "sid": 68,
+      "location": 2,
+      "content": "每月3万积分",
+      "music": 0.0
+    },
+    {
+      "from": 161.8,
+      "to": 163.02,
+      "sid": 69,
+      "location": 2,
+      "content": "带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 163.02,
+      "to": 166.23,
+      "sid": 70,
+      "location": 2,
+      "content": "每秒16积分能生成31分15秒",
+      "music": 0.0
+    },
+    {
+      "from": 166.23,
+      "to": 167.99,
+      "sid": 71,
+      "location": 2,
+      "content": "折合七毛五一秒",
+      "music": 0.0
+    },
+    {
+      "from": 167.99,
+      "to": 171.15,
+      "sid": 72,
+      "location": 2,
+      "content": "不带视频参考能生成19分14秒",
+      "music": 0.0
+    },
+    {
+      "from": 171.15,
+      "to": 172.829,
+      "sid": 73,
+      "location": 2,
+      "content": "折合一块211秒",
+      "music": 0.0
+    },
+    {
+      "from": 172.829,
+      "to": 174.089,
+      "sid": 74,
+      "location": 2,
+      "content": "年付1万4",
+      "music": 0.0
+    },
+    {
+      "from": 174.089,
+      "to": 175.109,
+      "sid": 75,
+      "location": 2,
+      "content": "带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 175.109,
+      "to": 178.089,
+      "sid": 76,
+      "location": 2,
+      "content": "每秒八积分每月能生成62分半",
+      "music": 0.0
+    },
+    {
+      "from": 178.089,
+      "to": 180.93,
+      "sid": 77,
+      "location": 2,
+      "content": "折合三毛111秒给到顶级",
+      "music": 0.0
+    },
+    {
+      "from": 180.93,
+      "to": 182.21,
+      "sid": 78,
+      "location": 2,
+      "content": "不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 182.21,
+      "to": 184.95,
+      "sid": 79,
+      "location": 2,
+      "content": "每月25分钟折合七毛八一秒",
+      "music": 0.0
+    },
+    {
+      "from": 184.95,
+      "to": 188.95,
+      "sid": 80,
+      "location": 2,
+      "content": "他的一年优惠跟前面的七天十天差别就在这里",
+      "music": 0.0
+    },
+    {
+      "from": 188.95,
+      "to": 192.17,
+      "sid": 81,
+      "location": 2,
+      "content": "pro年卡的扣点优惠能用365天",
+      "music": 0.0
+    },
+    {
+      "from": 192.17,
+      "to": 193.78,
+      "sid": 82,
+      "location": 2,
+      "content": "月卡能用30天",
+      "music": 0.0
+    },
+    {
+      "from": 193.78,
+      "to": 196.54,
+      "sid": 83,
+      "location": 2,
+      "content": "这轮购卡活动到10月27日",
+      "music": 0.0
+    },
+    {
+      "from": 196.54,
+      "to": 199.96,
+      "sid": 84,
+      "location": 2,
+      "content": "但积分还是30天有效优惠能用一年",
+      "music": 0.0
+    },
+    {
+      "from": 199.96,
+      "to": 202.41,
+      "sid": 85,
+      "location": 2,
+      "content": "不等于积分能攒一年",
+      "music": 0.0
+    },
+    {
+      "from": 202.77,
+      "to": 205.33,
+      "sid": 86,
+      "location": 2,
+      "content": "接下来是oi oi p x年卡",
+      "music": 0.0
+    },
+    {
+      "from": 205.33,
+      "to": 206.75,
+      "sid": 87,
+      "location": 2,
+      "content": "1万1988",
+      "music": 0.0
+    },
+    {
+      "from": 206.75,
+      "to": 208.43,
+      "sid": 88,
+      "location": 2,
+      "content": "摊到每个月999",
+      "music": 0.0
+    },
+    {
+      "from": 208.43,
+      "to": 210.05,
+      "sid": 89,
+      "location": 2,
+      "content": "每月1万8000盒饭",
+      "music": 0.0
+    },
+    {
+      "from": 210.05,
+      "to": 211.35,
+      "sid": 90,
+      "location": 2,
+      "content": "再加1860",
+      "music": 0.0
+    },
+    {
+      "from": 211.35,
+      "to": 213.579,
+      "sid": 91,
+      "location": 2,
+      "content": "签到盒饭首月额外送4万",
+      "music": 0.0
+    },
+    {
+      "from": 213.579,
+      "to": 217.139,
+      "sid": 92,
+      "location": 2,
+      "content": "官网的super2.57百二十P每秒22",
+      "music": 0.0
+    },
+    {
+      "from": 217.139,
+      "to": 218.859,
+      "sid": 93,
+      "location": 2,
+      "content": "盒饭签到全部领到",
+      "music": 0.0
+    },
+    {
+      "from": 218.859,
+      "to": 222.46,
+      "sid": 94,
+      "location": 2,
+      "content": "用完首月这批额度能生成45分21秒",
+      "music": 0.0
+    },
+    {
+      "from": 222.46,
+      "to": 224.35,
+      "sid": 95,
+      "location": 2,
+      "content": "折合三毛671秒",
+      "music": 0.0
+    },
+    {
+      "from": 224.35,
+      "to": 227.01,
+      "sid": 96,
+      "location": 2,
+      "content": "三毛六七是带首月礼包的价格",
+      "music": 0.0
+    },
+    {
+      "from": 227.01,
+      "to": 228.27,
+      "sid": 97,
+      "location": 2,
+      "content": "不能每个月都这么算",
+      "music": 0.0
+    },
+    {
+      "from": 228.27,
+      "to": 230.92,
+      "sid": 98,
+      "location": 2,
+      "content": "而且签到盒饭只有三天有效月",
+      "music": 0.0
+    },
+    {
+      "from": 230.92,
+      "to": 233.26,
+      "sid": 99,
+      "location": 2,
+      "content": "盒饭和首月加赠都是31天",
+      "music": 0.0
+    },
+    {
+      "from": 233.26,
+      "to": 235.0,
+      "sid": 100,
+      "location": 2,
+      "content": "不签到或者领了没用完",
+      "music": 0.0
+    },
+    {
+      "from": 235.0,
+      "to": 236.18,
+      "sid": 101,
+      "location": 2,
+      "content": "可用时长还会少",
+      "music": 0.0
+    },
+    {
+      "from": 236.18,
+      "to": 239.02,
+      "sid": 102,
+      "location": 2,
+      "content": "这家按官网统一的盒饭费率单独列",
+      "music": 0.0
+    },
+    {
+      "from": 239.02,
+      "to": 241.26,
+      "sid": 103,
+      "location": 2,
+      "content": "不混进前面的代参考优惠榜",
+      "music": 0.0
+    },
+    {
+      "from": 241.26,
+      "to": 243.14,
+      "sid": 104,
+      "location": 2,
+      "content": "10月21日下午合价时",
+      "music": 0.0
+    },
+    {
+      "from": 243.14,
+      "to": 245.52,
+      "sid": 105,
+      "location": 2,
+      "content": "官网倒计时指向当天晚上九点",
+      "music": 0.0
+    },
+    {
+      "from": 245.52,
+      "to": 248.94,
+      "sid": 106,
+      "location": 2,
+      "content": "实际活动结束时间以购买页面为准",
+      "music": 0.0
+    },
+    {
+      "from": 249.32,
+      "to": 253.38,
+      "sid": 107,
+      "location": 2,
+      "content": "最后cycle的至尊年卡首单8042万积分",
+      "music": 0.0
+    },
+    {
+      "from": 253.38,
+      "to": 254.29,
+      "sid": 108,
+      "location": 2,
+      "content": "一年有效",
+      "music": 0.0
+    },
+    {
+      "from": 254.29,
+      "to": 255.41,
+      "sid": 109,
+      "location": 2,
+      "content": "C扣2.5分",
+      "music": 0.0
+    },
+    {
+      "from": 255.41,
+      "to": 256.57,
+      "sid": 110,
+      "location": 2,
+      "content": "满血版和普惠版",
+      "music": 0.0
+    },
+    {
+      "from": 256.57,
+      "to": 259.05,
+      "sid": 111,
+      "location": 2,
+      "content": "按10月5日记录的扣点720",
+      "music": 0.0
+    },
+    {
+      "from": 259.05,
+      "to": 260.98,
+      "sid": 112,
+      "location": 2,
+      "content": "P满血版每秒18积分",
+      "music": 0.0
+    },
+    {
+      "from": 260.98,
+      "to": 262.5,
+      "sid": 113,
+      "location": 2,
+      "content": "普惠版每秒九积分",
+      "music": 0.0
+    },
+    {
+      "from": 262.5,
+      "to": 265.32,
+      "sid": 114,
+      "location": 2,
+      "content": "按这组扣点和8400的首单年卡来算",
+      "music": 0.0
+    },
+    {
+      "from": 265.32,
+      "to": 267.25,
+      "sid": 115,
+      "location": 2,
+      "content": "满血版折合一块261秒",
+      "music": 0.0
+    },
+    {
+      "from": 267.25,
+      "to": 269.23,
+      "sid": 116,
+      "location": 2,
+      "content": "全年额度约一小时51分",
+      "music": 0.0
+    },
+    {
+      "from": 269.23,
+      "to": 270.25,
+      "sid": 117,
+      "location": 2,
+      "content": "普惠版六毛三",
+      "music": 0.0
+    },
+    {
+      "from": 270.25,
+      "to": 272.12,
+      "sid": 118,
+      "location": 2,
+      "content": "一秒约三小时42分",
+      "music": 0.0
+    },
+    {
+      "from": 272.12,
+      "to": 275.06,
+      "sid": 119,
+      "location": 2,
+      "content": "所以看SECO先分清满血版和普惠版",
+      "music": 0.0
+    },
+    {
+      "from": 275.06,
+      "to": 276.62,
+      "sid": 120,
+      "location": 2,
+      "content": "再看这一年的总额度",
+      "music": 0.0
+    },
+    {
+      "from": 276.62,
+      "to": 278.2,
+      "sid": 121,
+      "location": 2,
+      "content": "12万积分是一整年",
+      "music": 0.0
+    },
+    {
+      "from": 278.2,
+      "to": 282.09,
+      "sid": 122,
+      "location": 2,
+      "content": "不是每个月都给12万活动价",
+      "music": 0.0
+    },
+    {
+      "from": 282.09,
+      "to": 283.75,
+      "sid": 123,
+      "location": 2,
+      "content": "这一轮的总榜先放这里",
+      "music": 0.0
+    },
+    {
+      "from": 283.75,
+      "to": 285.67,
+      "sid": 124,
+      "location": 2,
+      "content": "可以暂停截图",
+      "music": 0.0
+    },
+    {
+      "from": 288.8,
+      "to": 291.26,
+      "sid": 125,
+      "location": 2,
+      "content": "活动价看完再看日常价格",
+      "music": 0.0
+    },
+    {
+      "from": 291.26,
+      "to": 294.4,
+      "sid": 126,
+      "location": 2,
+      "content": "这一轮统一按720P无视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 294.4,
+      "to": 296.02,
+      "sid": 127,
+      "location": 2,
+      "content": "拿本次购买的年卡",
+      "music": 0.0
+    },
+    {
+      "from": 296.02,
+      "to": 299.02,
+      "sid": 128,
+      "location": 2,
+      "content": "去掉短期扣点优惠和额外礼包来算",
+      "music": 0.0
+    },
+    {
+      "from": 299.02,
+      "to": 300.26,
+      "sid": 129,
+      "location": 2,
+      "content": "续费金额有变化的",
+      "music": 0.0
+    },
+    {
+      "from": 300.26,
+      "to": 300.9,
+      "sid": 130,
+      "location": 2,
+      "content": "再另外说",
+      "music": 0.0
+    },
+    {
+      "from": 302.3,
+      "to": 304.23,
+      "sid": 131,
+      "location": 2,
+      "content": "先看吉梦和小云雀的日常价",
+      "music": 0.0
+    },
+    {
+      "from": 304.23,
+      "to": 306.61,
+      "sid": 132,
+      "location": 2,
+      "content": "吉梦和小云雀恢复每秒26积分",
+      "music": 0.0
+    },
+    {
+      "from": 306.61,
+      "to": 308.51,
+      "sid": 133,
+      "location": 2,
+      "content": "每月能生成35分钟",
+      "music": 0.0
+    },
+    {
+      "from": 308.51,
+      "to": 312.72,
+      "sid": 134,
+      "location": 2,
+      "content": "按这次年卡实付价是七毛八一秒给到人上人",
+      "music": 0.0
+    },
+    {
+      "from": 312.72,
+      "to": 316.0,
+      "sid": 135,
+      "location": 2,
+      "content": "但到下一年年卡续费4万3680",
+      "music": 0.0
+    },
+    {
+      "from": 318.28,
+      "to": 320.54,
+      "sid": 136,
+      "location": 2,
+      "content": "连续包月续费4299",
+      "music": 0.0
+    },
+    {
+      "from": 320.54,
+      "to": 322.06,
+      "sid": 137,
+      "location": 2,
+      "content": "则是两块051秒",
+      "music": 0.0
+    },
+    {
+      "from": 322.06,
+      "to": 325.99,
+      "sid": 138,
+      "location": 2,
+      "content": "给到拉首购和续费差的确实不少",
+      "music": 0.0
+    },
+    {
+      "from": 326.35,
+      "to": 327.97,
+      "sid": 139,
+      "location": 2,
+      "content": "再看running up的日常价",
+      "music": 0.0
+    },
+    {
+      "from": 327.97,
+      "to": 329.09,
+      "sid": 140,
+      "location": 2,
+      "content": "不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 329.09,
+      "to": 330.75,
+      "sid": 141,
+      "location": 2,
+      "content": "普通扣费是一秒1.89",
+      "music": 0.0
+    },
+    {
+      "from": 330.75,
+      "to": 334.22,
+      "sid": 142,
+      "location": 2,
+      "content": "钱包元钱包额度和你实际付的钱得分开算",
+      "music": 0.0
+    },
+    {
+      "from": 334.22,
+      "to": 337.34,
+      "sid": 143,
+      "location": 2,
+      "content": "连续包月max399块给459",
+      "music": 0.0
+    },
+    {
+      "from": 337.34,
+      "to": 339.64,
+      "sid": 144,
+      "location": 2,
+      "content": "钱包额度能生成4分03秒",
+      "music": 0.0
+    },
+    {
+      "from": 339.64,
+      "to": 341.17,
+      "sid": 145,
+      "location": 2,
+      "content": "折合一块641秒",
+      "music": 0.0
+    },
+    {
+      "from": 341.17,
+      "to": 343.75,
+      "sid": 146,
+      "location": 2,
+      "content": "超能plus年卡1万6999",
+      "music": 0.0
+    },
+    {
+      "from": 343.75,
+      "to": 344.85,
+      "sid": 147,
+      "location": 2,
+      "content": "每月5600",
+      "music": 0.0
+    },
+    {
+      "from": 344.85,
+      "to": 346.62,
+      "sid": 148,
+      "location": 2,
+      "content": "钱包恢复普通扣点",
+      "music": 0.0
+    },
+    {
+      "from": 346.62,
+      "to": 348.6,
+      "sid": 149,
+      "location": 2,
+      "content": "每月能生成49分23秒",
+      "music": 0.0
+    },
+    {
+      "from": 348.6,
+      "to": 350.84,
+      "sid": 150,
+      "location": 2,
+      "content": "折合四毛八一秒给到顶级",
+      "music": 0.0
+    },
+    {
+      "from": 350.84,
+      "to": 353.96,
+      "sid": 151,
+      "location": 2,
+      "content": "按这次年卡实付价恢复普通扣点以后",
+      "music": 0.0
+    },
+    {
+      "from": 353.96,
+      "to": 357.4,
+      "sid": 152,
+      "location": 2,
+      "content": "它仍然是这几家里无视频参考单价最低的钱包",
+      "music": 0.0
+    },
+    {
+      "from": 357.4,
+      "to": 358.54,
+      "sid": 153,
+      "location": 2,
+      "content": "每31天到期",
+      "music": 0.0
+    },
+    {
+      "from": 358.54,
+      "to": 361.31,
+      "sid": 154,
+      "location": 2,
+      "content": "没用完的额度也得算进成本",
+      "music": 0.0
+    },
+    {
+      "from": 361.67,
+      "to": 365.06,
+      "sid": 155,
+      "location": 2,
+      "content": "接下来LTV的日常价不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 365.06,
+      "to": 366.96,
+      "sid": 156,
+      "location": 2,
+      "content": "普通每秒46积分",
+      "music": 0.0
+    },
+    {
+      "from": 366.96,
+      "to": 369.96,
+      "sid": 157,
+      "location": 2,
+      "content": "每月能生成33分20秒",
+      "music": 0.0
+    },
+    {
+      "from": 369.96,
+      "to": 371.74,
+      "sid": 158,
+      "location": 2,
+      "content": "月付3099",
+      "music": 0.0
+    },
+    {
+      "from": 371.74,
+      "to": 373.409,
+      "sid": 159,
+      "location": 2,
+      "content": "折合一块551秒",
+      "music": 0.0
+    },
+    {
+      "from": 373.409,
+      "to": 375.249,
+      "sid": 160,
+      "location": 2,
+      "content": "4月续费3569",
+      "music": 0.0
+    },
+    {
+      "from": 375.249,
+      "to": 376.749,
+      "sid": 161,
+      "location": 2,
+      "content": "变成一块781秒",
+      "music": 0.0
+    },
+    {
+      "from": 376.749,
+      "to": 378.709,
+      "sid": 162,
+      "location": 2,
+      "content": "年卡1万8299",
+      "music": 0.0
+    },
+    {
+      "from": 378.709,
+      "to": 380.729,
+      "sid": 163,
+      "location": 2,
+      "content": "按12个月摊不计赠送",
+      "music": 0.0
+    },
+    {
+      "from": 380.729,
+      "to": 382.26,
+      "sid": 164,
+      "location": 2,
+      "content": "月恢复普通扣点",
+      "music": 0.0
+    },
+    {
+      "from": 382.26,
+      "to": 383.68,
+      "sid": 165,
+      "location": 2,
+      "content": "每月33分20秒",
+      "music": 0.0
+    },
+    {
+      "from": 383.68,
+      "to": 386.19,
+      "sid": 166,
+      "location": 2,
+      "content": "折合七毛六一秒给到人上人",
+      "music": 0.0
+    },
+    {
+      "from": 386.19,
+      "to": 389.27,
+      "sid": 167,
+      "location": 2,
+      "content": "跟极梦和小云雀的七毛八比便宜一点",
+      "music": 0.0
+    },
+    {
+      "from": 389.27,
+      "to": 391.73,
+      "sid": 168,
+      "location": 2,
+      "content": "不过这些积分也是每31天重置",
+      "music": 0.0
+    },
+    {
+      "from": 391.73,
+      "to": 394.59,
+      "sid": 169,
+      "location": 2,
+      "content": "没用完的部分不会一直给你留着",
+      "music": 0.0
+    },
+    {
+      "from": 394.97,
+      "to": 396.75,
+      "sid": 170,
+      "location": 2,
+      "content": "再看flower pro的日常价",
+      "music": 0.0
+    },
+    {
+      "from": 396.75,
+      "to": 399.23,
+      "sid": 171,
+      "location": 2,
+      "content": "恢复普通扣点以后不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 399.23,
+      "to": 400.67,
+      "sid": 172,
+      "location": 2,
+      "content": "每秒33积分",
+      "music": 0.0
+    },
+    {
+      "from": 400.67,
+      "to": 402.43,
+      "sid": 173,
+      "location": 2,
+      "content": "每月15分09秒",
+      "music": 0.0
+    },
+    {
+      "from": 402.43,
+      "to": 406.01,
+      "sid": 174,
+      "location": 2,
+      "content": "同样按这次年卡实付价折合一块281秒",
+      "music": 0.0
+    },
+    {
+      "from": 406.01,
+      "to": 407.02,
+      "sid": 175,
+      "location": 2,
+      "content": "给到NPC",
+      "music": 0.0
+    },
+    {
+      "from": 407.02,
+      "to": 409.62,
+      "sid": 176,
+      "location": 2,
+      "content": "待视频参考恢复每秒39积分",
+      "music": 0.0
+    },
+    {
+      "from": 409.62,
+      "to": 411.74,
+      "sid": 177,
+      "location": 2,
+      "content": "折合一块521秒",
+      "music": 0.0
+    },
+    {
+      "from": 412.189,
+      "to": 415.229,
+      "sid": 178,
+      "location": 2,
+      "content": "OYA这边去掉首月额外礼包",
+      "music": 0.0
+    },
+    {
+      "from": 415.229,
+      "to": 416.799,
+      "sid": 179,
+      "location": 2,
+      "content": "再算一次年卡",
+      "music": 0.0
+    },
+    {
+      "from": 416.799,
+      "to": 417.999,
+      "sid": 180,
+      "location": 2,
+      "content": "从第二个月起",
+      "music": 0.0
+    },
+    {
+      "from": 417.999,
+      "to": 420.59,
+      "sid": 181,
+      "location": 2,
+      "content": "每月1万9860盒饭",
+      "music": 0.0
+    },
+    {
+      "from": 420.59,
+      "to": 422.69,
+      "sid": 182,
+      "location": 2,
+      "content": "能生成15分03秒",
+      "music": 0.0
+    },
+    {
+      "from": 422.69,
+      "to": 426.539,
+      "sid": 183,
+      "location": 2,
+      "content": "按本次年费摊下来是一块111秒",
+      "music": 0.0
+    },
+    {
+      "from": 426.539,
+      "to": 429.019,
+      "sid": 184,
+      "location": 2,
+      "content": "如果按月付1319",
+      "music": 0.0
+    },
+    {
+      "from": 429.019,
+      "to": 430.839,
+      "sid": 185,
+      "location": 2,
+      "content": "签到全部领到并用完",
+      "music": 0.0
+    },
+    {
+      "from": 430.839,
+      "to": 432.51,
+      "sid": 186,
+      "location": 2,
+      "content": "同样是15分03秒",
+      "music": 0.0
+    },
+    {
+      "from": 432.51,
+      "to": 434.37,
+      "sid": 187,
+      "location": 2,
+      "content": "折合一块461秒",
+      "music": 0.0
+    },
+    {
+      "from": 434.37,
+      "to": 437.97,
+      "sid": 188,
+      "location": 2,
+      "content": "所以首月三毛六七和后续的一块一一",
+      "music": 0.0
+    },
+    {
+      "from": 437.97,
+      "to": 439.61,
+      "sid": 189,
+      "location": 2,
+      "content": "不能当成同一个价格",
+      "music": 0.0
+    },
+    {
+      "from": 439.61,
+      "to": 441.89,
+      "sid": 190,
+      "location": 2,
+      "content": "月盒饭只有31天签到",
+      "music": 0.0
+    },
+    {
+      "from": 441.89,
+      "to": 442.79,
+      "sid": 191,
+      "location": 2,
+      "content": "盒饭只有三天",
+      "music": 0.0
+    },
+    {
+      "from": 442.79,
+      "to": 447.52,
+      "sid": 192,
+      "location": 2,
+      "content": "都得记得用cycle同款至尊年卡再次购买",
+      "music": 0.0
+    },
+    {
+      "from": 447.52,
+      "to": 450.36,
+      "sid": 193,
+      "location": 2,
+      "content": "是1万零五百十二万积分",
+      "music": 0.0
+    },
+    {
+      "from": 450.36,
+      "to": 453.13,
+      "sid": 194,
+      "location": 2,
+      "content": "仍按10月5日那组扣点换算",
+      "music": 0.0
+    },
+    {
+      "from": 453.13,
+      "to": 455.11,
+      "sid": 195,
+      "location": 2,
+      "content": "满血版一块581秒",
+      "music": 0.0
+    },
+    {
+      "from": 455.11,
+      "to": 456.73,
+      "sid": 196,
+      "location": 2,
+      "content": "普惠版七毛九一秒",
+      "music": 0.0
+    },
+    {
+      "from": 456.73,
+      "to": 458.87,
+      "sid": 197,
+      "location": 2,
+      "content": "积分依然是一整年的总额度",
+      "music": 0.0
+    },
+    {
+      "from": 458.87,
+      "to": 461.03,
+      "sid": 198,
+      "location": 2,
+      "content": "满血版约一小时51分",
+      "music": 0.0
+    },
+    {
+      "from": 461.03,
+      "to": 463.09,
+      "sid": 199,
+      "location": 2,
+      "content": "普惠版约三小时42分",
+      "music": 0.0
+    },
+    {
+      "from": 463.09,
+      "to": 464.31,
+      "sid": 200,
+      "location": 2,
+      "content": "两个版本分开看",
+      "music": 0.0
+    },
+    {
+      "from": 464.31,
+      "to": 467.21,
+      "sid": 201,
+      "location": 2,
+      "content": "也别把一年的额度当成每个月都有",
+      "music": 0.0
+    },
+    {
+      "from": 467.57,
+      "to": 468.95,
+      "sid": 202,
+      "location": 2,
+      "content": "最后把榜单放一起",
+      "music": 0.0
+    },
+    {
+      "from": 468.95,
+      "to": 470.19,
+      "sid": 203,
+      "location": 2,
+      "content": "可以暂停截图",
+      "music": 0.0
+    },
+    {
+      "from": 470.19,
+      "to": 471.85,
+      "sid": 204,
+      "location": 2,
+      "content": "带视频参考的活动价",
+      "music": 0.0
+    },
+    {
+      "from": 471.85,
+      "to": 473.61,
+      "sid": 205,
+      "location": 2,
+      "content": "running hub1毛八集",
+      "music": 0.0
+    },
+    {
+      "from": 473.61,
+      "to": 477.2,
+      "sid": 206,
+      "location": 2,
+      "content": "梦小云雀和lip tv1毛九给到夯floor",
+      "music": 0.0
+    },
+    {
+      "from": 477.2,
+      "to": 477.84,
+      "sid": 207,
+      "location": 2,
+      "content": "三毛一一",
+      "music": 0.0
+    },
+    {
+      "from": 477.84,
+      "to": 479.8,
+      "sid": 208,
+      "location": 2,
+      "content": "给到顶级旁边的七天",
+      "music": 0.0
+    },
+    {
+      "from": 479.8,
+      "to": 482.77,
+      "sid": 209,
+      "location": 2,
+      "content": "十天和365天也得一起看再看",
+      "music": 0.0
+    },
+    {
+      "from": 482.77,
+      "to": 483.75,
+      "sid": 210,
+      "location": 2,
+      "content": "不带视频参考",
+      "music": 0.0
+    },
+    {
+      "from": 483.75,
+      "to": 485.41,
+      "sid": 211,
+      "location": 2,
+      "content": "按本次年卡实付价",
+      "music": 0.0
+    },
+    {
+      "from": 485.41,
+      "to": 487.77,
+      "sid": 212,
+      "location": 2,
+      "content": "去掉短期扣点优惠和额外礼包",
+      "music": 0.0
+    },
+    {
+      "from": 487.77,
+      "to": 491.45,
+      "sid": 213,
+      "location": 2,
+      "content": "running hub4毛八给到顶级lip tv7毛六",
+      "music": 0.0
+    },
+    {
+      "from": 491.45,
+      "to": 492.57,
+      "sid": 214,
+      "location": 2,
+      "content": "集梦和小云雀",
+      "music": 0.0
+    },
+    {
+      "from": 492.57,
+      "to": 494.15,
+      "sid": 215,
+      "location": 2,
+      "content": "七毛八给到人上人",
+      "music": 0.0
+    },
+    {
+      "from": 494.15,
+      "to": 496.58,
+      "sid": 216,
+      "location": 2,
+      "content": "flow a1块二八给到NPC",
+      "music": 0.0
+    },
+    {
+      "from": 496.58,
+      "to": 499.29,
+      "sid": 217,
+      "location": 2,
+      "content": "这张榜算的是这次买下来的年卡",
+      "music": 0.0
+    },
+    {
+      "from": 499.29,
+      "to": 501.69,
+      "sid": 218,
+      "location": 2,
+      "content": "集梦和小云雀下一年续费一块七",
+      "music": 0.0
+    },
+    {
+      "from": 501.69,
+      "to": 503.09,
+      "sid": 219,
+      "location": 2,
+      "content": "三一秒得单独记",
+      "music": 0.0
+    },
+    {
+      "from": 503.09,
+      "to": 505.13,
+      "sid": 220,
+      "location": 2,
+      "content": "不能继续套首年的七毛八",
+      "music": 0.0
+    },
+    {
+      "from": 505.13,
+      "to": 507.71,
+      "sid": 221,
+      "location": 2,
+      "content": "所以买之前先看你一个月能用多少",
+      "music": 0.0
+    },
+    {
+      "from": 507.71,
+      "to": 509.31,
+      "sid": 222,
+      "location": 2,
+      "content": "再看优惠能持续多久",
+      "music": 0.0
+    },
+    {
+      "from": 509.31,
+      "to": 510.75,
+      "sid": 223,
+      "location": 2,
+      "content": "七天里用不完的积分",
+      "music": 0.0
+    },
+    {
+      "from": 510.75,
+      "to": 512.37,
+      "sid": 224,
+      "location": 2,
+      "content": "不能拿七天的最低单价",
+      "music": 0.0
+    },
+    {
+      "from": 512.37,
+      "to": 513.74,
+      "sid": 225,
+      "location": 2,
+      "content": "算一整年的便宜",
+      "music": 0.0
+    }
+  ]
+}

@@ -137,6 +137,8 @@ if saved.get("brand_resolved"):
         job = client.get(f"/api/jobs/{jid}").json()
         if mode != "ok":
             assert job["status"] == "FAILED" and job["error_code"] == "BRAND_UNVERIFIED"
+            report = next((settings.data_dir / "jobs" / jid).glob("attempts/*/failure-report.json"))
+            assert json.loads(report.read_text())["error_code"] == "BRAND_UNVERIFIED"
         else:
             assert job["status"] == "COMPLETED"
             artifacts = {a["name"]: a for a in client.get(f"/api/jobs/{jid}/artifacts").json()["items"]}

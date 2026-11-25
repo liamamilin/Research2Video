@@ -1,0 +1,19 @@
+{
+  "core/engine.py": "0122706f47cac1d13750792f5370da3b79ddaa7ab99741b19bac21222e28b5f8",
+  "core/video/audience_strategy.py": null,
+  "core/video/episodes.py": "fb5149007402f41587f1cedac7dfc8ca423393fb158bb0e0c92eb200d3a988ce",
+  "core/video/story_pool.py": "e5e8146fedfdbebf0b0d9c331f2191f70c1062b329db7490250fc805365d7663",
+  "core/video/writer.py": "33ea43b7650ba6eea47d5009add137635dab3e5c893331ebb60fd17e1af0cf66",
+  "web/services/video_workflow.py": "5caaa0ed9eae13104d79df22aeab513f18db9f8ec84f8685546d3a34a2468562",
+  "web/services/video_autopilot.py": "ff17b998b5c35feb04ff5ab5d5616bec5cfee1f5af54cbe1e654c9d6d59f8ef6",
+  "tests/test_audience_rollout.py": null,
+  "tests/test_writer_audience_scope.py": null,
+  "jobs/monitoring/ai_flash_discovery.yaml": "07b47443b7aacb51801b28fd043ada76a4eac9416b9c814698163e0b8cb3c1b1",
+  "jobs/chatgpt_acquisition/t05_comparison.yaml": "03c4b012b19af3c647434d8409a360f255dec160f490b1a91a702617db0352ac",
+  "jobs/chatgpt_acquisition/t06_value.yaml": "c6dd1872d833478c9b41ca231938f230e7882a182a957c9bfcbbed9a8f315435",
+  "config/source_supply/ai_media.yaml": "c71c12da71c5e9ac9e2364754bd24a283c7030d13ff077c4a4b44b024ea47c26",
+  "config/source_supply/chatgpt_acquisition.yaml": "b4a372cac2c54d76bea8d95f1f2b611bc5fc42f1ed173da5e5e4d72c4cd9ce49",
+  "config/content_columns/ai_flash.yaml": "d17ec1e8e9c27b1ff3af33788db344275a63004819bedceaec1e787e44897c46",
+  "config/content_columns/chatgpt_t05_comparison.yaml": "966b0576ee2f0d9b4439e9f51c59898d21fb33ca51b3ee5957dd19869bcaad5f",
+  "tests/fixtures/job_prompt_hashes.json": "5065598e650116ab173c906a1c7805ccd02f1a2c60058f4b522cdff72f2c003d"
+}

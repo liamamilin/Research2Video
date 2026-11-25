@@ -1,0 +1,32 @@
+.......F                                                                 [100%]
+=================================== FAILURES ===================================
+___ test_job_archive_repairs_same_size_same_mtime_corruption_before_removal ____
+
+disks = (PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-409/test_job_archive_repai...vate/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-409/test_job_archive_repairs_same_0/disk'))
+
+    def test_job_archive_repairs_same_size_same_mtime_corruption_before_removal(disks):
+        state, data, disk = disks
+        _jobs_db(data, [("old-job", "COMPLETED", _iso(9), None)])
+        source = data / "jobs" / "old-job"
+        dest = archive.jobs_archive(str(disk)) / "old-job"
+        source.mkdir()
+        dest.mkdir(parents=True)
+        (source / "video.mp4").write_bytes(b"good")
+        (dest / "video.mp4").write_bytes(b"oops")
+        stamp = int(time.time()) - 86400
+        os.utime(source / "video.mp4", (stamp, stamp))
+        os.utime(dest / "video.mp4", (stamp, stamp))
+
+        result = archive.run("config", str(state), [])
+
+        assert result["jobs"]["moved"] == 1
+>       assert (dest / "video.mp4").read_bytes() == b"good"
+E       AssertionError: assert b'oops' == b'good'
+E
+E         At index 0 diff: b'o' != b'g'
+E         Use -v to get more diff
+
+tests/test_video_archive.py:150: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_video_archive.py::test_job_archive_repairs_same_size_same_mtime_corruption_before_removal
+1 failed, 7 passed in 0.76s

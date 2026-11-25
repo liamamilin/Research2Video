@@ -344,7 +344,12 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
 
 
 def messages(context: dict, correction: str | None = None) -> list[dict]:
-    system = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：为讲述设计信息动效。让观众看见数字的大小、对象的差别或事物间的关系，画面随着讲述帮助理解。接口输出 JSON，使用 component_props_schemas 中的受控组件。场景连续覆盖旁白，场景 id 为 s1、s2…；headline 与有 title 字段的 props.title 一致。结构见 required_schema。'
+    system = ('根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n'
+              '当前步骤：为讲述设计信息动效。先明确「谁在什么条件下发生什么变化」，再选择画面，让观众看见数字的大小、对象的差别或事物间的关系。'
+              '底部字幕已显示完整旁白，卡片要点只提炼4到16字视觉锚点短语，不要整句复述旁白；'
+              '讲同一对象的状态变化、前后对比或指标累计时保持对象名称与位置/颜色参照连续，避免把连续变化拆成多页等权白卡（concept_reveal）；'
+              '有数字优先用big_number/price_change/bar_chart，有对照优先用comparison。'
+              '接口输出 JSON，使用 component_props_schemas 中的受控组件。场景连续覆盖旁白，场景 id 为 s1、s2…；headline 与有 title 字段的 props.title 一致。结构见 required_schema。')
     from g2.audience_copy import GUIDANCE
     system += "\n" + GUIDANCE + "\n" + visual_language.GUIDANCE
     if context.get("verbatim"):
@@ -621,19 +626,28 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
         numbers = list(re.finditer(r'(?<![\d.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\d.])', text))
         used, matched_end = {}, 0
         for cue, value in zip(result[1:], phrases):
+            target_index = int(cue['target_id'].split(':')[1])
+            is_delta = target_index % 3 == 2
+            if target_index % 3 == 0:
+                matched_end = 0
             number = re.search(r'[-+]?\d[\d,]*(?:\.\d+)?', value)
             key = number[0].lstrip('+-').replace(',', '') if number else ''
             matches = [m for m in numbers if m[0].replace(',', '') == key]
+            if is_delta:
+                # A change belongs to this row's comparison. A matching number
+                # spoken earlier for another value must not reveal its badge.
+                matches = [m for m in matches if m.start() >= matched_end]
             if matches:
                 # Narration can introduce the new value before the old one.
                 # Match each value independently, keeping repeated occurrences
                 # ordered only when the exact same number appears again.
-                occurrence = used.get(key, 0)
+                occurrence = 0 if is_delta else used.get(key, 0)
                 match = matches[min(occurrence, len(matches) - 1)]
-                used[key] = occurrence + 1
+                if not is_delta:
+                    used[key] = occurrence + 1
                 at, phrase = match.start(), match[0]
                 matched_end = max(matched_end, match.end())
-            elif cue['target_id'].startswith('line:') and int(cue['target_id'].split(':')[1]) % 3 == 2:
+            elif is_delta:
                 # A spoken delta may be "涨了五个多百分点". Keep the supplied
                 # numeric delta, revealing it at the explanation after values.
                 tail = text[matched_end:]
@@ -685,7 +699,34 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                             cue['quote'] = phrases[index]
                         break
                     at -= len(row['text'])
-    visual_language.align_object_cues(scene, result, speech)
+    placed = visual_language.align_object_cues(scene, result, speech)
+    if scene.get('reveal_phrases') and scene['component'] in {'concept_reveal', 'comparison'}:
+        text = ''.join(row['text'] for row in speech)
+        page_targets = (
+            [f'line:{i}' for i in range(len(scene['props'].get('lines', [])))]
+            if scene['component'] == 'concept_reveal'
+            else ['side:left', 'side:right']
+        )
+        cursor = 0
+        for target_id, phrase in zip(page_targets, scene['reveal_phrases']):
+            if target_id in placed or not isinstance(phrase, str) or not phrase.strip():
+                continue
+            cue = next((c for c in result if c['target_id'] == target_id), None)
+            if cue is None:
+                continue
+            at = visual_language.phrase_at(text, phrase, cursor)
+            if at < 0:
+                at = visual_language.phrase_at(text, phrase)
+            if at >= 0:
+                cursor = at + len(phrase)
+                pos = at
+                for row in speech:
+                    if pos < len(row['text']):
+                        cue.update(segment_id=row['id'], quote=row['text'][pos:pos + 1], character_index=pos)
+                        placed.add(target_id)
+                        break
+                    pos -= len(row['text'])
+    visual_language.align_label_cues(scene, result, speech, placed)
     return result
 
 
@@ -715,7 +756,7 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
             beats.append(beat)
             timing.append({"scene_id": scene["id"], "beat_id": beat['id'], **cue, "automatic": automatic,
                            "estimated_start_ms": row["start_ms"] + offset})
-        beats.extend(visual_language.action_beats(scene, rows))
+        beats.extend(visual_language.action_beats(scene, rows, timing))
         beats.sort(key=lambda b: (order.index(b["trigger"]["segment_id"]), b["trigger"].get("offset_ms", 0)))
         scenes.append({"id": scene["id"], "component": scene["component"], "props": scene["props"],
                        "narration_segment_ids": scene["narration_segment_ids"], "purpose": scene["headline"],

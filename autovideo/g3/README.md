@@ -47,6 +47,8 @@ G3 提供本机 FastAPI + SQLite 服务和 React 界面，把已通过 G2 实测
 
 4. 在浏览器打开 `http://127.0.0.1:8000/`。默认数据目录为 `g3/data/`，可通过 `AUTOVIDEO_DATA_DIR` 指定独立的本地数据位置。服务首次启动会将上次停止时仍在运行的尝试记录为可重试失败，不会伪报为运行中或完成。
 
+每条视频的模型费用上限默认 **20 美元**，可在 `autovideo/.env` 设置 `AUTOVIDEO_G2_MAX_COST_USD`，进程环境变量优先。上限在该次生成进程启动时固定，不随模型切换或章节数量重算。`model-cost.json` 保留费用估算、失败请求预留和固定上限；调用次数及失败重试仍有限制。配置修改由后续新生成进程读取。
+
 ### React 构建
 
 项目仓库保留构建后的 `web/static/app.js` 和 `app.css`，以便 Python 服务无需运行 Node 即可启动。开发者依赖来自 G0 的 vendored npm 包；`package.json` 记录兼容版本，构建不需要联网。

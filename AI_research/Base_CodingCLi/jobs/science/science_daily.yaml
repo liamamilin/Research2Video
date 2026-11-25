@@ -1,5 +1,6 @@
 name: 科学新发现日报
-description: 每天值得关注的几项科学新发现（读 Quanta、Science、Nature、Phys.org、ScienceDaily 抓取的内容），不联网搜索
+description: 每天值得关注的几项科学新发现（读 Quanta、Science、Nature、Phys.org、ScienceDaily 抓取的内容），初稿沿用固定材料，选题后按问题补材
+domain: 科学与知识
 enabled: true
 keywords:
 - 科学新发现
@@ -27,7 +28,7 @@ sources:
 - source:new_scientist
 prompt: |
   为「科学新理解」整理研究底稿。观众想理解一项研究做了什么，以及它让我们对一个具体问题多理解了什么。
-  从本次材料选出可持续解释的研究问题。先用简短导读说明几个值得讲的候选，再为重点候选保留完整资料段落，供作者选择其中一个展开。
+  从本次材料选出可持续解释的研究问题。可以简短概览值得讲的候选，并为重点候选保留完整资料段落，供作者选择其中一个展开。
   围绕每个候选讲清具体研究对象、原来的疑问、研究者采取的操作或观测、看见的变化，以及结果如何连接到新的理解。
   保留材料里的实验过程、对照、例子、尺度、关键数字、对象之间的关系与适用情形；相关原文可以完整摘录在对应主题下，术语贴着它解释的现象展开。
   让后续作者可以沿一个具体过程讲故事，主要篇幅留给事情如何发生。已有材料中的缺失说明留在底稿，不转成要求观众执行的清单。讲述节奏与最终口播由后续作者安排。
@@ -39,3 +40,6 @@ prompt: |
 
   数据格式：Markdown；候选条目以「### 2.1 名称」标识，条目内部可用「####」保留具体过程和例子。对应素材链接放在条目中，末尾「### 来源清单」继续记录素材链接。
 output: output/science/{date}_science_daily.md
+audience_channel: science_daily
+content_strategy: audience-v1
+question_material: question-v1

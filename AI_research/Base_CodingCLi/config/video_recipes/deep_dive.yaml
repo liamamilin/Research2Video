@@ -2,8 +2,8 @@
 # research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
-name: 深度解读
-description: 陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+name: 深度解读（全景）
+description: 面向{{audience}}完整拆解整份深度报告的全部核心板块，一篇文稿讲透关键案例、数据口径与决策边界，做一个完整长视频。
 status: enabled
 tags:
   domain:
@@ -11,7 +11,7 @@ tags:
     name: AI 与软件
   type:
     key: deep_dive
-    name: 深度解读
+    name: 深度解读（全景）
   format:
     key: long
     name: B 站横屏长
@@ -20,7 +20,7 @@ target_minutes: 6
 minutes_range: [4, 8]
 topic:
   kind: single
-  sources: [opportunities]
+  sources: []
   whole_report: true
   fields: [核心角度, 目标受众, 为什么有人在乎]
 research:
@@ -31,7 +31,10 @@ writing:
     depth: '{{audience.depth}}'
     tone: explainer
   style: |
-    陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+    面向{{audience}}做整份报告的全景深度拆解，篇幅由内容决定，不为了压时长而砍掉主干板块。
+    按报告的核心维度逐章讲透（单节控制在 3 到 5 段以内）：每个重要板块都要落到具体工程、科研或产品案例、最能翻转判断的拐点数字以及评测口径与适用边界，不要把多个重磅发现揉成一句话带过。
+    严禁在口播里逐行朗读多列跑分表、延迟表或价目表（把完整表格留给画面）；涉及多模型/多方案对比的章节，直接讲清什么任务选谁与最隐蔽的坑，不端水、不报菜名；口播不念英文配置键名或代码路径，数字保留原小数位，前后不车轱辘重复。
+    用一条清晰的主线把各板块串起来，结尾把全篇证据收束成{{audience}}能直接用上的判断或行动建议。
 output:
   use: auto_form
   packaging:

@@ -176,7 +176,7 @@ def test_programme_scopes_tutorial_direction_to_each_item(column_env):
     result = content_columns.apply_script_context(recipe, context)
     assert "每项独立内容可围绕 操作 → 结果" in result.script_style
     assert "每项独立内容围绕自己的明确任务" in result.script_style
-    assert "同一问题的解释章节沿用共同主例子" in result.script_style
+    assert context["notes"] in result.script_style
     assert "单项内容创作方向" in result.script_style
     single = content_columns.apply_script_context(recipe, {**context, "content_mode": "individual"})
     assert "栏目创作方向" in single.script_style and "单项内容创作方向" not in single.script_style

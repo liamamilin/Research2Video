@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import yaml
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -28,6 +29,20 @@ def test_all_twelve_candidates_enter_even_with_legacy_auto_one(pilot_env):
     picked = pilot.pick_topics(run['spec'])
     assert len(picked) == 12
     assert len({i['topic']['id'] for i in picked}) == 12
+
+
+def test_configured_report_limit_caps_automatic_production(pilot_env):
+    env, _, _ = pilot_env
+    job = env / "jobs/monitoring/ai_flash_discovery.yaml"
+    config = yaml.safe_load(job.read_text())
+    config['topics']['daily_limit'] = 3
+    job.write_text(yaml.safe_dump(config, allow_unicode=True), encoding="utf-8")
+    _report(env).write_text(report_items(5), encoding="utf-8")
+    now = _fresh(env)
+    assert pilot.fire_auto(now) == 1
+    [run] = ap.list_runs()
+    picked = pilot.pick_topics(run["spec"])
+    assert [item["topic"]["title"] for item in picked] == [f"独立事件 {i}" for i in range(1, 4)]
 
 
 def test_all_same_day_reports_are_discovered_and_exact_inputs_survive(pilot_env):

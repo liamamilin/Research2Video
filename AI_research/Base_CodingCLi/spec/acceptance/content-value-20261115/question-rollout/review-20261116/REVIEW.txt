@@ -1,0 +1,25 @@
+后续状态：本文为修复前的检查记录；确认问题现已完成代码修复和回归，详见同目录FIXES.txt。生产服务未重启，旧任务/报告保留。
+
+2026-11-16 按问题补材接入复查
+
+范围：question_material、研究出口、写稿输入、知识题名/历史、45个Job配置及此前真实试跑失败记录。隔离副本 /tmp/question-material-review-20261116；没有修改生产代码、配置、数据库或服务。
+
+P1：知识类回退仍会丢失原底稿
+core/engine.py:400 只在status=enriched时记录question_material标记；web/services/video_workflow.py:494依赖该标记保护知识底稿。无需补材(unchanged)或补材异常(kept_original)时标记缺失，后续521行仍选择material or report，实际把选题参考替代完整解释交给作者。用真实ResearchEngine→报告元数据→topic_for→workflow.run路径、模拟模型结果离线复现：enriched控制组通过；unchanged及kept_original两组缺少原机制正文。
+建议：知识底稿输入保护由知识任务/显式流程类型决定，不能依赖是否成功补到新资料；保留成功与失败状态用于展示，而非决定原底稿是否可用。
+
+P2：把选题说明当成历史题名
+core/knowledge_job.py:58 和 core/video/reports.py:128 直接取第一个一级标题。真实降噪试跑报告首先写#选题说明，之后才是#降噪耳机是怎么把噪音消掉的。实际导入题名和past_titles均是选题说明，未记录真实问题，后续模型避重失去该题名。用实际归档文件核对，并以相同文档结构离线复现失败。
+建议：研究输出明确主问题的结构字段，导入题名、补材brief和历史题名共用同一提取规则；保留完整底稿，不依靠作者在写稿时猜回来。
+
+P2：启用开关不会随普通Git提交交付
+config/system.yaml的索引标志为S（skip-worktree）。本机question_material.enabled=true，但HEAD没有question_material键，普通git diff未展示该改动。core/video/question_material.py:64要求该开关明确为true，故即使提交其余新代码和45个Job，GitHub检出仍不会启用补材。当前本机服务已启用，不是本机失效。
+建议：把功能默认/启用配置放入正常跟踪的配置文件或可发布默认配置，不强行提交整份本机服务设置。
+
+已知未解决项
+此前Claude多格式交付和ChatGPT多文件夹两条教程仍在story_pool.validate因缺少主事件信息失败；换第三条只是完成试跑，不是修复前两条。原始模型响应未保存，现有错误同时覆盖title/subject/summary/action，不能据此断言具体缺少哪个字段。没有重新请求模型或反复试同一题。
+
+验证
+已有定向回归150项通过；新增4个边界场景中1通过3失败，三次失败对应上述前两项逻辑问题。配置交付问题由Git索引及HEAD/工作区配置差异确认。研究和视频服务健康均ok，研究PID保持69019，检查时busy=[]；没有重启服务或中断任务。
+
+本轮为检查与复现，尚未实施上述修复。

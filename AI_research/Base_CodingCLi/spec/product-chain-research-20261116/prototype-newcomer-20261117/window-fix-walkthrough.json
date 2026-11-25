@@ -1,0 +1,211 @@
+[
+  {
+    "name": "W01 daily manual default",
+    "yes": [
+      "11/16 14:00 → 11/17 14:00",
+      "最近 24 小时（默认）",
+      "每天 07:30、18:30"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 11 月 17 日早间 的报告\"\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\" [selected]\n          - option \"最近 7 天\"\n          - option \"按当前计划补跑最近完整时段\"\n        - term: 本次材料窗口\n        - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 每日合集、重点单条\n        - term: 自动计划\n        - definition: 每天 07:30、18:30\n        - generic: 手动运行默认读取最近 24 小时；本次选择不修改周期计划。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W02 explicit daily historical window",
+    "yes": [
+      "11/16 18:30 → 11/17 07:30",
+      "本次明确补跑历史完整时段"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 11 月 17 日早间 的报告\"\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\"\n          - option \"最近 7 天\"\n          - option \"按当前计划补跑最近完整时段\" [selected]\n        - term: 本次材料窗口\n        - definition: 11/16 18:30 → 11/17 07:30（最近完整计划时段）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 每日合集、重点单条\n        - term: 自动计划\n        - definition: 每天 07:30、18:30\n        - generic: 本次明确补跑历史完整时段，不包含窗口结束后的材料。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W03 report reuse preview",
+    "yes": [
+      "复用原报告及其材料窗口",
+      "11/16 18:30 → 11/17 07:30"
+    ],
+    "no": [
+      "combobox \"本次采集范围\""
+    ],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\"\n          - option \"复用 11 月 17 日早间 的报告\" [selected]\n        - generic: 复用原报告及其材料窗口，本次不重新采集或研究。\n        - term: 本次材料窗口\n        - definition: 11/16 18:30 → 11/17 07:30\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 每日合集、重点单条\n        - term: 自动计划\n        - definition: 每天 07:30、18:30\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W04 reuse uses same window",
+    "yes": [
+      "11/16 18:30 → 11/17 07:30",
+      "复用已有报告；本批未重新研究"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 2\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 排队中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 18:30 → 11/17 07:30\n      - term: 研究执行\n      - definition: 复用已有报告；本批未重新研究\n      - term: 报告身份\n      - definition: fe1be2f4a73a1e02\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 等待调度接收\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W05 reopen defaults again",
+    "yes": [
+      "11/16 14:00 → 11/17 14:00",
+      "最近 24 小时（默认）"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 11 月 17 日早间 的报告\"\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\" [selected]\n          - option \"最近 7 天\"\n          - option \"按当前计划补跑最近完整时段\"\n        - term: 本次材料窗口\n        - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 每日合集、重点单条\n        - term: 自动计划\n        - definition: 每天 07:30、18:30\n        - generic: 手动运行默认读取最近 24 小时；本次选择不修改周期计划。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W06 explicit seven days",
+    "yes": [
+      "11/10 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 11 月 17 日早间 的报告\"\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\"\n          - option \"最近 7 天\" [selected]\n          - option \"按当前计划补跑最近完整时段\"\n        - term: 本次材料窗口\n        - definition: 11/10 14:00 → 11/17 14:00（最近 7 天）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 每日合集、重点单条\n        - term: 自动计划\n        - definition: 每天 07:30、18:30\n        - generic: 手动运行默认读取最近 24 小时；本次选择不修改周期计划。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W07 submitted seven days",
+    "yes": [
+      "11/10 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 3\n      - heading \"AI Flash\" [level=1]\n      - paragraph: 排队中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/10 14:00 → 11/17 14:00（最近 7 天）\n      - term: 研究执行\n      - definition: 1 次研究 / 0 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 等待调度接收\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W08 new chain research step",
+    "yes": [
+      "研究方式"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"研究方式\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - generic: 6. 预览并创建\n      - text: 选题策略\n      - textbox \"选题策略\": 围绕观众问题选题\n      - checkbox \"根据选题问题自动补充材料\" [checked]\n      - text: 根据选题问题自动补充材料\n      - generic: 报告和原材料共同交给输出安排；补材服务失败会在运行中显示，不增加人工审批。\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W09 new outputs",
+    "yes": [
+      "视频输出"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 创建一条完整链路\n      - heading \"视频输出\" [level=1]\n      - button \"取消创建\"\n      - generic: 1. 内容目标\n      - generic: 2. 添加来源\n      - generic: 3. 研究方式\n      - generic: 4. 视频输出\n      - generic: 5. 运行计划\n      - generic: 6. 预览并创建\n      - text: 输出组合\n      - combobox \"输出组合\":\n        - option \"重点单条\" [selected]\n        - option \"一期合集\"\n        - option \"合集＋重点单条\"\n      - heading \"重点单条\" [level=3]\n      - paragraph: 每个选题独立成片；最多 5 条\n      - paragraph: 1.25 倍 · 信息动态图文 · 按内容决定时长\n      - generic: 创建后可以分别修改每个输出的选题、时长、声音和速度。\n      - button \"上一步\"\n      - button \"下一步\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W10 regression weekly first manual",
+    "yes": [
+      "每周三 10:00",
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [
+      "11/04 10:00"
+    ],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\" [selected]\n          - option \"最近 7 天\"\n          - option \"按当前计划补跑最近完整时段\"\n        - term: 本次材料窗口\n        - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 重点单条\n        - term: 自动计划\n        - definition: 每周三 10:00\n        - generic: 手动运行默认读取最近 24 小时；本次选择不修改周期计划。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W11 explicit weekly history restored",
+    "yes": [
+      "11/04 10:00 → 11/11 10:00",
+      "本次明确补跑历史完整时段"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\"\n          - option \"最近 7 天\"\n          - option \"按当前计划补跑最近完整时段\" [selected]\n        - term: 本次材料窗口\n        - definition: 11/04 10:00 → 11/11 10:00（最近完整计划时段）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 重点单条\n        - term: 自动计划\n        - definition: 每周三 10:00\n        - generic: 本次明确补跑历史完整时段，不包含窗口结束后的材料。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W12 submitted matches preview",
+    "yes": [
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 排队中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 0 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 等待调度接收\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W13 research",
+    "yes": [
+      "研究中",
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 研究中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 读取材料并研究\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W14 failed keeps frozen window",
+    "yes": [
+      "研究失败",
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 研究失败 · 0/0 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 1 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - text: 研究中止：补材搜索服务额度不足（HTTP 402）。没有创建视频。\n      - paragraph: 先在服务设置中处理额度；原型可模拟恢复后继续。\n      - button \"处理补材服务\"\n      - button \"按原设置重试研究\" [disabled]\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W15 retry uses same window",
+    "yes": [
+      "1 次研究 / 2 次尝试",
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 研究中 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: 尚无报告\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 读取材料并研究\n      - button \"推进模拟执行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W16 finish 0",
+    "yes": [],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 安排输出 · 0/0 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 报告就绪，准备接续启用输出\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W16 finish 1",
+    "yes": [],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 写稿中 · 0/2 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 为每条产物分别写稿；完成后自动进入视频制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"示例：AI 如何帮助研究者缩小实验范围\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"示例：AI 如何帮助研究者缩小实验范围\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"示例：研究团队怎样把 AI 接入实验流程\":\n        - paragraph: 重点单条 · 写稿中\n        - heading \"示例：研究团队怎样把 AI 接入实验流程\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿编写中 → 写稿中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W16 finish 2",
+    "yes": [],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 制作中 · 0/2 条视频完成\n      - button \"返回链路\"\n      - button \"取消本次\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic: 每条视频独立制作\n      - button \"推进模拟执行\"\n      - generic \"查看材料与输出分配\"\n      - region \"示例：AI 如何帮助研究者缩小实验范围\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"示例：AI 如何帮助研究者缩小实验范围\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 制作中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n      - region \"示例：研究团队怎样把 AI 接入实验流程\":\n        - paragraph: 重点单条 · 制作中\n        - heading \"示例：研究团队怎样把 AI 接入实验流程\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 制作中 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W16 finish 3",
+    "yes": [],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 已完成 · 2/2 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"示例：AI 如何帮助研究者缩小实验范围\":\n        - paragraph: 重点单条 · 完成\n        - heading \"示例：AI 如何帮助研究者缩小实验范围\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"示例：研究团队怎样把 AI 接入实验流程\":\n        - paragraph: 重点单条 · 完成\n        - heading \"示例：研究团队怎样把 AI 接入实验流程\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W17 persisted run window",
+    "yes": [
+      "已完成 · 2/2",
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 原型模拟 · 演练批次 1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 已完成 · 2/2 条视频完成\n      - button \"返回链路\"\n      - generic: 原型演练结果，不调用外部研究、补材或视频服务。\n      - term: 本批规则\n      - definition: 链路 v1 · 启动时冻结；当前链路 v1\n      - term: 材料窗口\n      - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n      - term: 研究执行\n      - definition: 1 次研究 / 2 次尝试\n      - term: 报告身份\n      - definition: demo-report-run-104\n      - term: 独立服务\n      - definition: 共享来源发现与积累不随本批取消\n      - generic \"查看材料与输出分配\"\n      - region \"示例：AI 如何帮助研究者缩小实验范围\":\n        - paragraph: 重点单条 · 完成\n        - heading \"示例：AI 如何帮助研究者缩小实验范围\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n      - region \"示例：研究团队怎样把 AI 接入实验流程\":\n        - paragraph: 重点单条 · 完成\n        - heading \"示例：研究团队怎样把 AI 接入实验流程\" [level=3]\n        - generic: 尝试 1\n        - paragraph: 研究报告 → 讲稿已就绪 → 完成 · 按内容定时长\n        - paragraph: 输出设置 v1 · 1.25 倍 · voxcpm_anchor · information_motion\n        - button \"按当前设置生成新版本\"\n        - generic \"版本与执行记录\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W18 scheduled rule unchanged",
+    "yes": [
+      "每周三 10:00",
+      "11/04 10:00 → 11/11 10:00"
+    ],
+    "no": [],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - paragraph: 单条链路 · v1\n      - heading \"科学观察 · 时间窗验收\" [level=1]\n      - paragraph: 启用 · 每周三 10:00 · 1 个视频输出\n      - button \"运行一次\"\n      - button \"复制链路\"\n      - button \"更多管理\"\n      - button \"链路总览\"\n      - button \"来源与研究\"\n      - button \"运行计划\" [pressed]\n      - button \"运行记录\"\n      - button \"内容去向\"\n      - button \"产出预览\"\n      - heading \"运行计划\" [level=2]\n      - button \"修改运行计划\"\n      - term: 研究触发\n      - definition: 每周三 10:00 · Asia/Shanghai\n      - term: 本链状态\n      - definition: 启用\n      - term: 下一次研究\n      - definition: 11/18 10:00\n      - term: 采集范围\n      - definition: 11/04 10:00 → 11/11 10:00（最近完整计划时段）\n      - term: 视频触发\n      - definition: 报告就绪 → 接续启用的输出\n      - term: 错过时段\n      - definition: 跳过，不补跑\n      - term: 失败重试\n      - definition: 2 次（总尝试最多 3 次）\n      - generic: 演练时钟固定在 11/17 14:00，便于核对时间范围。手动运行不会恢复周期。\n      - generic \"独立后台计划\"\n      - button \"暂停整链自动运行\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  },
+  {
+    "name": "W19 manual-only window",
+    "yes": [
+      "11/16 14:00 → 11/17 14:00"
+    ],
+    "no": [
+      "按当前计划补跑最近完整时段"
+    ],
+    "passed": true,
+    "snapshot": "- iframe [active] [id=\"codex-visualization\"]:\n  - generic \"研映生产链交互原型\":\n    - banner:\n      - generic: 研\n      - text: 研映\n      - navigation \"主导航\":\n        - button \"我的链路\"\n        - button \"作品与运行记录\"\n        - button \"共享来源与研究\"\n      - generic: 可交互原型 · 模拟数据\n    - main:\n      - status\n      - region \"运行一次\":\n        - heading \"运行一次\" [level=2]\n        - button \"关闭\"\n        - text: 起点\n        - combobox \"起点\":\n          - option \"重新研究，再制作视频\" [selected]\n          - option \"复用 演练批次 1 的报告\"\n        - text: 本次采集范围\n        - combobox \"本次采集范围\":\n          - option \"最近 24 小时（默认）\" [selected]\n          - option \"最近 7 天\"\n        - term: 本次材料窗口\n        - definition: 11/16 14:00 → 11/17 14:00（最近 24 小时）\n        - term: 时区\n        - definition: Asia/Shanghai\n        - term: 将接续\n        - definition: 重点单条\n        - term: 自动计划\n        - definition: 仅手动\n        - generic: 手动运行默认读取最近 24 小时；本次选择不修改周期计划。\n        - generic: 演练时钟：2026-11-17 14:00。下方批次保存此处展示的窗口，重试不重新计算。\n        - generic \"原型演练场景\"\n        - option \"全部成功\" [selected]\n        - option \"一条视频失败\"\n        - option \"研究补材失败\"\n        - option \"一条讲稿失败\"\n        - option \"没有新内容\"\n        - option \"同一报告已处理\"\n        - button \"开始模拟运行\"\n        - button \"取消\"\n    - contentinfo:\n      - generic: 信息源 → 共享研究 → 视频输出 → 每条作品\n      - generic: 实际配置快照：2026-11-17 · 所有操作仅作用于原型"
+  }
+]

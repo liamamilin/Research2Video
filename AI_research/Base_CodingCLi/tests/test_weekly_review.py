@@ -177,3 +177,54 @@ def test_report_shows_watch_numbers_and_old_reviews_still_render():
             for key in ("watch_measured", "completion", "avg_seconds", "exit3s", "cover_pass"):
                 group.pop(key)
     assert "观看情况" not in markdown(old, "24h")
+
+
+def test_review_compares_cover_styles_by_plays_and_cover_clicks():
+    pub = MONDAY + 12 * H
+    videos = ([_video(f"n{i}", pub, 60, cover="数字封面", watch={"cover_pass": 80.0}) for i in range(3)] +
+              [_video(f"t{i}", pub, 10, cover="标题封面", watch={"cover_pass": 50.0}) for i in range(3)] +
+              [_video("x", pub, 10)])
+    review = wr.review(videos, MONDAY, now=MONDAY + 7 * 86400)
+    groups = {g["value"]: g for g in next(d for d in review["dimensions"] if d["key"] == "cover")["groups"]}
+    assert groups["数字封面"]["median"] == 60 and groups["数字封面"]["cover_pass"] == 80.0
+    assert groups["标题封面"]["cover_pass"] == 50.0 and groups["未标注"]["videos"] == 1
+    assert any(f.startswith("封面样式「数字封面」24 小时中位数 60") for f in review["findings"])
+
+
+def test_cover_style_is_read_from_the_uploaded_cover(tmp_path):
+    import sqlite3
+    from web.services import publish_cover as pc
+    number, title_v2, old = tmp_path / "r1-abc-v2.jpg", tmp_path / "r2-def-v2.jpg", tmp_path / "r3-ghi.jpg"
+    (tmp_path / "r1-abc-copy.json").write_text(json.dumps({"copy": {"big": "差十倍"}}), encoding="utf-8")
+    (tmp_path / "r2-def-copy.json").write_text(json.dumps({"copy": None, "reason": "超时"}), encoding="utf-8")
+    assert [pc.style(str(p)) for p in (number, title_v2, old)] == [pc.NUMBER_LED, pc.TITLE, pc.TITLE]
+    assert pc.style("") == pc.FRAME
+    with sqlite3.connect(tmp_path / "platforms.db") as db:
+        db.execute("CREATE TABLE uploads (render_id TEXT, payload TEXT, status TEXT)")
+        db.executemany("INSERT INTO uploads VALUES (?,?,?)", [("r1", json.dumps({"cover": str(number)}), "PUBLISHED"),
+                                                              ("r4", json.dumps({"cover": ""}), "PUBLISHED"),
+                                                              ("r5", json.dumps({"cover": str(number)}), "FAILED")])
+    assert pc.upload_styles(str(tmp_path)) == {"r1": pc.NUMBER_LED, "r4": pc.FRAME}
+
+
+def test_review_tracks_delivered_materials_and_frozen_programme_separately_from_requests():
+    from core.video.presentation import snapshot
+    version = {'meta': {'prompt_version': 13, 'creative_direction': '三维度比较'}}
+    request = {'image_materials': [{}, {}, {}]}
+    unseen = snapshot(version, request, None)
+    assert unseen['requested_images'] == 3 and unseen['used_images'] is None
+    assert unseen['material_usage'] == '未读取成片分镜'
+    board = {'scenes': [
+        {'component': 'object_showcase', 'props': {'image': {'image_asset_id': 'a'}}},
+        {'component': 'material_collage', 'props': {'images': [{'image_asset_id': 'a'}, {'image_asset_id': 'b'}]}},
+        {'component': 'illustration_scene', 'props': {'layout': 'diagram', 'chapter_index': 1}},
+        {'component': 'illustration_scene', 'props': {'layout': 'diagram', 'chapter_index': 1}}]}
+    used = snapshot(version, request, board)
+    assert used['used_images'] == 2 and used['material_scenes'] == 2 and used['diagram_chapters'] == 1
+    assert used['programme'] == unseen['programme']
+    assert snapshot({'meta': {**version['meta'], 'creative_direction': '新写法'}}, request, board)['programme'] != used['programme']
+    video = _video('visual', MONDAY + 12 * H, 100, programme=used['programme'],
+                   material_usage=used['material_usage'], presentation=used)
+    review = wr.review([video], MONDAY, now=MONDAY + 7 * 86400)
+    assert review['videos'][0]['presentation'] == used
+    assert {'programme', 'material_usage'} <= {d['key'] for d in review['dimensions']}

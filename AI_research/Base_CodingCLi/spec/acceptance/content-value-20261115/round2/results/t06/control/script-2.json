@@ -1,0 +1,269 @@
+{
+  "title": "ChatGPT Plus 每月 20 美元，九项新增里只有两项是真解锁",
+  "sections": [
+    {
+      "title": "九项里，只有两项改了你能做什么",
+      "paragraphs": [
+        {
+          "text": "ChatGPT Plus 的页面上列了九项新增，我逐条对照下来，只有两项是真的让你多做一件事；六项是把同一个额度桶做大一点；还有一项是排队等新功能。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "大家好，我是洛洛，今天我们聊每月 20 美元的 Plus 到底买到什么。帮助页写得很省事：比 Free 有更广的模型和工具访问，20 美元一个月。但那九行字值得一行一行看，因为你现在要决定的是，这张卡刷不刷。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "先说个具体场景。周一早上九点，你手上有一份几十页的行业报告、三段访谈转出来的文字，还有你上个月写的那版结论。你想让 ChatGPT 把这些揉在一起，出一份能直接交给老板的初稿。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "先解决重贴背景这件烦事",
+      "paragraphs": [
+        {
+          "text": "这活放在 Free 里，最烦的动作不是它写得不好，是你每开一个新对话都得重新贴一遍背景。贴到第三次，你自己都懒得贴了，就在旧对话里接着聊，聊到后面它开始记混，你还得回头翻哪句是谁说的。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "九项里，唯一没写 expanded、也没写 more 的，是 Projects、scheduled tasks 和 custom GPTs 这一项。这个措辞我很看重：其余几项要么是“扩大的”，要么是“更复杂的”，只有这项是干干净净列出来的。它是新增的能力，不是把原来的额度放大。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "回到那份报告。你把 PDF、访谈文字、上一版结论放进同一个项目，之后每一次对话都自带这些材料，不用重贴。scheduled tasks 再往前一步：让它每周一早上自动跑一遍，把上周新增的内容整理成一页摘要，你端着咖啡坐到工位的时候，东西已经在那儿了。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第二项真解锁是模型。Plus 能用带 GPT-6 的进阶推理模型，Free 那边你在模型选择器里翻不到这个选项。拆成本结构、对齐三家公司的口径、挑出前后矛盾的地方，靠的是多步推理，不是聊天。所以这项我算进“解锁”：不是同样的活干得更多，是这类活原来根本干不了。",
+          "citations": [
+            "https://chatgpt.com/pricing",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "活往下走，一定会撞到额度墙",
+      "paragraphs": [
+        {
+          "text": "但这份活往下走，一定撞墙。你让它读完报告、逐段核对、画四张图、再改三版。改到第二版，提示词开始变长，你上传的文件开始变多，前面聊过的内容开始被挤出去。这时候卡住你的不是能力，是额度。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "剩下六项基本都在这一层：更多的消息和上传、更强的记忆和上下文、更大额度的深度研究、更多的 Codex 用量、桌面和手机上的 ChatGPT Work，还有图像。图像那项写的是“更复杂更准确”，不是“更多”，可 Pro 那边给的是“无限且更快”，说明 Plus 这边照样是有数的。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的判断很直接：这六项对你有没有用，取决于你有没有天天撞墙。一周撞一次，升上去立刻舒服；一个月才撞一次，你花这 20 美元买到的是一种安心，不是一个变化。价格页自己在这九行底下压了一行小字：Limits apply，限额适用。这是整页最诚实的一句话。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Pro 那页是最好的说明书",
+      "paragraphs": [
+        {
+          "text": "想知道 Plus 的九项里哪些只是额度，看 Pro 那页最快。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "Pro 开头写的是“Plus 的一切，再加”：三档用量自己选、更长的 Codex 和 Work 会话、常驻的 Dot agent、图像无限且更快、最大深度研究、最大记忆和上下文。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "同一件事，Plus 写 expanded，Pro 写 maximum；Plus 写 expanded Codex usage，Pro 写 longer sessions。词换了，东西没换。Plus 卖的是更大的额度桶，Pro 卖的是额度档位由你定。这条线一画清楚，那六项“值不值”就不用纠结了，它们本质上是同一个变量。至于 Pro 那笔每月 API 额度，页面上数字是空的，我不猜。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "这 20 美元怎么花",
+      "paragraphs": [
+        {
+          "text": "还有个容易被忽略的细节：Plus 现在不支持年付，也不能预付几个月。这条看着像限制，其实是给你的——你不用一次押一年。20 美元，一个月，随时停。折成人民币大概一百四五十块，一顿饭多一点。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus",
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的建议不是“先别升”，也不是“赶紧升”，而是拿你自己最重的那份材料，测三件事。一，这份文件 Free 让不让你传，传完读不读得完。二，你的账号在模型选择器里能不能选到那个推理模型。帮助页明确说了，模型可用性和限额会变，以你账号里的 model picker 为准，别拿别人的截图当标准。三，你上周有几个任务是因为额度断掉的。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "前两条就卡住，那 20 美元买的不是额度，是解锁，值。只有第三条偶尔发生，先留在 Free，等你连续两周天天撞墙再说。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "有两种情况我劝你别盯着 Plus 看。你要的是团队一起用，那该看 Business，不是一个人一个月 20 美元的档。你要是已经在跑很长的 Codex 会话、天天贴着上限走，Plus 也救不了你，该看 Pro。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "决定权不在“九”这个数字上",
+      "paragraphs": [
+        {
+          "text": "回到开头那句话：九项里，两项是解锁，六项是额度，一项是早一点拿到新功能。真正决定你升不升的，不是九这个数字，是那份材料能不能被读完、被记住、被接着做下去。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我自己的顺序是：先确认模型和项目这两项你用得上，再确认额度这六项你撞得到。顺序反了，你会为一个更大的桶付钱，却一直没打开水龙头。",
+          "citations": [
+            "https://chatgpt.com/pricing"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你可以想想上周有没有那么一次：你对着对话框重贴第三遍背景，然后叹了口气。那次就是你的答案。评论区可以说说你卡在哪一步，是文件传不上去，还是聊到一半它把前面忘了。我是洛洛，我们下期见。",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1546,
+    "estimated_seconds": 350,
+    "segments": 63,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 1.166,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "九项里，只有两项改了你能做什么",
+        "spoken_length": 213,
+        "budget": 218
+      },
+      {
+        "title": "先解决重贴背景这件烦事",
+        "spoken_length": 358,
+        "budget": 218
+      },
+      {
+        "title": "活往下走，一定会撞到额度墙",
+        "spoken_length": 276,
+        "budget": 218
+      },
+      {
+        "title": "Pro 那页是最好的说明书",
+        "spoken_length": 171,
+        "budget": 217
+      },
+      {
+        "title": "这 20 美元怎么花",
+        "spoken_length": 321,
+        "budget": 217
+      },
+      {
+        "title": "决定权不在“九”这个数字上",
+        "spoken_length": 207,
+        "budget": 217
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2783,
+      "completion_tokens": 5804,
+      "total_tokens": 8587,
+      "cache_read_tokens": 384,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 4023,
+      "cost_usd": 0.0038434,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 69.734,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 6
+  }
+}

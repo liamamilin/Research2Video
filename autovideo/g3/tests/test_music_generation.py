@@ -1,9 +1,11 @@
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 import sys
 import threading
 import time
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -155,3 +157,82 @@ def test_music_stem_download_uses_registered_file_and_range(client):
     assert result.status_code==206 and result.content==raw[:32] and result.headers['content-type']=='audio/wav'
     path.write_bytes(b'corrupted')
     assert client.get(url).status_code==409
+
+
+def test_music_pid_write_failure_still_stops_spawned_process(client, monkeypatch):
+    service = client.app.state.music_generation
+    job = client.post('/api/music-jobs', json={'name': 'PID写入异常'}).json()
+    process = SimpleNamespace(pid=123456)
+    stopped = []
+    monkeypatch.setattr('g3.music_generation.readiness', lambda: {'ready': True})
+    monkeypatch.setattr('g3.music_generation.subprocess.Popen', lambda *a, **kw: process)
+    monkeypatch.setattr('g3.music_generation.stop', lambda child: stopped.append(child))
+    original_update = service.jobs.update
+
+    def update(identity, **values):
+        if values.get('runner_pid') == process.pid:
+            raise sqlite3.OperationalError('database is locked')
+        return original_update(identity, **values)
+
+    monkeypatch.setattr(service.jobs, 'update', update)
+    assert service.run_one(threading.Event())
+    assert stopped == [process]
+    assert service.jobs.get(job['id'])['status'] == 'FAILED'
+
+
+def test_music_cancel_wins_over_failure(client, monkeypatch):
+    service = client.app.state.music_generation
+    job = client.post('/api/music-jobs', json={'name': '取消与失败竞争'}).json()
+
+    def execute(claimed, stop):
+        service.jobs.cancel(claimed['id'])
+        raise OSError('model exited during cancellation')
+
+    monkeypatch.setattr(service, 'execute', execute)
+    assert service.run_one(threading.Event())
+    assert service.jobs.get(job['id'])['status'] == 'CANCELLED'
+    assert service.jobs.get(job['id'])['error_code'] is None
+
+
+def test_music_failure_persistence_is_retried_before_returning(client, monkeypatch):
+    service = client.app.state.music_generation
+    job = client.post('/api/music-jobs', json={'name': '失败状态重试'}).json()
+    attempts = []
+    original_connect = service.jobs.connect
+
+    def connect():
+        attempts.append(True)
+        if len(attempts) == 1:
+            raise sqlite3.OperationalError('database is locked')
+        return original_connect()
+
+    def execute(claimed, stop):
+        monkeypatch.setattr(service.jobs, 'connect', connect)
+        raise OSError('inference failed')
+
+    stop = threading.Event()
+    waits = []
+    monkeypatch.setattr(stop, 'wait', lambda seconds: waits.append(seconds) or False)
+    monkeypatch.setattr(service, 'execute', execute)
+    assert service.run_one(stop)
+    assert service.jobs.get(job['id'])['status'] == 'FAILED'
+    assert waits == [1.0]
+
+
+def test_music_failure_retry_yields_to_shutdown_and_is_recoverable(client, monkeypatch):
+    service = client.app.state.music_generation
+    job = client.post('/api/music-jobs', json={'name': '退出后恢复失败状态'}).json()
+
+    def unavailable(*args, **kwargs):
+        raise sqlite3.OperationalError('database unavailable')
+
+    monkeypatch.setattr(service, 'execute', unavailable)
+    monkeypatch.setattr(service.jobs, 'fail', unavailable)
+    stop = threading.Event()
+    monkeypatch.setattr(stop, 'wait', lambda seconds: True)
+    assert service.run_one(stop)
+    assert service.jobs.get(job['id'])['status'] == 'RUNNING'
+    # Normal startup recovery finalizes the row after storage is available.
+    service.recover()
+    assert service.jobs.get(job['id'])['status'] == 'FAILED'
+    assert service.jobs.get(job['id'])['error_code'] == 'MUSIC_INTERRUPTED'

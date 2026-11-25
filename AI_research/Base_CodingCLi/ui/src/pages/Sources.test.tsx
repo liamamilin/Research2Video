@@ -83,3 +83,21 @@ describe("Sources page", () => {
     expect(await screen.findByRole("alert")).toBeTruthy();
   });
 });
+
+it('scopes source totals, tags, problems and coverage to the current chain', async () => {
+  const scope={key:'tech',name:'科技',job:'monitoring/tech_weekly',outputs:[],script_ids:[]};
+  const body={...BODY,coverage:[
+    {key:'tech',name:'科技覆盖',jobs:['monitoring/tech_weekly'],cells:[],candidates:{}},
+    {key:'economy',name:'经济覆盖',jobs:['monitoring/economy_weekly'],cells:[],candidates:{}},
+  ]};
+  vi.stubGlobal('fetch',vi.fn(async (url:string)=>({ok:true,status:200,statusText:'ok',text:async()=>JSON.stringify(String(url).includes('/scope')?scope:body)}) as Response));
+  render(<MemoryRouter initialEntries={['/sources?chain=tech']}><SourcesPage/></MemoryRouter>);
+  await screen.findByText('IEEE Spectrum');
+  expect(screen.getByRole('button',{name:'全部 1'})).toBeTruthy();
+  expect(screen.getByText('显示 1 / 1')).toBeTruthy();
+  expect(screen.queryByText('BLS')).toBeNull();
+  expect(screen.queryByRole('option',{name:'economy'})).toBeNull();
+  expect(screen.queryByLabelText('引用错误')).toBeNull();
+  expect(screen.getByText(/科技覆盖/)).toBeTruthy();
+  expect(screen.queryByText(/经济覆盖/)).toBeNull();
+});

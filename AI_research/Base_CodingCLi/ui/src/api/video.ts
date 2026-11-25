@@ -1,9 +1,10 @@
+import type { ExperimentMark } from "@/components/ExperimentBadge";
 // 视频文稿：选题 → 研究 → 文稿 → 定稿 → AutoVideo 出片。见 spec/video-scripts.md；
 // 风格、改编和审校见 spec/video-adaptation.md。
 import { api } from "./client";
 import type { UploadTask } from "./platforms";
 
-export type ScriptStatus = "RESEARCHING" | "WRITING" | "PLAN_READY" | "DRAFT" | "APPROVED" | "FAILED";
+export type ScriptStatus = "RESEARCHING" | "WRITING" | "PLAN_READY" | "DRAFT" | "APPROVED" | "FAILED" | "SKIPPED";
 export type Evidence = "CITED" | "UNCITED" | "NEEDS_REVIEW";
 export type RenderStatus =
   | "SUBMITTING"
@@ -276,6 +277,18 @@ export interface ScriptVersion {
   created_at: string;
 }
 
+export interface RenderDiagnostics {
+  steps?: { name: string; label: string; seconds: number | null; status: "ok" | "failed" }[];
+  duration_seconds?: number;
+  scene_count?: number;
+  components?: Record<string, number>;
+  text_card_ratio?: number;
+  captions?: { method?: string; cue_count?: number; fallback_segments?: number };
+  llm?: { model?: string; calls?: number; cost_usd?: number };
+  executor?: string;
+  encoder?: string;
+}
+
 export interface VideoRender {
   id: string;
   script_id: string;
@@ -295,7 +308,7 @@ export interface VideoRender {
   completed_at: string | null;
   created_at: string;
   updated_at?: string;
-  timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number };
+  timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number; diagnostics?: RenderDiagnostics };
   visuals?: import("./screenshots").AutomaticVisuals | null;
 }
 
@@ -306,7 +319,7 @@ export interface VideoScriptSummary {
   content_column_name?: string;
   content_matrix_id?: string;
   source_matrix_id?: string;
-  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
+  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string; experiments?: ExperimentMark[] };
   topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; user_materials?: { mode: "narration" | "adapt" | "research"; revision?: number }; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;
@@ -732,7 +745,7 @@ export const getVideoBoard = (signal?: AbortSignal) => api<VideoBoard>("/api/vid
 /** 自动化异常：自己跑的东西出了问题（批次空跑、Job 失败或被反复重启、周计划没触发、情报轮次失败）。 */
 export interface AutomationAlert {
   key: string;
-  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed" | "matrix_cap" | "matrix_cap_near" | "analytics_off" | "analytics_stale" | "review_saved" | "search_blocked" | "batch_cause" | "analytics_watch";
+  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed" | "matrix_cap" | "matrix_cap_near" | "analytics_off" | "analytics_stale" | "review_saved" | "search_blocked" | "batch_cause" | "analytics_watch" | "experiment";
   at: number;
   title: string;
   detail: string;

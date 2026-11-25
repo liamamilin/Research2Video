@@ -1,0 +1,482 @@
+{
+  "script_id": "2045bd6607094f18bf93575b37e70d53",
+  "version": 1,
+  "title": "12分钟173个来源，ChatGPT的调研能信吗",
+  "sections": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        {
+          "text": "一份市场调研，12分钟翻完173个来源，节目里有人估价，这样的研究值三万美元。可它写的每一条结论，你能不能点开来源核一遍？我是洛洛。今天从这份调研说起，后面还有：把三周没回的邮件排进四象限、免费版ChatGPT和Claude写同一条文案、200条客服工单里错标的那几条，以及5分钟搭一个“AI同事”靠不靠谱。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "先把一个前提说清楚：ChatGPT在国内应用商店下载不到，得用海外账号，还要能访问海外服务的网络，付费也不走国内App。真正在用的人，大多坐在电脑前开网页。Claude也一样，不是手机上能直接装的选项。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "opening"
+    },
+    {
+      "title": "12分钟173个来源",
+      "paragraphs": [
+        {
+          "text": "Kendra Ramirez是一位AI战略顾问，也是Cincy AI for Humans的联合创始人。她在节目里讲自己怎么用ChatGPT的深度研究做竞争分析和市场研究：给一个明确的市场问题，大约12分钟，翻173个来源，产出一份完整的市场研究。节目对话里有人问她这类研究值多少钱，估了个三万美元。这是她自己的使用分享，不是控制变量的实验。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "我的建议是，先别被173这个数字说服。真正要看的是：随机点开十条来源，有几条能打开，有几条真能支持报告里写的那句话。具体怎么试：新开一个对话，选研究模式，输入一个你真关心的市场问题，比如“列出中国播客剪辑工具市场前5个产品、定价、目标用户、最近12个月的重要更新，每个结论给来源链接，另列反证和不确定项”，按下开始计时，导出报告，抽查前10条来源。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "它适合的是调研初稿，也就是先把范围、名单、线索铺出来，省掉你一个个网站翻的时间；不适合直接拿去汇报。173个来源也可能只是堆数量，碰到中文或小市场，信息会明显变薄。我的判断是：每周都有调研需求的人，值得试；一个月才做一次竞品扫描的，先手动来一遍更稳。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "三周未回邮件排四象限",
+      "paragraphs": [
+        {
+          "text": "同一个Kendra，同一个视频里，还有一件更贴日常的事。她把Gmail权限给ChatGPT，跟它说：回看过去三周的邮件，找出我没回复的，然后把这些邮件放进艾森豪威尔矩阵，就是紧急重要、重要不紧急、紧急不重要、不紧急不重要那四格。她的评价是“很快”，而且“确实做了个性化的事”。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "我的建议是先别给发送权限。先用一个脱敏的测试邮箱，只给读权限，连上之后跑一遍，再拿Gmail搜索“is:unread”，一条条对，看它有没有把广告当成待办，有没有把“未读”当成“未回”。这俩不是一回事。跑完你才知道它漏了多少。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "这个用法真正省的是你翻三周收件箱的时间。适合每天要跟进一堆客户和同事的人；邮箱本来就干净、一周没几封要回的，手动翻更快。门槛不在提示词，在你敢不敢把邮箱交出去。先只读、先测试账号、先核对，再谈效率。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "免费版ChatGPT对Claude",
+      "paragraphs": [
+        {
+          "text": "再说个轻的：不登账号、不接数据，就用免费版。视频作者拿免费版ChatGPT和免费版Claude做同题对比，虚构了一家小店Sunnyside Coffee。第一个任务，给新品燕麦奶枫糖拿铁写一条Instagram文案，要求友好、不推销。ChatGPT的版本带了表情，写了浓缩咖啡、燕麦奶和一点枫糖甜味；Claude的版本更短，但加了一个标题，配文里用不上。这位测试者更偏好ChatGPT那条。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "第二个任务：营业时间从早上7点到晚上7点，改成早上7点到下午5点，写邮件通知顾客。ChatGPT回答更快，给出了主题行和邮件开头。两个任务用的都是免费版。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "这不是谁永远更好。同一条提示词，这次ChatGPT更接近能直接发，省一轮改写；Claude更短，但你得自己删标题。我的建议是：你每天要写这种小文案、通知邮件，就先用免费版同题各跑一遍，看哪个少改；一天写不了几条的，免费版够用，不用为这个升级。测试者的偏好是他的偏好，不是排名。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "200条工单错在哪",
+      "paragraphs": [
+        {
+          "text": "小任务看不出大问题，批量活才见真章。视频作者把200条混乱的客服工单交给Claude的Haiku 4.5和ChatGPT的Luna，要求按紧急程度和主题排序。Haiku先完成，几乎每张都对；Luna晚一点，错标了少数更棘手的，尤其是那种“用户很生气，但措辞很礼貌”的工单。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "价格也贴着这一步看：按调用量计费，每百万个token，Haiku输入1美元、输出5美元；Luna输入1美元、输出6美元，基本挨着。同一视频里还有个更值得看的细节：一道模式题，两个模型都答对了。Haiku把解好的网格直接画在窗口里，测试者两秒就能核对；Luna写成一大段文字描述，要读一墙字，在脑子里把网格重新搭一遍。答对了，不等于你能放心用。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "批量分诊可以提效，但不能无人值守。我的建议是先拿50条自己的工单做小测，人工标一遍，看错标集中在哪类；如果也是“礼貌但生气”这种，就在提示词里单独点名这一类，或者这类留给人工。200条全自动跑完很爽，错的那几条要你花时间找回来，这笔账要算进去。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "5分钟搭AI同事",
+      "paragraphs": [
+        {
+          "text": "再往前一步，是让它自己动手。视频作者Vaibhav打开ChatGPT，左侧栏最下面多了Agents，点Create agent，能从20多个模板里选：Chief of Staff、Sales Assistant、Data Analyst、Customer Reply Drafter。他说自己24小时建了两个代理，交给一个设计项目，拿回了“像样的产出”。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "另一份教程里更实用的是权限。桌面端ChatGPT Work有三档：Ask for approval，它要改外部文件或者上网，会先问你；Approve for me，只对它觉得可能不安全的动作问你；Full access，不限制访问互联网和你电脑上的任何文件。模型滑块放中间，对应的是5.6 Soul的中档。我的建议很直接：先用Ask for approval，别一上来给Full access。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 1 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 1 个不在报告可信来源里的引用"
+        },
+        {
+          "text": "模板多，不等于任务能闭环。你要看的是它什么时候停下来问权限，它引用的文件是不是真的存在。适合交给它的是周报草稿这种你能一眼核对的活；不适合的是让它替你发邮件、改合同这种出了错收不回来的活。想试的人，先建一个只读会议记录的周报助手，跑一周，看它编不编——模板多不等于你能放手。",
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "去掉了 2 个不在报告可信来源里的引用",
+          "review_reason": "去掉了 2 个不在报告可信来源里的引用"
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        {
+          "text": "这几件事放一起，我的判断是：ChatGPT的能力边界不在“能不能做”，在“做完你敢不敢直接用”。能核验、能抽查、错了能找回来的任务，值得交给它；核不了、收不回的，先自己来。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "你更愿意先试哪个：花12分钟让它出一份调研初稿，还是把邮箱交给它排未回邮件？评论区说你的选择。觉得有用就点个赞、收藏一下。我是洛洛，我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "closing"
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1967,
+    "estimated_seconds": 444,
+    "segments": 85,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": null,
+    "budget": null,
+    "ratio": null,
+    "status": null,
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期导读",
+        "spoken_length": 206
+      },
+      {
+        "title": "12分钟173个来源",
+        "spoken_length": 390
+      },
+      {
+        "title": "三周未回邮件排四象限",
+        "spoken_length": 279
+      },
+      {
+        "title": "免费版ChatGPT对Claude",
+        "spoken_length": 303
+      },
+      {
+        "title": "200条工单错在哪",
+        "spoken_length": 341
+      },
+      {
+        "title": "5分钟搭AI同事",
+        "spoken_length": 319
+      },
+      {
+        "title": "本期回顾",
+        "spoken_length": 129
+      }
+    ],
+    "dropped_citations": 17,
+    "duration_policy": "content"
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 19799,
+      "completion_tokens": 8400,
+      "total_tokens": 28199,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 6059,
+      "cost_usd": 0.00800985,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [
+      {
+        "from": "deepseek-v4.1-flash",
+        "to": "deepseek-v4.1-flash",
+        "reason": "额度或余额用完",
+        "from_provider": "amr-link.open-design.ai",
+        "to_provider": "opencode.ai"
+      }
+    ],
+    "duration_seconds": 81.885,
+    "generation": "goal_first",
+    "prompt_version": 13,
+    "creative_direction": "栏目：T04 · 实测与能力验证。持续交付：ChatGPT 实际表现怎么样？。\n每项独立内容可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。\n观众前提：国内用户使用 ChatGPT 的现实：国内应用商店下载不到，要有海外账号（海外手机号或海外区 Apple ID、Google Play）和能访问海外服务的网络，付费方式也和国内 App 不同；真正在用的人大多在电脑网页端使用。讲到 ChatGPT 时按这个前提：把使用门槛当作选择的一部分讲清楚，不把它当成手机上和国产 App 并列、能直接下载的选项；和国产产品比较时，先说清各自在国内能不能直接用。\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。\n单项内容创作方向：题材编号 T04；获客作用：建立信任。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。\n\n## 内容组织方式：整期节目\n本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。整期共享开场和收尾，各条之间按需要衔接。每条内容用一个 section，title 为适合导航的短标题，该 section 的 paragraphs 按需要展开背景、具体例子、操作过程、机制、结果与影响。同一内容可以有很多段旁白；不要把每个解释步骤拆成新的内容条目。开场和收尾各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。内容标题最多 24 字，不使用编号，视频自动显示序号。时长由内容决定，配方中单条视频的秒数、分钟数或字数只作历史参考，不作为整期篇幅上限。保留原始材料的具体细节和研究底稿的解释深度。上游结论直接用于讲述。本期素材若围绕同一问题，则按解释层次组织章节，不强行制造无关话题。\n整期总标题由你来写：从本期最值得看的一两条内容里取具体产品和数字，不写日期，也不写栏目名「ChatGPT 实测与能力验证」。日期不写进口播。\n报告中的内容线索：\n1. 12分钟跑173个来源：ChatGPT 深度研究能不能做一份可核验的市场调研？\n2. 把三周未回邮件排成艾森豪威尔矩阵：ChatGPT 连接 Gmail 的使用分享与复现\n3. 同一提示词，ChatGPT 免费版 vs Claude 免费版：一条新品文案和一封营业时间邮件\n4. 200条客服工单分诊：ChatGPT 的“答对了”和“能放心用”是两回事\n5. 5分钟建一个“AI同事”？ChatGPT Agents/Work 的待实测方案",
+    "trusted_urls": 51,
+    "episode": {
+      "mode": "episode",
+      "report_path": "output/chatgpt_acquisition/2026-11-12_t04_testing.md",
+      "publication": {
+        "scheme": "lead-subject/v2",
+        "title": "ChatGPT 实测与能力验证",
+        "label": "ChatGPT 实测与能力验证",
+        "issue_date": "2026-11-12"
+      },
+      "source_items": [
+        {
+          "id": "2026-11-12/CGD1@rb3656407990dd7e5",
+          "title": "12分钟跑173个来源：ChatGPT 深度研究能不能做一份可核验的市场调研？"
+        },
+        {
+          "id": "2026-11-12/CGD2@rb3656407990dd7e5",
+          "title": "把三周未回邮件排成艾森豪威尔矩阵：ChatGPT 连接 Gmail 的使用分享与复现"
+        },
+        {
+          "id": "2026-11-12/CGD3@rb3656407990dd7e5",
+          "title": "同一提示词，ChatGPT 免费版 vs Claude 免费版：一条新品文案和一封营业时间邮件"
+        },
+        {
+          "id": "2026-11-12/CGD4@rb3656407990dd7e5",
+          "title": "200条客服工单分诊：ChatGPT 的“答对了”和“能放心用”是两回事"
+        },
+        {
+          "id": "2026-11-12/CGD5@rb3656407990dd7e5",
+          "title": "5分钟建一个“AI同事”？ChatGPT Agents/Work 的待实测方案"
+        }
+      ],
+      "items": [
+        {
+          "index": 1,
+          "title": "12分钟173个来源",
+          "chapter_index": 1,
+          "paragraphs": 3
+        },
+        {
+          "index": 2,
+          "title": "三周未回邮件排四象限",
+          "chapter_index": 2,
+          "paragraphs": 3
+        },
+        {
+          "index": 3,
+          "title": "免费版ChatGPT对Claude",
+          "chapter_index": 3,
+          "paragraphs": 3
+        },
+        {
+          "index": 4,
+          "title": "200条工单错在哪",
+          "chapter_index": 4,
+          "paragraphs": 3
+        },
+        {
+          "index": 5,
+          "title": "5分钟搭AI同事",
+          "chapter_index": 5,
+          "paragraphs": 3
+        }
+      ]
+    },
+    "polish": {
+      "version": 3,
+      "findings": [],
+      "changes": [],
+      "rejected": [],
+      "usage": {
+        "requests": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "programme_direction": "栏目：T04 · 实测与能力验证。持续交付：ChatGPT 实际表现怎么样？。\n每项独立内容可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。\n观众前提：国内用户使用 ChatGPT 的现实：国内应用商店下载不到，要有海外账号（海外手机号或海外区 Apple ID、Google Play）和能访问海外服务的网络，付费方式也和国内 App 不同；真正在用的人大多在电脑网页端使用。讲到 ChatGPT 时按这个前提：把使用门槛当作选择的一部分讲清楚，不把它当成手机上和国产 App 并列、能直接下载的选项；和国产产品比较时，先说清各自在国内能不能直接用。\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。\n单项内容创作方向：题材编号 T04；获客作用：建立信任。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。",
+    "input_kind": "report_and_original_material",
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "da1a3ebc8371b4ee4a163ada4894082ce4e0b796a2ea455d21cca2e4bafbc7b2",
+      "material_sha256": "1a1f20ed697f0871cb96e8482b2a07a740c0eb77e71ad8fe16266cf68cbeddab",
+      "report_chars": 7311,
+      "material_chars": 55447
+    },
+    "material": {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output/chatgpt_acquisition/2026-11-12_t04_testing.materials-1a1f20ed697f0871.json",
+      "sha256": "1a1f20ed697f0871cb96e8482b2a07a740c0eb77e71ad8fe16266cf68cbeddab",
+      "report_sha256": "da1a3ebc8371b4ee4a163ada4894082ce4e0b796a2ea455d21cca2e4bafbc7b2"
+    },
+    "report_path": "output/chatgpt_acquisition/2026-11-12_t04_testing.md",
+    "written_at": "2026-11-12T08:25:35+0800",
+    "cell": {
+      "recipe": "chatgpt_acquisition",
+      "sha256": "981f9409469db466cb171b80cecc3f8292335c54a14df9e59ac550cb171ba5a6",
+      "cell": "chatgpt-general-explainer-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "chatgpt"
+        },
+        "type": {
+          "key": "explainer"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "general"
+        }
+      },
+      "resolved_sha256": "3adf9411e6239013da81b747b296bbaa2acf273c4b036267aa9e018010f192bb",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "general",
+          "sha256": "0cb36848f9724ed10585e7ddba96a31b632c37a6069777c18f2210dbe2d7168e"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    },
+    "content_context": {
+      "premise": "国内用户使用 ChatGPT 的现实：国内应用商店下载不到，要有海外账号（海外手机号或海外区 Apple ID、Google Play）和能访问海外服务的网络，付费方式也和国内 App 不同；真正在用的人大多在电脑网页端使用。讲到 ChatGPT 时按这个前提：把使用门槛当作选择的一部分讲清楚，不把它当成手机上和国产 App 并列、能直接下载的选项；和国产产品比较时，先说清各自在国内能不能直接用。",
+      "column": "chatgpt_t04_testing",
+      "column_name": "T04 · 实测与能力验证",
+      "type": "comparison",
+      "matrix": "chatgpt_acquisition",
+      "source_matrix": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t04_testing",
+      "revision": "0257050fe3e1bc0a8ff16119984d2859a6060846946d18b37d251baf1d58cc4e",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "promise": "ChatGPT 实际表现怎么样？",
+      "notes": "题材编号 T04；获客作用：建立信任。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。",
+      "content_mode": "episode",
+      "greeting": "",
+      "type_definition": {
+        "key": "comparison",
+        "name": "横评",
+        "promise": "理解多个对象的差异与适用条件",
+        "structure": [
+          "对象",
+          "比较维度",
+          "关键差异",
+          "适用情形"
+        ],
+        "preferred_visuals": [
+          "对比图",
+          "价格卡",
+          "真实画面",
+          "原理图"
+        ]
+      },
+      "render_inheritance": "content_matrix",
+      "render": {
+        "packaging": {
+          "label": "实测与能力验证",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。",
+        "preferred_visuals": [
+          "产品真实截图",
+          "操作步骤",
+          "结果展示",
+          "变化前后对比"
+        ]
+      }
+    }
+  },
+  "created_by": "autopilot",
+  "created_at": "2026-11-12T08:25:35+0800"
+}

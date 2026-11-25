@@ -164,3 +164,23 @@ def test_saved_column_keeps_source_defaults_when_binding_is_removed(video_env):
     matrices.remove(config_dir, "source")
     # A removed source still leaves the saved column's own settings usable.
     assert video_render.create(script)["request"]["production_context"]["matrix"]["id"] == "research-column:model_review"
+
+
+def test_illustration_style_is_a_production_setting_sent_in_the_matrix_layer(video_env, monkeypatch):
+    assert validate({"illustration_style": "geometric"}) == {"illustration_style": "geometric"}
+    for bad in ("Geometric", "../flat", 3, ""):
+        with pytest.raises(ValueError, match="illustration_style"):
+            validate({"illustration_style": bad})
+    script = {**_approved_script(), "production": "economy_illustrated"}
+    config = SimpleNamespace(usable=True, key="economy_illustrated", render={"illustration_style": "geometric"})
+    monkeypatch.setattr(production, "get", lambda *args: config)
+    request = video_render.create(script)["request"]
+    assert request["production_context"]["matrix"] == {
+        "id": "research-production:economy_illustrated", "settings": {"illustration_style": "geometric"}}
+    assert "illustration_style" not in request  # AutoVideo resolves it from the layer
+
+
+def test_png_artifacts_are_downloadable_names():
+    from core.video.autovideo import ARTIFACT_NAME
+    assert ARTIFACT_NAME.fullmatch("cover-frame.png")
+    assert not ARTIFACT_NAME.fullmatch("../cover-frame.png") and not ARTIFACT_NAME.fullmatch("cover.exe")

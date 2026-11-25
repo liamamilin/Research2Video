@@ -1,6 +1,7 @@
 """Information sources: the registry and how each source has been doing (web/services/source_catalog.py)."""
 
 from __future__ import annotations
+from web.services.chains import mutation
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Literal
@@ -19,13 +20,20 @@ router = APIRouter(prefix="/api/sources", tags=["sources"])
 @router.get("")
 def list_sources(user=Depends(require_viewer)) -> dict:
     """Every registered source with the Jobs that use it and its last fetch; Jobs that name a source the registry lacks."""
+    from web.services import read_cache
+
     paths = get_settings().paths
     try:
-        data = source_catalog.catalog(paths.config_dir, paths.jobs_dir, paths.state_dir)
         snap = source_registry.snapshot()
-        from core.source_coverage import overview
-        return {**data, 'revision': snap['revision'], 'adapters': snap['adapters'],
-                'coverage': overview(paths.config_dir, paths.state_dir)['profiles']}
+        key = (paths.config_dir, paths.jobs_dir, paths.state_dir, snap["revision"])
+
+        def _compute() -> dict:
+            data = source_catalog.catalog(paths.config_dir, paths.jobs_dir, paths.state_dir)
+            from core.source_coverage import overview
+            return {**data, 'revision': snap['revision'], 'adapters': snap['adapters'],
+                    'coverage': overview(paths.config_dir, paths.state_dir)['profiles']}
+
+        return read_cache.cached("sources_list", key, 15.0, _compute)
     except sources.RegistryError as exc:
         raise HTTPException(500, detail=ApiError.make("bad_registry", str(exc))) from exc
 
@@ -54,6 +62,7 @@ class SourceFields(BaseModel):
     spec: str | None = None
     tags: list[str] | None = None
     note: str | None = None
+    enabled: bool | None = None
 
 
 class SourceChange(BaseModel):
@@ -67,10 +76,13 @@ class SourceCreate(SourceChange):
 
 
 def _change(action, key, body, user):
+    from web.services import read_cache
+
     try:
         result = source_registry.change(action, key, body.fields.model_dump(exclude_none=True), body.expected_revision)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+    read_cache.invalidate("sources_list")
     audit.log('source_' + action, user=user['username'], target=key, details={'used_by': result['used_by'], 'backup': result['backup']})
     return result
 
@@ -85,15 +97,18 @@ def get_source(key: str, user=Depends(require_viewer)) -> dict:
 
 
 @router.post('', status_code=201)
+@mutation
 def create_source(body: SourceCreate, user=Depends(require_editor)) -> dict:
     return _change('create', body.id, body, user)
 
 
 @router.patch('/{key}')
+@mutation
 def update_source(key: str, body: SourceChange, user=Depends(require_editor)) -> dict:
     return _change('update', key, body, user)
 
 
 @router.delete('/{key}')
+@mutation
 def delete_source(key: str, expected_revision: str, user=Depends(require_editor)) -> dict:
     return _change('delete', key, SourceChange(expected_revision=expected_revision), user)

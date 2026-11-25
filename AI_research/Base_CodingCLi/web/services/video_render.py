@@ -21,12 +21,13 @@ import json
 import logging
 import os
 import re
+import sqlite3
 import threading
 import time
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from core.config import load_system_config
 from core.fileio import file_lock
@@ -219,8 +220,13 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     return {**publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh), "render_id": used}
 
 
-def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
-    """Record a render of the script's approved version. Does not contact AutoVideo."""
+def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None,
+           record: Optional[Callable[..., dict]] = None) -> dict:
+    """Record a render of the script's approved version. Does not contact AutoVideo.
+
+    ``record`` replaces ``store.create_render`` for a caller that needs the request without a render row: the A/B
+    preview (core/experiments/preview.py), whose output must never become a publishable render.
+    """
     if (script.get('topic') or {}).get('local_video'):
         raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     version_no = script.get("approved_version")
@@ -231,6 +237,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         raise RenderError("找不到定稿版本，请重新选择文稿版本")
     from core.video.article_writer import readiness
     if problem := readiness(version):
+        raise RenderError(problem)
+    from core.video.narration_stance import narration_problem
+    if problem := narration_problem(version, rendering=True):
         raise RenderError(problem)
     if script.get("topic", {}).get("article"):
         from core.video.articles import ArticleError
@@ -255,7 +264,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         raise RenderError(f"这个栏目不能用视频形式 {form}")
     request: dict[str, Any] = {
         "input_mode": "narration",
-        **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
+        **({"episode": {"items": [{"title": chapter_list[i]["title"], "chapter_indexes": [i]}
             for i, s in enumerate(spoken_sections) if s.get("episode_role", "item") == "item"]}}
             if programme else {}),
         "chapters": chapter_list,
@@ -453,8 +462,8 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         if supplied_images and not materials:
             visuals = {'state': 'pending', 'reason': '准备用户材料画面', 'input_kind': 'user_materials',
                        'material_context': user_context, 'decisions': []}
-        return store.create_render(script["id"], version_no, title=title, source_text=text,
-                                   source_sha256=sha, request=request, visuals=visuals)
+        return (record or store.create_render)(script["id"], version_no, title=title, source_text=text,
+                                               source_sha256=sha, request=request, visuals=visuals)
     except store.ActiveRenderError as exc:
         raise RenderError(str(exc)) from exc
     except screenshots.ScreenshotError as exc:
@@ -470,7 +479,14 @@ def start(render_id: str, *, client: Optional[AutoVideoClient] = None) -> None:
 
     def _target() -> None:
         try:
-            process(render_id, client=client)
+            while True:
+                try:
+                    process(render_id, client=client)
+                    break
+                except sqlite3.OperationalError as exc:
+                    if not _database_busy(exc):raise
+                    logger.warning('Render %s waits for local database; preserving the existing remote task',render_id)
+                    time.sleep(2)
         finally:
             with _running_lock:
                 _running.discard(render_id)
@@ -488,6 +504,10 @@ def resume_active() -> int:
     for render_id in ids:
         start(render_id)
     return len(ids)
+
+
+def _database_busy(exc: Exception) -> bool:
+    return isinstance(exc,sqlite3.OperationalError) and any(word in str(exc).lower() for word in ('locked','busy'))
 
 
 def process(render_id: str, *, client: Optional[AutoVideoClient] = None) -> str:
@@ -512,6 +532,7 @@ def process(render_id: str, *, client: Optional[AutoVideoClient] = None) -> str:
                         _timing(render_id, process_seconds=round(previous.get("process_seconds", 0)
                                                                  + time.monotonic() - started, 3))
             except Exception as exc:  # noqa: BLE001 - a crashed render must not look in-flight
+                if _database_busy(exc):raise
                 logger.exception("video render %s crashed", render_id)
                 return _fail(render_id, "INTERNAL_ERROR", f"{type(exc).__name__}: {exc}")
     except TimeoutError:
@@ -542,7 +563,7 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
     job_id = render["autovideo_job_id"]
     if job_id is None:
         if not render["submit_started_at"]:
-            if (render.get('visuals') or {}).get('input_kind') == 'user_materials':
+            if not render.get("submission_request") and (render.get('visuals') or {}).get('input_kind') == 'user_materials':
                 from web.services.assistant_materials import prepare_render, MaterialPreparationError
                 try:
                     render = prepare_render(render, client)
@@ -558,6 +579,15 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
         if outcome != "COMPLETED":
             return outcome
     return _download(render_id, job_id, client)
+
+
+WAITING_DRAW_THINGS = "WAITING_DRAW_THINGS"
+DRAW_THINGS_RETRY_SECONDS = 300
+DRAW_THINGS_WAIT_SECONDS = 6 * 3600
+
+
+def _sleep(seconds: float) -> None:
+    time.sleep(seconds)
 
 
 def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
@@ -577,14 +607,36 @@ def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
     payload = submission(render)
     if payload.get("input_mode") != "narration":
         payload["source_text"] = render["source_text"]
-    try:
-        created = client.create_job(payload)
-    except AutoVideoUnreachable as exc:
-        logger.warning("render %s: create got no answer (%s); reconciling", render["id"], exc)
-        return _reconcile({**render, "submit_started_at": started.isoformat()}, client)
-    except AutoVideoError as exc:
-        _fail(render["id"], exc.code, exc.message or str(exc))
-        return None
+    waited = 0.0
+    while True:
+        try:
+            created = client.create_job(payload)
+            break
+        except AutoVideoUnreachable as exc:
+            if getattr(exc, "not_sent", False):
+                logger.warning("render %s: AutoVideo unreachable before send (%s)", render["id"], exc)
+                store.update_render(render["id"], submit_started_at=None)
+                _fail(render["id"], "AUTOVIDEO_UNREACHABLE",
+                      f"连不上 AutoVideo（{client.base_url}），请先启动它后再重试。")
+                return None
+            logger.warning("render %s: create got no answer (%s); reconciling", render["id"], exc)
+            return _reconcile({**render, "submit_started_at": started.isoformat()}, client)
+        except AutoVideoError as exc:
+            # Illustrated videos need the local Draw Things app, which is opened by hand. AutoVideo refused before
+            # creating anything, so waiting and asking again cannot duplicate a job.
+            if exc.code == "DRAW_THINGS_NOT_READY" and waited < DRAW_THINGS_WAIT_SECONDS:
+                if not waited:
+                    logger.info("render %s: waiting for Draw Things (%s)", render["id"], exc.message)
+                store.update_render(render["id"], active_stage=WAITING_DRAW_THINGS)
+                _sleep(DRAW_THINGS_RETRY_SECONDS)
+                waited += DRAW_THINGS_RETRY_SECONDS
+                continue
+            if exc.code == "DRAW_THINGS_NOT_READY":
+                _fail(render["id"], exc.code, f"等了 {int(waited // 3600)} 小时 Draw Things 仍未打开：{exc.message}"
+                      "。打开 Draw Things 并开启 HTTP API 后重新出片。")
+            else:
+                _fail(render["id"], exc.code, exc.message or str(exc))
+            return None
     job_id = str(created["job_id"])
     _timing(render["id"], submit_seconds=round(time.monotonic() - timer, 3))
     store.update_render(render["id"], autovideo_job_id=job_id, status=_active(created.get("status")),
@@ -710,9 +762,11 @@ def _download(render_id: str, job_id: str, client: AutoVideoClient) -> str:
             continue
         if not any(a["name"] == "video.mp4" for a in saved):
             return _fail(render_id, "VIDEO_MISSING", "AutoVideo 任务已完成，但没有提供 video.mp4")
+        diagnostics = extract_diagnostics(dest)
         _timing(render_id, download_seconds=round(time.monotonic() - timer, 3),
                 artifact_list_seconds=round(listing_seconds, 3), download_attempts=attempt,
-                download_workers=4, artifacts=[row for _, row in results])
+                download_workers=4, artifacts=[row for _, row in results],
+                **({"diagnostics": diagnostics} if diagnostics else {}))
         store.update_render(render_id, status="COMPLETED", artifacts=saved, error_code=None,
                             error_message=None, completed_at=_now())
         ingest.sweep_async()  # the render's model calls and step timings, read while its files are fresh
@@ -741,12 +795,109 @@ def _parse(value: Any) -> Optional[datetime]:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+_STEP_LOG_RE = re.compile(r"^STEP ([a-z0-9-]+): (PASS|FAIL)(?:\s+in\s+([\d.]+)s|:\s*(.*))?$", re.M)
+_STEP_LABELS = {
+    "prepare-input": "输入准备",
+    "narration-plan": "旁白规划",
+    "tts-and-align": "配音与对齐",
+    "storyboard-plan": "分镜规划",
+    "draw-things-backgrounds": "插画生成",
+    "compile-ir": "编译与字幕",
+    "render": "视频渲染",
+    "verify-media": "质量验收",
+    "package": "片头片尾封装",
+    "mix-background-music": "背景混音",
+    "brand": "品牌包装",
+}
+
+
+def extract_diagnostics(folder: Path) -> dict:
+    """Read compact observability summary from a finished render's local artifacts; never raises."""
+    out: dict[str, Any] = {}
+    try:
+        if not folder.is_dir():
+            return out
+    except OSError:
+        return out
+    try:
+        log_path = folder / "execution-log.txt"
+        if log_path.is_file():
+            steps = []
+            for name, outcome, secs, _detail in _STEP_LOG_RE.findall(log_path.read_text(encoding="utf-8", errors="replace")):
+                steps.append({"name": name, "label": _STEP_LABELS.get(name, name),
+                              "seconds": round(float(secs), 2) if secs else None,
+                              "status": "ok" if outcome == "PASS" else "failed"})
+            if steps:
+                out["steps"] = steps
+    except (OSError, ValueError):
+        pass
+    try:
+        qa_path = folder / "qa.json"
+        if qa_path.is_file():
+            qa = json.loads(qa_path.read_text(encoding="utf-8"))
+            if isinstance(qa.get("video"), dict) and qa["video"].get("duration_seconds") is not None:
+                out["duration_seconds"] = round(float(qa["video"]["duration_seconds"]), 2)
+            if isinstance(qa.get("timeline"), dict) and qa["timeline"].get("scene_count") is not None:
+                out["scene_count"] = int(qa["timeline"]["scene_count"])
+            if isinstance(qa.get("captions"), dict):
+                out["captions"] = {
+                    "method": qa["captions"].get("method") or qa["captions"].get("alignment"),
+                    "cue_count": qa["captions"].get("cue_count"),
+                    "fallback_segments": int(qa["captions"].get("fallback_segments") or 0),
+                }
+    except (OSError, ValueError, TypeError):
+        pass
+    try:
+        for candidate in ("video-ir.json", "storyboard.json"):
+            path = folder / candidate
+            if not path.is_file():
+                continue
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            scenes = doc.get("scenes") if isinstance(doc, dict) else None
+            if isinstance(scenes, list) and scenes:
+                counts: dict[str, int] = {}
+                for scene in scenes:
+                    comp = str(scene.get("component") or "unknown")
+                    counts[comp] = counts.get(comp, 0) + 1
+                out["components"] = dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
+                text_cards = counts.get("concept_reveal", 0) + counts.get("title_card", 0)
+                out["text_card_ratio"] = round(text_cards / len(scenes), 2)
+                break
+    except (OSError, ValueError, TypeError):
+        pass
+    try:
+        cost_path = folder / "model-cost.json"
+        if cost_path.is_file():
+            cost = json.loads(cost_path.read_text(encoding="utf-8"))
+            out["llm"] = {
+                "model": cost.get("model"),
+                "calls": len(cost.get("calls") or []),
+                "cost_usd": round(float(cost.get("peak_uncached_cost_upper_bound_usd") or 0), 4),
+            }
+    except (OSError, ValueError, TypeError):
+        pass
+    try:
+        exec_path = folder / "production-execution.json"
+        if exec_path.is_file():
+            pe = json.loads(exec_path.read_text(encoding="utf-8"))
+            out["executor"] = pe.get("executor")
+            if pe.get("encoder"):
+                out["encoder"] = pe.get("encoder")
+    except (OSError, ValueError, TypeError):
+        pass
+    return out
+
+
 def render_timings(render: dict) -> dict:
-    """Expose measured phase times plus wall-clock creation-to-copy duration."""
+    """Expose measured phase times, cached diagnostics, plus wall-clock creation-to-copy duration."""
     result = dict(render.get("timings") or {})
     started, finished = _parse(render.get("created_at")), _parse(render.get("completed_at"))
     if started and finished:
         result["elapsed_seconds"] = round(max(0, (finished - started).total_seconds()), 3)
+    if "diagnostics" not in result and render.get("status") in ("COMPLETED", "FAILED"):
+        diag = extract_diagnostics(files_dir(render["id"]))
+        if diag:
+            result["diagnostics"] = diag
     return result
 
 
@@ -785,3 +936,35 @@ def safe_file(render: dict, name: str) -> Optional[Path]:
     archived = video_archive.archived_dir(get_settings().paths.config_dir, render["id"])
     path = archived / name if archived else None
     return path if path is not None and path.is_file() else None
+
+
+def file_checker(name: str = "video.mp4") -> Callable[[dict], bool]:
+    """Batch existence check for catalog scans: resolves storage roots once instead of per-row."""
+    if not ARTIFACT_NAME.match(name):
+        return lambda _render: False
+    local_root = Path(get_settings().paths.state_dir) / "video_renders"
+    try:
+        local_ids = set(os.listdir(local_root))
+    except OSError:
+        local_ids = set()
+    conf = video_archive.settings(get_settings().paths.config_dir)
+    archive_root: Optional[Path] = None
+    archive_ids: set[str] = set()
+    if conf is not None and video_archive.mounted(conf["dir"]):
+        archive_root = video_archive.renders_archive(conf["dir"])
+        try:
+            archive_ids = set(os.listdir(archive_root))
+        except OSError:
+            archive_ids = set()
+
+    def _has_file(render: dict) -> bool:
+        if not any(a.get("name") == name for a in render.get("artifacts") or []):
+            return False
+        rid = render["id"]
+        if rid in local_ids and (local_root / rid / name).is_file():
+            return True
+        if archive_root is not None and rid in archive_ids and (archive_root / rid / name).is_file():
+            return True
+        return False
+
+    return _has_file

@@ -1,0 +1,15 @@
+name: 区块链动态
+domain: 区块链动态
+keywords:
+- 区块链协议升级
+- 稳定币与 RWA
+- 监管合规
+- 链上安全
+jobs:
+- chains/blockchain_updates
+render:
+  video_speed: 1.25
+content:
+  name: 区块链动态
+  role: domain
+  status: configured

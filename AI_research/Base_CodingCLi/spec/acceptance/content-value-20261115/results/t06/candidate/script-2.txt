@@ -1,0 +1,13 @@
+每月20美元的Plus，哪些任务能做了，哪些只是额度变大
+
+每月20美元的ChatGPT Plus，最容易被当成“免费版跑得更快”。但我把官方那九项增量拆开看，它真正卖的不是速度，而是三件事：几类任务从不能做变成能做，几项额度被放大，还有一项是早期功能。大家好，我是洛洛，今天我们就把这九项逐条对照，看看哪些会改变你每周的流程，哪些只是让你多传几个文件、多跑几轮研究。官方对Plus的描述是“Everything in Go and:”，后面跟了九项，最后一句是“Limits apply”。我注意到里面“expanded”出现了好几次，这词不是“无限”，是“扩大”。Pro页面也能反证：Plus之上还有三档用量自选、更长Codex和Work会话、最大deep research、最大记忆和上下文，所以Plus不是顶配。对正在考虑Plus的人来说，先别问“值不值”，先问“这九项里哪几项会改我的工作流”。
+
+第一组是Projects、scheduled tasks、custom GPTs。这三项放在一起，不是消息数变多，而是任务类型变了。Projects让你把资料、对话、上下文放进一个项目里；scheduled tasks让重复任务不用每次手动起头；custom GPTs把固定流程封装成可复用的入口。对做资料研究、多步骤项目的人，这比多几百条消息更直接。另一项入口是ChatGPT Work在桌面、网页、手机都能用，官方写的是“expanded access”，意思是跨端覆盖扩大，不是所有端完全一样。还有advanced reasoning models with GPT-6，这是模型入口，但帮助中心提醒，模型可用性和限额会变，要以账号里的model picker为准。
+
+第二组是四个“expanded”：messages and uploads、deep research、memory and context、Codex usage。这四项不改变“能不能做”，改变“一次能做多少、一周能跑几轮”。上传扩大，你一次能塞更多资料；deep research扩大，研究任务能多跑；memory和context扩大，长文档和多步骤项目不容易断片；Codex usage扩大，写代码的人能多用。但官方写的是“expanded”，不是“unlimited”，Pro页面还有“longer Codex and ChatGPT Work sessions”和“maximum memory and context”，说明Plus的额度是中间档。对职场和学习人群，判断标准很简单：你每周是不是真的会因为消息、上传、记忆或Codex用量卡住？卡住，额度就有价值；不卡，这部分对你就是纸面增量。
+
+第三组是“more complex and accurate image creation”，这是图像能力的质量提升，不是单纯额度。第四组是“early access to new features”，早期功能。这两项要分开看：图像质量提升对做内容、做演示的人有用；早期功能适合愿意尝鲜的人，但不适合把稳定工作流押上去。官方也写了“Limits apply”，早期功能不是稳定承诺。
+
+价格条件也要说清楚。Plus是20美元一个月，提供的是ChatGPT网页应用的增强访问。目前Plus不支持年付，也不能预付多月；Go、Plus、Business是月付，Business和Enterprise才有年付，所有付费档按每用户每月计价。所以别把20美元当成可以锁一年的价格，也别把“早期功能”当成买断的权益。
+
+所以我的判断是，Plus这九项里，真正值得你掏钱的不是“更多消息”，而是那几个入口：Projects、scheduled tasks、custom GPTs，加上ChatGPT Work的跨端访问。如果你每周有一个必须跨会话、跨步骤、跨端完成的任务，这笔钱买的是任务解锁；如果你只是免费版消息不够用，先看额度是不是真的卡你，再决定要不要上Plus。模型和限额会变，买之前以你账号里的model picker为准。我是洛洛，我们下期见。

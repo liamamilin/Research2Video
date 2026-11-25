@@ -1,0 +1,15 @@
+{
+  "production_files_checked": 17,
+  "production_files_changed": [],
+  "prototype_bytes": 79456,
+  "prototype_sha256": "56d440c1583e086e85aad5b6d6d7e0410a3cc2a29fd0a02baaa3b99f14452f97",
+  "browser_observations": 78,
+  "visible_assertions": 118,
+  "failed_assertions": [],
+  "prototype_console_errors": [],
+  "formal_tasks_created": 0,
+  "formal_tasks_deleted": 0,
+  "formal_runs_triggered": 0,
+  "external_generation_calls": 0,
+  "prototype_only": true
+}

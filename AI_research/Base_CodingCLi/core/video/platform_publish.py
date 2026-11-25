@@ -98,7 +98,9 @@ def adapt(pack: dict, platform: str, current: dict | None = None) -> dict:
     spec = limits(platform)
     original = deepcopy(current or {k: pack.get(k, [] if k == "tags" else "") for k in ("title", "description", "tags")})
     candidate = deepcopy(original)
-    candidate["title"] = short_title(original.get("title", "").strip(), spec)
+    polished_douyin = str(pack.get("douyin_title") or "").strip() if (platform == "douyin" and current is None) else ""
+    used_polished_douyin = bool(polished_douyin and spec["title_min"] <= count(polished_douyin) <= spec["title_limit"])
+    candidate["title"] = polished_douyin if used_polished_douyin else short_title(original.get("title", "").strip(), spec)
     candidate["tags"] = _tags(original.get("tags", []), spec)
     content = pack.get("content") or {}
     refs = list(pack.get("references") or [])
@@ -140,7 +142,9 @@ def adapt(pack: dict, platform: str, current: dict | None = None) -> dict:
                 candidate = proposal
             else:
                 notes.append("章节时间保留在原发布包中。")
-    if candidate["title"] != original.get("title", ""):
+    if used_polished_douyin:
+        notes.append("标题使用文稿打磨生成的抖音专属短标题。")
+    elif candidate["title"] != original.get("title", ""):
         notes.append("标题使用原题中完整的开头分句，未截断型号或数字。")
     if candidate["tags"] != original.get("tags", []):
         notes.append(f"按本平台规则整理话题，保留 {len(candidate['tags'])} 个。")

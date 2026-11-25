@@ -1,0 +1,17 @@
+[
+  {
+    "path": "AI_research/Base_CodingCLi/core/video/screenshot_ocr.swift",
+    "returncode": 0,
+    "error": "2026-11-15 10:37:38.399 xcodebuild[48483:34242626]  DVTFilePathFSEvents: Failed to start fs event stream.\n2026-11-15 10:37:38.752 xcodebuild[48483:34242624] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 \"Input/output error\". Using NSCachesDirectory instead.\n2026-11-15 10:37:39.520 xcodebuild[48490:34242810]  DVTFilePathFSEvents: Failed to start fs event stream.\n2026-11-15 10:37:39.676 xcodebuild[48490:34242804] [MT] DVTDeveloperPaths: Failed to get length of DARWIN_USER_CACHE_DIR from confstr(3), error = Error Domain=NSPOSIXErrorDomain Code=5 \"Input/output error\". Using NSCachesDirectory instead.\n"
+  },
+  {
+    "path": "autovideo/g3/launcher/AppMain.swift",
+    "returncode": 0,
+    "error": ""
+  },
+  {
+    "path": "autovideo/g3/launcher/Icon.swift",
+    "returncode": 0,
+    "error": ""
+  }
+]

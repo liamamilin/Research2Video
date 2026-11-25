@@ -1,0 +1,134 @@
+{
+  "current_shared_change": {
+    "file": "core/video/question_material.py",
+    "before_sha256": "4215252f373fd54943942454fcdfe9fe58c84a6bdd01bc13c0f31f2599763730",
+    "after_sha256": "a77a96545a9c2e25abbca88611ade1a0b17d2bc93f86ad3f238b896a02ffb403",
+    "change": "remove inherited prose style requirement; keep topic identity; version receipt only"
+  },
+  "author_unchanged": true,
+  "comparisons": [
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r2/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r2/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r1/science/control/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-dossier-r1/culture/control/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/source-dossier-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/source-dossier-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/direct-sources-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/direct-sources-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-sources-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-sources-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-dossier-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-dossier-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-enrich-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/topic-enrich-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": [
+        "core/video/question_material.py"
+      ]
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-style-free-r1/science/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": []
+    },
+    {
+      "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/input-style-free-r1/culture/candidate/input-receipt.json",
+      "status": "DRAFT",
+      "changed_since_run": []
+    }
+  ],
+  "note": "Earlier runs predate the one input-style removal; G runs match current sources. Frozen/replayed input is not live end-to-end research."
+}

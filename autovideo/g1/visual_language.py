@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +22,7 @@ def visuals_schema() -> dict:
             'target': {'type': 'string', 'pattern': r'^(line:[0-3]|side:(left|right)|node:[a-z][a-z0-9_]{0,47})$'},
             'icon': {'enum': [row['id'] for row in vocabulary['objects']]},
             'action': {'enum': ['none', *vocabulary['actions']]},
+            'reveal_phrase': {'type': 'string', 'minLength': 1, 'maxLength': 80},
             'phrase': {'type': 'string', 'minLength': 1, 'maxLength': 80}}}}
 
 
@@ -29,6 +31,17 @@ def component_schema(component: str) -> dict:
     schema = json.loads((ROOT / f'schemas/components/{component}.schema.json').read_text(encoding='utf-8'))
     if component in COMPONENTS:
         schema['properties']['visuals'] = visuals_schema()
+    if component == 'illustration_scene':
+        schema['properties']['layout'] = {'enum': ['scene', 'diagram']}
+    if component == 'flow_diagram':
+        layout = deepcopy(schema['properties']['layout'])
+        layout['properties']['nodes']['minItems'] = 1
+        layout['properties']['edges']['minItems'] = 0
+        schema['properties']['layout_views'] = {'type': 'array', 'maxItems': 255, 'items': {
+            'type': 'object', 'additionalProperties': False, 'required': ['targets', 'layout'],
+            'properties': {'targets': {'type': 'array', 'minItems': 1, 'maxItems': 8,
+                'uniqueItems': True, 'items': {'type': 'string', 'pattern': r'^node:[a-z][a-z0-9_]{0,47}$'}},
+                'layout': layout}}}
     if component == 'bar_chart':
         # The complete unit may be displayed once in the scene heading.
         schema['properties']['unit']['minLength'] = 0

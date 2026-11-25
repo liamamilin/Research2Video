@@ -4,7 +4,10 @@
 
 状态：**第 3 期已做**（2026-10-20）。设计见 `spec/product-redesign.md` 第 2.1 节和第 4 节第 4、8 条。
 
-一个矩阵是一组研究 Job，共用一个**领域**和一套**关键词**。例如「AI 矩阵」「医疗矩阵」。矩阵只负责把 Job 归在一起，并在运行时给它们领域和关键词。运行、停用、改提示词还在各 Job 页，定时还在周期调度页。
+一个矩阵是一组研究 Job 的**分组与运维壳**。例如「AI 视频栏目」「ChatGPT 获客」。矩阵负责：成员名单、暂停、月搜上限、跨矩阵事件避重、视频默认倍速。  
+**报告写法（`{domain}` / `{keywords}`）以各 Job 文件为准**，不再从矩阵注入。矩阵上的 `domain` / `keywords` 仅作分组展示与「换关键词复制」时写入新 Job 的种子。减负约定见 [config-simplification.md](config-simplification.md)。
+
+运行、停用、改提示词还在各 Job 页，定时还在周期调度页。
 
 ## 文件
 
@@ -12,8 +15,8 @@
 
 ```yaml
 name: 医疗矩阵
-domain: 医疗健康            # 提示词里的 {domain}
-keywords: [新药审批, 医保政策] # 成员 Job 的 {keywords} 先放这些，再放 Job 自己的
+domain: 医疗健康            # 分组展示；复制矩阵时写入新 Job 的 domain
+keywords: [新药审批, 医保政策] # 复制时写入新 Job；日常运行不再合并进成员 prompt
 jobs:
   - medical/flash_discovery
   - job: monitoring/ai_flash_discovery
@@ -24,7 +27,7 @@ render:                    # 可选：矩阵内视频的共用默认设置
 paused: [monitoring/ai_flash_discovery]   # 程序写的：整个暂停时停掉定时的 Job，恢复时打开它们，不用手改
 ```
 
-- **成员只记在矩阵文件里**。Job 放进或移出矩阵时，Job 文件一个字都不改。
+- **成员只记在矩阵文件里**。Job 放进或移出矩阵时，不必改 Job 的成员关系字段；但 Job 应自带 `domain` / `keywords`。
 - 一个 Job 只能属于一个矩阵。两个矩阵写了同一个 Job 时，按文件名排在后面的那个会标错，那一行不算数。
 - 视频流水线生成的 Job（`jobs/video/`、`jobs/vod/`）不能放进矩阵。
 - 英文名用小写字母开头，只含小写字母、数字、下划线，最多 24 个字符。
@@ -38,11 +41,12 @@ paused: [monitoring/ai_flash_discovery]   # 程序写的：整个暂停时停掉
 
 研究引擎跑一个成员 Job 时（`core/matrices.py` 的 `for_run`，在 `run_job` 里调用）：
 
-- `{keywords}` 和搜索兜底用的关键词：先放矩阵的，再放 Job 自己的、没重复的（第 4 条：Job 能追加、不能删）。
-- `{domain}`：矩阵的领域。不在矩阵里的 Job，`{domain}` 就是 Job 的名字。
+- 标记 `_matrix`（归属 / 遥测）。
+- `{keywords}`：用 Job 自己的列表；矩阵不再合并。
+- `{domain}`：优先 Job 的 `domain`；未写时才回退矩阵 `domain`；不在矩阵里且无 `domain` 时用 Job 名。
 - **事件记忆**：别的矩阵的 Job 记下的来源，不会出现在这个 Job 的「已报道」列表里。只有别的矩阵记过的才去掉，同时被自己这边记过的照样列出。不在任何矩阵里的 Job，还和以前一样读全部。
 
-这一步只在运行时做，Job 编辑页读的还是 Job 文件本身，所以保存 Job 时不会把矩阵的关键词写进去。
+Job 编辑页读写的是 Job 文件；改矩阵的 `domain`/`keywords` **不会**改变已有成员的报告写法。
 
 ## AI 矩阵
 
@@ -60,7 +64,7 @@ paused: [monitoring/ai_flash_discovery]   # 程序写的：整个暂停时停掉
   - 复制出来的 Job 也带着 `copy_as`，所以可以再复制一次。
 - 新 Job 放在 `jobs/<新英文名>/<模板名>.yaml`，名字是「<领域> <模板标签>」。
   - 输出：`output/<新英文名>/{date}_<模板名>.md`，不会和原来的报告撞。
-  - 不带关键词：关键词来自矩阵。
+  - 新 Job 写入复制表单里的 `domain` 与 `keywords`（自描述，不依赖运行时矩阵注入）。
   - `enabled: true`，周期是手动，没有定时计划：**后台不会跑它，也不花钱**，点运行才跑。只有在命令行直接跑 `python run.py`、不带 Job 名时，它会和别的启用的 Job 一起跑。
 - 原来的 Job 是选题来源的，新 Job 也是，并且自动配好：
   - `alias` 是「<新英文名>_<模板名>」；

@@ -1,0 +1,205 @@
+{
+  "title": "同一句“早晨咖啡”，元宝写成了散文，豆包写成了段子",
+  "sections": [
+    {
+      "title": "同一句提示词，交上来两种东西",
+      "paragraphs": [
+        {
+          "text": "你让两个 AI 写同一句“早晨咖啡”的小红书文案，一个交上来像散文，一个交上来像段子。同一句提示词，出来的根本不是同一种东西。大家好，我是洛洛，今天聊聊腾讯元宝和豆包写小红书文案，到底差在哪。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "任务是同一个：写一段“早晨咖啡”主题的小红书文案，要小清新，150 字。同一时间，分别丢给元宝和豆包。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "元宝交出来的开头是：“清晨 7 点的窗台，第一缕阳光斜斜地洒进来，刚好落在那杯热气腾腾的拿铁上……”后面还有一句：“醒过来的我，抓起耳机和书，把‘今天好像也没什么特别的’过成了‘今天怎么连阳光都温柔’。”标签是 #早晨 #咖啡 #治愈日常。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "豆包交出来的开头是：“一杯燕麦拿铁，叫醒一整天的浪漫～”中间一句：“玻璃杯里的咖啡纹路像极了上班路上的心电图，但只要奶泡足够厚，没有什么是一杯咖啡治不好的。没的话，那就两杯～”标签是 #早安 #早C #咖啡日记。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "散文还是段子，差在句式上",
+      "paragraphs": [
+        {
+          "text": "你细看元宝的句子结构：清晨几点、什么光、落在什么上。动词是“洒”“落”“抓起”，它先给你搭一个画面，最后收在情绪上——“今天怎么连阳光都温柔”。这是散文的写法，读完你觉得被安抚了一下。它给你的第一版，你顶多改两个形容词就能发。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "豆包的句子结构不一样：一杯什么、叫醒什么。它把咖啡纹路比作上班路上的心电图，把喝咖啡和打工人的状态直接挂钩，最后一句“没的话，那就两杯～”是在跟读者搭话，留了一个接评论的口子。这是网感的写法，它的目标不是让你安静下来，是让你想回一句。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "标签也不一样。元宝给的是 #治愈日常，豆包给的是 #咖啡日记、#早C。#早安 对 #早晨，一个是状态词，一个是场景加品类词。你在小红书上搜，后者更容易被当成一个内容池子捞进去。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "所以我的判断很直接：这件事上，别问谁更强。它俩谁都不差，差的是默认语气。元宝的默认是散文，豆包的默认是网感。你拿同一句提示词去问，等于在问“你俩平时说话是什么调”。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "选工具，其实是选默认值",
+      "paragraphs": [
+        {
+          "text": "这就落到你自己的账号上了。如果你做的是慢生活、治愈系、一张安静照片配一段长句，元宝的第一版更接近成稿，你改得少。如果你做的是打工人嘴替、轻松俏皮、评论区比正文还热闹，豆包的第一版更接近，因为它的收尾天生带互动。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一个背景值得说：元宝绑的是微信生态，公众号、视频号、朋友圈那套它熟；豆包绑的是抖音生态，短视频脚本、画面节奏、热点梗它跟得更紧。这俩对个人用户都免费，所以你不用在钱上纠结，你要纠结的是你主要发在哪。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "有人会问，那改提示词不就行了？行，你可以让元宝“更口语化”，也可以让豆包“更高级感”，都能往回拉一点。但你每写一篇都要多搭一句话去扳它的默认值，时间长了你就懒得扳了，最后还是回到那个不用扳的工具上。选工具，很多时候选的就是那个默认值。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "至于 ChatGPT，我的看法是这件事上它不是主角。它的强项在英文和长文，中文网感不是它默认给你的东西。你专门为一条小红书文案去开它，性价比不高。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "回到那句“早晨咖啡”",
+      "paragraphs": [
+        {
+          "text": "所以回到开头的问题：同一句“早晨咖啡”，元宝像散文，豆包像段子，没有谁更懂小红书，只有谁更像你这个账号。这句提示词真正测出来的，不是两个模型谁分高，是它们默认站在哪种语气里说话。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "今晚你可以做一件很小的事：拿你自己账号最近发的一篇文案，用同一句提示词，分别丢给元宝和豆包，看哪个第一版你改得少。改得少的那个，就是你现阶段该用的默认工具。",
+          "citations": [
+            "https://daoark.com/books/yuanbao/appendix-b-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D%E5%AF%B9%E6%AF%94%E5%85%B6%E4%BB%96ai.html"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "你的账号是什么人设？你平时写第一版用哪个？评论区聊聊。我是洛洛，我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1167,
+    "estimated_seconds": 264,
+    "segments": 46,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.878,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "同一句提示词，交上来两种东西",
+        "spoken_length": 304,
+        "budget": 327
+      },
+      {
+        "title": "散文还是段子，差在句式上",
+        "spoken_length": 336,
+        "budget": 326
+      },
+      {
+        "title": "选工具，其实是选默认值",
+        "spoken_length": 345,
+        "budget": 326
+      },
+      {
+        "title": "回到那句“早晨咖啡”",
+        "spoken_length": 182,
+        "budget": 326
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 309708,
+      "completion_tokens": 4485,
+      "total_tokens": 314193,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 2234,
+      "cost_usd": 0.0491472,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 56.13,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "83295285d20da1591f6a74f78573e71e121de497377a79b526f1a4021f5d73e4",
+    "trusted_urls": 1068
+  }
+}

@@ -1,0 +1,65 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_old_completed_video_does_not_block_a_new_approved_version ________
+
+pilot_env = (['3dc38aa610d045aa879cfd5fe6c8e39d'], ['e5498c0858134d0b9c9808fe338eaa9a'])
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x113a0f4f0>
+
+    def test_old_completed_video_does_not_block_a_new_approved_version(pilot_env, monkeypatch):
+        run = batch(monkeypatch, 1)
+        pilot.tick()
+        item = item_of(run["id"], 0)
+        script_id = item["script_id"]
+        draft(script_id)
+        pilot.tick()
+        pilot.tick()
+        old = store.list_renders(script_id)[0]
+        store.update_render(old["id"], status="COMPLETED")
+        draft(script_id)
+        store.update_script(script_id, status="APPROVED", approved_version=2)
+        ap.update_item(item["id"], state="HELD", note="等待新版定稿")
+        ap.update_run(run["id"], status="DONE")
+
+        pilot.tick()
+
+        renders = store.list_renders(script_id)
+>       assert {r["version"] for r in renders} == {1, 2}
+E       assert {1} == {1, 2}
+E
+E         Extra items in the right set:
+E         2
+E         Use -v to get more diff
+
+tests/test_video_autopilot.py:632: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  ai_research.web.video:video_render.py:177 script 3dc38aa610d045aa879cfd5fe6c8e39d: no readable report, so no source card
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-416/test_old_completed_video_does_0/config/system.yaml, using defaults
+WARNING  core.config:config.py:23 system.yaml not found at /private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-416/test_old_completed_video_does_0/config/system.yaml, using defaults
+___________ test_approved_hold_older_than_the_first_fifty_is_resumed ___________
+
+pilot_env = ([], [])
+
+    def test_approved_hold_older_than_the_first_fifty_is_resumed(pilot_env):
+        run = ap.create_run({}, [{"column_key": "flash", "topic": topic(i)} for i in range(51)])
+        for item in run["items"]:
+            ap.update_item(item["id"], state="HELD", note="等待处理")
+        oldest = run["items"][0]
+        script = store.create_script("flash", oldest["topic"])
+        draft(script["id"])
+        store.update_script(script["id"], status="APPROVED", approved_version=1)
+        ap.update_item(oldest["id"], script_id=script["id"])
+        with store.connect(write=True) as db:
+            db.execute("UPDATE autopilot_items SET updated_at=? WHERE id=?",
+                       ("2000-01-01T00:00:00+0800", oldest["id"]))
+        ap.update_run(run["id"], status="DONE")
+
+>       assert pilot.reopen_approved() == 1
+E       assert 0 == 1
+E        +  where 0 = <function reopen_approved at 0x1139efe20>()
+E        +    where <function reopen_approved at 0x1139efe20> = pilot.reopen_approved
+
+tests/test_video_autopilot.py:651: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_video_autopilot.py::test_old_completed_video_does_not_block_a_new_approved_version
+FAILED tests/test_video_autopilot.py::test_approved_hold_older_than_the_first_fifty_is_resumed
+2 failed, 54 deselected in 1.88s

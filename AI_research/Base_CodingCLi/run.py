@@ -280,6 +280,14 @@ def main():
         print("No jobs to run. Use --list to see available jobs.")
         return
 
+    from core.local_proxy import ProxyUnavailableError, ensure_local_proxy
+    try:
+        ensure_local_proxy(sys_cfg)
+    except ProxyUnavailableError as exc:
+        logger.error("local proxy required: %s", exc)
+        print(f"  ✗ local proxy unavailable: {exc}", file=sys.stderr)
+        sys.exit(1)
+
     print(f"\nRunning {len(names)} job(s)...")
     print("=" * 50)
     print(f"Start: {datetime.now():%Y-%m-%d %H:%M:%S}\n")

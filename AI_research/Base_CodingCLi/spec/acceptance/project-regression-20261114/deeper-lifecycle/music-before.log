@@ -1,0 +1,112 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_music_pid_write_failure_still_stops_spawned_process ___________
+
+client = <starlette.testclient.TestClient object at 0x132c80700>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x132c574c0>
+
+    def test_music_pid_write_failure_still_stops_spawned_process(client, monkeypatch):
+        service = client.app.state.music_generation
+        job = client.post('/api/music-jobs', json={'name': 'PID写入异常'}).json()
+        process = SimpleNamespace(pid=123456)
+        stopped = []
+        monkeypatch.setattr('g3.music_generation.readiness', lambda: {'ready': True})
+        monkeypatch.setattr('g3.music_generation.subprocess.Popen', lambda *a, **kw: process)
+        monkeypatch.setattr('g3.music_generation.stop', lambda child: stopped.append(child))
+        original_update = service.jobs.update
+
+        def update(identity, **values):
+            if values.get('runner_pid') == process.pid:
+                raise sqlite3.OperationalError('database is locked')
+            return original_update(identity, **values)
+
+        monkeypatch.setattr(service.jobs, 'update', update)
+        assert service.run_one(threading.Event())
+>       assert stopped == [process]
+E       assert [] == [namespace(pid=123456)]
+E
+E         Right contains one more item: namespace(pid=123456)
+E         Use -v to get more diff
+
+g3/tests/test_music_generation.py:179: AssertionError
+_____________________ test_music_cancel_wins_over_failure ______________________
+
+client = <starlette.testclient.TestClient object at 0x132deb070>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x132d1b8e0>
+
+    def test_music_cancel_wins_over_failure(client, monkeypatch):
+        service = client.app.state.music_generation
+        job = client.post('/api/music-jobs', json={'name': '取消与失败竞争'}).json()
+
+        def execute(claimed, stop):
+            service.jobs.cancel(claimed['id'])
+            raise OSError('model exited during cancellation')
+
+        monkeypatch.setattr(service, 'execute', execute)
+        assert service.run_one(threading.Event())
+>       assert service.jobs.get(job['id'])['status'] == 'CANCELLED'
+E       AssertionError: assert 'FAILED' == 'CANCELLED'
+E
+E         - CANCELLED
+E         + FAILED
+
+g3/tests/test_music_generation.py:193: AssertionError
+__________ test_music_failure_persistence_is_retried_before_returning __________
+
+claimed = {'asset_id': None, 'cancel_requested': False, 'created_at': '2026-11-14T15:33:25.668766+00:00', 'error_code': None, ...}
+stop = <threading.Event object at 0x132ef3820>
+
+    def execute(claimed, stop):
+        monkeypatch.setattr(service.jobs, 'connect', connect)
+>       raise OSError('inference failed')
+E       OSError: inference failed
+
+g3/tests/test_music_generation.py:211: OSError
+
+During handling of the above exception, another exception occurred:
+
+client = <starlette.testclient.TestClient object at 0x132e83f40>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x132de13c0>
+
+    def test_music_failure_persistence_is_retried_before_returning(client, monkeypatch):
+        service = client.app.state.music_generation
+        job = client.post('/api/music-jobs', json={'name': '失败状态重试'}).json()
+        attempts = []
+        original_connect = service.jobs.connect
+
+        def connect():
+            attempts.append(True)
+            if len(attempts) == 1:
+                raise sqlite3.OperationalError('database is locked')
+            return original_connect()
+
+        def execute(claimed, stop):
+            monkeypatch.setattr(service.jobs, 'connect', connect)
+            raise OSError('inference failed')
+
+        stop = threading.Event()
+        waits = []
+        monkeypatch.setattr(stop, 'wait', lambda seconds: waits.append(seconds) or False)
+        monkeypatch.setattr(service, 'execute', execute)
+>       assert service.run_one(stop)
+
+g3/tests/test_music_generation.py:217:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+g3/music_generation.py:64: in run_one
+    self.jobs.update(job['id'],status='FAILED',runner_pid=None,
+g3/music_jobs.py:103: in update
+    with self.connect() as conn:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def connect():
+        attempts.append(True)
+        if len(attempts) == 1:
+>           raise sqlite3.OperationalError('database is locked')
+E           sqlite3.OperationalError: database is locked
+
+g3/tests/test_music_generation.py:206: OperationalError
+=========================== short test summary info ============================
+FAILED g3/tests/test_music_generation.py::test_music_pid_write_failure_still_stops_spawned_process
+FAILED g3/tests/test_music_generation.py::test_music_cancel_wins_over_failure
+FAILED g3/tests/test_music_generation.py::test_music_failure_persistence_is_retried_before_returning
+3 failed, 22 deselected in 0.53s

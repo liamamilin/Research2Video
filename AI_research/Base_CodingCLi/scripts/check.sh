@@ -18,8 +18,11 @@ fi
 echo "== python compile =="
 $PY -m compileall -q core web utils scripts run.py run_web.py
 
+echo "== fixed-data console performance =="
+"$PY" scripts/check_console_performance.py
+
 echo "== unit tests =="
-"$PY" -m pytest tests -q
+"$PY" -m pytest tests -q -m "not console_performance"
 
 echo "== config validation =="
 $PY run.py --validate | tail -1

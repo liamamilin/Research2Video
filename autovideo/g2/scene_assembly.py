@@ -43,7 +43,12 @@ def arrange(groups: list[dict], alignment: dict, saved: dict) -> tuple[list[dict
             current.append(sid)
         if current:
             chunks.append(current)
-        # Keep a short tail with its context when the whole final unit still fits.
+        # Keep a short head or tail chunk with its neighbor when the combined unit still fits,
+        # preventing <minimum-second flash pages inside a split paragraph.
+        if len(chunks) > 1 and duration(chunks[0]) < rhythm['minimum']*1000:
+            joined = chunks[0]+chunks[1]
+            if duration(joined) <= maximum*1.25 and len(joined) <= count+1:
+                chunks[:2] = [joined]
         if len(chunks) > 1 and duration(chunks[-1]) < rhythm['minimum']*1000:
             joined = chunks[-2]+chunks[-1]
             if duration(joined) <= maximum*1.25 and len(joined) <= count+1:

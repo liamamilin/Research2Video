@@ -1,0 +1,152 @@
+{
+ "report": "./output/flash/2026-11-10_ai_flash_discovery.md",
+ "item": "Claude Fable 5.2 降价 20%，但 Claude Code 默认模型和 Copilot 企业开关才是重点",
+ "next_episode": "",
+ "title": "Claude 降价 20%，Copilot 用户却还用不上",
+ "sections": [
+  {
+   "title": "先看你从哪个门进",
+   "paragraphs": [
+    {
+     "text": "Claude 的新模型便宜了两成，可有人今天打开编辑器，模型列表里根本找不到它。同一场发布，三个入口，三道门槛。我是洛洛，这期帮你搞清楚：你用的那个入口，到底变没变。",
+     "citations": [
+      "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "先把对象说清楚。这次是 Claude Fable 5.2，标准 API 价格从每百万 token 输入 10 美元、输出 50 美元，降到 8 美元和 40 美元，正好两成；上下文拉到 100 万 token，输出快了大约 30%。跟它同底的 Mythos 5.2 保留了更完整的网络安全和生物能力，只对通过验证的机构开放。",
+     "citations": [
+      "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+      "https://platform.claude.com/docs/en/about-claude/pricing#model-pricing"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "但这里有个容易漏掉的地方：便宜两成说的是标准价，不是每种用法都便宜。Batch 批量接口是半价，Fast Mode 反过来，价格翻倍，换最高 2.5 倍速度。第三方 Artificial Analysis 的跑分里，Fable 5.2 最高档排第一，峰值单任务成本大约 26.5 美元，是 Opus 5.5 的 2.6 倍。我的判断是：最强和最划算，压根不是一个档位。",
+     "citations": [
+      "https://platform.claude.com/docs/en/about-claude/pricing#model-pricing",
+      "https://www.anthropic.com/claude-fable-and-mythos-5-2"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "Claude Code：你没点升级，默认模型也换了",
+   "paragraphs": [
+    {
+     "text": "第二个入口是 Claude Code。这里变的不是价格，是默认值。更新到 2.1.321 之后，你以前保存的 Fable 5.1 选择会被自动迁到 fable，也就是 5.2。Pro 和 Max 用户立即生效，Team 和 Enterprise 要等组织放行。想切回去，敲 /model claude-fable-5-1。",
+     "citations": [
+      "https://code.claude.com/docs/en/changelog#2-1-321",
+      "https://github.com/anthropics/claude-code/releases/tag/v2.1.321"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "我提醒一句：它不是模型选择器里多了一项，是你的默认模型、计费单价、缓存价格一起换了。缓存读是每百万 token 0.2 美元。所以升级完先看一眼自己在跑什么，尤其是那些本来用 Opus 5.5 就够的活——换到 Fable，反而更贵。官方自己的建议就是日常用 Opus，难任务才上 Fable。",
+     "citations": [
+      "https://code.claude.com/docs/en/changelog#2-1-321",
+      "https://www.anthropic.com/claude-fable-and-mythos-5-2"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "Copilot 企业版：那个开关默认是关的",
+   "paragraphs": [
+    {
+     "text": "第三个入口最像现实里的麻烦。GitHub Copilot 的 Pro+、Max、Business、Enterprise 都能用 Fable 5.2，VS Code、JetBrains、CLI 这些客户端也都覆盖了。但 Business 和 Enterprise 的管理员得先去设置里打开 Claude Fable 5.2 policy，而这个开关默认是关的。",
+     "citations": [
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "打开意味着什么？意味着你确认了数据保留要求：用 Fable 5.2 的时候，Anthropic 会保留 prompts 和 outputs 来跑安全分类器，不用于训练；其他 Claude 模型继续走零数据保留。合格企业到年底有时限豁免，之后还想用，就得走 Enterprise Frontier Safeguards。GitHub 支持判定不了资格，得找客户团队。",
+     "citations": [
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "我的结论：三个入口，三种算法",
+   "paragraphs": [
+    {
+     "text": "把三个入口摆在一起看就有意思了。API 用户拿到的是一张降价单，Claude Code 用户遇到的是默认值被换掉，Copilot 企业用户看到的则是一个默认关闭的开关。同一场发布，同一张价格表，落到你手上的动作完全不一样。",
+     "citations": [
+      "https://www.anthropic.com/claude-fable-and-mythos-5-2",
+      "https://code.claude.com/docs/en/changelog#2-1-321",
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "所以回到开头那个问题，我的结论分三种：个人 Claude Code 用户，升级就当白捡两成降价，但记得把日常任务留给 Opus；API 用户，离线批量走 Batch，别默认开 Fast Mode；企业 Copilot 用户，模型上不上线不取决于 GitHub，取决于你们管理员愿不愿意签那个数据保留。",
+     "citations": [
+      "https://platform.claude.com/docs/en/about-claude/pricing#model-pricing",
+      "https://code.claude.com/docs/en/changelog#2-1-321",
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "你现在是哪一种？是升级就能直接用的个人开发者，还是得等管理员点头的那一边？评论区说一句。觉得有用就点个赞、收藏起来。我是洛洛，我们下期见。",
+     "citations": [
+      "https://github.blog/changelog/2026-11-09-claude-fable-5-2-in-github-copilot"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "length_check": {
+  "spoken_length": 877,
+  "estimated_seconds": 200,
+  "segments": 41,
+  "units_per_second": 4.35,
+  "voice": "voxcpm_anchor",
+  "target_minutes": 1.25,
+  "budget": 326,
+  "ratio": 2.667,
+  "status": "OVER",
+  "tolerance": 0.15,
+  "sections": [
+   {
+    "title": "先看你从哪个门进",
+    "spoken_length": 285,
+    "budget": 82
+   },
+   {
+    "title": "Claude Code：你没点升级，默认模型也换了",
+    "spoken_length": 185,
+    "budget": 82
+   },
+   {
+    "title": "Copilot 企业版：那个开关默认是关的",
+    "spoken_length": 168,
+    "budget": 81
+   },
+   {
+    "title": "我的结论：三个入口，三种算法",
+    "spoken_length": 239,
+    "budget": 81
+   }
+  ],
+  "dropped_citations": 0
+ }
+}

@@ -1,10 +1,11 @@
 name: "AI 模型竞技场"
-description: "本期模型排行与热门模型：智能指数、价格、速度（读 Artificial Analysis、Hugging Face、The Rundown 抓取的内容，不联网搜索）"
+description: "本期模型排行与热门模型：智能指数、价格、速度（读 Artificial Analysis、Hugging Face、The Rundown 抓取的内容，初稿沿用固定材料，选题后按问题补材）"
+domain: AI 与软件开发
 enabled: true
 keywords:
-  - 模型排行
-  - 模型价格
-  - 开源模型
+- 模型排行
+- 模型价格
+- 开源模型
 language: "zh"
 schedule:
   type: "manual"
@@ -14,10 +15,10 @@ runtime:
 search: false
 sources_limit: 20
 sources:
-  - "aa:models"
-  - "hf_models:trending"
-  - "rss:https://www.therundown.ai/feed"
-  - "tag:ai_radar"
+- "aa:models"
+- "hf_models:trending"
+- "rss:https://www.therundown.ai/feed"
+- "tag:ai_radar"
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：研究事情本身，形成供视频作者展开讲述的研究底稿。
@@ -36,3 +37,6 @@ prompt: |
 
   数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
 output: "output/arena/{date}_ai_model_arena.md"
+audience_channel: ai_arena
+content_strategy: audience-v1
+question_material: question-v1

@@ -10,6 +10,7 @@ import { ToastProvider } from "@/lib/toast";
 import { pageLoaders } from "@/lib/page-modules";
 import { PageLoading } from "@/components/PageLoading";
 
+const ChainsPage = lazy(pageLoaders.ChainsPage);
 const DashboardPage = lazy(pageLoaders.DashboardPage);
 const HomeBoardPage = lazy(pageLoaders.HomeBoardPage);
 const TopicsPage = lazy(pageLoaders.TopicsPage);
@@ -69,6 +70,8 @@ function AppRoutes() {
       <Route path="/share/:token" element={<ShareViewPage />} />
       <Route element={<Layout />}>
         <Route index element={<HomeBoardPage />} />
+        <Route path="/chains" element={<ChainsPage />} />
+        <Route path="/chains/:key" element={<ChainsPage />} />
         <Route path="/engine" element={<DashboardPage />} />
         <Route path="/matrices" element={<MatricesPage />} />
         <Route path="/sources" element={<SourcesPage />} />

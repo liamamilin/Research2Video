@@ -31,6 +31,10 @@ class ThemeCreate(ThemeFields):
     category: str = Field(min_length=1, max_length=100)
 
 
+class ThemeUpdate(ThemeFields):
+    category: str | None = Field(default=None, min_length=1, max_length=100)
+
+
 class Start(BaseModel):
     model_config = ConfigDict(extra="forbid")
     auto_video: bool = False
@@ -104,9 +108,29 @@ def used(matrix_key: str, theme_id: str, user=Depends(require_editor)):
 
 
 @router.patch("/{theme_id}")
-def edit(matrix_key: str, theme_id: str, body: ThemeFields, user=Depends(require_editor)):
+def edit(matrix_key: str, theme_id: str, body: ThemeUpdate, user=Depends(require_editor)):
     call(workbench.require_theme, matrix_key, theme_id)
-    return call(workbench.storage().edit, theme_id, **body.model_dump())
+    if body.category is not None and workbench.category(matrix_key, body.category) is None:
+        raise HTTPException(409, "请选择本矩阵的栏目")
+    result = call(workbench.storage().edit, theme_id, **body.model_dump())
+    audit.log("theme_edit", user=user["username"], target=theme_id)
+    return result
+
+
+@router.delete("/{theme_id}")
+def delete(matrix_key: str, theme_id: str, user=Depends(require_editor)):
+    call(workbench.require_theme, matrix_key, theme_id)
+    result = call(workbench.storage().delete, theme_id)
+    audit.log("theme_delete", user=user["username"], target=theme_id)
+    return result
+
+
+@router.post("/{theme_id}/reuse", status_code=201)
+def reuse(matrix_key: str, theme_id: str, user=Depends(require_editor)):
+    call(workbench.require_theme, matrix_key, theme_id)
+    result = call(workbench.storage().reuse, theme_id)
+    audit.log("theme_reuse", user=user["username"], target=result["id"], details={"from": theme_id})
+    return result
 
 
 @router.post("/{theme_id}/dismiss")

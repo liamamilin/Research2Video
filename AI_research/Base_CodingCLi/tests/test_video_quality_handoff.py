@@ -57,8 +57,8 @@ def test_manual_approval_returns_location_and_preserves_the_draft(client, video_
     original = historical_version(script)
     store.update_script(script["id"], status="DRAFT", approved_version=None)
     response = client.post(f"/api/video/scripts/{script['id']}/approve", json={}, headers=_csrf(client))
-    assert response.status_code == 200
-    assert store.get_script(script["id"])["status"] == "APPROVED"
+    assert response.status_code == 409
+    assert store.get_script(script["id"])["status"] == "DRAFT"
     assert store.get_version(script["id"], 1)["sections"] == original["sections"]
 
 

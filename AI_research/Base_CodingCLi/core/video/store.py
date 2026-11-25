@@ -40,6 +40,10 @@ STALE_AFTER_SECONDS = 120
 
 _DB_PATH_OVERRIDE: Optional[str] = None
 _lock = threading.Lock()
+_write_seq = 0
+_cv_lock = threading.Lock()
+_cv_revision: Optional[tuple] = None
+_cv_rows: dict[str, dict] = {}
 
 _SCRIPT_JSON = ("topic", "content_context")
 _VERSION_JSON = ("sections", "length_check", "meta")
@@ -50,9 +54,24 @@ def db_path() -> str:
     return _DB_PATH_OVERRIDE or DB_FILE
 
 
+def _stat_sig(path: str) -> tuple[int, int]:
+    try:
+        st = os.stat(path)
+        return (st.st_mtime_ns, st.st_size)
+    except OSError:
+        return (0, 0)
+
+
+def db_revision() -> tuple:
+    """Fast (~0.01 ms) write/file revision that invalidates on both in-process and external DB writes."""
+    path = db_path()
+    return (path, _write_seq, _stat_sig(path), _stat_sig(path + "-wal"))
+
+
 def set_db_path(path: Optional[str]) -> None:
-    global _DB_PATH_OVERRIDE
+    global _DB_PATH_OVERRIDE, _write_seq
     _DB_PATH_OVERRIDE = path
+    _write_seq += 1
 
 
 def use_state_dir(state_dir: str) -> None:
@@ -61,9 +80,14 @@ def use_state_dir(state_dir: str) -> None:
 
 @contextmanager
 def connect(write: bool = False) -> Iterator[sqlite3.Connection]:
+    global _write_seq
     with sqlite_util.connect(db_path(), write=write) as conn:
         conn.row_factory = sqlite3.Row
-        yield conn
+        try:
+            yield conn
+        finally:
+            if write:
+                _write_seq += 1
 
 
 def _now() -> str:
@@ -197,6 +221,16 @@ def init_db() -> None:
         if "content_context" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_production ON scripts(production,created_at DESC)")
+        for name, definition in (
+            ("idx_scripts_chain_summary", "scripts(production,created_at DESC,id,status,current_version,archived)"),
+            ("idx_scripts_archived_created", "scripts(archived,created_at DESC,id DESC)"),
+            ("idx_script_versions_summary", "script_versions(script_id,version,title)"),
+        ):
+            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='index' AND name=?", (name,)).fetchone():
+                conn.execute(f"CREATE INDEX {name} ON {definition}")
+                conn.execute(f"ANALYZE {name}")
+
         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
             if name not in pub_columns:
@@ -327,7 +361,7 @@ def update_script(script_id: str, **fields: Any) -> None:
 def topic_ids_in_use() -> set[str]:
     """Topic ids that already have a script that did not fail (a roundup covers each of its items)."""
     with connect() as conn:
-        rows = conn.execute("SELECT topic FROM scripts WHERE status != 'FAILED'").fetchall()
+        rows = conn.execute("SELECT topic FROM scripts WHERE status NOT IN ('FAILED', 'SKIPPED')").fetchall()
     ids: set = set()
     for row in rows:
         topic = json.loads(row["topic"])
@@ -340,7 +374,7 @@ def scripts_by_topic() -> dict[str, list[dict]]:
     """Topic id → the scripts that cover it (not failed, newest first), a roundup covering each of its items."""
     with connect() as conn:
         rows = conn.execute("SELECT id, column_key, topic, status, created_at, archived FROM scripts"
-                            " WHERE status != 'FAILED' ORDER BY created_at DESC").fetchall()
+                            " WHERE status NOT IN ('FAILED', 'SKIPPED') ORDER BY created_at DESC").fetchall()
     covered: dict[str, list[dict]] = {}
     for row in rows:
         topic = json.loads(row["topic"])
@@ -577,6 +611,24 @@ def list_rechecks(script_id: str) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def rechecks_by_script(script_ids: list[str]) -> dict[str, list[dict]]:
+    """Batch recheck rows for list/board views without N+1 queries."""
+    ids = list(dict.fromkeys(script_ids))
+    out: dict[str, list[dict]] = {}
+    if not ids:
+        return out
+    with connect() as conn:
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            marks = ",".join("?" for _ in batch)
+            for row in conn.execute(
+                f"SELECT * FROM rechecks WHERE script_id IN ({marks}) ORDER BY created_at DESC, id DESC",
+                batch,
+            ):
+                out.setdefault(row["script_id"], []).append(dict(row))
+    return out
+
+
 def update_recheck(recheck_id: str, **fields: Any) -> None:
     if not fields:
         return
@@ -635,8 +687,10 @@ def add_version(
     now = _now()
     with connect(write=True) as conn:
         context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
-        if context and context[0] != "{}":
-            meta = {**(meta or {}), "content_context": json.loads(context[0])}
+        frozen = json.loads(context[0]) if context and context[0] else {}
+        # An A/B assignment mark alone does not make a context (spec/ab-testing.md §2: arm A stays as today).
+        if any(key != "experiments" for key in frozen):
+            meta = {**(meta or {}), "content_context": frozen}
         current = conn.execute(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]
@@ -695,21 +749,37 @@ def get_version(script_id: str, version: int) -> dict | None:
 
 
 def current_versions(script_ids: list[str]) -> dict[str, dict]:
-    """Current versions for a page, in batches instead of one database connection per row."""
+    """Current versions for a page, cached per db_revision instead of re-decoding all JSON on every request."""
+    global _cv_revision, _cv_rows
     ids = list(dict.fromkeys(script_ids))
-    out: dict[str, dict] = {}
     if not ids:
-        return out
+        return {}
+    rev = db_revision()
+    with _cv_lock:
+        if _cv_revision == rev:
+            missing = [sid for sid in ids if sid not in _cv_rows]
+            if not missing:
+                return {sid: _cv_rows[sid] for sid in ids if _cv_rows[sid] is not None}
+        else:
+            _cv_revision = rev
+            _cv_rows = {}
+            missing = ids
+    fetched: dict[str, Optional[dict]] = {sid: None for sid in missing}
     with connect() as conn:
-        for start in range(0, len(ids), 500):
-            batch = ids[start:start + 500]
+        for start in range(0, len(missing), 500):
+            batch = missing[start:start + 500]
             rows = conn.execute(
                 "SELECT v.* FROM script_versions v JOIN scripts s"
                 " ON v.script_id = s.id AND v.version = s.current_version"
                 f" WHERE s.id IN ({','.join('?' for _ in batch)})", batch,
             )
-            out.update((r["script_id"], _decode(r, _VERSION_JSON)) for r in rows)
-    return out
+            for r in rows:
+                fetched[r["script_id"]] = _decode(r, _VERSION_JSON)
+    with _cv_lock:
+        if _cv_revision == rev:
+            _cv_rows.update(fetched)
+            return {sid: _cv_rows[sid] for sid in ids if _cv_rows.get(sid) is not None}
+    return {sid: row for sid, row in fetched.items() if row is not None}
 
 
 def versions_of(pairs: list[tuple[str, int]]) -> dict[tuple[str, int], dict]:
@@ -830,6 +900,22 @@ def resume_render_download(render_id: str) -> dict | None:
                 "UPDATE renders SET status='DOWNLOADING',error_code=NULL,error_message=NULL,"
                 " completed_at=NULL,updated_at=? WHERE id=? AND status='FAILED'"
                 " AND error_code='DOWNLOAD_FAILED' AND autovideo_job_id IS NOT NULL",
+                (_now(), render_id),
+            ).rowcount
+    except sqlite3.IntegrityError as exc:
+        raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+    return get_render(render_id) if changed else None
+
+
+def resume_unconfirmed_render(render_id: str) -> dict | None:
+    """Retry a SUBMIT_UNCONFIRMED render atomically, keeping its frozen payload and idempotency_key."""
+    try:
+        with connect(write=True) as conn:
+            changed = conn.execute(
+                "UPDATE renders SET status='SUBMITTING',error_code=NULL,error_message=NULL,"
+                " completed_at=NULL,submit_started_at=NULL,updated_at=?"
+                " WHERE id=? AND status='FAILED' AND error_code='SUBMIT_UNCONFIRMED'"
+                " AND autovideo_job_id IS NULL",
                 (_now(), render_id),
             ).rowcount
     except sqlite3.IntegrityError as exc:

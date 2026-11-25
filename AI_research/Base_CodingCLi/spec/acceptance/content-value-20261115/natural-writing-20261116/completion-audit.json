@@ -1,0 +1,288 @@
+{
+  "current_scope": {
+    "status": "verified",
+    "jobs": 74,
+    "matrices": 15,
+    "bindings": 57,
+    "modified_job_files": 45,
+    "archived_jobs_modified": 0,
+    "checked_at": "2026-11-16T08:48:14.045120+00:00",
+    "matched_manifest_files": 91
+  },
+  "individual_reviews": {
+    "status": "verified",
+    "dispositions": {
+      "soft_guidance_adopted_effect_validation_in_progress": 48,
+      "retained_helper_contract": 26
+    },
+    "limit": "26 helper entries reviewed as dispatch/model contracts, not executed as 26 writer jobs",
+    "current_configuration_evidence": "soft-job-reviews.json"
+  },
+  "runtime_prompt_wiring": {
+    "status": "verified for representative real runs and all config bindings",
+    "references": [
+      "wrap-scope.json",
+      "wrap-runtime.json",
+      "optional-roles-runtime.json",
+      "research-brief-scope.json",
+      "research-field-soft-scope.json",
+      "shared-selection-soft-scope.json",
+      "selection-input-trace.json"
+    ],
+    "reverified_composition": "current-binding-audit-route-captures.json",
+    "changed_compositions_since_soft_final_capture": [
+      "ai_media_opensource_digest",
+      "ai_media_business_digest",
+      "ai_media_deep_dive",
+      "ai_media_arena_digest",
+      "chatgpt_t01_product",
+      "chatgpt_t02_scenarios",
+      "chatgpt_t03_tutorials",
+      "chatgpt_t04_testing",
+      "chatgpt_t06_value",
+      "chatgpt_t07_subscription",
+      "chatgpt_t08_troubleshooting",
+      "chatgpt_t09_updates",
+      "company_daily",
+      "company_weekly",
+      "consumer_daily",
+      "consumer_weekly",
+      "culture_daily",
+      "culture_weekly",
+      "economy_daily",
+      "economy_weekly",
+      "geography_daily",
+      "geography_weekly",
+      "history_daily",
+      "history_weekly",
+      "industry_daily",
+      "industry_weekly",
+      "flash_daily",
+      "science_daily",
+      "science_weekly",
+      "software_daily",
+      "software_weekly",
+      "tech_daily",
+      "tech_weekly"
+    ],
+    "active_service_pid": 35133,
+    "latest_active_selector": 7
+  },
+  "real_manuscript_content": {
+    "status": "supported for identified constraint/input changes, with specific remaining flaws",
+    "references": [
+      "ORIGINAL-FEEDBACK-FINAL-REVIEW.txt",
+      "LATE-HOLDOUT-REVIEW.txt",
+      "SOFT-REVIEW.txt",
+      "input-comparison.html",
+      "t05-kept-item-runtime.json",
+      "author-input-dedup-runtime.json",
+      "flash-same-supply-runtime.json"
+    ]
+  },
+  "fresh_flash_research_through_author": {
+    "status": "verified in an ordinary collection using actual delivery history",
+    "references": [
+      "flash-live-runtime.json",
+      "INPUT-FOCUS-REVIEW.txt"
+    ],
+    "pending": null,
+    "latest_actual_collection": {
+      "status": "DRAFT",
+      "session": 42364,
+      "handle_checked": "exited 0",
+      "reference": "flash-warm-runtime.json"
+    }
+  },
+  "controlled_flash_research": {
+    "status": "three first research calls reviewed with identical full source supply",
+    "references": [
+      "flash-research-prompt-runtime.json",
+      "INPUT-FOCUS-REVIEW.txt"
+    ],
+    "limitations": "one research sample; no script generated from flexible_fields variant"
+  },
+  "regression": {
+    "status": "verified relevant paths",
+    "manifest_files": 91,
+    "references": [
+      "SOFT-VALIDATION.txt",
+      "current-validation.json"
+    ],
+    "latest_targeted_test_result": "329 passed"
+  },
+  "historical_overclaim": {
+    "status": "corrected",
+    "references": [
+      "PLAN.txt",
+      "REVIEW.txt",
+      "STATUS.txt"
+    ]
+  },
+  "goal_completion": "Verified scoped prompt changes and text generation evidence. Future output quality, voiceover and rendered viewing are not part of the claim.",
+  "shared_selection_softening": {
+    "status": "four matched same-supply manuscripts and actual warm generation recorded; current v7 case separately verified",
+    "reference": "shared-selection-soft-scope.json",
+    "flash_sessions": [
+      95379,
+      62692,
+      69120,
+      84882
+    ],
+    "t05_sessions": [
+      21967,
+      77591,
+      95476
+    ],
+    "runtime": "shared-selection-soft-runtime.json",
+    "activation": "shared-selection-soft-format-activation.json"
+  },
+  "latest_flash_supply_replay": {
+    "status": "Four same-initial-supply Flash manuscripts read; selection, supplemental body, and writer propagation verified",
+    "reference": "flash-same-supply-runtime.json",
+    "current_old_selector_status": "DRAFT",
+    "pending_sessions": [],
+    "latest_warm_handle": null,
+    "latest_warm_result": "flash-warm-runtime.json"
+  },
+  "selection_input_quality_trial": {
+    "status": "verified the one matched writer case; deployed and healthy",
+    "reference": "selection-input-trace.json",
+    "pending_sessions": [],
+    "activation": "selection-input-activation.json"
+  },
+  "masked_order_reread": {
+    "procedure": "Existing complete manuscripts were shuffled separately by topic. Review notes were saved before reading the label mapping. Reviewer had already worked on the project; no independent reviewer claim.",
+    "cases": {
+      "tutorial-A.txt": {
+        "source": "state/acceptance-content-value-20261115/natural-writing-20261116/tutorial-wrap/t03/control/script.txt",
+        "version": "control",
+        "sha256": "5a2164a7b262ee04a7c1c4ce304aff16a1d4246a93bb186b02ff58853b189307",
+        "pre_reveal_notes": "Runs the same three source documents through upload, comparable rows, contradiction review, and traceable briefing. It explicitly separates plausible causes from cited contradictions, but repeats the promised outputs in the opening, result, and recap."
+      },
+      "tutorial-B.txt": {
+        "source": "state/acceptance-content-value-20261115/natural-writing-20261116/tutorial-wrap/t03/candidate/script.txt",
+        "version": "candidate",
+        "sha256": "b9d27110f39c37fdea3a02f9c4ec5296e0326f3a0cc0b58914a3fd00ca058a12",
+        "pre_reveal_notes": "Keeps the same shop and before/after hours through outline, draft, and correction. The opening describes a concrete weak initial attempt and also announces all stages. It distinguishes a planned compensation from information actually supplied; climax largely repeats the steps."
+      },
+      "science-A.txt": {
+        "source": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-roles/science/control/script.txt",
+        "version": "control",
+        "sha256": "be9dde6b60448e5f0329297441b75203a13bad6cb1079618f6ab04401c73bfd0",
+        "pre_reveal_notes": "Includes more independent stories, gives concrete experimental examples, and tries to bridge them with one idea. Some bridges feel imposed, and the mechanism claims can run past the details actually known."
+      },
+      "science-B.txt": {
+        "source": "state/acceptance-content-value-20261115/natural-writing-20261116/optional-roles/science/candidate/script.txt",
+        "version": "candidate",
+        "sha256": "15cff463d4b20e58cb669815a1baaa5f9bfcd781b41387576e874569f93e94cc",
+        "pre_reveal_notes": "Fewer distinct strands. Gives an example that makes absolute and relative risk intelligible and better distinguishes designs, with a long repeat in the recap. Still makes some firm-sounding causal statements before qualifying them."
+      }
+    },
+    "limits": "Same initial report within each pair. Autoselected example or focus can differ. Quality observations accompany exact request and rollout evidence, not a uniform win."
+  },
+  "ordinary_first_item_current_selector": {
+    "status": "DRAFT; matching raw inputs and full manuscript inspected",
+    "handle": 85272,
+    "started_check": "2026-11-16T09:27:52.516311+00:00",
+    "scope": "Replay one automatically selected warm item via current model-backed selected-source pass and unchanged actual flash_each service; preserve the real collected original texts. Not the whole warm roundup.",
+    "receipt": "state/acceptance-content-value-20261115/natural-writing-20261116/warm-selection-entry/receipt.json",
+    "selector_receipt": {
+      "state": "one item from the actual first automatic selection of fresh sources",
+      "original_capture": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/latest-warm/calls/1794819505193196000-request.json",
+      "file_sha256": "bd0583da37341041a6c8c7422f3d0c65b6107e4f2646667c67c6b8663cc562c5",
+      "job": "monitoring/ai_flash_discovery",
+      "selector_version": 7,
+      "selector_sha256": "688dd0c163f264af964fdf4f9a29e034a0b1af6b9660fe5368d66bbb406640e6",
+      "initial_title": "DeepSeek免费版开始限额：长对话、单次输入和日额度分别卡在哪",
+      "source_ids": [
+        "S26",
+        "S30",
+        "S34",
+        "S38"
+      ],
+      "interventions": [
+        "replay the first-ranked automatic candidate and its actual original documents",
+        "perform the real selected-source pass using the current implementation"
+      ]
+    },
+    "draft": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-warm/script.txt",
+    "draft_sha256": "6ed9f78491f4717ac0ab6ec47e7e7ecd71a3d8869e5d05e97f948ebf46526e92",
+    "author_request": "state/acceptance-content-value-20261115/natural-writing-20261116/flash-live/selection-replay-warm/calls/1794821309667407000-request.json",
+    "conditions_traced": [
+      "不到两小时",
+      "72 小时",
+      "59.2 万亿",
+      "官方公告",
+      "按量计费"
+    ],
+    "quality_observations": [
+      "Direct opening; distinguishes inconsistent user reports, evidence periods and API access conditions.",
+      "Opening introduced an unsupported three-week paper-work anecdote. The actual material only names long-paper users as an affected group."
+    ],
+    "limits": "Current real source-reading step and normal single-news writer from the automatic first warm case; no supplements in this single-item replay. The independently running full roundup includes live supplements."
+  },
+  "contract_surface_comparison": {
+    "nonprompt_differences_from_captured_initial_jobs": [],
+    "job_prompt_files": 45,
+    "manifest_match": true,
+    "jobs": 74,
+    "bindings": 57,
+    "used_profile_jobs": 16,
+    "selector_version": 7
+  },
+  "requirements_verified_at": "2026-11-16T09:43:11.636469+00:00",
+  "requirement_findings": [
+    {
+      "criterion": "All in-use jobs, with manual or unscheduled matrices and in-use helpers; no archived edits",
+      "status": "verified",
+      "evidence": [
+        "JOBS.txt",
+        "soft-job-reviews.json",
+        "current_scope",
+        "contract_surface_comparison"
+      ]
+    },
+    {
+      "criterion": "Distinguish editorial quotas and required phrasing from actual show, operational and data contracts",
+      "status": "verified",
+      "evidence": [
+        "soft-job-reviews.json",
+        "current-binding-audit-route-captures.json",
+        "shared-selection-soft-scope.json",
+        "soft-applied-files.json"
+      ]
+    },
+    {
+      "criterion": "Representative same-material comparisons of different structures preserve details, explanation and usable operations",
+      "status": "verified with documented content limitations",
+      "evidence": [
+        "input-comparison.html",
+        "ORIGINAL-FEEDBACK-FINAL-REVIEW.txt",
+        "LATE-HOLDOUT-REVIEW.txt",
+        "masked_order_reread",
+        "selection-input-trace.json"
+      ]
+    },
+    {
+      "criterion": "Production binding, real collection and research-to-manuscript propagation",
+      "status": "verified at the tested boundaries",
+      "evidence": [
+        "flash-warm-runtime.json",
+        "flash-same-supply-runtime.json",
+        "ordinary_first_item_current_selector",
+        "selection-input-activation.json"
+      ]
+    },
+    {
+      "criterion": "Relevant regressions, retain failed or inconclusive trials, correct the prior overclaim",
+      "status": "verified",
+      "evidence": [
+        "SOFT-VALIDATION.txt",
+        "INPUT-FOCUS-REVIEW.txt",
+        "PLAN.txt",
+        "STATUS.txt"
+      ]
+    }
+  ]
+}

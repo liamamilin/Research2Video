@@ -1,0 +1,229 @@
+Window: "研映 · Research2Video", App: Google Chrome.
+0 标准窗口 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/chains/job-050ab505483c, Secondary Actions: Raise
+	1 container 研映 · Research2Video - 属于“⚡ 页面性能”群组 - Google Chrome - Liam, URL: 127.0.0.1:8775/chains/job-050ab505483c
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 container
+					8 弹出式按钮 查看网站信息
+					9 文本栏 (settable) 地址和搜索栏, Value: http://127.0.0.1:8775/chains/job-050ab505483c, Placeholder: 问问 Google 或输入网址
+					10 按钮 为此标签页添加书签
+				11 container
+					12 弹出式按钮 Ghelper
+					13 弹出式按钮 MetaMask
+可以访问此网站
+					14 弹出式按钮 ChatGPT
+可以访问此网站
+					15 弹出式按钮 扩展程序
+				16 按钮 Liam
+				17 弹出式按钮 完成更新
+			18 工具栏 书签
+				19 工具栏 已保存的标签页分组
+					20 “已保存的标签页分组”按钮 “⚡ 页面性能”分组 - 已打开
+					21 按钮 标签页分组
+				22 分离器 分隔符
+				23 书签文件夹按钮 不常用
+				24 书签文件夹按钮 常用
+				25 书签文件夹按钮 大模型
+				26 书签文件夹按钮 项目
+				27 书签文件夹按钮 数据发现
+				28 书签文件夹按钮 阅读
+				29 书签文件夹按钮 工具
+				30 书签文件夹按钮 所有书签
+				31 分离器 分隔符
+			32 container
+				33 滚动区
+					34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/chains/job-050ab505483c
+						35 container
+							36 标题 研映 · Research2Video, Value: 2
+								37 文本 研映 · Research2Video
+							38 按钮 admin · admin （账号设置）
+							39 container
+								40 link 链路管理, Value: 127.0.0.1:8775/chains
+								41 link 矩阵, Value: 127.0.0.1:8775/matrices?chain=job-050ab505483c
+								42 link 产出, Value: 127.0.0.1:8775/outputs?chain=job-050ab505483c
+								43 link 视频看板, Value: 127.0.0.1:8775/?chain=job-050ab505483c
+								44 link 文稿, Value: 127.0.0.1:8775/video?chain=job-050ab505483c
+								45 link 成片与发布, Value: 127.0.0.1:8775/publish?chain=job-050ab505483c
+								46 link 平台管理, Value: 127.0.0.1:8775/platforms?chain=job-050ab505483c
+								47 link 助手, Value: 127.0.0.1:8775/ask?chain=job-050ab505483c
+								48 文本 研究引擎
+								49 link 研究总览, Value: 127.0.0.1:8775/engine?chain=job-050ab505483c
+								50 link Jobs, Value: 127.0.0.1:8775/jobs?chain=job-050ab505483c
+								51 link 情报轮次, Value: 127.0.0.1:8775/rounds?chain=job-050ab505483c
+								52 link 报告, Value: 127.0.0.1:8775/reports?chain=job-050ab505483c
+								53 link 周期调度, Value: 127.0.0.1:8775/scheduler?chain=job-050ab505483c
+								54 文本 高级
+								55 link 选题, Value: 127.0.0.1:8775/topics?chain=job-050ab505483c
+								56 link 信息源, Value: 127.0.0.1:8775/sources?chain=job-050ab505483c
+								57 link 文稿配方, Value: 127.0.0.1:8775/video-recipes?chain=job-050ab505483c
+								58 link 数据分析, Value: 127.0.0.1:8775/analytics?chain=job-050ab505483c
+								59 link 设置, Value: 127.0.0.1:8775/settings?chain=job-050ab505483c
+							60 按钮 退出
+							61 文本 链路管理 · 信息源、研究、文稿与视频统一管理
+							62 container
+								63 link 全部链路, Value: 127.0.0.1:8775/chains
+								64 标题 AI Flash Discovery, Value: 1
+									65 文本 AI Flash Discovery
+								66 文本 从信息源到视频，在这里管理一条完整的生产流程。
+								67 按钮 刷新链路
+							68 按钮 链路与设置
+							69 按钮 运行记录
+							70 按钮 全部产出
+							71 link 研究任务, Value: 127.0.0.1:8775/jobs/monitoring%2Fai_flash_discovery?chain=job-050ab505483c
+							72 link 所属矩阵, Value: 127.0.0.1:8775/matrices/ai_media?chain=job-050ab505483c
+							73 link 信息源库, Value: 127.0.0.1:8775/sources?chain=job-050ab505483c
+							74 link 周期调度, Value: 127.0.0.1:8775/scheduler?chain=job-050ab505483c
+							75 container
+								76 text 13  项来源
+								77 图像
+								78 文本 AI Flash Discovery
+								79 图像
+								80 text 7  个视频输出
+								81 图像
+								82 text 253  条历史文稿 研究已纳入生产窗口策略。 沿用现有受管周期，由正式调度器执行。 周期：30 7,18 * * *  ·  Asia/Shanghai  ·  已启用 下次研究：2026/11/18 18:30:00
+								83 按钮 修改链路
+								84 按钮 暂停自动制作
+								85 按钮 暂停研究周期
+								86 按钮 归档链路入口
+							87 container
+								88 标题 立即运行这条链路, Value: 2
+									89 文本 立即运行这条链路
+								90 文本 重新读取来源、生成报告，接续当前开启的视频输出。原有结果保留。
+								91 弹出式按钮 本次单条视频数量, Value: 单条最多 1 条
+									92 (selected) 单条最多 1 条
+								93 按钮 (disabled) 运行
+							94 container
+								95 标题 实际采集范围, Value: 2
+									96 文本 实际采集范围
+								97 text 按相邻周期之间的时间范围研究 ，显式来源  13  项。 补充采集： 启用  · 覆盖来源  43  项 · 每次最多再选择  4  个已发现来源。
+								98 开合三角标记 查看额外覆盖来源
+									99 文本 查看额外覆盖来源
+							100 container
+								101 标题 信息来源, Value: 2
+									102 文本 信息来源
+								103 text B站 · AI 热词 启用 bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI
+								104 开合三角标记 来源成员及影响范围
+									105 文本 来源成员及影响范围
+								106 按钮 全局停用此来源
+								107 text ChatGPT Release Notes 启用 page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes
+								108 开合三角标记 来源成员及影响范围
+									109 文本 来源成员及影响范围
+								110 按钮 全局停用此来源
+								111 text OpenAI News 启用 rss:https://openai.com/news/rss.xml
+								112 开合三角标记 来源成员及影响范围
+									113 文本 来源成员及影响范围
+								114 按钮 全局停用此来源
+								115 text ChatGPT Pro Tiers 启用 page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers
+								116 开合三角标记 来源成员及影响范围
+									117 文本 来源成员及影响范围
+								118 按钮 全局停用此来源
+								119 text tag:ai_daily_shared 启用 tag:ai_daily_shared
+								120 开合三角标记 来源成员及影响范围
+									121 文本 来源成员及影响范围
+								122 text github:anthropics/claude-code 启用 github:anthropics/claude-code
+								123 开合三角标记 来源成员及影响范围
+									124 文本 来源成员及影响范围
+								125 text tldr:ai 启用 tldr:ai
+								126 开合三角标记 来源成员及影响范围
+									127 文本 来源成员及影响范围
+								128 text rss:https://www.therundown.ai/feed 启用 rss:https://www.therundown.ai/feed
+								129 开合三角标记 来源成员及影响范围
+									130 文本 来源成员及影响范围
+								131 text hf_models:trending 启用 hf_models:trending
+								132 开合三角标记 来源成员及影响范围
+									133 文本 来源成员及影响范围
+								134 text tag:ai_radar 启用 tag:ai_radar
+								135 开合三角标记 来源成员及影响范围
+									136 文本 来源成员及影响范围
+								137 text tag:ai_news 启用 tag:ai_news
+								138 开合三角标记 来源成员及影响范围
+									139 文本 来源成员及影响范围
+								140 text tag:radar_official 启用 tag:radar_official
+								141 开合三角标记 来源成员及影响范围
+									142 文本 来源成员及影响范围
+								143 text tag:radar_dev 启用 tag:radar_dev
+								144 开合三角标记 来源成员及影响范围
+									145 文本 来源成员及影响范围
+							146 container
+								147 标题 视频输出, Value: 2
+									148 文本 视频输出
+								149 按钮 ＋ 添加输出
+								150 text 盘点 · 开发者 · B 站横屏长 已暂停 独立视频  · 实际速度  1.25  倍 单条参考时长约 4 分钟  · 
+								151 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/ai-developer-roundup-long?chain=job-050ab505483c
+								152 开合三角标记 查看实际生效设置
+									153 文本 查看实际生效设置
+								154 按钮 移除此输出
+								155 text 一个知识点 · 普通用户 · B 站横屏短 已暂停 独立视频  · 实际速度  1.25  倍 单条参考时长约 1.5 分钟  · 
+								156 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/point_short?chain=job-050ab505483c
+								157 开合三角标记 查看实际生效设置
+									158 文本 查看实际生效设置
+								159 按钮 移除此输出
+								160 text 快讯 · 普通用户 · B 站横屏短 已暂停 独立视频  · 实际速度  1.25  倍 单条参考时长约 1.25 分钟  · 
+								161 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/flash?chain=job-050ab505483c
+								162 开合三角标记 查看实际生效设置
+									163 文本 查看实际生效设置
+								164 按钮 移除此输出
+								165 text 快讯 · 开发者 · B 站横屏短 已暂停 独立视频  · 实际速度  1.25  倍 单条参考时长约 1.25 分钟  · 
+								166 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/flash?chain=job-050ab505483c
+								167 开合三角标记 查看实际生效设置
+									168 文本 查看实际生效设置
+								169 按钮 移除此输出
+								170 text 快讯 · 每天（不再调研） 自动制作 合集节目  · 实际速度  1.25  倍 合集片长按内容组织  · 
+								171 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/flash?chain=job-050ab505483c
+								172 开合三角标记 查看实际生效设置
+									173 文本 查看实际生效设置
+								174 按钮 移除此输出
+								175 text 快讯 · 每条一期（不再调研） 自动制作 独立视频  · 实际速度  1.25  倍 单条参考时长约 1.25 分钟  · 
+								176 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/flash?chain=job-050ab505483c
+								177 开合三角标记 查看实际生效设置
+									178 文本 查看实际生效设置
+								179 按钮 移除此输出
+								180 text 一个知识点 · 开发者 · B 站横屏短 已暂停 独立视频  · 实际速度  1.25  倍 单条参考时长约 1.5 分钟  · 
+								181 link 文稿与画面配方, Value: 127.0.0.1:8775/video-recipes/point_short?chain=job-050ab505483c
+								182 开合三角标记 查看实际生效设置
+									183 文本 查看实际生效设置
+								184 按钮 移除此输出
+							185 按钮 让助手处理当前页面
+			186 弹出式按钮 标签页搜索
+			187 container
+				188 标签组
+					189 标签 (settable, boolean) Master of Science in Blockchain | NTU Singapore - 已固定, Value: off
+					190 标签 (settable, boolean) ChatGPT - 已固定, Value: off
+					191 标签 (settable, boolean) ChatGPT - 内存用量高 - 1.0 GB, Value: off
+					192 标签 (settable, boolean) 鹈鹕骑自行车 | AI 考题博物馆 - 闲置标签页 - 已释放 143 MB, Value: off
+					193 标签 (settable, boolean) Cursor Vibe Jam 2026 - 闲置标签页 - 已释放 170 MB, Value: off
+					194 标签 (settable, boolean) OpenCode Console - 闲置标签页 - 已释放 51.1 MB, Value: off
+					195 标签 (settable, boolean) Go | OpenCode - 闲置标签页 - 已释放 73.4 MB, Value: off
+					196 标签 (settable, boolean) 登录 | AutoDL算力云 - 闲置标签页 - 已释放 108 MB, Value: off
+					197 标签 (settable, boolean) 社会机制库 - 闲置标签页 - 已释放 132 MB, Value: off
+					198 标签 (settable, boolean) LLM&Agent 课程 - 闲置标签页 - 已释放 137 MB, Value: off
+					199 标签 (settable, boolean) Open Design Cloud - 闲置标签页, Value: off
+					200 标签 (settable, boolean) Some-Project/个人重要/****** 我的书.md at master · liamamilin/Some-Project - 闲置标签页 - 已释放 74.1 MB, Value: off
+					201 标签 (settable, boolean) liamamilin/ATLAS-METHODS - 闲置标签页 - 已释放 81.1 MB, Value: off
+					202 标签 (settable, boolean) 第 03 章 Python 组织程序的基本工具 · Python 设计模式：从问题到方案 - 闲置标签页 - 已释放 121 MB, Value: off
+					203 标签组 分组“⚡ 页面性能”- 2 个标签页•  研映 · Research2Video•  研映 · Research2Video - 已展开
+					204 标签 (selected, settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: on
+						205 按钮 关闭
+					206 标签 (settable, boolean) 研映 · Research2Video - 属于“⚡ 页面性能”群组, Value: off
+					207 标签 (settable, boolean) Mureka：AI音乐生成器，轻松创作旋律、歌曲与歌词 | 最佳AI作曲平台与音乐创作工具, Value: off
+			208 按钮 新标签页
+			209 按钮 打开 Chrome 中的 Gemini
+	210 关闭按钮
+	211 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	212 最小化按钮
+213 menu bar
+	214 Chrome
+	215 文件
+	216 编辑
+	217 显示
+	218 历史记录
+	219 书签
+	220 个人资料
+	221 标签页
+	222 窗口
+	223 帮助
+
+The focused UI element is 34 HTML 内容 研映 · Research2Video, URL: 127.0.0.1:8775/chains/job-050ab505483c

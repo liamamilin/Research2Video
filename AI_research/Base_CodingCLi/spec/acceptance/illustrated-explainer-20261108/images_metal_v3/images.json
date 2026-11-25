@@ -1,0 +1,54 @@
+{
+ "style": "极简几何",
+ "version": 2,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans steps in through a doorway in cold weather, one hand recoiling from a metal door handle, the other hand resting on the wooden door frame; a thermometer on the wall beside them stays blank., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 31.7,
+   "kind": "scene"
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans stands in a room with a bare forearm, one fingertip pressed against a metal radiator, the other hand held slightly away from it, palm open., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 33.8,
+   "kind": "scene"
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans on the left and young adult with shoulder-length brown hair, wearing a light gray long-sleeve henley shirt and olive-green trousers on the right sit at a kitchen table, each pressing one fingertip onto a different flat slab, one metal, one wood; two plain glasses of water stand between them., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 32.6,
+   "kind": "scene"
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans leans over a kitchen counter pressing a palm flat on a thick metal block, a large plain metal tray and a pot of water beside it; young adult with shoulder-length brown hair, wearing a light gray long-sleeve henley shirt and olive-green trousers in the background touches a thin wooden board., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 31.5,
+   "kind": "scene"
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans sits at a table with one fingertip touching a metal spoon and the other hand resting on a wooden spoon, eyes narrowed slightly as if judging the sensation., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 31.5,
+   "kind": "scene"
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 653350517,
+   "prompt": "Bauhaus-inspired minimal geometric illustration, everything constructed from bold circles, semicircles, rectangles, triangles and straight lines, crisp hard edges, flat solid colors, no gradients, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, stylized figures built from geometric shapes: a circle head without facial details, a trapezoid torso, rectangle limbs, clothes in one solid color block each, young adult with short black hair, wearing a mustard-yellow crewneck sweater and dark navy jeans stands barefoot on a tiled kitchen floor, one foot lifted while the other rests on a small rug; a plain wooden-handled pan sits on the stove nearby., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, wordless picture: every paper, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 31.8,
+   "kind": "scene"
+  }
+ ]
+}

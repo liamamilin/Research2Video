@@ -1,0 +1,33 @@
+# 插画讲解：和「主题讲解」(theme_research.yaml) 并列的新配方，原配方不改。设计见 spec/illustrated-explainer.md。
+# 一段一个画面：每段围绕一个能画出来的情境（几个人在做一件事、或一个象征物），画面由出片环节按段生成。
+# 插画讲解配方：文稿按节写成能画的情境，出片走 AutoVideo 插画讲解形式（output: illustrated）。
+
+name: 插画讲解
+description: 围绕一个知识问题，用几个能画出来的生活情境，把原理一步步讲明白。
+status: enabled
+tags:
+  domain: {key: themes, name: 主题创作}
+  type: {key: illustrated_explainer, name: 插画讲解}
+  format: {key: long, name: B站横屏长}
+audiences: [general]
+target_minutes: 3
+minutes_range: [2, 5]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众, 补充材料]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style: {depth: intro, tone: explainer}
+  style: |
+    从一个看得见却反直觉的日常现象、具体场景、价签或生活动作切入，不要一上来背诵教科书定义。
+    一段对应一个能画出来的具体情境或物件变化，每节只推进一步因果机制：先把眼前看到的变化说准，再扣住背后真正起作用的那一个机制，不把五六个分支概念、英文配置键名或整张算账表硬塞进同一段口播。
+    opening 只抛出反常识疑问，绝不提前把第一节的数字和拆解复述一遍；同一事实或数字全篇只讲一次并保留原小数位。
+    收尾回到开头的具体物件、场景或选择，给观众一句下次碰到同类情况能直接拿来判断的标尺。
+output:
+  use: illustrated
+  packaging:
+    use: common
+    label: 插画讲解

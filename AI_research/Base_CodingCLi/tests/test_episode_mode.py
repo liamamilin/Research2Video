@@ -180,7 +180,9 @@ def test_episode_length_is_measured_but_never_flagged_against_single_item_minute
         column_style=episodes.brief({'content_mode':'episode'}),target_minutes=.5,llm_config=LLMConfig())
     assert written.length_check['status'] is None and written.length_check['budget'] is None
     assert written.length_check['estimated_seconds'] > 0
-    assert '多个独立内容' in llm.calls[0][0]['content']
+    system = llm.calls[0][0]["content"]
+    assert '"episode_role"' in system
+    assert all(role in system for role in ("opening", "item", "closing"))
 
 
 def test_programme_column_keeps_multiple_research_jobs_as_separate_report_suppliers(column_env):

@@ -11,7 +11,8 @@ from dataclasses import dataclass, field
 
 from .length import MAX_MINUTES, MIN_MINUTES
 
-VIDEO_FORMS = ("auto", "information_motion", "process_diagram", "kinetic_typography", "image_slideshow", "chat_dialogue", "information_cards")
+VIDEO_FORMS = ("auto", "information_motion", "process_diagram", "kinetic_typography", "image_slideshow", "chat_dialogue", "information_cards",
+               "illustrated_explainer")
 #: What a script of the column is made from: one topic (single), several items of a discovery report cut into a
 #: list video (roundup), or two subjects set against each other (comparison); see spec/video-matrix.md.
 TOPIC_KINDS = ("single", "roundup", "comparison")

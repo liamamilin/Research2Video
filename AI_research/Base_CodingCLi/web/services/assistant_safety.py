@@ -52,6 +52,27 @@ def _redact(value, secrets: tuple[str, ...]):
     return value
 
 
+_LOOPBACK = {'localhost', '127.0.0.1', '::1'}
+
+
+def allowed_model_url(value) -> bool:
+    """A model address the assistant may set: a known provider preset's, or this machine's.
+
+    Requests to it carry the configured key, and a test call sends one before anything is saved, so text the
+    model read (a fetched page inside a report) must not be able to point it elsewhere. Another service is
+    added on the settings page."""
+    from core.providers import find_provider_by_base_url
+    if value is None:
+        return True
+    if not isinstance(value, str):
+        return False
+    try:
+        host = urlsplit(value).hostname
+    except ValueError:
+        return False
+    return find_provider_by_base_url(value) is not None or (host or '').lower() in _LOOPBACK
+
+
 def validate_patch(patch: dict):
     allowed = {'ai', 'search', 'qa', 'research', 'budget', 'notifications', 'extraction', 'defaults', 'logging', 'cleanup'}
     if not patch or set(patch) - allowed:
@@ -64,14 +85,36 @@ def validate_patch(patch: dict):
             for key, value in data.items():
                 if not isinstance(key, str) or secret_key(key) or key == 'extra_headers':
                     raise ValueError('凭据与请求头请通过受保护输入或设置页修改')
+                if (key == 'base_url' or key.endswith('_base_url')) and not allowed_model_url(value):
+                    raise ValueError('助手只能把模型地址设为已知服务商预设或本机地址；其他地址请在设置页修改')
                 if key.endswith(('_env', '_envs')):
-                    values = value.values() if isinstance(value, dict) else [value]
-                    if any(v is not None and (not isinstance(v, str) or (v and not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', v))) for v in values):
-                        raise ValueError('环境变量字段必须是环境变量名')
+                    # Pointing a field at another variable would send that secret where this field's value goes
+                    # (an SMTP login, a push service). Provider presets fill these in on their own path.
+                    raise ValueError('密钥变量名请在设置页修改；切换模型服务商请用 provider_id')
                 walk(value)
         elif isinstance(data, list):
             for value in data:
                 walk(value)
         elif isinstance(data, str) and data.startswith(('http://', 'https://')) and safe_url(data) != data:
             raise ValueError('URL 不能包含凭据、查询密钥或片段；请使用环境变量配置敏感地址')
+    _check_destinations(patch)
     walk(patch)
+
+
+#: What the assistant may change in sections whose other fields decide where data goes or is written (11-15):
+#: notification servers, recipients and webhooks, the log file and the report folder are set on the settings page.
+_NOTIFICATION_FIELDS = {'enabled', 'notify_on', 'timeout', 'digest', 'max_actions'}
+
+
+def _check_destinations(patch: dict) -> None:
+    def notification(data, path):
+        for key, value in data.items():
+            if isinstance(value, dict):
+                notification(value, path + [key])
+            elif key not in _NOTIFICATION_FIELDS:
+                raise ValueError('通知的服务器、收件人、Webhook 与凭据请在设置页修改：' + '.'.join(path + [key]))
+    notification(patch.get('notifications') or {}, ['notifications'])
+    if set(patch.get('logging') or {}) - {'level'}:
+        raise ValueError('日志文件位置请在设置页修改；助手只能调整日志级别')
+    if 'output_dir' in (patch.get('defaults') or {}):
+        raise ValueError('报告输出目录请在设置页修改')

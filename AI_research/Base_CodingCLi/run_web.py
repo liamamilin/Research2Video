@@ -29,6 +29,15 @@ def cmd_serve(args):
     from web.settings import get_settings
 
     settings = get_settings()
+    # Overseas source fetches need a local Clash/mihomo proxy; warn only so a
+    # missing proxy does not block opening the local console.
+    try:
+        from core.config import load_system_config
+        from core.local_proxy import ensure_local_proxy
+        ensure_local_proxy(load_system_config(settings.paths.config_dir), required=False)
+    except Exception as exc:  # noqa: BLE001 — serve must still start
+        print(f"Warning: local proxy setup failed ({exc}); continuing without it.",
+              file=sys.stderr)
     # With the gateway in front, the app moves to the internal port so exactly
     # one process owns the URL a browser (or a phone) talks to. The env var lets
     # the gateway choose the port without editing config on the fly.

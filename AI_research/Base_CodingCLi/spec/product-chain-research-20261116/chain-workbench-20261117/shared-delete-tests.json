@@ -1,0 +1,4 @@
+{
+  "shared_chain_without_outputs_keeps_research": true,
+  "last_reference_removes_research": true
+}

@@ -63,9 +63,11 @@ def test_missing_icon_reference_is_not_confused_with_a_duplicate(tmp_path):
         validate_video_ir(ir, root)
 
 
-def test_planner_receives_the_actual_five_node_layout_limit():
+def test_planner_uses_registered_flow_capacity_and_id_contract():
     payload = json.loads(explanation.messages({"title": "关系", "groups": []})[1]["content"])
-    assert payload["component_props_schemas"]["flow_diagram"]["properties"]["nodes"]["maxItems"] == 5
+    props = payload["component_props_schemas"]["flow_diagram"]["properties"]
+    assert props["nodes"]["maxItems"] == 8
+    assert props["nodes"]["items"]["properties"]["id"]["pattern"] == "^[a-z][a-z0-9_]{0,23}$"
 
 
 def test_numeric_cues_allow_new_before_old_and_a_spoken_delta_in_words():

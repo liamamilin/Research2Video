@@ -1,0 +1,30 @@
+{
+  "key": "flat",
+  "name": "扁平插画",
+  "version": 2,
+  "for": [
+    "economy",
+    "business",
+    "consumer"
+  ],
+  "prefix": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream,",
+  "characters": "simple rounded characters with round heads, minimal friendly faces, solid color clothes,",
+  "suffix": "uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+  "negative": "text, letters, numbers, words, watermark, logo, photo, realistic, 3d render, complex background, clutter, deformed hands, extra fingers, cropped heads",
+  "params": {
+    "width": 1344,
+    "height": 768,
+    "steps": 4,
+    "guidance_scale": 1,
+    "sampler": "DDIM Trailing"
+  },
+  "seed": "per_video",
+  "palette": {
+    "background": "#f4efe2",
+    "ink": "#16324f",
+    "accent": "#e8833a",
+    "secondary": "#2a8c8c"
+  },
+  "sample": "autovideo/image_style_samples/price_up_0.png",
+  "note": "画风包：只管怎么画；画面内容来自分镜的画面描述。设计见 AREC spec/illustrated-explainer.md §2.2。"
+}

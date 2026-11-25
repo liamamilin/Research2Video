@@ -46,6 +46,7 @@ import hashlib
 import json
 import os
 import re
+import threading
 from dataclasses import dataclass, field, replace
 from typing import Optional
 
@@ -547,9 +548,45 @@ def variant_key(base: Recipe, audience: str) -> str:
     return "-".join(audience if dim == "audience" else base.tags[dim]["key"] for dim in DIMENSIONS)
 
 
+_EXPANDED_CACHE: dict[str, tuple[tuple, dict[str, Recipe]]] = {}
+_EXPANDED_LOCK = threading.Lock()
+
+
+def _expanded_cache_sig(config_dir: str) -> tuple:
+    entries: list[tuple[str, int, int]] = []
+    roots = [
+        recipes_dir(config_dir),
+        os.path.join(config_dir, PARTS_DIR),
+        os.path.join(jobs_dir_for(config_dir), RESEARCH_TEMPLATES),
+    ]
+    for base in roots:
+        if not os.path.isdir(base):
+            continue
+        for root, dirs, files in os.walk(base):
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            for name in files:
+                if name.endswith((".yaml", ".yml")) and not name.startswith("."):
+                    full = os.path.join(root, name)
+                    try:
+                        st = os.stat(full)
+                        entries.append((full, st.st_mtime_ns, st.st_size))
+                    except OSError:
+                        continue
+    entries.sort()
+    return tuple(entries)
+
+
 def expanded(config_dir: str) -> dict[str, Recipe]:
     """Every column there is: each recipe file's own (its first audience) and one more for each other audience it
     offers. A key a file already has is not taken by an audience's version."""
+    use_cache = not _TRYING.get()
+    cache_key = os.path.abspath(config_dir)
+    sig = _expanded_cache_sig(config_dir) if use_cache else ()
+    if use_cache:
+        with _EXPANDED_LOCK:
+            cached = _EXPANDED_CACHE.get(cache_key)
+            if cached is not None and cached[0] == sig:
+                return dict(cached[1])
     every = load(config_dir)
     out = dict(every)
     for key, base in every.items():
@@ -566,7 +603,11 @@ def expanded(config_dir: str) -> dict[str, Recipe]:
             if name not in out:
                 out[name] = parse(name, text, base.path, config_dir, audience=audience, base=key)
     order = {status: i for i, status in enumerate(STATUSES)}
-    return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))
+    result = dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))
+    if use_cache:
+        with _EXPANDED_LOCK:
+            _EXPANDED_CACHE[cache_key] = (sig, dict(result))
+    return result
 
 
 _VARIANT_KEY = re.compile(r"(.+?)(?:-m(\d{1,2})(p5)?)?(-nr)?")

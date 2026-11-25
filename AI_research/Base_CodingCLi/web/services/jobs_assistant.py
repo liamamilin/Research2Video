@@ -127,6 +127,8 @@ def execute_tool(name: str, arguments: dict, request: Request, user: dict) -> di
         items = []
         for item in jobs.list_all(user=user):
             data = item.model_dump(mode="json")
+            if isinstance(data.get("state"), dict):
+                data["state"].pop("last_usage", None)
             config = load_job(get_settings().paths.jobs_dir, item.name) or {}
             data["title"] = config.get("name") or item.name
             if not args.query or args.query.casefold() in json.dumps(data, ensure_ascii=False).casefold():

@@ -1,0 +1,75 @@
+[
+  {
+    "production": "science_weekly",
+    "status": "DRAFT",
+    "title": "3D打印手套：两种材料，分开两个电台",
+    "sections": 5,
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "science_weekly",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "78bb84cf3eec8a656e219e27fc3ff98e5588920e401bb8bea841d76af61a09c0",
+      "material_sha256": "74cea9955e4b00dfb2311623fe37fc9e042b6f4e4aedaff0236c8f3988198bb8",
+      "report_chars": 4203,
+      "material_chars": 3225
+    },
+    "artifact": "AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/expansion/evidence/smoke/science_weekly/result.json"
+  },
+  {
+    "production": "ai_tool_tutorials",
+    "status": "DRAFT",
+    "title": "WorkBuddy 产物做完别先下载：点「⋯」直接上传到云端",
+    "sections": 5,
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "ai_tutorial",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "audience_selection",
+      "report_sha256": "364f87ccdf2a53b3dd2da6fe917ce6037429fefb6d3f08d048bb62e0f9aedad0",
+      "material_sha256": "790f1d1a6022b7bf5dd78cc03ea63bafe9d457e9823220c3ba39296697293118",
+      "report_chars": 1779,
+      "material_chars": 1539
+    },
+    "artifact": "AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/expansion/evidence/smoke/ai_tool_tutorials/result.json"
+  },
+  {
+    "production": "consumer_illustrated",
+    "status": "DRAFT",
+    "title": "降噪耳机不是把噪音变没，是再造一股声去打架",
+    "sections": 6,
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "consumer_illustrated",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": null,
+    "artifact": "AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/expansion/evidence/smoke/consumer_illustrated/result.json"
+  },
+  {
+    "production": "company_daily",
+    "status": "DRAFT",
+    "title": "单季116亿美元，Anthropic合同签到2036年",
+    "sections": 6,
+    "strategy": {
+      "strategy": "audience-v1",
+      "channel": "company_daily",
+      "writer": "original_with_audience_scope"
+    },
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "6e59b989ae6acd6e98fd4b59de623d4225d57d155c062457f1be67be08f6c180",
+      "material_sha256": "450139203b271fec509dd17e57c27ac81a3a99f700b462c35460bf16815ad525",
+      "report_chars": 4672,
+      "material_chars": 42124
+    },
+    "artifact": "AI_research/Base_CodingCLi/state/acceptance-content-value-20261115/expansion/evidence/smoke/company_daily/result.json"
+  }
+]

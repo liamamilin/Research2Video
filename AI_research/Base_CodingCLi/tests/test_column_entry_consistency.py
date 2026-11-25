@@ -141,7 +141,7 @@ def test_every_shipped_column_binding_uses_its_own_shared_writer_settings(monkey
         options = writer.write_for_column(column=recipe, content_context=context, topic=topic,
             report='固定上游材料', citation_check=None, llm_config=object())
         assert options['report'] == '固定上游材料'
-        assert options['greeting'] == episodes.greeting(topic, context)
+        assert (options['greeting'] or '') == episodes.greeting(topic, context)
         assert options['voice'] == (recipe.voice_id or None)
         assert options['tutorial'] is (context['type'] == 'tutorial')
         assert topic['content_mode'] == context['content_mode']

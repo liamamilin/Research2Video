@@ -1,0 +1,61 @@
+{
+  "jobs": 74,
+  "matrices": 15,
+  "production_bindings": 57,
+  "changed_static_routes": [
+    {
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "production": "chatgpt_t03_tutorials",
+      "recipe": "chatgpt_acquisition",
+      "profile": null,
+      "mode": "episode",
+      "path": "state/acceptance-content-value-20261115/natural-writing-20261116/wrap-final-config/routes/chatgpt_t03_tutorials.json",
+      "changed_fields": [
+        "system"
+      ]
+    },
+    {
+      "job": "chatgpt_acquisition/t07_subscription",
+      "production": "chatgpt_t07_subscription",
+      "recipe": "chatgpt_acquisition",
+      "profile": null,
+      "mode": "episode",
+      "path": "state/acceptance-content-value-20261115/natural-writing-20261116/wrap-final-config/routes/chatgpt_t07_subscription.json",
+      "changed_fields": [
+        "system"
+      ]
+    },
+    {
+      "job": "chatgpt_acquisition/t08_troubleshooting",
+      "production": "chatgpt_t08_troubleshooting",
+      "recipe": "chatgpt_acquisition",
+      "profile": "t08-v2",
+      "mode": "episode",
+      "path": "state/acceptance-content-value-20261115/natural-writing-20261116/wrap-final-config/routes/chatgpt_t08_troubleshooting.json",
+      "changed_fields": [
+        "system"
+      ]
+    },
+    {
+      "job": "monitoring/ai_flash_discovery",
+      "production": "flash_daily",
+      "recipe": "flash-nr",
+      "profile": null,
+      "mode": "episode",
+      "path": "state/acceptance-content-value-20261115/natural-writing-20261116/wrap-final-config/routes/flash_daily.json",
+      "changed_fields": [
+        "context",
+        "user_shape"
+      ]
+    }
+  ],
+  "dynamic_routes": [
+    {
+      "job": "chatgpt_acquisition/t05_comparison",
+      "production": "chatgpt_t05_comparison",
+      "condition": "actual next_episode title present after completed following render"
+    }
+  ],
+  "research_job_changed": "monitoring/ai_flash_discovery",
+  "archived_changes": []
+}

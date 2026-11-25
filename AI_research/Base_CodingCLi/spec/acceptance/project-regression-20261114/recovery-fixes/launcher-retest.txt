@@ -1,0 +1,3 @@
+沙箱外仅重跑本机端口测试，不访问生产服务。
+命令：python3 -m pytest g3/tests/test_local_launcher.py -q
+结果（工具原始输出）：2 passed in 2.57s

@@ -342,7 +342,7 @@ def test_the_job_pool_starts_each_run_with_the_callers_attribution(db, monkeypat
     monkeypatch.setattr(executor, "_attach_persistence", lambda *a: None)
     monkeypatch.setattr(executor, "run_job_in_thread", lambda *a, **k: seen.append(telemetry.current()))
     monkeypatch.setattr("core.matrices.cap_block", lambda *a, **k: "")
-    registry = NS(start=lambda name, by, engine: NS(log_bus=NS(write=lambda e: None), future=None))
+    registry = NS(start=lambda name, by, engine: NS(log_bus=NS(write=lambda e: None), future=None, status="running"))
     monkeypatch.setattr(executor, "TaskRegistry", lambda: registry)
     with telemetry.bind(script_id="s1"):
         executor.start_job("daily", "video").future.result(timeout=5)

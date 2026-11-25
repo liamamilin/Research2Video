@@ -1,0 +1,3 @@
+mode: enabled
+allow_create: true
+writable_chains: ["*"]

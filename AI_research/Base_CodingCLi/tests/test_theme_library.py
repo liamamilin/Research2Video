@@ -84,7 +84,8 @@ def test_old_used_topics_also_block_platform_rediscovery(tmp_path):
     assert store.history('demo')['themes'][0]['script_id'] == 'script-kept'
 
 
-def test_generation_runs_through_the_engine_once_without_search_and_keeps_the_brief(theme_env, monkeypatch):
+@pytest.mark.parametrize('outline', [None, ['跟着同一个例子说明'], [f'原始推进关系 {i}' for i in range(9)]])
+def test_generation_runs_through_the_engine_once_without_search_and_keeps_the_brief(theme_env, monkeypatch, outline):
     from core import lock
     from web.runner import executor
     from web.runner.registry import TaskRegistry
@@ -101,10 +102,13 @@ def test_generation_runs_through_the_engine_once_without_search_and_keeps_the_br
         def chat(self, messages, **kwargs):
             payload = json.loads(messages[1]['content']); calls.append(payload)
             assert payload['extra_direction'] == '面向职场新人'
+            pattern = {'name': '任务与升级判断', 'title_pattern': '{任务}值得升级吗？'}
+            if outline is not None:
+                pattern['outline'] = outline
             return SimpleNamespace(content=json.dumps({'themes': [{'category': 'demo_value', 'title': '准备英语面试时，语音练习值得付费吗？',
                 'question': '语音面试练习的订阅选择', 'topic_key': 'voice_interview_upgrade', 'reason': '结合具体任务作选择',
                 'angle': '从任务完成情况判断', 'example_ids': [example['id']],
-                'format': {'name': '任务与升级判断', 'title_pattern': '{任务}值得升级吗？', 'outline': ['场景', '比较', '决策']}}]}))
+                'format': pattern}]}))
         def close(self): pass
     monkeypatch.setattr(theme_ideas, 'LLMClient', Model)
     monkeypatch.setattr(theme_ideas.LLMConfig, 'from_system', lambda *args: LLMConfig(model='test'))
@@ -118,7 +122,7 @@ def test_generation_runs_through_the_engine_once_without_search_and_keeps_the_br
     assert theme['signals'][0]['url'] == example['url'] and theme['signals'][0]['metrics'] == {}
     result = library.run(started['request_id'])
     assert result['status'] == 'success' and result['result']['usage']['searches'] == 0
-    assert library.snapshot('demo')['patterns'][0]['outline'] == ['场景', '比较', '决策']
+    assert theme['inspiration']['outline'] == library.snapshot('demo')['patterns'][0]['outline'] == (outline or [])
     # A future generation can reference this same format without finding web pages again.
     ThemeStore(str(theme_env/'state')).mark_used(theme['id'])
     new = theme_workbench.generate('demo', 'editor', pattern_id=theme['inspiration']['pattern_id'])

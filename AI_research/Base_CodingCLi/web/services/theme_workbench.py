@@ -56,13 +56,32 @@ def _schedule(key: str) -> dict | None:
 
 
 def _with_production(items: list[dict]) -> list[dict]:
+    script_ids = list(dict.fromkeys(item["script_id"] for item in items if item.get("script_id")))
+    if not script_ids:
+        return items
+    scripts: dict[str, dict] = {}
+    renders_by_script: dict[str, list[dict]] = {}
+    with video_store.connect() as conn:
+        for start_idx in range(0, len(script_ids), 500):
+            batch = script_ids[start_idx:start_idx + 500]
+            marks = ",".join("?" for _ in batch)
+            for row in conn.execute(
+                f"SELECT id, status, stage, error, report_path, current_version FROM scripts WHERE id IN ({marks})",
+                batch,
+            ):
+                scripts[row["id"]] = dict(row)
+            for row in conn.execute(
+                f"SELECT id, script_id, status FROM renders WHERE script_id IN ({marks}) ORDER BY created_at DESC, id DESC",
+                batch,
+            ):
+                renders_by_script.setdefault(row["script_id"], []).append({"id": row["id"], "status": row["status"]})
     for item in items:
-        script = video_store.get_script(item["script_id"]) if item["script_id"] else None
+        sid = item.get("script_id")
+        script = scripts.get(sid) if sid else None
         if script:
-            renders = video_store.list_renders(script["id"])
             item.update(script_status=script["status"], stage=script.get("stage"), error=script.get("error"),
                         report_path=script.get("report_path"), version=script["current_version"],
-                        renders=[{"id": r["id"], "status": r["status"]} for r in renders])
+                        renders=renders_by_script.get(sid, []))
     return items
 
 
@@ -206,12 +225,13 @@ def production_input(key: str, value: dict, minutes: float = 4, *, automatic: bo
         raise ValueError("主题所属栏目已移除，请调整栏目后再研究")
     configs = production.load_all(paths().config_dir, paths().jobs_dir)
     binding = next((configs[pid] for pid in found["production_ids"] if pid in configs and not configs[pid].errors and (not automatic or configs[pid].auto)), None)
-    recipe_key = "theme_research"
+    recipe_key = "deep_dive"
     recipe = recipes.find(paths().config_dir, recipe_key)
     if recipe and recipe.minutes_range and recipe.minutes_range[0] <= minutes <= recipe.minutes_range[1]:
         recipe_key = recipes.variant_column_key(recipe_key, minutes=minutes)
     sources = theme_context.source_specs(found, paths().config_dir, paths().jobs_dir, matrix(key))
-    topic = {"title": value["title"], "fields": {"核心角度": value["angle"], "目标受众": value["audience"],
+    topic = {"title": value["title"], "preserve_audience_scope": True,
+              "fields": {"核心角度": value["angle"], "目标受众": value["audience"],
               "一句话": found["promise"], "补充材料": value["notes"]}, "theme_task_id": value["id"],
               "theme_research": theme_context.research_spec(value, found, matrix(key), sources=sources)}
     if binding:

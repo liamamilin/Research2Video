@@ -34,7 +34,7 @@ def _template_text() -> str:
 def test_template_declares_every_placeholder_the_builder_substitutes():
     text = _template_text()
     builder = BUILD.read_text(encoding="utf-8")
-    for placeholder in ("@PROJECT_DIR@", "@PYTHON_BIN@", "@LOG_FILE@",
+    for placeholder in ("@BASE_URL@", "@PROJECT_DIR@", "@PYTHON_BIN@", "@LOG_FILE@",
                         "@START_SCRIPT@", "@STATE_DIR@"):
         assert placeholder in text, f"{placeholder} missing from the template"
         assert placeholder in builder, f"{placeholder} is never substituted"
@@ -50,7 +50,8 @@ def test_template_has_no_hardcoded_user_paths():
 def test_builder_substitutes_every_placeholder():
     out = subprocess.run(
         ["/bin/sh", "-c",
-         f"sed -e 's|@PROJECT_DIR@|{REPO}|g' -e 's|@PYTHON_BIN@|/bin/python3|g' "
+         f"sed -e 's|@BASE_URL@|http://127.0.0.1:9876|g' "
+         f"-e 's|@PROJECT_DIR@|{REPO}|g' -e 's|@PYTHON_BIN@|/bin/python3|g' "
          f"-e 's|@LOG_FILE@|/tmp/x.log|g' -e 's|@START_SCRIPT@|/tmp/s.sh|g' "
          f"-e 's|@STATE_DIR@|/tmp/state|g' "
          f"{TEMPLATE}"],
@@ -70,6 +71,7 @@ def test_template_compiles_with_stay_open():
     tmp = REPO / "scripts" / ".test_launcher.applescript"
     tmp.write_text(
         _template_text()
+        .replace("@BASE_URL@", "http://127.0.0.1:9876")
         .replace("@PROJECT_DIR@", str(REPO))
         .replace("@PYTHON_BIN@", sys.executable)
         .replace("@LOG_FILE@", "/tmp/launcher_test.log")
@@ -182,42 +184,27 @@ def test_starter_detaches_and_returns_immediately(tmp_path):
     assert re.search(r"^exit 0\s*$", starter, re.M)
 
 
-@pytest.mark.skipif(sys.platform != "darwin", reason="spawns a real server")
 def test_starter_returns_before_the_server_is_ready(tmp_path):
-    """The launcher calls this and must get control back immediately."""
-    repo = REPO
-    rendered = repo / "scripts" / ".start_server.test.sh"
+    """Exercise detachment in an isolated project without touching live ports."""
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (tmp_path / "run_web.py").write_text(
+        "import time\nfrom pathlib import Path\n"
+        "time.sleep(2)\nPath('ready').touch()\n", encoding="utf-8")
+    rendered = scripts / ".start_server.test.sh"
     rendered.write_text(
         STARTER.read_text(encoding="utf-8").replace(
             "@PYTHON_BIN@", sys.executable),
         encoding="utf-8",
     )
-    port_free = _port_is_free(8765)
-    if not port_free:
-        pytest.skip("port 8765 is busy; not spawning a second server")
-    try:
-        started = time.time()
-        result = subprocess.run(["/bin/bash", str(rendered)],
-                                capture_output=True, text=True, timeout=30)
-        elapsed = time.time() - started
-        assert result.returncode == 0, result.stderr
-        assert elapsed < 10, f"starter blocked for {elapsed:.1f}s"
-    finally:
-        rendered.unlink(missing_ok=True)
-        _wait_for(lambda: _port_is_free(8765), timeout=60) or _kill_port()
-
-
-def _port_is_free(port: int) -> bool:
-    import socket
-
-    with socket.socket() as s:
-        s.settimeout(0.3)
-        return s.connect_ex(("127.0.0.1", port)) != 0
-
-
-def _kill_port() -> None:
-    subprocess.run("lsof -ti :8765 | xargs kill -9",
-                   shell=True, capture_output=True)
+    started = time.monotonic()
+    result = subprocess.run(["/bin/bash", str(rendered)],
+                            capture_output=True, text=True, timeout=10)
+    elapsed = time.monotonic() - started
+    assert result.returncode == 0, result.stderr
+    assert elapsed < 2, f"starter blocked for {elapsed:.1f}s"
+    assert not (tmp_path / "ready").exists()
+    assert _wait_for(lambda: (tmp_path / "ready").exists(), timeout=10)
 
 
 def _wait_for(predicate, timeout: float = 30) -> bool:
@@ -227,6 +214,33 @@ def _wait_for(predicate, timeout: float = 30) -> bool:
             return True
         time.sleep(0.5)
     return False
+
+
+@darwin_only
+@pytest.mark.parametrize("port", [9876, 9877])
+def test_build_uses_configured_port_in_named_bundle(tmp_path, port):
+    """A rebuilt legacy icon must follow config, including a changed port."""
+    project = tmp_path / "project"
+    (project / "scripts").mkdir(parents=True)
+    (project / "config").mkdir()
+    venv = tmp_path / ".AI_research" / "bin"
+    venv.mkdir(parents=True)
+    (venv / "python").symlink_to(sys.executable)
+    for source in (BUILD, STARTER, TEMPLATE):
+        shutil.copy2(source, project / "scripts" / source.name)
+    (project / "config" / "web.yaml").write_text(
+        f"server:\n  port: {port}\n", encoding="utf-8")
+    destination = tmp_path / "apps"
+    subprocess.run(
+        ["bash", str(project / "scripts" / BUILD.name), str(destination),
+         "AI Research Console.app"], capture_output=True, text=True, check=True)
+    compiled = destination / "AI Research Console.app/Contents/Resources/Scripts/main.scpt"
+    text = subprocess.run(["osadecompile", str(compiled)],
+                          capture_output=True, text=True, check=True).stdout
+    assert f'property baseUrl : "http://127.0.0.1:{port}"' in text
+    assert "@BASE_URL@" not in text
+    assert "/api/live" in text
+    assert "-fsS" in text
 
 
 def test_app_bundle_name_is_consistent():
@@ -242,8 +256,8 @@ def test_app_bundle_name_is_consistent():
     app_name = match.group(1)
     assert app_name == "AREC.app", f"unexpected app bundle name: {app_name}"
     assert f"`{app_name}`" in readme, f"README does not mention {app_name}"
-    assert "AI Research Console.app" not in readme, \
-        "README still points at the old bundle name"
+    assert "AI Research Console.app" in readme, \
+        "README must explain how to update an existing legacy bundle"
     # Notifications are how the launcher talks when something fails.
     assert 'with title "AREC"' in _template_text()
 

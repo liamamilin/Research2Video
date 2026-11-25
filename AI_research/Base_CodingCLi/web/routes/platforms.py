@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, File, Form, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
 
 from web import audit
@@ -34,7 +34,13 @@ class PublishWindowIn(Input):
     enabled: bool = True
     start: int = Field(default=8, ge=0, le=23)
     end: int = Field(default=23, ge=1, le=24)
-    spacing: int = Field(default=20, ge=5, le=180)
+    spacing: int = Field(default=30, ge=5, le=180)
+
+
+class RestrictedCommentIn(Input):
+    enabled: bool = False
+    text: str = Field(default="", max_length=1000)
+    pin: bool = True
 
 
 class SettingsIn(Input):
@@ -43,9 +49,13 @@ class SettingsIn(Input):
     tid: int = Field(ge=0, le=65535)
     tid_by_matrix: dict[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,23}$")], Annotated[int, Field(ge=1, le=65535)]] | None = Field(
         default=None, description="按矩阵指定投稿分区；未列出的矩阵用默认分区 tid。省略时保留原设置。")
+    creation_statement: int | None = Field(
+        default=None, description="默认创作声明：0=不标注，1=包含 AI 生成内容，3=内容含营销信息。省略时保留原设置。")
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
     publish_window: PublishWindowIn | None = Field(
         default=None, description="自动投稿的公开时段；时段外完成的成片定时到下一个时段公开。省略时保留原设置。")
+    restricted_comment: RestrictedCommentIn | None = Field(
+        default=None, description="稿件因评论区商业推广被限流时：删掉本账号带站外链接的评论，换上这条引导评论（不可带站外链接）。省略时保留原设置。")
 
 
 class UploadIn(Input):
@@ -55,11 +65,62 @@ class UploadIn(Input):
     description: str = Field(max_length=2000)
     tags: list[str] = Field(min_length=1, max_length=10)
     tid: int = Field(ge=1, le=65535)
+    creation_statement: int | None = Field(default=None, description="创作声明：0=不标注，1=包含 AI 生成内容，3=内容含营销信息；省略时继承账号默认。")
     first_comment: FirstCommentIn | None = Field(default=None, description="省略或为 null 时继承账号默认首评；enabled=false 明确关闭本次首评。")
 
 
 class VideoIn(Input):
     bvid: str = Field(pattern=r"^BV[0-9A-Za-z]{10}$")
+
+
+class CoverPathsIn(Input):
+    account_uid: str = Field(min_length=1, max_length=64)
+    cover_4x3: str = Field(min_length=1, max_length=4096)
+    cover_16x9: str = Field(min_length=1, max_length=4096)
+
+
+class CoverUpdateIn(Input):
+    account_uid: str = Field(min_length=1, max_length=64)
+
+
+@router.get('/covers/{render_id}')
+def covers_preview(render_id: str, user=Depends(require_viewer)) -> dict:
+    from web.services import bilibili_covers
+    render, _, _ = call(manager.eligible, render_id)
+    return call(bilibili_covers.preview, render)
+
+
+@router.put('/covers/{render_id}/paths')
+def covers_paths(render_id: str, body: CoverPathsIn, user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    if body.account_uid != call(manager.uid):
+        raise HTTPException(409, detail=ApiError.make('account_changed', '平台账号已改变。'))
+    call(manager.eligible, render_id)
+    result = call(bilibili_covers.import_paths, render_id, {'4x3': body.cover_4x3, '16x9': body.cover_16x9})
+    audit.log('bilibili_cover_assets', user=user['username'], target=render_id)
+    return result
+
+
+@router.post('/covers/{render_id}/{ratio}')
+async def cover_file(render_id: str, ratio: str, account_uid: str = Form(...),
+                     file: UploadFile = File(...), user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    if account_uid != call(manager.uid):
+        raise HTTPException(409, detail=ApiError.make('account_changed', '平台账号已改变。'))
+    call(manager.eligible, render_id)
+    data = await file.read(bilibili_covers.MAX_BYTES + 1)
+    await file.close()
+    result = call(bilibili_covers.save, render_id, {ratio: data})
+    audit.log('bilibili_cover_asset', user=user['username'], target=render_id, details={'ratio': ratio})
+    return result
+
+
+@router.post('/uploads/{task_id}/covers')
+def update_covers(task_id: str, body: CoverUpdateIn, user=Depends(require_editor)) -> dict:
+    from web.services import bilibili_covers
+    result = call(bilibili_covers.update_published, task_id, body.account_uid)
+    audit.log('bilibili_cover_edit', user=user['username'], target=task_id, result=result['status'])
+    return result
 
 
 class SyncIn(VideoIn):
@@ -172,10 +233,19 @@ def settings(body: SettingsIn, user=Depends(require_admin)) -> dict:
         if body.tid < 1 or not bilibili.biliup_binary():
             raise HTTPException(409, detail=ApiError.make("platform_not_ready", "自动投稿需要连接账号、安装 biliup 并选择默认投稿分区。"))
     patch = body.model_dump(exclude_unset=True)
+    if patch.get("creation_statement") is None:
+        patch.pop("creation_statement", None)
+    else:
+        patch["creation_statement"] = call(bilibili.clean_creation_statement, body.creation_statement)
     if patch.get("publish_window", 0) is None:
         del patch["publish_window"]
     elif body.publish_window and body.publish_window.start >= body.publish_window.end:
         raise HTTPException(422, detail=ApiError.make("invalid_publish_window", "发布时段的开始时间需早于结束时间。"))
+    if patch.get("restricted_comment", 0) is None:
+        del patch["restricted_comment"]
+    elif "restricted_comment" in patch:
+        from web.services import comment_restrictions
+        patch["restricted_comment"] = call(comment_restrictions.clean_settings, body.restricted_comment.model_dump())
     if "first_comment" in patch:
         if body.first_comment.enabled:
             call(manager.uid)
@@ -288,4 +358,14 @@ def reply(bvid: str, rpid: str, body: ReplyIn, user=Depends(require_editor)) -> 
         raise HTTPException(422, detail=ApiError.make("empty_reply", "回复不能为空。"))
     result = call(manager.send_reply, bvid, rpid, body.text.strip())
     audit.log("platform_reply", user=user["username"], target=f"{bvid}/{rpid}", result=result["reply_rpid"])
+    return result
+
+
+@router.post("/restrictions/{bvid}/dismiss")
+def dismiss_restriction(bvid: str, user=Depends(require_editor)) -> dict:
+    if not bilibili.BV.fullmatch(bvid):
+        raise HTTPException(422, detail=ApiError.make("invalid_video", "请使用有效的 BV 号。"))
+    from web.services import comment_restrictions
+    result = call(comment_restrictions.dismiss, call(manager.uid), bvid)
+    audit.log("platform_restriction_dismiss", user=user["username"], target=bvid)
     return result

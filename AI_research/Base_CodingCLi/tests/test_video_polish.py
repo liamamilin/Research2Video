@@ -21,13 +21,25 @@ def _reply(**texts):
     return json.dumps({"paragraphs": [{"id": key, "text": text} for key, text in texts.items()]}, ensure_ascii=False)
 
 
-def test_the_program_finds_production_notes_stock_endings_and_a_contrast_tic():
+def test_final_polish_accepts_an_opening_without_introduction_and_applies_body_edit(llm, monkeypatch):
+    monkeypatch.setattr(polish.persona, "load", lambda: {"name": "洛洛", "opening_greeting": "大家好"})
+    opening = "这份报告能直接交吗？大家好，我是洛洛，今天就来看看怎么验。材料里写过一种做法。"
+    sections = _sections(["材料里写过一种做法。"])
+    sections[0]["paragraphs"] = [_p(opening)]
+    llm.polish_replies = [_reply(S1P1="这份报告能直接交吗？先看看怎么验。", S2P1="先从报告里的引用查起。")]
+    result, record = polish.polish(llm(None), sections)
+    assert result[0]["paragraphs"][0]["text"] == "这份报告能直接交吗？先看看怎么验。"
+    assert result[1]["paragraphs"][0]["text"] == "先从报告里的引用查起。"
+    assert record["rejected"] == []
+    assert [item["id"] for item in record["changes"]] == ["S1P1", "S2P1"]
+
+
+def test_the_program_finds_production_notes_and_stock_endings():
     sections = _sections(["素材给的信息是 MIT，254 stars。", "视频里应该说清楚：效果要自己验。"],
-                         ["这条的要点是：别急着改配置。"],
-                         ["关键不是速度，而是额度。", "它不是新工具，是旧功能。", "重点不是价格，而是时长。"])
+                         ["这条的要点是：别急着改配置。"])
     found = polish.findings(sections, greeting=GREETING)
     assert [(f["id"], f["rule"]) for f in found] == [
-        ("S2P1", "production_note"), ("S2P2", "production_note"), ("S3P1", "stock_ending"), ("S4P3", "contrast_overuse")]
+        ("S2P1", "production_note"), ("S2P2", "production_note"), ("S3P1", "stock_ending")]
     # Talking about videos and footage is not a production note, and the greeting is never flagged.
     assert polish.findings(_sections(["这个模型能生成一段会说话的视频，口播也更自然。", "生成的视频应该更稳定，画面要展示口型。",
                                       "素材没有版权就别用，素材显示在时间线上。"]), greeting=GREETING) == []
@@ -37,6 +49,14 @@ def test_a_clean_draft_makes_no_model_call(llm):
     sections = _sections(["先看额度：每周上限变成 5 小时。"])
     out, record = polish.polish(llm(None), sections, greeting=GREETING)
     assert out is sections and record["findings"] == [] and llm.polish_calls == []
+
+
+def test_repeated_comparisons_alone_leave_the_authors_scope_intact(llm):
+    sections = _sections(["变化不是功能，是计费方式。", "这不是模型更新，是安装通道调整。",
+                         "这次不是 API 定价变化，是零售促销。"])
+    out, record = polish.polish(llm(None), sections, greeting=GREETING)
+    assert out is sections
+    assert record["findings"] == [] and llm.polish_calls == []
 
 
 def test_only_flagged_paragraphs_change_and_keep_their_citations_and_place(llm):
@@ -91,11 +111,10 @@ def test_a_fresh_programme_draft_is_polished_and_the_record_is_saved(llm):
 
 def test_a_closing_rewrite_keeps_its_goodbye(llm):
     sections = _sections(["先看额度。"])
-    sections[-1]["paragraphs"] = [_p("如果只记一句：它不是炫技，而是补上验收。"), _p("一句话：这期不是工具，而是方法。"),
-                                  _p("真正值得记住的不是生成，而是验收。好，今天就到这里，感谢收看，我们下期见。")]
-    llm.polish_replies = [_reply(S3P3="真正值得记住的是验收。")]
+    sections[-1]["paragraphs"] = [_p("口播里要说清楚验收。好，今天就到这里，感谢收看，我们下期见。")]
+    llm.polish_replies = [_reply(S3P1="真正值得记住的是验收。")]
     out, record = polish.polish(llm(None), sections, greeting=GREETING)
-    assert out[2]["paragraphs"][2]["text"] == "真正值得记住的是验收。好，今天就到这里，感谢收看，我们下期见。"
+    assert out[2]["paragraphs"][0]["text"] == "真正值得记住的是验收。好，今天就到这里，感谢收看，我们下期见。"
 
 
 def test_research_material_mentioned_to_the_viewer_is_a_production_note():
@@ -105,11 +124,10 @@ def test_research_material_mentioned_to_the_viewer_is_a_production_note():
 
 def test_a_reworded_goodbye_is_not_added_twice(llm):
     sections = _sections(["先看额度。"])
-    sections[-1]["paragraphs"] = [_p("一句话：它不是炫技，而是验收。"), _p("另一句：不是工具，而是方法。"),
-                                  _p("值得记住的不是生成，而是验收。感谢收看，我们下期见。")]
-    llm.polish_replies = [_reply(S3P3="值得记住的是验收。感谢收看，下期见。")]
+    sections[-1]["paragraphs"] = [_p("口播里要说清楚验收。感谢收看，我们下期见。")]
+    llm.polish_replies = [_reply(S3P1="值得记住的是验收。感谢收看，下期见。")]
     out, _ = polish.polish(llm(None), sections, greeting=GREETING)
-    assert out[2]["paragraphs"][2]["text"] == "值得记住的是验收。感谢收看，下期见。"
+    assert out[2]["paragraphs"][0]["text"] == "值得记住的是验收。感谢收看，下期见。"
 
 
 def test_a_bug_in_polishing_keeps_the_draft(llm, monkeypatch):
@@ -131,3 +149,40 @@ def test_stock_memorable_lines_made_up_bridges_and_disclaimer_hedges_are_found()
     closing = _sections()
     closing[-1]["paragraphs"].insert(0, _p("今天最值得记住的是：额度是钱，不是配额。"))
     assert polish.findings(closing, greeting=GREETING) == []
+
+
+def test_polish_can_drop_an_irrelevant_number_and_reuse_the_sections_own_result(llm):
+    sections = [{"title": "模型差别", "paragraphs": [
+        _p("Kimi K3.1 Pro 拿到 55 分。"),
+        _p("底稿另引 Kimi K3 的 25.5 分，只是背景，不是效果承诺。"),
+    ]}]
+    llm.polish_replies = [_reply(S1P2="55 分是综合成绩，选型可以先拿自己的任务试一遍。")]
+    revised, record = polish.polish(llm(None), sections)
+    assert revised[0]["paragraphs"][0] == sections[0]["paragraphs"][0]
+    assert revised[0]["paragraphs"][1]["text"] == "55 分是综合成绩，选型可以先拿自己的任务试一遍。"
+    assert not record["rejected"]
+
+
+
+def test_replacement_does_not_repeat_the_preceding_paragraph(llm):
+    prior = "女王的措辞也有秘书的声音。"
+    sections = _sections([prior, "材料里写过，公开信强调了对手的行动。"])
+    llm.polish_replies = [_reply(S2P2=prior + "公开信强调了对手的行动。")]
+    revised, record = polish.polish(llm(None), sections)
+    assert [paragraph["text"] for paragraph in revised[1]["paragraphs"]] == [
+        prior, "公开信强调了对手的行动。",
+    ]
+    assert record["changes"][0]["after"] == "公开信强调了对手的行动。"
+
+
+def test_english_long_phrase_is_flagged_for_chinese_tts_polish():
+    sections = _sections(
+        ["作者原话说 Claude far outpaced me near the finish line，引发了很多讨论。"],
+        ["设置里可以看到 Include your audio recordings 这个开关。"],
+        ["这里只提了 Claude Code 和 GitHub Action，正常放行。"],
+    )
+    found = polish.findings(sections, greeting=GREETING)
+    assert [(f["id"], f["rule"]) for f in found] == [
+        ("S2P1", "english_phrase"),
+        ("S3P1", "english_phrase"),
+    ]

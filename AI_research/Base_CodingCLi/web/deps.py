@@ -18,6 +18,7 @@ _SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 # An object key cannot be supplied through HTTP headers, cookies or JSON. Only
 # an in-process ASGI transport may delegate a previously authorized batch.
 _BACKGROUND_ACTOR = object()
+_STREAM_ACTOR = object()
 
 
 def delegate_background(scope: dict, user_id: int) -> None:
@@ -27,6 +28,16 @@ def delegate_background(scope: dict, user_id: int) -> None:
 def inherit_background(source: dict, target: dict) -> None:
     if _BACKGROUND_ACTOR in source:
         target[_BACKGROUND_ACTOR] = source[_BACKGROUND_ACTOR]
+
+
+def delegate_stream(scope: dict, user_id: int) -> None:
+    """Allow an already-authenticated live SSE stream's internal calls to survive natural access exp."""
+    scope[_STREAM_ACTOR] = user_id
+
+
+def inherit_stream(source: dict, target: dict) -> None:
+    if _STREAM_ACTOR in source:
+        target[_STREAM_ACTOR] = source[_STREAM_ACTOR]
 
 
 def _user_from_api_token(request: Request) -> Optional[dict]:
@@ -68,7 +79,14 @@ def current_user(request: Request) -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ApiError.make("not_authenticated", "未登录"),
         )
-    payload = jwt_helper.decode_token(token)
+    payload, reason = jwt_helper.decode_token_diagnostic(token)
+    if not payload and reason == "expired" and _STREAM_ACTOR in request.scope:
+        # An active SSE stream holds the access cookie captured at stream start.
+        # Allow natural exp rollover only for that authenticated user while still
+        # enforcing signature, revocation, CSRF binding, and active-user checks.
+        expired_payload = jwt_helper.decode_expired_token(token)
+        if expired_payload and str(expired_payload.get("sub")) == str(request.scope[_STREAM_ACTOR]):
+            payload = expired_payload
     if not payload or payload.get("kind") != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

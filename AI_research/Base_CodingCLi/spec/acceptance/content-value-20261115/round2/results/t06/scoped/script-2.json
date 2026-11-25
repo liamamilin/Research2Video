@@ -1,0 +1,220 @@
+{
+  "title": "20美元的ChatGPT Plus：六项只是额度，一项是真解锁",
+  "sections": [
+    {
+      "title": "先把结论摆出来",
+      "paragraphs": [
+        {
+          "text": "每月20美元的ChatGPT Plus，定价页上列了九项权益。我一行一行数过：六项是同一件事能多做一点，真正让你多出一种干法的，只有一行。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "大家好，我是洛洛。今天这期就干一件事，把这九项摊开看，你掏的这20美元，哪些买的是新能力，哪些只是额度变大。之所以值得较真，是因为这两样东西对你的价值完全不一样：额度不够，你的代价是多等几分钟、多按几次重试；功能没有，有些活你压根开不了工。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=What%20is%20ChatGPT%20Plus%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "答案其实写在页面自己的用词里",
+      "paragraphs": [
+        {
+          "text": "先把九项念一遍：一，带GPT-6的高级推理模型；二，更多的消息和上传；三，更复杂更准确的图像生成；四，更多的深度研究；五，更大的记忆和上下文；六，Projects、定时任务和自定义GPT；七，更多的Codex用量，就是写代码那套；八，桌面、网页、手机端更多的ChatGPT Work访问；九，新功能提前尝鲜。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "数一下用词就有意思了。带“扩展”或者“更多”意思的有六行：消息和上传、图像、深度研究、记忆和上下文、Codex、Work。这六个说的全是同一句话——同一件事，你能多做一点。换句话说，它们不是门槛，是天花板的高度。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "没带这两个词的只剩三行。一行是GPT-6推理模型，那是换个更会想的脑子，同一个任务做得更准；一行是“新功能提前尝鲜”，那是时间差，别人下周能用，你这周就能用；最后一行是Projects、定时任务、自定义GPT——这一行我最看重。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "为什么我盯住Projects这一行",
+      "paragraphs": [
+        {
+          "text": "举个你身上可能正在发生的事。你手上有三十份访谈记录，要归纳成一份交给老板的材料，而且每个月还要更新一次。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "没有这一行的时候，你的做法是每开一个新对话，重新把文件传一遍，重新把那句“只按这三个口径归纳”打一遍。这些动作一分钱价值都不产生，但你每次都得重来一遍。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "有这一行之后：第一步，把这三十份记录固定放进一个项目里，把归纳口径写进这个项目；第二步，设一个定时任务，让它在每个月初自动跑一次汇总；第三步，把这一整套存成一个自定义GPT，下次你自己点开就能用，不用再想提示词该怎么写。三样东西——固定的资料、自动的时间、可复用的助手——都在这一行里，而额度变大给不了你其中任何一样。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "我的依据是反过来看的：Pro那一栏写的是“扩展的projects、tasks和custom GPTs”。Pro比Plus多，说明Plus本来就有。这是开关，放大的那种只是水龙头开得更大——开关和水龙头，是两种东西。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Pro"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "那六项“更多”什么时候才翻上来",
+      "paragraphs": [
+        {
+          "text": "那六项是不是白给？不是。如果你的活就是长文档吞吐——一天几十份PDF轮着读、反复跑深度研究、让Codex改脚本改到半夜——那你付的钱大头确实花在额度上，而且花得值。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但对你我这种一周做几个项目、偶尔啃一份长报告的人来说，额度大多是你撞不到的天花板，多给的那部分你根本感知不到；而Projects这一行，你用一次就少一次重复动作。所以我的判断是分人的：一周里有三天在做资料整理、多步骤项目、代码或长文档，这20美元值，但值的地方不是那六项“更多”，是那一行开关；反过来，如果你只是隔几天问两句话，那这20美元买的基本是你撞不到的高度，先别升。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "两个容易忽略的前提，和你怎么自己验",
+      "paragraphs": [
+        {
+          "text": "有两件事得说清楚。第一，限额。“Limits apply”这句话就印在九项底下，帮助中心也写明模型可用性和限额会变，要以你自己账号里的模型选择器为准。所以别人截图给你看的额度，不等于你的额度，别拿去当决策依据。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=What%20is%20ChatGPT%20Plus%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "第二，付钱的方式。Plus现在不支持年付，也不能预付几个月。这听着像个限制，其实对你有利：它意味着你不存在被锁一年这回事，按月付，试一个月，然后翻自己的记录——这一周你建过项目吗？设过定时任务吗？把哪套流程存成自定义GPT了吗？",
+          "citations": [
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus#:~:text=Is%20there%20an%20annual%20plan%20available%3F",
+            "https://chatgpt.com/pricing/#:~:text=How%20does%20ChatGPT%E2%80%99s%20pricing%20work%3F"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "一次都没用过，说明你实际买的是额度，那就按额度去算值不值；已经开始往项目里塞资料，说明你买到的是能力。这个结论用你自己的使用记录来验证，比看任何人的评测都准。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "回到开头那个问题：九项权益里，六项只是把天花板抬高，一项给了你新的干法。你上一次觉得“这活免费版ChatGPT干不了”，是在做什么？评论区说说，我下期挑几个典型的拆开讲。我是洛洛，我们下期见。",
+          "citations": [
+            "https://chatgpt.com/pricing#:~:text=Plus"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1306,
+    "estimated_seconds": 296,
+    "segments": 57,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 5,
+    "budget": 1305,
+    "ratio": 0.986,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先把结论摆出来",
+        "spoken_length": 159,
+        "budget": 261
+      },
+      {
+        "title": "答案其实写在页面自己的用词里",
+        "spoken_length": 272,
+        "budget": 261
+      },
+      {
+        "title": "为什么我盯住Projects这一行",
+        "spoken_length": 319,
+        "budget": 261
+      },
+      {
+        "title": "那六项“更多”什么时候才翻上来",
+        "spoken_length": 227,
+        "budget": 261
+      },
+      {
+        "title": "两个容易忽略的前提，和你怎么自己验",
+        "spoken_length": 329,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 2833,
+      "completion_tokens": 7443,
+      "total_tokens": 10276,
+      "cache_read_tokens": 384,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 5630,
+      "cost_usd": 0.0048343,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 86.384,
+    "generation": "goal_first",
+    "prompt_version": 15,
+    "introduction": {
+      "status": "authored",
+      "requests": 0
+    },
+    "creative_direction": "面向普通 ChatGPT 用户，以一个观众任务或疑问开场，沿输入、操作、输出或选择过程展开。用报告已有的具体例子讲清功能、价值与适用人群。教程让人跟得上步骤，对比讲清同一任务下的取舍，动态讲清变化对用法的影响。结尾自然回到观众下一步能做的事，不编造购买链接、联系方式或服务承诺。",
+    "author_system_prompt_sha256": "558e69e0c734139b8cc5ce1daaa4db281a3666853229fec32c08a0af44b54947",
+    "trusted_urls": 6
+  }
+}

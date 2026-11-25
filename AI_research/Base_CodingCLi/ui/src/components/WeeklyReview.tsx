@@ -5,6 +5,7 @@ import { loadWeeklyReview, weeklyReportUrl, type ReviewGroup } from "@/api/telem
 import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
+import { ExperimentBadge } from "./ExperimentBadge";
 
 const th = "pb-2 font-normal text-right whitespace-nowrap";
 const td = "py-2 text-right tabular-nums whitespace-nowrap";
@@ -21,12 +22,12 @@ function Groups({ label, groups, minN, watch }: { label: string; groups: ReviewG
   return <section className="card p-4 space-y-3">
     <h2 className="text-sm font-medium">按{label}</h2>
     <div className="overflow-x-auto"><table className="w-full text-xs text-left">
-      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">{label}</th><th className={th}>视频</th><th className={th}>有 24h 数据</th><th className={th}>24h 中位数</th><th className={th}>上周中位数</th><th className={th}>最高</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th></> : null}<th className="pb-2 font-normal pl-4">最高的一条</th></tr></thead>
+      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">{label}</th><th className={th}>视频</th><th className={th}>有 24h 数据</th><th className={th}>24h 中位数</th><th className={th}>上周中位数</th><th className={th}>最高</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th><th className={th}>封面点击超过同类</th></> : null}<th className="pb-2 font-normal pl-4">最高的一条</th></tr></thead>
       <tbody>{groups.map(g => <tr key={g.value} className="border-t border-border">
         <td className="py-2">{g.value}{g.flag ? <span className={cn("ml-2 px-1.5 rounded text-[11px]", g.flag === "high" ? "bg-success/15 text-success" : "bg-danger/15 text-danger")}>{g.flag === "high" ? "明显偏高" : "明显偏低"}</span> : null}</td>
         <td className={td}>{g.videos}</td><td className={td} title={g.measured < minN ? `少于 ${minN} 条，不下结论` : undefined}>{g.measured}{g.measured && g.measured < minN ? <span className="text-text-muted">（少）</span> : null}</td>
         <td className={td}>{num(g.median)}</td><td className={td}>{num(g.previous_median)}</td><td className={td}>{num(g.max)}</td>
-        {watch ? <><td className={td}>{pct(g.completion)}</td><td className={td}>{secs(g.avg_seconds)}</td><td className={td}>{pct(g.exit3s)}</td></> : null}
+        {watch ? <><td className={td}>{pct(g.completion)}</td><td className={td}>{secs(g.avg_seconds)}</td><td className={td}>{pct(g.exit3s)}</td><td className={td}>{pct(g.cover_pass)}</td></> : null}
         <td className="py-2 pl-4 max-w-[22rem] truncate" title={g.best_title}>{g.best_title || "—"}</td></tr>)}</tbody></table></div>
   </section>;
 }
@@ -82,18 +83,24 @@ export function WeeklyReview() {
     {!watch ? <p className="text-xs text-text-muted">完播率、平均观看时长和 3 秒退出每天 12:30 后从创作中心读取一次；这一周还没有读到。</p> : null}
     <section className="card p-4 space-y-2">
       <h2 className="text-sm font-medium">本周结论</h2>
-      {data.findings.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.findings.map(f => <li key={f}>{f}</li>)}</ul> : <p className="text-sm text-text-muted">没有哪一组明显偏离整体。</p>}
+      {data.findings.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.findings.map(f => <li key={f}>{f}
+        <a className="ml-2 text-xs text-accent hover:underline" href={`/analytics?tab=experiments&new=1&hypothesis=${encodeURIComponent(f)}`}>为它建实验</a></li>)}</ul> : <p className="text-sm text-text-muted">没有哪一组明显偏离整体。</p>}
       <h3 className="text-sm font-medium pt-2">建议（需要你确认后再改配置）</h3>
       {data.suggestions.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.suggestions.map(f => <li key={f}>{f}</li>)}</ul> : <p className="text-sm text-text-muted">数据还不足以给出连续两周成立的建议。</p>}
     </section>
+    {data.experiments?.length ? <section className="card p-4 space-y-2" aria-label="实验进展">
+      <h2 className="text-sm font-medium">实验进展</h2>
+      <p className="text-xs text-text-muted">下面标了「实验 · B 组」的视频用了实验里的改动，看本周变化时把它们分开看。</p>
+      <ul className="text-sm space-y-1">{data.experiments.map(e => <li key={e.id}>{e.name}：A {e.A} 条、B {e.B} 条 · {e.ended_this_week ? `本周结束，${e.verdict}` : e.verdict}</li>)}</ul>
+    </section> : null}
     {data.dimensions.map(d => <Groups key={d.key} label={d.label} groups={d.groups} minN={data.min_n} watch={watch} />)}
     <section className="card p-4 space-y-3">
       <h2 className="text-sm font-medium">本周每一条</h2>
       {data.videos.length ? <div className="overflow-x-auto"><table className="w-full text-xs text-left">
-        <thead className="text-text-muted"><tr><th className="pb-2 font-normal">发布</th><th className="pb-2 font-normal">标题</th><th className="pb-2 font-normal">栏目</th><th className="pb-2 font-normal">形式</th><th className={th}>24h</th><th className={th}>72h</th><th className={th}>7 天</th><th className={th}>目前</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th></> : null}</tr></thead>
+        <thead className="text-text-muted"><tr><th className="pb-2 font-normal">发布</th><th className="pb-2 font-normal">标题</th><th className="pb-2 font-normal">栏目</th><th className="pb-2 font-normal">形式</th><th className={th}>24h</th><th className={th}>72h</th><th className={th}>7 天</th><th className={th}>目前</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th><th className={th}>封面点击超过同类</th></> : null}</tr></thead>
         <tbody>{data.videos.map(v => <tr key={v.bvid} className="border-t border-border">
           <td className="py-2 whitespace-nowrap">{when(v.pubdate)}</td>
-          <td className="py-2 max-w-[22rem] truncate" title={v.title}><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title}</a>{v.structure ? <span className="ml-2 text-text-muted">{v.structure}</span> : null}</td>
+          <td className="py-2 max-w-[22rem] truncate" title={v.title}><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title}</a>{v.structure ? <span className="ml-2 text-text-muted">{v.structure}</span> : null}{v.experiments?.length ? <span className="ml-2"><ExperimentBadge marks={v.experiments} /></span> : null}</td>
           <td className="py-2 whitespace-nowrap">{v.column}</td><td className="py-2 whitespace-nowrap">{v.form}</td>
           <td className={td}>{v.state === "ok" ? num(v.h24) : <span className="text-text-muted">{STATE[v.state]}</span>}</td>
           <td className={td}>{num(v.h72)}</td><td className={td}>{num(v.h168)}</td><td className={td}>{num(v.view)}</td>

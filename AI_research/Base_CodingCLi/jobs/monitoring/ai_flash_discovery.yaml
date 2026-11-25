@@ -1,42 +1,46 @@
 name: "AI Flash Discovery"
-description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown、Radar 订阅源与 AI 新闻媒体，不联网搜索）"
+description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown、Radar 订阅源与 AI 新闻媒体，初稿沿用固定材料，选题后按问题补材）"
+domain: AI 与软件开发
 enabled: true
 keywords:
-  - 新模型发布
-  - API 价格变化
-  - AI 编程工具更新
-  - agent 框架发布
-  - 开源模型发布
-  - 额度与限流变化
+- 新模型发布
+- API 价格变化
+- AI 编程工具更新
+- agent 框架发布
+- 开源模型发布
+- 额度与限流变化
 language: "zh"
 schedule:
   type: "manual"
-search: false            # 只读下面声明的订阅源，不联网搜索（core/engine.py）
+search: false
 sources_limit: 10
 sources:
-  - "source:cg_release_notes"
-  - "source:cg_openai_news"
-  - "source:cg_pro_tiers"
-  - "tag:ai_daily_shared"
-  - "github:anthropics/claude-code"
-  - "tldr:ai"
-  - "rss:https://www.therundown.ai/feed"
-  - "hf_models:trending"
-  - "tag:ai_radar"
-  - "tag:ai_news"
-  - "tag:radar_official"
-  - "tag:radar_dev"
+- "source:bili_hot_ai"     # B站观众本周在看的 AI 热点（core/bili_hot.py，11-10 选题热度）
+- "source:cg_release_notes"
+- "source:cg_openai_news"
+- "source:cg_pro_tiers"
+- "tag:ai_daily_shared"
+- "github:anthropics/claude-code"
+- "tldr:ai"
+- "rss:https://www.therundown.ai/feed"
+- "hf_models:trending"
+- "tag:ai_radar"
+- "tag:ai_news"
+- "tag:radar_official"
+- "tag:radar_dev"
 runtime:
-  timeout_seconds: 2400
+  timeout_seconds: 3600
   skip_if_running: true
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：研究事情本身，形成供视频作者展开讲述的研究底稿。
-  栏目：AI 快讯，面向已经在工作中使用 AI 的开发者和高频使用者。
+  栏目：AI 快讯，面向希望理解 AI 对消费、工作和生活影响的中文普通用户。
   研究方向：从现有来源中挑出会改变能力、成本、使用门槛或操作方式的重要变化，帮助后续作者回答“这次变化和我做的哪件事有关”。
-  对每个候选保留具体对象、这次改变了什么、相关工作场景，以及能展示变化的页面与细节。优先把最值得单独讲一期的发现放在前面，候选数量由本期材料决定。
+  标「B站热词」的材料说明 B站观众这周在看哪些产品和事件：其中有实质新进展的，优先单独成条并放在前面，用随后的网页材料写清具体变化；没有新进展的不硬写。
+  对每个候选保留具体对象、这次改变了什么，以及有助于理解的依据和细节。相关场景与可展示的页面可以帮助解释变化。优先把最值得单独讲一期的发现放在前面，候选数量由本期材料决定。
+  已取得的公告、更新日志和订阅正文能解释变化时，可以直接使用。摘要缺少会影响结论的细节时，留待补材再选这条，继续比较手头其他题材。没有材料够用的题材时，写“本次暂无新题材”。
   研究保留足以展开讲述的材料，视频作者将围绕其中一个变化重新创作完整口播。
-  开头用简短导读说明本期值得关注的变化，条目正文保留理解它所需的细节。对有展开价值的变化，沿一个具体使用场景写清原来怎样操作、现在过程怎样改变、用户最终得到什么；把材料中的一次操作或前后状态展开，解释中间起作用的机制。
+  可以概览本期值得关注的变化，条目正文保留理解它所需的细节。根据材料中的观察、对照或实际操作解释变化发生的过程及影响；场景、背景和适用条件按它们对理解本项变化的帮助安排。
   一句话字段用于快速浏览，正文中的例子、过程和背景仍然充分展开。保留可展示的页面、输入输出或功能位置，相关条件贴着它影响的操作说明。研究底稿和原始材料会共同交给作者，视频顺序、篇幅与标题留给作者组织，不预先压成短口播。
   将项目、论文或公告的原始链接贴在相应的例子与解释旁，末尾仍保留来源清单，便于后续作者取用对应正文。
   任务：{name}
@@ -53,9 +57,31 @@ prompt: |
 
   ### 来源清单
   素材链接。
+
+  选题优先考虑中文观众在消费、工作或生活中遇到的实际问题。普通人共同的处境值得关注，专业题说明适用范围。
+  材料按需求线索、变化材料、具体案例、比较背景搭配；不要求每题凑齐四类。产品热度仅作辅助，不代表某一专业任务有广泛需求。
+  按本轮值得制作的顺序排列。可以记录帮助选题的受众需要、特殊限制或待补材料。候选的组织依材料与问题而定。
 output: "output/flash/{date}_ai_flash_discovery.md"
-# 选题来源（spec/video-topics.md）：报告里的 ### 1.1 条目导入选题表，编号 F1、F2…；自动流水线可在当天没有报告时启动它
+audience_channel: flash
+content_strategy: audience-v1
 topics:
   alias: flash
   format: flash
   refresh: true
+
+# 仅在回退 research_mode: legacy 时生效；opencode_topic_v1 模式下由 Stage 3 逐题深挖直接替代。
+question_material: question-v1
+
+# Four-stage OpenCode pipeline (pilot): Discover -> Soft Filter -> Per-Topic Gather -> Assemble
+research_mode: opencode_topic_v1
+topic_criteria: |
+  关注 AI 模型发布、API/订阅定价与额度变化、AI 编程工具与 Agent 框架重要更新、以及会影响普通用户或开发者能力、成本、安全或工作流的变化。
+  标「B站热词」的线索若有实质新进展优先入选；无实质新进展不硬写。
+  同一产品或同一事件的多条零散小更新请使用相同 cluster_key 合并为一个综合选题。
+  不设数量上限；只剔除重复旧闻、无一手来源的传闻和空洞公关稿。
+gather_requirements: |
+  每道题必须拿到一手公告/文档/更新日志原文链接，并尽可能补齐：
+  1. 变化前后的具体对照（价格、额度、速率限制、可用地区或同档竞品对比）；
+  2. 可验证的具体数字、时间节点、适用范围与限制条件；
+  3. 真实使用案例、社区实测反馈或潜在踩坑点；
+  4. 明确区分官方确认事实、第三方实测与尚未核实项。

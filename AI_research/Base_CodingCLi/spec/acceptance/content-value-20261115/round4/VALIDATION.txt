@@ -1,0 +1,4 @@
+离线读取回归：PYTHONPATH=. python -m pytest spec/acceptance/content-value-20261115/round4/test_acquire.py -q；2 passed。
+组间控制检查：3 组 passed；760 个生产文件哈希未变。
+HTML：3 组、6 份完整稿、无可执行 script，科学空结果保留。
+实验 Python 文件编译通过。服务健康与实例证据见 before.json / after.json。

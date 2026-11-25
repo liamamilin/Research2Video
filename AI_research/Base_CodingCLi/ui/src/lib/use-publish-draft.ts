@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "./auth-store";
 import type { FirstComment } from "@/api/platforms";
-export type PublishFields = { title: string; description: string; tags: string; firstComment: FirstComment; tid?: number };
+export type PublishFields = { title: string; description: string; tags: string; firstComment: FirstComment; tid?: number; creationStatement?: number };
 const fingerprint = (value: PublishFields) => JSON.stringify(value);
 function read(key: string): PublishFields | null {
   try {
     const value = JSON.parse(localStorage.getItem(key) || "null");
-    if (value && typeof value.title === "string" && typeof value.description === "string" && typeof value.tags === "string" && typeof value.firstComment?.enabled === "boolean" && typeof value.firstComment?.text === "string" && typeof value.firstComment?.pin === "boolean" && (value.tid == null || typeof value.tid === "number")) return value;
+    if (value && typeof value.title === "string" && typeof value.description === "string" && typeof value.tags === "string" && typeof value.firstComment?.enabled === "boolean" && typeof value.firstComment?.text === "string" && typeof value.firstComment?.pin === "boolean" && (value.tid == null || typeof value.tid === "number") && (value.creationStatement == null || typeof value.creationStatement === "number")) return value;
   } catch { /* Keep the server draft usable when browser storage is unavailable. */ }
   return null;
 }

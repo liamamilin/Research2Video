@@ -1,3 +1,5 @@
+import { readPageSnapshot, savePageSnapshot, snapshotRevision } from "@/lib/page-snapshots";
+import {useChainScope} from '@/lib/use-chain-scope';
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,6 +26,7 @@ import { errorMessage, useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { DraftQualityPanel } from "./VideoQuality";
 import { ArticleCreate } from "@/components/ArticleCreate";
+import { ExperimentBadge } from "@/components/ExperimentBadge";
 import { scriptFromTopic, topicReturn, topicTaken } from "@/lib/topic-progress";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
@@ -32,6 +35,7 @@ export const STATUS_LABEL: Record<ScriptStatus, string> = {
   PLAN_READY: "方案待确认",
   DRAFT: "待审稿",
   APPROVED: "已定稿",
+  SKIPPED: "已跳过",
   FAILED: "失败",
 };
 
@@ -41,6 +45,7 @@ export const STATUS_CLASS: Record<ScriptStatus, string> = {
   PLAN_READY: "bg-warning/15 text-warning border-warning/30",
   DRAFT: "bg-warning/15 text-warning border-warning/30",
   APPROVED: "bg-success/15 text-success border-success/30",
+  SKIPPED: "bg-bg-card text-text-muted border-border",
   FAILED: "bg-danger/15 text-danger border-danger/30",
 };
 
@@ -88,7 +93,7 @@ export const STATUS_NOTE: Partial<Record<VideoCell["status"], string>> = {
 
 const IN_FLIGHT: ScriptStatus[] = ["RESEARCHING", "WRITING"];
 // 状态按钮的顺序：先写稿，再出片，最后发布；失败的放最后
-const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "unpublished", "published", "FAILED"];
+const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "unpublished", "published", "SKIPPED", "FAILED"];
 
 export function minutes(seconds: number | null | undefined): string {
   if (!seconds) return "—";
@@ -96,12 +101,15 @@ export function minutes(seconds: number | null | undefined): string {
 }
 
 export function VideoScriptsPage() {
+  const chainScope=useChainScope();
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [result, setResult] = useState<{ archived: boolean; scripts: VideoScriptSummary[] } | null>(null);
+  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived", "platform", "distribution"]);
+  const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
+  const [result, setResult] = useState<{ archived: boolean; scripts: VideoScriptSummary[] } | null>(() => readPageSnapshot(`scripts:${showArchived}`));
   const [loading, setLoading] = useState(false);
   const flight = useRef<AbortController | null>(null);
   const [advanced, setAdvanced] = useState(false);
@@ -118,7 +126,6 @@ export function VideoScriptsPage() {
   // 生产配置派生出来的栏目（如 flash-nr）不在格子目录里：用配置的名字，不显示内部的键
   const [configNames, setConfigNames] = useState<Record<string, string>>({});
   const [params, setParams] = useSearchParams();
-  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived", "platform", "distribution"]);
   const requestedStatus = params.get("status") ?? "all";
   const statusFilter = ["archived", "all"].includes(requestedStatus) ? "" : requestedStatus;
   const highlight = params.get("topic");
@@ -140,23 +147,23 @@ export function VideoScriptsPage() {
   const [articleOpen, setArticleOpen] = useState(false);
   const [articleMounted, setArticleMounted] = useState(false);
 
-  const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
   const scripts = result?.archived === showArchived ? result.scripts : null;
   const load = useCallback(async () => {
     if (flight.current) return;
+    const revision = snapshotRevision();
     const controller = new AbortController(); flight.current = controller; setLoading(true);
     try {
       const rows = await listVideoScripts(showArchived, controller.signal);
       if (!Array.isArray(rows)) throw new Error("文稿数据格式异常，请重试");
-      if (!controller.signal.aborted) { setResult({ archived: showArchived, scripts: rows }); setError(null); }
-    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e, "加载视频文稿失败")); }
-    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
+      if (!controller.signal.aborted && revision === snapshotRevision()) { const result = { archived: showArchived, scripts: rows }; savePageSnapshot(`scripts:${showArchived}`, result, revision); setResult(result); setError(null); }
+    } catch (e) { if (!controller.signal.aborted && revision === snapshotRevision()) setError(errorMessage(e, "加载视频文稿失败")); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); if (!controller.signal.aborted && revision !== snapshotRevision()) void load(); } }
   }, [showArchived]);
   useEffect(() => { setError(null); void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
-  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (s.status !== "FAILED" && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
+  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (!["FAILED", "SKIPPED"].includes(s.status) && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void load(); };
-    const timer = window.setInterval(refresh, inFlight ? 5000 : 30000);
+    const timer = window.setInterval(refresh, inFlight ? 15000 : 45000);
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [inFlight, load]);
@@ -187,7 +194,7 @@ export function VideoScriptsPage() {
     const stage = stageOf(x);
     return stage === "WRITING" ? "RESEARCHING" : stage;
   };
-  const scope = (scripts ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
+  const scope = (scripts ?? []).filter((s) => chainScope.script(s.id) && (!f.matrix || (s.matrix || "_independent") === f.matrix));
   const matrixOptions = [...new Map((scripts ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
   const columnName = (key: string) => (scripts ?? []).find((s) => s.column_key === key)?.column_label || cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") || configNames[key] || key;
   const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : key === "published" ? Boolean(x.published) : chipOf(x) === key;
@@ -280,8 +287,8 @@ export function VideoScriptsPage() {
               value={cellId}
               onChange={(e) => setCellId(e.target.value)}
             >
-              {cells.map((c) => (
-                <option key={c.id} value={c.id} disabled={!c.usable}>
+              {cells.filter((c) => c.usable).map((c) => (
+                <option key={c.id} value={c.id}>
                   {c.label}
                   {STATUS_NOTE[c.status] ? `（${STATUS_NOTE[c.status]}）` : ""}
                 </option>
@@ -521,7 +528,7 @@ export function VideoScriptsPage() {
         <thead className="text-xs text-text-muted border-b border-border"><tr><th className="text-left font-normal px-4 py-3">文稿与来源</th><th className="text-left font-normal px-4 py-3">制作进度</th><th className="text-left font-normal px-4 py-3">事实审计</th><th className="text-left font-normal px-4 py-3">创建时间</th></tr></thead>
         <tbody>{shownScripts.slice(0, limit).map((s, i) => <Fragment key={s.id}>{i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? <tr className="bg-bg-hover/50"><td colSpan={4} className="px-4 py-2 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr> : null}<tr className="border-b border-border last:border-0 hover:bg-bg-hover">
           <td className="px-4 py-3 min-w-60"><Link to={`/video/${s.id}`} className="font-medium text-sm leading-6 hover:text-accent hover:underline">{s.title}</Link><div className="text-xs text-text-muted flex flex-wrap gap-x-2 gap-y-1 mt-1"><span>{s.matrix_name || "独立视频"}</span>{s.current_version ? <span>v{s.current_version}</span> : null}{s.has_previous_video ? <span>有旧版成片</span> : null}{s.auto ? <span>自动生成</span> : null}</div><p className="text-xs text-text-muted mt-1">{columnName(s.column_key)}{s.length_check?.estimated_seconds ? ` · 预计口播 ${minutes(s.length_check.estimated_seconds)}` : ""}</p>{s.job_name ? <p className="text-xs text-text-muted mt-1">{s.job_name}</p> : null}</td>
-          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span><div className="mt-2"><DistributionSummary rows={s.distributions} /></div></td>
+          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span>{s.content_context?.experiments?.length ? <div className="mt-1 flex flex-wrap gap-1"><ExperimentBadge marks={s.content_context.experiments} /></div> : null}<div className="mt-2"><DistributionSummary rows={s.distributions} /></div></td>
           <td className="px-4 py-3 align-top pt-4"><Link to={`/video/${s.id}?tab=review`} className="inline-flex hover:opacity-80" aria-label={`查看审校：${s.title}`}><CredibilityBadge value={s.credibility} /></Link></td>
           <td className="px-4 py-3 align-top pt-4"><TimeStamp value={s.created_at} staleDays={Infinity} /></td>
         </tr></Fragment>)}</tbody>

@@ -1,0 +1,90 @@
+[
+  {
+    "job": "company/company_illustrated",
+    "path": "jobs/company/company_illustrated.yaml",
+    "original_sha256": "c07cc26c27c2a15ca8315ded7ac8b7b6c4684336dc5ed29fdbe26364c502d057",
+    "candidate_sha256": "23aaa3ed059f12599f062cf6fcf988766b989a74ce5f6f273e709735c74fa045",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个商业问题中的需求、交易和交付关系，用具体经营过程解释成本、收益或激励怎样产生；例子要能让人看见这些关系怎样影响结果。"
+  },
+  {
+    "job": "consumer/consumer_illustrated",
+    "path": "jobs/consumer/consumer_illustrated.yaml",
+    "original_sha256": "81f6eec9c0ccb6451af7831c85120d9ef4385d3c691524dfc7b0697d29030be2",
+    "candidate_sha256": "7a8635e4ea8e1221eb6ff3a7a7055c9583fd7e98bb70f05df40a5541db5590ff",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清产品或使用体验为什么出现这种变化，用具体操作、可感知的结果和必要条件解释原理。"
+  },
+  {
+    "job": "culture/culture_illustrated",
+    "path": "jobs/culture/culture_illustrated.yaml",
+    "original_sha256": "c4471dc6950fbd9e7eaca8689483d81994443a2af09362146c06cd9e67c0a910",
+    "candidate_sha256": "0df5ea938dec84720f38861518737786ab9a274a0f3d9d257f2ce45f9b68cc3a",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "围绕具体作品或表达讲清它怎样影响观看、聆听或理解，用可辨认的形式细节和创作做法支撑解释。"
+  },
+  {
+    "job": "economy/economy_illustrated",
+    "path": "jobs/economy/economy_illustrated.yaml",
+    "original_sha256": "a104e520a4b706d9fffdb939dc84eeb11ec41df96af880ae265bb9782fb2aca1",
+    "candidate_sha256": "de7cc9bc73c16c4ab5aaa08a80aeeabe443b13f8ecc62deade9de0ddbc3306f9",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个生活经济现象怎样产生，用具体交易、价格或算例说明参与者的行为、成本和结果之间的关系。"
+  },
+  {
+    "job": "geography/geography_illustrated",
+    "path": "jobs/geography/geography_illustrated.yaml",
+    "original_sha256": "e32d377377d82090af46194d3cf43d35f110067927ef9926d38fc195018ed313",
+    "candidate_sha256": "3e29e7e0eccf7b1f2b4b5c792370dcb6035a3058d171da2103e3568172906fbb",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个地理现象的形成过程与空间关系，用具体位置、尺度、条件变化和可想象的过程帮助理解。"
+  },
+  {
+    "job": "history/history_illustrated",
+    "path": "jobs/history/history_illustrated.yaml",
+    "original_sha256": "0cc557035427a5d49c9671cd395202d0c413b82e07ad1a8e71de7849aa329880",
+    "candidate_sha256": "0b926ea3b882a3da108b46ba5d43ebc5c5318987dae2ea9ffeb1a721f5dc7f52",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个历史问题所涉及的人、制度或日常做法，把具体过程放回当时的条件中解释。"
+  },
+  {
+    "job": "industry/industry_illustrated",
+    "path": "jobs/industry/industry_illustrated.yaml",
+    "original_sha256": "9f36e2a30be576cae5487fea105fbf10657f3c581969041744201d0a0f4f4f77",
+    "candidate_sha256": "710fcdb58fa3a7eec040c49d8987f79ad08ee19157006524d4a51f2ee668724d",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个制造问题的实际工艺和因果，用原料、设备或产品发生的具体变化说明为什么这样做。"
+  },
+  {
+    "job": "science/science_illustrated",
+    "path": "jobs/science/science_illustrated.yaml",
+    "original_sha256": "5b15ff19cb3890572cef04dd4ebb9601c95d1d4106f82870dd82a30d4da2fa6c",
+    "candidate_sha256": "855633bf1b972507fa699df8eaa5c9310115b8d45f4fd164db1e34ea6e62d964",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清现象怎样发生、相关条件怎样影响结果，用具体观察和过程解释其中的科学原理。"
+  },
+  {
+    "job": "software/software_illustrated",
+    "path": "jobs/software/software_illustrated.yaml",
+    "original_sha256": "7c658fae5041c55a12d968b34ad631255dca1de8c99a38730c3d5b700f1b19f5",
+    "candidate_sha256": "0f26cb6c86097b00cc98466dfd4d327e32c24a7584fe20c9abc6464d1cd0c754",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个软件或数字工具现象的原因，用具体输入、处理过程和输出说明机制。"
+  },
+  {
+    "job": "tech/tech_illustrated",
+    "path": "jobs/tech/tech_illustrated.yaml",
+    "original_sha256": "6b53b4fcc94da431132abd532a386f594fd37c4f789c570a8daa2bc41a248c13",
+    "candidate_sha256": "b450a7d8c1d54a7d0542c84eccc7c8124ff101d674c1e638ba471350fd2f72ce",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "讲清这个技术问题的原理与实际效果，用具体部件、信号、操作或结果帮助理解。"
+  },
+  {
+    "job": "chatgpt_acquisition/t05_comparison",
+    "path": "config/content_columns/chatgpt_t05_comparison.yaml",
+    "original_sha256": "7545b460821625f1cb384f424af98e3e4b85d7edc3e9db4f1a36f08737586571",
+    "candidate_sha256": "c5710a98c9995a4489c01e31962d57a596110dbde00581b3ae9a36b8092cac7d",
+    "status": "prepared_local_only; output_quality_unverified",
+    "retained": "跨公司、同任务或同维度的实质比较，核心角度、入口费用条件与选择依据；未启用的t05 profile不改。"
+  }
+]

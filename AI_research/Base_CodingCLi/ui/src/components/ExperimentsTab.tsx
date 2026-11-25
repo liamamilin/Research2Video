@@ -1,0 +1,271 @@
+import { Link, useSearchParams } from "react-router-dom";
+import { Fragment, useCallback, useState } from "react";
+import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, loadSuggestion, loadRecords, decideExperiment, estimateExperiment, moveExperiment, requestPreview, setExperimentsEnabled,
+  type Definition, type EstimateResult, type ExperimentDetail, type ExperimentRow, type Move, type SwitchRow } from "@/api/experiments";
+import { usePageResource } from "@/lib/use-page-resource";
+import { ErrorState } from "./ErrorState";
+
+const STATUS: Record<ExperimentRow["status"], string> = { draft: "草稿", queued: "排队中", running: "进行中", paused: "已暂停", ended: "已结束", decided: "已处理" };
+const TIMING = { before_writing: "写稿前", from_writing: "写稿起" } as const;
+const REACH = { all: "全部", with_column: "要有内容栏目" } as const;
+const STATE = { existing: "已有", planned: "要新增", unconfirmed: "待确认" } as const;
+const METRICS: Record<string, { label: string; better: "higher" | "lower" }> = {
+  completion_adjusted: { label: "时长校正后的完播率", better: "higher" }, completion: { label: "完播率", better: "higher" },
+  exit3s: { label: "3 秒退出", better: "lower" }, cover_pass: { label: "封面点击超过同类", better: "higher" } };
+const ACTIONS: Record<ExperimentRow["status"], [Move, string][]> = {
+  draft: [["start", "开始"], ["queue", "排队"]], queued: [["unqueue", "取消排队"]], running: [["pause", "暂停"], ["end", "结束"]], paused: [["resume", "继续"], ["end", "结束"]], ended: [], decided: [] };
+const th = "pb-2 font-normal whitespace-nowrap";
+const list = (text: string) => text.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+const message = (e: unknown) => e instanceof Error ? e.message : String(e);
+
+function parseValue(raw: string, sw: SwitchRow | undefined): unknown {
+  if (sw?.values.length) return sw.values.find(v => String(v) === raw) ?? raw;
+  try { return JSON.parse(raw); } catch { return raw; }
+}
+
+export function estimateText(e: EstimateResult, perArm: number, maxDays: number): string {
+  const coverage = e.coverage != null ? `，其中约 ${Math.round(e.coverage * 100)}% 读得到主要指标` : "（主要指标的覆盖率还没有数据，按全部读得到估算）";
+  const stopped = e.stopped_days ? `；其中 ${e.stopped_days} 天停产` : "";
+  const days = e.days == null ? "这个范围最近没有视频，跑不起来"
+    : `凑够每组 ${perArm} 条大约要 ${e.days} 天${e.within_max ? "" : `，超过设定的 ${maxDays} 天，到时多半是「没有分出差异」`}`;
+  return `按近 ${e.window_days} 天的产量：范围内每天约 ${e.per_day} 条自动视频${coverage}${stopped}；${days}`;
+}
+
+function NewExperiment({ registry, onDone, initial }: { registry: SwitchRow[]; onDone: (note?: string) => void; initial?: { name?: string; hypothesis?: string } }) {
+  const [kind, setKind] = useState<"compare" | "aa">(initial?.hypothesis ? "compare" : "aa");
+  const [id, setId] = useState(""); const [name, setName] = useState(initial?.name ?? "");
+  const [hypothesis, setHypothesis] = useState(initial?.hypothesis ?? "");
+  const [path, setPath] = useState(registry[0]?.path ?? ""); const [sub, setSub] = useState(""); const [value, setValue] = useState("");
+  const [primary, setPrimary] = useState("completion_adjusted"); const [effect, setEffect] = useState(8);
+  const [share, setShare] = useState(50); const [perArm, setPerArm] = useState(20); const [days, setDays] = useState(28);
+  const [columns, setColumns] = useState(""); const [matrices, setMatrices] = useState(""); const [mode, setMode] = useState("");
+  const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
+  const sw = registry.find(r => r.path === path);
+  const prefix = path.endsWith(".*");
+  const [estimate, setEstimate] = useState<EstimateResult | null>(null);
+  const build = (): Definition => {
+    const key = prefix ? `${path.slice(0, -2)}.${sub}` : path;
+    return { id, name, hypothesis, kind, share_b: share,
+      scope: { columns: list(columns), matrices: list(matrices), content_mode: (mode || null) as "individual" | "episode" | null },
+      arms: { A: { name: "现状", overrides: {} }, B: { name: kind === "aa" ? "现状（对照）" : `${sw?.label ?? key}：${value}`, overrides: kind === "aa" ? {} : { [key]: parseValue(value, sw) } } },
+      metric: { primary, better: METRICS[primary].better, min_effect: effect }, stop: { per_arm: perArm, max_days: days } };
+  };
+  const guess = async () => {
+    setError("");
+    try { setEstimate(await estimateExperiment({ ...build(), id: id || "estimate", name: name || "估算" })); } catch (e) { setError(message(e)); }
+  };
+  const submit = async () => {
+    const definition = build();
+    setBusy(true); setError("");
+    try {
+      const made = await createExperiment(definition);
+      onDone(made.duplicates?.length ? `以前做过改同样开关、同样取值的实验：${made.duplicates.map(d => `${d.name}（${d.verdict ? VERDICT[d.verdict as keyof typeof VERDICT] ?? d.verdict : STATUS[d.status as ExperimentRow["status"]] ?? d.status}）`).join("、")}，可以先看实验记录。` : undefined);
+    } catch (e) { setError(message(e)); } finally { setBusy(false); }
+  };
+  const field = "input text-xs";
+  return <section className="card p-4 space-y-3" aria-label="新建实验">
+    <h2 className="text-sm font-medium">新建实验</h2>
+    <div className="grid gap-3 sm:grid-cols-2 text-xs">
+      <label className="space-y-1"><span>类型</span><select className={field} value={kind} onChange={e => { const k = e.target.value as "compare" | "aa"; setKind(k); setPerArm(k === "aa" ? 20 : 45); }}>
+        <option value="aa">A/A 检查（两组相同，检查流程）</option><option value="compare">对比实验</option></select></label>
+      <label className="space-y-1"><span>标识（小写字母、数字、-、_）</span><input className={field} value={id} onChange={e => setId(e.target.value)} /></label>
+      <label className="space-y-1 sm:col-span-2"><span>名称</span><input className={field} value={name} onChange={e => setName(e.target.value)} /></label>
+      <label className="space-y-1 sm:col-span-2"><span>假设（为什么觉得 B 会更好）</span><textarea className={field} rows={2} value={hypothesis} onChange={e => setHypothesis(e.target.value)} /></label>
+      {kind === "compare" ? <>
+        <label className="space-y-1"><span>要改的开关</span><select className={field} value={path} onChange={e => { setPath(e.target.value); setValue(""); }}>
+          {registry.map(r => <option key={r.path} value={r.path}>{r.label}（{r.path}）{r.status !== "existing" ? ` · ${STATE[r.status]}` : ""}</option>)}</select></label>
+        {prefix ? <label className="space-y-1"><span>子项</span><input className={field} value={sub} onChange={e => setSub(e.target.value)} placeholder="voice_id" /></label> : null}
+        <label className="space-y-1"><span>B 组的取值</span>{sw?.values.length ?
+          <select className={field} value={value} onChange={e => setValue(e.target.value)}><option value="">选择</option>{sw.values.map(v => <option key={String(v)} value={String(v)}>{String(v)}</option>)}</select> :
+          <input className={field} value={value} onChange={e => setValue(e.target.value)} />}</label>
+        <label className="space-y-1"><span>主要指标</span><select className={field} value={primary} onChange={e => setPrimary(e.target.value)}>
+          {Object.entries(METRICS).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}</select></label>
+        <label className="space-y-1"><span>要测出的差异（个点）</span><input type="number" min={1} className={field} value={effect} onChange={e => setEffect(Number(e.target.value))} /></label>
+        <label className="space-y-1"><span>B 组比例</span><select className={field} value={share} onChange={e => setShare(Number(e.target.value))}>
+          {[50, 45, 40, 35, 30, 25, 20, 15, 10, 5].map(v => <option key={v} value={v}>{v}%</option>)}</select></label>
+      </> : null}
+      <label className="space-y-1"><span>终点：每组条数</span><input type="number" min={2} className={field} value={perArm} onChange={e => setPerArm(Number(e.target.value))} /></label>
+      <label className="space-y-1"><span>终点：最多天数</span><input type="number" min={1} className={field} value={days} onChange={e => setDays(Number(e.target.value))} /></label>
+      <label className="space-y-1"><span>只在这些栏目（逗号分隔，空 = 全部）</span><input className={field} value={columns} onChange={e => setColumns(e.target.value)} /></label>
+      <label className="space-y-1"><span>只在这些矩阵（逗号分隔，空 = 全部）</span><input className={field} value={matrices} onChange={e => setMatrices(e.target.value)} /></label>
+      <label className="space-y-1"><span>单篇还是整期</span><select className={field} value={mode} onChange={e => setMode(e.target.value)}>
+        <option value="">都可以</option><option value="individual">单篇</option><option value="episode">整期节目</option></select></label>
+    </div>
+    {estimate ? <p className="text-xs" role="status">{estimateText(estimate, perArm, days)}</p> : null}
+    {error ? <p role="alert" className="text-xs text-danger">{error}</p> : null}
+    <div className="flex gap-2"><button className="btn text-xs" onClick={() => void guess()}>估算要跑多久</button>
+      <button className="btn btn-primary text-xs" disabled={busy || !id || !name} onClick={() => void submit()}>保存草稿</button>
+      <button className="btn text-xs" onClick={() => onDone()}>取消</button></div>
+  </section>;
+}
+
+const PREVIEW_STATUS = { requested: "排队中（等正式出片空闲）", running: "正在出片", done: "已出好", failed: "没出成" } as const;
+
+function Preview({ id }: { id: string }) {
+  const load = useCallback((signal: AbortSignal) => loadPreview(id, signal), [id]);
+  const { data, error, reload } = usePageResource(load);
+  const [source, setSource] = useState(""); const [problem, setProblem] = useState("");
+  if (error) return <p className="text-xs text-danger">{message(error)}</p>;
+  if (!data || data.kind === "none") return null;
+  const run = async (fn: () => Promise<unknown>) => { setProblem(""); try { await fn(); await reload(); } catch (e) { setProblem(message(e)); } };
+  const p = data.preview;
+  return <div className="border-t border-border pt-2 mt-2 space-y-2" aria-label="预览 B">
+    <p className="font-medium">预览 B（只出片，不发布）{data.confirmed ? <span className="text-success ml-2">已确认</span> : null}</p>
+    {p ? <p>状态：{PREVIEW_STATUS[p.status]}{p.error ? `：${p.error}` : ""}</p> : <p className="text-text-muted">还没有预览。</p>}
+    {data.a_video && data.b_video ? <div className="grid gap-2 sm:grid-cols-2">
+      <figure><figcaption className="text-text-muted mb-1">A（现状）</figcaption><video controls src={data.a_video} className="w-full rounded" /></figure>
+      <figure><figcaption className="text-text-muted mb-1">B</figcaption><video controls src={data.b_video} className="w-full rounded" /></figure></div> : null}
+    <div className="flex flex-wrap gap-2 items-center">
+      <select aria-label="预览用的视频" className="input text-xs w-auto" value={source} onChange={e => setSource(e.target.value)}>
+        <option value="">最近的一条</option>{data.sources.map(s => <option key={s.render_id} value={s.render_id}>{s.title}</option>)}</select>
+      <button className="btn text-xs" disabled={p?.status === "requested" || p?.status === "running" || data.sources.length === 0}
+        onClick={() => void run(() => requestPreview(id, source || undefined))}>生成预览</button>
+      {p?.status === "done" && !data.confirmed ? <button className="btn btn-primary text-xs" onClick={() => void run(() => confirmPreview(id))}>确认 B 没问题</button> : null}
+      <button className="btn text-xs" onClick={() => void reload()}>刷新</button>
+    </div>
+    {data.covers ? <div className="grid gap-2 sm:grid-cols-2">
+      <figure><figcaption className="text-text-muted mb-1">A（现状）</figcaption><img src={data.covers.a} alt="A 组封面" className="w-full rounded" /></figure>
+      <figure><figcaption className="text-text-muted mb-1">B</figcaption><img src={data.covers.b} alt="B 组封面" className="w-full rounded" /></figure></div> : null}
+    {data.sources.length === 0 ? <p className="text-text-muted">最近 7 天没有这个实验范围内的自动出片，暂时没法预览。</p> : null}
+    {problem ? <p role="alert" className="text-danger">{problem}</p> : null}
+  </div>;
+}
+
+const VERDICT = { running: "进行中，不下结论", srm: "分组失衡，结论不可信", b_better: "B 更好", b_worse: "B 更差", no_difference: "没有分出差异" } as const;
+const fmt = (v: number | null | undefined, digits = 1) => v == null ? "—" : (Math.round(v * 10 ** digits) / 10 ** digits).toString();
+
+function SuggestionPanel({ id }: { id: string }) {
+  const load = useCallback((signal: AbortSignal) => loadSuggestion(id, signal), [id]);
+  const { data } = usePageResource(load);
+  if (!data?.items.length) return null;
+  return <div className="border-t border-border pt-2 mt-2 space-y-1" aria-label="建议改动">
+    <p className="font-medium">建议改动（在栏目配置页确认保存后才生效）</p>
+    {data.items.map((s, i) => <p key={i}>{s.editable && s.link ? <Link className="text-accent hover:underline" to={s.link}>
+      去「{s.column_name}」栏目：{s.path} 从 {JSON.stringify(s.from ?? "")} 改成 {JSON.stringify(s.to)}</Link> : <span>{s.path} → {JSON.stringify(s.to)}：{s.reason}</span>}</p>)}
+  </div>;
+}
+
+const AA_VERDICT = { running: "进行中", srm: "分组失衡：分组或取数据有问题", b_better: "流程有问题：两组设置相同却分出了差异",
+  b_worse: "流程有问题：两组设置相同却分出了差异", no_difference: "流程正常（两组设置相同，没有分出差异）" } as const;
+const STATE_LABEL = { measured: "已读到", pending: "待测", missing: "缺失" } as const;
+
+function ResultsPanel({ id, status, kind, onChanged }: { id: string; status: ExperimentRow["status"]; kind: "compare" | "aa"; onChanged: () => void }) {
+  const [showVideos, setShowVideos] = useState(false);
+  const load = useCallback((signal: AbortSignal) => loadResults(id, signal), [id]);
+  const { data, error } = usePageResource(load);
+  if (error) return <p className="text-xs text-danger">{message(error)}</p>;
+  if (!data) return <p className="text-xs text-text-muted">正在计算…</p>;
+  const p = data.primary;
+  return <div className="border-t border-border pt-2 mt-2 space-y-1" aria-label="实验结果">
+    <p className="font-medium">结论：{(kind === "aa" ? AA_VERDICT : VERDICT)[data.verdict.verdict]}{data.frozen ? "（已存档，不再改写）" : ""}</p>
+    {data.missing_alarm ? <p className="text-danger">两组缺数据的比例相差超过 15 个点，结论不可信</p> : null}
+    {data.code_changed ? <p className="text-warning">实验期间被测开关相关的代码改过（{data.code_changed.files.join("、")}），比较可能不公平</p> : null}
+    {data.verdict.minimum_detectable != null ? <p>这次样本量能测出的最小差异：约 {fmt(data.verdict.minimum_detectable)} 个点</p> : null}
+    {data.verdict.notes.map(n => <p key={n} className="text-warning">{n}</p>)}
+    {data.harm ? <p className="text-danger">{data.harm}（由你决定是否停止）</p> : null}
+    <p>样本：A {data.n.A} 条（有数据 {data.with_data.A}，缺失 {data.missing.A}），B {data.n.B} 条（有数据 {data.with_data.B}，缺失 {data.missing.B}）；分组检查 p = {fmt(data.srm_p, 3)}</p>
+    <p>主要指标 {METRICS[p.metric]?.label ?? p.metric}：B − A = {fmt(p.estimate)}，90% 区间 [{fmt(p.low)}, {fmt(p.high)}]{data.verdict.verdict === "running" ? "（未到终点）" : ""}</p>
+    {data.guardrails.map(g => <p key={g.metric} className={g.status === "worse" ? "text-danger" : undefined}>护栏 {g.metric}：{fmt(g.estimate, 2)} [{fmt(g.low, 2)}, {fmt(g.high, 2)}]{g.status === "worse" ? " 明显变差" : g.status === "hint" ? " 变差，样本不足以确认" : ""}</p>)}
+    <button className="text-accent hover:underline" onClick={() => setShowVideos(!showVideos)}>{showVideos ? "收起视频列表" : `看两组的视频（${data.videos.length} 条）`}</button>
+    {showVideos ? <div className="overflow-x-auto"><table className="w-full text-left"><thead className="text-text-muted"><tr><th className={th}>组</th><th className={th}>视频</th><th className={th}>状态</th><th className={th}>{METRICS[p.metric]?.label ?? p.metric}</th></tr></thead>
+      <tbody>{data.videos.map(v => <tr key={v.script_id} className="border-t border-border"><td className="py-1">{v.arm}</td>
+        <td className="py-1">{v.bvid ? <a className="text-accent hover:underline" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.bvid}</a> : <Link className="hover:underline" to={`/video/${v.script_id}`}>稿件</Link>}</td>
+        <td className="py-1">{STATE_LABEL[v.state]}</td><td className="py-1 tabular-nums">{typeof v[p.metric] === "number" ? fmt(v[p.metric] as number) : "—"}</td></tr>)}</tbody></table></div> : null}
+    {data.frozen && data.verdict.verdict === "b_better" && kind === "compare" ? <SuggestionPanel id={id} /> : null}
+    {data.frozen && status === "ended" ? <div className="flex flex-wrap gap-2 items-center"><span>你的选择：</span>
+      {([["adopt", "采用 B"], ["keep", "保留 A"], ["defer", "暂不处理"]] as const).map(([choice, label]) =>
+        <button key={choice} className="btn text-xs" onClick={() => void decideExperiment(id, choice).then(onChanged)}>{label}</button>)}
+      <span className="text-text-muted">采用 B 只记下选择和改动前的值，配置要在栏目页保存。</span></div> : null}
+    {data.reference && data.reference.estimate != null ? <p className="text-text-muted">仅供参考：只看 48 小时播放 {data.reference.min_views} 次以上的视频，B − A = {fmt(data.reference.estimate)} [{fmt(data.reference.low)}, {fmt(data.reference.high)}]，不用来下结论</p> : null}
+    {data.completion_skipped && (data.completion_skipped.A || data.completion_skipped.B) ? <p className="text-text-muted">完播率只有诊断列表读数而跳过的：A {data.completion_skipped.A} 条，B {data.completion_skipped.B} 条</p> : null}
+    {data.no_metric ? <p className="text-text-muted">已发布满 48 小时但没读到主要指标：A {data.no_metric.A} 条，B {data.no_metric.B} 条</p> : null}
+    {data.costs && (data.costs.A || data.costs.B) ? <p className="text-text-muted">平均每条成本：{(["A", "B"] as const).map(arm => { const c = data.costs?.[arm]; return c ? `${arm} 组 $${c.cost_usd.toFixed(3)}${c.partial ? "+" : ""}、出片 ${fmt(c.render_minutes)} 分钟` : `${arm} 组暂无`; }).join("；")}</p> : null}
+    <p className="text-text-muted">已跑 {fmt(data.active_days)} 天（不含暂停）{data.production_gaps ? `，其中 ${data.production_gaps} 天停产` : ""}；时长中位数 A {fmt(data.median_duration.A, 0)} 秒 / B {fmt(data.median_duration.B, 0)} 秒；24 小时播放中位数 A {fmt(data.median_views.A, 0)} / B {fmt(data.median_views.B, 0)}（仅供参考）{data.applied_rate != null ? `；B 组实际生效率 ${Math.round(data.applied_rate * 100)}%` : ""}</p>
+  </div>;
+}
+
+function Details({ id, onChanged }: { id: string; onChanged: () => void }) {
+  const load = useCallback((signal: AbortSignal) => loadExperiment(id, signal), [id]);
+  const { data, error } = usePageResource(load);
+  if (error) return <p className="text-xs text-danger">{message(error)}</p>;
+  if (!data) return <p className="text-xs text-text-muted">正在读取…</p>;
+  const d: ExperimentDetail = data;
+  return <div className="text-xs space-y-1 py-2">
+    <p>已分组：A {d.arms.A} 条，B {d.arms.B} 条</p>
+    {d.start_problems.length ? <ul className="text-danger list-disc pl-4">{d.start_problems.map(p => <li key={p}>{p}</li>)}</ul> : null}
+    {d.status === "draft" || d.status === "queued" ? <Preview id={id} /> : <ResultsPanel id={id} status={d.status} kind={d.definition.kind} onChanged={onChanged} />}
+    <p className="text-text-muted">记录：{d.events.map(e => `${new Date(e.at * 1000).toLocaleString("zh-CN", { hour12: false })} ${e.kind}`).join("；")}</p>
+  </div>;
+}
+
+function Records() {
+  const { data } = usePageResource(loadRecords);
+  if (!data?.items.length) return null;
+  return <section className="card p-4 space-y-2" aria-label="实验记录">
+    <h2 className="text-sm font-medium">实验记录</h2>
+    <ul className="text-xs space-y-1">{data.items.map(r => <li key={r.id}><strong>{r.name}</strong>：{r.verdict ? VERDICT[r.verdict as keyof typeof VERDICT] ?? r.verdict : "结论未存档"}
+      {r.estimate != null ? `（${METRICS[r.metric]?.label ?? r.metric} B − A = ${fmt(r.estimate)}，区间 [${fmt(r.low)}, ${fmt(r.high)}]）` : ""}
+      {r.minimum_detectable != null ? `；这次能测出的最小差异约 ${fmt(r.minimum_detectable)} 个点` : ""}
+      {r.decision ? `；你的选择：${r.decision.label}` : ""}</li>)}</ul>
+  </section>;
+}
+
+/** spec/ab-testing.md §9. */
+export function ExperimentsTab() {
+  const { data, error, reload } = usePageResource(loadExperiments);
+  const [params, setParams] = useSearchParams();
+  const fromReview = params.get("new") === "1" ? { name: (params.get("hypothesis") || "").slice(0, 40), hypothesis: params.get("hypothesis") || "" } : undefined;
+  const [creating, setCreating] = useState(Boolean(fromReview));
+  const [notice, setNotice] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
+  const [problem, setProblem] = useState("");
+  if (error) return <ErrorState error={error} onRetry={reload} compact />;
+  if (!data) return <p className="text-sm text-text-muted">正在读取…</p>;
+  const act = async (fn: () => Promise<unknown>) => { setProblem(""); try { await fn(); await reload(); } catch (e) { setProblem(message(e)); } };
+  const toggle = () => {
+    if (!data.enabled && !window.confirm("打开后，进行中的实验会给新建的自动稿件分组。确定打开？")) return;
+    void act(() => setExperimentsEnabled(!data.enabled));
+  };
+  return <div className="space-y-4">
+    <section className="card p-4 text-sm flex flex-wrap items-center gap-x-6 gap-y-2">
+      <span>总开关：<strong className={data.enabled ? "text-success" : "text-text-muted"}>{data.enabled ? "开" : "关"}</strong></span>
+      <span className="text-text-muted text-xs">关着时所有稿件都按现状（A）生产，进行中的实验也不分组。</span>
+      <button className="btn text-xs ml-auto" onClick={toggle}>{data.enabled ? "关闭总开关" : "打开总开关"}</button>
+    </section>
+    {problem ? <p role="alert" className="text-xs text-danger">{problem}</p> : null}
+    {notice ? <p role="status" className="text-xs text-warning">{notice}</p> : null}
+    {creating ? <NewExperiment registry={data.registry} initial={fromReview} onDone={(note) => {
+      setCreating(false); setNotice(note ?? "");
+      if (fromReview) setParams(previous => { const next = new URLSearchParams(previous); next.delete("new"); next.delete("hypothesis"); return next; }, { replace: true });
+      void reload(); }} /> : null}
+    <section className="card p-4 space-y-3">
+      <div className="flex items-center"><h2 className="text-sm font-medium">实验</h2>
+        {!creating ? <button className="btn btn-primary text-xs ml-auto" onClick={() => setCreating(true)}>新建实验</button> : null}</div>
+      {data.experiments.length === 0 ? <p className="text-xs text-text-muted">还没有实验。</p> :
+        <div className="overflow-x-auto"><table className="w-full text-xs text-left">
+          <thead className="text-text-muted"><tr><th className={th}>名称</th><th className={th}>类型</th><th className={th}>状态</th><th className={th}>B 组比例</th><th className={th}>主要指标</th><th className={th}>终点</th><th className={th}></th></tr></thead>
+          <tbody>{data.experiments.map(e => <Fragment key={e.id}>
+            <tr className="border-t border-border">
+              <td className="py-2"><button className="text-accent hover:underline" onClick={() => setOpen(open === e.id ? null : e.id)}>{e.definition.name}</button></td>
+              <td className="py-2">{e.definition.kind === "aa" ? "A/A 检查" : "对比实验"}</td>
+              <td className="py-2">{STATUS[e.status]}</td><td className="py-2 tabular-nums">{e.definition.share_b}%</td>
+              <td className="py-2">{METRICS[e.definition.metric.primary]?.label ?? e.definition.metric.primary}</td>
+              <td className="py-2 tabular-nums">每组 {e.definition.stop.per_arm} 条 / {e.definition.stop.max_days} 天</td>
+              <td className="py-2 text-right space-x-1 whitespace-nowrap">{ACTIONS[e.status].map(([action, label]) =>
+                <button key={action} className="btn text-xs" onClick={() => void act(() => moveExperiment(e.id, action))}>{label}</button>)}</td></tr>
+            {open === e.id ? <tr><td colSpan={7}><Details id={e.id} onChanged={() => void reload()} /></td></tr> : null}
+          </Fragment>)}</tbody></table></div>}
+    </section>
+    <Records />
+    <section className="card p-4 space-y-3">
+      <h2 className="text-sm font-medium">开关登记表</h2>
+      <p className="text-xs text-text-muted">B 组只能改这里登记过的开关。</p>
+      <div className="overflow-x-auto"><table className="w-full text-xs text-left">
+        <thead className="text-text-muted"><tr><th className={th}>开关</th><th className={th}>写入位置</th><th className={th}>读取时机</th><th className={th}>能生效的稿件</th><th className={th}>怎么判断生效</th><th className={th}>现状</th></tr></thead>
+        <tbody>{data.registry.map(s => <tr key={s.path} className="border-t border-border align-top">
+          <td className="py-2">{s.label}{s.note ? <p className="text-text-muted mt-0.5">{s.note}</p> : null}</td>
+          <td className="py-2 font-mono">{s.path}</td><td className="py-2">{TIMING[s.timing]}</td><td className="py-2">{REACH[s.reaches]}</td>
+          <td className="py-2">{s.applied_by}</td><td className="py-2">{STATE[s.status]}</td></tr>)}</tbody></table></div>
+    </section>
+  </div>;
+}

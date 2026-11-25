@@ -1,0 +1,738 @@
+{
+  "split": "holdout",
+  "sha256": "57e033a48f8a89e68b3cb4cc7950248b75592f54ac4e86a8a722d39986ad57c4",
+  "summary": {
+    "1": {
+      "cases": 40,
+      "failed": 0,
+      "index": 22
+    },
+    "0.9": {
+      "cases": 40,
+      "failed": 0,
+      "index": 27
+    }
+  },
+  "cases": [
+    {
+      "id": "holdout-fork-00",
+      "family": "fork",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-fork-00",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-merge-01",
+      "family": "merge",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-merge-01",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-diamond-02",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-diamond-02",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-ladder-03",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-ladder-03",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-layered-04",
+      "family": "layered",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-layered-04",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-cycle-05",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-cycle-05",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-disconnected-06",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-disconnected-06",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-parallel-07",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-parallel-07",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-fork-08",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-fork-08",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-merge-09",
+      "family": "merge",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.6398295581969,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-merge-09",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-diamond-10",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-diamond-10",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32.0,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-ladder-11",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-ladder-11",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-layered-12",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-layered-12",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-cycle-13",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-cycle-13",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-disconnected-14",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-disconnected-14",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-parallel-15",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.171163202122955,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-parallel-15",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-fork-16",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-fork-16",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-merge-17",
+      "family": "merge",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-merge-17",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 34.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-diamond-18",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-diamond-18",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-ladder-19",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-ladder-19",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 32.0,
+      "duration_frames": 150
+    },
+    {
+      "id": "holdout-layered-20",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-layered-20",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-cycle-21",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-cycle-21",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-disconnected-22",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.2549877015578,
+      "duration_frames": 80
+    },
+    {
+      "id": "holdout-disconnected-22",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "holdout-parallel-23",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.796407185628745,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-parallel-23",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-fork-24",
+      "family": "fork",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 33.171163202122955,
+      "duration_frames": 80
+    },
+    {
+      "id": "holdout-fork-24",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 80
+    },
+    {
+      "id": "holdout-merge-25",
+      "family": "merge",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-merge-25",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-diamond-26",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-diamond-26",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-ladder-27",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-ladder-27",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-layered-28",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-layered-28",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 480
+    },
+    {
+      "id": "holdout-cycle-29",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-cycle-29",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-disconnected-30",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-disconnected-30",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-parallel-31",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 34,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-parallel-31",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 30.000000000000004,
+      "duration_frames": 360
+    },
+    {
+      "id": "holdout-fork-32",
+      "family": "fork",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-fork-32",
+      "family": "fork",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-merge-33",
+      "family": "merge",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-merge-33",
+      "family": "merge",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-diamond-34",
+      "family": "diamond",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-diamond-34",
+      "family": "diamond",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 900
+    },
+    {
+      "id": "holdout-ladder-35",
+      "family": "ladder",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.17823639774859,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-ladder-35",
+      "family": "ladder",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.660412757973734,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-layered-36",
+      "family": "layered",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-layered-36",
+      "family": "layered",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 240
+    },
+    {
+      "id": "holdout-cycle-37",
+      "family": "cycle",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-cycle-37",
+      "family": "cycle",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 32.4,
+      "duration_frames": 120
+    },
+    {
+      "id": "holdout-disconnected-38",
+      "family": "disconnected",
+      "scale": 1,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 35.277516462841014,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout-disconnected-38",
+      "family": "disconnected",
+      "scale": 0.9,
+      "mode": "graph",
+      "issues": [],
+      "minimum_node_px": 31.74976481655691,
+      "duration_frames": 720
+    },
+    {
+      "id": "holdout-parallel-39",
+      "family": "parallel",
+      "scale": 1,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36,
+      "duration_frames": 450
+    },
+    {
+      "id": "holdout-parallel-39",
+      "family": "parallel",
+      "scale": 0.9,
+      "mode": "index",
+      "issues": [],
+      "minimum_node_px": 36.0,
+      "duration_frames": 450
+    }
+  ]
+}

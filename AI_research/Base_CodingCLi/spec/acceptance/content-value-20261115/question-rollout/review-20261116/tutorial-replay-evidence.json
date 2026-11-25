@@ -1,0 +1,48 @@
+[
+  {
+    "script_id": "563fe7a52362419c8a03603dc24a87ed",
+    "title": "一份问卷 CSV 同时变成 PPT、PDF 报告和 Excel：用 Claude 文件创建对齐三份交付物",
+    "packets": 26,
+    "before_status": "passed",
+    "before_returned_actions": [
+      [
+        "create"
+      ],
+      [
+        "tutorial"
+      ],
+      [
+        "release"
+      ]
+    ],
+    "after_status": "passed",
+    "after_requests": 1,
+    "registered_actions": [
+      "analysis"
+    ],
+    "scope": "frozen automatic inputs; event registration only"
+  },
+  {
+    "script_id": "9558d2fbd3d946998fa17e7de898beb5",
+    "title": "ChatGPT 本地项目挂了多个文件夹，为什么新聊天和 Codex 还是从错目录开始",
+    "packets": 16,
+    "before_status": "failed",
+    "before_returned_actions": [
+      [
+        "set_primary_folder"
+      ],
+      [
+        "tutorial"
+      ],
+      [
+        "configure"
+      ]
+    ],
+    "after_status": "passed",
+    "after_requests": 1,
+    "registered_actions": [
+      "analysis"
+    ],
+    "scope": "frozen automatic inputs; event registration only"
+  }
+]

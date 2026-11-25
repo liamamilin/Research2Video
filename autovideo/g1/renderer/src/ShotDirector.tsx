@@ -1,5 +1,6 @@
 import React from 'react';
 import {type Story} from './StoryDirection';
+import {extent,fitFrame,transformFor} from './Framing';
 
 export type Rect = {x:number;y:number;width:number;height:number};
 export type ShotPlan = {version:1;profile:'brief'|'balanced'|'explain';summary_beat_id?:string;
@@ -102,8 +103,7 @@ export function shotsFor(scene:Scene):Shot[] {
     if(previous && !interrupted && at-previous.frame<pace.hold){
       // Dense speech gets a sustained view of the related objects, rather than
       // a series of short pans. Their native reveals still follow the voice.
-      const union=Array.from(new Set([...previous.targets,...cue.targets]));
-      if(union.length<=4)previous.targets=union;
+      previous.targets=Array.from(new Set([...previous.targets,...cue.targets]));
       continue;
     }
     focus.push({kind:'focus',frame:at,targets:[...cue.targets]});
@@ -166,6 +166,30 @@ export function materialAt(scene:Scene & {component?:string;props:any},frame:num
 export function flowRects(props:any):Record<string,Rect> {
   return Object.fromEntries(props.layout.nodes.map((n:any)=>[`node:${n.id}`,
     {x:n.x,y:n.y,width:n.width,height:n.height}]));
+}
+
+export function flowCameraAt(scene:any,frame:number,overviewOnly=false) {
+  const p=scene.props,whole=p.layout,view={x:0,y:0,width:1560,height:500};
+  const bounds=(layout:any)=>extent([...Object.values(flowRects({layout})),...(layout.edges??[]).flatMap((edge:any)=>{
+    const label=(p.edges??[]).find((e:any)=>e.id===edge.id)?.label??'';
+    return [...edge.points.map((point:any)=>({...point,width:0,height:0})),...(label&&edge.label_x!==undefined?
+      [{x:edge.label_x-(label.length*layout.edge_font_size+20)/2,y:edge.label_y-layout.edge_font_size/2-6,
+        width:label.length*layout.edge_font_size+20,height:layout.edge_font_size+12}]:[])];
+  })]);
+  const wholePose=fitFrame(bounds(whole),view,{x:60,y:40},36/whole.font_size);
+  const shots=shotsFor(scene),shot=shots.filter(s=>s.frame<=frame).slice(-1)[0];
+  const detail=(p.layout_views??[]).find((v:any)=>v.targets.length===shot.targets.length&&v.targets.every((t:string)=>shot.targets.includes(t)));
+  const useDetail=!overviewOnly && whole.font_size*wholePose.zoom<30 && shot.kind==='focus' && !!detail;
+  const layout=useDetail?detail.layout:whole;
+  // A view containing the complete graph is already its own context. A
+  // duplicate overview must not consume the space needed to read that graph.
+  const showMap=useDetail&&detail.targets.length<p.nodes.length;
+  const viewport=showMap?{...view,width:1180}:view;
+  const pose=useDetail?fitFrame(bounds(layout),viewport,{x:60,y:40},36/layout.font_size):wholePose;
+  return {shot,pose,transform:transformFor(pose),view:viewport,layout,
+    visibleTargets:useDetail?detail.targets:null,detail:useDetail,showMap,
+    readable:layout.font_size*pose.zoom>=30,
+    effectiveFont:layout.font_size*pose.zoom};
 }
 
 export function CameraAxis({sceneId,svg,zoom}:{sceneId:string;svg:string;zoom:number}) {

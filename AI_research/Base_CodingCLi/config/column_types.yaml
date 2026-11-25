@@ -2,28 +2,28 @@ schema_version: 1
 types:
   news:
     name: 快讯
-    promise: 迅速知道发生了什么，以及为什么重要
-    structure: [变化, 影响, 重点]
+    promise: 直击最值得关心的变化或现场，讲透实质影响与关键看点
+    structure: [核心切口, 变化实质与边界, 现实影响或带走判断]
     preferred_visuals: [重点卡, 真实截图, 关键数字]
   explainer:
     name: 解读
-    promise: 理解事件或概念背后的原因
-    structure: [问题, 机制, 例子, 结论]
+    promise: 从反常识现象或真实卡点切入，讲透背后真正起作用的一条因果机制与现实判断标尺
+    structure: [反常识切口与真问题, 核心因果机制与具体例子, 现实边界与带走标尺]
     preferred_visuals: [图表, 流程, 截图, 解释卡]
   comparison:
     name: 横评
-    promise: 理解多个对象的差异与适用条件
-    structure: [对象, 比较维度, 关键差异, 适用情形]
+    promise: 讲清什么人选谁、各自最隐蔽的坑在哪，让观众直接做决定
+    structure: [核心分水岭, 什么人选各自选项, 各自最隐蔽的坑, 拍板结论]
     preferred_visuals: [对比图, 价格卡, 真实画面, 原理图]
   tutorial:
     name: 教程
-    promise: 按照步骤完成一个具体任务
-    structure: [目标, 准备, 操作, 结果]
+    promise: 沿一条干净主路径按步完成任务或定位排障，每步给清可见验证信号与红绿灯分岔
+    structure: [目标或症状切口, 干净主路径与可见验证, 红绿灯分岔与避坑, 动作口诀收尾]
     preferred_visuals: [操作截图, 步骤演示, 局部聚焦, 流程]
   deep_research:
     name: 深度研究
-    promise: 理解完整问题、材料、争议与结论
-    structure: [问题, 多章节展开, 比较, 收束]
+    promise: 从反直觉实验或硬核矛盾切入，讲透完整因果机制、口径边界与可执行决策
+    structure: [核心矛盾与主线, 分层证据与机制拆解, 口径边界与选型取舍, 决策收束]
     preferred_visuals: [多章节混合画面, 图表, 真实素材, 视觉回顾]
   series:
     name: 专题系列
